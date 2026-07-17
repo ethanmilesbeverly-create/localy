@@ -1987,37 +1987,25 @@ async function ensureRealPlaces(base){
   if(_realFetchInFlight[key]) return;
   _realFetchInFlight[key] = true;
   try{
-    // 1) Fast path: serve from Supabase cache if a fresh tile exists.
-    const cached = await readTileCache(key);
-    if(cached){
-      console.log('[localy] real places from cache for tile '+key+' ('+cached.length+' places)');
-      applyRealPlaces(key, base, cached);
-      return;
-    }
-    // 2) Live fetch. Show Wikipedia the moment it lands (fast), then fill in
-    //    Overpass when it arrives — so the map never sits empty waiting.
-    let acc = [];
-    const wikiP = fetchWikipedia(base).then(w=>{
-      acc = dedupeReal(w, acc);
-      applyRealPlaces(key, base, acc);
-      return w;
-    }).catch(()=>[]);
-    const osmP = fetchOverpass(base).then(o=>{
-      acc = dedupeReal(acc, o); // keep whatever's there first (incl. wiki), add osm
-      applyRealPlaces(key, base, acc);
-      return o;
-    }).catch(()=>[]);
-
-    const [wiki, osm] = await Promise.all([wikiP, osmP]);
-    const merged = dedupeReal(wiki, osm); // final canonical list (wiki wins ties)
-    if(merged.length){
-      applyRealPlaces(key, base, merged);
-      writeTileCache(key, merged); // populate cache for everyone else
-      console.log('[localy] real places loaded for tile '+key+':', _realDebug.lastCounts, '(osm '+osm.length+', wiki '+wiki.length+')');
+    // All fetching + caching now happens server-side in the `nearby-places`
+    // Edge Function: no CORS, no null-origin issue (works from https, file://,
+    // and Capacitor), and the cache is read/written there with the service-role
+    // key. We just receive the finished, categorized, de-duped list and blend.
+    const { data, error } = await sb.functions.invoke('nearby-places', { body:{ lat:base.lat, lng:base.lng } });
+    if(error) throw error;
+    const places = (data && data.places) || [];
+    _realDebug.lastOverpassStatus = (data && data.overpassStatus != null) ? data.overpassStatus : null;
+    _realDebug.lastOverpassError  = (data && data.overpassError) || null;
+    if(places.length){
+      applyRealPlaces(key, base, places); // sets _realDebug.lastCounts
+      const src = data.cached ? (data.stale ? 'cache(stale)' : 'cache') : 'live';
+      console.log('[localy] real places for tile '+key+' ('+places.length+' places, '+src+')', _realDebug.lastCounts);
     } else {
-      console.warn('[localy] no real places for tile '+key+' (osm '+osm.length+', wiki '+wiki.length+'). Overpass status:', _realDebug.lastOverpassStatus, 'err:', _realDebug.lastOverpassError);
+      console.warn('[localy] no real places for tile '+key+' — procedural fallback stays. Overpass status:', _realDebug.lastOverpassStatus, 'err:', _realDebug.lastOverpassError);
     }
-  }catch(e){ /* silent — procedural fallback remains in place */ }
+  }catch(e){
+    console.warn('[localy] nearby-places function failed — procedural fallback stays in place.', (e && e.message) || e);
+  }
   finally{ delete _realFetchInFlight[key]; }
 }
 
@@ -2284,14 +2272,18 @@ async function init(){
 window.localyDebug = async function(){
   const base = state.me || FALLBACK_LOCATION;
   console.log('Base location:', base, '| tile:', realTileKey(base));
-  console.log('Cached real places:', state.realPlaces && state.realPlaces.byCat);
-  console.log('Last counts:', _realDebug.lastCounts, '| last Overpass status:', _realDebug.lastOverpassStatus, '| last Overpass error:', _realDebug.lastOverpassError);
-  console.log('Refetching now…');
-  const [osm, wiki] = await Promise.all([
-    fetchOverpass(base).then(r=>{console.log('Overpass OK:', r.length, 'places'); return r;}).catch(e=>{console.error('Overpass FAILED:', e.message); return [];}),
-    fetchWikipedia(base).then(r=>{console.log('Wikipedia OK:', r.length, 'places'); return r;}).catch(e=>{console.error('Wikipedia FAILED:', e.message); return [];})
-  ]);
-  return { osmCount:osm.length, wikiCount:wiki.length, osmSample:osm.slice(0,5), wikiSample:wiki.slice(0,3) };
+  console.log('Cached real places (in memory):', state.realPlaces && state.realPlaces.byCat);
+  console.log('Calling nearby-places Edge Function…');
+  const { data, error } = await sb.functions.invoke('nearby-places', { body:{ lat:base.lat, lng:base.lng } });
+  if(error){ console.error('Function FAILED:', (error && error.message) || error); return { error:(error && error.message) || String(error) }; }
+  const places = (data && data.places) || [];
+  const byCat = {};
+  places.forEach(p=>{ byCat[p.category] = (byCat[p.category]||0)+1; });
+  const osmCount = places.filter(p=>p.source==='osm').length;
+  const wikiCount = places.filter(p=>p.source==='wiki').length;
+  console.log('Function OK:', places.length, 'places | source:', data.cached ? (data.stale?'cache(stale)':'cache') : 'live', '| counts:', byCat);
+  console.log('OSM:', osmCount, '| Wikipedia:', wikiCount, '| Overpass status:', data.overpassStatus, '| Overpass error:', data.overpassError);
+  return { total:places.length, osmCount, wikiCount, byCat, cached:!!data.cached, sample:places.slice(0,6) };
 };
 
 function showToast(msg){
