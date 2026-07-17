@@ -24,6 +24,57 @@
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
+  <script>
+(function(){
+  var css = document.createElement('style');
+  css.textContent =
+    '#search-here-btn{display:none;position:absolute;top:16px;left:50%;' +
+    'transform:translateX(-50%);z-index:600;padding:8px 16px;border-radius:999px;' +
+    'border:none;background:#1F3F32;color:#EDE9DD;font-size:14px;font-weight:600;' +
+    'box-shadow:0 2px 8px rgba(0,0,0,0.25);cursor:pointer;}' +
+    '#search-here-btn.show{display:block;}';
+  document.head.appendChild(css);
+
+  var SEARCH_HERE_DIST_M = 600; // tune: lower = more eager, higher = calmer
+
+  function huntAnchor(){
+    var h = window.state && state.currentHunt;
+    if(!h || !h.points || !h.points.length) return null;
+    var la=0, ln=0;
+    h.points.forEach(function(p){ la+=p.lat; ln+=p.lng; });
+    return {lat: la/h.points.length, lng: ln/h.points.length};
+  }
+  window.maybeShowSearchHere = function(){
+    var btn = document.getElementById('search-here-btn');
+    if(!btn || !window.state || !state.leafletMap) return;
+    var anchor = huntAnchor();
+    if(state.browsingLocation || !anchor){ btn.classList.remove('show'); return; }
+    var c = state.leafletMap.getCenter();
+    var drifted = haversine(c.lat, c.lng, anchor.lat, anchor.lng) > SEARCH_HERE_DIST_M;
+    btn.classList.toggle('show', drifted);
+  };
+  window.searchThisArea = function(){
+    if(!state.leafletMap) return;
+    var c = state.leafletMap.getCenter();
+    regenerateCurrentHuntAt({lat: c.lat, lng: c.lng});
+    document.getElementById('search-here-btn').classList.remove('show');
+  };
+
+  function install(){
+    if(!window.state || !state.leafletMap){ return setTimeout(install, 400); }
+    if(document.getElementById('search-here-btn')) return;
+    var btn = document.createElement('button');
+    btn.id = 'search-here-btn';
+    btn.setAttribute('aria-label', 'Search this area');
+    btn.textContent = 'Search this area';
+    btn.onclick = window.searchThisArea;
+    var host = document.getElementById('leaflet-map') || document.body;
+    (host.parentNode || document.body).appendChild(btn);
+    state.leafletMap.on('moveend', window.maybeShowSearchHere);
+  }
+  install();
+})();
+</script>
   body{
     margin:0;
     background:var(--bg);
