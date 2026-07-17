@@ -1636,6 +1636,16 @@ function approvedGemPoints(base, bucket, limit){
    whole batch. */
 function generateOneCategoryPoint(category, base, placed, excludeGemIds){
   const uid = Date.now()+'_'+Math.floor(Math.random()*10000);
+  // Prefer a real internet place for this slot before falling back to procedural.
+  if(category!=='gems'){
+    const usedReal = (state.currentHunt && state.currentHunt.points || [])
+      .filter(p=>p.source && p.id).map(p=>p.id);
+    const real = nearbyRealPlaces(base, category, 3, usedReal);
+    if(real.length){
+      const r = real[0];
+      return {...r, category};
+    }
+  }
   if(category==='park'){
     const p = offsetPointSpaced(base, randBetween(150,1600), placed, 150);
     return {id:'dlp'+uid, name:genParkName(), lat:p.lat, lng:p.lng, desc:'A nearby local park.', category:'park'};
@@ -1758,7 +1768,372 @@ function generateDiscoverSpots(base){
   return pts;
 }
 
+/* =========================================================
+   REAL PLACE DATA  (OpenStreetMap Overpass + Wikipedia)
+   ---------------------------------------------------------
+   Placeholder "ask a local" content that is nonetheless REAL and valid:
+   actual nearby places pulled from the internet. These fill category slots
+   ABOVE the procedural filler but BELOW real user submissions (gems), so as
+   locals submit their own spots those submissions displace these internet
+   pins slot-by-slot ("trickle out"). Everything here is best-effort and
+   fully optional — if a fetch fails, times out, or returns nothing, the app
+   silently falls back to the procedural generators exactly as before.
 
+   NOTE: fetches need a real browser tab (https or file://); they will fail
+   inside the sandboxed in-app preview pane, same as Supabase.
+   ========================================================= */
+const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse one fetch
+const REAL_INCLUDE_RADIUS_M = 9000;  // only surface real places within ~5.5mi of you
+const OVERPASS_RADIUS_M = 4200;      // query radius sent to Overpass
+const OVERPASS_TIMEOUT_MS = 25000;   // Overpass cold queries can take 15-30s
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+];
+const _realDebug = { lastOverpassError:null, lastOverpassStatus:null, lastCounts:null };
+
+function normName(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function realTileKey(base){ return Math.round(base.lat/REAL_TILE_DEG)+'_'+Math.round(base.lng/REAL_TILE_DEG); }
+
+/* Map an OSM element's tags to one of the app's categories (priority order). */
+function categorizeOsm(t){
+  if(!t) return null;
+  if(t.historic || t.memorial || t.tourism==='museum' || t.tourism==='artwork') return 'history';
+  if(t.amenity==='bar' || t.amenity==='pub' || t.amenity==='biergarten') return 'bars';
+  if(t.amenity==='restaurant' || t.amenity==='cafe' || t.amenity==='fast_food') return 'restaurants';
+  if(t.leisure==='park' || t.leisure==='garden' || t.leisure==='nature_reserve' || t.boundary==='national_park') return 'park';
+  if(t.shop) return 'shops';
+  if(t.highway==='path' || t.highway==='footway' || t.route==='hiking') return 'trail';
+  if(t.tourism==='attraction') return 'history';
+  return null;
+}
+/* Short "a local would tell you" style blurb built from the real tags. */
+function osmDesc(t, category){
+  const clean = s => String(s).split(';')[0].replace(/_/g,' ').trim();
+  if(category==='restaurants'){
+    if(t.amenity==='cafe') return t.cuisine ? `Local ${clean(t.cuisine)} café.` : 'A local café worth a stop.';
+    if(t.amenity==='fast_food') return t.cuisine ? `Quick ${clean(t.cuisine)} counter locals grab.` : 'A quick local bite.';
+    return t.cuisine ? `Local ${clean(t.cuisine)} spot to eat.` : 'A local place to eat.';
+  }
+  if(category==='bars') return t.amenity==='pub' ? 'A neighborhood pub.' : (t.amenity==='biergarten' ? 'An outdoor beer garden.' : 'A local bar.');
+  if(category==='shops') return t.shop ? `A local ${clean(t.shop)} shop.` : 'A local shop.';
+  if(category==='park'){
+    if(t.leisure==='garden') return 'A local garden to wander.';
+    if(t.leisure==='nature_reserve') return 'A protected local nature area.';
+    return 'A local green space to wander.';
+  }
+  if(category==='trail') return 'A walking path nearby.';
+  if(category==='history') return t.historic ? `A local landmark (${clean(t.historic)}).` : 'A notable local spot.';
+  return 'A local spot worth a look.';
+}
+
+/* --- Overpass fetch: named nodes/ways of interest around a point ---
+   Races all mirrors at once and takes the first that answers, so latency is
+   the FASTEST endpoint rather than the sum of the slow ones. --- */
+function buildOverpassQuery(base){
+  const R = OVERPASS_RADIUS_M, la = base.lat, ln = base.lng;
+  return `[out:json][timeout:20];(` +
+      `node["amenity"~"^(bar|pub|biergarten|restaurant|cafe|fast_food)$"](around:${R},${la},${ln});` +
+      `node["shop"~"^(books|gift|clothes|art|music|antiques|craft|florist|deli|toys|stationery|bakery|second_hand|bicycle|jewelry|shoes|furniture|records|garden_centre|variety_store)$"](around:${R},${la},${ln});` +
+      `node["historic"](around:${R},${la},${ln});` +
+      `way["historic"](around:${R},${la},${ln});` +
+      `node["tourism"~"^(attraction|museum|artwork)$"](around:${R},${la},${ln});` +
+      `way["leisure"~"^(park|garden|nature_reserve)$"](around:${R},${la},${ln});` +
+      `node["leisure"~"^(park|garden)$"](around:${R},${la},${ln});` +
+    `);out center 110;`;
+}
+function parseOverpass(json){
+  const out = [];
+  (json.elements||[]).forEach(el=>{
+    const t = el.tags||{};
+    const name = t.name;
+    if(!name) return;
+    const lat = (el.lat!=null)?el.lat:(el.center&&el.center.lat);
+    const lng = (el.lon!=null)?el.lon:(el.center&&el.center.lon);
+    if(lat==null||lng==null) return;
+    const category = categorizeOsm(t);
+    if(!category) return;
+    out.push({ id:'osm_'+el.type+el.id, name, lat, lng, desc:osmDesc(t, category), category, source:'osm', real:true });
+  });
+  return out;
+}
+async function fetchOverpassOne(url, q){
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), OVERPASS_TIMEOUT_MS);
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:'data='+encodeURIComponent(q),
+      signal:ctrl.signal
+    });
+    _realDebug.lastOverpassStatus = res.status;
+    if(!res.ok) throw new Error('HTTP '+res.status+' from '+url);
+    const json = await res.json();
+    if(json && json.remark && (!json.elements || !json.elements.length)){
+      throw new Error('Overpass remark: '+json.remark);
+    }
+    return parseOverpass(json);
+  } finally { clearTimeout(timer); }
+}
+async function fetchOverpass(base){
+  const q = buildOverpassQuery(base);
+  try{
+    const result = await Promise.any(OVERPASS_ENDPOINTS.map(url=>
+      fetchOverpassOne(url, q).catch(e=>{
+        _realDebug.lastOverpassError = (e && e.message) || String(e);
+        throw e; // let Promise.any move on to whichever mirror answers first
+      })
+    ));
+    _realDebug.lastOverpassError = null;
+    return result;
+  }catch(aggErr){
+    console.warn('[localy] All Overpass mirrors failed — using procedural for OSM categories. Last error:', _realDebug.lastOverpassError);
+    throw aggErr;
+  }
+}
+
+/* --- Wikipedia GeoSearch: nearby articles → real landmark/history points,
+   with genuine intro-sentence descriptions, all in one request. --- */
+async function fetchWikipedia(base){
+  const url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*'
+    + '&generator=geosearch&ggscoord='+base.lat+'%7C'+base.lng
+    + '&ggsradius=6000&ggslimit=25'
+    + '&prop=coordinates%7Cextracts&exintro=1&explaintext=1&exsentences=2&colimit=max';
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), 12000);
+  const res = await fetch(url, {signal:ctrl.signal});
+  clearTimeout(timer);
+  if(!res.ok) throw new Error('wiki '+res.status);
+  const json = await res.json();
+  const pages = (json.query && json.query.pages) || {};
+  const out = [];
+  Object.values(pages).forEach(pg=>{
+    const co = pg.coordinates && pg.coordinates[0];
+    if(!co) return;
+    let desc = (pg.extract||'').trim();
+    if(desc.length>220) desc = desc.slice(0,217).replace(/\s+\S*$/,'')+'…';
+    out.push({
+      id:'wiki_'+pg.pageid, name:pg.title, lat:co.lat, lng:co.lon,
+      desc: desc || 'A notable local landmark.',
+      category:'history', source:'wiki', real:true
+    });
+  });
+  return out;
+}
+
+/* De-dupe two lists by same-name-within-90m. `primary` wins ties (kept first),
+   so Wikipedia (richer descriptions) should be passed as primary. */
+function dedupeReal(primary, secondary){
+  const merged = [];
+  const seen = [];
+  const tryAdd = p=>{
+    const key = normName(p.name);
+    if(!key) return;
+    if(seen.some(s=> s.key===key && haversine(s.lat,s.lng,p.lat,p.lng) < 90)) return;
+    seen.push({key, lat:p.lat, lng:p.lng});
+    merged.push(p);
+  };
+  (primary||[]).forEach(tryAdd);
+  (secondary||[]).forEach(tryAdd);
+  return merged;
+}
+function groupRealByCat(list){
+  const by = {park:[], trail:[], shops:[], bars:[], restaurants:[], history:[]};
+  list.forEach(p=>{ if(by[p.category]) by[p.category].push(p); });
+  return by;
+}
+
+/* Apply a list of real places to state + refresh the view, but only if we're
+   still on the tile we fetched for (guards against a slow response landing
+   after the user has moved to a new area). */
+function applyRealPlaces(key, base, list){
+  if(!list || !list.length) return;
+  const cur = realTileKey(state.me || base);
+  if(cur !== key) return; // user moved on; ignore stale result
+  const byCat = groupRealByCat(list);
+  state.realPlaces = { tile:key, center:base, all:list, byCat };
+  _realDebug.lastCounts = Object.fromEntries(Object.entries(byCat).map(([k,v])=>[k,v.length]));
+  onRealPlacesReady();
+}
+
+/* Supabase shared_kv cache: one row per tile (public, same table as shared
+   hunt codes). First visitor to a tile populates it; everyone after — and
+   every reload — gets real data in a single fast DB read instead of hitting
+   Overpass. Gems stay live (queried separately), so trickle-out is unaffected. */
+const PLACES_CACHE_TTL_MS = 21 * 24 * 3600 * 1000; // 21 days
+async function readTileCache(key){
+  try{
+    const row = await window.storage.get('places:'+key, true);
+    if(!row || !row.value) return null;
+    const obj = JSON.parse(row.value);
+    if(!obj || !obj.ts || !Array.isArray(obj.places) || !obj.places.length) return null;
+    if(Date.now() - obj.ts > PLACES_CACHE_TTL_MS) return null; // stale — refetch
+    return obj.places;
+  }catch(e){ return null; }
+}
+async function writeTileCache(key, places){
+  try{ await window.storage.set('places:'+key, JSON.stringify({ ts:Date.now(), places }), true); }
+  catch(e){ /* caching is best-effort */ }
+}
+
+let _realFetchInFlight = {};
+async function ensureRealPlaces(base){
+  if(!base || base.lat==null) return;
+  const key = realTileKey(base);
+  if(state.realPlaces && state.realPlaces.tile===key) return; // already loaded for this tile
+  if(_realFetchInFlight[key]) return;
+  _realFetchInFlight[key] = true;
+  try{
+    // 1) Fast path: serve from Supabase cache if a fresh tile exists.
+    const cached = await readTileCache(key);
+    if(cached){
+      console.log('[localy] real places from cache for tile '+key+' ('+cached.length+' places)');
+      applyRealPlaces(key, base, cached);
+      return;
+    }
+    // 2) Live fetch. Show Wikipedia the moment it lands (fast), then fill in
+    //    Overpass when it arrives — so the map never sits empty waiting.
+    let acc = [];
+    const wikiP = fetchWikipedia(base).then(w=>{
+      acc = dedupeReal(w, acc);
+      applyRealPlaces(key, base, acc);
+      return w;
+    }).catch(()=>[]);
+    const osmP = fetchOverpass(base).then(o=>{
+      acc = dedupeReal(acc, o); // keep whatever's there first (incl. wiki), add osm
+      applyRealPlaces(key, base, acc);
+      return o;
+    }).catch(()=>[]);
+
+    const [wiki, osm] = await Promise.all([wikiP, osmP]);
+    const merged = dedupeReal(wiki, osm); // final canonical list (wiki wins ties)
+    if(merged.length){
+      applyRealPlaces(key, base, merged);
+      writeTileCache(key, merged); // populate cache for everyone else
+      console.log('[localy] real places loaded for tile '+key+':', _realDebug.lastCounts, '(osm '+osm.length+', wiki '+wiki.length+')');
+    } else {
+      console.warn('[localy] no real places for tile '+key+' (osm '+osm.length+', wiki '+wiki.length+'). Overpass status:', _realDebug.lastOverpassStatus, 'err:', _realDebug.lastOverpassError);
+    }
+  }catch(e){ /* silent — procedural fallback remains in place */ }
+  finally{ delete _realFetchInFlight[key]; }
+}
+
+/* Nearest real internet places of a category (mirrors nearbyApprovedGems). */
+function nearbyRealPlaces(base, category, limit, excludeIds){
+  const cache = state.realPlaces;
+  const list = (cache && cache.byCat && cache.byCat[category]) || [];
+  const ex = excludeIds || [];
+  return list
+    .filter(p=>!ex.includes(p.id))
+    .map(p=>({...p, dist:haversine(base.lat, base.lng, p.lat, p.lng)}))
+    .filter(p=>p.dist<=REAL_INCLUDE_RADIUS_M)
+    .sort((a,b)=>a.dist-b.dist)
+    .slice(0, limit);
+}
+
+/* ---- The unified priority blend for one category ----
+   1) approved user submissions (gems)  2) real internet places  3) procedural
+   Fills up to targetCount, never producing duplicates by name. Every returned
+   point carries `category` so map coloring stays correct. */
+function gemToPoint(g){
+  return {id:'catgem'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id, real:true};
+}
+function blendCategory(base, category, targetCount, procFn, gemBucket){
+  const out = [];
+  const usedNames = new Set();
+  const push = p => { const k=normName(p.name); if(k && usedNames.has(k)) return; if(k) usedNames.add(k); out.push(p); };
+
+  // 1) real user submissions for this category, nearest first
+  if(gemBucket){
+    nearbyApprovedGems(base, [], targetCount, gemBucket).forEach(g=> push(gemToPoint(g)));
+  }
+  // 2) real internet places
+  if(out.length < targetCount){
+    nearbyRealPlaces(base, category, targetCount*2).forEach(rp=>{
+      if(out.length>=targetCount) return;
+      push({...rp, category});
+    });
+  }
+  // 3) procedural filler to reach the target
+  if(out.length < targetCount && typeof procFn==='function'){
+    (procFn()||[]).forEach(p=>{
+      if(out.length>=targetCount) return;
+      push({...p, category:(p.category||category)});
+    });
+  }
+  return out.slice(0, targetCount);
+}
+
+/* ---- Point builders (shared by the hunt starters AND the in-place
+   re-blend that runs when real data arrives), so both stay identical. ---- */
+function buildAllThingsLocal(base){
+  const pts = [];
+  const seen = new Set();
+  const take = arr => arr.forEach(p=>{ const k=normName(p.name); if(k&&seen.has(k))return; if(k)seen.add(k); pts.push(p); });
+  take(blendCategory(base,'park',3,()=>generateLocalParks(base).slice(0,3), null));
+  take(blendCategory(base,'trail',3,()=>generateTrails(base).slice(0,3), null));
+  take(blendCategory(base,'shops',3,()=>generateShops(base).slice(0,3), 'shops'));
+  take(blendCategory(base,'bars',3,()=>generateBars(base).slice(0,3), 'barsrest'));
+  take(blendCategory(base,'restaurants',3,()=>generateRestaurants(base).slice(0,3), 'barsrest'));
+  take(blendCategory(base,'history',3,()=>generateLocalHistory(base).slice(0,3), 'history'));
+  nearbyApprovedGems(base, [], 2).forEach(g=>{
+    const k=normName(g.name); if(k&&seen.has(k))return; if(k)seen.add(k);
+    pts.push({id:'dlg'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id});
+  });
+  return pts;
+}
+function buildPointsForKey(key, base){
+  if(key.startsWith('local_'))      return buildAllThingsLocal(base);
+  if(key.startsWith('parkstrails_'))return [
+    ...blendCategory(base,'park',6,()=>generateLocalParks(base),'park'),
+    ...blendCategory(base,'trail',6,()=>generateTrails(base),null)
+  ];
+  if(key.startsWith('shops_'))      return blendCategory(base,'shops',8,()=>generateShops(base),'shops');
+  if(key.startsWith('bars_'))       return blendCategory(base,'bars',8,()=>generateBars(base),'barsrest');
+  if(key.startsWith('restaurants_'))return blendCategory(base,'restaurants',8,()=>generateRestaurants(base),'barsrest');
+  if(key.startsWith('barsrest_'))   return [
+    ...blendCategory(base,'bars',5,()=>generateBars(base),'barsrest'),
+    ...blendCategory(base,'restaurants',5,()=>generateRestaurants(base),'barsrest')
+  ];
+  if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
+  if(key.startsWith('trails_'))     return blendCategory(base,'trail',6,()=>generateTrails(base),null);
+  if(key.startsWith('discover_'))   return blendCategory(base,'history',6,()=>generateDiscoverSpots(base),null);
+  return null;
+}
+
+/* When a real-place fetch lands, upgrade the current auto-generated hunt in
+   place: keep anything already captured, swap the rest up to real data.
+   Preserves the hunt key (and therefore progress) and never touches
+   user-made or browse-locked hunts. */
+const REAL_UPGRADABLE_KEY = /^(local_|parkstrails_|shops_|bars_|restaurants_|barsrest_|history_|trails_|discover_)/;
+function reblendHuntInPlace(h){
+  const base = state.localHuntOrigin || state.me || FALLBACK_LOCATION;
+  const prog = state.progress[h.key] || {};
+  const foundSet = new Set(prog.foundIds || []);
+  const keptFound = h.points.filter(p=>foundSet.has(p.id));
+  const fresh = buildPointsForKey(h.key, base) || h.points;
+  const keptNames = new Set(keptFound.map(p=>normName(p.name)));
+  const merged = [...keptFound];
+  fresh.forEach(p=>{
+    if(foundSet.has(p.id)) return;
+    const k = normName(p.name);
+    if(k && keptNames.has(k)) return;
+    if(k) keptNames.add(k);
+    merged.push(p);
+  });
+  h.points = merged;
+}
+function onRealPlacesReady(){
+  const h = state.currentHunt;
+  if(!h || state.browsingLocation) return;
+  if(!REAL_UPGRADABLE_KEY.test(h.key)) return;
+  reblendHuntInPlace(h);
+  if(typeof refreshTargetsUI==='function') refreshTargetsUI();
+  if(typeof refreshTrackUI==='function') refreshTrackUI();
+}
 
 /* =========================================================
    STATE
@@ -1788,6 +2163,7 @@ let state = {
   pendingAchievementPopups: [],
   gemSubmissions: [],   // this user's OWN submissions (from the shared submissions table)
   approvedGems: [],     // all APPROVED submissions near the user, for discovery
+  realPlaces: null,     // {tile, center, all[], byCat{}} — real OSM/Wikipedia places for the current tile
   gemDraftPin: null,
   pendingSavePoint: null,
   browsingLocation: null,
@@ -1902,6 +2278,21 @@ async function init(){
   fixMapSize();
   startLocating();
 }
+
+/* Console helper: run `localyDebug()` in DevTools to see what real data loaded
+   and force a fresh Overpass/Wikipedia fetch for your current location. */
+window.localyDebug = async function(){
+  const base = state.me || FALLBACK_LOCATION;
+  console.log('Base location:', base, '| tile:', realTileKey(base));
+  console.log('Cached real places:', state.realPlaces && state.realPlaces.byCat);
+  console.log('Last counts:', _realDebug.lastCounts, '| last Overpass status:', _realDebug.lastOverpassStatus, '| last Overpass error:', _realDebug.lastOverpassError);
+  console.log('Refetching now…');
+  const [osm, wiki] = await Promise.all([
+    fetchOverpass(base).then(r=>{console.log('Overpass OK:', r.length, 'places'); return r;}).catch(e=>{console.error('Overpass FAILED:', e.message); return [];}),
+    fetchWikipedia(base).then(r=>{console.log('Wikipedia OK:', r.length, 'places'); return r;}).catch(e=>{console.error('Wikipedia FAILED:', e.message); return [];})
+  ]);
+  return { osmCount:osm.length, wikiCount:wiki.length, osmSample:osm.slice(0,5), wikiSample:wiki.slice(0,3) };
+};
 
 function showToast(msg){
   const t = document.getElementById('toast');
@@ -2066,6 +2457,7 @@ function onLocation(lat,lng,sim,accuracy){
     }
   }
 
+  ensureRealPlaces({lat, lng});
   refreshDiscoverLocalIfNeeded(lat, lng);
   checkCuratedStaleness(lat, lng);
   refreshTargetsUI();
@@ -2480,14 +2872,15 @@ function startBuiltinHunt(id){
 function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
+  ensureRealPlaces(base);
   const key = 'local_'+Date.now();
-  setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:generateDiscoverLocal(base)});
+  setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
 }
 function startParksAndTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'parkstrails_'+Date.now();
-  const points = [...generateLocalParks(base), ...generateTrails(base), ...approvedGemPoints(base,'park',3)];
-  setCurrentHunt({key, name:'Parks & Trails', mode:'park', points});
+  setCurrentHunt({key, name:'Parks & Trails', mode:'park', points:buildPointsForKey(key, base)});
 }
 function startLocalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
@@ -2496,31 +2889,33 @@ function startLocalParksHunt(base){
 }
 function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'shops_'+Date.now();
-  const points = [...generateShops(base), ...approvedGemPoints(base,'shops',3)];
-  setCurrentHunt({key, name:'Shops', mode:'shops', points});
+  setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
 }
 function startBarsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'bars_'+Date.now();
-  setCurrentHunt({key, name:'Bars', mode:'bars', points:generateBars(base)});
+  setCurrentHunt({key, name:'Bars', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'restaurants_'+Date.now();
-  setCurrentHunt({key, name:'Restaurants', mode:'restaurants', points:generateRestaurants(base)});
+  setCurrentHunt({key, name:'Restaurants', mode:'restaurants', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'barsrest_'+Date.now();
-  const points = [...generateBars(base), ...generateRestaurants(base), ...approvedGemPoints(base,'barsrest',3)];
-  setCurrentHunt({key, name:'Bars & Restaurants', mode:'bars', points});
+  setCurrentHunt({key, name:'Bars & Restaurants', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startHistoryHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'history_'+Date.now();
-  const points = [...generateLocalHistory(base), ...approvedGemPoints(base,'history',3)];
-  setCurrentHunt({key, name:'History', mode:'history', points});
+  setCurrentHunt({key, name:'History', mode:'history', points:buildPointsForKey(key, base)});
 }
 function startHiddenGemsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
@@ -2548,13 +2943,15 @@ function startNationalParksHunt(base){
 }
 function startTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'trails_'+Date.now();
-  setCurrentHunt({key, name:'Trails Nearby', mode:'trail', points:generateTrails(base)});
+  setCurrentHunt({key, name:'Trails Nearby', mode:'trail', points:buildPointsForKey(key, base)});
 }
 function startDiscoverHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
   const key = 'discover_'+Date.now();
-  setCurrentHunt({key, name:'Discover — First Visit', mode:'discover', points:generateDiscoverSpots(base)});
+  setCurrentHunt({key, name:'Discover — First Visit', mode:'discover', points:buildPointsForKey(key, base)});
   showToast('Good for a first visit anywhere — built around wherever you are now');
 }
 
