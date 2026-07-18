@@ -846,6 +846,8 @@
   #achievement-popup-label{margin:0;font-size:15px;font-weight:600;color:var(--text);}
 
   ::-webkit-scrollbar{width:0;height:0;}
+  #search-here-btn{display:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:600;padding:8px 16px;border-radius:999px;border:none;background:#1F3F32;color:#EDE9DD;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.25);cursor:pointer;}
+  #search-here-btn.show{display:block;}
 </style>
 </head>
 <body>
@@ -1049,6 +1051,7 @@
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
+    <button id="search-here-btn" onclick="searchThisArea()" aria-label="Search this area">Search this area</button>
     <button id="list-toggle-btn" onclick="toggleDrawer()" aria-label="Show nearby list">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 20S3 14.2 3 9.3a5.5 5.5 0 0 1 11 0C14 14.2 8.5 20 8.5 20z"/><circle cx="8.5" cy="9" r="1.8" fill="currentColor" stroke="none"/><line x1="14.5" y1="6" x2="21" y2="6"/><line x1="14.5" y1="11" x2="21" y2="11"/><line x1="14.5" y1="16" x2="21" y2="16"/></svg>
       <span id="list-toggle-badge" class="badge-dot" style="display:none;"></span>
@@ -1681,6 +1684,28 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
 }
 
 const DISCOVER_FALLOFF_M = 2500; // a Discover Local spot this far from you gets swapped for a fresh nearby one
+const SEARCH_HERE_DIST_M = 600; // tune: lower = more eager, higher = calmer
+function huntAnchor(){
+  const h = state.currentHunt;
+  if(!h || !h.points || !h.points.length) return null;
+  let la=0, ln=0;
+  h.points.forEach(p=>{ la+=p.lat; ln+=p.lng; });
+  return {lat: la/h.points.length, lng: ln/h.points.length};
+}
+function maybeShowSearchHere(){
+  const btn = document.getElementById('search-here-btn');
+  if(!btn) return;
+  const anchor = huntAnchor();
+  if(state.browsingLocation || !anchor){ btn.classList.remove('show'); return; }
+  const c = state.leafletMap.getCenter();
+  const drifted = haversine(c.lat, c.lng, anchor.lat, anchor.lng) > SEARCH_HERE_DIST_M;
+  btn.classList.toggle('show', drifted);
+}
+function searchThisArea(){
+  const c = state.leafletMap.getCenter();
+  regenerateCurrentHuntAt({lat: c.lat, lng: c.lng});
+  document.getElementById('search-here-btn').classList.remove('show');
+}
 function refreshDiscoverLocalIfNeeded(lat, lng){
   if(state.browsingLocation) return; // don't let real-position drift touch content while browsing elsewhere
   const hunt = state.currentHunt;
@@ -2626,6 +2651,7 @@ function setupBaseMap(){
     state.followMe = false;
     document.getElementById('locate-btn').classList.remove('following');
   });
+  state.leafletMap.on('moveend', maybeShowSearchHere);
   // pinch/scroll zoom can shift the center point away from the player — snap back
   // to center immediately after, so zooming never drifts you off-center. Skipped when
   // the zoom came from a deliberate programmatic view change (like the overview fit),
