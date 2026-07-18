@@ -509,6 +509,7 @@
   .ps-btn:active{transform:scale(0.99);}
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
   .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
+  .ps-far{font-size:13px;color:var(--text-dim);line-height:1.4;}
   /* #33 — location row: address when we have one, coords when we don't. Plain
      text plus a copy icon — no background or border, because the filled surface
      read as a tappable button and competed with the real actions below it.
@@ -2690,7 +2691,13 @@ function fmtDist(m){
   const p = fmtDistParts(m);
   return `${p.value} ${p.unit}`;
 }
-const FOUND_THRESHOLD_M = 3; // ~10ft — you should actually be standing there to capture it
+// 25m (~80ft). Was 3m, which sat below the noise floor of the hardware: phone GPS
+// is ~5m in the open and 20-40m beside a building, so the app was demanding a
+// precision the device was simultaneously reporting it did not have. Compounding
+// that, OSM `out center` pins a building at its CENTROID, so a storefront or a
+// garden sits 20-50m behind the door you are standing at. The two errors add, and
+// the result was a user at the front door unable to capture. (#51)
+const FOUND_THRESHOLD_M = 25;
 const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this doesn't count as continuous travel
 // Real GPS is rarely accurate to 3m on its own — this widens the effective range to at
 // least match the phone's own reported accuracy, so normal GPS wobble doesn't make an
@@ -2699,7 +2706,7 @@ const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this d
 function effectiveCaptureRange(){
   const acc = state.meAccuracy;
   if(typeof acc !== 'number' || acc<=0) return FOUND_THRESHOLD_M;
-  return Math.min(Math.max(FOUND_THRESHOLD_M, acc), 30);
+  return Math.min(Math.max(FOUND_THRESHOLD_M, acc), 75);
 }
 
 /* =========================================================
@@ -3967,6 +3974,13 @@ function fillPinSheet(t){
     actions += `<div class="ps-found">✓ Captured — added to your passport</div>`;
   } else if(inRange){
     actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
+  } else if(typeof t.dist === 'number'){
+    // Never silently hide the action. All three capture paths used to just omit or
+    // disable the button out of range, so a user standing at the door got silence
+    // and learned nothing. Saying the number makes the radius read as physics
+    // rather than as a bug. (#51)
+    const needFt = Math.round(effectiveCaptureRange() * 3.28084);
+    actions += `<div class="ps-far">Get within ${needFt} ft to capture — you're ${escapeHtml(fmtDist(t.dist))} away</div>`;
   }
   actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>`;
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
@@ -4137,7 +4151,7 @@ function refreshTargetsUI(){
         <div class="blaze-mini">${pinSVGsized(t.found?color:'#EDE9DD', t.found, 18,26)}</div>
         <div class="t-meta">
           <div class="t-name">${escapeHtml(t.name)}${t.found?' ✓':''}</div>
-          <div class="t-dist">${t.found?'Found':fmtDist(t.dist)+' away'}</div>
+          <div class="t-dist">${t.found ? `✓ Found · ${fmtDist(t.dist)}` : fmtDist(t.dist)+' away'}</div>
         </div>
       </div>
     </div>`;
@@ -4243,7 +4257,7 @@ async function attemptMarkFound(){
   const dist = haversine(state.me.lat, state.me.lng, target.lat, target.lng);
   const captureRange = effectiveCaptureRange();
   if(dist > captureRange){
-    showToast(`Get within ${Math.round(captureRange*3.28084)} ft to mark this found`);
+    showToast(`Get within ${Math.round(captureRange*3.28084)} ft — you're ${fmtDist(dist)} away`);
     return;
   }
   if(!state.progress[key]) state.progress[key] = {foundIds:[], foundAt:{}, foundMeta:{}};
