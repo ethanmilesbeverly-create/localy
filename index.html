@@ -2148,13 +2148,42 @@ function maybeShowSearchHere(){
   const drifted = haversine(c.lat, c.lng, anchor.lat, anchor.lng) > SEARCH_HERE_DIST_M;
   btn.classList.toggle('show', drifted);
 }
+/* #8 — "Search this area" means search THERE and stay there. Three separate
+   things used to drag you home, and fixing only the obvious one would have left
+   the other two to undo the search a moment later:
+     (1) setCurrentHunt() ends with an unconditional centerOnPlayer(), so the
+         regenerated hunt snapped the viewport back to you immediately;
+     (2) on the next GPS tick refreshDiscoverLocalIfNeeded() swaps out any
+         Discover-Local point more than DISCOVER_FALLOFF_M (2.5km) from your REAL
+         position — every point you just searched for — and since procedural
+         filler is off (#37) the replacements come back null and the slots simply
+         drop, i.e. the searched area quietly empties out;
+     (3) when the async place fetch lands, reblendHuntInPlace() rebuilds against
+         `state.localHuntOrigin || state.me`, and only startLocalHunt sets that
+         origin — so every other category re-anchored to the player.
+   state.searchedArea marks "content is deliberately anchored somewhere else",
+   and localHuntOrigin moves with it so late-arriving real places land in the
+   right place. Cleared by recenterMap(), which is the deliberate way home. */
 function searchThisArea(){
   const c = state.leafletMap.getCenter();
-  regenerateCurrentHuntAt({lat: c.lat, lng: c.lng});
+  const base = {lat: c.lat, lng: c.lng};
+  state.searchedArea = base;
+  state.localHuntOrigin = base;
+  state.followMe = false; // or the next GPS tick pans you off the area you asked for
+  document.getElementById('locate-btn').classList.remove('following');
+  state._preserveViewOnNextHunt = true;
+  try{
+    regenerateCurrentHuntAt(base);
+  }finally{
+    // Always clear, even if regenerate took the fixed-content branch and never
+    // reached setCurrentHunt — a stuck flag would swallow the next legitimate
+    // recenter instead.
+    state._preserveViewOnNextHunt = false;
+  }
   document.getElementById('search-here-btn').classList.remove('show');
 }
 function refreshDiscoverLocalIfNeeded(lat, lng){
-  if(state.browsingLocation) return; // don't let real-position drift touch content while browsing elsewhere
+  if(state.browsingLocation || state.searchedArea) return; // browsing or searching elsewhere on purpose — real-position drift must not rewrite that content (#8)
   const hunt = state.currentHunt;
   if(!hunt || hunt.mode!=='discoverlocal') return;
   const base = {lat,lng};
@@ -2197,7 +2226,7 @@ function curatedRegenFnFor(key){
   return null;
 }
 function checkCuratedStaleness(lat, lng){
-  if(state.browsingLocation) return; // browsing elsewhere on purpose — real-position distance isn't the relevant signal here
+  if(state.browsingLocation || state.searchedArea) return; // browsing/searching elsewhere on purpose — real-position distance isn't the relevant signal here (#8)
   const hunt = state.currentHunt;
   const banner = document.getElementById('stale-hunt-banner');
   if(!hunt || !hunt.points || hunt.points.length===0){ banner.classList.remove('show'); return; }
@@ -2652,6 +2681,7 @@ let state = {
   gemDraftPin: null,
   pendingSavePoint: null,
   browsingLocation: null,
+  searchedArea: null,   // #8 — set while content is anchored to a panned-to area
   _addrCache: new Map(),   // #33 — rounded coords -> short address (or null after a failed lookup)
   _programmaticViewChange: false,
   meAccuracy: null,
@@ -3334,6 +3364,7 @@ async function searchMapLocation(){
   }
 }
 function enterLocationBrowseMode(base, placeName){
+  state.searchedArea = null; // browse mode supersedes a panned search (#8)
   state.browsingLocation = base;
   state.followMe = false;
   document.getElementById('locate-btn').classList.remove('following');
@@ -3347,6 +3378,7 @@ function enterLocationBrowseMode(base, placeName){
 function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
   state.browsingLocation = null;
+  state.searchedArea = null;
   state.followMe = true;
   document.getElementById('locate-btn').classList.add('following');
   document.getElementById('browsing-indicator').classList.remove('show');
@@ -3365,6 +3397,14 @@ function recenterMap(){
   if(state.browsingLocation){
     exitLocationBrowseMode();
     return;
+  }
+  // #8 — recenter is the deliberate way back from a searched area, so it returns
+  // the CONTENT as well as the view, mirroring exitLocationBrowseMode().
+  if(state.searchedArea){
+    state.searchedArea = null;
+    state.localHuntOrigin = state.me || state.localHuntOrigin;
+    if(state.me) regenerateCurrentHuntAt(state.me);
+    return; // regenerate -> setCurrentHunt already recenters
   }
   centerOnPlayer();
 }
@@ -3410,7 +3450,10 @@ function setCurrentHunt(hunt){
   refreshTargetsUI();
   refreshTrackUI();
   saveProgress();
-  centerOnPlayer();
+  // #8 — skip the snap-home when the hunt was rebuilt for an area the user
+  // deliberately panned to. Every other path still recenters as before.
+  if(state._preserveViewOnNextHunt) state._preserveViewOnNextHunt = false;
+  else centerOnPlayer();
   updateExploreSelectionIcons();
 }
 const EXPLORE_CAT_KEYPREFIX = {
