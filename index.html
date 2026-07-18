@@ -1611,6 +1611,15 @@ const RANDOM_LABELS = [
    generates plausible nearby spots around whichever coordinates you actually are at —
    mostly close, with a few notable ones farther out. Swap generateLocalSpots etc for
    real API calls (Google Places, NPS API, state park databases) when this goes further. */
+
+/* ── FAKE-DATA KILL-SWITCH ───────────────────────────────────────────────
+   When false, NO procedural/placeholder spots are ever shown. The app then
+   surfaces ONLY: (1) approved user-submitted gems and (2) real internet places
+   (OpenStreetMap/Overpass + Wikipedia). Low-coverage areas stay honestly empty
+   — pair with an empty-state affordance (roadmap R11) so a sparse map reads as
+   "nothing here yet," not broken. Flip to true only to restore old demo filler. */
+const SHOW_PROCEDURAL_FILLER = false;
+
 const SHOP_NAMES = [
   'Vintage Bookshop','Indie Record Shop','Neighborhood Gift Shop','Corner Hardware Store',
   'Thrift & Vintage Store','Boutique Clothing Shop','Flower Stand','Stationery & Card Shop'
@@ -1808,6 +1817,15 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
       return {...r, category};
     }
   }
+  // No fabrication when filler is disabled: return a real gem if one exists,
+  // otherwise null so the caller drops the slot instead of inventing a place.
+  if(!SHOW_PROCEDURAL_FILLER){
+    if(category==='gems'){
+      const g = nearbyApprovedGems(base, excludeGemIds||[], 1)[0];
+      return g ? {id:'dlg'+g.id+'_'+uid, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id} : null;
+    }
+    return null;
+  }
   if(category==='park'){
     const p = offsetPointSpaced(base, randBetween(150,1600), placed, 150);
     return {id:'dlp'+uid, name:genParkName(), lat:p.lat, lng:p.lng, desc:'A nearby local park.', category:'park'};
@@ -1878,7 +1896,8 @@ function refreshDiscoverLocalIfNeeded(lat, lng){
     if(d > DISCOVER_FALLOFF_M){
       anyChanged = true;
       const placed = newPoints.map(np=>({lat:np.lat, lng:np.lng}));
-      newPoints.push(generateOneCategoryPoint(p.category, base, placed, usedGemIds));
+      const np = generateOneCategoryPoint(p.category, base, placed, usedGemIds);
+      if(np) newPoints.push(np); // null when no real replacement exists → slot drops
     } else {
       newPoints.push(p);
     }
@@ -2229,8 +2248,8 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
       push({...rp, category});
     });
   }
-  // 3) procedural filler to reach the target
-  if(out.length < targetCount && typeof procFn==='function'){
+  // 3) procedural filler to reach the target — DISABLED unless kill-switch on
+  if(SHOW_PROCEDURAL_FILLER && out.length < targetCount && typeof procFn==='function'){
     (procFn()||[]).forEach(p=>{
       if(out.length>=targetCount) return;
       push({...p, category:(p.category||category)});
@@ -2297,36 +2316,6 @@ function reblendHuntInPlace(h){
     merged.push(p);
   });
   h.points = merged;
-  injectCapturedPins(h);
-}
-/* Re-add previously captured pins (using the coords saved at capture time) that
-   this session's fresh generation didn't reproduce, so captured spots stay on
-   the map with their checkmark when you come back. Deduped by id and by nearby
-   same-name; only pins near the current origin are re-added, so returning to an
-   area shows its past captures without dragging in ones from other trips.
-   Captures made before coords were saved have no lat/lng and are skipped here
-   (they still count in the passport/stats). */
-const CAPTURED_REINJECT_RADIUS_M = 8000;
-function injectCapturedPins(hunt){
-  if(!hunt || !Array.isArray(hunt.points)) return;
-  const prog = state.progress[hunt.key];
-  if(!prog || !prog.foundMeta) return;
-  const base = state.localHuntOrigin || state.me || FALLBACK_LOCATION;
-  const haveIds = new Set(hunt.points.map(p=>p.id));
-  const haveNames = new Set(hunt.points.map(p=>normName(p.name)));
-  (prog.foundIds || []).forEach(id=>{
-    if(haveIds.has(id)) return;                 // stable-id place already present
-    const m = prog.foundMeta[id];
-    if(!m || typeof m.lat!=='number' || typeof m.lng!=='number') return; // pre-coords capture
-    if(base && haversine(base.lat, base.lng, m.lat, m.lng) > CAPTURED_REINJECT_RADIUS_M) return;
-    const nm = normName(m.name);
-    if(nm && haveNames.has(nm)) return;         // a fresh same-name pin already covers it
-    const pin = { id, name:m.name, lat:m.lat, lng:m.lng, desc:m.desc||'' };
-    if(m.category) pin.category = m.category;
-    hunt.points.push(pin);
-    haveIds.add(id);
-    if(nm) haveNames.add(nm);
-  });
 }
 function onRealPlacesReady(){
   const h = state.currentHunt;
@@ -2963,7 +2952,6 @@ function setCurrentHunt(hunt){
   state.currentHunt = hunt;
   if(!state.progress[hunt.key]) state.progress[hunt.key] = {foundIds:[], foundAt:{}, foundMeta:{}};
   if(!state.progress[hunt.key].foundMeta) state.progress[hunt.key].foundMeta = {};
-  injectCapturedPins(hunt);
   document.getElementById('hunt-chip-name').textContent = hunt.name;
   document.getElementById('stale-hunt-banner').classList.remove('show');
   enterHuntMode();
@@ -3084,48 +3072,49 @@ function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
   ensureRealPlaces(base);
-  const key = 'local_main';
+  const key = 'local_'+Date.now();
   setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
 }
 function startParksAndTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'parkstrails_main';
+  const key = 'parkstrails_'+Date.now();
   setCurrentHunt({key, name:'Parks & Trails', mode:'park', points:buildPointsForKey(key, base)});
 }
 function startLocalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const key = 'localparks_main';
-  setCurrentHunt({key, name:'Local Parks', mode:'park', points:generateLocalParks(base)});
+  ensureRealPlaces(base);
+  const key = 'localparks_'+Date.now();
+  setCurrentHunt({key, name:'Local Parks', mode:'park', points:blendCategory(base,'park',8,()=>generateLocalParks(base),'park')});
 }
 function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'shops_main';
+  const key = 'shops_'+Date.now();
   setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
 }
 function startBarsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'bars_main';
+  const key = 'bars_'+Date.now();
   setCurrentHunt({key, name:'Bars', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'restaurants_main';
+  const key = 'restaurants_'+Date.now();
   setCurrentHunt({key, name:'Restaurants', mode:'restaurants', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'barsrest_main';
+  const key = 'barsrest_'+Date.now();
   setCurrentHunt({key, name:'Bars & Restaurants', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startHistoryHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'history_main';
+  const key = 'history_'+Date.now();
   setCurrentHunt({key, name:'History', mode:'history', points:buildPointsForKey(key, base)});
 }
 function startHiddenGemsHunt(base){
@@ -3134,7 +3123,7 @@ function startHiddenGemsHunt(base){
   const points = approved.map(g=>({
     id:'gem'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems'
   }));
-  const key = 'gems_main';
+  const key = 'gems_'+Date.now();
   setCurrentHunt({key, name:'Hidden Gems', mode:'gems', points});
   if(points.length===0){
     showToast('No hidden gems yet — be the first to suggest one!');
@@ -3142,26 +3131,30 @@ function startHiddenGemsHunt(base){
 }
 function startStateParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const key = 'stateparks_main';
-  setCurrentHunt({key, name:'State Park', mode:'park', points:generateStateParks(base)});
-  showToast('Showing a state park with its landmarks — might be a drive away');
+  ensureRealPlaces(base);
+  const key = 'stateparks_'+Date.now();
+  const points = blendCategory(base,'park',8,()=>generateStateParks(base),'park');
+  setCurrentHunt({key, name:'State Park', mode:'park', points});
+  showToast(points.length ? 'Showing real parks near you' : 'No park data loaded here yet — pan the map or try again shortly');
 }
 function startNationalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const key = 'nationalparks_main';
-  setCurrentHunt({key, name:'National Park', mode:'park', points:generateNationalParks(base)});
-  showToast('National parks are far — great for planning a trip, not a walk today');
+  ensureRealPlaces(base);
+  const key = 'nationalparks_'+Date.now();
+  const points = blendCategory(base,'park',8,()=>generateNationalParks(base),'park');
+  setCurrentHunt({key, name:'National Park', mode:'park', points});
+  showToast(points.length ? 'Showing real parks near you' : 'No national/state park data wired up for this area yet');
 }
 function startTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'trails_main';
+  const key = 'trails_'+Date.now();
   setCurrentHunt({key, name:'Trails Nearby', mode:'trail', points:buildPointsForKey(key, base)});
 }
 function startDiscoverHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'discover_main';
+  const key = 'discover_'+Date.now();
   setCurrentHunt({key, name:'Discover — First Visit', mode:'discover', points:buildPointsForKey(key, base)});
   showToast('Good for a first visit anywhere — built around wherever you are now');
 }
@@ -3187,20 +3180,23 @@ function selectExplore(cat){
 }
 
 function startRandomHunt(){
-  const base = state.me || {lat:41.8827,lng:-87.6233};
-  const count = 5;
-  const points = [];
-  const placed = [];
-  const shuffled = [...RANDOM_LABELS].sort(()=>Math.random()-0.5);
-  for(let i=0;i<count;i++){
-    const dist = 150 + Math.random()*1200; // 150m - 1350m
-    const p = offsetPointSpaced(base, dist, placed, 150);
-    placed.push(p);
-    points.push({id:'r'+i, name:shuffled[i], lat:p.lat, lng:p.lng, desc:'A random marker near your start point.'});
+  const base = state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base); // warm the real-place cache for this area
+  const cats = ['park','trail','shops','bars','restaurants','history'];
+  let pool = [];
+  cats.forEach(c=>{ pool = pool.concat(nearbyRealPlaces(base, c, 4)); });
+  pool = pool.concat(nearbyApprovedGems(base, [], 8).map(gemToPoint));
+  const seen = new Set();
+  pool = pool.filter(p=>{ const k=normName(p.name); if(!k||seen.has(k)) return false; seen.add(k); return true; });
+  pool.sort(()=>Math.random()-0.5);
+  const points = pool.slice(0,5).map((p,i)=>({...p, id:p.id||('r'+i)}));
+  if(!points.length){
+    showToast('No real spots loaded here yet — give it a moment or pan the map, then try again');
+    return;
   }
-  const key = 'random_main';
+  const key = 'random_'+Date.now();
   setCurrentHunt({key, name:'Random Nearby', mode:'random', points});
-  showToast('New random hunt scattered around you');
+  showToast('Random hunt from real spots near you');
 }
 
 async function searchCreateLocation(){
@@ -3957,11 +3953,7 @@ async function attemptMarkFound(){
       name: target ? target.name : id,
       huntName: state.currentHunt.name,
       color: MODE_COLOR[effectiveMode] || '#E8622C',
-      mode: effectiveMode,
-      lat: target.lat,
-      lng: target.lng,
-      desc: target.desc || '',
-      category: target.category || null
+      mode: effectiveMode
     };
     await saveProgress();
     if(!state.hasCapturedOnce){
