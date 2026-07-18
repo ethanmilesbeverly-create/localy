@@ -317,7 +317,10 @@
     background:var(--surface);
     border-top:1px solid var(--line);
     padding:12px 16px calc(90px + env(safe-area-inset-bottom));
-    max-height:75vh;
+    /* Taller ceiling now that the compass panel is gone — more rows fit. This is
+       a MAX, not a fixed height: the drawer still shrinks to content, so one or
+       two items stay short rather than opening a mostly-empty panel. */
+    max-height:88vh;
   }
   #drawer-header{
     position:relative;
@@ -391,9 +394,6 @@
   .target-row .t-name{font-size:14.5px;font-weight:600;}
   .target-row .t-dist{font-size:12px;color:var(--text-dim);}
   .target-row .t-meta{flex:1;min-width:0;}
-  .t-chevron{width:16px;height:16px;color:var(--text-dim);flex-shrink:0;transition:transform .2s ease;}
-  .t-chevron svg{width:100%;height:100%;display:block;}
-  .target-row.expanded .t-chevron{transform:rotate(180deg);}
   .target-row-detail{margin-top:10px;}
   .target-row-detail .t-desc{font-size:13px;color:var(--text-dim);line-height:1.5;margin:8px 0 0;}
   .t-image{
@@ -1136,31 +1136,10 @@
         </button>
       </div>
       <div id="drawer-body">
-        <div id="nearest-panel">
-          <div class="compass-wrap" id="compass-wrap">
-            <div class="compass-tick n">N</div>
-            <div class="compass-tick e"></div>
-            <div class="compass-tick s"></div>
-            <div class="compass-tick w"></div>
-            <div id="compass-arrow">
-              <svg viewBox="0 0 24 24">
-                <polygon points="12,2 15.5,12.5 12,10.8 8.5,12.5" fill="currentColor"/>
-                <polygon points="12,22 15.5,12.5 12,14.2 8.5,12.5" fill="rgba(237,233,221,0.3)"/>
-              </svg>
-            </div>
-            <div class="compass-center-dot"></div>
-          </div>
-          <div class="nearest-info">
-            <div id="track-dist">-- <span>away</span></div>
-            <div id="track-name">Pick a hunt to start tracking</div>
-          </div>
-          <div class="nearest-actions">
-            <button class="btn" id="open-camera-btn" onclick="openAR()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              Capture
-            </button>
-          </div>
-        </div>
+        <!-- Compass / distance / Capture panel removed: the drawer is now a pure
+             list so more recommendations fit. Tracking still runs in JS (it drives
+             the floating #map-camera-btn); capture happens via that button or from
+             a stop's detail sheet after tapping a row. -->
         <div id="target-list"></div>
       </div>
     </div>
@@ -3887,7 +3866,6 @@ function refreshTargetsUI(){
           <div class="t-name">${escapeHtml(t.name)}${t.found?' ✓':''}</div>
           <div class="t-dist">${t.found?'Found':fmtDist(t.dist)+' away'}</div>
         </div>
-        <div class="t-chevron">${CHEVRON_SVG}</div>
       </div>
     </div>`;
   }).join('');
@@ -3895,21 +3873,19 @@ function refreshTargetsUI(){
 function blazeSVGsized(color, filled, w, h){
   return blazeSVG(color, filled).replace('viewBox="0 0 28 40"', `viewBox="0 0 28 40" width="${w}" height="${h}"`);
 }
-function toggleTargetExpand(id){
-  const alreadyOpen = state.expandedTargets.has(id);
-  state.expandedTargets.clear();
-  if(!alreadyOpen) state.expandedTargets.add(id);
-  refreshTargetsUI();
-  refreshTrackUI();
-}
 
 /* =========================================================
    TRACK / COMPASS
    ========================================================= */
 function refreshTrackUI(){
   const unfoundTargets = currentTargetsSorted().filter(t=>!t.found);
+  // These live in the removed drawer compass panel — may be absent. Tracking
+  // logic still runs because it drives #map-camera-btn and state._nearestId.
   const wrap = document.getElementById('compass-wrap');
   const cameraBtn = document.getElementById('open-camera-btn');
+  const arrowEl = document.getElementById('compass-arrow');
+  const distEl = document.getElementById('track-dist');
+  const nameEl = document.getElementById('track-name');
   const mapCameraBtn = document.getElementById('map-camera-btn');
 
   // If exactly one list item is expanded, the compass/distance follow that
@@ -3921,23 +3897,23 @@ function refreshTrackUI(){
   }
 
   if(!state.currentHunt || (!focused && unfoundTargets.length===0)){
-    document.getElementById('track-dist').innerHTML = '-- <span>away</span>';
-    document.getElementById('track-name').textContent = state.currentHunt ? 'All stops found! 🎉' : 'Pick a hunt to start tracking';
-    cameraBtn.classList.remove('ready');
-    mapCameraBtn.classList.remove('show');
-    wrap.classList.remove('in-range');
+    if(distEl) distEl.innerHTML = '-- <span>away</span>';
+    if(nameEl) nameEl.textContent = state.currentHunt ? 'All stops found! 🎉' : 'Pick a hunt to start tracking';
+    if(cameraBtn) cameraBtn.classList.remove('ready');
+    if(mapCameraBtn) mapCameraBtn.classList.remove('show');
+    if(wrap) wrap.classList.remove('in-range');
     return;
   }
   const nearest = focused || unfoundTargets[0];
   const brg = bearing(state.me.lat, state.me.lng, nearest.lat, nearest.lng);
-  document.getElementById('compass-arrow').style.transform = `rotate(${brg}deg)`;
+  if(arrowEl) arrowEl.style.transform = `rotate(${brg}deg)`;
   const distParts = fmtDistParts(nearest.dist);
-  document.getElementById('track-dist').innerHTML = `${distParts.value} <span>${distParts.unit} away</span>`;
-  document.getElementById('track-name').textContent = nearest.name;
+  if(distEl) distEl.innerHTML = `${distParts.value} <span>${distParts.unit} away</span>`;
+  if(nameEl) nameEl.textContent = nearest.name;
   const inRange = nearest.dist <= effectiveCaptureRange();
-  wrap.classList.toggle('in-range', inRange);
-  cameraBtn.classList.toggle('ready', inRange && !nearest.found);
-  mapCameraBtn.classList.toggle('show', inRange && !nearest.found);
+  if(wrap) wrap.classList.toggle('in-range', inRange);
+  if(cameraBtn) cameraBtn.classList.toggle('ready', inRange && !nearest.found);
+  if(mapCameraBtn) mapCameraBtn.classList.toggle('show', inRange && !nearest.found);
   state._nearestId = nearest.id;
 
   // AR sync if open
