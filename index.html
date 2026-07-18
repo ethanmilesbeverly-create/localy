@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Localy</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
@@ -2297,6 +2297,36 @@ function reblendHuntInPlace(h){
     merged.push(p);
   });
   h.points = merged;
+  injectCapturedPins(h);
+}
+/* Re-add previously captured pins (using the coords saved at capture time) that
+   this session's fresh generation didn't reproduce, so captured spots stay on
+   the map with their checkmark when you come back. Deduped by id and by nearby
+   same-name; only pins near the current origin are re-added, so returning to an
+   area shows its past captures without dragging in ones from other trips.
+   Captures made before coords were saved have no lat/lng and are skipped here
+   (they still count in the passport/stats). */
+const CAPTURED_REINJECT_RADIUS_M = 8000;
+function injectCapturedPins(hunt){
+  if(!hunt || !Array.isArray(hunt.points)) return;
+  const prog = state.progress[hunt.key];
+  if(!prog || !prog.foundMeta) return;
+  const base = state.localHuntOrigin || state.me || FALLBACK_LOCATION;
+  const haveIds = new Set(hunt.points.map(p=>p.id));
+  const haveNames = new Set(hunt.points.map(p=>normName(p.name)));
+  (prog.foundIds || []).forEach(id=>{
+    if(haveIds.has(id)) return;                 // stable-id place already present
+    const m = prog.foundMeta[id];
+    if(!m || typeof m.lat!=='number' || typeof m.lng!=='number') return; // pre-coords capture
+    if(base && haversine(base.lat, base.lng, m.lat, m.lng) > CAPTURED_REINJECT_RADIUS_M) return;
+    const nm = normName(m.name);
+    if(nm && haveNames.has(nm)) return;         // a fresh same-name pin already covers it
+    const pin = { id, name:m.name, lat:m.lat, lng:m.lng, desc:m.desc||'' };
+    if(m.category) pin.category = m.category;
+    hunt.points.push(pin);
+    haveIds.add(id);
+    if(nm) haveNames.add(nm);
+  });
 }
 function onRealPlacesReady(){
   const h = state.currentHunt;
@@ -2933,6 +2963,7 @@ function setCurrentHunt(hunt){
   state.currentHunt = hunt;
   if(!state.progress[hunt.key]) state.progress[hunt.key] = {foundIds:[], foundAt:{}, foundMeta:{}};
   if(!state.progress[hunt.key].foundMeta) state.progress[hunt.key].foundMeta = {};
+  injectCapturedPins(hunt);
   document.getElementById('hunt-chip-name').textContent = hunt.name;
   document.getElementById('stale-hunt-banner').classList.remove('show');
   enterHuntMode();
@@ -3053,48 +3084,48 @@ function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
   ensureRealPlaces(base);
-  const key = 'local_'+Date.now();
+  const key = 'local_main';
   setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
 }
 function startParksAndTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'parkstrails_'+Date.now();
+  const key = 'parkstrails_main';
   setCurrentHunt({key, name:'Parks & Trails', mode:'park', points:buildPointsForKey(key, base)});
 }
 function startLocalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const key = 'localparks_'+Date.now();
+  const key = 'localparks_main';
   setCurrentHunt({key, name:'Local Parks', mode:'park', points:generateLocalParks(base)});
 }
 function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'shops_'+Date.now();
+  const key = 'shops_main';
   setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
 }
 function startBarsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'bars_'+Date.now();
+  const key = 'bars_main';
   setCurrentHunt({key, name:'Bars', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'restaurants_'+Date.now();
+  const key = 'restaurants_main';
   setCurrentHunt({key, name:'Restaurants', mode:'restaurants', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'barsrest_'+Date.now();
+  const key = 'barsrest_main';
   setCurrentHunt({key, name:'Bars & Restaurants', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startHistoryHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'history_'+Date.now();
+  const key = 'history_main';
   setCurrentHunt({key, name:'History', mode:'history', points:buildPointsForKey(key, base)});
 }
 function startHiddenGemsHunt(base){
@@ -3103,7 +3134,7 @@ function startHiddenGemsHunt(base){
   const points = approved.map(g=>({
     id:'gem'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems'
   }));
-  const key = 'gems_'+Date.now();
+  const key = 'gems_main';
   setCurrentHunt({key, name:'Hidden Gems', mode:'gems', points});
   if(points.length===0){
     showToast('No hidden gems yet — be the first to suggest one!');
@@ -3111,26 +3142,26 @@ function startHiddenGemsHunt(base){
 }
 function startStateParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const key = 'stateparks_'+Date.now();
+  const key = 'stateparks_main';
   setCurrentHunt({key, name:'State Park', mode:'park', points:generateStateParks(base)});
   showToast('Showing a state park with its landmarks — might be a drive away');
 }
 function startNationalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const key = 'nationalparks_'+Date.now();
+  const key = 'nationalparks_main';
   setCurrentHunt({key, name:'National Park', mode:'park', points:generateNationalParks(base)});
   showToast('National parks are far — great for planning a trip, not a walk today');
 }
 function startTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'trails_'+Date.now();
+  const key = 'trails_main';
   setCurrentHunt({key, name:'Trails Nearby', mode:'trail', points:buildPointsForKey(key, base)});
 }
 function startDiscoverHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'discover_'+Date.now();
+  const key = 'discover_main';
   setCurrentHunt({key, name:'Discover — First Visit', mode:'discover', points:buildPointsForKey(key, base)});
   showToast('Good for a first visit anywhere — built around wherever you are now');
 }
@@ -3167,7 +3198,7 @@ function startRandomHunt(){
     placed.push(p);
     points.push({id:'r'+i, name:shuffled[i], lat:p.lat, lng:p.lng, desc:'A random marker near your start point.'});
   }
-  const key = 'random_'+Date.now();
+  const key = 'random_main';
   setCurrentHunt({key, name:'Random Nearby', mode:'random', points});
   showToast('New random hunt scattered around you');
 }
@@ -3926,7 +3957,11 @@ async function attemptMarkFound(){
       name: target ? target.name : id,
       huntName: state.currentHunt.name,
       color: MODE_COLOR[effectiveMode] || '#E8622C',
-      mode: effectiveMode
+      mode: effectiveMode,
+      lat: target.lat,
+      lng: target.lng,
+      desc: target.desc || '',
+      category: target.category || null
     };
     await saveProgress();
     if(!state.hasCapturedOnce){
