@@ -70,7 +70,7 @@
   }
   #topbar .brand span{color:var(--orange);}
   #map-top-row{
-    position:absolute;top:14px;left:16px;right:16px;z-index:500;
+    position:absolute;top:60px;left:16px;right:16px;z-index:500;
     display:flex;align-items:center;gap:8px;
   }
   #hunt-chip{
@@ -105,7 +105,7 @@
     border-radius:999px;padding:9px 12px;font-size:13px;font-family:inherit;
   }
   #browsing-indicator{
-    position:absolute;top:58px;left:16px;right:16px;z-index:500;
+    position:absolute;top:108px;left:16px;right:16px;z-index:500;
     display:none;align-items:center;justify-content:space-between;gap:10px;
     background:rgba(216,166,58,0.15);border:1px solid var(--yellow);color:var(--yellow);
     border-radius:10px;padding:9px 12px;font-size:12.5px;cursor:pointer;
@@ -412,6 +412,61 @@
   .map-popup-body b{font-size:14px;}
   .map-popup-body p{font-size:12px;color:var(--text-dim);margin:5px 0;line-height:1.4;}
   .map-popup-dist{font-size:12px;color:var(--orange);font-weight:700;}
+
+  /* ---------- Pin detail sheet (flight-tracker style) ---------- */
+  #pin-sheet{
+    position:absolute;left:0;right:0;
+    bottom:calc(56px + env(safe-area-inset-bottom));
+    max-width:480px;margin:0 auto;
+    z-index:590;
+    background:rgba(18,32,27,0.86);
+    -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+    border-top:1px solid rgba(237,233,221,0.16);
+    border-radius:20px 20px 0 0;
+    box-shadow:0 -12px 34px rgba(0,0,0,0.42);
+    padding:0 16px 14px;
+    transform:translateY(130%);
+    transition:transform .3s cubic-bezier(.22,.61,.36,1);
+    will-change:transform;
+  }
+  #pin-sheet.open{transform:translateY(0);}
+  #pin-sheet-drag{cursor:grab;touch-action:none;}
+  #pin-sheet-grabber{
+    width:42px;height:5px;border-radius:3px;
+    background:rgba(237,233,221,0.34);
+    margin:10px auto 12px;
+  }
+  #pin-sheet-peek{display:flex;gap:14px;align-items:flex-start;}
+  #pin-sheet-info{flex:1;min-width:0;}
+  .ps-title{
+    color:var(--yellow);font-weight:700;font-size:19px;line-height:1.15;letter-spacing:0.01em;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .ps-sub{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13.5px;color:var(--text);}
+  .ps-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .ps-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:9px;font-size:12.5px;color:var(--text-dim);}
+  .ps-meta .ps-div{width:1px;height:11px;background:rgba(237,233,221,0.22);display:inline-block;}
+  #pin-sheet-thumb{
+    width:96px;height:76px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  }
+  #pin-sheet-thumb .t-image{height:76px !important;border-radius:0 !important;}
+  #pin-sheet-expand{
+    max-height:0;overflow:hidden;opacity:0;margin-top:0;
+    transition:max-height .3s ease, opacity .25s ease, margin .3s ease, padding .3s ease;
+  }
+  #pin-sheet.expanded #pin-sheet-expand{
+    max-height:44vh;overflow-y:auto;opacity:1;margin-top:14px;padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+  .ps-desc{font-size:13.5px;line-height:1.55;color:var(--text-dim);margin:0 0 14px;}
+  .ps-actions{display:flex;flex-direction:column;gap:10px;}
+  .ps-btn{
+    width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;
+    cursor:pointer;border:1px solid var(--line);background:var(--surface-2);color:var(--text);
+  }
+  .ps-btn:active{transform:scale(0.99);}
+  .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
 
   /* ---------- Game-map styling (bird's-eye, floating markers) ---------- */
   #map-tint{
@@ -1154,6 +1209,21 @@
     </div>
   </div>
 
+  <div id="pin-sheet" aria-hidden="true">
+    <div id="pin-sheet-drag">
+      <div id="pin-sheet-grabber"></div>
+      <div id="pin-sheet-peek">
+        <div id="pin-sheet-info">
+          <div id="pin-sheet-title" class="ps-title"></div>
+          <div id="pin-sheet-sub" class="ps-sub"></div>
+          <div id="pin-sheet-meta" class="ps-meta"></div>
+        </div>
+        <div id="pin-sheet-thumb"></div>
+      </div>
+    </div>
+    <div id="pin-sheet-expand"></div>
+  </div>
+
   <div id="bottomnav">
     <button class="nav-btn active" data-screen="screen-map" onclick="setTab('screen-map')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg>
@@ -1252,6 +1322,40 @@ const SUPABASE_ANON_KEY = "sb_publishable_sJkeQ89O2geQLB5z6d__Zw_9G6nxLt_";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* =========================================================
+   DEMO MODE  ← lets you preview without logging in
+   - true   : always skip login (force demo)
+   - false  : always require login
+   - 'auto' : skip login only when the backend isn't reachable,
+              e.g. inside Claude's preview iframe. On your real
+              deployed site (a normal top-level page) login stays on.
+   Flip to false — or just leave it on 'auto' — before pushing to git.
+   ========================================================= */
+const DEMO_MODE = 'auto';
+
+function demoBypassActive(){
+  if(DEMO_MODE === true)  return true;
+  if(DEMO_MODE === false) return false;
+  // 'auto': treat "running inside an iframe" (Claude preview) as demo.
+  // Accessing window.top cross-origin throws — which also means iframed.
+  try { return window.self !== window.top; }
+  catch(e){ return true; }
+}
+
+/* In-memory storage used only in demo mode: the app works fully for
+   the session, nothing is written to Supabase, nothing persists. */
+const _memKV = new Map();
+const memStorage = {
+  async get(key, shared){
+    const k = (shared ? 'shared:' : 'user:') + key;
+    return _memKV.has(k) ? { value: _memKV.get(k) } : null;
+  },
+  async set(key, value, shared){
+    const k = (shared ? 'shared:' : 'user:') + key;
+    _memKV.set(k, value);
+  }
+};
+
+/* =========================================================
    STORAGE LAYER — real Supabase, drop-in for the old fake
    window.storage. Same interface the app already uses:
      get(key, shared)  -> {value} | null
@@ -1261,7 +1365,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    The app JSON.stringifies before set and JSON.parses after get,
    so value is always a plain string here.
    ========================================================= */
-window.storage = {
+const supabaseStorage = {
   async get(key, shared){
     if(shared){
       const { data, error } = await sb
@@ -1292,6 +1396,9 @@ window.storage = {
     if(error) throw error;
   }
 };
+
+/* Use in-memory storage in demo mode, real Supabase otherwise. */
+window.storage = demoBypassActive() ? memStorage : supabaseStorage;
 
 /* =========================================================
    AUTH
@@ -1368,6 +1475,13 @@ async function logout(){
   location.reload(); // simplest clean reset back to the login screen
 }
 async function checkAuthAndBoot(){
+  if(demoBypassActive()){
+    // Skip login: use a throwaway local user and boot straight into the app.
+    state.user = { id: 'demo-user', email: 'demo@localy.app' };
+    document.getElementById('auth-overlay').classList.add('hidden');
+    if(!state._booted){ state._booted = true; init(); }
+    return;
+  }
   wireAuthUI();
   setAuthMode('login');
   try{
@@ -1414,6 +1528,44 @@ function pinSVG(color, filled){
 function pinSVGsized(color, filled, w, h){
   return pinSVG(color, filled).replace('viewBox="0 0 24 32"', `viewBox="0 0 24 32" width="${w}" height="${h}"`);
 }
+/* Blend a hex color toward the dark map background — used to dim an
+   un-captured pin while keeping its category hue (green stays green). */
+function mixHex(a, b, t){
+  const pa=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16));
+  const pb=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));
+  return '#'+pa.map((v,i)=>Math.round(v+(pb[i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+function dimColor(hex){ return mixHex(hex, '#10231C', 0.45); }
+/* Solid rounded-drop map pin. captured -> full color + check; default -> dimmed + dot. */
+function dropPinSVG(fillColor, captured, w, h){
+  const glyph = captured
+    ? `<path d="M8.4 10.4 l2.4 2.4 l4.4 -5" fill="none" stroke="#EDE9DD" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`
+    : `<circle cx="12" cy="10.5" r="3.1" fill="#EDE9DD"/>`;
+  return `<svg viewBox="0 0 24 32" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 1.5C6.8 1.5 2.5 5.8 2.5 11c0 6.4 9.5 19.5 9.5 19.5S21.5 17.4 21.5 11c0-5.2-4.3-9.5-9.5-9.5z" fill="${fillColor}"/>
+    ${glyph}
+  </svg>`;
+}
+/* =========================================================
+   #23 — PINCH-ZOOM GUARD
+   Native page pinch-zoom scales the whole visual viewport, which drags
+   the header and bottom nav around on mobile. Block multi-touch page zoom
+   at the document level, but leave Leaflet's own map pinch-zoom working by
+   ignoring gestures that start on the map itself.
+   ========================================================= */
+function onMap(e){
+  return e.target && e.target.closest && e.target.closest('.leaflet-container');
+}
+function installZoomGuard(){
+  document.addEventListener('touchmove', e=>{
+    if(e.touches.length > 1 && !onMap(e)) e.preventDefault();
+  }, { passive:false });
+  // iOS Safari also fires its own gesture events for pinch — guard those too.
+  ['gesturestart','gesturechange','gestureend'].forEach(evt=>{
+    document.addEventListener(evt, e=>{ if(!onMap(e)) e.preventDefault(); }, { passive:false });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   document.body.innerHTML = document.body.innerHTML
     .replace(/\$\{'\{\{BLAZE_ORANGE\}\}'\}/g, `<div class="blaze">${blazeSVG('#E8622C',true)}</div>`)
@@ -1424,6 +1576,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     .replace(/\$\{'\{\{BLAZE_PLUM\}\}'\}/g, `<div class="blaze">${blazeSVG('#C1587A',true)}</div>`)
     .replace(/\$\{'\{\{BLAZE_BRASS\}\}'\}/g, `<div class="blaze">${blazeSVG('#B08D57',true)}</div>`)
     .replace(/\$\{'\{\{BLAZE_OUTLINE\}\}'\}/g, `<div class="blaze">${blazeSVG('#EDE9DD',false)}</div>`);
+  installZoomGuard();
   checkAuthAndBoot();
 });
 
@@ -2293,6 +2446,7 @@ async function init(){
   renderGemSubmissions();
   renderPassport();
   setupBaseMap();
+  wirePinSheet();
   startLocalHunt(FALLBACK_LOCATION); // content immediately, refined once real location resolves
   fixMapSize();
   startLocating();
@@ -2333,6 +2487,7 @@ function showScreen(id){
   const el = document.getElementById(id);
   el.classList.add('active');
   el.scrollTop = 0;
+  if(id!=='screen-map') closePinSheet();
 }
 function goToModeSelect(){
   document.getElementById('bottomnav').classList.remove('hidden');
@@ -2650,6 +2805,7 @@ function setupBaseMap(){
   }).addTo(state.leafletMap);
   // clicking map always allowed to enable simulate mode manually via long info, but auto only on geo failure
   state.leafletMap.on('click', e=>{
+    closePinSheet();
     if(state.simulating) onLocation(e.latlng.lat, e.latlng.lng, true);
   });
   // manual panning pauses auto-follow so a walking user's view isn't yanked back mid-look-around
@@ -3498,6 +3654,126 @@ function placeholderImageHTML(t, color, heightPx){
   </div>`;
 }
 
+/* =========================================================
+   PIN DETAIL SHEET (flight-tracker style)
+   Peek preview on pin tap; drag up / tap to expand for more.
+   ========================================================= */
+const PIN_CAT_LABEL = {
+  gems:'Hidden Gem', park:'Park & Trail', parks_trails:'Park & Trail', trail:'Trail',
+  shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
+  history:'History', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
+};
+function pinSheetColor(t){
+  const def = (state.currentHunt && MODE_COLOR[state.currentHunt.mode]) || '#E8622C';
+  return (t && t.category && MODE_COLOR[t.category]) || def;
+}
+function fillPinSheet(t){
+  const color = pinSheetColor(t);
+  const cat = PIN_CAT_LABEL[t.category] || 'Spot';
+  const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
+  const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
+  const statusTxt = t.found ? 'Captured' : (inRange ? 'In range' : 'Not captured');
+  const meta = [distTxt, cat, statusTxt].filter(Boolean)
+    .map(p=>`<span>${escapeHtml(p)}</span>`).join('<i class="ps-div"></i>');
+
+  document.getElementById('pin-sheet-title').textContent = t.name || 'Unnamed spot';
+  document.getElementById('pin-sheet-sub').innerHTML =
+    `<span class="ps-cat-dot" style="background:${color}"></span>${escapeHtml(cat)}`;
+  document.getElementById('pin-sheet-meta').innerHTML = meta;
+  document.getElementById('pin-sheet-thumb').innerHTML = placeholderImageHTML(t, color, 76);
+
+  let actions = '';
+  if(t.found){
+    actions += `<div class="ps-found">✓ Captured — added to your passport</div>`;
+  } else if(inRange){
+    actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
+  }
+  actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>`;
+  document.getElementById('pin-sheet-expand').innerHTML =
+    `<p class="ps-desc">${escapeHtml(t.desc || 'No description yet.')}</p>
+     <div class="ps-actions">${actions}</div>`;
+}
+function openPinSheet(t){
+  state.selectedPinId = t.id;
+  // don't stack on top of the nearby-list drawer
+  const drawer = document.getElementById('target-drawer');
+  if(drawer && !drawer.classList.contains('collapsed')) toggleDrawer();
+  fillPinSheet(t);
+  const sheet = document.getElementById('pin-sheet');
+  sheet.classList.add('open');
+  sheet.setAttribute('aria-hidden','false');
+  refreshTargetsUI();
+}
+function closePinSheet(){
+  const sheet = document.getElementById('pin-sheet');
+  if(!sheet) return;
+  sheet.classList.remove('open','expanded');
+  sheet.setAttribute('aria-hidden','true');
+  state.selectedPinId = null;
+  refreshTargetsUI();
+}
+function expandPinSheet(){ document.getElementById('pin-sheet').classList.add('expanded'); }
+function collapsePinSheet(){ document.getElementById('pin-sheet').classList.remove('expanded'); }
+function togglePinSheetExpand(){ document.getElementById('pin-sheet').classList.toggle('expanded'); }
+function captureFromSheet(){
+  if(state.selectedPinId){ state.expandedTargets = new Set([state.selectedPinId]); refreshTrackUI(); }
+  closePinSheet();
+  openAR();
+}
+/* Open the detail sheet for a stop by id (used by the nearby list).
+   Flies the map to center on the stop, pausing auto-follow so it stays put. */
+function openPinSheetById(id){
+  const t = currentTargetsSorted().find(x=>x.id===id);
+  if(!t) return;
+  state.expandedTargets = new Set([id]);
+  refreshTrackUI();
+  openPinSheet(t);
+  flyToStop(t.lat, t.lng);
+}
+function flyToStop(lat, lng){
+  const map = state.leafletMap;
+  if(!map) return;
+  // Pause auto-follow so the next GPS update doesn't yank the map back off the pin.
+  state.followMe = false;
+  const lb = document.getElementById('locate-btn');
+  if(lb) lb.classList.remove('following');
+  // Center on the stop, nudged up so it sits above the detail sheet, not behind it.
+  const zoom = map.getZoom();
+  const pt = map.project([lat, lng], zoom);
+  pt.y += 80;
+  map.flyTo(map.unproject(pt, zoom), zoom, { duration: 0.6 });
+}
+function wirePinSheet(){
+  const sheet = document.getElementById('pin-sheet');
+  const zone = document.getElementById('pin-sheet-drag');
+  let startY = null;
+  zone.addEventListener('pointerdown', e=>{ startY = e.clientY; });
+  window.addEventListener('pointerup', e=>{
+    if(startY === null) return;
+    const dy = e.clientY - startY;
+    startY = null;
+    const expanded = sheet.classList.contains('expanded');
+    if(dy < -28)      expandPinSheet();          // swipe up → expand
+    else if(dy > 28)  expanded ? collapsePinSheet() : closePinSheet(); // swipe down
+    else              togglePinSheetExpand();     // tap
+  });
+}
+
+/* The orange dotted guide line runs from the user to the currently selected
+   pin (when its detail sheet is open), otherwise to the nearest unfound stop. */
+function refreshGuideLine(){
+  if(!state.guideLayer) return;
+  state.guideLayer.clearLayers();
+  if(!state.me || !state.currentHunt) return;
+  const targets = currentTargetsSorted();
+  const selected = state.selectedPinId && targets.find(t=>t.id===state.selectedPinId);
+  const guideTarget = selected || targets.find(t=>!t.found);
+  if(!guideTarget) return;
+  L.polyline([[state.me.lat,state.me.lng],[guideTarget.lat,guideTarget.lng]], {
+    color:'#E8622C', weight:2, opacity:0.5, dashArray:'2,10', lineCap:'round'
+  }).addTo(state.guideLayer);
+}
+
 function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
   if(!state.currentHunt){
@@ -3511,6 +3787,8 @@ function refreshTargetsUI(){
   const defaultColor = MODE_COLOR[state.currentHunt.mode] || '#E8622C';
   const colorFor = t => (t.category && MODE_COLOR[t.category]) || defaultColor;
   const nearestUnfound = targets.find(t=>!t.found);
+  const selectedTarget = state.selectedPinId && targets.find(t=>t.id===state.selectedPinId);
+  const haloTarget = selectedTarget || nearestUnfound;
   const remaining = targets.filter(t=>!t.found).length;
 
   if(remaining > 0){
@@ -3525,42 +3803,37 @@ function refreshTargetsUI(){
 
   targets.forEach(t=>{
     const color = colorFor(t);
-    const isNearest = nearestUnfound && t.id===nearestUnfound.id;
+    const isNearest = haloTarget && t.id===haloTarget.id;
     const icon = L.divIcon({
       className:'',
       html:`<div class="fm-wrap">
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-shadow"></div>
         <div class="fm-icon ${t.found?'fm-found':''}">
-          ${pinSVGsized(t.found?color:'#173229', t.found, 26,37)}
+          ${dropPinSVG(t.found ? color : dimColor(color), t.found, 26, 37)}
         </div>
       </div>`,
       iconSize:[38,56],
       iconAnchor:[19,52]
     });
     const m = L.marker([t.lat,t.lng], {icon}).addTo(state.markersLayer);
-    m.bindPopup(`<div class="map-popup">
-      ${placeholderImageHTML(t, color, 90)}
-      <div class="map-popup-body">
-        <b>${escapeHtml(t.name)}</b>
-        <p>${escapeHtml(t.desc||'')}</p>
-        <div class="map-popup-dist">${t.found?'Found':fmtDist(t.dist)+' away'}</div>
-      </div>
-    </div>`);
+    m.on('click', ()=> openPinSheet(t));
   });
 
-  if(nearestUnfound && state.me){
-    L.polyline([[state.me.lat,state.me.lng],[nearestUnfound.lat,nearestUnfound.lng]], {
-      color:'#E8622C', weight:2, opacity:0.5, dashArray:'2,10', lineCap:'round'
-    }).addTo(state.guideLayer);
+  // Keep an open pin sheet in sync with fresh data (live distance / capture state).
+  if(state.selectedPinId){
+    const sel = targets.find(x=>x.id===state.selectedPinId);
+    if(sel) fillPinSheet(sel);
+    else closePinSheet();
   }
+
+  refreshGuideLine();
 
   document.getElementById('target-list').innerHTML = targets.map(t=>{
     const color = colorFor(t);
-    const expanded = state.expandedTargets.has(t.id);
     return `
-    <div class="target-row ${expanded?'expanded':''}">
-      <div class="target-row-main" onclick="toggleTargetExpand('${t.id}')">
+    <div class="target-row">
+      <div class="target-row-main" onclick="openPinSheetById('${t.id}')">
         <div class="blaze-mini">${pinSVGsized(t.found?color:'#EDE9DD', t.found, 18,26)}</div>
         <div class="t-meta">
           <div class="t-name">${escapeHtml(t.name)}${t.found?' ✓':''}</div>
@@ -3568,12 +3841,6 @@ function refreshTargetsUI(){
         </div>
         <div class="t-chevron">${CHEVRON_SVG}</div>
       </div>
-      ${expanded ? `
-      <div class="target-row-detail">
-        ${placeholderImageHTML(t, color, 120)}
-        <p class="t-desc">${escapeHtml(t.desc||'No description yet.')}</p>
-        <button class="link-btn" style="margin-top:8px;padding:6px 0;" onclick="event.stopPropagation(); openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>
-      </div>` : ''}
     </div>`;
   }).join('');
 }
