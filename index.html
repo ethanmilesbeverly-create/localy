@@ -391,6 +391,15 @@
     box-shadow:0 10px 30px rgba(0,0,0,0.45); text-align:center;
   }
   #hunt-empty.show{display:block;}
+  #hunt-empty-close{
+    position:absolute; top:8px; right:8px;
+    width:30px; height:30px; padding:0;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent; border:none; border-radius:50%;
+    color:var(--text-dim); cursor:pointer;
+  }
+  #hunt-empty-close svg{width:15px; height:15px;}
+  #hunt-empty-close:active{background:rgba(255,255,255,0.08);}
   #hunt-empty .he-icon{margin:0 auto 10px; width:34px; height:34px; color:var(--lore, #3E9C8F);}
   #hunt-empty h4{margin:0 0 6px; font-size:15px; color:var(--text); font-weight:700;}
   #hunt-empty p{margin:0 0 14px; font-size:13px; line-height:1.5; color:var(--text-dim);}
@@ -1234,6 +1243,9 @@
       </div>
     </div>
     <div id="hunt-empty">
+      <button id="hunt-empty-close" type="button" onclick="dismissHuntEmpty()" aria-label="Dismiss">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <svg class="he-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 5h6a3 3 0 0 1 3 3v12a2.6 2.6 0 0 0-2.6-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2.6 2.6 0 0 1 2.6-2H21z"/></svg>
       <h4 id="hunt-empty-title">Nothing here yet</h4>
       <p id="hunt-empty-body"></p>
@@ -2185,8 +2197,10 @@ function searchThisArea(){
     // that made remote areas render empty in the first place.
     state.browsingLocation = base;
     // The banner named a specific place that is no longer what you are looking at.
-    document.getElementById('browsing-indicator-text').innerHTML =
-      "Browsing <b>this area</b> — you're not really here";
+    if(SHOW_BROWSING_BANNER){
+      document.getElementById('browsing-indicator-text').innerHTML =
+        "Browsing <b>this area</b> — you're not really here";
+    }
   } else {
     state.searchedArea = base;
     state.followMe = false; // or the next GPS tick pans you off the area you asked for
@@ -3403,6 +3417,19 @@ async function searchMapLocation(){
     showToast("Location search isn't available here — try again later");
   }
 }
+/* #19 REVERSED. The banner was kept on the argument that browse mode is signalled
+   only by an ABSENCE (your marker and range circle disappear) and nobody notices
+   an absence. That was true when it was written; it is weaker now, because #18
+   put a real distance on every pin sheet — "312 mi away" is unmissable and
+   states the same fact more usefully. Left in the DOM behind a kill-switch
+   rather than deleted, same pattern as SHOW_PROCEDURAL_FILLER (#37), so it is
+   one flag to restore.
+   NOTE: the banner was also the visible way OUT of browse mode. The exit path is
+   now solely the locate/recenter button, which routes through
+   exitLocationBrowseMode() — if that button is ever moved or hidden, browse mode
+   becomes a room with no door. */
+const SHOW_BROWSING_BANNER = false;
+
 function enterLocationBrowseMode(base, placeName){
   state.searchedArea = null; // browse mode supersedes a panned search (#8)
   state.browsingLocation = base;
@@ -3412,7 +3439,7 @@ function enterLocationBrowseMode(base, placeName){
   if(state.rangeCircle) state.leafletMap.removeLayer(state.rangeCircle);
   document.getElementById('browsing-indicator-text').innerHTML =
     `Browsing <b>${escapeHtml(placeName)}</b> — you're not really here`;
-  document.getElementById('browsing-indicator').classList.add('show');
+  if(SHOW_BROWSING_BANNER) document.getElementById('browsing-indicator').classList.add('show');
   regenerateCurrentHuntAt(base);
 }
 function exitLocationBrowseMode(){
@@ -4573,10 +4600,29 @@ const EMPTY_DEFAULT = {
   title: 'Nothing mapped here yet',
   body: "We couldn't find anything for this category nearby. That usually means thin coverage rather than an empty neighborhood — try another category, or add a spot you know."
 };
+/* The empty card is informative, not an error, so it must be dismissable —
+   otherwise "this town has nothing, let me pan one town over and try again"
+   means panning and searching with a modal-looking panel in the way the entire
+   time. Dismissal is scoped to the CURRENT hunt + anchor: pick another
+   category, search another area, or move, and a fresh empty result is allowed
+   to speak again. A permanent dismissal would silently turn the empty state
+   off for good, which is worse than not having the button. */
+function huntEmptyScope(){
+  const h = state.currentHunt;
+  const a = state.browsingLocation || state.searchedArea || state.localHuntOrigin || state.me;
+  const at = a ? (a.lat.toFixed(2) + ',' + a.lng.toFixed(2)) : 'none';
+  return ((h && h.key) || 'none') + '@' + at;
+}
+function dismissHuntEmpty(){
+  state._huntEmptyDismissedFor = huntEmptyScope();
+  const el = document.getElementById('hunt-empty');
+  if(el) el.classList.remove('show');
+}
 function updateHuntEmptyState(count){
   const el = document.getElementById('hunt-empty');
   if(!el) return;
   if(count === null || count > 0){ el.classList.remove('show'); return; }
+  if(state._huntEmptyDismissedFor === huntEmptyScope()){ el.classList.remove('show'); return; }
   const mode = (state.currentHunt && state.currentHunt.mode) || '';
   const copy = EMPTY_COPY[mode] || EMPTY_DEFAULT;
   document.getElementById('hunt-empty-title').textContent = copy.title;
