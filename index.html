@@ -387,29 +387,36 @@
   #hunt-empty{
     position:absolute; bottom:200px; left:20px; right:20px; z-index:520;
     background:var(--surface); border:1px solid var(--line);
-    border-radius:16px; padding:18px; display:none;
+    border-radius:16px; padding:18px 18px 18px; display:none;
     box-shadow:0 10px 30px rgba(0,0,0,0.45); text-align:center;
   }
   #hunt-empty.show{display:block;}
-  #hunt-empty-close{
-    position:absolute; top:8px; right:8px;
-    width:30px; height:30px; padding:0;
+  /* Selector carries the element type on purpose. `#hunt-empty button` below is
+     (1,0,1) and comes later in the sheet, so a plain `#hunt-empty-close` at
+     (1,0,0) lost to it — the close button inherited padding:10px 16px inside a
+     fixed 30px box, leaving negative content width, and the X rendered at zero
+     size. It looked like a missing icon; it was a squashed one. */
+  #hunt-empty button#hunt-empty-close{
+    position:absolute; top:6px; right:6px;
+    width:32px; height:32px; padding:0;
     display:flex; align-items:center; justify-content:center;
     background:transparent; border:none; border-radius:50%;
-    color:var(--text-dim); cursor:pointer;
+    color:var(--text-dim); cursor:pointer; line-height:0;
   }
-  #hunt-empty-close svg{width:15px; height:15px;}
-  #hunt-empty-close:active{background:rgba(255,255,255,0.08);}
+  #hunt-empty button#hunt-empty-close svg{width:16px; height:16px; display:block;}
+  #hunt-empty button#hunt-empty-close:active{background:rgba(255,255,255,0.08);}
   #hunt-empty .he-icon{margin:0 auto 10px; width:34px; height:34px; color:var(--lore, #3E9C8F);}
   #hunt-empty h4{margin:0 0 6px; font-size:15px; color:var(--text); font-weight:700;}
   #hunt-empty p{margin:0 0 14px; font-size:13px; line-height:1.5; color:var(--text-dim);}
   #hunt-empty .he-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
-  #hunt-empty button{
+  /* Scoped to .he-actions — this was always meant for the two action buttons,
+     and only reached the close button because it matched every descendant. */
+  #hunt-empty .he-actions button{
     font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
     padding:10px 16px; border-radius:11px; border:1px solid var(--line);
     background:var(--surface-2); color:var(--text);
   }
-  #hunt-empty button.he-primary{background:var(--orange); border-color:var(--orange); color:#fff;}
+  #hunt-empty .he-actions button.he-primary{background:var(--orange); border-color:var(--orange); color:#fff;}
   #screen-map.drawer-open #hunt-empty{display:none;}
 
   #target-drawer:not(.collapsed) #drawer-body{
