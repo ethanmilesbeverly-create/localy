@@ -1038,7 +1038,7 @@
       </div>
       <div class="mode-card" data-cat="lore" onclick="selectExplore('lore')">
         <div class="icon-wrap"></div>
-        <div><h3>Lore &amp; Stories</h3><p>Things that happened here — told by people who know. All submitted, never scraped.</p></div>
+        <div><h3>Lore &amp; Stories</h3><p>Ordinary places where something happened. The diner from the film, the bar where the band got its name, etc.</p></div>
       </div>
     </div>
 
@@ -1098,8 +1098,8 @@
       </select>
       <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
         <b>History</b> is a place that matters — a landmark, a monument, somewhere old.
-        <b>Lore &amp; Stories</b> is something that <i>happened</i> here — the house a book was
-        written in, the corner from the song. Not sure? Pick either, we'll sort it out.
+        <b>Lore &amp; Stories</b> is an ordinary place where something <i>happened</i> — the diner
+        from the film, the bar where the band got its name. Not sure? Pick either, we'll sort it out.
       </p>
     </div>
     <button class="btn" onclick="submitGem()">Submit for Review</button>
@@ -4095,14 +4095,18 @@ function refreshTargetsUI(){
    because "nobody has written a story here yet" and "no shops loaded here yet"
    mean genuinely different things — one is an invitation, the other is thin
    coverage. Passing null hides it. */
+/* Copy rule: never describe where content comes from. Users should experience
+   one map of places, not a system with a scraped tier and a human tier — the
+   scaffolding is temporary and pointing at it only dates the product. Invite
+   the contribution, don't explain the machinery. */
 const EMPTY_COPY = {
   lore: {
     title: 'No stories here yet',
-    body: "Lore is all people, no scraping — so this stays empty until someone who knows the area fills it in. Know what happened around here? You'd be the first."
+    body: "Nobody's shared what happened around here. If you know a story about this area, yours would be the first."
   },
   gems: {
     title: 'No hidden gems here yet',
-    body: 'Every gem is submitted by someone local. Be the one who puts this area on the map.'
+    body: "Nothing's turned up around here yet. Know somewhere worth finding? Put it on the map."
   }
 };
 const EMPTY_DEFAULT = {
