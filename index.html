@@ -2500,27 +2500,106 @@ let state = {
 /* =========================================================
    STORAGE HELPERS
    ========================================================= */
-async function loadPersonal(){
+/* =========================================================
+   #1a — NEVER WRITE OVER DATA WE FAILED TO READ
+   ---------------------------------------------------------
+   window.storage is a direct Supabase pass-through with no local layer, so a
+   failed READ was indistinguishable from an empty account: loadPersonal caught
+   the error, substituted {}, and the very next capture upserted that empty
+   object over the user's real row. One network hiccup at boot plus one capture
+   permanently destroyed all progress, achievements and saved guides — with no
+   local copy to recover from, because there is no local copy.
+
+   Reads now record WHICH keys failed. Writers refuse to run for a failed key
+   until a later read succeeds. Refusing to save is recoverable and visible;
+   overwriting the server with {} is neither.
+
+   This is deliberately only the safety half. Buffering the finds made during an
+   outage and syncing them on reconnect is #1b, and until that ships the honest
+   behaviour here is to block, say so, and not pretend. See warnLoadFailed().
+   ========================================================= */
+function loadFailedKeys(){
+  if(!state._loadFailedKeys) state._loadFailedKeys = new Set();
+  return state._loadFailedKeys;
+}
+function canPersist(key){ return !loadFailedKeys().has(key); }
+
+/* Throttled rather than once-per-session. The old notePersistenceIssue fired a
+   single toast and then went quiet for the rest of the outing, so a walk with
+   eight captures on bad signal produced one vague warning and lost all eight. */
+function throttledToast(tag, ms, msg){
+  if(!state._toastGate) state._toastGate = {};
+  const now = Date.now();
+  if(state._toastGate[tag] && now - state._toastGate[tag] < ms) return;
+  state._toastGate[tag] = now;
+  showToast(msg);
+}
+function warnLoadFailed(){
+  throttledToast('loadfail', 45000,
+    "Couldn't load your saved progress — new finds won't be saved until this reconnects");
+}
+
+/* Reads one key. Returns true on a clean read, INCLUDING a genuinely absent row
+   (null), which is the distinction the old code could not make. A JSON.parse
+   error inside apply() also counts as a failure, which is correct: corrupt data
+   is another thing we must not blindly overwrite. */
+async function loadKey(key, apply, fallback){
   try{
-    const p = await window.storage.get('progress', false);
-    state.progress = p ? JSON.parse(p.value) : {};
-  }catch(e){ state.progress = {}; }
+    const r = await window.storage.get(key, false);
+    apply(r ? r.value : null);
+    loadFailedKeys().delete(key);
+    return true;
+  }catch(e){
+    fallback();
+    loadFailedKeys().add(key);
+    return false;
+  }
+}
+
+async function loadPersonal(quiet){
+  await loadKey('progress',
+    v=>{ state.progress = v ? JSON.parse(v) : {}; },
+    ()=>{ state.progress = {}; });
+  await loadKey('my-hunts',
+    v=>{ state.myHunts = v ? JSON.parse(v) : []; },
+    ()=>{ state.myHunts = []; });
+  await loadKey('stats',
+    v=>{ state.totalWalkedMeters = v ? (JSON.parse(v).totalWalkedMeters||0) : 0; },
+    ()=>{ state.totalWalkedMeters = 0; });
+  await loadKey('unlocked-achievements',
+    v=>{ state.unlockedAchievements = v ? new Set(JSON.parse(v)) : new Set(); },
+    ()=>{ state.unlockedAchievements = new Set(); });
+  await loadKey('has-captured-once',
+    v=>{ state.hasCapturedOnce = v ? JSON.parse(v) === true : false; },
+    ()=>{ state.hasCapturedOnce = false; });
+
+  if(loadFailedKeys().size && !quiet) warnLoadFailed();
+  return loadFailedKeys().size === 0;
+}
+
+/* Self-heal when the connection comes back — but ONLY if nothing has been
+   captured since the failure. Re-reading replaces in-memory state with the
+   server's, so doing it after an unsaved capture would silently discard that
+   capture: the same class of data loss this ticket exists to stop, just
+   pointing the other way. When there ARE unsaved finds the correct fix is the
+   merge/queue in #1b, so until then we stay blocked and keep saying so. */
+async function retryLoadPersonal(){
+  if(!loadFailedKeys().size) return;
+  if(state._retryingLoad) return;
+  if(state._unsavedSinceLoadFail){ warnLoadFailed(); return; }
+  state._retryingLoad = true;
   try{
-    const h = await window.storage.get('my-hunts', false);
-    state.myHunts = h ? JSON.parse(h.value) : [];
-  }catch(e){ state.myHunts = []; }
-  try{
-    const s = await window.storage.get('stats', false);
-    state.totalWalkedMeters = s ? (JSON.parse(s.value).totalWalkedMeters||0) : 0;
-  }catch(e){ state.totalWalkedMeters = 0; }
-  try{
-    const a = await window.storage.get('unlocked-achievements', false);
-    state.unlockedAchievements = a ? new Set(JSON.parse(a.value)) : new Set();
-  }catch(e){ state.unlockedAchievements = new Set(); }
-  try{
-    const c = await window.storage.get('has-captured-once', false);
-    state.hasCapturedOnce = c ? JSON.parse(c.value) === true : false;
-  }catch(e){ state.hasCapturedOnce = false; }
+    const ok = await loadPersonal(true);
+    if(ok){
+      state._toastGate && (state._toastGate.loadfail = 0);
+      showToast('Reconnected — your progress is back and saving again');
+      renderMyHunts();
+      renderPassport();
+      refreshTargetsUI();
+    }
+  }finally{
+    state._retryingLoad = false;
+  }
 }
 
 /* Load THIS user's own submissions (any status) for the "My Submissions" list. */
@@ -2560,26 +2639,36 @@ async function saveGemSubmissions(){
   catch(e){ notePersistenceIssue(e); }
 }
 async function saveUnlockedAchievements(){
+  if(!canPersist('unlocked-achievements')) return blockedSave();
   try{ await window.storage.set('unlocked-achievements', JSON.stringify([...state.unlockedAchievements]), false); }
   catch(e){ notePersistenceIssue(e); }
 }
 async function saveProgress(){
+  if(!canPersist('progress')) return blockedSave();
   try{ await window.storage.set('progress', JSON.stringify(state.progress), false); }
   catch(e){ notePersistenceIssue(e); }
 }
 async function saveMyHunts(){
+  if(!canPersist('my-hunts')) return blockedSave();
   try{ await window.storage.set('my-hunts', JSON.stringify(state.myHunts), false); }
   catch(e){ notePersistenceIssue(e); }
 }
 async function saveStats(){
+  if(!canPersist('stats')) return blockedSave();
   try{ await window.storage.set('stats', JSON.stringify({totalWalkedMeters: state.totalWalkedMeters}), false); }
   catch(e){ notePersistenceIssue(e); }
 }
+/* A write we deliberately refused, which is NOT the same as a write that failed.
+   Flags the session as holding unsaved work so retryLoadPersonal() knows a
+   re-read would now destroy something. */
+function blockedSave(){
+  state._unsavedSinceLoadFail = true;
+  warnLoadFailed();
+}
 function notePersistenceIssue(e){
-  if(!state._warnedPersistence){
-    state._warnedPersistence = true;
-    showToast("Progress won't be saved between visits right now — everything still works this session");
-  }
+  state._unsavedSinceLoadFail = true;
+  throttledToast('savefail', 45000,
+    "Couldn't save that just now — it's on screen but won't survive a reload");
 }
 
 /* =========================================================
@@ -2597,6 +2686,10 @@ async function init(){
   startLocalHunt(FALLBACK_LOCATION); // content immediately, refined once real location resolves
   fixMapSize();
   startLocating();
+  // #1a — retry the blocked read when the connection returns, so a bad boot is a
+  // temporary condition rather than a dead session.
+  window.addEventListener('online', retryLoadPersonal);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) retryLoadPersonal(); });
 }
 
 /* Console helper: run `localyDebug()` in DevTools to see what real data loaded
@@ -4275,8 +4368,10 @@ async function attemptMarkFound(){
     await saveProgress();
     if(!state.hasCapturedOnce){
       state.hasCapturedOnce = true;
-      try{ await window.storage.set('has-captured-once', JSON.stringify(true), false); }
-      catch(e){ notePersistenceIssue(e); }
+      if(canPersist('has-captured-once')){
+        try{ await window.storage.set('has-captured-once', JSON.stringify(true), false); }
+        catch(e){ notePersistenceIssue(e); }
+      } else { blockedSave(); }
     }
     showToast('Captured! Marked as found.');
     refreshTargetsUI();
