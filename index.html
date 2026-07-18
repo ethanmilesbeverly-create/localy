@@ -2047,6 +2047,21 @@ function buildOverpassQuery(base){
       `node["leisure"~"^(park|garden)$"](around:${R},${la},${ln});` +
     `);out center 110;`;
 }
+/* ---- Chain filter: keep it local ----
+   The whole point is hole-in-the-wall / dive / independent spots, so franchise
+   chains get dropped. Primary signal is OSM's own brand tagging (brand /
+   brand:wikidata) — chains carry it, independents don't, so it needs no
+   hand-maintained list and stays current as OSM does. The name regex is a
+   safety net for the common chains occasionally mapped without a brand tag.
+   Set EXCLUDE_CHAINS = false to bring chains back. */
+const EXCLUDE_CHAINS = true;
+const CHAIN_NAME_RE = /\b(mc\s?donald|burger king|wendy|taco bell|chipotle|subway|starbucks|mccafe|dunkin|kfc|popeye|chick[- ]?fil[- ]?a|domino|pizza hut|papa john|little caesar|arby|sonic drive|dairy queen|panera|five guys|shake shack|in[- ]?n[- ]?out|jack in the box|carl'?s jr|hardee|wingstop|raising cane|panda express|olive garden|applebee|chili'?s|buffalo wild wings|ihop|denny'?s|waffle house|cracker barrel|red lobster|outback steak|texas roadhouse|cheesecake factory|tgi ?friday|baskin[- ]?robbins|krispy kreme|jimmy john|jersey mike|firehouse subs|qdoba|moe'?s southwest|noodles ?& ?company|chuck e|hooters|white castle|whataburger|culver'?s|del taco|el pollo loco|church'?s (chicken|texas)|long john silver|auntie anne|cinnabon|tim horton|caribou coffee|peet'?s coffee|dutch bros|7[- ]?eleven|circle k|wawa|sheetz)\b/i;
+function isChainPlace(t, name){
+  if(!EXCLUDE_CHAINS) return false;
+  if(t && (t.brand || t['brand:wikidata'])) return true; // strongest signal
+  if(name && CHAIN_NAME_RE.test(name)) return true;       // unbranded-but-obvious
+  return false;
+}
 function parseOverpass(json){
   const out = [];
   (json.elements||[]).forEach(el=>{
@@ -2058,6 +2073,7 @@ function parseOverpass(json){
     if(lat==null||lng==null) return;
     const category = categorizeOsm(t);
     if(!category) return;
+    if(isChainPlace(t, name)) return; // drop franchise chains — keep it local
     out.push({ id:'osm_'+el.type+el.id, name, lat, lng, desc:osmDesc(t, category), category, source:'osm', real:true });
   });
   return out;
