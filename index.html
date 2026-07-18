@@ -3325,21 +3325,13 @@ function renderGemSubmissions(){
     }).join('') +
     `</div>`;
 }
-async function simulateApproveGem(id){
-  try{
-    const { error } = await sb.from('submissions')
-      .update({ status:'approved', ai_decision:'approve', ai_reason:'manual (simulated)' })
-      .eq('id', id);
-    if(error) throw error;
-  }catch(e){
-    showToast("Couldn't approve right now — check your connection");
-    return;
-  }
-  await loadMyGems();
-  await loadApprovedGems();   // refresh so it appears in discovery immediately
-  renderGemSubmissions();
-  showToast('Approved (simulated) — now live in Hidden Gems');
-}
+/* Gem moderation is deliberately NOT in the client. Approvals happen admin-side
+   in Supabase (see moderation.sql): the `pending_review` view is the queue, and
+   approve_submission(id) / reject_submission(id, note) are the actions. The old
+   simulateApproveGem() lived here — it was never wired to any markup, but as a
+   global it let any logged-in user self-approve from the browser console. It is
+   gone, and UPDATE on `submissions` is revoked from app users so it can't come
+   back by accident. */
 function openCreateScreen(existingHunt, seedPoint){
   showScreen('screen-create');
   document.getElementById('bottomnav').classList.add('hidden');
