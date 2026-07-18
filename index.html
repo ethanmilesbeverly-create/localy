@@ -51,11 +51,17 @@
 
   /* ---------- Top bar ---------- */
   #topbar{
+    position:absolute;
+    top:0;left:0;right:0;
+    z-index:490;
     display:flex;
     align-items:center;
     justify-content:space-between;
     padding:14px 16px 10px;
     border-bottom:1px solid var(--line);
+    background:rgba(16,35,28,0.5);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     flex-shrink:0;
   }
   #topbar .brand{
@@ -113,7 +119,7 @@
     flex:1;
     overflow-y:auto;
     display:none;
-    padding:18px 16px 90px;
+    padding:52px 16px 90px;
     -webkit-overflow-scrolling:touch;
   }
   .screen.active{display:block;}
