@@ -2134,16 +2134,26 @@ const DISCOVER_FALLOFF_M = 2500; // a Discover Local spot this far from you gets
 const SEARCH_HERE_DIST_M = 600; // tune: lower = more eager, higher = calmer
 function huntAnchor(){
   const h = state.currentHunt;
-  if(!h || !h.points || !h.points.length) return null;
-  let la=0, ln=0;
-  h.points.forEach(p=>{ la+=p.lat; ln+=p.lng; });
-  return {lat: la/h.points.length, lng: ln/h.points.length};
+  if(h && h.points && h.points.length){
+    let la=0, ln=0;
+    h.points.forEach(p=>{ la+=p.lat; ln+=p.lng; });
+    return {lat: la/h.points.length, lng: ln/h.points.length};
+  }
+  // #8 — fall back to wherever content is currently anchored. Without this the
+  // pill could never appear in an area that came back EMPTY, which is exactly
+  // the area you most want to pan away from and re-search.
+  return state.browsingLocation || state.searchedArea || state.me || null;
 }
 function maybeShowSearchHere(){
   const btn = document.getElementById('search-here-btn');
   if(!btn) return;
   const anchor = huntAnchor();
-  if(state.browsingLocation || !anchor){ btn.classList.remove('show'); return; }
+  // Was also suppressed whenever state.browsingLocation was set, which meant
+  // that once you searched your way into another city you were stuck with that
+  // one framing: panning three blocks offered no way to re-search. Browsing is
+  // where re-searching is MOST useful, so the only test now is drift from
+  // wherever the content is anchored.
+  if(!anchor){ btn.classList.remove('show'); return; }
   const c = state.leafletMap.getCenter();
   const drifted = haversine(c.lat, c.lng, anchor.lat, anchor.lng) > SEARCH_HERE_DIST_M;
   btn.classList.toggle('show', drifted);
@@ -2167,10 +2177,22 @@ function maybeShowSearchHere(){
 function searchThisArea(){
   const c = state.leafletMap.getCenter();
   const base = {lat: c.lat, lng: c.lng};
-  state.searchedArea = base;
+  if(state.browsingLocation){
+    // Already browsing elsewhere: MOVE the browse anchor rather than adding a
+    // second one. Setting searchedArea here instead would leave both set, and
+    // since browsingLocation wins the precedence order in applyRealPlaces(),
+    // the fetch for the new tile would be discarded as stale — the same bug
+    // that made remote areas render empty in the first place.
+    state.browsingLocation = base;
+    // The banner named a specific place that is no longer what you are looking at.
+    document.getElementById('browsing-indicator-text').innerHTML =
+      "Browsing <b>this area</b> — you're not really here";
+  } else {
+    state.searchedArea = base;
+    state.followMe = false; // or the next GPS tick pans you off the area you asked for
+    document.getElementById('locate-btn').classList.remove('following');
+  }
   state.localHuntOrigin = base;
-  state.followMe = false; // or the next GPS tick pans you off the area you asked for
-  document.getElementById('locate-btn').classList.remove('following');
   state._preserveViewOnNextHunt = true;
   try{
     regenerateCurrentHuntAt(base);
