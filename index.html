@@ -2172,8 +2172,13 @@ function applyRealPlaces(key, base, list){
   if(!list || !list.length) return;
   const cur = realTileKey(state.me || base);
   if(cur !== key) return; // user moved on; ignore stale result
-  const byCat = groupRealByCat(list);
-  state.realPlaces = { tile:key, center:base, all:list, byCat };
+  // Drop franchise chains here — this is the single write point for real places
+  // from the server `nearby-places` function AND its cache, so filtering here
+  // catches them regardless of source (the client Overpass path is unused).
+  const filtered = EXCLUDE_CHAINS ? list.filter(p => !isChainPlace(p, p && p.name)) : list;
+  if(!filtered.length){ return; }
+  const byCat = groupRealByCat(filtered);
+  state.realPlaces = { tile:key, center:base, all:filtered, byCat };
   _realDebug.lastCounts = Object.fromEntries(Object.entries(byCat).map(([k,v])=>[k,v.length]));
   onRealPlacesReady();
 }
