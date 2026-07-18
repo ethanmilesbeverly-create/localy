@@ -2469,8 +2469,16 @@ function groupRealByCat(list){
    after the user has moved to a new area). */
 function applyRealPlaces(key, base, list){
   if(!list || !list.length) return;
-  const cur = realTileKey(state.me || base);
-  if(cur !== key) return; // user moved on; ignore stale result
+  // #8/#28 — the "did the user move on?" guard used to resolve the current tile
+  // from state.me ALWAYS, so any fetch for a place you were browsing or had
+  // panned to got thrown away the moment GPS had a fix: your real tile never
+  // matches a remote one, so the result was discarded as stale and
+  // state.realPlaces stayed empty for that area forever. Deliberate relocation
+  // (browsing / searching) is the anchor when it is set; state.me only matters
+  // when you are actually looking at yourself.
+  const anchor = state.browsingLocation || state.searchedArea || state.me || base;
+  const cur = realTileKey(anchor);
+  if(cur !== key) return; // genuinely moved on; ignore stale result
   // Drop franchise chains here — this is the single write point for real places
   // from the server `nearby-places` function AND its cache, so filtering here
   // catches them regardless of source (the client Overpass path is unused).
@@ -2524,7 +2532,9 @@ async function ensureRealPlaces(base){
       const src = data.cached ? (data.stale ? 'cache(stale)' : 'cache') : 'live';
       console.log('[localy] real places for tile '+key+' ('+places.length+' places, '+src+')', _realDebug.lastCounts);
     } else {
-      console.warn('[localy] no real places for tile '+key+' — procedural fallback stays. Overpass status:', _realDebug.lastOverpassStatus, 'err:', _realDebug.lastOverpassError);
+      // NB: the old wording here said "procedural fallback stays", which stopped
+      // being true at #37 — there is no fallback now, the area just renders empty.
+      console.warn('[localy] no real places for tile '+key+' — area will render empty. Overpass status:', _realDebug.lastOverpassStatus, 'err:', _realDebug.lastOverpassError);
     }
   }catch(e){
     console.warn('[localy] nearby-places function failed — procedural fallback stays in place.', (e && e.message) || e);
@@ -2624,7 +2634,11 @@ function buildPointsForKey(key, base){
    user-made or browse-locked hunts. */
 const REAL_UPGRADABLE_KEY = /^(local_|parkstrails_|shops_|bars_|restaurants_|barsrest_|history_|trails_|discover_)/;
 function reblendHuntInPlace(h){
-  const base = state.localHuntOrigin || state.me || FALLBACK_LOCATION;
+  // Order matters: a deliberate relocation outranks both the last hunt origin
+  // and your real position. Only startLocalHunt sets localHuntOrigin, so every
+  // other category used to re-anchor to the player when places arrived late.
+  const base = state.browsingLocation || state.searchedArea
+            || state.localHuntOrigin || state.me || FALLBACK_LOCATION;
   const prog = state.progress[h.key] || {};
   const foundSet = new Set(prog.foundIds || []);
   const keptFound = h.points.filter(p=>foundSet.has(p.id));
@@ -2642,7 +2656,11 @@ function reblendHuntInPlace(h){
 }
 function onRealPlacesReady(){
   const h = state.currentHunt;
-  if(!h || state.browsingLocation) return;
+  // Was `if(!h || state.browsingLocation) return;` — which meant that even once
+  // remote places DID load, a browsed hunt was never rebuilt with them, so the
+  // area stayed empty. Blending is safe while browsing precisely because
+  // reblendHuntInPlace() now anchors on the browsed point rather than on you.
+  if(!h) return;
   if(!REAL_UPGRADABLE_KEY.test(h.key)) return;
   reblendHuntInPlace(h);
   if(typeof refreshTargetsUI==='function') refreshTargetsUI();
