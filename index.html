@@ -509,25 +509,31 @@
   .ps-btn:active{transform:scale(0.99);}
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
   .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
-  /* #33 — location row: address when we have one, coords when we don't. Tapping
-     copies rather than launching a maps app — the point is to keep people inside
-     Localy, so the address is available to paste wherever they want without the
-     app handing them off to Google/Apple Maps mid-hunt. */
+  /* #33 — location row: address when we have one, coords when we don't. Plain
+     text plus a copy icon — no background or border, because the filled surface
+     read as a tappable button and competed with the real actions below it.
+     Copy rather than an outbound maps link: the point is to keep people inside
+     Localy, so the address is available to paste without handing the session off
+     to Google/Apple Maps mid-hunt. */
   .ps-loc{
-    display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;
-    padding:11px 12px;margin:0 0 14px;border-radius:12px;
-    border:1px solid var(--line);background:var(--surface-2);
-    color:var(--text);font-size:13px;line-height:1.45;font-family:inherit;
-    text-decoration:none;cursor:pointer;
+    display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;
+    padding:0;margin:0 0 14px;
+    background:none;border:none;border-radius:0;
+    color:var(--text-dim);font-size:13px;line-height:1.45;font-family:inherit;
   }
-  .ps-loc:active{transform:scale(0.99);}
-  .ps-loc svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--yellow);}
   /* Selectable so long-press-to-select still works if the clipboard API is
      unavailable (insecure context, older webview). */
   .ps-loc-text{flex:1;min-width:0;user-select:text;-webkit-user-select:text;}
-  .ps-loc-open{font-size:11.5px;color:var(--text-dim);margin-top:3px;user-select:none;-webkit-user-select:none;}
-  .ps-loc-open.copied{color:var(--moss);font-weight:600;}
   .ps-loc-text.is-coords{font-variant-numeric:tabular-nums;}
+  .ps-loc-copy{
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    width:28px;height:28px;margin:-4px -4px 0 0;padding:0;
+    background:none;border:none;border-radius:8px;
+    color:var(--text-dim);cursor:pointer;font-family:inherit;
+  }
+  .ps-loc-copy:active{transform:scale(0.92);}
+  .ps-loc-copy.copied{color:var(--moss);}
+  .ps-loc-copy svg{width:15px;height:15px;display:block;}
 
   /* ---------- Game-map styling (bird's-eye, floating markers) ---------- */
   #map-tint{
@@ -2729,11 +2735,14 @@ function enableSimulateOnClick(){
   });
 }
 const ZOOM_WALK = 18;
-/* Default framing when no hunt is active yet (cold boot / hard refresh). Matches the
-   cap the bounds-fit below uses, so landing in the app looks the same as loading a
-   hunt — wide enough that nearby spots are actually on screen, instead of the
-   street-level ZOOM_WALK view that showed almost nothing. */
+/* Safety floor only — the real framing is computed from FRAME_RADIUS_M below. */
 const ZOOM_OVERVIEW = 16;
+/* THE knob for how wide the map opens. The player is always centered and this
+   many meters are guaranteed visible in the narrower screen dimension. 3000m
+   reproduces the overview framing the recenter button used to produce by
+   accident. Want it wider? Raise this. Tighter? Lower it. Nothing else needs
+   to change. */
+const FRAME_RADIUS_M = 3000;
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
   // Track real walking distance: ignore tiny GPS jitter and big jumps (simulate-mode
@@ -3173,23 +3182,25 @@ function centerOnPlayer(){
     if(!state.leafletMap) return;
     state.leafletMap.invalidateSize();
     state.leafletMap.setMinZoom(2); // clear any leftover floor first, so the calculation below isn't clamped by it
-    let targetZoom = ZOOM_OVERVIEW;
-    const hunt = state.currentHunt;
-    if(hunt && hunt.points && hunt.points.length>0){
-      // Build bounds centered exactly on the player (not the true centroid of the points),
-      // so the computed zoom reflects "how much is nearby" while never shifting where the
-      // center actually sits. Capped so one distant outlier can't zoom you out to nothing.
-      const dists = hunt.points.map(p=>haversine(center.lat, center.lng, p.lat, p.lng));
-      const maxDist = Math.min(Math.max(...dists), 3000);
-      const latOffset = maxDist / 111320;
-      const lngOffset = maxDist / (111320 * Math.cos(center.lat * Math.PI/180));
-      const bounds = L.latLngBounds(
-        [center.lat - latOffset, center.lng - lngOffset],
-        [center.lat + latOffset, center.lng + lngOffset]
-      );
-      const fitZoom = state.leafletMap.getBoundsZoom(bounds, false, L.point(48,48));
-      targetZoom = Math.min(fitZoom, 16);
-    }
+    // Frame a FIXED radius around the player rather than fitting whatever points
+    // happen to be loaded right now. That point-driven fit was the bug: on a cold
+    // boot the async place fetch hasn't landed, so the hunt has only a couple of
+    // very close spots (or none), the bounds come out tiny, and you get a
+    // street-level view. Pressing recenter later — once the far pins exist — ran
+    // the same code against a much wider spread and produced the overview. Same
+    // function, same call, two completely different results depending on network
+    // timing. A constant radius makes first boot, explore-card taps, and the
+    // recenter button all identical, and immune to when the fetch resolves.
+    const latOffset = FRAME_RADIUS_M / 111320;
+    const lngOffset = FRAME_RADIUS_M / (111320 * Math.cos(center.lat * Math.PI/180));
+    const bounds = L.latLngBounds(
+      [center.lat - latOffset, center.lng - lngOffset],
+      [center.lat + latOffset, center.lng + lngOffset]
+    );
+    const fitZoom = state.leafletMap.getBoundsZoom(bounds, false, L.point(48,48));
+    // ZOOM_OVERVIEW is only a floor for the degenerate case where the container
+    // still measures zero and getBoundsZoom returns something nonsensical.
+    let targetZoom = Number.isFinite(fitZoom) ? Math.min(fitZoom, ZOOM_OVERVIEW) : ZOOM_OVERVIEW;
     state._programmaticViewChange = true;
     state.leafletMap.setView([center.lat, center.lng], targetZoom);
     state.leafletMap.setMinZoom(targetZoom - 2); // real headroom to pinch out from the default framing, instead of being frozen half a level below it
@@ -3871,20 +3882,19 @@ function copyToClipboard(text){
     }catch(e){ reject(e); }
   });
 }
-function copyPinLocation(el){
-  const text = el.getAttribute('data-copy') || '';
+const COPY_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const CHECK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+function copyPinLocation(btn){
+  const text = btn.getAttribute('data-copy') || '';
   if(!text) return;
-  const hint = el.querySelector('.ps-loc-open');
   copyToClipboard(text).then(()=>{
-    if(hint){
-      hint.textContent = 'Copied';
-      hint.classList.add('copied');
-      clearTimeout(el._copyTimer);
-      el._copyTimer = setTimeout(()=>{
-        hint.textContent = 'Tap to copy';
-        hint.classList.remove('copied');
-      }, 1800);
-    }
+    btn.innerHTML = CHECK_ICON_SVG;
+    btn.classList.add('copied');
+    clearTimeout(btn._copyTimer);
+    btn._copyTimer = setTimeout(()=>{
+      btn.innerHTML = COPY_ICON_SVG;
+      btn.classList.remove('copied');
+    }, 1800);
   }).catch(()=>{
     showToast('Press and hold the address to copy it');
   });
@@ -3921,13 +3931,11 @@ async function lookupAddress(t){
 function renderPinLocationRow(t, addr){
   const hasAddr = !!addr;
   const primary = hasAddr ? addr : fmtCoords(t.lat, t.lng);
-  const pinIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6.2-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg>';
-  return `<button type="button" class="ps-loc" data-copy="${escapeHtml(primary)}" onclick="copyPinLocation(this)">
-    ${pinIcon}
-    <span class="ps-loc-text${hasAddr?'':' is-coords'}">${escapeHtml(primary)}
-      <span class="ps-loc-open">Tap to copy</span>
-    </span>
-  </button>`;
+  return `<div class="ps-loc">
+    <span class="ps-loc-text${hasAddr?'':' is-coords'}">${escapeHtml(primary)}</span>
+    <button type="button" class="ps-loc-copy" data-copy="${escapeHtml(primary)}"
+      onclick="copyPinLocation(this)" aria-label="Copy address">${COPY_ICON_SVG}</button>
+  </div>`;
 }
 
 function pinSheetColor(t){
@@ -3978,7 +3986,7 @@ function fillPinSheet(t){
       if(!row) return;
       row.classList.remove('is-coords');
       row.firstChild.textContent = addr;
-      const btn = document.querySelector('#pin-sheet-expand .ps-loc');
+      const btn = document.querySelector('#pin-sheet-expand .ps-loc-copy');
       if(btn) btn.setAttribute('data-copy', addr);
     });
   }
