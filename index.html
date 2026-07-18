@@ -381,6 +381,28 @@
     background:none;border:none;color:inherit;font-weight:700;
     cursor:pointer;font-size:12.5px;white-space:nowrap;
   }
+  /* Empty-state card. Built for Lore (which ships empty by design) but written
+     generically — it's a first slice of the rural/low-coverage empty state, and
+     the copy is caller-supplied so other tabs can reuse it. */
+  #hunt-empty{
+    position:absolute; bottom:200px; left:20px; right:20px; z-index:520;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:16px; padding:18px; display:none;
+    box-shadow:0 10px 30px rgba(0,0,0,0.45); text-align:center;
+  }
+  #hunt-empty.show{display:block;}
+  #hunt-empty .he-icon{margin:0 auto 10px; width:34px; height:34px; color:var(--lore, #3E9C8F);}
+  #hunt-empty h4{margin:0 0 6px; font-size:15px; color:var(--text); font-weight:700;}
+  #hunt-empty p{margin:0 0 14px; font-size:13px; line-height:1.5; color:var(--text-dim);}
+  #hunt-empty .he-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  #hunt-empty button{
+    font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
+    padding:10px 16px; border-radius:11px; border:1px solid var(--line);
+    background:var(--surface-2); color:var(--text);
+  }
+  #hunt-empty button.he-primary{background:var(--orange); border-color:var(--orange); color:#fff;}
+  #screen-map.drawer-open #hunt-empty{display:none;}
+
   #target-drawer:not(.collapsed) #drawer-body{
     flex:1;min-height:0;overflow-y:auto;
     margin-top:14px;
@@ -1012,7 +1034,11 @@
       </div>
       <div class="mode-card" data-cat="history" onclick="selectExplore('history')">
         <div class="icon-wrap"></div>
-        <div><h3>History</h3><p>Fun facts and local legends at spots near you.</p></div>
+        <div><h3>History</h3><p>Landmarks, monuments, and museums close by.</p></div>
+      </div>
+      <div class="mode-card" data-cat="lore" onclick="selectExplore('lore')">
+        <div class="icon-wrap"></div>
+        <div><h3>Lore &amp; Stories</h3><p>Things that happened here — told by people who know. All submitted, never scraped.</p></div>
       </div>
     </div>
 
@@ -1068,7 +1094,13 @@
         <option value="shops">Shops</option>
         <option value="barsrest">Bars &amp; Restaurants</option>
         <option value="history">History</option>
+        <option value="lore">Lore &amp; Stories</option>
       </select>
+      <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
+        <b>History</b> is a place that matters — a landmark, a monument, somewhere old.
+        <b>Lore &amp; Stories</b> is something that <i>happened</i> here — the house a book was
+        written in, the corner from the song. Not sure? Pick either, we'll sort it out.
+      </p>
     </div>
     <button class="btn" onclick="submitGem()">Submit for Review</button>
     <div class="edit-links-row">
@@ -1164,6 +1196,15 @@
       <div class="stale-actions">
         <button onclick="refreshStaleHunt()">Refresh for here</button>
         <button onclick="dismissStaleHunt()" aria-label="Dismiss">✕</button>
+      </div>
+    </div>
+    <div id="hunt-empty">
+      <svg class="he-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 5h6a3 3 0 0 1 3 3v12a2.6 2.6 0 0 0-2.6-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2.6 2.6 0 0 1 2.6-2H21z"/></svg>
+      <h4 id="hunt-empty-title">Nothing here yet</h4>
+      <p id="hunt-empty-body"></p>
+      <div class="he-actions">
+        <button class="he-primary" onclick="openSuggestGemScreen()">Add the first one</button>
+        <button onclick="goToModeSelect()">Browse something else</button>
       </div>
     </div>
     <div id="target-drawer" class="collapsed">
@@ -1600,7 +1641,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* =========================================================
    DATA
    ========================================================= */
-const MODE_COLOR = { tourist:'#E8622C', discover:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', gems:'#D4AF37' };
+const MODE_COLOR = { tourist:'#E8622C', discover:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', gems:'#D4AF37' };
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 const BUILTIN = {
@@ -1834,7 +1875,8 @@ function approvedGemPoints(base, bucket, limit){
    which list the gem is being blended into. */
 const GEM_BUCKET_CATEGORY = {
   park:'park', trail:'trail', shops:'shops',
-  barsrest:'barsrest', bars:'bars', restaurants:'restaurants', history:'history'
+  barsrest:'barsrest', bars:'bars', restaurants:'restaurants', history:'history',
+  lore:'lore'
 };
 function gemDisplayCategory(g, ctxCategory){
   /* Falls back to 'local' (the neutral cream pin), never to 'gems' — a row with
@@ -2360,6 +2402,9 @@ function buildPointsForKey(key, base){
     ...blendCategory(base,'restaurants',5,()=>generateRestaurants(base),'barsrest')
   ];
   if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
+  // No blendCategory here on purpose: blending would let OSM/Wikipedia places
+  // leak into a tab whose entire premise is that everything in it is human.
+  if(key.startsWith('lore_'))       return nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
   if(key.startsWith('trails_'))     return blendCategory(base,'trail',6,()=>generateTrails(base),null);
   if(key.startsWith('discover_'))   return blendCategory(base,'history',6,()=>generateDiscoverSpots(base),null);
   return null;
@@ -3041,6 +3086,7 @@ const EXPLORE_CAT_KEYPREFIX = {
   shops: 'shops_',
   bars_restaurants: 'barsrest_',
   history: 'history_',
+  lore: 'lore_',
   gems: 'gems_',
   national_parks: 'nationalparks_'
 };
@@ -3050,6 +3096,7 @@ const EXPLORE_CAT_COLOR = {
   shops: '#4C8FC0',
   bars_restaurants: '#C1587A',
   history: '#B08D57',
+  lore: '#3E9C8F',
   gems: '#D4AF37',
   national_parks: '#6FA85C'
 };
@@ -3058,7 +3105,9 @@ const EXPLORE_ICON_DEFS = {
   parks_trails: {vb:'0 0 24 24', body:'M12 2 L18 12 H15 L19 18 H5 L9 12 H6 Z M10.5 18 H13.5 V22 H10.5 Z'},
   shops: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   bars_restaurants: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
-  history: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'}
+  history: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
+  // Open book — lore is something written down and passed on, not a structure.
+  lore: {vb:'0 0 24 24', body:'M3 5h6a3 3 0 0 1 3 3v12a2.6 2.6 0 0 0-2.6-2H3z M21 5h-6a3 3 0 0 0-3 3v12a2.6 2.6 0 0 1 2.6-2H21z'}
 };
 function exploreCategoryIconSVG(cat, color, filled){
   const def = EXPLORE_ICON_DEFS[cat];
@@ -3201,6 +3250,23 @@ function startHiddenGemsHunt(base){
     showToast('No hidden gems yet — be the first to suggest one!');
   }
 }
+/* Lore & Stories is the one category that is USER-SUBMITTED ONLY, and that is
+   structural rather than a policy choice. There is no OSM tag for "the bridge
+   the tour bus emptied its tank over" and Wikipedia doesn't mark which articles
+   carry a story — so no scraper can fill this, which is exactly why it's worth
+   having. History stays scaffolded by OSM/Wikipedia; Lore cannot be.
+
+   Consequence, and it is the whole risk of this feature: it ships EMPTY
+   everywhere until people submit. The empty state below is therefore not a
+   nicety, it's the feature — an empty Lore tab has to read as an invitation,
+   never as a broken map. */
+function startLoreHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  const points = nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
+  const key = 'lore_'+Date.now();
+  setCurrentHunt({key, name:'Lore & Stories', mode:'lore', points});
+}
+
 function startStateParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
@@ -3244,6 +3310,7 @@ function selectExplore(cat){
   else if(cat==='shops'){ startShopsHunt(base); }
   else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
   else if(cat==='history'){ startHistoryHunt(base); }
+  else if(cat==='lore'){ startLoreHunt(base); }
   else if(cat==='gems'){ startHiddenGemsHunt(base); }
   else if(cat==='local_parks'){ startLocalParksHunt(base); }
   else if(cat==='state_parks'){ startStateParksHunt(base); }
@@ -3752,7 +3819,7 @@ function placeholderImageHTML(t, color, heightPx){
 const PIN_CAT_LABEL = {
   gems:'Hidden Gem', park:'Park & Trail', parks_trails:'Park & Trail', trail:'Trail',
   shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
-  barsrest:'Bar & Restaurant',
+  barsrest:'Bar & Restaurant', lore:'Lore & Story',
   history:'History', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
 };
 /* ---- #33: address + directions ----
@@ -3956,6 +4023,7 @@ function refreshGuideLine(){
 function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
   if(!state.currentHunt){
+    updateHuntEmptyState(null);
     document.getElementById('target-list').innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:10px 0;">No hunt active — choose one from the hunt menu up top.</p>';
     badge.style.display = 'none';
     state.markersLayer && state.markersLayer.clearLayers();
@@ -3963,6 +4031,7 @@ function refreshTargetsUI(){
     return;
   }
   const targets = currentTargetsSorted();
+  updateHuntEmptyState(targets.length);
   const defaultColor = MODE_COLOR[state.currentHunt.mode] || '#E8622C';
   const colorFor = t => (t.category && MODE_COLOR[t.category]) || defaultColor;
   const nearestUnfound = targets.find(t=>!t.found);
@@ -4022,6 +4091,35 @@ function refreshTargetsUI(){
     </div>`;
   }).join('');
 }
+/* Shows the empty-state card when a hunt has no points. Copy varies by mode,
+   because "nobody has written a story here yet" and "no shops loaded here yet"
+   mean genuinely different things — one is an invitation, the other is thin
+   coverage. Passing null hides it. */
+const EMPTY_COPY = {
+  lore: {
+    title: 'No stories here yet',
+    body: "Lore is all people, no scraping — so this stays empty until someone who knows the area fills it in. Know what happened around here? You'd be the first."
+  },
+  gems: {
+    title: 'No hidden gems here yet',
+    body: 'Every gem is submitted by someone local. Be the one who puts this area on the map.'
+  }
+};
+const EMPTY_DEFAULT = {
+  title: 'Nothing mapped here yet',
+  body: "We couldn't find anything for this category nearby. That usually means thin coverage rather than an empty neighborhood — try another category, or add a spot you know."
+};
+function updateHuntEmptyState(count){
+  const el = document.getElementById('hunt-empty');
+  if(!el) return;
+  if(count === null || count > 0){ el.classList.remove('show'); return; }
+  const mode = (state.currentHunt && state.currentHunt.mode) || '';
+  const copy = EMPTY_COPY[mode] || EMPTY_DEFAULT;
+  document.getElementById('hunt-empty-title').textContent = copy.title;
+  document.getElementById('hunt-empty-body').textContent = copy.body;
+  el.classList.add('show');
+}
+
 function blazeSVGsized(color, filled, w, h){
   return blazeSVG(color, filled).replace('viewBox="0 0 28 40"', `viewBox="0 0 28 40" width="${w}" height="${h}"`);
 }
