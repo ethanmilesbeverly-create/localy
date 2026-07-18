@@ -317,10 +317,15 @@
     background:var(--surface);
     border-top:1px solid var(--line);
     padding:12px 16px calc(90px + env(safe-area-inset-bottom));
-    /* Taller ceiling now that the compass panel is gone — more rows fit. This is
-       a MAX, not a fixed height: the drawer still shrinks to content, so one or
-       two items stay short rather than opening a mostly-empty panel. */
-    max-height:88vh;
+    /* Ceiling raised when the compass panel was removed (more rows fit), then
+       pulled back so the drawer still reads as a slide-up sheet rather than a
+       full-screen takeover. Expressed as a reserved strip instead of a raw vh
+       number: ~150px is always left above the drawer, which clears the
+       #topbar overlay (~52px) and leaves ~100px of live map visible beneath it
+       on any screen height. This is a MAX, not a fixed height — the drawer
+       still shrinks to content, so one or two items stay short. Want it taller
+       or shorter? Change only the 150px. */
+    max-height:calc(100vh - 150px - env(safe-area-inset-top));
   }
   #drawer-header{
     position:relative;
