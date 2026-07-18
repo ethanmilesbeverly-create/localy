@@ -2700,6 +2700,48 @@ async function loadKey(key, apply, fallback){
   }
 }
 
+/* =========================================================
+   #40 (actually implemented this time) — STABLE HUNT KEYS
+   ---------------------------------------------------------
+   Every category hunt used to build its key as `'local_'+Date.now()`, so each
+   session filed its captures under a brand-new throwaway bucket. saveProgress
+   wrote them correctly; isFound() then looked in the NEXT session's bucket and
+   found nothing, so pins reverted to uncaptured on every reload. The passport
+   totals iterate ALL buckets and sum them, which is why the count stayed right
+   while the pins went blank — the symptom that made this look like a rendering
+   bug rather than a keying bug.
+
+   Keys are now `<prefix>_v1`. The trailing underscore is load-bearing and must
+   stay: buildPointsForKey() and regenerateCurrentHuntAt() both dispatch on
+   key.startsWith('local_'), so a bare 'local' would silently stop hunts from
+   regenerating as you move.
+
+   MIGRATION: fold any old timestamped buckets into the stable one so captures
+   made before this fix still show as found. Whitelisted by prefix on purpose —
+   `custom_<id>` can also be numeric, and must never be swept up by this. */
+const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
+  'restaurants','barsrest','history','gems','lore','stateparks','nationalparks',
+  'trails','discover','random'];
+
+function migrateTimestampedProgress(){
+  let changed = false;
+  Object.keys(state.progress || {}).forEach(oldKey=>{
+    const m = oldKey.match(/^([a-z]+)_(\d{10,})$/);
+    if(!m || STABLE_HUNT_PREFIXES.indexOf(m[1]) === -1) return;
+    const target = m[1] + '_v1';
+    const src = state.progress[oldKey] || {};
+    const dst = state.progress[target] || {foundIds:[], foundAt:{}, foundMeta:{}};
+    (src.foundIds||[]).forEach(id=>{ if(dst.foundIds.indexOf(id)===-1) dst.foundIds.push(id); });
+    Object.assign(dst.foundAt   = dst.foundAt   || {}, src.foundAt   || {});
+    Object.assign(dst.foundMeta = dst.foundMeta || {}, src.foundMeta || {});
+    state.progress[target] = dst;
+    delete state.progress[oldKey];
+    changed = true;
+  });
+  if(changed) saveProgress(); // guarded by #1a's canPersist, so a failed load can't clobber
+  return changed;
+}
+
 async function loadPersonal(quiet){
   await loadKey('progress',
     v=>{ state.progress = v ? JSON.parse(v) : {}; },
@@ -2820,6 +2862,7 @@ function notePersistenceIssue(e){
    ========================================================= */
 async function init(){
   await loadPersonal();
+  migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   await loadMyGems();
   await loadApprovedGems();
   renderMyHunts();
@@ -3464,56 +3507,56 @@ function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
   ensureRealPlaces(base);
-  const key = 'local_'+Date.now();
+  const key = 'local_v1';
   setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
 }
 function startParksAndTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'parkstrails_'+Date.now();
+  const key = 'parkstrails_v1';
   setCurrentHunt({key, name:'Parks & Trails', mode:'park', points:buildPointsForKey(key, base)});
 }
 function startLocalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'localparks_'+Date.now();
+  const key = 'localparks_v1';
   setCurrentHunt({key, name:'Local Parks', mode:'park', points:blendCategory(base,'park',8,()=>generateLocalParks(base),'park')});
 }
 function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'shops_'+Date.now();
+  const key = 'shops_v1';
   setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
 }
 function startBarsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'bars_'+Date.now();
+  const key = 'bars_v1';
   setCurrentHunt({key, name:'Bars', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'restaurants_'+Date.now();
+  const key = 'restaurants_v1';
   setCurrentHunt({key, name:'Restaurants', mode:'restaurants', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'barsrest_'+Date.now();
+  const key = 'barsrest_v1';
   setCurrentHunt({key, name:'Bars & Restaurants', mode:'bars', points:buildPointsForKey(key, base)});
 }
 function startHistoryHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'history_'+Date.now();
+  const key = 'history_v1';
   setCurrentHunt({key, name:'History', mode:'history', points:buildPointsForKey(key, base)});
 }
 function startHiddenGemsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   const approved = (state.approvedGems||[]).filter(g=>g.status==='approved');
   const points = approved.map(g=> gemPoint(g, 'gem'));
-  const key = 'gems_'+Date.now();
+  const key = 'gems_v1';
   setCurrentHunt({key, name:'Hidden Gems', mode:'gems', points});
   if(points.length===0){
     showToast('No hidden gems yet — be the first to suggest one!');
@@ -3532,14 +3575,14 @@ function startHiddenGemsHunt(base){
 function startLoreHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   const points = nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
-  const key = 'lore_'+Date.now();
+  const key = 'lore_v1';
   setCurrentHunt({key, name:'Lore & Stories', mode:'lore', points});
 }
 
 function startStateParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'stateparks_'+Date.now();
+  const key = 'stateparks_v1';
   const points = blendCategory(base,'park',8,()=>generateStateParks(base),'park');
   setCurrentHunt({key, name:'State Park', mode:'park', points});
   showToast(points.length ? 'Showing real parks near you' : 'No park data loaded here yet — pan the map or try again shortly');
@@ -3547,7 +3590,7 @@ function startStateParksHunt(base){
 function startNationalParksHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'nationalparks_'+Date.now();
+  const key = 'nationalparks_v1';
   const points = blendCategory(base,'park',8,()=>generateNationalParks(base),'park');
   setCurrentHunt({key, name:'National Park', mode:'park', points});
   showToast(points.length ? 'Showing real parks near you' : 'No national/state park data wired up for this area yet');
@@ -3555,13 +3598,13 @@ function startNationalParksHunt(base){
 function startTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'trails_'+Date.now();
+  const key = 'trails_v1';
   setCurrentHunt({key, name:'Trails Nearby', mode:'trail', points:buildPointsForKey(key, base)});
 }
 function startDiscoverHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
-  const key = 'discover_'+Date.now();
+  const key = 'discover_v1';
   setCurrentHunt({key, name:'Discover — First Visit', mode:'discover', points:buildPointsForKey(key, base)});
   showToast('Good for a first visit anywhere — built around wherever you are now');
 }
@@ -3602,7 +3645,7 @@ function startRandomHunt(){
     showToast('No real spots loaded here yet — give it a moment or pan the map, then try again');
     return;
   }
-  const key = 'random_'+Date.now();
+  const key = 'random_v1';
   setCurrentHunt({key, name:'Random Nearby', mode:'random', points});
   showToast('Random hunt from real spots near you');
 }
