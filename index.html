@@ -104,15 +104,30 @@
     border:1px solid var(--line);color:var(--text);
     border-radius:999px;padding:9px 12px;font-size:13px;font-family:inherit;
   }
+  /* #34 — was rgba(216,166,58,0.15): a 15% tint the map read straight through,
+     leaving yellow-on-yellow-on-map that was barely legible over light tiles.
+     Now an opaque surface, with yellow held back for the border and the icon. */
   #browsing-indicator{
     position:absolute;top:108px;left:16px;right:16px;z-index:500;
-    display:none;align-items:center;justify-content:space-between;gap:10px;
-    background:rgba(216,166,58,0.15);border:1px solid var(--yellow);color:var(--yellow);
-    border-radius:10px;padding:9px 12px;font-size:12.5px;cursor:pointer;
+    display:none;align-items:center;gap:10px;
+    background:var(--surface);border:1px solid var(--yellow);color:var(--text);
+    border-radius:10px;padding:9px 8px 9px 12px;font-size:12.5px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,0.4);
   }
   #browsing-indicator.show{display:flex;}
-  #browsing-indicator span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  #browsing-indicator svg{width:15px;height:15px;flex-shrink:0;}
+  #browsing-indicator .bi-eye{width:15px;height:15px;flex-shrink:0;color:var(--yellow);}
+  #browsing-indicator-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #browsing-indicator-text b{color:var(--yellow);font-weight:700;}
+  /* The X used to be inert markup inside a bar that called recenterMap() — so it
+     looked like "dismiss" and behaved like "teleport me home". It's now its own
+     button with its own handler, and reads as the exit it always actually was. */
+  #browsing-exit{
+    flex-shrink:0;display:flex;align-items:center;gap:5px;
+    background:none;border:none;font-family:inherit;font-size:12px;font-weight:600;
+    color:var(--yellow);padding:4px 6px;cursor:pointer;border-radius:8px;
+  }
+  #browsing-exit:active{background:rgba(217,180,74,0.15);}
+  #browsing-exit svg{width:13px;height:13px;flex-shrink:0;}
 
   /* ---------- Screens ---------- */
   .screen{
@@ -472,6 +487,20 @@
   .ps-btn:active{transform:scale(0.99);}
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
   .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
+  /* #33 — tappable location row: address when we have one, coords when we don't,
+     always opening the device's own map app. */
+  .ps-loc{
+    display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;
+    padding:11px 12px;margin:0 0 14px;border-radius:12px;
+    border:1px solid var(--line);background:var(--surface-2);
+    color:var(--text);font-size:13px;line-height:1.45;font-family:inherit;
+    text-decoration:none;cursor:pointer;
+  }
+  .ps-loc:active{transform:scale(0.99);}
+  .ps-loc svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--yellow);}
+  .ps-loc-text{flex:1;min-width:0;}
+  .ps-loc-open{font-size:11.5px;color:var(--text-dim);margin-top:3px;}
+  .ps-loc-text.is-coords{font-variant-numeric:tabular-nums;}
 
   /* ---------- Game-map styling (bird's-eye, floating markers) ---------- */
   #map-tint{
@@ -1109,9 +1138,13 @@
         <span class="name" id="hunt-chip-name">Choose a hunt</span>
       </div>
     </div>
-    <div id="browsing-indicator" onclick="recenterMap()">
+    <div id="browsing-indicator" onclick="recenterMap()" role="button" aria-label="Return to your real location">
+      <svg class="bi-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
       <span id="browsing-indicator-text"></span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button id="browsing-exit" type="button" onclick="event.stopPropagation();exitLocationBrowseMode();" aria-label="Stop browsing and return to your location">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Exit
+      </button>
     </div>
     <button id="tilt-toggle-btn" class="is-2d" onclick="toggleTilt()" aria-label="Toggle 3D view">2D</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
@@ -1567,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* =========================================================
    DATA
    ========================================================= */
-const MODE_COLOR = { tourist:'#E8622C', discover:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', gems:'#D4AF37' };
+const MODE_COLOR = { tourist:'#E8622C', discover:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', gems:'#D4AF37' };
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 const BUILTIN = {
@@ -1764,7 +1797,7 @@ function generateDiscoverLocal(base){
   shuffled(RESTAURANT_NAMES).slice(0,3).forEach((name,i)=> add(name, 'dlr', i, 'A local restaurant nearby.', 'restaurants', 150, 1400));
   shuffled(HISTORY_NAMES).slice(0,3).forEach((name,i)=> add(name, 'dlh', i, shuffled(HISTORY_FACTS)[0], 'history', 150, 1600));
   nearbyApprovedGems(base, [], 2).forEach(g=>{
-    pts.push({id:'dlg'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id});
+    pts.push(gemPoint(g, 'dlg'));
   });
   return pts;
 }
@@ -1780,9 +1813,41 @@ function nearbyApprovedGems(base, excludeIds, limit, bucket){
     .slice(0,limit);
 }
 function approvedGemPoints(base, bucket, limit){
-  return nearbyApprovedGems(base, [], limit, bucket).map(g=>({
-    id:'catgem'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id
-  }));
+  return nearbyApprovedGems(base, [], limit, bucket).map(g=> gemPoint(g, 'catgem'));
+}
+
+/* ---- #32: a gem's DISPLAY category is the one its submitter chose ----
+   Every gem used to be stamped category:'gems', so all of them rendered gold
+   and read "Hidden Gem" — including a gem sitting inside the Shops tab, where
+   it was the one off-colour pin in an otherwise consistent set. Colour and
+   label now follow the stored bucket instead.
+
+   `isGem` rides along but is deliberately NOT rendered anywhere. Nothing in the
+   UI should distinguish a user submission from a scaffolded OSM/Wikipedia place
+   — the goal is for every pin on the map to be user-submitted, so surfacing the
+   difference advertises a gap that is meant to close. The flag exists only for
+   things that genuinely need provenance (#11 attribution, moderation), never
+   for styling or labelling.
+
+   `ctxCategory` lets a caller pin down the finer split the bucket can't express
+   — the single `barsrest` bucket becomes 'bars' or 'restaurants' depending on
+   which list the gem is being blended into. */
+const GEM_BUCKET_CATEGORY = {
+  park:'park', trail:'trail', shops:'shops',
+  barsrest:'barsrest', bars:'bars', restaurants:'restaurants', history:'history'
+};
+function gemDisplayCategory(g, ctxCategory){
+  /* Falls back to 'local' (the neutral cream pin), never to 'gems' — a row with
+     no stored category is a data anomaly, and dropping it into the gold "Hidden
+     Gem" bucket would reintroduce exactly the marker we just removed. With this,
+     no pin anywhere renders as the gems category. */
+  return ctxCategory || GEM_BUCKET_CATEGORY[g && g.bucket] || 'local';
+}
+function gemPoint(g, idPrefix, ctxCategory, extra){
+  return Object.assign({
+    id:(idPrefix||'gem')+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc,
+    category:gemDisplayCategory(g, ctxCategory), bucket:g.bucket, gemId:g.id, isGem:true
+  }, extra||{});
 }
 
 /* Generates one fresh point of a given category near `base`, avoiding the
@@ -1806,7 +1871,7 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
   if(!SHOW_PROCEDURAL_FILLER){
     if(category==='gems'){
       const g = nearbyApprovedGems(base, excludeGemIds||[], 1)[0];
-      return g ? {id:'dlg'+g.id+'_'+uid, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id} : null;
+      return g ? gemPoint(g, 'dlg', null, {id:'dlg'+g.id+'_'+uid}) : null;
     }
     return null;
   }
@@ -1834,7 +1899,7 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
     const candidates = nearbyApprovedGems(base, excludeGemIds||[], 1);
     if(candidates.length>0){
       const g = candidates[0];
-      return {id:'dlg'+g.id+'_'+uid, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id};
+      return gemPoint(g, 'dlg', null, {id:'dlg'+g.id+'_'+uid});
     }
     // no other unused gem nearby — fall back to a different category so the slot isn't just lost
     const fallbackCats = ['park','trail','shops','bars','restaurants','history'];
@@ -2234,8 +2299,8 @@ function nearbyRealPlaces(base, category, limit, excludeIds){
    1) approved user submissions (gems)  2) real internet places  3) procedural
    Fills up to targetCount, never producing duplicates by name. Every returned
    point carries `category` so map coloring stays correct. */
-function gemToPoint(g){
-  return {id:'catgem'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id, real:true};
+function gemToPoint(g, ctxCategory){
+  return gemPoint(g, 'catgem', ctxCategory, {real:true});
 }
 function blendCategory(base, category, targetCount, procFn, gemBucket){
   const out = [];
@@ -2244,7 +2309,7 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
 
   // 1) real user submissions for this category, nearest first
   if(gemBucket){
-    nearbyApprovedGems(base, [], targetCount, gemBucket).forEach(g=> push(gemToPoint(g)));
+    nearbyApprovedGems(base, [], targetCount, gemBucket).forEach(g=> push(gemToPoint(g, category)));
   }
   // 2) real internet places
   if(out.length < targetCount){
@@ -2277,7 +2342,7 @@ function buildAllThingsLocal(base){
   take(blendCategory(base,'history',3,()=>generateLocalHistory(base).slice(0,3), 'history'));
   nearbyApprovedGems(base, [], 2).forEach(g=>{
     const k=normName(g.name); if(k&&seen.has(k))return; if(k)seen.add(k);
-    pts.push({id:'dlg'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems', gemId:g.id});
+    pts.push(gemPoint(g, 'dlg'));
   });
   return pts;
 }
@@ -2363,6 +2428,7 @@ let state = {
   gemDraftPin: null,
   pendingSavePoint: null,
   browsingLocation: null,
+  _addrCache: new Map(),   // #33 — rounded coords -> short address (or null after a failed lookup)
   _programmaticViewChange: false,
   meAccuracy: null,
   lastWalkPos: null,
@@ -2895,7 +2961,8 @@ function enterLocationBrowseMode(base, placeName){
   document.getElementById('locate-btn').classList.remove('following');
   if(state.meMarker) state.leafletMap.removeLayer(state.meMarker);
   if(state.rangeCircle) state.leafletMap.removeLayer(state.rangeCircle);
-  document.getElementById('browsing-indicator-text').textContent = `Browsing ${placeName} — not really here`;
+  document.getElementById('browsing-indicator-text').innerHTML =
+    `Browsing <b>${escapeHtml(placeName)}</b> — you're not really here`;
   document.getElementById('browsing-indicator').classList.add('show');
   regenerateCurrentHuntAt(base);
 }
@@ -2909,6 +2976,8 @@ function exitLocationBrowseMode(){
     if(state.meMarker) state.meMarker.addTo(state.leafletMap);
     if(state.rangeCircle) state.rangeCircle.addTo(state.leafletMap);
     regenerateCurrentHuntAt(state.me);
+    centerOnPlayer(); // #34 — the Exit button should land you back on yourself now,
+                      // not on the next GPS tick whenever that happens to arrive
   }
 }
 function recenterMap(){
@@ -3125,9 +3194,7 @@ function startHistoryHunt(base){
 function startHiddenGemsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   const approved = (state.approvedGems||[]).filter(g=>g.status==='approved');
-  const points = approved.map(g=>({
-    id:'gem'+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc, category:'gems'
-  }));
+  const points = approved.map(g=> gemPoint(g, 'gem'));
   const key = 'gems_'+Date.now();
   setCurrentHunt({key, name:'Hidden Gems', mode:'gems', points});
   if(points.length===0){
@@ -3685,14 +3752,88 @@ function placeholderImageHTML(t, color, heightPx){
 const PIN_CAT_LABEL = {
   gems:'Hidden Gem', park:'Park & Trail', parks_trails:'Park & Trail', trail:'Trail',
   shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
+  barsrest:'Bar & Restaurant',
   history:'History', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
 };
+/* ---- #33: address + directions ----
+   Nothing in the app stores an address today, so this reverse-geocodes on
+   demand when a sheet opens — one request per pin, cached by rounded coords,
+   user-initiated, which keeps it well inside Nominatim's 1 req/sec policy.
+   When OSM `addr:*` tags start surviving parseOverpass, or #31 stores an
+   address on submissions, those simply pre-empt the lookup and this never
+   fires for that pin.
+
+   The coordinate fallback is the point: both Apple and Google Maps accept a
+   bare "lat,lng", so the row is actionable even when the lookup fails or the
+   user is offline. It degrades, it never disappears. */
+function fmtCoords(lat, lng){
+  return lat.toFixed(5) + ', ' + lng.toFixed(5);
+}
+function isAppleDevice(){
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) ||
+         (/Macintosh/.test(ua) && navigator.maxTouchPoints > 0) ||
+         /Mac OS X/.test(ua);
+}
+function mapsUrlFor(t){
+  const q = t.lat + ',' + t.lng;
+  const label = encodeURIComponent(t.name || 'Spot');
+  return isAppleDevice()
+    ? 'https://maps.apple.com/?q=' + label + '&ll=' + q
+    : 'https://www.google.com/maps/search/?api=1&query=' + q;
+}
+function addrCacheKey(lat, lng){ return lat.toFixed(4) + ',' + lng.toFixed(4); }
+/* Compact street address out of Nominatim's very verbose reverse response —
+   house number + street + city is what you'd actually read aloud; the full
+   display_name runs to county, postcode and country and is unusable in a row. */
+function shortAddress(a){
+  if(!a) return null;
+  const street = [a.house_number, a.road].filter(Boolean).join(' ');
+  const city = a.city || a.town || a.village || a.suburb || a.neighbourhood;
+  const out = [street, city, a.state].filter(Boolean).join(', ');
+  return out || null;
+}
+async function lookupAddress(t){
+  const key = addrCacheKey(t.lat, t.lng);
+  const cache = state._addrCache;
+  if(cache.has(key)) return cache.get(key);
+  cache.set(key, null); // reserve immediately so a double-tap can't fire twice
+  try{
+    const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&lat='
+      + t.lat + '&lon=' + t.lng;
+    const res = await fetch(url, {headers:{'Accept':'application/json'}});
+    if(!res.ok) return null;
+    const data = await res.json();
+    const addr = shortAddress(data && data.address);
+    cache.set(key, addr);
+    return addr;
+  }catch(e){
+    return null; // stays null in cache: one failed attempt, no retry storm
+  }
+}
+function renderPinLocationRow(t, addr){
+  const hasAddr = !!addr;
+  const primary = hasAddr ? addr : fmtCoords(t.lat, t.lng);
+  const pinIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6.2-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg>';
+  return `<a class="ps-loc" href="${escapeHtml(mapsUrlFor(t))}" target="_blank" rel="noopener">
+    ${pinIcon}
+    <span class="ps-loc-text${hasAddr?'':' is-coords'}">${escapeHtml(primary)}
+      <span class="ps-loc-open" style="display:block;">Open in ${isAppleDevice()?'Apple Maps':'Google Maps'}</span>
+    </span>
+  </a>`;
+}
+
 function pinSheetColor(t){
   const def = (state.currentHunt && MODE_COLOR[state.currentHunt.mode]) || '#E8622C';
   return (t && t.category && MODE_COLOR[t.category]) || def;
 }
 function fillPinSheet(t){
   const color = pinSheetColor(t);
+  /* #32 — a gem reads exactly like any other pin of its category. No "Hidden
+     Gem" marker: the end state is that every spot on the map is user-submitted,
+     so flagging which ones already are would advertise a distinction that is
+     meant to disappear. The OSM/Wikipedia places are scaffolding until real
+     submissions fill in behind them, not a second class of content. */
   const cat = PIN_CAT_LABEL[t.category] || 'Spot';
   const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
   const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
@@ -3713,9 +3854,23 @@ function fillPinSheet(t){
     actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
   }
   actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>`;
+  const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   document.getElementById('pin-sheet-expand').innerHTML =
     `<p class="ps-desc">${escapeHtml(t.desc || 'No description yet.')}</p>
+     ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
+
+  // Coords render instantly; the address swaps in if/when the lookup lands.
+  if(!cachedAddr){
+    const pinId = t.id;
+    lookupAddress(t).then(addr=>{
+      if(!addr || state.selectedPinId !== pinId) return;
+      const row = document.querySelector('#pin-sheet-expand .ps-loc-text');
+      if(!row) return;
+      row.classList.remove('is-coords');
+      row.firstChild.textContent = addr;
+    });
+  }
 }
 function openPinSheet(t){
   state.selectedPinId = t.id;
