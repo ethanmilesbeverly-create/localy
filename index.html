@@ -1467,8 +1467,147 @@ const supabaseStorage = {
   }
 };
 
-/* Use in-memory storage in demo mode, real Supabase otherwise. */
-window.storage = demoBypassActive() ? memStorage : supabaseStorage;
+/* =========================================================
+   #1b — LOCAL MIRROR + WRITE QUEUE
+   ---------------------------------------------------------
+   Wraps supabaseStorage rather than replacing it. Every private write lands in
+   localStorage FIRST (synchronous, cannot fail on a bad connection) and then
+   goes to Supabase; a write that cannot reach the server is queued and flushed
+   on reconnect. Reads try the server, fall back to the mirror, and prefer the
+   mirror outright for any key with unflushed local writes, since those are
+   strictly newer than whatever the server last saw.
+
+   WHY localStorage AND NOT IndexedDB: the payload is a few KB of JSON, and
+   every call site already JSON.stringifies before set and parses after get, so
+   this is a drop-in wrapper around the storage object rather than a change to
+   any of the ~15 call sites. IndexedDB earns its complexity for blobs and large
+   datasets; there are none here.
+
+   THE MIRROR IS A BUFFER, NEVER THE SOURCE OF TRUTH. Safari evicts localStorage
+   for non-installed sites after ~7 days unused (#49), so it survives a walk
+   through a dead zone, not a month away. Supabase stays authoritative.
+
+   SCOPE: private (shared=false) keys only. The shared keys are the `places:`
+   tile cache and `hunt-code:` payloads — the tile cache is already server-cached
+   for 21 days and is big enough to blow the ~5MB localStorage quota on its own.
+
+   NAMESPACED BY USER ID, deliberately: localStorage is per-origin and shared
+   across accounts on the same device, so unnamespaced keys would leak one
+   person's progress into another's session after a sign-out/sign-in.
+
+   KNOWN TRADE, accepted: during an outage the mirror can go stale relative to a
+   second device, and the flush is last-write-wins, so a capture made elsewhere
+   mid-outage loses. Real multi-device merge needs the relational schema (#6).
+   ========================================================= */
+const MIRROR_PREFIX = 'localy:v1:';
+
+function mirrorNS(){
+  const uid = state.user && state.user.id;
+  return uid ? MIRROR_PREFIX + uid + ':' : null;
+}
+/* Every localStorage call is wrapped: it throws in Safari private mode and on
+   quota, and the correct response to that is to degrade silently to exactly the
+   pre-#1b behaviour, never to break a save. */
+function mirrorGet(key){
+  const ns = mirrorNS(); if(!ns) return null;
+  try{
+    const raw = localStorage.getItem(ns + key);
+    return raw == null ? null : JSON.parse(raw); // {value, ts}
+  }catch(e){ return null; }
+}
+function mirrorSet(key, value){
+  const ns = mirrorNS(); if(!ns) return false;
+  try{
+    localStorage.setItem(ns + key, JSON.stringify({ value, ts: Date.now() }));
+    return true;
+  }catch(e){ return false; }
+}
+function pendingKeys(){
+  const ns = mirrorNS(); if(!ns) return [];
+  try{ return JSON.parse(localStorage.getItem(ns + '__pending') || '[]'); }
+  catch(e){ return []; }
+}
+function setPendingKeys(list){
+  const ns = mirrorNS(); if(!ns) return;
+  try{ localStorage.setItem(ns + '__pending', JSON.stringify([...new Set(list)])); }catch(e){}
+}
+function purgeMirror(){
+  const ns = mirrorNS(); if(!ns) return;
+  try{
+    Object.keys(localStorage).filter(k=>k.indexOf(ns)===0).forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
+
+/* Flushes queued writes in order, stopping at the first failure so a still-dead
+   connection doesn't burn through the whole queue. Talks to supabaseStorage
+   directly rather than window.storage, so it cannot recurse back into itself. */
+let _flushingWrites = false;
+async function flushPendingWrites(){
+  if(_flushingWrites) return;
+  const keys = pendingKeys();
+  if(!keys.length) return;
+  _flushingWrites = true;
+  let synced = 0;
+  try{
+    for(const key of keys){
+      const rec = mirrorGet(key);
+      if(!rec){ setPendingKeys(pendingKeys().filter(k=>k!==key)); continue; }
+      try{
+        await supabaseStorage.set(key, rec.value, false);
+        setPendingKeys(pendingKeys().filter(k=>k!==key));
+        synced++;
+      }catch(e){ break; }
+    }
+  }finally{
+    _flushingWrites = false;
+  }
+  if(synced && !pendingKeys().length){
+    throttledToast('synced', 10000, 'Back online — your finds are saved');
+  }
+}
+
+const mirroredStorage = {
+  async get(key, shared){
+    if(shared) return supabaseStorage.get(key, true);
+    let res = null, remoteOk = false;
+    try{
+      res = await supabaseStorage.get(key, false);
+      remoteOk = true;
+    }catch(e){
+      const rec = mirrorGet(key);
+      if(rec) return { value: rec.value };  // offline but mirrored — NOT a failed read
+      throw e;                              // nothing local either: let #1a block writes
+    }
+    // Unflushed local writes are newer than anything the server can return.
+    if(pendingKeys().indexOf(key) !== -1){
+      const rec = mirrorGet(key);
+      if(rec){ flushPendingWrites(); return { value: rec.value }; }
+    }
+    if(res) mirrorSet(key, res.value);
+    if(remoteOk) flushPendingWrites(); // connectivity is evidently back
+    return res;
+  },
+  async set(key, value, shared){
+    if(shared) return supabaseStorage.set(key, value, true);
+    const mirrored = mirrorSet(key, value);
+    try{
+      await supabaseStorage.set(key, value, false);
+      setPendingKeys(pendingKeys().filter(k=>k!==key));
+    }catch(e){
+      // Queued and durable: resolve rather than throw, or the caller's catch
+      // would warn "won't survive a reload" about a write that now will.
+      if(mirrored){
+        setPendingKeys([...pendingKeys(), key]);
+        throttledToast('queued', 20000, "Saved — offline for now, will sync when you're back");
+        return;
+      }
+      throw e; // no mirror available (private mode / quota): pre-#1b behaviour
+    }
+  }
+};
+
+/* Use in-memory storage in demo mode, mirrored Supabase otherwise. */
+window.storage = demoBypassActive() ? memStorage : mirroredStorage;
 
 /* =========================================================
    AUTH
@@ -1541,6 +1680,11 @@ function onAuthed(session){
   }
 }
 async function logout(){
+  // #1b — drop this user's local mirror before signing out. localStorage is
+  // per-origin and shared across accounts on a device, so leaving it would show
+  // one person's progress to the next person who signs in here.
+  try{ await flushPendingWrites(); }catch(e){}
+  purgeMirror();
   await sb.auth.signOut();
   location.reload(); // simplest clean reset back to the login screen
 }
@@ -2688,8 +2832,12 @@ async function init(){
   startLocating();
   // #1a — retry the blocked read when the connection returns, so a bad boot is a
   // temporary condition rather than a dead session.
-  window.addEventListener('online', retryLoadPersonal);
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) retryLoadPersonal(); });
+  window.addEventListener('online', ()=>{ flushPendingWrites(); retryLoadPersonal(); });
+  document.addEventListener('visibilitychange', ()=>{
+    if(!document.hidden){ flushPendingWrites(); retryLoadPersonal(); }
+  });
+  flushPendingWrites(); // anything queued by a previous session
+
 }
 
 /* Console helper: run `localyDebug()` in DevTools to see what real data loaded
