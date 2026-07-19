@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Localy</title>
+<!-- ============================================================
+     "#N" IN COMMENTS = a row number in localy-roadmap.md.
+     Those numbers used to double as the priority rank, so reordering the
+     table silently rewrote every reference in here — seven comments had
+     rotted by the time anyone checked, each one pointing confidently at the
+     wrong item. The number is now a STABLE ID: rows are appended, never
+     renumbered, and priority lives in the row order instead. Read a #N here
+     and it will still mean what it meant when it was written.
+     ============================================================ -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   :root{
@@ -528,7 +537,7 @@
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
   .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
   .ps-far{font-size:13px;color:var(--text-dim);line-height:1.4;}
-  /* #33 — location row: address when we have one, coords when we don't. Plain
+  /* #18 — location row: address when we have one, coords when we don't. Plain
      text plus a copy icon — no background or border, because the filled surface
      read as a tappable button and competed with the real actions below it.
      Copy rather than an outbound maps link: the point is to keep people inside
@@ -1803,7 +1812,7 @@ function dropPinSVG(fillColor, captured, w, h){
   </svg>`;
 }
 /* =========================================================
-   #23 — PINCH-ZOOM GUARD
+   #46 — PINCH-ZOOM GUARD
    Native page pinch-zoom scales the whole visual viewport, which drags
    the header and bottom nav around on mobile. Block multi-touch page zoom
    at the document level, but leave Leaflet's own map pinch-zoom working by
@@ -2065,7 +2074,7 @@ function approvedGemPoints(base, bucket, limit){
    UI should distinguish a user submission from a scaffolded OSM/Wikipedia place
    — the goal is for every pin on the map to be user-submitted, so surfacing the
    difference advertises a gap that is meant to close. The flag exists only for
-   things that genuinely need provenance (#11 attribution, moderation), never
+   things that genuinely need provenance (#23 attribution, moderation), never
    for styling or labelling.
 
    `ctxCategory` lets a caller pin down the finer split the bucket can't express
@@ -2671,6 +2680,98 @@ function buildPointsForKey(key, base){
   return null;
 }
 
+/* ---------------------------------------------------------
+   #40b — PUT CAPTURED PINS BACK ON THE MAP
+   ---------------------------------------------------------
+   #40a made progress SURVIVE. It did not make it VISIBLE, and those are two
+   different bugs wearing the same symptom. A category hunt rebuilds its point
+   list from scratch on every start and every regeneration, and the generators
+   have no idea what you already found — so a spot you captured yesterday is
+   simply absent from today's list, and a pin that is not in the list cannot
+   render as found. isFound() was correct the whole time; nothing was asking it
+   about the missing pin. foundMeta is the only record that outlives the point
+   list, so that is what we rebuild from.
+
+   Three limits, each of which is a real bug if you remove it:
+
+   (1) AUTO-GENERATED HUNTS ONLY. A custom or redeemed guide has an AUTHORED
+       point list — injecting into it would resurrect a stop whose owner
+       deleted it, and the user would have no way to remove it again.
+       STABLE_HUNT_PREFIXES is already exactly the "we generate this" set, so
+       it is reused rather than a second list being invented to drift from it.
+
+   (2) NEAR THE CONTENT ANCHOR ONLY. progress is keyed by CATEGORY, not by
+       city — local_v1 accumulates every "all things local" capture you have
+       ever made, anywhere. With no radius, stepping outside in Chicago drops
+       pins from a trip to Denver into the drawer with a 900-mile distance on
+       them. Captures that far away belong in the passport (#22), not on this
+       map. Anchored on browse/search location first, the same precedence
+       order #8 established, so browsing another city shows THAT city's finds.
+
+   (3) CAPPED, NEAREST FIRST. Capture counts in a dense city grow without
+       bound, and every injected point is a Leaflet marker plus a drawer row.
+
+   Captures made before #40c have no lat/lng and are SKIPPED, not guessed at.
+   A captured pin at an invented coordinate is worse than an absent one — the
+   same call #15 made about pinning trails at a bbox centre. */
+const CAPTURED_INJECT_RADIUS_M = 5000;
+const CAPTURED_INJECT_MAX = 40;
+const CAPTURED_TWIN_M = 150;
+function injectCapturedPins(hunt, base){
+  if(!hunt || !Array.isArray(hunt.points)) return;
+  if(STABLE_HUNT_PREFIXES.indexOf(String(hunt.key).split('_')[0]) === -1) return;
+  const prog = state.progress[hunt.key];
+  if(!prog || !prog.foundMeta) return;
+  const anchor = base || state.browsingLocation || state.searchedArea
+              || state.localHuntOrigin || state.me;
+  if(!anchor) return;
+
+  const presentIds = new Set(hunt.points.map(p=>p.id));
+  const claimed = new Set();
+
+  const near = Object.keys(prog.foundMeta).map(id=>{
+    const m = prog.foundMeta[id] || {};
+    if(typeof m.lat !== 'number' || typeof m.lng !== 'number') return null;
+    return {id, m, dist: haversine(anchor.lat, anchor.lng, m.lat, m.lng)};
+  }).filter(e => e && e.dist <= CAPTURED_INJECT_RADIUS_M)
+    .sort((a,b) => a.dist - b.dist)
+    .slice(0, CAPTURED_INJECT_MAX);
+
+  near.forEach(entry=>{
+    const id = entry.id, m = entry.m;
+    if(presentIds.has(id)) return; // already in the list — isFound() handles it
+    const nk = normName(m.name);
+    /* Same place, regenerated under a different id. Adopt the captured id onto
+       the point that is already there instead of adding a second pin, or the
+       map shows the spot twice — once found, once not — which is #54's
+       duplicate-place problem arriving by a different route. Name alone is not
+       enough (plenty of cities have two "Lincoln Park"s), so it must also be
+       within CAPTURED_TWIN_M of where the capture physically happened:
+       proximity AND fuzzy name, the match rule #54 settled on. */
+    const twin = nk ? hunt.points.find(p =>
+      !claimed.has(p.id) &&
+      normName(p.name) === nk &&
+      haversine(p.lat, p.lng, m.lat, m.lng) <= CAPTURED_TWIN_M) : null;
+    if(twin){
+      twin.id = id;          // isFound(twin.id) is now true — no second marker
+      claimed.add(id);
+      presentIds.add(id);
+      return;
+    }
+    hunt.points.push({
+      id,
+      name: m.name || 'Captured spot',
+      lat: m.lat,
+      lng: m.lng,
+      desc: m.desc || '',
+      // mode was stored as `target.category || hunt.mode`, so it is already a
+      // valid MODE_COLOR key — the injected pin keeps the colour it had.
+      category: m.mode || hunt.mode
+    });
+    presentIds.add(id);
+  });
+}
+
 /* When a real-place fetch lands, upgrade the current auto-generated hunt in
    place: keep anything already captured, swap the rest up to real data.
    Preserves the hunt key (and therefore progress) and never touches
@@ -2696,6 +2797,11 @@ function reblendHuntInPlace(h){
     merged.push(p);
   });
   h.points = merged;
+  // #40b — re-run after the swap. keptFound already carries injected pins
+  // through (they are in foundSet), but real places arriving late may be the
+  // twin of a capture that had to be injected standalone on a cold start, and
+  // this is the pass that merges the two instead of leaving a duplicate.
+  injectCapturedPins(h, base);
 }
 function onRealPlacesReady(){
   const h = state.currentHunt;
@@ -2743,7 +2849,7 @@ let state = {
   pendingSavePoint: null,
   browsingLocation: null,
   searchedArea: null,   // #8 — set while content is anchored to a panned-to area
-  _addrCache: new Map(),   // #33 — rounded coords -> short address (or null after a failed lookup)
+  _addrCache: new Map(),   // #18 — rounded coords -> short address (or null after a failed lookup)
   _programmaticViewChange: false,
   meAccuracy: null,
   lastWalkPos: null,
@@ -3460,7 +3566,7 @@ function exitLocationBrowseMode(){
     if(state.meMarker) state.meMarker.addTo(state.leafletMap);
     if(state.rangeCircle) state.rangeCircle.addTo(state.leafletMap);
     regenerateCurrentHuntAt(state.me);
-    centerOnPlayer(); // #34 — the Exit button should land you back on yourself now,
+    centerOnPlayer(); // #19 — the Exit button should land you back on yourself now,
                       // not on the next GPS tick whenever that happens to arrive
   }
 }
@@ -3518,6 +3624,10 @@ function setCurrentHunt(hunt){
   state.currentHunt = hunt;
   if(!state.progress[hunt.key]) state.progress[hunt.key] = {foundIds:[], foundAt:{}, foundMeta:{}};
   if(!state.progress[hunt.key].foundMeta) state.progress[hunt.key].foundMeta = {};
+  // #40b — every hunt starter funnels through here, so this is the one place
+  // captured pins have to be restored. Must run BEFORE refreshTargetsUI(), or
+  // the first render of the session is missing them and they pop in later.
+  injectCapturedPins(hunt);
   document.getElementById('hunt-chip-name').textContent = hunt.name;
   document.getElementById('stale-hunt-banner').classList.remove('show');
   enterHuntMode();
@@ -4278,7 +4388,7 @@ const PIN_CAT_LABEL = {
    Nothing in the app stores an address today, so this reverse-geocodes on
    demand when a sheet opens — one request per pin, cached by rounded coords,
    user-initiated, which keeps it well inside Nominatim's 1 req/sec policy.
-   When OSM `addr:*` tags start surviving parseOverpass, or #31 stores an
+   When OSM `addr:*` tags start surviving parseOverpass, or #17 stores an
    address on submissions, those simply pre-empt the lookup and this never
    fires for that pin.
 
@@ -4375,7 +4485,7 @@ function pinSheetColor(t){
 }
 function fillPinSheet(t){
   const color = pinSheetColor(t);
-  /* #32 — a gem reads exactly like any other pin of its category. No "Hidden
+  /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
      Gem" marker: the end state is that every spot on the map is user-submitted,
      so flagging which ones already are would advertise a distinction that is
      meant to disappear. The OSM/Wikipedia places are scaffolding until real
@@ -4717,7 +4827,17 @@ async function attemptMarkFound(){
       name: target ? target.name : id,
       huntName: state.currentHunt.name,
       color: MODE_COLOR[effectiveMode] || '#E8622C',
-      mode: effectiveMode
+      mode: effectiveMode,
+      // #40c — the capture is the ONLY moment this place's coordinates are
+      // guaranteed to exist. The point list is rebuilt from scratch on every
+      // hunt start and every move, so by the next session the generator may
+      // never produce this spot again and nothing else in the app remembers
+      // where it was. Without these two numbers a captured pin cannot be put
+      // back on the map (#40b) and "places you've been" (#22) has nothing to
+      // plot. desc is carried for the same reason — cheap now, unrecoverable later.
+      lat: target.lat,
+      lng: target.lng,
+      desc: target.desc || ''
     };
     await saveProgress();
     if(!state.hasCapturedOnce){
