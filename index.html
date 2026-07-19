@@ -111,10 +111,16 @@
     flex:1;min-width:0;
     display:flex;gap:6px;
   }
+  /* #11 (regression fix) — this rule is MORE SPECIFIC than the shared input rule
+     and was still setting 13px, so the header search pill kept triggering iOS
+     focus-zoom after the viewport lock was removed. Any sub-16px font-size on a
+     focusable input reintroduces that zoom no matter what the shared rule says.
+     Padding drops 9px -> 7px so the pill's overall height is within a pixel of
+     what it was; the text is the only thing that grows. */
   #map-search-row input{
     flex:1;min-width:0;background:rgba(23,50,41,0.95);backdrop-filter:blur(8px);
     border:1px solid var(--line);color:var(--text);
-    border-radius:999px;padding:9px 12px;font-size:13px;font-family:inherit;
+    border-radius:999px;padding:7px 12px;font-size:16px;font-family:inherit;
   }
   /* #34 — was rgba(216,166,58,0.15): a 15% tint the map read straight through,
      leaving yellow-on-yellow-on-map that was barely legible over light tiles.
@@ -4743,12 +4749,7 @@ function fillPinSheet(t){
   const cat = PIN_CAT_LABEL[t.category] || 'Spot';
   const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
   const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
-  /* #61(a) — "Too far", not "Not captured". With the .ps-far sentence gone this
-     chip carries the whole out-of-range message, and "Not captured" states the
-     wrong fact: it describes your history when what you need is the reason the
-     button is missing. The distance sits immediately to its left, so the chip
-     only has to name the cause, not quantify it. */
-  const statusTxt = t.found ? 'Captured' : (inRange ? 'In range' : 'Too far');
+  const statusTxt = t.found ? 'Captured' : (inRange ? 'In range' : 'Not captured');
   const meta = [distTxt, cat, statusTxt].filter(Boolean)
     .map(p=>`<span>${escapeHtml(p)}</span>`).join('<i class="ps-div"></i>');
 
@@ -4768,8 +4769,11 @@ function fillPinSheet(t){
      three capture paths hid or disabled the button out of range and explained
      nothing, so a user standing at the door got silence. That argument is now
      weaker IN THIS ONE PLACE, because the meta row directly above already renders
-     `distance · category · Too far` — the sheet stated both facts and then
+     `distance · category · Not captured` — the sheet stated both facts and then
      restated them in a sentence, on the surface #36 fought to densify.
+     The row proposed promoting that chip to "Too far" as compensation; shipped,
+     rejected, reverted. Do not re-propose it. Distance-away already carries the
+     out-of-range message and the chip stays about capture history.
      The identical copy in the capture toast is deliberately KEPT: that is the
      path where nothing else on screen explains the failure, and it is the case
      #51 was really about. Deleting both would reintroduce the silence. */
