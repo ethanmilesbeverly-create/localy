@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- #11 — maximum-scale / user-scalable removed: they blocked pinch-to-read for
+     low-vision users. iOS input auto-zoom (the reason #46 reached for the lock)
+     is now prevented the correct way, by 16px font-size on every input below. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Localy</title>
 <!-- ============================================================
      "#N" IN COMMENTS = a row number in localy-roadmap.md.
@@ -295,17 +298,24 @@
     padding:8px;
   }
   .btn.small{padding:9px 14px;font-size:13px;width:auto;}
-  input[type=text], textarea, select{
+  /* #11 — selector widened past [type=text]: email/password/search/number inputs
+     were never covered by it, and those are exactly the ones on the auth screen.
+     font-size MUST stay >=16px on every one of these — below 16px iOS Safari
+     zooms the page on focus and does not zoom back out, which is the behaviour
+     #46 was originally locking the viewport to suppress. */
+  input[type=text], input[type=email], input[type=password], input[type=search],
+  input[type=number], input[type=tel], input[type=url], textarea, select{
     width:100%;
     background:var(--surface);
     border:1px solid var(--line);
     color:var(--text);
     border-radius:10px;
     padding:12px 14px;
-    font-size:15px;
+    font-size:16px;
     font-family:inherit;
   }
-  input[type=text]:focus, textarea:focus, select:focus{outline:1px solid var(--orange);}
+  input[type=text]:focus, input[type=email]:focus, input[type=password]:focus,
+  input[type=search]:focus, textarea:focus, select:focus{outline:1px solid var(--orange);}
   label.field-label{
     display:block;
     font-size:12px;
@@ -515,10 +525,6 @@
   .ps-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
   .ps-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:9px;font-size:12.5px;color:var(--text-dim);}
   .ps-meta .ps-div{width:1px;height:11px;background:rgba(237,233,221,0.22);display:inline-block;}
-  #pin-sheet-thumb{
-    width:96px;height:76px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);
-  }
-  #pin-sheet-thumb .t-image{height:76px !important;border-radius:0 !important;}
   #pin-sheet-expand{
     max-height:0;overflow:hidden;opacity:0;margin-top:0;
     transition:max-height .3s ease, opacity .25s ease, margin .3s ease, padding .3s ease;
@@ -644,16 +650,9 @@
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
   .player-wrap{position:relative;width:64px;height:64px;}
-  .player-pulse{
-    position:absolute;top:50px;left:50%;width:18px;height:18px;
-    margin:-9px 0 0 -9px;border-radius:50%;
-    background:rgba(76,143,192,0.35);
-    animation:playerPulse 2.2s ease-out infinite;
-  }
-  @keyframes playerPulse{
-    0%{transform:scale(0.6);opacity:0.8;}
-    100%{transform:scale(2.6);opacity:0;}
-  }
+  /* #20 — .player-pulse / @keyframes playerPulse deleted. You always know where
+     you are; the pulse spent attention on the one thing that needs none and
+     competed with .fm-halo, which is the pulse that actually means something. */
   .player-shadow{
     position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
     width:20px;height:7px;border-radius:50%;
@@ -875,7 +874,7 @@
   .pin-list-row .pin-name-input{
     flex:1;min-width:0;
     background:transparent;border:none;border-bottom:1px dashed transparent;
-    color:var(--text);font-size:14px;font-family:inherit;
+    color:var(--text);font-size:16px;font-family:inherit; /* #11 — see note on the shared input rule */
     padding:2px 0;
   }
   .pin-list-row .pin-name-input:hover{border-bottom-color:var(--line);}
@@ -1339,7 +1338,6 @@
           <div id="pin-sheet-sub" class="ps-sub"></div>
           <div id="pin-sheet-meta" class="ps-meta"></div>
         </div>
-        <div id="pin-sheet-thumb"></div>
       </div>
     </div>
     <div id="pin-sheet-expand"></div>
@@ -1430,7 +1428,7 @@
   .auth-input{
     width:100%; background:var(--surface-2);
     border:1px solid var(--line); color:var(--text);
-    border-radius:10px; padding:12px; font-size:14px; font-family:inherit;
+    border-radius:10px; padding:12px; font-size:16px; font-family:inherit; /* #11 — 14px triggered iOS focus-zoom */
   }
   .auth-input:focus{ outline:none; border-color:var(--orange); }
   .auth-btn{
@@ -1990,7 +1988,18 @@ function dropPinSVG(fillColor, captured, w, h){
 function onMap(e){
   return e.target && e.target.closest && e.target.closest('.leaflet-container');
 }
+/* #11 — the meta-tag half of #46 was only half the lock; this guard was the other
+   half, and removing user-scalable=no without touching it would have changed
+   nothing a user could feel. Flipped OFF so pinch-to-read works.
+   THE TRADE IS REAL AND IS THE POINT OF THE DECISION: deliberate page pinch will
+   once again drag the header and bottom nav, which is exactly what #46 shipped to
+   stop. The difference is that #46 was fixing ACCIDENTAL zoom on input focus, and
+   that cause is now fixed properly by the 16px rule instead of by banning zoom for
+   everyone. Set this back to true to restore #46 verbatim — one word, no other
+   edit — but note the 16px inputs should stay either way. */
+const LOCK_PAGE_ZOOM = false;
 function installZoomGuard(){
+  if(!LOCK_PAGE_ZOOM) return;
   document.addEventListener('touchmove', e=>{
     if(e.touches.length > 1 && !onMap(e)) e.preventDefault();
   }, { passive:false });
@@ -3622,7 +3631,6 @@ function playerIcon(){
   return L.divIcon({
     className:'',
     html:`<div class="player-wrap">
-      <div class="player-pulse"></div>
       <div class="player-shadow"></div>
       <div class="player-marker" id="player-cone">
         <svg viewBox="0 0 32 44" xmlns="http://www.w3.org/2000/svg">
@@ -3751,6 +3759,15 @@ function recenterMap(){
   maybeRequestCompassPermission();
   state.followMe = true;
   document.getElementById('locate-btn').classList.add('following');
+  /* #59 — recenter is the deliberate way home, so the pill must go with it.
+     It has to be cleared HERE, at the top, and not in any one branch: all three
+     exits below (browse, searched-area, plain centre) leave a stale "Search this
+     area" pill offering to re-search the place you just left. The searchedArea
+     branch is the one that made this visible, because it returns early and the
+     later maybeShowSearchHere() calls compare drift against an anchor that has
+     already moved — so the pill's own logic can no longer decide to hide it. */
+  const shBtn = document.getElementById('search-here-btn');
+  if(shBtn) shBtn.classList.remove('show');
   if(state.browsingLocation){
     exitLocationBrowseMode();
     return;
@@ -4542,14 +4559,15 @@ function currentTargetsSorted(){
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 const CHEVRON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
 
-/* No real photo source is wired up, so this generates a consistent stylized
-   placeholder (gradient + blaze glyph) per spot instead of a fabricated image. */
-function placeholderImageHTML(t, color, heightPx){
-  const angle = Math.round(seededRand(Math.floor(t.lat*1000), Math.floor(t.lng*1000), 11)*360);
-  return `<div class="t-image" style="height:${heightPx}px;background:linear-gradient(${angle}deg, ${color}66, var(--surface-2))">
-    <div class="t-image-icon">${pinSVGsized(color, true, 34, 48)}</div>
-  </div>`;
-}
+/* #21(a) — placeholderImageHTML() deleted, along with #pin-sheet-thumb and its
+   two CSS rules. It generated a gradient + blaze glyph per spot, which read as a
+   photo slot that never fills: after #37 killed procedural filler it was the last
+   invented content in the app, and it cost ~96x76px in a sheet #36 had just
+   fought to densify. When real photos land (#21b: Wikipedia pageimages / Wikidata
+   P18 / Places Photos), the miss case renders NO image rather than this — a
+   deterministic gradient is not a photo and should not occupy a photo's space.
+   The generic .t-image / .t-image-icon / .map-popup .t-image rules are left in
+   the stylesheet on purpose: they are the styling hook #21b will reuse. */
 
 /* =========================================================
    PIN DETAIL SHEET (flight-tracker style)
@@ -4678,7 +4696,6 @@ function fillPinSheet(t){
   document.getElementById('pin-sheet-sub').innerHTML =
     `<span class="ps-cat-dot" style="background:${color}"></span>${escapeHtml(cat)}`;
   document.getElementById('pin-sheet-meta').innerHTML = meta;
-  document.getElementById('pin-sheet-thumb').innerHTML = placeholderImageHTML(t, color, 76);
 
   let actions = '';
   if(t.found){
@@ -5214,7 +5231,17 @@ function renderAchievementIcon(iconKey, unlocked, size){
 function renderAchievements(){
   const stats = computeAchievementStats();
   const el = document.getElementById('achievements-section');
-  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>
+  /* #63(a) — a count, NOT a sort. ACHIEVEMENTS is a deliberate ladder
+     (first_stamp -> stamps_10 -> stamps_25 -> stamps_50); sorting earned ones to
+     the front breaks the ladder and destroys the positional memory that makes a
+     badge grid read as a collection. The real complaint behind "should earned
+     ones move up" is density -- locked badges outnumber earned ones early -- and
+     a count fixes density without moving anything. If the grid outgrows a screen,
+     the next step is an Earned/Locked split, which keeps ladder order inside each
+     section. Per-item reordering: never. */
+  const earned = ACHIEVEMENTS.filter(a=>a.check(stats)).length;
+  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements
+      <span style="float:right;font-weight:600;color:var(--text-dim);">${earned} of ${ACHIEVEMENTS.length} earned</span></p>
     <div class="achievement-grid">` +
     ACHIEVEMENTS.map(a=>{
       const unlocked = a.check(stats);
