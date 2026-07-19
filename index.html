@@ -5231,17 +5231,7 @@ function renderAchievementIcon(iconKey, unlocked, size){
 function renderAchievements(){
   const stats = computeAchievementStats();
   const el = document.getElementById('achievements-section');
-  /* #63(a) — a count, NOT a sort. ACHIEVEMENTS is a deliberate ladder
-     (first_stamp -> stamps_10 -> stamps_25 -> stamps_50); sorting earned ones to
-     the front breaks the ladder and destroys the positional memory that makes a
-     badge grid read as a collection. The real complaint behind "should earned
-     ones move up" is density -- locked badges outnumber earned ones early -- and
-     a count fixes density without moving anything. If the grid outgrows a screen,
-     the next step is an Earned/Locked split, which keeps ladder order inside each
-     section. Per-item reordering: never. */
-  const earned = ACHIEVEMENTS.filter(a=>a.check(stats)).length;
-  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements
-      <span style="float:right;font-weight:600;color:var(--text-dim);">${earned} of ${ACHIEVEMENTS.length} earned</span></p>
+  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>
     <div class="achievement-grid">` +
     ACHIEVEMENTS.map(a=>{
       const unlocked = a.check(stats);
