@@ -5190,9 +5190,29 @@ function refreshTrackUI(){
     document.getElementById('ar-mark-btn').disabled = !inRange;
     positionArArrow(brg);
     /* #73 — a dead button that says nothing is the failure #51 was about. Even
-       with the watch fixed, a disabled Capture must state its reason: the user
-       cannot tell "walk 40 more feet" from "your location stopped updating",
-       and those need opposite responses. */
+       with the watch fixed, a disabled Capture must state its reason.
+
+       DECIDED 2026-07-19 — AR OPENS ONLY WHEN IN RANGE. Do not re-propose the
+       alternative; it was raised and rejected in the same session. AR is capture
+       confirmation, not navigation — the map and drawer already navigate, and a
+       second navigator sitting behind a camera permission prompt (#52) is a worse
+       version of a screen that already exists. All three entry points already
+       gate on inRange, so the decision costs no code; what it costs is this
+       block's assumptions, corrected below.
+
+       CONSEQUENCE: the only way to be here is to open AR in range and then move
+       out of it — walking off, or a widening accuracy figure shrinking
+       effectiveCaptureRange() under you. So the copy is "you left", never
+       "keep walking": the user is standing where they just were and needs to be
+       told they drifted, not given directions.
+
+       The simulate-mode branch that used to sit here is DELETED as unreachable,
+       and recording why matters more than the deletion: in simulate mode
+       meAccuracy is 0, so effectiveCaptureRange() is a constant 25 m, and
+       position cannot change at all while AR is open because the overlay covers
+       the map. Entering this block therefore requires real GPS. That AR is
+       untestable in simulate mode is #73's own root cause seen from the other
+       side, and it is why the QA for this row has to be done on foot. */
     const hint = document.getElementById('ar-hint');
     if(hint){
       const staleMs = state.lastFixTime ? (Date.now() - state.lastFixTime) : Infinity;
@@ -5200,13 +5220,11 @@ function refreshTrackUI(){
         hint.textContent = '';
         hint.classList.remove('show');
       } else if(staleMs > AR_STALE_FIX_MS){
-        hint.textContent = state.simulating
-          ? 'Location is simulated — close the camera and tap the map to move.'
-          : "Your location hasn't updated in a while — GPS may have dropped.";
+        hint.textContent = "Your location hasn't updated in a while — GPS may have dropped.";
         hint.classList.add('show');
       } else {
         const need = Math.round((nearest.dist - effectiveCaptureRange()) * 3.28084);
-        hint.textContent = `About ${need} ft too far — keep walking.`;
+        hint.textContent = `You've moved out of range — step back about ${need} ft.`;
         hint.classList.add('show');
       }
     }
@@ -5334,7 +5352,7 @@ async function openAR(){
   }catch(e){
     document.getElementById('ar-marker').style.display='none';
     msg.style.display='block';
-    msg.textContent = "Camera access isn't available here (permissions, or blocked by this preview environment) — you can still use the compass and distance above to line up, and Capture once you're in range.";
+    msg.textContent = "Camera access isn't available here (permissions, or blocked by this preview environment) — the compass and distance above still work, and Capture is ready since you're in range.";
   }
   refreshTrackUI();
   startArSync();
