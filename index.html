@@ -503,7 +503,12 @@
     border-top:1px solid rgba(237,233,221,0.16);
     border-radius:20px 20px 0 0;
     box-shadow:0 -12px 34px rgba(0,0,0,0.42);
-    padding:0 16px 14px;
+    /* #61(b) — 14px -> 22px. This edge is pinned above the nav at
+       bottom:calc(56px + env(safe-area-inset-bottom)), so there is no safe-area
+       slack quietly absorbing it and the last button sat right on the edge.
+       Left unresolved on purpose: #target-drawer reserves 90px at its bottom.
+       Two bottom sheets, 22px vs 90px, neither derived from the other. */
+    padding:0 16px 22px;
     transform:translateY(130%);
     transition:transform .3s cubic-bezier(.22,.61,.36,1);
     will-change:transform;
@@ -534,7 +539,13 @@
     border-top:1px solid var(--line);
   }
   .ps-desc{font-size:13.5px;line-height:1.55;color:var(--text-dim);margin:0 0 14px;}
-  .ps-actions{display:flex;flex-direction:column;gap:10px;}
+  /* #61(b) — padding-bottom lives HERE as well as on #pin-sheet, and the reason
+     is not redundancy. #pin-sheet.expanded #pin-sheet-expand is
+     max-height:44vh; overflow-y:auto, so on a short screen with a long
+     description "+ Save to a hunt" is the last row INSIDE a scroll container —
+     and #pin-sheet's padding sits OUTSIDE it, creating no room at the scroll end.
+     Raising the sheet's padding alone fixes the short case and misses this one. */
+  .ps-actions{display:flex;flex-direction:column;gap:10px;padding-bottom:8px;}
   .ps-btn{
     width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;
     cursor:pointer;border:1px solid var(--line);background:var(--surface-2);color:var(--text);
@@ -542,7 +553,6 @@
   .ps-btn:active{transform:scale(0.99);}
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
   .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
-  .ps-far{font-size:13px;color:var(--text-dim);line-height:1.4;}
   /* #18 — location row: address when we have one, coords when we don't. Plain
      text plus a copy icon — no background or border, because the filled surface
      read as a tappable button and competed with the real actions below it.
@@ -2339,6 +2349,17 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
 const DISCOVER_FALLOFF_M = 2500; // a Discover Local spot this far from you gets swapped for a fresh nearby one
 const SEARCH_HERE_DIST_M = 600; // tune: lower = more eager, higher = calmer
 function huntAnchor(){
+  /* #59 (correction) — the centroid is the right anchor ONLY when content is
+     deliberately anchored somewhere other than you. In the ordinary case it is
+     exactly wrong: with real OSM places blended in, the points spread across the
+     whole tile, so the centroid routinely sits several hundred metres off your
+     real position — and SEARCH_HERE_DIST_M is only 600 m. Recentring landed the
+     map precisely on you and the drift test STILL read as drifted.
+     This is the load-bearing half. The remove('show') added to recenterMap() is
+     a no-op on its own, because centerOnPlayer() setViews inside a
+     requestAnimationFrame and the moveend it fires re-runs this function a frame
+     later. Browse/search keep the centroid — #8 widened that on purpose. */
+  if(!state.browsingLocation && !state.searchedArea && state.me) return state.me;
   const h = state.currentHunt;
   if(h && h.points && h.points.length){
     let la=0, ln=0;
@@ -2353,6 +2374,13 @@ function huntAnchor(){
 function maybeShowSearchHere(){
   const btn = document.getElementById('search-here-btn');
   if(!btn) return;
+  /* #59 — follow mode means "the view is tracking me," which is definitionally
+     not a drifted view. dragstart already clears followMe, so the pill returns
+     the instant you pan. Belt to the anchor fix's braces, and it is what makes
+     the recenter case correct even before the rAF resolves. */
+  if(state.followMe && !state.browsingLocation && !state.searchedArea){
+    btn.classList.remove('show'); return;
+  }
   const anchor = huntAnchor();
   // Was also suppressed whenever state.browsingLocation was set, which meant
   // that once you searched your way into another city you were stuck with that
@@ -3780,7 +3808,12 @@ function recenterMap(){
     if(state.me) regenerateCurrentHuntAt(state.me);
     return; // regenerate -> setCurrentHunt already recenters
   }
-  centerOnPlayer();
+  // #60 — plain local recentre is the ONLY keep-zoom caller. Browse-exit above
+  // routes through exitLocationBrowseMode()'s own centerOnPlayer() and keeps the
+  // fixed frame: coming back from another city is a re-framing, not a nudge, and
+  // since #19 retired the banner this button is the only door out of browse mode,
+  // so landing on a known frame is the honest reset.
+  centerOnPlayer({keepZoom:true});
 }
 function toggleTilt(){
   state.is3D = !state.is3D;
@@ -3904,10 +3937,32 @@ function fitMapToHunt(hunt){
 }
 /* You are always the center of the map — pins come and go around you based on
    proximity, rather than the map ever reframing itself to show "everything." */
-function centerOnPlayer(){
+function centerOnPlayer(opts){
   if(!state.leafletMap) return;
   const center = state.browsingLocation || state.me;
   if(!center) return;
+  /* #60 — position and zoom are two different requests, and this button used to
+     answer both: zoom into a block, press locate, and you got your position back
+     at the cost of the zoom you chose. Keep-zoom is passed ONLY from
+     recenterMap()'s plain local branch.
+     Three things are deliberately skipped on this path, and the last is the trap:
+       - the zoom computation: there is no zoom to compute, so panTo is enough
+         and is smoother than setView;
+       - invalidateSize + requestAnimationFrame: that dance exists solely to
+         measure the container BEFORE computing a zoom;
+       - setMinZoom: this is the trap. The floor below is targetZoom-2, derived
+         from a real framing. Deriving it from wherever the user happens to be
+         zoomed IN to would ratchet the floor up with them — zoom to a street,
+         tap locate, and you can no longer pinch back out to the neighbourhood.
+         Leave the floor wherever the last real framing set it.
+     _programmaticViewChange is also NOT set here, on purpose: it is only ever
+     cleared inside the zoomend handler, and a panTo with no zoom change fires no
+     zoomend — so setting it would leave a stuck flag that swallows the snap-back
+     on the user's next genuine pinch. */
+  if(opts && opts.keepZoom){
+    state.leafletMap.panTo([center.lat, center.lng]);
+    return;
+  }
   // The map container may have just become visible this same tick (e.g. switching from
   // Explore to Map) and not finished resizing yet — computing zoom against a stale
   // container size produces a way-too-tight result. Force a resize read, then wait a
@@ -4688,7 +4743,12 @@ function fillPinSheet(t){
   const cat = PIN_CAT_LABEL[t.category] || 'Spot';
   const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
   const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
-  const statusTxt = t.found ? 'Captured' : (inRange ? 'In range' : 'Not captured');
+  /* #61(a) — "Too far", not "Not captured". With the .ps-far sentence gone this
+     chip carries the whole out-of-range message, and "Not captured" states the
+     wrong fact: it describes your history when what you need is the reason the
+     button is missing. The distance sits immediately to its left, so the chip
+     only has to name the cause, not quantify it. */
+  const statusTxt = t.found ? 'Captured' : (inRange ? 'In range' : 'Too far');
   const meta = [distTxt, cat, statusTxt].filter(Boolean)
     .map(p=>`<span>${escapeHtml(p)}</span>`).join('<i class="ps-div"></i>');
 
@@ -4702,14 +4762,17 @@ function fillPinSheet(t){
     actions += `<div class="ps-found">✓ Captured — added to your passport</div>`;
   } else if(inRange){
     actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
-  } else if(typeof t.dist === 'number'){
-    // Never silently hide the action. All three capture paths used to just omit or
-    // disable the button out of range, so a user standing at the door got silence
-    // and learned nothing. Saying the number makes the radius read as physics
-    // rather than as a bug. (#51)
-    const needFt = Math.round(effectiveCaptureRange() * 3.28084);
-    actions += `<div class="ps-far">Get within ${needFt} ft to capture — you're ${escapeHtml(fmtDist(t.dist))} away</div>`;
   }
+  /* #61(a) — the .ps-far line ("Get within X ft to capture") is deleted here.
+     RECORD THIS AS A REVERSAL OF #51, NOT AS DRIFT. #51's argument was that all
+     three capture paths hid or disabled the button out of range and explained
+     nothing, so a user standing at the door got silence. That argument is now
+     weaker IN THIS ONE PLACE, because the meta row directly above already renders
+     `distance · category · Too far` — the sheet stated both facts and then
+     restated them in a sentence, on the surface #36 fought to densify.
+     The identical copy in the capture toast is deliberately KEPT: that is the
+     path where nothing else on screen explains the failure, and it is the case
+     #51 was really about. Deleting both would reintroduce the silence. */
   actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>`;
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   document.getElementById('pin-sheet-expand').innerHTML =
