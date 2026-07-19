@@ -3182,6 +3182,47 @@ function migrateTimestampedProgress(){
   return changed;
 }
 
+/* #4/#5 — capture telemetry is EVIDENCE WITH AN EXPIRY, not history.
+
+   The distinction that makes this cheap: foundMeta's other fields (name, lat,
+   lng, mode) are user-facing content — they draw the pin and fill the passport,
+   which is why #40c insisted on recording them. `cap` is none of that. Nothing
+   renders it. It exists solely to answer a question nobody is asking yet, so it
+   gets a TTL and the capture itself is left completely untouched.
+
+   `sim` survives permanently: it is one boolean, it is the ABSENCE of location
+   data rather than location data, and it is the flag that matters most. Net
+   effect after 30 days is that #4 added a single boolean to what this app
+   permanently stores about a user's movements — that is the answer that clears
+   #5's objection to widening capture records at all.
+
+   Velocity checking (#4 phase 2) is unaffected by pruning: it compares only
+   CONSECUTIVE captures, and foundAt[id] — which predates this work and is not
+   new data — still anchors the previous one after cap.t is gone.
+
+   No determinable timestamp -> prune. Data that cannot be aged cannot be
+   justified as retained. */
+const CAP_TELEMETRY_TTL_MS = 30 * 24 * 3600 * 1000;
+function pruneCaptureTelemetry(){
+  const cutoff = Date.now() - CAP_TELEMETRY_TTL_MS;
+  let changed = false;
+  Object.values(state.progress || {}).forEach(p=>{
+    if(!p || !p.foundMeta) return;
+    Object.keys(p.foundMeta).forEach(id=>{
+      const meta = p.foundMeta[id], c = meta && meta.cap;
+      if(!c || c.pruned) return;
+      const t = (typeof c.t === 'number') ? c.t
+              : (p.foundAt && typeof p.foundAt[id] === 'number' ? p.foundAt[id] : null);
+      if(t !== null && t > cutoff) return;
+      // `pruned` distinguishes "aged out" from "never recorded" (no v at all).
+      meta.cap = { v: c.v, sim: !!c.sim, pruned: true };
+      changed = true;
+    });
+  });
+  if(changed) saveProgress(); // canPersist-guarded, same as the migration above
+  return changed;
+}
+
 async function loadPersonal(quiet){
   await loadKey('progress',
     v=>{ state.progress = v ? JSON.parse(v) : {}; },
@@ -3303,6 +3344,7 @@ function notePersistenceIssue(e){
 async function init(){
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
+  pruneCaptureTelemetry(); // #4/#5 — after the migration, so it sees final hunt keys
   await loadMyGems();
   await loadApprovedGems();
   renderMyHunts();
@@ -5098,7 +5140,34 @@ async function attemptMarkFound(){
       // plot. desc is carried for the same reason — cheap now, unrecoverable later.
       lat: target.lat,
       lng: target.lng,
-      desc: target.desc || ''
+      desc: target.desc || '',
+      /* #4 — capture provenance. RECORDED, NEVER JUDGED HERE. The accuracy
+         reading exists only at this instant and cannot be reconstructed later;
+         the detection rules can be written any afternoon. That asymmetry is the
+         whole reason this ships before there is anything to cheat for — the same
+         argument as #40c above, where capture is the only moment the coords exist.
+
+         `sim` MUST be carried separately. onLocation() sets meAccuracy = 0 for
+         simulate-mode, effectiveCaptureRange() reads 0 as "no data" via its
+         acc<=0 guard, and logging that as an accuracy figure would record a
+         FLAWLESS FIX on the one capture guaranteed to be fake. Simulate-mode is
+         itself the cheapest attack on the app — enableSimulateOnClick() fires
+         whenever geolocation is denied, so deny permission, tap the map, capture.
+         state.simulating is set once and never cleared, so this flag is
+         session-scoped and deliberately conservative.
+
+         `v` distinguishes "captured before telemetry existed" from "telemetry
+         missing" — needed the day this migrates to a server-authoritative table.
+         See pruneCaptureTelemetry(): everything here except v/sim is stripped
+         after 30 days. */
+      cap: {
+        v: 1,
+        acc:   state.simulating ? null : state.meAccuracy,
+        sim:   !!state.simulating,
+        dist:  Math.round(dist),
+        range: Math.round(captureRange),
+        t:     Date.now()   // client clock — untrusted, kept for ordering only
+      }
     };
     await saveProgress();
     if(!state.hasCapturedOnce){
