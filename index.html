@@ -2714,7 +2714,15 @@ function buildPointsForKey(key, base){
    Captures made before #40c have no lat/lng and are SKIPPED, not guessed at.
    A captured pin at an invented coordinate is worse than an absent one — the
    same call #15 made about pinning trails at a bbox centre. */
-const CAPTURED_INJECT_RADIUS_M = 5000;
+/* Deliberately DERIVED, not a second number. REAL_INCLUDE_RADIUS_M already
+   answers "how far can a place be and still be on my map"; giving captures a
+   tighter answer of their own produced arbitrary behaviour in the gap between
+   the two — a captured place 7km out reappeared if the blend happened to
+   return it and vanished if it didn't, for a reason invisible to the user.
+   Live repro that caught this: a search 9.4km from home surfaced three
+   captured spots via the blend, which the injection radius would have refused
+   to restore on its own. If the blend radius moves, this moves with it. */
+const CAPTURED_INJECT_RADIUS_M = REAL_INCLUDE_RADIUS_M;
 const CAPTURED_INJECT_MAX = 40;
 const CAPTURED_TWIN_M = 150;
 function injectCapturedPins(hunt, base){
