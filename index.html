@@ -1368,19 +1368,40 @@
       <div id="auth-brand" class="display">Local<span>y</span></div>
       <p id="auth-tagline">Ask a local. Discover anywhere.</p>
 
-      <label class="auth-label" for="auth-email">Email</label>
-      <input id="auth-email" class="auth-input" type="email" autocomplete="email" placeholder="you@example.com" spellcheck="false">
+      <!-- #2 — four modes share this one card: login / signup / forgot / reset.
+           setAuthMode() is the single place that decides what is visible; every
+           field below is addressed by id there, so nothing is hidden by CSS
+           alone and there is no second screen to keep in sync. -->
+      <div id="auth-email-row">
+        <label class="auth-label" for="auth-email">Email</label>
+        <input id="auth-email" class="auth-input" type="email" autocomplete="email" placeholder="you@example.com" spellcheck="false">
+      </div>
 
-      <label class="auth-label" for="auth-password">Password</label>
-      <input id="auth-password" class="auth-input" type="password" autocomplete="current-password" placeholder="At least 6 characters">
+      <div id="auth-password-row">
+        <label class="auth-label" id="auth-password-label" for="auth-password">Password</label>
+        <input id="auth-password" class="auth-input" type="password" autocomplete="current-password" placeholder="At least 6 characters">
+      </div>
+
+      <div id="auth-password2-row" class="auth-hidden">
+        <label class="auth-label" for="auth-password2">Confirm new password</label>
+        <input id="auth-password2" class="auth-input" type="password" autocomplete="new-password" placeholder="Type it again">
+      </div>
 
       <button id="auth-submit" class="auth-btn">Log in</button>
 
       <div id="auth-msg"></div>
 
+      <div id="auth-forgot-row">
+        <button id="auth-forgot-btn" type="button">Forgot password?</button>
+      </div>
+
       <div id="auth-switch">
         <span id="auth-switch-text">New here?</span>
         <button id="auth-switch-btn" type="button">Create an account</button>
+      </div>
+
+      <div id="auth-back-row" class="auth-hidden">
+        <button id="auth-back-btn" type="button">Back to log in</button>
       </div>
     </div>
   </div>
@@ -1424,6 +1445,14 @@
   #auth-msg.err{ display:block; color:#f0a9a4; }
   #auth-msg.ok{ display:block; color:#b9dcae; }
   #auth-switch{ margin-top:20px; text-align:center; font-size:13px; color:var(--text-dim); }
+  .auth-hidden{ display:none !important; }
+  #auth-forgot-row{ margin-top:14px; text-align:center; }
+  #auth-back-row{ margin-top:16px; text-align:center; }
+  #auth-forgot-btn, #auth-back-btn{
+    background:none; border:none; color:var(--text-dim);
+    font-weight:600; font-size:13px; cursor:pointer; font-family:inherit;
+    padding:4px; text-decoration:underline;
+  }
   #auth-switch-btn{
     background:none; border:none; color:var(--orange);
     font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;
@@ -1663,14 +1692,64 @@ window.storage = demoBypassActive() ? memStorage : mirroredStorage;
 /* =========================================================
    AUTH
    ========================================================= */
-let authMode = 'login'; // 'login' | 'signup'
+let authMode = 'login'; // 'login' | 'signup' | 'forgot' | 'reset'
 
+/* #2 — where a recovery link lands. We append our OWN marker rather than
+   reading Supabase's, because the SDK's recovery URL format differs between
+   the implicit flow (`#type=recovery`) and PKCE (`?code=`, no marker at all),
+   and the CDN tag `@supabase/supabase-js@2` is an unpinned alias that can move
+   between them without notice — the same class of bug as item 3(a). A param we
+   write ourselves is flow-agnostic and readable synchronously at boot, before
+   any await, so nothing depends on SDK event ordering.
+   REQUIRES: this URL in Supabase → Authentication → URL Configuration →
+   Redirect URLs, or the redirect silently falls back to Site URL, the marker
+   is lost, and the backdoor described below comes back. */
+const AUTH_REDIRECT_BASE = location.origin + location.pathname;
+const RESET_REDIRECT = AUTH_REDIRECT_BASE + '?mode=reset';
+function resetLinkActive(){
+  try{ return new URLSearchParams(location.search).get('mode') === 'reset'; }
+  catch(e){ return false; }
+}
+function clearResetParam(){
+  try{ history.replaceState(null, '', AUTH_REDIRECT_BASE); }catch(e){}
+}
+
+function show(id, on){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('auth-hidden', !on);
+}
 function setAuthMode(mode){
   authMode = mode;
-  document.getElementById('auth-submit').textContent = mode==='login' ? 'Log in' : 'Create account';
-  document.getElementById('auth-switch-text').textContent = mode==='login' ? 'New here?' : 'Already have an account?';
-  document.getElementById('auth-switch-btn').textContent = mode==='login' ? 'Create an account' : 'Log in';
-  document.getElementById('auth-password').setAttribute('autocomplete', mode==='login' ? 'current-password' : 'new-password');
+  const submit = document.getElementById('auth-submit');
+  const pw     = document.getElementById('auth-password');
+
+  submit.textContent =
+    mode==='login'  ? 'Log in' :
+    mode==='signup' ? 'Create account' :
+    mode==='forgot' ? 'Send reset link' :
+                      'Set new password';
+
+  // Email is meaningless on the reset screen — the link already identifies you.
+  show('auth-email-row',     mode!=='reset');
+  show('auth-password-row',  mode!=='forgot');
+  show('auth-password2-row', mode==='reset');
+  show('auth-forgot-row',    mode==='login');
+  show('auth-switch',        mode==='login' || mode==='signup');
+  // No escape hatch out of 'reset': leaving it half-done is what strands people.
+  show('auth-back-row',      mode==='forgot');
+
+  document.getElementById('auth-password-label').textContent =
+    mode==='reset' ? 'New password' : 'Password';
+  pw.setAttribute('autocomplete', mode==='login' ? 'current-password' : 'new-password');
+
+  if(mode==='login' || mode==='signup'){
+    document.getElementById('auth-switch-text').textContent =
+      mode==='login' ? 'New here?' : 'Already have an account?';
+    document.getElementById('auth-switch-btn').textContent =
+      mode==='login' ? 'Create an account' : 'Log in';
+  }
+
+  if(mode!=='reset'){ pw.value = ''; document.getElementById('auth-password2').value = ''; }
   authMsg('', '');
 }
 function authMsg(text, kind){
@@ -1682,26 +1761,71 @@ function wireAuthUI(){
   document.getElementById('auth-switch-btn').addEventListener('click', ()=>{
     setAuthMode(authMode==='login' ? 'signup' : 'login');
   });
+  document.getElementById('auth-forgot-btn').addEventListener('click', ()=> setAuthMode('forgot'));
+  document.getElementById('auth-back-btn').addEventListener('click', ()=> setAuthMode('login'));
   document.getElementById('auth-submit').addEventListener('click', submitAuth);
-  document.getElementById('auth-password').addEventListener('keydown', e=>{
-    if(e.key==='Enter') submitAuth();
+  ['auth-email','auth-password','auth-password2'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown', e=>{
+      if(e.key==='Enter') submitAuth();
+    });
   });
 }
 async function submitAuth(){
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
+  const password2 = document.getElementById('auth-password2').value;
   const btn = document.getElementById('auth-submit');
-  if(!email || !password){ authMsg("Enter your email and password."); return; }
-  if(password.length < 6){ authMsg("Password must be at least 6 characters."); return; }
+
+  if(authMode==='forgot'){
+    if(!email){ authMsg("Enter your email."); return; }
+  } else if(authMode==='reset'){
+    if(password.length < 6){ authMsg("Password must be at least 6 characters."); return; }
+    if(password !== password2){ authMsg("Those two passwords don't match."); return; }
+  } else {
+    if(!email || !password){ authMsg("Enter your email and password."); return; }
+    if(password.length < 6){ authMsg("Password must be at least 6 characters."); return; }
+  }
 
   btn.disabled = true;
   const original = btn.textContent;
-  btn.textContent = authMode==='login' ? 'Logging in…' : 'Creating account…';
+  btn.textContent =
+    authMode==='login'  ? 'Logging in…' :
+    authMode==='signup' ? 'Creating account…' :
+    authMode==='forgot' ? 'Sending…' :
+                          'Saving…';
   authMsg('', '');
 
   try{
+    if(authMode==='forgot'){
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: RESET_REDIRECT });
+      /* #2 — deliberately the same message whether or not the account exists.
+         Confirming it would leak which emails are registered, and signUp already
+         refuses to leak that (Supabase returns an obfuscated user for an address
+         already in use), so being honest here would undo the protection there. */
+      if(error && error.status !== 400){ authMsg(error.message); return; }
+      authMsg("If that email has an account, a reset link is on its way. It expires in an hour.", 'ok');
+      return;
+    }
+
+    if(authMode==='reset'){
+      const { error } = await sb.auth.updateUser({ password });
+      if(error){ authMsg(error.message); return; }
+      clearResetParam();
+      state._recovery = false;
+      const { data } = await sb.auth.getSession();
+      if(data.session){ onAuthed(data.session); }
+      else { setAuthMode('login'); authMsg("Password updated. Log in with your new password.", 'ok'); }
+      return;
+    }
+
     if(authMode==='signup'){
-      const { data, error } = await sb.auth.signUp({ email, password });
+      /* #2 — emailRedirectTo pinned explicitly. Without it the confirmation link
+         resolves against whatever Site URL happens to be set, which is the exact
+         footgun in the Auth URLs row of the roadmap header — and item 50's
+         rename is going to move that value. */
+      const { data, error } = await sb.auth.signUp({
+        email, password, options: { emailRedirectTo: AUTH_REDIRECT_BASE }
+      });
       if(error){ authMsg(error.message); return; }
       if(!data.session){
         // Email confirmation is turned on — no session yet.
@@ -1749,8 +1873,53 @@ async function checkAuthAndBoot(){
   }
   wireAuthUI();
   setAuthMode('login');
+
+  /* #2 — THE BACKDOOR THIS CLOSES. supabase-js runs with detectSessionInUrl on
+     by default, so a recovery link used to be consumed silently during init and
+     getSession() below would hand onAuthed() a perfectly valid session. The user
+     landed inside the app, logged in, never asked for a new password — so the
+     password they had forgotten was still the password, and the next visit
+     locked them out again. A reset link was a one-time backdoor that fixed
+     nothing. Detect it BEFORE the session check and return without booting. */
+  sb.auth.onAuthStateChange((event)=>{
+    // Belt-and-braces for the implicit flow, where this fires even if the
+    // ?mode=reset marker was lost to a misconfigured Redirect URL allow list.
+    if(event === 'PASSWORD_RECOVERY'){
+      state._recovery = true;
+      document.getElementById('auth-overlay').classList.remove('hidden');
+      setAuthMode('reset');
+    }
+  });
+
+  if(resetLinkActive()){
+    state._recovery = true;
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    setAuthMode('reset');
+    try{
+      const { data } = await sb.auth.getSession();
+      if(!data.session){
+        // Recovery links are single-use and short-lived; say so instead of
+        // rendering a password form that cannot possibly save.
+        state._recovery = false;
+        clearResetParam();
+        setAuthMode('login');
+        authMsg("That reset link has expired or was already used. Request a new one.");
+      }
+    }catch(e){
+      state._recovery = false;
+      clearResetParam();
+      setAuthMode('login');
+      authMsg("Couldn't verify that reset link. Check your connection and try again.");
+    }
+    return; // never boot the app off a recovery link
+  }
+
   try{
     const { data } = await sb.auth.getSession();
+    if(state._recovery){
+      document.getElementById('auth-overlay').classList.remove('hidden');
+      return;
+    }
     if(data.session){
       onAuthed(data.session);        // already logged in from a previous visit
     } else {
