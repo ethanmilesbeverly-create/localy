@@ -169,6 +169,69 @@
     margin:0 0 22px;
   }
 
+  /* ---------- #81 Settings surface ----------
+     Reached ONLY from the gear on the passport. Deliberately NOT a bottom-nav
+     tab: five tabs is already the practical ceiling on a phone, and settings is
+     a place you visit twice a year, not a destination.
+
+     The gear sits in a flex row with the page title rather than absolutely
+     positioned, so it cannot collide with the title on a long word or a large
+     text-size setting. */
+  .title-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin:4px 0 6px;
+  }
+  .title-row h1.page-title{margin:0;}
+  .icon-btn{
+    flex-shrink:0;
+    width:38px;height:38px;border-radius:11px;
+    background:var(--surface);border:1px solid var(--line);
+    color:var(--text-dim);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-family:inherit;padding:0;
+  }
+  .icon-btn:active{background:var(--surface-2);}
+  .icon-btn svg{width:19px;height:19px;}
+  .settings-section{
+    margin:0 0 26px;
+  }
+  .settings-section > h2{
+    font-size:12px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--text-dim);margin:0 0 10px;font-weight:700;
+  }
+  .settings-card{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);padding:14px 15px;
+  }
+  .settings-card p{margin:0 0 10px;font-size:13px;line-height:1.55;color:var(--text-dim);}
+  .settings-card p:last-child{margin-bottom:0;}
+  .settings-card .val{color:var(--text);font-weight:600;word-break:break-all;}
+  .data-list{margin:0;padding:0 0 0 17px;font-size:13px;line-height:1.6;color:var(--text-dim);}
+  .data-list li{margin-bottom:5px;}
+  .data-list li:last-child{margin-bottom:0;}
+  .settings-btn{
+    width:100%;background:none;border:1px solid var(--line);color:var(--text-dim);
+    border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;
+    cursor:pointer;font-family:inherit;
+  }
+  .settings-btn.danger{border-color:rgba(192,82,76,0.5);color:var(--danger);}
+  .settings-btn:disabled{opacity:0.5;cursor:default;}
+  /* Two-step confirm, and the two buttons are deliberately NOT in the same
+     place as the button that opened them — a destructive action confirmed by
+     tapping the same pixel twice is confirmed by a double-tap. */
+  .confirm-panel{
+    margin-top:10px;border:1px solid rgba(192,82,76,0.5);border-radius:11px;
+    padding:13px;background:rgba(192,82,76,0.08);
+  }
+  .confirm-panel p{margin:0 0 12px;font-size:12.5px;line-height:1.55;color:var(--text);}
+  .confirm-row{display:flex;gap:9px;}
+  .confirm-row button{
+    flex:1;border-radius:9px;padding:11px;font-size:13px;font-weight:700;
+    cursor:pointer;font-family:inherit;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--text);
+  }
+  .confirm-row button.go{background:var(--danger);border-color:var(--danger);color:#fff;}
+
   /* ---------- Mode cards ---------- */
   .mode-grid{
     display:grid;
@@ -1324,14 +1387,83 @@
 
   <!-- PASSPORT -->
   <div class="screen" id="screen-passport">
-    <h1 class="page-title">Passport</h1>
+    <!-- #81 — the gear is the ONLY route to settings. It is not a nav tab. -->
+    <div class="title-row">
+      <h1 class="page-title">Passport</h1>
+      <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
     <p class="page-sub">Every spot you find earns a stamp here — start collecting.</p>
     <div class="stat-row">
       <div class="stat-box"><div class="num" id="stat-found">0</div><div class="lbl">Stamps</div></div>
       <div class="stat-box"><div class="num" id="stat-walked">0 m</div><div class="lbl">Traveled</div></div>
     </div>
     <div id="achievements-section"></div>
-    <button onclick="logout()" style="margin-top:26px;width:100%;background:none;border:1px solid var(--line);color:var(--text-dim);border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;">Log out</button>
+  </div>
+
+  <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
+       passport gear, left by the back arrow. See openSettings() for why this
+       does not go through setTab(). -->
+  <div class="screen" id="screen-settings">
+    <div class="title-row">
+      <h1 class="page-title">Settings</h1>
+      <button class="icon-btn" onclick="closeSettings()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">Your account and what this app keeps.</p>
+
+    <div class="settings-section">
+      <h2>Account</h2>
+      <div class="settings-card">
+        <p>Signed in as <span class="val" id="settings-email">—</span></p>
+      </div>
+      <button class="settings-btn" style="margin-top:10px;" onclick="logout()">Log out</button>
+    </div>
+
+    <div class="settings-section">
+      <h2>Your data</h2>
+      <div class="settings-card">
+        <p>What's kept in your account:</p>
+        <ul class="data-list">
+          <li>The spots you've captured, and <strong>where you were standing</strong> when you captured them</li>
+          <li>How far you've traveled, and the stamps you've earned</li>
+          <li>Guides you've made or saved</li>
+          <li>Gems you've submitted</li>
+        </ul>
+        <p style="margin-top:11px;">Only you can read your capture history. It is never shown to another user.</p>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2>Clear my progress</h2>
+      <div class="settings-card">
+        <p>Erases your captures, capture locations, travel distance and stamps — everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Your account stays open, and guides you made and gems you submitted are kept.</p>
+      </div>
+      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Clear my progress</button>
+      <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
+        <p>This permanently erases every capture and stamp on your account. There is no undo and no backup.</p>
+        <div class="confirm-row">
+          <button onclick="cancelClearProgress()">Keep it</button>
+          <button class="go" id="clear-progress-go" onclick="clearMyProgress()">Erase everything</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2>About</h2>
+      <div class="settings-card">
+        <p>Localy — <span class="val" id="settings-version">—</span></p>
+        <p>Ask a local.</p>
+      </div>
+    </div>
   </div>
 
   <!-- AR OVERLAY -->
@@ -3584,6 +3716,118 @@ function setTab(id){
   if(id==='screen-modes'){
     updateExploreSelectionIcons();
   }
+}
+
+/* =========================================================
+   #81 — SETTINGS SURFACE
+   ---------------------------------------------------------
+   Item 5 (location privacy) has read as "decide it" for four passes while
+   never becoming buildable, because a privacy stance, a retention statement
+   and a delete control need a screen and there wasn't one. Items 23 and 29
+   both recorded needing this surface; item 5 needed it and never said so.
+
+   DELIBERATELY NOT ROUTED THROUGH setTab(). setTab toggles .nav-btn.active by
+   dataset.screen, and no nav button carries 'screen-settings' — so going
+   through it would darken every button in the footer and the app would look
+   broken while you were in here. showScreen() alone leaves Passport lit, which
+   is the truth: settings is a room inside the passport, not a sixth tab.
+
+   THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
+   practical ceiling on a phone. */
+const APP_VERSION = '2026.07.20';
+
+function openSettings(){
+  const u = state.user || {};
+  document.getElementById('settings-email').textContent = u.email || 'unknown';
+  document.getElementById('settings-version').textContent = APP_VERSION;
+  cancelClearProgress(); // never open with a destructive confirm already armed
+  showScreen('screen-settings');
+}
+function closeSettings(){
+  cancelClearProgress();
+  setTab('screen-passport');
+}
+function askClearProgress(){
+  document.getElementById('clear-progress-confirm').style.display = 'block';
+  document.getElementById('clear-progress-btn').style.display = 'none';
+}
+function cancelClearProgress(){
+  const c = document.getElementById('clear-progress-confirm');
+  const b = document.getElementById('clear-progress-btn');
+  if(c) c.style.display = 'none';
+  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Clear my progress'; }
+}
+
+/* THE KEYS THIS OWNS. Enumerated here rather than derived, because the cost of
+   the two mistakes is asymmetric: a key missing from this list survives a wipe
+   the user was told was total, which is the failure that matters. Cross-check
+   against loadPersonal() when a key is added there. 'my-hunts' and
+   'gem-submissions' are deliberately absent — guides and submissions are
+   content, not capture history, and the on-screen copy says so. */
+const PROGRESS_KEYS_TO_CLEAR = [
+  ['progress',              ()=>JSON.stringify({})],
+  ['stats',                 ()=>JSON.stringify({ totalWalkedMeters: 0 })],
+  ['unlocked-achievements', ()=>JSON.stringify([])],
+  ['has-captured-once',     ()=>JSON.stringify(false)],
+  /* 'null' tombstone rather than a delete: there is NO window.storage.delete in
+     this environment (#4 phase 2 found this the expensive way — the call threw,
+     a silent catch swallowed it, and a stale coordinate survived indefinitely).
+     loadPersonal's `v ? JSON.parse(v) : null` already reads this back as null. */
+  ['capture-anchor',        ()=>'null'],
+];
+
+async function clearMyProgress(){
+  /* BLOCKED ON A FAILED LOAD, and this is the #1a rule applied to a deliberate
+     action rather than an accidental one. If a key failed to read, in-memory
+     state is a fallback default, not the user's data — so "clearing" it would
+     either be a no-op the user believes worked, or would push empty JSON over a
+     real server row we never successfully read. Both are worse than refusing. */
+  const failed = [...loadFailedKeys()];
+  if(failed.length){
+    showToast("Can't clear right now — your data hasn't loaded. Reconnect and try again.");
+    cancelClearProgress();
+    return;
+  }
+
+  const btn = document.getElementById('clear-progress-go');
+  if(btn){ btn.disabled = true; btn.textContent = 'Erasing…'; }
+
+  /* ORDER IS LOAD-BEARING: the local mirror and its pending queue go FIRST.
+     #1b flushes queued writes on 'online' and on visibilitychange, and
+     flushPendingWrites() explicitly drains anything queued by a PREVIOUS
+     session. Wipe state without dropping the queue and a pre-wipe write lands
+     on top the next time the app is backgrounded and reopened — the stamps come
+     back, hours later, with no action from the user. Same ordering trap as #73
+     in captureFromSheet() and #4 phase 2's anchor. */
+  purgeMirror();
+
+  // In-memory next, so the UI cannot re-render stale data mid-write.
+  state.progress = {};
+  state.totalWalkedMeters = 0;
+  state.unlockedAchievements = new Set();
+  state.pendingAchievementPopups = [];
+  state.hasCapturedOnce = false;
+  state.captureAnchor = null;
+  state.lastWalkPos = null;
+  state.lastWalkTime = null;
+
+  let allWritten = true;
+  for(const [key, emptyValue] of PROGRESS_KEYS_TO_CLEAR){
+    try{ await window.storage.set(key, emptyValue(), false); }
+    catch(e){ allWritten = false; }
+  }
+
+  renderPassport();
+  refreshTargetsUI();
+  cancelClearProgress();
+
+  /* Honest about the offline case rather than claiming a server wipe we did not
+     observe. #1b queues the empty writes and flushes them on reconnect, so the
+     erase is real — it just is not finished yet, and saying "done" would be a
+     claim about a machine we cannot currently reach. */
+  showToast(allWritten
+    ? 'Progress cleared.'
+    : "Cleared on this phone — the rest syncs when you're back online.");
 }
 function fixMapSize(){
   if(!state.leafletMap) return;
