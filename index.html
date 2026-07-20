@@ -1441,7 +1441,7 @@
       </div>
     </div>
 
-    <div class="settings-section">
+    <div class="settings-section" id="clear-data-section" style="display:none;">
       <h2>Clear my data</h2>
       <div class="settings-card">
         <p>Erases everything you've built up in Localy — your captures and the locations they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
@@ -3735,13 +3735,43 @@ function setTab(id){
 
    THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
    practical ceiling on a phone. */
-const APP_VERSION = '2026.07.20d';
+const APP_VERSION = '2026.07.20e';
+
+/* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
+   Flip to true only when "Delete my account" ships beside it.
+
+   Why it is hidden rather than deleted: clearMyProgress() and WIPE_KEYS are a
+   COMPONENT of account deletion, not a competitor to it. Removing a row from
+   auth.users does not clear user_state unless that FK carries ON DELETE
+   CASCADE — so whatever deletes an account has to run this wipe first, or every
+   capture coordinate is orphaned in the table forever with the account gone and
+   the location history still there. That is the precise record #5 exists to
+   prevent, and it would be invisible.
+
+   Why it is hidden rather than shipped: as scoped it erases everything EXCEPT
+   the account, which serves neither audience. Not a fresh start (submitted gems
+   and already-shared guide codes survive), not erasure (the email — the identity
+   #69 is about — survives). Two features were wearing one button: "Start over"
+   is a game affordance, "delete my data" is a privacy right. Putting the second
+   label on the first thing makes #5 LOOK answered on a settings screen while the
+   stance behind it does not exist — which is how #2's password reset came to sit
+   at 🟢 while being broken in the field for everyone outside the org.
+
+   Rejected alternative, recorded so it is not re-proposed: rename to "Start
+   over" and move it under a non-privacy heading. It works, but it ships a
+   second destructive control that account deletion then has to either absorb or
+   coexist with, and one honest control beats two overlapping ones. */
+const SHOW_CLEAR_MY_DATA = false;
 
 function openSettings(){
   const u = state.user || {};
   document.getElementById('settings-email').textContent = u.email || 'unknown';
   document.getElementById('settings-version').textContent = APP_VERSION;
   cancelClearProgress(); // never open with a destructive confirm already armed
+  /* Gated, not deleted — see SHOW_CLEAR_MY_DATA. Toggled here rather than left
+     to the inline style so flipping the constant is genuinely the only edit. */
+  const dataSection = document.getElementById('clear-data-section');
+  if(dataSection) dataSection.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
   showScreen('screen-settings');
 }
 function closeSettings(){
