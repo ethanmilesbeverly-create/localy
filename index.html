@@ -135,23 +135,37 @@
      OPAQUE ON PURPOSE. The pill above it is rgba(23,50,41,0.95) + backdrop
      blur, which is fine for one line of text but the same treatment on a
      5-row list sitting over bright map tiles is the #34 failure again —
-     a tint the map reads straight through. --surface is solid; the blur is
-     kept only so the edge against the pill doesn't look like a seam. */
+     a tint the map reads straight through. --surface is solid.
+
+     #88a — backdrop-filter REMOVED, and it was never doing anything. The
+     background is already opaque, so the blur had nothing to blur; it was
+     copied off the pill out of habit. On iOS Safari a backdrop-filter
+     composited together with an animation/transform on the same element is a
+     long-standing render bug — the layer promotes and paints EMPTY. Desktop
+     Chrome composites it correctly, so the element existed, had the right
+     size, and drew nothing, on phones only. Do not add it back for the sake
+     of matching the pill.
+
+     #88a — max-height raised so five results NEVER need to scroll. A
+     scrollable list is a list iOS treats as scroll-pending on touch, which is
+     what makes it fire pointercancel mid-tap (see attachPlaceSuggest). Five
+     rows plus the attribution line is ~360px; the cap is only a guard for
+     very short viewports now, not a normal-case constraint. */
   .place-suggest{
     display:none;
     position:absolute;
     top:calc(100% + 6px);left:0;right:0;
     z-index:20;
     background:var(--surface);
-    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
     border:1px solid var(--line);
     border-radius:var(--radius);
     box-shadow:0 8px 24px rgba(0,0,0,0.45);
     overflow:hidden;
-    max-height:min(52vh, 320px);
+    max-height:min(64vh, 420px);
     overflow-y:auto;
     overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
+    touch-action:manipulation;
   }
   .place-suggest.show{display:block;}
   .place-suggest-row{
@@ -162,6 +176,7 @@
     font-family:inherit;
     cursor:pointer;
     -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;   /* #88a — see .place-suggest */
   }
   .place-suggest-row + .place-suggest-row{
     border-top:1px solid var(--line);
@@ -204,11 +219,15 @@
   /* Hunt-builder host. .location-search-row is the flex wrapper around the
      input + Go button; the dropdown spans the whole row, button included. */
   .location-search-row{position:relative;}
+  /* #88a — transform removed from this keyframe. A transform plus a
+     compositing filter on the same element is the iOS blank-layer pairing;
+     the filter is gone now, but the transform is not worth the risk for 4px
+     of travel. Opacity alone still reads as "this appeared". */
   @media (prefers-reduced-motion: no-preference){
     .place-suggest{animation:placeSuggestIn .13s ease-out;}
     @keyframes placeSuggestIn{
-      from{opacity:0;transform:translateY(-4px);}
-      to{opacity:1;transform:translateY(0);}
+      from{opacity:0;}
+      to{opacity:1;}
     }
   }
   /* #34 — was rgba(216,166,58,0.15): a 15% tint the map read straight through,
@@ -4596,6 +4615,9 @@ function attachPlaceSuggest(inputId, onPick){
   function close(){
     st.open = false;
     st.active = -1;
+    st.results = [];   // #88a — belt to the commit guard's braces: a late
+                       // synthetic click after a committed pointerup finds
+                       // nothing to commit, independent of any timing window.
     list.classList.remove('show');
     list.innerHTML = '';
     input.setAttribute('aria-expanded', 'false');
@@ -4680,6 +4702,8 @@ function attachPlaceSuggest(inputId, onPick){
     clearTimeout(st.timer);
     const q = input.value.trim();
     st.failed = false;
+    lastCommitAt = 0;   // #88a — a new query is a new decision; don't let the
+                        // double-commit window swallow a fast second pick
     if(q.length < SUGGEST_MIN_CHARS){ close(); return; }
     st.timer = setTimeout(()=>run(q), SUGGEST_DEBOUNCE_MS);
   });
@@ -4718,10 +4742,42 @@ function attachPlaceSuggest(inputId, onPick){
     }
   });
 
-  /* pointerdown: keep focus (no keyboard flicker) and remember where the
-     finger went down. pointerup: commit only if it did not travel — a drag
-     that starts on a row is someone scrolling the list, not choosing. */
-  let downAt = null, downIdx = -1;
+  /* #88 — pointerdown: keep focus (no keyboard flicker, no reflow under the
+     finger) and remember where the finger went down. Commit on pointerup only
+     if it did not travel — a drag that starts on a row is someone scrolling
+     the list, not choosing.
+
+     #88a — THIS IS THE PART THAT FAILED ON PHONES AND NOT ON DESKTOP.
+     iOS Safari fires `pointercancel` when it decides an in-progress touch
+     belongs to a scroll gesture, and it decides that eagerly on any element
+     inside a scrollable box. The old handler treated pointercancel as "user
+     changed their mind" and threw the pending index away, so on a phone the
+     tap was cancelled before pointerup ever arrived and NOTHING in the list
+     was ever selectable. A mouse never fires pointercancel, which is exactly
+     why desktop looked fine.
+
+     Three changes, belt and braces, because one untestable-from-here fix is a
+     guess and three independent ones is a fix:
+       1. touch-action:manipulation in the CSS, so Safari stops holding the
+          touch open as a possible scroll in the first place.
+       2. pointercancel no longer discards the pending pick — it only clears
+          the drag origin. If a `click` follows, the pick still lands.
+       3. `click` is a parallel commit path, deduped against pointerup by a
+          token so a device that fires both cannot double-commit.
+     Every path funnels through commitByIndex(), so there is one place a
+     selection can happen regardless of which event won. */
+  let downAt = null, downIdx = -1, lastCommitAt = 0;
+  function commitByIndex(i){
+    if(i < 0 || !st.results[i]) return;
+    /* A device that fires BOTH pointerup and a synthetic click would otherwise
+       commit twice — first pick wins, second is swallowed. Time-based rather
+       than event-token based: pointer and mouse events carry timestamps from
+       different clocks on some browsers, so comparing them is not reliable. */
+    const now = Date.now();
+    if(now - lastCommitAt < 700) return;
+    lastCommitAt = now;
+    commit(st.results[i]);
+  }
   list.addEventListener('pointerdown', (e)=>{
     const row = e.target.closest('.place-suggest-row');
     if(!row) return;
@@ -4732,14 +4788,24 @@ function attachPlaceSuggest(inputId, onPick){
     syncActive();
   });
   list.addEventListener('pointerup', (e)=>{
-    if(downIdx < 0 || !downAt) return;
-    const moved = Math.abs(e.clientX - downAt.x) > 10 || Math.abs(e.clientY - downAt.y) > 10;
+    if(downIdx < 0) return;
+    const moved = downAt &&
+      (Math.abs(e.clientX - downAt.x) > 10 || Math.abs(e.clientY - downAt.y) > 10);
     const idx = downIdx;
     downAt = null; downIdx = -1;
     if(moved) return;
-    commit(st.results[idx]);
+    commitByIndex(idx);
   });
-  list.addEventListener('pointercancel', ()=>{ downAt = null; downIdx = -1; });
+  /* Deliberately does NOT clear downIdx — see the note above. */
+  list.addEventListener('pointercancel', ()=>{ downAt = null; });
+  list.addEventListener('click', (e)=>{
+    const row = e.target.closest('.place-suggest-row');
+    if(!row) return;
+    e.preventDefault();
+    const idx = parseInt(row.dataset.i, 10);
+    downAt = null; downIdx = -1;
+    commitByIndex(idx, 0);
+  });
 
   /* Tapping anywhere else closes it. Capture phase so a tap on the map, which
      Leaflet will happily swallow, still reaches us first. */
