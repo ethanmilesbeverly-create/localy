@@ -210,12 +210,13 @@
     line-height:1.4;
   }
   .place-suggest-status b{color:var(--text);font-weight:600;}
-  .place-suggest-attrib{
-    padding:7px 13px 8px;
-    border-top:1px solid var(--line);
-    font-size:10.5px;letter-spacing:0.04em;
-    color:var(--text-dim);opacity:0.75;
-  }
+  /* #91 — `.place-suggest-attrib` REMOVED from here. It read "Places from
+     OpenStreetMap" under every result list, which was the wrong wording in
+     the wrong place: OSMF's guidance puts the credit on the APPLICATION that
+     incorporates a geocoder, and explicitly says a group of geocoding results
+     need not carry attribution attached to the results. It also happened to
+     be the only OSM credit anywhere in the app, which is what made this worth
+     finding. Replaced by #map-attrib + the Credits section in Settings. */
   /* Hunt-builder host. .location-search-row is the flex wrapper around the
      input + Go button; the dropdown spans the whole row, button included. */
   .location-search-row{position:relative;}
@@ -628,6 +629,8 @@
   #screen-map.drawer-open #browsing-indicator,
   #screen-map.drawer-open #search-here-btn,
   #screen-map.sheet-open #search-here-btn,
+  #screen-map.drawer-open #map-attrib,
+  #screen-map.sheet-open #map-attrib,
   #screen-map.drawer-open #map-camera-btn{
     display:none;
   }
@@ -1231,6 +1234,70 @@
   }
   #search-here-btn.show{display:flex;}
   #search-here-btn svg{width:15px;height:15px;flex-shrink:0;}
+
+  /* ---------- #91: map corner credit ----------
+     The bottom of this map is crowded — #list-toggle-btn (left:14, 44px
+     circle), #locate-btn (right) and #map-camera-btn (centre) all occupy the
+     96px row, and #bottomnav is ~67px tall. This sits in the band BELOW all
+     of them and above the nav.
+
+     left:66px, not 14px, and that is the whole reason it fits. At 14px it is
+     directly under the list-toggle circle and the two bounding boxes overlap
+     by a pixel — measured, not guessed. Starting past the circle's right edge
+     (58px) removes the vertical constraint entirely, so the only neighbour
+     left is the nav below. If #list-toggle-btn ever changes size, this offset
+     is what needs rechecking.
+
+     It has a background rather than bare text ON PURPOSE — item 34 settled
+     that dim cream over unpredictable map tiles is unreadable, and a credit
+     nobody can read is not a credit. Small and low-contrast so it reads as a
+     footnote, which is what the guidance asks for: legible, not prominent. */
+  #map-attrib{
+    position:absolute;left:66px;
+    bottom:calc(71px + env(safe-area-inset-bottom));
+    z-index:500;
+    display:flex;align-items:center;gap:5px;
+    max-width:calc(100% - 80px);
+    padding:3px 9px;border-radius:999px;
+    background:rgba(23,50,41,0.92);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    font-family:inherit;font-size:9.5px;letter-spacing:0.03em;
+    line-height:1.4;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+  #map-attrib:active{background:var(--surface-2);}
+  #map-attrib svg{width:10px;height:10px;flex-shrink:0;opacity:0.8;}
+  /* Belt to the geometry's braces. #map-camera-btn's box reaches 3px into
+     this band, and it is the one element here that appears unpredictably
+     (whenever you walk into capture range), so a layout that is merely
+     *nearly* clear of it is not clear of it. Hidden while it shows, same
+     reasoning as the drawer and sheet rules above — the credit is a footnote
+     and the capture prompt is the reason the user opened the app. */
+  #screen-map.camera-ready #map-attrib{display:none;}
+
+  /* Credits list in Settings. Links are the point of this section — the
+     guidance asks that "OpenStreetMap" be reachable as a link to
+     openstreetmap.org/copyright — so they are underlined and in --text,
+     not styled down into the surrounding dim body copy. */
+  .credit-row{
+    margin:0 0 11px;font-size:13px;line-height:1.55;color:var(--text-dim);
+  }
+  .credit-row:last-child{margin-bottom:0;}
+  .credit-row strong{
+    display:block;color:var(--text);font-weight:600;
+    font-size:12px;letter-spacing:0.05em;text-transform:uppercase;
+    margin-bottom:2px;
+  }
+  .credit-link{
+    color:var(--text);text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .credit-link:active{color:var(--orange);}
 </style>
 </head>
 <body>
@@ -1450,6 +1517,15 @@
       </button>
     </div>
     <button id="tilt-toggle-btn" class="is-2d" onclick="toggleTilt()" aria-label="Toggle 3D view">2D</button>
+    <!-- #91 — the app's OSM/CARTO credit. Tapping opens Settings → Credits,
+         which is where the actual links live; this element is the "corner of
+         the map" placement the tile licence asks for, and the reachable link
+         is what OSMF's guidance asks for. Both halves are required; neither
+         works alone. -->
+    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      © OpenStreetMap · CARTO
+    </button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -1568,6 +1644,39 @@
           <button onclick="cancelClearProgress()">Keep it</button>
           <button class="go" id="clear-progress-go" onclick="clearMyProgress()">Erase everything</button>
         </div>
+      </div>
+    </div>
+
+    <!-- #91 — every third-party source in one place. Localy pulls OSM data
+         through THREE separate doors (tiles, place pins, geocoding) and the
+         obligation is one credit, not three, so they are listed together
+         rather than scattered next to each feature. Wikipedia is here for the
+         same reason: pin descriptions come from it and it was credited
+         nowhere. Keep this section in sync when a data source is added or
+         swapped — a provider change is a credits change. -->
+    <div class="settings-section" id="credits-section">
+      <h2>Credits &amp; licences</h2>
+      <div class="settings-card">
+        <p class="credit-row">
+          <strong>Map data</strong>
+          © <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors, available under the Open Database Licence (ODbL). The places you find here, and the addresses on them, come from map data that thousands of people surveyed and typed in by hand.
+        </p>
+        <p class="credit-row">
+          <strong>Map tiles</strong>
+          © <a class="credit-link" href="https://carto.com/" target="_blank" rel="noopener noreferrer">CARTO</a>, built from OpenStreetMap data.
+        </p>
+        <p class="credit-row">
+          <strong>Place search</strong>
+          <a class="credit-link" href="https://photon.komoot.io/" target="_blank" rel="noopener noreferrer">Photon</a> by Komoot, and <a class="credit-link" href="https://nominatim.openstreetmap.org/" target="_blank" rel="noopener noreferrer">Nominatim</a>. Both search OpenStreetMap data.
+        </p>
+        <p class="credit-row">
+          <strong>Place descriptions</strong>
+          Some come from <a class="credit-link" href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia</a>, under CC BY-SA.
+        </p>
+        <p class="credit-row">
+          <strong>Everything else</strong>
+          Gems are written by the people who submitted them. That part isn't borrowed from anywhere.
+        </p>
       </div>
     </div>
 
@@ -3907,6 +4016,29 @@ function openSettings(){
   if(dataSection) dataSection.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
   showScreen('screen-settings');
 }
+/* #91 — mirrors #map-camera-btn's visibility onto #screen-map so CSS can move
+   other furniture out of its way. Reads the button rather than recomputing
+   "am I in range?", because there are two places that decide that and a third
+   copy of the condition is a third thing to keep in sync. Call it after any
+   change to the button's .show class. */
+function syncCameraReadyClass(){
+  const btn = document.getElementById('map-camera-btn');
+  const screen = document.getElementById('screen-map');
+  if(!btn || !screen) return;
+  screen.classList.toggle('camera-ready', btn.classList.contains('show'));
+}
+/* #91 — the map corner credit's destination. Deliberately routes through
+   openSettings() rather than duplicating its setup, so the credits entry point
+   can never show a Settings screen with a stale email or an armed destructive
+   confirm. The scroll is deferred one frame because showScreen() sets
+   scrollTop = 0 on the way in, and scrolling before that lands nowhere. */
+function openCredits(){
+  openSettings();
+  requestAnimationFrame(()=>{
+    const el = document.getElementById('credits-section');
+    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+}
 function closeSettings(){
   cancelClearProgress();
   setTab('screen-passport');
@@ -4653,7 +4785,7 @@ function attachPlaceSuggest(inputId, onPick){
       (r.sub ? '<span class="place-suggest-sub">' + escapeHtml(r.sub) + '</span>' : '') +
       '</button>'
     ).join('');
-    openWith(rows + '<div class="place-suggest-attrib">Places from OpenStreetMap</div>');
+    openWith(rows);
     syncActive();
   }
 
@@ -6146,6 +6278,7 @@ function refreshTrackUI(){
     if(nameEl) nameEl.textContent = state.currentHunt ? 'All stops found! 🎉' : 'Pick a hunt to start tracking';
     if(cameraBtn) cameraBtn.classList.remove('ready');
     if(mapCameraBtn) mapCameraBtn.classList.remove('show');
+    syncCameraReadyClass();
     if(wrap) wrap.classList.remove('in-range');
     // #73 — this early return also owns the AR HUD when it fires with the
     // overlay open, or the hint below keeps showing a reason for a target that
@@ -6164,6 +6297,7 @@ function refreshTrackUI(){
   if(wrap) wrap.classList.toggle('in-range', inRange);
   if(cameraBtn) cameraBtn.classList.toggle('ready', inRange && !nearest.found);
   if(mapCameraBtn) mapCameraBtn.classList.toggle('show', inRange && !nearest.found);
+  syncCameraReadyClass();
   state._nearestId = nearest.id;
 
   // AR sync if open
