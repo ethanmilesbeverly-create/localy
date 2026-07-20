@@ -219,97 +219,67 @@
      (below) plus the Credits section in Settings — see that block for why it
      is a corner credit and not a Settings-only link. */
 
-  /* ---------- #91: map corner credit, self-collapsing ----------
-     TWO EARLIER SHAPES WERE TRIED AND ARE BOTH WRONG. Read this before
-     changing it, because the obvious simplification is the one that fails.
+  /* ---------- #91: map corner credit ----------
+     THREE EARLIER SHAPES WERE TRIED. Read this before changing it — two of
+     the obvious simplifications are already known to fail.
 
-     (1) A PERMANENT PILL. Shipped first, rejected on taste — too much
-         furniture on an already-crowded map for a footnote.
+     (1) PERMANENT PILL, BOTTOM-LEFT. Rejected on taste: crowded that corner.
      (2) SETTINGS-ONLY, NO MAP ELEMENT. Rejected on the guideline. OSMF's
-         first safe-harbour requirement is that attribution must be presented
-         to anyone who views the work and "should not require individuals to
+         first safe-harbour requirement is that attribution be presented to
+         anyone who views the work and "should not require individuals to
          interact with the map or produced work to see the attribution."
-         A credit you reach by opening Settings and scrolling requires exactly
-         that interaction. Note this is a SAFE HARBOUR, not the statute — but
-         stepping outside it means arguing the ODbL's general standard instead
-         of pointing at a checklist, for no gain.
+         A credit reached by opening Settings and scrolling requires exactly
+         that. (Safe harbour, not statute — but stepping outside it means
+         arguing the ODbL's general standard instead of pointing at a
+         checklist, for no gain.)
+     (3) COLLAPSING PILL + (i) BUTTON. Built, verified, rejected on taste —
+         the (i) read as generic chrome rather than a credit. The collapse
+         itself was legitimate: the guideline permits fading "automatically
+         on map interaction" or "after five seconds". It is available again
+         if this ever feels heavy; the removed machinery was a timer plus
+         three one-shot Leaflet listeners.
 
-     WHAT SHIPPED, and every part of it is something the guideline names:
-     the credit is visible in a corner of the map on load, may collapse
-     "automatically on map interaction such as panning, clicking, or zooming,
-     or automatically after five seconds", and once collapsed the licence
-     info must still be findable — "for example from an '(i)' button in the
-     corner of the map". So the collapsed state is an (i) button ON PURPOSE;
-     it is not decoration and it is not a generic info affordance. It must
-     stay tappable and it must keep leading to the licence text.
+     WHAT SHIPPED: always visible, centred, no icon, no collapse. Note this is
+     STRICTLY MORE compliant than (3), not less — permanent display is the
+     baseline the collapse rules are an exemption from. Nothing to re-check.
 
-     CARTO's basemap licence separately asks for credits in the corner of a
-     browsable map, which this also satisfies. Both obligations, one element.
-
-     GEOMETRY. left:66px, not 14px: at 14px the box overlaps #list-toggle-btn
-     by a measured pixel. Starting past that circle's right edge (58px)
-     removes the vertical constraint, leaving only #bottomnav below. Collapsed
-     and expanded are the SAME HEIGHT so the collapse is a horizontal shrink
-     with no vertical jump and no re-measuring. */
+     GEOMETRY. Centred, so unlike the bottom-left versions it cannot collide
+     with #list-toggle-btn or #locate-btn at all. #map-camera-btn is also
+     centred but sits on the 96px row; its pulse is box-shadow only, no
+     transform, so it does not grow into this band. The only neighbour left is
+     #bottomnav directly below — which is z-index 600 against this element's
+     500, so it wins any shared pixel. That is the whole collision story. */
   #map-attrib{
-    position:absolute;left:66px;
+    position:absolute;
+    left:50%;transform:translateX(-50%);
     bottom:calc(71px + env(safe-area-inset-bottom));
     z-index:500;
-    display:flex;align-items:center;gap:5px;
+    display:flex;align-items:center;
     height:22px;
-    max-width:calc(100% - 80px);
-    padding:0 9px;border-radius:999px;
+    max-width:calc(100% - 32px);
+    padding:0 11px;border-radius:999px;
     background:rgba(23,50,41,0.92);
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
     border:1px solid var(--line);
     color:var(--text-dim);
     font-family:inherit;font-size:9.5px;letter-spacing:0.03em;
-    white-space:nowrap;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     touch-action:manipulation;
-    transition:padding .45s ease, gap .45s ease;
   }
-  /* THE CLIP LIVES ON THE TEXT, NOT THE BUTTON, and that is load-bearing.
-     The obvious version puts overflow:hidden on the button and animates its
-     max-width — but overflow:hidden also clips ::after, and ::after is the
-     only way to give the collapsed 22px circle a 44px touch target without
-     making the circle itself 44px. Clipping the span instead leaves the
-     button's overflow free. */
-  #map-attrib-text{
-    overflow:hidden;
-    max-width:220px;
-    transition:max-width .45s ease, opacity .3s ease;
-  }
-  /* Invisible hit expander. Meets the 44px minimum in both states while the
-     visible pill stays a 22px footnote.
-
-     ANCHORED DOWNWARD, not centred, and that is a deliberate collision
-     choice rather than a styling one. A centred 44px box reaches ~8px up into
-     #list-toggle-btn's box — both are z-index 500, so a tap in that corner
-     resolves by DOM order, which is not a thing anyone should have to reason
-     about. Pushing the expander down moves the whole overlap onto #bottomnav
-     instead, which is z-index 600 and therefore wins every tap in the shared
-     band. Ambiguity traded for a rule. */
+  #map-attrib:active{background:var(--surface-2);}
+  /* Invisible hit expander: the pill is 22px tall, half the 44px touch
+     minimum. Anchored downward rather than centred so the extra height falls
+     onto #bottomnav (z-index 600, wins) instead of upward into the capture
+     button's row. Safe to use overflow:hidden on the button now only because
+     ::after is positioned outside it — if the clip ever needs to apply to
+     this pseudo-element too, the expander has to move to a wrapper. */
   #map-attrib::after{
     content:'';
     position:absolute;left:50%;top:-2px;
     transform:translateX(-50%);
     width:100%;min-width:44px;height:44px;
-  }
-  #map-attrib:active{background:var(--surface-2);}
-  #map-attrib svg{width:11px;height:11px;flex-shrink:0;opacity:0.85;}
-  /* Collapsed: a 22px circle — 11px icon plus 5px padding each side. */
-  #map-attrib.collapsed{
-    padding:0 5px;
-    gap:0;
-  }
-  #map-attrib.collapsed #map-attrib-text{
-    max-width:0;
-    opacity:0;
-  }
-  @media (prefers-reduced-motion: reduce){
-    #map-attrib, #map-attrib-text{transition:none;}
   }
   /* Hunt-builder host. .location-search-row is the flex wrapper around the
      input + Go button; the dropdown spans the whole row, button included. */
@@ -725,7 +695,6 @@
   #screen-map.sheet-open #search-here-btn,
   #screen-map.drawer-open #map-attrib,
   #screen-map.sheet-open #map-attrib,
-  #screen-map.camera-ready #map-attrib,
   #screen-map.drawer-open #map-camera-btn{
     display:none;
   }
@@ -1568,16 +1537,12 @@
       </button>
     </div>
     <button id="tilt-toggle-btn" class="is-2d" onclick="toggleTilt()" aria-label="Toggle 3D view">2D</button>
-    <!-- #91 — visible on load, collapses to the (i) after 5s or on the first
-         map interaction, whichever comes first. The (i) is the guideline's own
-         named fallback for a collapsed credit, so it must keep leading to the
-         licence text: onclick goes to Settings → Credits in BOTH states.
-         aria-label is state-independent for the same reason — a screen-reader
-         user should not have to know it collapsed. -->
-    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      <span id="map-attrib-text">© OpenStreetMap · CARTO</span>
-    </button>
+    <!-- #91 — always visible, centred, text only. The (i) icon and the
+         collapse behaviour were both removed; see the CSS block for the three
+         shapes tried and why this one is the safest of them. onclick is the
+         guideline's required route to the licence text, so it must keep
+         leading to Settings → Credits. -->
+    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · CARTO</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -3498,7 +3463,6 @@ let state = {
   browsingLocation: null,
   searchedArea: null,   // #8 — set while content is anchored to a panned-to area
   _addrCache: new Map(),   // #18 — rounded coords -> short address (or null after a failed lookup)
-  _attribTimer: null,      // #91 — map credit auto-collapse
   _programmaticViewChange: false,
   meAccuracy: null,
   lastWalkPos: null,
@@ -3930,7 +3894,6 @@ async function init(){
   setupBaseMap();
   wirePinSheet();
   wirePlaceSuggest();   // #88 — both location search fields get the dropdown
-  initMapAttrib();      // #91 — must run AFTER setupBaseMap(); it binds to state.leafletMap
   startLocalHunt(FALLBACK_LOCATION); // content immediately, refined once real location resolves
   fixMapSize();
   startLocating();
@@ -3998,6 +3961,13 @@ function showScreen(id){
   const el = document.getElementById(id);
   el.classList.add('active');
   el.scrollTop = 0;
+  /* #91 — #app is overflow:hidden, which stops the USER scrolling it but not
+     script. Anything that scrolls an ancestor (scrollIntoView, focus() on an
+     off-screen input, an IME) can leave the frame permanently offset with the
+     header clipped and no gesture able to undo it. Zeroing here makes that
+     state un-sticky: one navigation heals it. */
+  const app = document.getElementById('app');
+  if(app) app.scrollTop = 0;
   if(id!=='screen-map') closePinSheet();
 }
 function goToModeSelect(){
@@ -4031,7 +4001,21 @@ function setTab(id){
 
    THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
    practical ceiling on a phone. */
-const APP_VERSION = '2026.07.20e';
+/* #91 — BUMP THIS ON EVERY DELIVERED FILE, WITHOUT EXCEPTION.
+
+   It sat at '2026.07.20e' across four consecutive delivered builds — the
+   search dropdown, its mobile fix, the attribution work, and the rollback of
+   that work — so Settings → About reported the same string for four
+   materially different files, and "am I even testing the new build?" became
+   unanswerable from inside the app. That is the item 8 lesson wearing a
+   different hat: the file in hand could not be confirmed to be the file that
+   is live. A version constant that does not move is worse than no version
+   constant, because it answers the question confidently and wrongly.
+
+   The suffix letter is the deploy within the day, not the feature. If two
+   files leave in one day, they get two letters, even if one is a one-line
+   revert. */
+const APP_VERSION = '2026.07.20g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4071,73 +4055,51 @@ function openSettings(){
   showScreen('screen-settings');
 }
 /* =========================================================
-   #91 — MAP CREDIT (collapse controller)
+   #91 — CREDITS ENTRY POINT
    =========================================================
-   The credit shows on load and collapses to the (i) on whichever comes first:
-   five seconds, or the user's first pan/zoom/tap on the map. Both triggers are
-   named in OSMF's guideline as permitted collapse conditions; using both is
-   the friendlier reading, because a user who starts dragging immediately has
-   demonstrably seen the map and does not need the pill in the way.
+   REPORTED: tapping the credit opens Settings with the header cut off, and it
+   persists after returning to the map. NOT REPRODUCED as of this build — in a
+   harness against the real CSS, the old `scrollIntoView` call moved only
+   #screen-settings and reset cleanly on the next navigation. #app.scrollTop,
+   window.scrollY and document.documentElement.scrollTop all stayed 0.
 
-   ONCE COLLAPSED IT STAYS COLLAPSED for the session. The guideline is explicit
-   that startup attribution "does not need to be presented to the user every
-   time the user looks at or interacts with the application", so re-expanding
-   on every screen return would be noise, not compliance.
+   So the changes below are HARDENING, not a confirmed fix. Recorded that way
+   on purpose: an unverified cause written up as a solved bug is how the same
+   symptom gets rediscovered three passes later against a comment that says it
+   was already handled.
 
-   DO NOT make this collapse instantly, and do not gate it behind a tap. The
-   whole point of this element is that it is visible WITHOUT interaction —
-   that requirement is what ruled out the Settings-only version. */
-const MAP_ATTRIB_COLLAPSE_MS = 5000;
+   Three things changed, cheapest first:
 
-function collapseMapAttrib(){
-  const el = document.getElementById('map-attrib');
-  if(!el || el.classList.contains('collapsed')) return;
-  el.classList.add('collapsed');
-  clearTimeout(state._attribTimer);
-  state._attribTimer = null;
-}
+   1. scrollIntoView is gone. It walks up and scrolls EVERY scrollable
+      ancestor, which makes its blast radius the whole page rather than the
+      one container intended. Setting scrollTop on the one element that should
+      move is strictly narrower, whether or not it was the culprit here.
+   2. The scroll is INSTANT, not smooth. A 300ms smooth animation starting on
+      a screen that was made visible one frame earlier is the remaining
+      hypothesis: the animation and the screen swap race, and on iOS Safari a
+      scroll animation against a just-shown container is not well-behaved.
+   3. showScreen() now zeroes #app.scrollTop on every navigation. #app is
+      overflow:hidden, which stops the USER scrolling it but not script, so if
+      anything ever does offset it the state would be unrecoverable by gesture.
+      Cheap insurance; heals rather than prevents.
 
-function initMapAttrib(){
-  const el = document.getElementById('map-attrib');
-  if(!el) return;
-  el.classList.remove('collapsed');
-  clearTimeout(state._attribTimer);
-  state._attribTimer = setTimeout(collapseMapAttrib, MAP_ATTRIB_COLLAPSE_MS);
-  /* Leaflet's `once` means these unbind themselves after firing, so there is
-     no listener left running for the rest of the session. dragstart rather
-     than move: programmatic recentring fires move, and a credit that vanishes
-     because GPS resolved has not been "dismissed by the user". */
-  const map = state.leafletMap;
-  if(map){
-    map.once('dragstart', collapseMapAttrib);
-    map.once('zoomstart', collapseMapAttrib);
-    map.once('click', collapseMapAttrib);
-  }
-}
-
-/* Mirrors #map-camera-btn's visibility onto #screen-map so CSS can move the
-   credit out of its way — the capture button's box reaches into the credit's
-   band, and it appears unpredictably (whenever you walk into range), so a
-   layout that is merely nearly clear of it is not clear of it. Reads the
-   button rather than recomputing "am I in range?", because two places already
-   decide that and a third copy is a third thing to keep in sync. */
-function syncCameraReadyClass(){
-  const btn = document.getElementById('map-camera-btn');
-  const screen = document.getElementById('screen-map');
-  if(!btn || !screen) return;
-  screen.classList.toggle('camera-ready', btn.classList.contains('show'));
-}
-
-/* The credit's destination in both states. Routes through openSettings()
-   rather than duplicating its setup, so this entry point can never show a
-   Settings screen with a stale email or an armed destructive confirm. The
-   scroll is deferred one frame because showScreen() sets scrollTop = 0 on the
-   way in, and scrolling before that lands nowhere. */
+   IF THE SYMPTOM SURVIVES ALL THREE, the next thing to suspect is not this
+   function — it is something about #topbar or the screen's 52px top padding,
+   and the scroll is a red herring. Removing the scroll entirely (open Settings
+   at the top, let the user scroll) is the zero-risk fallback and costs only a
+   little discoverability. */
 function openCredits(){
   openSettings();
+  /* Deferred a frame: showScreen() sets scrollTop = 0 on the way in, so
+     scrolling before it has run lands nowhere. */
   requestAnimationFrame(()=>{
+    const screen = document.getElementById('screen-settings');
     const el = document.getElementById('credits-section');
-    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+    if(!screen || !el) return;
+    // Offset of the section within the scroller, measured rather than assumed
+    // (.screen is not position:relative, so offsetTop is not trustworthy here).
+    const delta = el.getBoundingClientRect().top - screen.getBoundingClientRect().top;
+    screen.scrollTop = Math.max(0, screen.scrollTop + delta - 12);
   });
 }
 function closeSettings(){
@@ -4898,7 +4860,18 @@ function attachPlaceSuggest(inputId, onPick){
       el.setAttribute('aria-selected', on ? 'true' : 'false');
       if(on){
         input.setAttribute('aria-activedescendant', el.id);
-        if(el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+        /* #91 — was `el.scrollIntoView({block:'nearest'})`. Same latent bug
+           openCredits() shipped with: scrollIntoView scrolls every scrollable
+           ancestor, and #app is overflow:hidden, which blocks the user from
+           scrolling it but not script. Arrow-keying down a long result list
+           inside the hunt-builder screen could shove the whole app frame up
+           with no way back. Rarely reachable today because five rows fit
+           without scrolling — but "rarely reachable" is how the other one got
+           shipped. Scroll the list, and only the list. */
+        const lr = list.getBoundingClientRect();
+        const er = el.getBoundingClientRect();
+        if(er.top < lr.top) list.scrollTop -= (lr.top - er.top);
+        else if(er.bottom > lr.bottom) list.scrollTop += (er.bottom - lr.bottom);
       }
     });
     if(st.active < 0) input.removeAttribute('aria-activedescendant');
@@ -6379,7 +6352,6 @@ function refreshTrackUI(){
     if(nameEl) nameEl.textContent = state.currentHunt ? 'All stops found! 🎉' : 'Pick a hunt to start tracking';
     if(cameraBtn) cameraBtn.classList.remove('ready');
     if(mapCameraBtn) mapCameraBtn.classList.remove('show');
-    syncCameraReadyClass();  // #91
     if(wrap) wrap.classList.remove('in-range');
     // #73 — this early return also owns the AR HUD when it fires with the
     // overlay open, or the hint below keeps showing a reason for a target that
@@ -6398,7 +6370,6 @@ function refreshTrackUI(){
   if(wrap) wrap.classList.toggle('in-range', inRange);
   if(cameraBtn) cameraBtn.classList.toggle('ready', inRange && !nearest.found);
   if(mapCameraBtn) mapCameraBtn.classList.toggle('show', inRange && !nearest.found);
-  syncCameraReadyClass();  // #91
   state._nearestId = nearest.id;
 
   // AR sync if open
