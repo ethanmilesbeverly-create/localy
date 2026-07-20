@@ -712,6 +712,27 @@
     background:var(--surface-2); color:var(--text);
   }
   #hunt-empty .he-actions button.he-primary{background:var(--orange); border-color:var(--orange); color:#fff;}
+  /* #78c — LOADING PHASE. Same card, same position, so the transition to the
+     empty state is a change of words rather than a card appearing out of
+     nowhere. The close button is hidden while loading on purpose: there is
+     nothing to dismiss yet, and a dismissable "please wait" invites you to
+     dismiss the answer before it arrives. */
+  #hunt-empty .he-spinner{
+    display:none; margin:0 auto 10px; width:30px; height:30px;
+    border-radius:50%; border:2.5px solid var(--line);
+    border-top-color:var(--lore, #3E9C8F);
+    animation:he-spin 0.9s linear infinite;
+  }
+  #hunt-empty.loading .he-spinner{display:block;}
+  #hunt-empty.loading #hunt-empty-icon{display:none;}
+  #hunt-empty.loading button#hunt-empty-close{display:none;}
+  @keyframes he-spin{to{transform:rotate(360deg);}}
+  /* Respect the OS setting rather than spinning regardless — a persistent
+     rotation is one of the specific things reduced-motion is asking us not to
+     do, and the card still reads correctly as a static ring. */
+  @media (prefers-reduced-motion: reduce){
+    #hunt-empty .he-spinner{animation:none; border-top-color:var(--lore, #3E9C8F);}
+  }
   #screen-map.drawer-open #hunt-empty{display:none;}
 
   #target-drawer:not(.collapsed) #drawer-body{
@@ -1600,13 +1621,14 @@
       <button id="hunt-empty-close" type="button" onclick="dismissHuntEmpty()" aria-label="Dismiss">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <svg class="he-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 5h6a3 3 0 0 1 3 3v12a2.6 2.6 0 0 0-2.6-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2.6 2.6 0 0 1 2.6-2H21z"/></svg>
+      <svg id="hunt-empty-icon" class="he-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 5h6a3 3 0 0 1 3 3v12a2.6 2.6 0 0 0-2.6-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2.6 2.6 0 0 1 2.6-2H21z"/></svg>
+      <!-- #78c — the spinner is a SIBLING of the icon, not a class on it. The
+           card swaps between two genuinely different states and sharing one
+           element would mean animating a path that is also a book. -->
+      <div id="hunt-empty-spinner" class="he-spinner" aria-hidden="true"></div>
       <h4 id="hunt-empty-title">Nothing here yet</h4>
       <p id="hunt-empty-body"></p>
-      <div class="he-actions">
-        <button class="he-primary" onclick="openSuggestGemScreen()">Add the first one</button>
-        <button onclick="goToModeSelect()">Browse something else</button>
-      </div>
+      <div class="he-actions" id="hunt-empty-actions"></div>
     </div>
     <div id="target-drawer" class="collapsed">
       <div id="drawer-header">
@@ -2858,6 +2880,11 @@ function searchThisArea(){
     }
   } else {
     state.searchedArea = base;
+    // #90 — you have panned away from the pin you picked, so the city we were
+    // ready to offer is no longer necessarily the city you are looking at.
+    // A stale offer is worse than none: it would name somewhere plausible and
+    // wrong, which is the exact failure mode #90 exists to stop.
+    state.browseLocality = null;
     state.followMe = false; // or the next GPS tick pans you off the area you asked for
     document.getElementById('locate-btn').classList.remove('following');
   }
@@ -2989,6 +3016,42 @@ const _realDebug = { lastOverpassError:null, lastOverpassStatus:null, lastCounts
 
 function normName(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
 function realTileKey(base){ return Math.round(base.lat/REAL_TILE_DEG)+'_'+Math.round(base.lng/REAL_TILE_DEG); }
+
+/* #78c — PER-TILE FETCH STATUS. The one fact the UI has never had.
+   Before this, "we are still fetching" and "we fetched and the area is empty"
+   were the same observable state: `state.realPlaces` pointing at some other
+   tile. `updateHuntEmptyState()` therefore fired "Nothing mapped here yet"
+   synchronously at hunt creation, 15–30s before a cold Overpass query could
+   possibly have answered — so the empty card was wrong on EVERY cold search,
+   not just the genuinely-empty ones #90 is about.
+
+   Values: 'loading' | 'empty' | 'loaded'. Absent = never asked.
+   'empty' and absent are deliberately DIFFERENT: absent means we have no
+   grounds to say anything, 'empty' means we asked and the answer was nothing.
+   #90's "show me the city instead" offer is only honest in the 'empty' case,
+   which is exactly why that offer had to wait on this map existing.
+
+   NOT persisted. A reload should re-ask rather than inherit a verdict — the
+   tile cache (`places:<key>`, 21d) is where "we already know this area" lives,
+   and it is server-side and shared. This is per-session UI truth only. */
+const _realTileState = {};
+function setTileState(key, s){
+  if(!key) return;
+  if(_realTileState[key] === s) return;
+  _realTileState[key] = s;
+  /* The status changed, so the card's correctness changed. Repaint through the
+     normal path rather than poking the DOM — refreshTargetsUI() is the only
+     thing that knows whether there are points to show in the first place. */
+  if(typeof refreshTargetsUI === 'function' && state && state.currentHunt) refreshTargetsUI();
+}
+/* Status for wherever the current hunt's content is anchored. Mirrors
+   huntAnchor()'s precedence deliberately: browse/search outrank your real
+   position, because the whole of #90 is about a deliberate relocation. */
+function currentTileState(){
+  const a = state.browsingLocation || state.searchedArea || state.localHuntOrigin || state.me;
+  if(!a || a.lat == null) return null;
+  return _realTileState[realTileKey(a)] || null;
+}
 
 /* Map an OSM element's tags to one of the app's categories (priority order). */
 function categorizeOsm(t){
@@ -3159,7 +3222,7 @@ function groupRealByCat(list){
    still on the tile we fetched for (guards against a slow response landing
    after the user has moved to a new area). */
 function applyRealPlaces(key, base, list){
-  if(!list || !list.length) return;
+  if(!list || !list.length){ setTileState(key, 'empty'); return; }
   // #8/#28 — the "did the user move on?" guard used to resolve the current tile
   // from state.me ALWAYS, so any fetch for a place you were browsing or had
   // panned to got thrown away the moment GPS had a fix: your real tile never
@@ -3169,15 +3232,41 @@ function applyRealPlaces(key, base, list){
   // when you are actually looking at yourself.
   const anchor = state.browsingLocation || state.searchedArea || state.me || base;
   const cur = realTileKey(anchor);
-  if(cur !== key) return; // genuinely moved on; ignore stale result
+  if(cur !== key){
+    /* #78c — genuinely moved on. Clear rather than mark: we hold real data for
+       this tile that we are about to drop on the floor, so claiming 'loaded'
+       would hide the card with nothing behind it, and claiming 'empty' would be
+       a flat lie. Absent = "ask again if you come back", which ensureRealPlaces
+       will, because state.realPlaces.tile never became this key. */
+    delete _realTileState[key];
+    return;
+  }
   // Drop franchise chains here — this is the single write point for real places
   // from the server `nearby-places` function AND its cache, so filtering here
   // catches them regardless of source (the client Overpass path is unused).
   const filtered = EXCLUDE_CHAINS ? list.filter(p => !isChainPlace(p, p && p.name)) : list;
-  if(!filtered.length){ return; }
+  /* #78c — AN AREA THAT IS ALL CHAINS IS EMPTY *TO THIS APP*, and it must say
+     so. This early return used to be the quietest path in the file: a strip mall
+     with twelve franchises came back as a full list, got filtered to nothing,
+     and returned without touching state or logging — indistinguishable from a
+     fetch that never happened. It is a real #90 trigger independent of search
+     precision, and it is the one case where "nothing mapped here" is arguably
+     the wrong words for a place with plenty mapped. Left as generic empty copy
+     for now rather than inventing a third message; noted so it is a decision
+     and not an oversight. */
+  if(!filtered.length){ setTileState(key, 'empty'); return; }
   const byCat = groupRealByCat(filtered);
   state.realPlaces = { tile:key, center:base, all:filtered, byCat };
   _realDebug.lastCounts = Object.fromEntries(Object.entries(byCat).map(([k,v])=>[k,v.length]));
+  /* #78c — WRITTEN DIRECTLY, NOT THROUGH setTileState(), and the reason is a
+     one-frame bug that setTileState's own repaint would have caused. At this
+     line the hunt still holds ZERO points; the blend happens inside
+     onRealPlacesReady() on the next line. Repainting here would render the
+     card with count 0 and a settled tile — i.e. flash "Nothing mapped here
+     yet" for one frame immediately before the pins land, which is a worse
+     version of the exact bug this ticket is closing. Set the fact, let
+     onRealPlacesReady() do the painting once there is something to paint. */
+  _realTileState[key] = 'loaded';
   onRealPlacesReady();
 }
 
@@ -3205,9 +3294,12 @@ let _realFetchInFlight = {};
 async function ensureRealPlaces(base){
   if(!base || base.lat==null) return;
   const key = realTileKey(base);
-  if(state.realPlaces && state.realPlaces.tile===key) return; // already loaded for this tile
+  // #78c — already have it: make sure the UI knows, then bail as before.
+  if(state.realPlaces && state.realPlaces.tile===key){ setTileState(key, 'loaded'); return; }
   if(_realFetchInFlight[key]) return;
   _realFetchInFlight[key] = true;
+  setTileState(key, 'loading');   // #78c — the flag that already existed here,
+                                  // finally visible to the empty card.
   try{
     // All fetching + caching now happens server-side in the `nearby-places`
     // Edge Function: no CORS, no null-origin issue (works from https, file://,
@@ -3219,16 +3311,25 @@ async function ensureRealPlaces(base){
     _realDebug.lastOverpassStatus = (data && data.overpassStatus != null) ? data.overpassStatus : null;
     _realDebug.lastOverpassError  = (data && data.overpassError) || null;
     if(places.length){
-      applyRealPlaces(key, base, places); // sets _realDebug.lastCounts
+      applyRealPlaces(key, base, places); // sets _realDebug.lastCounts + tile state
       const src = data.cached ? (data.stale ? 'cache(stale)' : 'cache') : 'live';
       console.log('[localy] real places for tile '+key+' ('+places.length+' places, '+src+')', _realDebug.lastCounts);
     } else {
       // NB: the old wording here said "procedural fallback stays", which stopped
       // being true at #37 — there is no fallback now, the area just renders empty.
+      setTileState(key, 'empty');   // #78c — we asked, and the answer was nothing.
       console.warn('[localy] no real places for tile '+key+' — area will render empty. Overpass status:', _realDebug.lastOverpassStatus, 'err:', _realDebug.lastOverpassError);
     }
   }catch(e){
-    console.warn('[localy] nearby-places function failed — procedural fallback stays in place.', (e && e.message) || e);
+    /* #78c/#90 — A TRANSPORT FAILURE IS NOT EVIDENCE OF AN EMPTY AREA, and
+       conflating the two is how #90 would come back wearing a new hat. The
+       status is cleared to absent (not 'empty'), so the card falls back to its
+       old generic copy and the "show me the city instead" offer — which claims
+       we looked — stays hidden. Deleting also means the next ensureRealPlaces()
+       for this tile retries instead of inheriting a verdict we never earned. */
+    delete _realTileState[key];
+    if(state.currentHunt) refreshTargetsUI();
+    console.warn('[localy] nearby-places function failed — no real places this pass.', (e && e.message) || e);
   }
   finally{ delete _realFetchInFlight[key]; }
 }
@@ -3495,6 +3596,7 @@ let state = {
   gemDraftPin: null,
   pendingSavePoint: null,
   browsingLocation: null,
+  browseLocality: null, // #90 — {name,label,kind} of the settlement enclosing a searched pick, or null
   searchedArea: null,   // #8 — set while content is anchored to a panned-to area
   _addrCache: new Map(),   // #18 — rounded coords -> short address (or null after a failed lookup)
   settingsReturn: null,    // #91 — which tab Settings' Back button returns to
@@ -3980,7 +4082,10 @@ const placeSuggest = {map:null, create:null};
 function wirePlaceSuggest(){
   placeSuggest.map = attachPlaceSuggest('map-search-input', place=>{
     document.getElementById('map-search-input').value = '';
-    enterLocationBrowseMode({lat:place.lat, lng:place.lng}, place.name);
+    // #90 — the whole place object now, not two fields. enterLocationBrowseMode
+    // needs `locality`/`kind` to be able to offer the enclosing city if the pick
+    // turns out to be somewhere with nothing around it.
+    enterLocationBrowseMode({lat:place.lat, lng:place.lng}, place.name, place);
   });
   placeSuggest.create = attachPlaceSuggest('create-location-search', place=>{
     jumpCreateMapTo(place);
@@ -4071,7 +4176,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20i';
+const APP_VERSION = '2026.07.20j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4829,7 +4934,27 @@ async function photonSearch(q, signal){
     const key = (title + '|' + sub).toLowerCase();
     if(seen.has(key)) return;   // Photon can return the node and the way for one place
     seen.add(key);
-    out.push({name:title, sub, lat, lng});
+    const pr = f.properties || {};
+    /* #90 — CARRY THE CONTEXT, DO NOT ACT ON IT HERE. Item 88 normalised every
+       feature down to {name, sub, lat, lng} and dropped `properties` on the
+       floor, which is why #90 read as "needs no extra request" and was in fact
+       unimplementable without touching this function.
+
+       `kind` is Photon's own coarse type (house/street/locality/district/city/
+       county/state/country) with the osm_key as a fallback — the "how big is
+       the thing you picked" signal. `locality` is the enclosing settlement,
+       which is the ONLY reason #90's escape hatch can name a city.
+
+       Both are ADVISORY. Nothing downstream is allowed to silently re-aim the
+       map on them (that was option (i), rejected): they exist so the empty card
+       can OFFER an alternative the user taps. See enterLocationBrowseMode(). */
+    const locality = pr.city || pr.town || pr.village || pr.county || '';
+    out.push({
+      name:title, sub, lat, lng,
+      kind: pr.type || pr.osm_key || '',
+      locality,
+      localityLabel: [locality, pr.state].filter(Boolean).join(', ')
+    });
   });
   return out;
 }
@@ -5115,9 +5240,23 @@ function attachPlaceSuggest(inputId, onPick){
    becomes a room with no door. */
 const SHOW_BROWSING_BANNER = false;
 
-function enterLocationBrowseMode(base, placeName){
+function enterLocationBrowseMode(base, placeName, place){
   state.searchedArea = null; // browse mode supersedes a panned search (#8)
   state.browsingLocation = base;
+  /* #90 — WHAT WE COULD OFFER, recorded at the moment we know it and never
+     acted on automatically. Set only when the pick actually came from the
+     Photon dropdown AND names a settlement that is not the thing you picked
+     ("Phoenix" when you chose Wrigley Mansion; nothing when you chose Phoenix
+     itself, because offering to show you where you already are is noise).
+
+     Null on the Nominatim Enter-key fallback, by construction — geocodeFirstHit
+     has no locality field to give. That is the intended degradation: the empty
+     card loses one button and keeps every word it says true. */
+  const loc = place && place.locality ? String(place.locality) : '';
+  const sameAsPick = loc && normName(loc) === normName(placeName || '');
+  state.browseLocality = (loc && !sameAsPick)
+    ? { name: loc, label: (place.localityLabel || loc), kind: place.kind || '' }
+    : null;
   state.followMe = false;
   document.getElementById('locate-btn').classList.remove('following');
   if(state.meMarker) state.leafletMap.removeLayer(state.meMarker);
@@ -5130,6 +5269,7 @@ function enterLocationBrowseMode(base, placeName){
 function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
   state.browsingLocation = null;
+  state.browseLocality = null;   // #90 — the offer belongs to the pick that made it
   state.searchedArea = null;
   state.followMe = true;
   document.getElementById('locate-btn').classList.add('following');
@@ -6356,6 +6496,14 @@ const EMPTY_COPY = {
     body: "Nothing's turned up around here yet. Know somewhere worth finding? Put it on the map."
   }
 };
+/* #78c — Copy rule from EMPTY_COPY still applies: do not describe the
+   machinery. "Checking Overpass" means nothing to anyone. What the user needs
+   is permission to wait, and the reason it is slow the FIRST time, because the
+   second time is instant and the inconsistency is otherwise alarming. */
+const LOADING_COPY = {
+  title: 'Looking around…',
+  body: "Finding what's mapped in this area. It can take a few seconds the first time anyone looks here."
+};
 const EMPTY_DEFAULT = {
   title: 'Nothing mapped here yet',
   body: "We couldn't find anything for this category nearby. That usually means thin coverage rather than an empty neighborhood — try another category, or add a spot you know."
@@ -6373,20 +6521,115 @@ function huntEmptyScope(){
   const at = a ? (a.lat.toFixed(2) + ',' + a.lng.toFixed(2)) : 'none';
   return ((h && h.key) || 'none') + '@' + at;
 }
+/* #78c — DISMISSAL IS SCOPED TO THE PHASE AS WELL AS THE PLACE, and this is
+   load-bearing rather than tidy. The card now says two different things at the
+   same anchor: "still looking" and, seconds later, "we looked and there is
+   nothing." Those are different claims. Dismissing the first must not suppress
+   the second — otherwise the honest answer, which is the one the user is
+   waiting for, is the one they never see. */
+function huntEmptyDismissKey(phase){ return huntEmptyScope() + '|' + phase; }
 function dismissHuntEmpty(){
-  state._huntEmptyDismissedFor = huntEmptyScope();
+  state._huntEmptyDismissedFor = huntEmptyDismissKey(state._huntEmptyPhase || 'empty');
   const el = document.getElementById('hunt-empty');
   if(el) el.classList.remove('show');
 }
+
+/* #90 — THE ESCAPE HATCH, and the whole reason it is a button and not a
+   behaviour. Option (i) (silently widen the radius on a point-like result) and
+   option (ii) (silently re-anchor to the enclosing city) were both rejected:
+   each takes the pin the user deliberately chose and quietly replaces it with
+   something else, then labels the result with their choice. That is the same
+   defect class as #75's un-ellipsised name — a display decision rendering as
+   if it were the truth.
+
+   So we obey the pick, generate what is actually there, and when the answer is
+   genuinely nothing we OFFER the city. The user relocates or does not; either
+   way the map only ever shows a place they asked for. */
+async function browseToLocality(){
+  const loc = state.browseLocality;
+  if(!loc) return;
+  const btn = document.getElementById('hunt-empty-locality-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Finding ' + loc.name + '…'; }
+  try{
+    const results = await photonSearch(loc.label || loc.name, undefined);
+    const hit = (results && results[0]) || null;
+    if(!hit) throw new Error('no hit');
+    /* Cleared BEFORE entering, not after: enterLocationBrowseMode sets it from
+       the new pick, and a city result normally has no enclosing locality of its
+       own, so this correctly ends up null and the offer does not recur. */
+    state.browseLocality = null;
+    enterLocationBrowseMode({lat:hit.lat, lng:hit.lng}, hit.name, hit);
+  }catch(_){
+    /* Deliberately does NOT clear the offer — the lookup failed, the city is
+       still the right suggestion, and the user can tap again. */
+    if(btn){ btn.disabled = false; btn.textContent = 'Show me ' + loc.name + ' instead'; }
+    showToast("Couldn't look that up just now — check your connection and try again");
+  }
+}
+
+/* Modes whose emptiness has nothing to do with the real-places fetch. A lore
+   hunt with no stories is not "still loading" just because an unrelated
+   Overpass call happens to be in flight, and saying so would be a new lie in
+   the place we just removed one. */
+const REALPLACE_BACKED = k => k !== 'lore' && k !== 'gems';
+
 function updateHuntEmptyState(count){
   const el = document.getElementById('hunt-empty');
   if(!el) return;
-  if(count === null || count > 0){ el.classList.remove('show'); return; }
-  if(state._huntEmptyDismissedFor === huntEmptyScope()){ el.classList.remove('show'); return; }
+  if(count === null || count > 0){
+    el.classList.remove('show','loading');
+    state._huntEmptyPhase = null;
+    return;
+  }
   const mode = (state.currentHunt && state.currentHunt.mode) || '';
+  /* #78c — THE DECISION THIS WHOLE TICKET EXISTS FOR. `count === 0` used to be
+     read as "empty" full stop, which fired 15–30s before a cold Overpass query
+     could answer. Now zero points plus a fetch in flight for THIS anchor's tile
+     is a loading state, and only zero points with a settled tile is empty. */
+  const tile = currentTileState();
+  const phase = (tile === 'loading' && REALPLACE_BACKED(mode)) ? 'loading' : 'empty';
+  state._huntEmptyPhase = phase;
+  if(state._huntEmptyDismissedFor === huntEmptyDismissKey(phase)){
+    el.classList.remove('show','loading');
+    return;
+  }
+  const titleEl = document.getElementById('hunt-empty-title');
+  const bodyEl  = document.getElementById('hunt-empty-body');
+  const actions = document.getElementById('hunt-empty-actions');
+
+  if(phase === 'loading'){
+    el.classList.add('loading');
+    titleEl.textContent = LOADING_COPY.title;
+    bodyEl.textContent  = LOADING_COPY.body;
+    actions.innerHTML   = '';
+    el.classList.add('show');
+    return;
+  }
+
+  el.classList.remove('loading');
   const copy = EMPTY_COPY[mode] || EMPTY_DEFAULT;
-  document.getElementById('hunt-empty-title').textContent = copy.title;
-  document.getElementById('hunt-empty-body').textContent = copy.body;
+  titleEl.textContent = copy.title;
+  bodyEl.textContent  = copy.body;
+
+  /* The offer appears ONLY when we actually looked (`tile === 'empty'`). On a
+     failed fetch the status is absent, not 'empty', so the button stays hidden
+     — we have no grounds to tell someone their area is bare when the truth is
+     we could not reach the server. */
+  const loc = state.browseLocality;
+  const canOffer = !!loc && tile === 'empty' && REALPLACE_BACKED(mode);
+  const offerBtn = canOffer
+    ? '<button class="he-primary" id="hunt-empty-locality-btn" onclick="browseToLocality()">Show me ' +
+      escapeHtml(loc.name) + ' instead</button>'
+    : '';
+  /* When the city offer is present it takes the primary slot and "Add the first
+     one" steps down to secondary. Relocating is the more useful next move when
+     you are 1,700 miles away and looking at a lot with nothing on it — and
+     inviting a submission for a place the user has never stood in is the weaker
+     ask of the two. */
+  actions.innerHTML = offerBtn +
+    '<button' + (canOffer ? '' : ' class="he-primary"') +
+    ' onclick="openSuggestGemScreen()">Add the first one</button>' +
+    '<button onclick="goToModeSelect()">Browse something else</button>';
   el.classList.add('show');
 }
 
