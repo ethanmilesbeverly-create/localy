@@ -3735,7 +3735,7 @@ function setTab(id){
 
    THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
    practical ceiling on a phone. */
-const APP_VERSION = '2026.07.20c';
+const APP_VERSION = '2026.07.20d';
 
 function openSettings(){
   const u = state.user || {};
@@ -3772,6 +3772,23 @@ function cancelClearProgress(){
    against loadPersonal() when a key is added there. 'my-hunts' and
    'gem-submissions' are deliberately absent — guides and submissions are
    content, not capture history, and the on-screen copy says so. */
+/* Which badges still legitimately pass once everything the wipe clears is gone.
+   With guides now included in the wipe this returns an empty list in practice —
+   but it stays DERIVED rather than hardcoded to [], because renderAchievements()
+   recomputes every badge live from computeAchievementStats() and never reads the
+   stored set. If a badge is ever added that keys off something the wipe
+   preserves (a submitted-gem stamp, item 24, is the obvious candidate), an
+   emptied ledger would desync from a still-lit grid and re-fire its popup on the
+   next capture. That is the exact defect this file's QA caught with hunt_maker.
+
+   Declared before its callers on purpose: it is a function declaration, so
+   hoisting covers the reference, and ACHIEVEMENTS / computeAchievementStats are
+   only touched when it RUNS — long after the script has finished evaluating. */
+function survivingAchievementIds(){
+  const stats = computeAchievementStats();
+  return ACHIEVEMENTS.filter(a=>a.check(stats)).map(a=>a.id);
+}
+
 const WIPE_KEYS = [
   ['progress',              ()=>JSON.stringify({})],
   ['stats',                 ()=>JSON.stringify({ totalWalkedMeters: 0 })],
