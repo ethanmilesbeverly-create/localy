@@ -3735,7 +3735,7 @@ function setTab(id){
 
    THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
    practical ceiling on a phone. */
-const APP_VERSION = '2026.07.20b';
+const APP_VERSION = '2026.07.20c';
 
 function openSettings(){
   const u = state.user || {};
@@ -3755,8 +3755,15 @@ function askClearProgress(){
 function cancelClearProgress(){
   const c = document.getElementById('clear-progress-confirm');
   const b = document.getElementById('clear-progress-btn');
+  const g = document.getElementById('clear-progress-go');
   if(c) c.style.display = 'none';
   if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Clear my data'; }
+  /* THE STUCK BUTTON. This one was reset nowhere, so after a single attempt it
+     stayed disabled reading "Erasing…" for the rest of the session — which
+     looks identical to a hang whether or not anything actually hung, and sent
+     the diagnosis at the storage layer instead of at four lines of DOM. Reset
+     both, always, and only from here so there is one place that owns it. */
+  if(g){ g.disabled = false; g.textContent = 'Erase everything'; }
 }
 
 /* THE KEYS THIS OWNS. Enumerated here rather than derived, because the cost of
@@ -3794,14 +3801,26 @@ const WIPE_KEYS = [
   ['capture-anchor',        ()=>'null'],
 ];
 
+/* Storage calls are raced against a timeout. A supabase write that never
+   settles used to wedge this function on its first await with the button stuck
+   reading "Erasing…" and no way out but a reload — and a reload looked exactly
+   like "the wipe did nothing", which is the wrong diagnosis for a hang. A
+   timeout turns an invisible wedge into a named failure. */
+const WIPE_WRITE_TIMEOUT_MS = 12000;
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((_, reject)=>setTimeout(()=>reject(new Error('timeout: '+label)), ms))
+  ]);
+}
+
 async function clearMyProgress(){
   /* BLOCKED ON A FAILED LOAD, and this is the #1a rule applied to a deliberate
      action rather than an accidental one. If a key failed to read, in-memory
      state is a fallback default, not the user's data — so "clearing" it would
      either be a no-op the user believes worked, or would push empty JSON over a
      real server row we never successfully read. Both are worse than refusing. */
-  const failed = [...loadFailedKeys()];
-  if(failed.length){
+  if(loadFailedKeys().size){
     showToast("Can't clear right now — your data hasn't loaded. Reconnect and try again.");
     cancelClearProgress();
     return;
@@ -3810,56 +3829,83 @@ async function clearMyProgress(){
   const btn = document.getElementById('clear-progress-go');
   if(btn){ btn.disabled = true; btn.textContent = 'Erasing…'; }
 
-  /* ORDER IS LOAD-BEARING: the local mirror and its pending queue go FIRST.
-     #1b flushes queued writes on 'online' and on visibilitychange, and
-     flushPendingWrites() explicitly drains anything queued by a PREVIOUS
-     session. Wipe state without dropping the queue and a pre-wipe write lands
-     on top the next time the app is backgrounded and reopened — the stamps come
-     back, hours later, with no action from the user. Same ordering trap as #73
-     in captureFromSheet() and #4 phase 2's anchor. */
-  purgeMirror();
+  const failedKeys = [];
+  /* EVERYTHING FROM HERE IS INSIDE try/finally. The previous version reset the
+     button only on the success path, so any throw — in a write, in a render,
+     anywhere — left a disabled button reading "Erasing…" forever. A destructive
+     action with no visible outcome and no way to retry is the worst possible
+     failure mode for this particular control. */
+  try{
+    /* ORDER IS LOAD-BEARING: the local mirror and its pending queue go FIRST.
+       #1b flushes queued writes on 'online' and on visibilitychange, and
+       flushPendingWrites() explicitly drains anything queued by a PREVIOUS
+       session. Wipe state without dropping the queue and a pre-wipe write lands
+       on top the next time the app is backgrounded and reopened. Same ordering
+       trap as #73 in captureFromSheet() and #4 phase 2's anchor. */
+    purgeMirror();
 
-  // In-memory next, so the UI cannot re-render stale data mid-write.
-  state.progress = {};
-  state.totalWalkedMeters = 0;
-  state.pendingAchievementPopups = [];
-  state.hasCapturedOnce = false;
-  state.captureAnchor = null;
-  state.lastWalkPos = null;
-  state.lastWalkTime = null;
-  state.myHunts = [];
-  state.gemSubmissions = [];
-  state.editingHuntId = null;
-  /* If the guide you were partway through is one of the guides we just deleted,
-     its points are still sitting in state.currentHunt and the map would keep
-     drawing a hunt whose definition no longer exists — a live route pointing at
-     nothing, which is worse than an empty map. refreshTargetsUI() already has
-     the correct no-hunt branch, so hand it that. */
-  if(state.currentHunt && String(state.currentHunt.key || '').indexOf('custom_') === 0){
-    state.currentHunt = null;
+    // In-memory next, so the UI cannot re-render stale data mid-write.
+    state.progress = {};
+    state.totalWalkedMeters = 0;
+    state.pendingAchievementPopups = [];
+    state.hasCapturedOnce = false;
+    state.captureAnchor = null;
+    state.lastWalkPos = null;
+    state.lastWalkTime = null;
+    state.myHunts = [];
+    state.gemSubmissions = [];
+    state.editingHuntId = null;
+    /* If the guide you were partway through is one we just deleted, its points
+       are still in state.currentHunt and the map would keep drawing a route
+       whose definition no longer exists. refreshTargetsUI() already has the
+       correct no-hunt branch, so hand it that. */
+    if(state.currentHunt && String(state.currentHunt.key || '').indexOf('custom_') === 0){
+      state.currentHunt = null;
+    }
+    // AFTER the resets above, so it sees the wiped stats. See WIPE_KEYS below.
+    state.unlockedAchievements = new Set(survivingAchievementIds());
+
+    for(const [key, emptyValue] of WIPE_KEYS){
+      try{
+        await withTimeout(window.storage.set(key, emptyValue(), false), WIPE_WRITE_TIMEOUT_MS, key);
+      }catch(e){
+        failedKeys.push(key);
+        console.error('[#81] clear-my-data write failed:', key, e);
+      }
+    }
+
+    /* Renders are individually guarded. A throw in one of these used to abort
+       the whole function AFTER the data was already gone, which reported
+       failure for a wipe that had actually succeeded. */
+    [renderPassport, renderMyHunts, renderGemSubmissions, refreshTargetsUI].forEach(fn=>{
+      try{ fn(); }catch(e){ console.error('[#81] post-wipe render failed:', fn.name, e); }
+    });
+
+    /* Named keys, not a generic apology. This is tested on a phone with no
+       console, so the failure has to be legible on screen or it is not
+       reportable — the same argument as #3's ai_status and #4's anchor-expiry
+       warning: a failure nobody can see is hidden, not handled. */
+    if(!failedKeys.length){
+      showToast('Data cleared.');
+      /* RELOAD ON SUCCESS, same reasoning as logout(): "simplest clean reset."
+         Re-running loadPersonal() from the server means what you end up looking
+         at is what is actually STORED, not what we hoped we set in memory. The
+         complaint that produced this line was "it does not actually load with
+         data erased" — a hand-repainted screen is a claim about the server; a
+         reloaded one is a reading of it. Deliberately NOT done on the partial
+         path: there, the mirror and the server disagree on purpose, and a
+         reload would paper over which. */
+      setTimeout(()=>location.reload(), 700);
+    }else{
+      state._wipeFailedKeys = failedKeys;
+      showToast('Partly cleared — failed: ' + failedKeys.join(', '));
+    }
+  }catch(e){
+    console.error('[#81] clear-my-data aborted:', e);
+    showToast('Clear failed: ' + (e && e.message ? e.message : 'unknown error'));
+  }finally{
+    cancelClearProgress();
   }
-  // AFTER the resets above, so it sees the wiped stats. See WIPE_KEYS below.
-  state.unlockedAchievements = new Set(survivingAchievementIds());
-
-  let allWritten = true;
-  for(const [key, emptyValue] of WIPE_KEYS){
-    try{ await window.storage.set(key, emptyValue(), false); }
-    catch(e){ allWritten = false; }
-  }
-
-  renderPassport();
-  renderMyHunts();
-  renderGemSubmissions();
-  refreshTargetsUI();
-  cancelClearProgress();
-
-  /* Honest about the offline case rather than claiming a server wipe we did not
-     observe. #1b queues the empty writes and flushes them on reconnect, so the
-     erase is real — it just is not finished yet, and saying "done" would be a
-     claim about a machine we cannot currently reach. */
-  showToast(allWritten
-    ? 'Progress cleared.'
-    : "Cleared on this phone — the rest syncs when you're back online.");
 }
 function fixMapSize(){
   if(!state.leafletMap) return;
