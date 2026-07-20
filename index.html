@@ -1442,14 +1442,15 @@
     </div>
 
     <div class="settings-section">
-      <h2>Clear my progress</h2>
+      <h2>Clear my data</h2>
       <div class="settings-card">
-        <p>Erases your captures, capture locations, travel distance and the stamps you earned from them — everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
-        <p>Your account stays open. Guides you made and gems you submitted are kept — so any stamp earned for <em>making</em> a guide is kept too.</p>
+        <p>Erases everything you've built up in Localy — your captures and the locations they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Two things this does <strong class="val">not</strong> do. Gems you've submitted stay — once approved they're public spots other people use. And guide codes you've already shared keep working for the people you sent them to, even after your copy is gone.</p>
+        <p>Your account stays open. To remove the account itself, contact support.</p>
       </div>
-      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Clear my progress</button>
+      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Clear my data</button>
       <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
-        <p>This permanently erases every capture and stamp on your account. There is no undo and no backup.</p>
+        <p>This permanently erases every capture, stamp and guide on your account. There is no undo and no backup.</p>
         <div class="confirm-row">
           <button onclick="cancelClearProgress()">Keep it</button>
           <button class="go" id="clear-progress-go" onclick="clearMyProgress()">Erase everything</button>
@@ -3734,7 +3735,7 @@ function setTab(id){
 
    THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
    practical ceiling on a phone. */
-const APP_VERSION = '2026.07.20';
+const APP_VERSION = '2026.07.20b';
 
 function openSettings(){
   const u = state.user || {};
@@ -3755,7 +3756,7 @@ function cancelClearProgress(){
   const c = document.getElementById('clear-progress-confirm');
   const b = document.getElementById('clear-progress-btn');
   if(c) c.style.display = 'none';
-  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Clear my progress'; }
+  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Clear my data'; }
 }
 
 /* THE KEYS THIS OWNS. Enumerated here rather than derived, because the cost of
@@ -3764,40 +3765,34 @@ function cancelClearProgress(){
    against loadPersonal() when a key is added there. 'my-hunts' and
    'gem-submissions' are deliberately absent — guides and submissions are
    content, not capture history, and the on-screen copy says so. */
-const PROGRESS_KEYS_TO_CLEAR = [
+const WIPE_KEYS = [
   ['progress',              ()=>JSON.stringify({})],
   ['stats',                 ()=>JSON.stringify({ totalWalkedMeters: 0 })],
-  /* NOT emptied — RE-SEEDED, and the reason is the defect this row's QA found.
-     renderAchievements() never reads state.unlockedAchievements. It recomputes
-     every badge live from computeAchievementStats(), so the grid is a query,
-     not a record. `hunt_maker` checks myHuntsCount>=1 — derived from my-hunts,
-     which this wipe deliberately keeps — so that badge stays lit after a wipe
-     no matter what we write here.
-
-     Emptying the stored set therefore did not un-light anything; it only
-     desynced the popup ledger from the screen, so the next capture would fire a
-     "Hunt Maker" popup for a badge that never went out. Writing the surviving
-     set keeps the ledger equal to what is actually displayed.
-
-     Evaluated at WRITE time, after the in-memory reset above — that ordering is
-     what makes the thunk see post-wipe stats. */
-  ['unlocked-achievements', ()=>JSON.stringify(survivingAchievementIds())],
   ['has-captured-once',     ()=>JSON.stringify(false)],
-  /* 'null' tombstone rather than a delete: there is NO window.storage.delete in
-     this environment (#4 phase 2 found this the expensive way — the call threw,
-     a silent catch swallowed it, and a stale coordinate survived indefinitely).
+  /* Guides go too. Per-guide delete already exists in Explore, and BOTH of its
+     paths (deleteMyHuntDirect / deleteCurrentHunt) remove the guide AND its
+     custom_<id> progress — so the app already treats a guide and what you
+     earned inside it as one object. Keeping them here was the only place that
+     split them, and it made the button lie about the word "everything". */
+  ['my-hunts',              ()=>JSON.stringify([])],
+  /* Local cache of your own submissions. Cleared for completeness; it refills
+     from the submissions table on the next load, because the server copy is the
+     real one and the client cannot delete it. The on-screen copy says so. */
+  ['gem-submissions',       ()=>JSON.stringify([])],
+  /* Recomputed rather than emptied. renderAchievements() never reads this — it
+     re-derives every badge live from computeAchievementStats() — so this is a
+     popup ledger, not a record. Writing the surviving set keeps the ledger
+     equal to the screen. With guides now going too, this lands empty in
+     practice; it stays derived so a future badge built on something the wipe
+     preserves cannot silently desync. Evaluated at WRITE time, after the
+     in-memory reset. */
+  ['unlocked-achievements', ()=>JSON.stringify(survivingAchievementIds())],
+  /* 'null' tombstone, not a delete: there is NO window.storage.delete in this
+     environment (#4 phase 2 found this the expensive way — the call threw, a
+     silent catch swallowed it, and a stale coordinate survived indefinitely).
      loadPersonal's `v ? JSON.parse(v) : null` already reads this back as null. */
   ['capture-anchor',        ()=>'null'],
 ];
-
-/* Which badges still legitimately pass once progress is gone. Currently exactly
-   one — hunt_maker — but derived rather than hardcoded, so a future badge built
-   on myHunts or on anything else the wipe preserves stays correct here without
-   anyone remembering this function exists. */
-function survivingAchievementIds(){
-  const stats = computeAchievementStats();
-  return ACHIEVEMENTS.filter(a=>a.check(stats)).map(a=>a.id);
-}
 
 async function clearMyProgress(){
   /* BLOCKED ON A FAILED LOAD, and this is the #1a rule applied to a deliberate
@@ -3832,16 +3827,29 @@ async function clearMyProgress(){
   state.captureAnchor = null;
   state.lastWalkPos = null;
   state.lastWalkTime = null;
-  // AFTER the resets above, so it sees the wiped stats. See the key list below.
+  state.myHunts = [];
+  state.gemSubmissions = [];
+  state.editingHuntId = null;
+  /* If the guide you were partway through is one of the guides we just deleted,
+     its points are still sitting in state.currentHunt and the map would keep
+     drawing a hunt whose definition no longer exists — a live route pointing at
+     nothing, which is worse than an empty map. refreshTargetsUI() already has
+     the correct no-hunt branch, so hand it that. */
+  if(state.currentHunt && String(state.currentHunt.key || '').indexOf('custom_') === 0){
+    state.currentHunt = null;
+  }
+  // AFTER the resets above, so it sees the wiped stats. See WIPE_KEYS below.
   state.unlockedAchievements = new Set(survivingAchievementIds());
 
   let allWritten = true;
-  for(const [key, emptyValue] of PROGRESS_KEYS_TO_CLEAR){
+  for(const [key, emptyValue] of WIPE_KEYS){
     try{ await window.storage.set(key, emptyValue(), false); }
     catch(e){ allWritten = false; }
   }
 
   renderPassport();
+  renderMyHunts();
+  renderGemSubmissions();
   refreshTargetsUI();
   cancelClearProgress();
 
