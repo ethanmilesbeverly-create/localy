@@ -470,8 +470,18 @@ function renderHunt(code, hunt){
     + '</div></li>'
   ).join('');
 
-  renderMap(hunt.points);
+  /* ORDER IS LOAD-BEARING. show() must run BEFORE renderMap().
+     #view-hunt is `display:none !important` until show() reveals it, and
+     Leaflet measures its container at construction. Built while hidden it
+     reads a zero-width box, requests a single column of tiles, and fits
+     bounds against a viewport that does not exist — which renders as a
+     narrow strip of map down the left edge and nothing else. Revealing
+     the div afterwards does not tell Leaflet anything changed.
+     Same shape as captureFromSheet() in #73: two correct operations in
+     the wrong order. index.html already carries fixMapSize() for the
+     mobile version of this. */
   show('view-hunt');
+  renderMap(hunt.points);
   document.title = hunt.name + ' — a hunt on Localy';
 }
 
@@ -517,6 +527,26 @@ function renderMap(points){
   }else{
     map.fitBounds(L.latLngBounds(latlngs).pad(0.18));
   }
+
+  /* Belt and braces on the ordering fix above. Even revealed, the grid
+     may not have settled by the time this runs, so re-measure on the next
+     frame and re-apply the view. Cheap, idempotent, and it makes the map
+     robust to any future caller that gets the order wrong again. */
+  const applyView = ()=>{
+    map.invalidateSize(false);
+    if(latlngs.length === 1) map.setView(latlngs[0], 15);
+    else map.fitBounds(L.latLngBounds(latlngs).pad(0.18));
+  };
+  requestAnimationFrame(applyView);
+
+  /* The layout goes one-column below 900px, so a mid-session resize
+     changes the container width under a map that has already measured. */
+  let resizeTimer = null;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(applyView, 180);
+  });
+
   $('map-note').textContent = 'Scroll-zoom is off so the page still scrolls. Drag to pan.';
 }
 
