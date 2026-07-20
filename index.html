@@ -3117,6 +3117,12 @@ let state = {
      conservative as before and never less. */
   simEverUsed: false,
   meIsSim: false,
+  /* #4 phase 2 — the ONE previous-capture fix, kept outside foundMeta on purpose.
+     Velocity compares consecutive captures, so it needs exactly one prior
+     coordinate, not the whole history. Holding it here means the velocity check
+     never reads foundMeta.lat/lng and #5 can decide the fate of those
+     coordinates on their own merits. See captureVelocityFlag(). */
+  captureAnchor: null,
   lastFixTime: null,   // when state.me was last written, by any path
   _arSyncTimer: null,
   _simClickBound: false
@@ -3264,6 +3270,88 @@ function pruneCaptureTelemetry(){
   return changed;
 }
 
+/* =========================================================
+   #4 PHASE 2 — IMPLIED VELOCITY BETWEEN CONSECUTIVE CAPTURES
+   =========================================================
+   The row scoped this as "flatten foundAt + foundMeta across all hunt keys,
+   find the globally-previous capture, compare." That is not how it is built,
+   and the difference is the point.
+
+   Reading the previous capture's lat/lng out of foundMeta would have made this
+   check DEPEND on the coordinates #5 wants to coarsen or strip — the conflict
+   both prior passes recorded and neither resolved. It does not have to. The
+   comparison only ever needs ONE prior fix, and that fix exists at the instant
+   of the previous capture. So it is computed here, at capture time, and what
+   gets stored is a scalar judgement rather than a location.
+
+   Net effect: velocity checking adds ONE coordinate to what the app retains
+   (this anchor, overwritten every capture, expiring on the same 30-day clock as
+   the rest of the cap block) instead of making N historical coordinates
+   load-bearing for anti-spoof. #5 is now free to decide foundMeta's coordinates
+   on #40b/#22 grounds alone, which is the question it was actually asking.
+
+   RECORD, DO NOT BLOCK — #4's standing rule. Nothing here refuses a capture,
+   and the flag is stripped by pruneCaptureTelemetry() along with everything
+   else. That is deliberate: the O'Hare case (capture, fly, capture on landing)
+   is a TRUE positive for impossible travel and a FALSE positive for cheating,
+   the 40 m/s threshold has never been validated against real data, and
+   permanently retaining an unvalidated accusation against a user is exactly the
+   kind of record #5 exists to prevent. Thirty days is long enough to look.
+
+   THE THRESHOLD IS ALMOST CERTAINLY WRONG AND THAT IS FINE FOR NOW. At 40 m/s
+   every commercial flight trips this — ORD to LAX in four hours implies ~195
+   m/s — so the dominant population of flagged records will be air travellers,
+   not spoofers. Speed alone does not separate them; what does is the SHAPE
+   (a sub-minute gap across hundreds of km is impossible, four hours is a
+   Tuesday). Which is why the measured `mps` is stored and not just a boolean:
+   the threshold can then be re-derived from what actually shows up, instead of
+   being guessed twice. Do not tune it before there is data, and do not gate a
+   capture on it before there is a prize. */
+const CAPTURE_VELOCITY_MAX_MPS = 40;              // ~90 mph — commercial flight, not a car
+const CAPTURE_ANCHOR_TTL_MS = CAP_TELEMETRY_TTL_MS;
+function captureVelocityFlag(lat, lng, now){
+  const a = state.captureAnchor;
+  if(!a || typeof a.lat !== 'number' || typeof a.lng !== 'number' || typeof a.t !== 'number') return {};
+  const elapsed = now - a.t;
+  // Stale anchor: implied speed across a month-old gap is not a measurement.
+  if(elapsed > CAPTURE_ANCHOR_TTL_MS) return {};
+  // Non-positive elapsed means a clock change, not a teleport. No judgement:
+  // the client clock is untrusted (see cap.t) and dividing by it would turn a
+  // timezone change into an accusation.
+  if(!(elapsed > 0)) return {};
+  const mps = haversine(a.lat, a.lng, lat, lng) / (elapsed / 1000);
+  if(!isFinite(mps) || mps <= CAPTURE_VELOCITY_MAX_MPS) return {};
+  return { flag: 'velocity', mps: Math.round(mps) };
+}
+
+/* Deliberately NOT routed through blockedSave()/notePersistenceIssue().
+   Those set state._unsavedSinceLoadFail, which blocks retryLoadPersonal()'s
+   self-heal — a safety mechanism protecting CAPTURES from being overwritten.
+   Letting a failed write of disposable evidence disable that would be an
+   anti-spoof nicety degrading a data-loss guard, which is the wrong trade in
+   every direction. The anchor fails silently; a missed anchor costs exactly one
+   unchecked velocity comparison. */
+async function setCaptureAnchor(lat, lng, t){
+  state.captureAnchor = { lat, lng, t };
+  if(!canPersist('capture-anchor')) return;
+  try{ await window.storage.set('capture-anchor', JSON.stringify(state.captureAnchor), false); }
+  catch(e){ /* silent by design — see above */ }
+}
+
+/* Same TTL as the cap block: the anchor is one coordinate of evidence, and
+   evidence with no expiry is just retained location data under another name. */
+async function pruneCaptureAnchor(){
+  const a = state.captureAnchor;
+  if(!a || typeof a.t !== 'number') return false;
+  if(Date.now() - a.t <= CAPTURE_ANCHOR_TTL_MS) return false;
+  state.captureAnchor = null;
+  if(canPersist('capture-anchor')){
+    try{ await window.storage.delete('capture-anchor', false); }
+    catch(e){ /* silent by design */ }
+  }
+  return true;
+}
+
 async function loadPersonal(quiet){
   await loadKey('progress',
     v=>{ state.progress = v ? JSON.parse(v) : {}; },
@@ -3280,6 +3368,13 @@ async function loadPersonal(quiet){
   await loadKey('has-captured-once',
     v=>{ state.hasCapturedOnce = v ? JSON.parse(v) === true : false; },
     ()=>{ state.hasCapturedOnce = false; });
+  /* #4 phase 2. A failed read is NOT added to the blocked set in a way that
+     matters — loadKey handles that — and the fallback is null, which simply
+     means the next capture is the first one this check can see. Losing the
+     anchor degrades to no comparison, never to a false accusation. */
+  await loadKey('capture-anchor',
+    v=>{ state.captureAnchor = v ? JSON.parse(v) : null; },
+    ()=>{ state.captureAnchor = null; });
 
   if(loadFailedKeys().size && !quiet) warnLoadFailed();
   return loadFailedKeys().size === 0;
@@ -3386,6 +3481,7 @@ async function init(){
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   pruneCaptureTelemetry(); // #4/#5 — after the migration, so it sees final hunt keys
+  pruneCaptureAnchor();    // #4 phase 2 — same TTL, same reasoning
   await loadMyGems();
   await loadApprovedGems();
   renderMyHunts();
@@ -5262,6 +5358,10 @@ async function attemptMarkFound(){
     state.progress[key].foundIds.push(id);
     state.progress[key].foundAt[id] = Date.now();
     const effectiveMode = target.category || state.currentHunt.mode;
+    /* #4 phase 2 — computed BEFORE the anchor is overwritten below, and against
+       the current fix rather than anything read back out of foundMeta. */
+    const capturedAt = Date.now();
+    const velocity = captureVelocityFlag(target.lat, target.lng, capturedAt);
     state.progress[key].foundMeta[id] = {
       name: target ? target.name : id,
       huntName: state.currentHunt.name,
@@ -5299,18 +5399,29 @@ async function attemptMarkFound(){
 
          `v` distinguishes "captured before telemetry existed" from "telemetry
          missing" — needed the day this migrates to a server-authoritative table.
+         v:2 additionally means "velocity checking was live at capture time", so
+         the absence of a velocity flag on a v:2 record is a NEGATIVE RESULT
+         rather than a gap. pruneCaptureTelemetry() preserves v, so that
+         distinction survives the TTL when nothing else does — which is the
+         entire reason the field exists.
          See pruneCaptureTelemetry(): everything here except v/sim is stripped
-         after 30 days. */
-      cap: {
-        v: 1,
+         after 30 days, and that INCLUDES the velocity flag, deliberately. */
+      cap: Object.assign({
+        v: 2,
         acc:   state.meIsSim ? null : state.meAccuracy,
         sim:   !!(state.simEverUsed || state.meIsSim),
         dist:  Math.round(dist),
         range: Math.round(captureRange),
-        t:     Date.now()   // client clock — untrusted, kept for ordering only
-      }
+        t:     capturedAt   // client clock — untrusted, kept for ordering only
+      }, velocity)
     };
     await saveProgress();
+    /* #4 phase 2 — AFTER saveProgress, and after the flag above was computed
+       against the OLD anchor. Order is load-bearing: overwriting first would
+       compare every capture against itself and the check would never fire.
+       Awaited but non-throwing (see setCaptureAnchor) so it cannot interpose a
+       failure between the capture and the rest of the flow. */
+    await setCaptureAnchor(target.lat, target.lng, capturedAt);
     if(!state.hasCapturedOnce){
       state.hasCapturedOnce = true;
       if(canPersist('has-captured-once')){
