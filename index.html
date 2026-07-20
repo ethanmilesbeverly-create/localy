@@ -1444,8 +1444,8 @@
     <div class="settings-section">
       <h2>Clear my progress</h2>
       <div class="settings-card">
-        <p>Erases your captures, capture locations, travel distance and stamps — everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
-        <p>Your account stays open, and guides you made and gems you submitted are kept.</p>
+        <p>Erases your captures, capture locations, travel distance and the stamps you earned from them — everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Your account stays open. Guides you made and gems you submitted are kept — so any stamp earned for <em>making</em> a guide is kept too.</p>
       </div>
       <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Clear my progress</button>
       <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
@@ -3767,7 +3767,21 @@ function cancelClearProgress(){
 const PROGRESS_KEYS_TO_CLEAR = [
   ['progress',              ()=>JSON.stringify({})],
   ['stats',                 ()=>JSON.stringify({ totalWalkedMeters: 0 })],
-  ['unlocked-achievements', ()=>JSON.stringify([])],
+  /* NOT emptied — RE-SEEDED, and the reason is the defect this row's QA found.
+     renderAchievements() never reads state.unlockedAchievements. It recomputes
+     every badge live from computeAchievementStats(), so the grid is a query,
+     not a record. `hunt_maker` checks myHuntsCount>=1 — derived from my-hunts,
+     which this wipe deliberately keeps — so that badge stays lit after a wipe
+     no matter what we write here.
+
+     Emptying the stored set therefore did not un-light anything; it only
+     desynced the popup ledger from the screen, so the next capture would fire a
+     "Hunt Maker" popup for a badge that never went out. Writing the surviving
+     set keeps the ledger equal to what is actually displayed.
+
+     Evaluated at WRITE time, after the in-memory reset above — that ordering is
+     what makes the thunk see post-wipe stats. */
+  ['unlocked-achievements', ()=>JSON.stringify(survivingAchievementIds())],
   ['has-captured-once',     ()=>JSON.stringify(false)],
   /* 'null' tombstone rather than a delete: there is NO window.storage.delete in
      this environment (#4 phase 2 found this the expensive way — the call threw,
@@ -3775,6 +3789,15 @@ const PROGRESS_KEYS_TO_CLEAR = [
      loadPersonal's `v ? JSON.parse(v) : null` already reads this back as null. */
   ['capture-anchor',        ()=>'null'],
 ];
+
+/* Which badges still legitimately pass once progress is gone. Currently exactly
+   one — hunt_maker — but derived rather than hardcoded, so a future badge built
+   on myHunts or on anything else the wipe preserves stays correct here without
+   anyone remembering this function exists. */
+function survivingAchievementIds(){
+  const stats = computeAchievementStats();
+  return ACHIEVEMENTS.filter(a=>a.check(stats)).map(a=>a.id);
+}
 
 async function clearMyProgress(){
   /* BLOCKED ON A FAILED LOAD, and this is the #1a rule applied to a deliberate
@@ -3804,12 +3827,13 @@ async function clearMyProgress(){
   // In-memory next, so the UI cannot re-render stale data mid-write.
   state.progress = {};
   state.totalWalkedMeters = 0;
-  state.unlockedAchievements = new Set();
   state.pendingAchievementPopups = [];
   state.hasCapturedOnce = false;
   state.captureAnchor = null;
   state.lastWalkPos = null;
   state.lastWalkTime = null;
+  // AFTER the resets above, so it sees the wiped stats. See the key list below.
+  state.unlockedAchievements = new Set(survivingAchievementIds());
 
   let allWritten = true;
   for(const [key, emptyValue] of PROGRESS_KEYS_TO_CLEAR){
