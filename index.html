@@ -679,10 +679,24 @@
   /* Empty-state card. Built for Lore (which ships empty by design) but written
      generically — it's a first slice of the rural/low-coverage empty state, and
      the copy is caller-supplied so other tabs can reuse it. */
+  /* #78c — CENTRED ON THE VIEWPORT, same geometry as #hunt-loading below.
+     Was `position:absolute; bottom:200px; left:20px; right:20px`, an anchor
+     inherited from when this was the only card on the map and it was sized to
+     sit clear of the drawer. Now that a loading card precedes it in the same
+     flow, the two must occupy the SAME box or the sequence reads as one card
+     appearing in the middle and a different, unrelated card appearing lower
+     down — when it is in fact one message resolving into its answer.
+
+     position:FIXED is safe here specifically because #app is position:relative
+     with NO transform; a transformed ancestor would silently re-base fixed
+     positioning onto it. On phones #app and the window are the same box, so a
+     future transform on #app would only show up on desktop. */
   #hunt-empty{
-    position:absolute; bottom:200px; left:20px; right:20px; z-index:520;
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:520; display:none;
+    width:min(340px, calc(100vw - 40px));
     background:var(--surface); border:1px solid var(--line);
-    border-radius:16px; padding:18px 18px 18px; display:none;
+    border-radius:16px; padding:18px 18px 18px;
     box-shadow:0 10px 30px rgba(0,0,0,0.45); text-align:center;
   }
   #hunt-empty.show{display:block;}
@@ -729,7 +743,7 @@
   #hunt-loading{
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     z-index:530; display:none; pointer-events:none;
-    width:min(260px, calc(100vw - 48px));
+    width:min(340px, calc(100vw - 40px));
     background:var(--surface); border:1px solid var(--line);
     border-radius:16px; padding:20px 18px; text-align:center;
     box-shadow:0 10px 30px rgba(0,0,0,0.45);
@@ -4194,7 +4208,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20k';
+const APP_VERSION = '2026.07.20m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
