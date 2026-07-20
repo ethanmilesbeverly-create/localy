@@ -249,26 +249,60 @@
      transform, so it does not grow into this band. The only neighbour left is
      #bottomnav directly below — which is z-index 600 against this element's
      500, so it wins any shared pixel. That is the whole collision story. */
+  /* VISUAL WEIGHT: this is a CAPTION, not a control, and every property below
+     is chosen to say so. It previously reused the floating-control treatment
+     (brand-green surface, 1px --line border, pill radius, backdrop blur),
+     which made it read as a peer of #locate-btn and #list-toggle-btn — three
+     buttons in a row, one of which does nothing you'd want.
+
+     WHAT MAKES SOMETHING RECEDE, in the order that actually matters here:
+       - colour identity: neutral black scrim, NOT --surface. Brand green is
+         this app's "interactive" signal; borrowing it is the loudest thing
+         this element was doing.
+       - border: gone. A 1px outline is the strongest "tap me" cue at this
+         size, stronger than the fill.
+       - shape: 4px radius, not 999px. Pills are buttons; slightly-rounded
+         rectangles are labels.
+       - blur: gone. backdrop-filter is expensive AND it is the glass-control
+         idiom shared with the search pill and the hunt chip.
+       - size: 9px, one notch down.
+
+     WHAT DOES *NOT* RECEDE, deliberately: contrast. The obvious way to hide
+     something is to fade it, and that is the one move that trades directly
+     against the guideline's own legibility requirement — it names font, size,
+     colour and contrast, and recommends WCAG. So the scrim is DARKER than the
+     old one, not lighter, and the text stays near full strength. Measured
+     0.62 is the scrim opacity, and it is a MEASURED FLOOR, not a taste call.
+     Against the brightest plausible CARTO tile the treatment computes to
+     4.85:1, clearing WCAG AA's 4.5:1 with a little margin; 0.58 measured 4.21
+     and 0.55 drops under 4:1. Going lighter fails on pale tiles first, which
+     is exactly where nobody looks during review. For reference, the intuitive
+     "just fade it" version — 0.70 text on a 0.35 scrim — measures 1.78:1 over
+     the same tile: invisible in practice, tasteful in a screenshot.
+     Quiet comes from being small, neutral and borderless, not from being
+     faint. If this ever needs to recede further, take it out of the size and
+     the shape, never out of the contrast. */
   #map-attrib{
     position:absolute;
     left:50%;transform:translateX(-50%);
     bottom:calc(71px + env(safe-area-inset-bottom));
     z-index:500;
     display:flex;align-items:center;
-    height:22px;
+    height:20px;
     max-width:calc(100% - 32px);
-    padding:0 11px;border-radius:999px;
-    background:rgba(23,50,41,0.92);
-    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-    border:1px solid var(--line);
-    color:var(--text-dim);
-    font-family:inherit;font-size:9.5px;letter-spacing:0.03em;
+    padding:0 7px;border-radius:4px;
+    background:rgba(0,0,0,0.62);
+    border:none;
+    color:rgba(237,233,221,0.92);
+    font-family:inherit;font-size:9px;letter-spacing:0.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     touch-action:manipulation;
   }
-  #map-attrib:active{background:var(--surface-2);}
+  /* No --surface-2 flash on press: that is the control language again. A
+     small brightness lift is enough to confirm the tap landed. */
+  #map-attrib:active{background:rgba(0,0,0,0.72);}
   /* Invisible hit expander: the pill is 22px tall, half the 44px touch
      minimum. Anchored downward rather than centred so the extra height falls
      onto #bottomnav (z-index 600, wins) instead of upward into the capture
@@ -3463,6 +3497,7 @@ let state = {
   browsingLocation: null,
   searchedArea: null,   // #8 — set while content is anchored to a panned-to area
   _addrCache: new Map(),   // #18 — rounded coords -> short address (or null after a failed lookup)
+  settingsReturn: null,    // #91 — which tab Settings' Back button returns to
   _programmaticViewChange: false,
   meAccuracy: null,
   lastWalkPos: null,
@@ -3974,9 +4009,15 @@ function goToModeSelect(){
   document.getElementById('bottomnav').classList.remove('hidden');
   setTab('screen-modes');
 }
+/* #91 — split out of setTab() so a screen that is NOT a tab can still say
+   which tab it belongs to. Settings needs exactly that: it lights Passport
+   while being its own screen. */
+function setNavActive(id){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
+}
 function setTab(id){
   showScreen(id);
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
+  setNavActive(id);
   if(id==='screen-map' && state.leafletMap){
     fixMapSize();
   }
@@ -3996,11 +4037,26 @@ function setTab(id){
    DELIBERATELY NOT ROUTED THROUGH setTab(). setTab toggles .nav-btn.active by
    dataset.screen, and no nav button carries 'screen-settings' — so going
    through it would darken every button in the footer and the app would look
-   broken while you were in here. showScreen() alone leaves Passport lit, which
-   is the truth: settings is a room inside the passport, not a sixth tab.
+   broken while you were in here. Settings lights PASSPORT, which is the truth:
+   settings is a room inside the passport, not a sixth tab.
 
-   THE GEAR IS THE ONLY ENTRANCE, by decision. Five nav tabs is already the
-   practical ceiling on a phone. */
+   ~~THE GEAR IS THE ONLY ENTRANCE, by decision.~~ **STALE — item 91 added a
+   second entrance (the map credit pill) and broke this row's assumption
+   without noticing.** The original code relied on the gear being the only way
+   in: it called showScreen() and let whatever the nav already showed stand,
+   which was always Passport because you could only arrive from Passport.
+   Entering from the map left MAP lit while Settings was on screen — the footer
+   claiming you were somewhere you were not.
+
+   THE LESSON, and it generalises past this row: AN INVARIANT ENFORCED BY
+   "THERE IS ONLY ONE CALLER" IS NOT ENFORCED. Nothing in the code said the
+   gear was the only entrance; a comment said it, and the second caller did not
+   read the comment. Now openSettings() sets the nav explicitly rather than
+   inheriting it, so it is correct from any entrance, and it takes a return
+   target so Back goes where you came from instead of always dumping you on
+   Passport. Five nav tabs is still the practical ceiling on a phone — the
+   decision that mattered was that settings is not a sixth tab, and that
+   stands. */
 /* #91 — BUMP THIS ON EVERY DELIVERED FILE, WITHOUT EXCEPTION.
 
    It sat at '2026.07.20e' across four consecutive delivered builds — the
@@ -4015,7 +4071,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20g';
+const APP_VERSION = '2026.07.20i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4043,7 +4099,7 @@ const APP_VERSION = '2026.07.20g';
    coexist with, and one honest control beats two overlapping ones. */
 const SHOW_CLEAR_MY_DATA = false;
 
-function openSettings(){
+function openSettings(returnTo){
   const u = state.user || {};
   document.getElementById('settings-email').textContent = u.email || 'unknown';
   document.getElementById('settings-version').textContent = APP_VERSION;
@@ -4052,7 +4108,16 @@ function openSettings(){
      to the inline style so flipping the constant is genuinely the only edit. */
   const dataSection = document.getElementById('clear-data-section');
   if(dataSection) dataSection.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
+  /* #91 — where Back goes. Defaults to the passport because the gear is still
+     the primary entrance; the map credit passes 'screen-map' so the pill is a
+     round trip rather than a one-way door onto a screen you weren't on. */
+  state.settingsReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-passport';
   showScreen('screen-settings');
+  /* #91 — SET, don't inherit. This used to rely on the nav already showing
+     Passport, which was only ever true because the gear was the sole entrance.
+     Stating it here makes the footer correct from any entrance, including ones
+     that don't exist yet. */
+  setNavActive('screen-passport');
 }
 /* =========================================================
    #91 — CREDITS ENTRY POINT
@@ -4089,7 +4154,7 @@ function openSettings(){
    at the top, let the user scroll) is the zero-risk fallback and costs only a
    little discoverability. */
 function openCredits(){
-  openSettings();
+  openSettings('screen-map');
   /* Deferred a frame: showScreen() sets scrollTop = 0 on the way in, so
      scrolling before it has run lands nowhere. */
   requestAnimationFrame(()=>{
@@ -4104,7 +4169,11 @@ function openCredits(){
 }
 function closeSettings(){
   cancelClearProgress();
-  setTab('screen-passport');
+  /* #91 — returns to the entrance rather than always to the passport. Before
+     this, opening Settings from the map credit and pressing Back stranded you
+     on the passport, two screens from where you started. */
+  setTab(state.settingsReturn || 'screen-passport');
+  state.settingsReturn = null;
 }
 function askClearProgress(){
   document.getElementById('clear-progress-confirm').style.display = 'block';
