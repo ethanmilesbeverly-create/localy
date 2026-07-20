@@ -107,9 +107,14 @@
     color:var(--text);
     font-weight:600;
   }
+  /* #88 — position:relative added so the suggest dropdown can hang off the pill.
+     Without it the dropdown resolves against #map-top-row, which is 16px inset
+     from BOTH edges and shares its box with #hunt-chip, so the list rendered
+     under the chip as well as the input. */
   #map-search-row{
     flex:1;min-width:0;
     display:flex;gap:6px;
+    position:relative;
   }
   /* #11 (regression fix) — this rule is MORE SPECIFIC than the shared input rule
      and was still setting 13px, so the header search pill kept triggering iOS
@@ -121,6 +126,90 @@
     flex:1;min-width:0;background:rgba(23,50,41,0.95);backdrop-filter:blur(8px);
     border:1px solid var(--line);color:var(--text);
     border-radius:999px;padding:7px 12px;font-size:16px;font-family:inherit;
+  }
+
+  /* ---------- #88: place suggest dropdown (shared component) ----------
+     Used by the map header pill and the hunt-builder location field. One rule
+     set, two hosts, so the two search surfaces cannot drift apart again.
+
+     OPAQUE ON PURPOSE. The pill above it is rgba(23,50,41,0.95) + backdrop
+     blur, which is fine for one line of text but the same treatment on a
+     5-row list sitting over bright map tiles is the #34 failure again —
+     a tint the map reads straight through. --surface is solid; the blur is
+     kept only so the edge against the pill doesn't look like a seam. */
+  .place-suggest{
+    display:none;
+    position:absolute;
+    top:calc(100% + 6px);left:0;right:0;
+    z-index:20;
+    background:var(--surface);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 8px 24px rgba(0,0,0,0.45);
+    overflow:hidden;
+    max-height:min(52vh, 320px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .place-suggest.show{display:block;}
+  .place-suggest-row{
+    display:block;width:100%;text-align:left;
+    background:transparent;border:0;
+    border-left:2px solid transparent;
+    padding:10px 13px;
+    font-family:inherit;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .place-suggest-row + .place-suggest-row{
+    border-top:1px solid var(--line);
+  }
+  /* The left rule is the only decoration in here and it does one job: mark the
+     row Enter will commit. Nothing else in the app uses it, so it never reads
+     as ornament. Colour alone would fail for the ~8% who can't separate the
+     orange from the cream, hence a shape change too. */
+  .place-suggest-row.active{
+    background:var(--surface-2);
+    border-left-color:var(--orange);
+  }
+  .place-suggest-title{
+    display:block;
+    font-size:14.5px;font-weight:600;color:var(--text);
+    line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .place-suggest-sub{
+    display:block;
+    margin-top:2px;
+    font-size:12px;color:var(--text-dim);
+    line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  /* Status rows (searching / nothing found / unreachable) are NOT buttons and
+     must not look tappable — no hover, no active rule, no pointer. */
+  .place-suggest-status{
+    padding:11px 13px;
+    font-size:12.5px;color:var(--text-dim);
+    line-height:1.4;
+  }
+  .place-suggest-status b{color:var(--text);font-weight:600;}
+  .place-suggest-attrib{
+    padding:7px 13px 8px;
+    border-top:1px solid var(--line);
+    font-size:10.5px;letter-spacing:0.04em;
+    color:var(--text-dim);opacity:0.75;
+  }
+  /* Hunt-builder host. .location-search-row is the flex wrapper around the
+     input + Go button; the dropdown spans the whole row, button included. */
+  .location-search-row{position:relative;}
+  @media (prefers-reduced-motion: no-preference){
+    .place-suggest{animation:placeSuggestIn .13s ease-out;}
+    @keyframes placeSuggestIn{
+      from{opacity:0;transform:translateY(-4px);}
+      to{opacity:1;transform:translateY(0);}
+    }
   }
   /* #34 — was rgba(216,166,58,0.15): a 15% tint the map read straight through,
      leaving yellow-on-yellow-on-map that was barely legible over light tiles.
@@ -1290,7 +1379,7 @@
     <div class="field">
       <label class="field-label">Planning ahead? Jump the map somewhere else</label>
       <div class="location-search-row">
-        <input type="text" id="create-location-search" placeholder="City, address, or zip code" onkeydown="if(event.key==='Enter'){event.preventDefault();searchCreateLocation();}">
+        <input type="text" id="create-location-search" placeholder="City, address, or zip code" enterkeyhint="search">
         <button type="button" id="create-location-search-btn" class="btn small" onclick="searchCreateLocation()">Go</button>
       </div>
     </div>
@@ -1322,7 +1411,12 @@
     <div id="map-vignette"></div>
     <div id="map-top-row">
       <div id="map-search-row">
-        <input type="text" id="map-search-input" placeholder="Search a place" enterkeyhint="search" onkeydown="if(event.key==='Enter'){event.preventDefault();searchMapLocation();}">
+        <!-- #88 — the inline onkeydown Enter handler is GONE. attachPlaceSuggest()
+             binds its own keydown and owns Enter (commit highlighted result, or
+             fall back to the single-hit lookup). Leaving the attribute here made
+             both fire, so Enter jumped to Photon's top hit AND to Nominatim's,
+             two different places, in that order. -->
+        <input type="text" id="map-search-input" placeholder="Search a place" enterkeyhint="search">
       </div>
       <div id="hunt-chip" onclick="goToModeSelect()">
         <span class="name" id="hunt-chip-name">Choose a hunt</span>
@@ -3654,6 +3748,7 @@ async function init(){
   renderPassport();
   setupBaseMap();
   wirePinSheet();
+  wirePlaceSuggest();   // #88 — both location search fields get the dropdown
   startLocalHunt(FALLBACK_LOCATION); // content immediately, refined once real location resolves
   fixMapSize();
   startLocating();
@@ -3697,7 +3792,26 @@ function showToast(msg){
 /* =========================================================
    NAV / SCREENS
    ========================================================= */
+/* #88 — controllers kept so a screen change can force the list shut. The
+   outside-tap listener does not fire for a programmatic navigation (bottom
+   nav routes through showScreen, not through a tap on the map), so without
+   this the dropdown survives underneath the next screen. */
+const placeSuggest = {map:null, create:null};
+function wirePlaceSuggest(){
+  placeSuggest.map = attachPlaceSuggest('map-search-input', place=>{
+    document.getElementById('map-search-input').value = '';
+    enterLocationBrowseMode({lat:place.lat, lng:place.lng}, place.name);
+  });
+  placeSuggest.create = attachPlaceSuggest('create-location-search', place=>{
+    jumpCreateMapTo(place);
+  });
+}
+function closeAllPlaceSuggest(){
+  if(placeSuggest.map) placeSuggest.map.close();
+  if(placeSuggest.create) placeSuggest.create.close();
+}
 function showScreen(id){
+  closeAllPlaceSuggest();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el = document.getElementById(id);
   el.classList.add('active');
@@ -4345,26 +4459,308 @@ function regenerateCurrentHuntAt(base){
     if(state.currentHunt) showToast("This hunt's spots are fixed — showing the area, but the list won't change");
   }
 }
-async function searchMapLocation(){
-  const input = document.getElementById('map-search-input');
-  const q = input.value.trim();
-  if(!q) return;
-  try{
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`);
-    if(!res.ok) throw new Error('search failed');
-    const data = await res.json();
-    if(data && data.length>0){
-      const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-      const placeName = data[0].display_name.split(',')[0];
-      enterLocationBrowseMode({lat,lng}, placeName);
-      input.value = '';
-    } else {
-      showToast("Couldn't find that place — try a different search");
-    }
-  }catch(e){
-    showToast("Location search isn't available here — try again later");
-  }
+/* =========================================================
+   #88 — PLACE SUGGEST (shared type-ahead component)
+   =========================================================
+   Replaces two independent `limit=1` Nominatim calls that took the first hit
+   blind (`searchMapLocation`, `searchCreateLocation`). Both now render a real
+   list and let the user pick.
+
+   WHY PHOTON AND NOT NOMINATIM. Nominatim's usage policy caps ~1 req/sec and
+   explicitly discourages per-keystroke autocomplete, so a type-ahead built on
+   it has to hide behind a ~500ms debounce and still be impolite. Photon
+   (Komoot, same OSM data, Apache-2.0) is purpose-built for search-as-you-type
+   and asks only that usage stay reasonable. No key, no billing, no secret —
+   so there is NOTHING to configure outside this file for this feature.
+
+   NOMINATIM IS NOT REMOVED. It stays as the Enter-key fallback via
+   `geocodeFirstHit()`, so if Photon is down/blocked the pill degrades to
+   exactly the behaviour it had before this change rather than to nothing.
+   Reverse geocoding for #18's address row is untouched and still Nominatim.
+
+   PHOTON HAS NO display_name. Nominatim hands back one pre-joined string;
+   Photon returns GeocodeJson properties (name/street/housenumber/city/
+   state/country) and expects the client to compose the label. That is what
+   `photonLabel()` is for — do not go looking for a display_name field.
+
+   THE TAP BUG THIS AVOIDS. Closing the list on the input's `blur` fires
+   BEFORE the tap lands on a row, so the row is gone by the time the click
+   resolves and nothing is ever selectable. Selection is therefore committed
+   on pointerup with pointerdown preventDefault()'d (keeps focus, kills the
+   synthetic-click delay), and a >10px drag between the two is treated as a
+   scroll, not a pick. */
+
+const PHOTON_ENDPOINT = 'https://photon.komoot.io/api/';
+const SUGGEST_DEBOUNCE_MS = 220;   // Photon is built for this; no need for Nominatim's 500
+const SUGGEST_MIN_CHARS = 2;
+const SUGGEST_LIMIT = 5;
+
+/* Compose a two-line label out of Photon's GeocodeJson properties.
+   title = the thing you searched for; sub = enough context to tell two
+   identically-named places apart, which is the entire point of the dropdown. */
+function photonLabel(p){
+  const street = [p.housenumber, p.street].filter(Boolean).join(' ');
+  const title = p.name || street || p.city || p.state || p.country || 'Unnamed place';
+  const sub = [
+    (title !== street ? street : ''),
+    p.district,
+    p.city || p.county,
+    p.state,
+    p.country
+  ].filter(Boolean);
+  // de-dupe: "Chicago, Chicago, Illinois" reads like a bug even when it isn't
+  const seen = new Set([title.toLowerCase()]);
+  const subOut = sub.filter(s=>{
+    const k = String(s).toLowerCase();
+    if(seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return {title, sub: subOut.join(', ')};
 }
+
+/* Photon forward search -> normalised [{name, sub, lat, lng}].
+   Biased toward wherever the user is actually looking (browse target first,
+   real position second) so "main street" resolves near them and not in the
+   first Main Street on earth. Throws on transport failure so the caller can
+   fall back. */
+async function photonSearch(q, signal){
+  const anchor = state.browsingLocation || state.searchedArea || state.me;
+  let url = PHOTON_ENDPOINT + '?q=' + encodeURIComponent(q)
+          + '&limit=' + SUGGEST_LIMIT + '&lang=en';
+  if(anchor && isFinite(anchor.lat) && isFinite(anchor.lng)){
+    url += '&lat=' + anchor.lat.toFixed(4) + '&lon=' + anchor.lng.toFixed(4);
+  }
+  const res = await fetch(url, {signal});
+  if(!res.ok) throw new Error('photon ' + res.status);
+  const json = await res.json();
+  const feats = (json && json.features) || [];
+  const out = [];
+  const seen = new Set();
+  feats.forEach(f=>{
+    const c = f.geometry && f.geometry.coordinates;
+    if(!c || c.length < 2) return;
+    const lng = parseFloat(c[0]), lat = parseFloat(c[1]);
+    if(!isFinite(lat) || !isFinite(lng)) return;
+    const {title, sub} = photonLabel(f.properties || {});
+    const key = (title + '|' + sub).toLowerCase();
+    if(seen.has(key)) return;   // Photon can return the node and the way for one place
+    seen.add(key);
+    out.push({name:title, sub, lat, lng});
+  });
+  return out;
+}
+
+/* The old behaviour, kept whole: one Nominatim hit, no choice. Only reachable
+   now when Photon has failed and the user presses Enter anyway. */
+async function geocodeFirstHit(q){
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`
+  );
+  if(!res.ok) throw new Error('nominatim ' + res.status);
+  const data = await res.json();
+  if(!data || !data.length) return null;
+  return {
+    name: String(data[0].display_name).split(',')[0],
+    sub: String(data[0].display_name),
+    lat: parseFloat(data[0].lat),
+    lng: parseFloat(data[0].lon)
+  };
+}
+
+/* Bind a suggest dropdown to a text input.
+   onPick(place) fires with {name, sub, lat, lng}. Returns a controller so
+   callers can close it on screen changes. */
+function attachPlaceSuggest(inputId, onPick){
+  const input = document.getElementById(inputId);
+  if(!input || input._suggestBound) return null;
+  input._suggestBound = true;
+
+  const host = input.parentElement;
+  const list = document.createElement('div');
+  list.className = 'place-suggest';
+  list.id = inputId + '-suggest';
+  list.setAttribute('role', 'listbox');
+  host.appendChild(list);
+
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-autocomplete', 'list');
+  input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-controls', list.id);
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('autocorrect', 'off');
+  input.setAttribute('spellcheck', 'false');
+
+  const st = {results:[], active:-1, seq:0, ctrl:null, timer:null, failed:false, open:false};
+
+  function close(){
+    st.open = false;
+    st.active = -1;
+    list.classList.remove('show');
+    list.innerHTML = '';
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    if(st.ctrl){ st.ctrl.abort(); st.ctrl = null; }
+    clearTimeout(st.timer);
+  }
+
+  function openWith(html){
+    list.innerHTML = html;
+    list.classList.add('show');
+    st.open = true;
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  function renderStatus(msg){
+    st.results = [];
+    st.active = -1;
+    input.removeAttribute('aria-activedescendant');
+    openWith('<div class="place-suggest-status">' + msg + '</div>');
+  }
+
+  function renderResults(){
+    if(!st.results.length){
+      renderStatus('No match for that. Try a city, a full address, or a zip code.');
+      return;
+    }
+    const rows = st.results.map((r, i)=>
+      '<button type="button" class="place-suggest-row' + (i === st.active ? ' active' : '') +
+      '" role="option" aria-selected="' + (i === st.active) + '" id="' + list.id + '-opt' + i +
+      '" data-i="' + i + '">' +
+      '<span class="place-suggest-title">' + escapeHtml(r.name) + '</span>' +
+      (r.sub ? '<span class="place-suggest-sub">' + escapeHtml(r.sub) + '</span>' : '') +
+      '</button>'
+    ).join('');
+    openWith(rows + '<div class="place-suggest-attrib">Places from OpenStreetMap</div>');
+    syncActive();
+  }
+
+  function syncActive(){
+    const rows = list.querySelectorAll('.place-suggest-row');
+    rows.forEach((el, i)=>{
+      const on = i === st.active;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-selected', on ? 'true' : 'false');
+      if(on){
+        input.setAttribute('aria-activedescendant', el.id);
+        if(el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+      }
+    });
+    if(st.active < 0) input.removeAttribute('aria-activedescendant');
+  }
+
+  function commit(place){
+    if(!place) return;
+    close();
+    input.blur();
+    onPick(place);
+  }
+
+  async function run(q){
+    const my = ++st.seq;
+    if(st.ctrl) st.ctrl.abort();
+    st.ctrl = new AbortController();
+    renderStatus('Searching…');
+    try{
+      const results = await photonSearch(q, st.ctrl.signal);
+      if(my !== st.seq) return;            // a newer keystroke already won
+      st.failed = false;
+      st.results = results;
+      st.active = results.length ? 0 : -1; // pre-arm Enter on the top hit
+      renderResults();
+    }catch(err){
+      if(err && err.name === 'AbortError') return;
+      if(my !== st.seq) return;
+      st.failed = true;
+      renderStatus('Search is unreachable right now. Press <b>Enter</b> to try the basic lookup, or pan the map instead.');
+    }
+  }
+
+  input.addEventListener('input', ()=>{
+    clearTimeout(st.timer);
+    const q = input.value.trim();
+    st.failed = false;
+    if(q.length < SUGGEST_MIN_CHARS){ close(); return; }
+    st.timer = setTimeout(()=>run(q), SUGGEST_DEBOUNCE_MS);
+  });
+
+  input.addEventListener('keydown', async (e)=>{
+    if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      if(!st.open || !st.results.length) return;
+      e.preventDefault();
+      const d = e.key === 'ArrowDown' ? 1 : -1;
+      st.active = (st.active + d + st.results.length) % st.results.length;
+      syncActive();
+      return;
+    }
+    if(e.key === 'Escape'){
+      if(st.open){ e.preventDefault(); close(); }
+      return;
+    }
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      if(st.active >= 0 && st.results[st.active]){
+        commit(st.results[st.active]);
+        return;
+      }
+      // Nothing highlighted: either the list never opened or Photon fell over.
+      const q = input.value.trim();
+      if(!q) return;
+      clearTimeout(st.timer);
+      renderStatus('Searching…');
+      try{
+        const hit = await geocodeFirstHit(q);
+        if(hit) commit(hit);
+        else renderStatus('No match for that. Try a city, a full address, or a zip code.');
+      }catch(_){
+        renderStatus('Search is unavailable right now — pan the map instead.');
+      }
+    }
+  });
+
+  /* pointerdown: keep focus (no keyboard flicker) and remember where the
+     finger went down. pointerup: commit only if it did not travel — a drag
+     that starts on a row is someone scrolling the list, not choosing. */
+  let downAt = null, downIdx = -1;
+  list.addEventListener('pointerdown', (e)=>{
+    const row = e.target.closest('.place-suggest-row');
+    if(!row) return;
+    e.preventDefault();
+    downAt = {x:e.clientX, y:e.clientY};
+    downIdx = parseInt(row.dataset.i, 10);
+    st.active = downIdx;
+    syncActive();
+  });
+  list.addEventListener('pointerup', (e)=>{
+    if(downIdx < 0 || !downAt) return;
+    const moved = Math.abs(e.clientX - downAt.x) > 10 || Math.abs(e.clientY - downAt.y) > 10;
+    const idx = downIdx;
+    downAt = null; downIdx = -1;
+    if(moved) return;
+    commit(st.results[idx]);
+  });
+  list.addEventListener('pointercancel', ()=>{ downAt = null; downIdx = -1; });
+
+  /* Tapping anywhere else closes it. Capture phase so a tap on the map, which
+     Leaflet will happily swallow, still reaches us first. */
+  document.addEventListener('pointerdown', (e)=>{
+    if(!st.open) return;
+    if(host.contains(e.target)) return;
+    close();
+  }, true);
+
+  return {close, el:list};
+}
+
+/* #88 — `searchMapLocation()` is DELETED, not unwired. Its only caller was the
+   inline onkeydown on #map-search-input, and its whole body (geocode the query,
+   take the first hit, enterLocationBrowseMode) is now the Enter fallback branch
+   inside attachPlaceSuggest. Leaving it defined would have left a
+   plausible-looking global that nothing calls and that would silently diverge
+   from the real path the first time either changed. The create screen's
+   `searchCreateLocation()` survives because it still has a real caller: the
+   Go button, which the map pill does not have. */
+
 /* #19 REVERSED. The banner was kept on the argument that browse mode is signalled
    only by an ABSENCE (your marker and range circle disappear) and nobody notices
    an absence. That was true when it was written; it is weaker now, because #18
@@ -4734,6 +5130,10 @@ function toggleDrawer(){
   const drawer = document.getElementById('target-drawer');
   const nowCollapsed = drawer.classList.toggle('collapsed');
   document.getElementById('screen-map').classList.toggle('drawer-open', !nowCollapsed);
+  // #88 — .drawer-open hides #map-search-row in CSS, which takes the dropdown
+  // with it visually but leaves it "open" in state: reopening the drawer would
+  // then show a stale list against a query the user has forgotten typing.
+  if(!nowCollapsed) closeAllPlaceSuggest();
 }
 function selectExplore(cat){
   const base = state.me || FALLBACK_LOCATION;
@@ -4771,6 +5171,11 @@ function startRandomHunt(){
   showToast('Random hunt from real spots near you');
 }
 
+/* #88 — this is now ONLY the Go button. The dropdown does the real work; Go is
+   the escape hatch for someone who typed and never looked down, and for the
+   case where Photon is unreachable. Kept deliberately on Nominatim single-hit
+   so the two failure modes are independent — if both providers are down the
+   button says so instead of spinning. */
 async function searchCreateLocation(){
   const input = document.getElementById('create-location-search');
   const q = input.value.trim();
@@ -4780,15 +5185,9 @@ async function searchCreateLocation(){
   btn.textContent = '...';
   btn.disabled = true;
   try{
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`);
-    if(!res.ok) throw new Error('search failed');
-    const data = await res.json();
-    if(data && data.length>0){
-      const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-      if(state.createMap){
-        state.createMap.setView([lat,lng], 14);
-      }
-      showToast(`Showing ${data[0].display_name.split(',')[0]}`);
+    const hit = await geocodeFirstHit(q);
+    if(hit){
+      jumpCreateMapTo(hit);
     } else {
       showToast("Couldn't find that place — try a different search");
     }
@@ -4798,6 +5197,16 @@ async function searchCreateLocation(){
     btn.textContent = original;
     btn.disabled = false;
   }
+}
+/* Single place the create-map camera moves, so the dropdown and the Go button
+   cannot diverge on zoom level or toast copy. */
+function jumpCreateMapTo(place){
+  closeAllPlaceSuggest();  // Go sits INSIDE the dropdown's host, so the
+                           // outside-tap listener never fires for it
+  if(state.createMap){
+    state.createMap.setView([place.lat, place.lng], 14);
+  }
+  showToast(`Showing ${place.name}`);
 }
 function openSuggestGemScreen(){
   showScreen('screen-suggest-gem');
@@ -5428,6 +5837,7 @@ function openPinSheet(t){
   // #8 — the sheet occupies the bottom of the viewport, which is where the
   // "Search this area" pill now lives. Same mechanism the drawer already uses.
   document.getElementById('screen-map').classList.add('sheet-open');
+  closeAllPlaceSuggest();   // #88 — sheet takes over the screen; stale list must go
   refreshTargetsUI();
 }
 function closePinSheet(){
