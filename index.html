@@ -3339,15 +3339,47 @@ async function setCaptureAnchor(lat, lng, t){
 }
 
 /* Same TTL as the cap block: the anchor is one coordinate of evidence, and
-   evidence with no expiry is just retained location data under another name. */
+   evidence with no expiry is just retained location data under another name.
+
+   THERE IS NO window.storage.delete IN THIS ENVIRONMENT. It was called here on
+   the strength of the documented API and it does not exist — `typeof` returns
+   "undefined", the call threw a TypeError, and the original silent catch
+   swallowed it: memory was cleared, this function returned true, and the row
+   survived in storage indefinitely. Caught by QA step 3.2 on 2026-07-19, and
+   only because the check read storage back rather than trusting the return
+   value. Nothing else in the app calls storage.delete, so this was the only
+   instance.
+
+   Expiry is therefore an OVERWRITE, not a deletion, and it is described that
+   way on purpose: the key remains, its coordinates do not. loadPersonal's
+   `v ? JSON.parse(v) : null` parses the 'null' string back to null, so the
+   read path needs no change. If a delete method ever appears, the branch below
+   picks it up.
+
+   AND THE CATCH IS NO LONGER SILENT. setCaptureAnchor's silence is correct — a
+   failed WRITE of disposable evidence must not trip _unsavedSinceLoadFail and
+   disable the self-heal that protects captures. A failed EXPIRY is the opposite
+   case: it means location data that was supposed to age out did not, which is
+   the exact outcome #5 exists to prevent, and a failure nobody can see is
+   hidden rather than handled (#3's lesson, arriving in a different row). It
+   warns and sets a flag instead of toasting, because the user cannot act on it
+   and the person who needs to see it is whoever is reading the console. */
 async function pruneCaptureAnchor(){
   const a = state.captureAnchor;
   if(!a || typeof a.t !== 'number') return false;
   if(Date.now() - a.t <= CAPTURE_ANCHOR_TTL_MS) return false;
   state.captureAnchor = null;
   if(canPersist('capture-anchor')){
-    try{ await window.storage.delete('capture-anchor', false); }
-    catch(e){ /* silent by design */ }
+    try{
+      if(typeof window.storage.delete === 'function'){
+        await window.storage.delete('capture-anchor', false);
+      } else {
+        await window.storage.set('capture-anchor', 'null', false);
+      }
+    }catch(e){
+      state._anchorExpiryFailed = true;
+      console.warn('[#4/#5] capture-anchor expiry did NOT persist — stale coordinate still in storage:', e);
+    }
   }
   return true;
 }
