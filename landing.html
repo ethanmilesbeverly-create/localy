@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A hunt on Localy</title>
+<!-- A shared hunt is a named list of places somebody walks to, often near where
+     they live. The data is already reachable with the anon key, but an HTML page
+     a crawler can index is a different kind of findable than a REST row you need
+     the exact key for. Off by default; removing this is a deliberate decision,
+     not something that should happen by omission. Adjacent to #5. -->
+<meta name="robots" content="noindex, nofollow">
+
+<!-- ============================================================
+     landing.html — SHARE-LINK LANDING PAGE (roadmap item 49a)
+
+     THIS FILE IS READ-ONLY BY CONSTRUCTION AND MUST STAY THAT WAY.
+
+     It contains NO call to navigator.geolocation, NO capture path, NO
+     AR, and NO simulate-on-click. That is not a styling decision, it is
+     the anti-spoof rule from item 4 enforced architecturally rather
+     than by a conditional someone can regress.
+
+     WHY: on desktop there is no GPS. Browser geolocation is wifi/IP
+     triangulation or an outright denial, so enableSimulateOnClick()
+     would fire on essentially every desktop session — and capture()
+     gates on distance only, never on whether the position was measured
+     or tapped. A pretty desktop map with a Capture button is a
+     click-to-teleport stamp console. Today that is contained only by
+     the fact that index.html renders as a 480px column on a monitor,
+     which is neglect pointing the right way, not a control.
+
+     The rule, stated so it does not have to be re-derived:
+       CAPTURE IS MOBILE-ONLY BECAUSE DESKTOP HAS NO GPS, AND
+       SIMULATE-MODE CAPTURE IS ITEM 4'S CHEAPEST ATTACK VECTOR.
+
+     If a future pass wants desktop capture, it inherits item 4 phase 2
+     (the judging layer) as a hard prerequisite. Do not add it here.
+
+     "#N" = a row in localy-roadmap.md. Stable IDs, never renumbered.
+     ============================================================ -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  /* Tokens lifted verbatim from index.html. Deliberate: this page's job is
+     to be recognised as the same product when the invited user opens the
+     app twenty minutes later on their phone. A separate brand here would
+     be a worse page that looked more designed. */
+  :root{
+    --bg:#10231C;
+    --surface:#173229;
+    --surface-2:#1F3F32;
+    --surface-3:#264a3a;
+    --text:#EDE9DD;
+    --text-dim:#9FB3A4;
+    --line:rgba(237,233,221,0.12);
+    --orange:#E8622C;
+    --yellow:#D9B44A;
+    --blue:#4C8FC0;
+    --violet:#9A7FBF;
+    --moss:#6FA85C;
+    --danger:#C0524C;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .display{
+    font-family:Futura,"Century Gothic","Trebuchet MS",sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-weight:700;
+  }
+  a{color:var(--yellow);}
+
+  /* Ambient texture: a very faint contour wash, so a wide monitor is not a
+     flat slab of green. Fixed, non-interactive, cheap. */
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, rgba(111,168,92,0.10), transparent 60%),
+      radial-gradient(900px 600px at 105% 20%, rgba(76,143,192,0.08), transparent 60%);
+  }
+
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 24px 72px;}
+
+  /* ---------- masthead ---------- */
+  .masthead{display:flex; align-items:center; gap:10px; padding:26px 0 0;}
+  .mark{width:26px; height:26px; flex:none;}
+  .wordmark{font-size:17px;}
+  .masthead .eyebrow{
+    margin-left:auto; font-size:11px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--text-dim);
+  }
+
+  /* ---------- mobile bounce bar (#49a) ---------- */
+  /* Someone opening a share link ON A PHONE should not be reading a preview
+     page. Prominent, top, not an auto-redirect — auto-redirect breaks the
+     back button and hides the fact that a page existed at all. */
+  .bounce{display:none; margin:20px 0 0;}
+  .bounce a{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:var(--orange); color:#fff; text-decoration:none;
+    padding:16px; border-radius:var(--radius); font-size:16px; font-weight:700;
+  }
+  body.is-mobile .bounce{display:block;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:52px 0 0; max-width:760px;}
+  .kicker{
+    font-size:12px; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--moss); margin:0 0 14px;
+  }
+  h1.title{
+    font-family:Futura,"Century Gothic","Trebuchet MS",sans-serif;
+    font-weight:700; letter-spacing:0.01em;
+    font-size:clamp(34px, 6vw, 60px); line-height:1.05; margin:0;
+  }
+  .subline{color:var(--text-dim); font-size:17px; margin:16px 0 0; max-width:52ch;}
+
+  /* ---------- SIGNATURE: the empty passport strip ---------- */
+  /* The one memorable element. The product's payload is stamps, and the whole
+     argument of this page is that you cannot get them here. So the page shows
+     the exact stamps this hunt is worth, all of them empty, none of them
+     collectable on this screen. It carries the CTA better than a headline
+     could, and it makes the no-capture rule legible instead of arbitrary. */
+  .passport{margin:38px 0 0;}
+  .passport-label{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--text-dim); margin:0 0 14px;
+  }
+  .stamps{display:flex; flex-wrap:wrap; gap:12px;}
+  .stamp{
+    width:82px; height:82px; flex:none; border-radius:50%;
+    border:2px dashed rgba(237,233,221,0.26);
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(237,233,221,0.30);
+    opacity:0; transform:scale(0.92);
+    animation:stampIn 420ms ease forwards;
+  }
+  .stamp svg{width:30px; height:30px;}
+  .stamp.more{
+    border-style:solid; border-color:var(--line);
+    font-size:15px; font-weight:700; color:var(--text-dim);
+  }
+  @keyframes stampIn{to{opacity:1; transform:scale(1);}}
+  .passport-note{color:var(--text-dim); font-size:14px; margin:16px 0 0;}
+
+  /* ---------- CTA ---------- */
+  .cta{
+    margin:34px 0 0; padding:22px; background:var(--surface);
+    border:1px solid var(--line); border-radius:var(--radius);
+    display:flex; flex-wrap:wrap; align-items:center; gap:18px;
+  }
+  .cta-code{flex:1; min-width:210px;}
+  .cta-code .lbl{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--text-dim); margin:0 0 6px;
+  }
+  .code-value{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:30px; font-weight:700; letter-spacing:0.16em; color:var(--yellow);
+  }
+  .cta-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .btn{
+    appearance:none; border:1px solid var(--line); background:var(--surface-2);
+    color:var(--text); font:inherit; font-weight:600; font-size:15px;
+    padding:13px 20px; border-radius:var(--radius); cursor:pointer;
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn:hover{background:var(--surface-3);}
+  .btn.primary{background:var(--orange); border-color:var(--orange); color:#fff;}
+  .btn.primary:hover{background:#d1551f;}
+  .btn:focus-visible, .stop:focus-visible, input:focus-visible{
+    outline:2px solid var(--yellow); outline-offset:2px;
+  }
+
+  /* ---------- map + stops ---------- */
+  .cols{display:grid; grid-template-columns:1fr; gap:26px; margin:56px 0 0;}
+  @media (min-width:900px){
+    .cols{grid-template-columns:1.15fr 1fr; align-items:start;}
+  }
+  .panel-label{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--text-dim); margin:0 0 12px;
+  }
+  #map{
+    height:420px; border-radius:var(--radius); overflow:hidden;
+    border:1px solid var(--line); background:var(--surface);
+  }
+  .map-note{color:var(--text-dim); font-size:13px; margin:10px 0 0;}
+
+  .stops{list-style:none; margin:0; padding:0; border-top:1px solid var(--line);}
+  /* No 01/02/03 numbering: the points array is authoring order, and the app
+     re-sorts by distance at runtime. Numbering would assert a sequence the
+     product does not honour. */
+  .stop{
+    display:flex; gap:14px; padding:16px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .stop-mark{width:16px; flex:none; margin-top:3px; color:var(--violet);}
+  .stop-mark svg{width:16px; height:16px; display:block;}
+  .stop h3{margin:0; font-size:16px; font-weight:600;}
+  .stop p{margin:5px 0 0; color:var(--text-dim); font-size:14px;}
+
+  /* ---------- code entry / errors ---------- */
+  .entry{max-width:460px; margin:52px 0 0;}
+  .entry .row{display:flex; gap:10px; margin:16px 0 0;}
+  input[type=text]{
+    flex:1; min-width:0; font-size:16px; padding:14px 16px;
+    background:var(--surface); color:var(--text);
+    border:1px solid var(--line); border-radius:var(--radius);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    letter-spacing:0.14em; text-transform:uppercase;
+  }
+  input[type=text]::placeholder{letter-spacing:0.08em; color:var(--text-dim); text-transform:none;}
+  .msg{
+    display:none; margin:18px 0 0; padding:14px 16px; border-radius:var(--radius);
+    font-size:14.5px; background:rgba(192,82,76,0.14);
+    border:1px solid rgba(192,82,76,0.4); color:#F0C9C6;
+  }
+  .msg.show{display:block;}
+  .msg code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px;}
+
+  .loading{color:var(--text-dim); font-size:15px; padding:60px 0;}
+
+  footer{
+    margin:70px 0 0; padding:22px 0 0; border-top:1px solid var(--line);
+    color:var(--text-dim); font-size:13px;
+    display:flex; flex-wrap:wrap; gap:6px 18px;
+  }
+
+  .hidden{display:none !important;}
+
+  @media (prefers-reduced-motion:reduce){
+    .stamp{animation:none; opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="#E8622C" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M5 21V4c4-2 8 2 12 0v9c-4 2-8-2-12 0"/>
+    </svg>
+    <span class="wordmark display">Localy</span>
+    <span class="eyebrow">Shared hunt</span>
+  </header>
+
+  <!-- Phone visitors get the app, not the preview. -->
+  <div class="bounce" id="bounce">
+    <a class="display" id="bounce-link" href="#">Open this hunt in the app</a>
+  </div>
+
+  <!-- ===== loading ===== -->
+  <div id="view-loading" class="loading hidden">Looking up that code…</div>
+
+  <!-- ===== code entry (no ?code= in the URL, or a failed lookup) ===== -->
+  <section id="view-entry" class="hidden">
+    <div class="hero">
+      <p class="kicker">Someone sent you a walk</p>
+      <h1 class="title">Enter the code<br>you were given</h1>
+      <p class="subline">Six letters and numbers. It opens the list of places
+        the person who made this hunt thinks are worth standing in front of.</p>
+    </div>
+    <div class="entry">
+      <div class="row">
+        <input type="text" id="code-input" maxlength="6" placeholder="e.g. K7M2QP"
+               autocomplete="off" autocapitalize="characters" spellcheck="false"
+               aria-label="Hunt code">
+        <button class="btn primary" id="code-go">Look it up</button>
+      </div>
+      <div class="msg" id="entry-msg" role="alert"></div>
+    </div>
+  </section>
+
+  <!-- ===== the hunt ===== -->
+  <section id="view-hunt" class="hidden">
+    <div class="hero">
+      <p class="kicker" id="hunt-kicker">A hunt someone made</p>
+      <h1 class="title" id="hunt-name"></h1>
+      <p class="subline" id="hunt-sub"></p>
+    </div>
+
+    <div class="passport">
+      <p class="passport-label">Stamps in this hunt</p>
+      <div class="stamps" id="stamps"></div>
+      <p class="passport-note" id="passport-note"></p>
+    </div>
+
+    <div class="cta">
+      <div class="cta-code">
+        <p class="lbl">Hunt code</p>
+        <div class="code-value display" id="cta-code"></div>
+      </div>
+      <div class="cta-actions">
+        <button class="btn" id="copy-btn">Copy code</button>
+        <a class="btn primary" id="open-btn" href="#">Open in the app</a>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <p class="panel-label">Where the stops are</p>
+        <div id="map" role="img" aria-label="Map of this hunt's stops"></div>
+        <p class="map-note" id="map-note"></p>
+      </div>
+      <div>
+        <p class="panel-label">The stops</p>
+        <ul class="stops" id="stops"></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Localy — walks made by people who live there.</span>
+    <span>Capturing a stop happens on your phone, in front of the place.</span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* =========================================================
+   CONFIG — mirrors index.html. The anon key is already public in
+   index.html; this exposes nothing new.
+
+   APP_URL assumes landing.html sits NEXT TO index.html on the same
+   host. Change this one line if it does not.
+   ========================================================= */
+const SUPABASE_URL      = "https://siacjgpqzaylsfefihyr.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_sJkeQ89O2geQLB5z6d__Zw_9G6nxLt_";
+const APP_URL           = "./index.html";
+const MAX_STAMPS_SHOWN  = 11;   // 12th slot becomes a "+N more" chip
+
+/* No supabase-js. One REST call does not justify a 100 KB dependency,
+   and a plain fetch lets us read the HTTP status — which is the only
+   way to tell "no such code" apart from "RLS is blocking anonymous
+   reads", and those two need very different fixes. */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+const FLAG_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4c4-2 8 2 12 0v9c-4 2-8-2-12 0"/></svg>';
+
+function show(view){
+  ['view-loading','view-entry','view-hunt'].forEach(v=>{
+    $(v).classList.toggle('hidden', v !== view);
+  });
+}
+
+function setEntryError(html){
+  const el = $('entry-msg');
+  el.innerHTML = html;
+  el.classList.add('show');
+}
+
+/* ---------- mobile bounce ---------- */
+/* Coarse pointer OR narrow viewport. Deliberately generous: a false
+   positive shows one extra button, a false negative strands a phone
+   user on a preview page. */
+function detectMobile(){
+  const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+  return coarse || window.innerWidth < 760;
+}
+
+/* ---------- code parsing ---------- */
+/* Alphabet matches randomCode() in index.html: no I, O, 0, 1. */
+function normaliseCode(raw){
+  const c = String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return /^[A-HJ-NP-Z2-9]{6}$/.test(c) ? c : null;
+}
+
+/* ---------- lookup ---------- */
+class LookupError extends Error{
+  constructor(kind, detail){ super(kind); this.kind = kind; this.detail = detail; }
+}
+
+async function lookupHunt(code){
+  const key = 'hunt-code:' + code;
+  const url = SUPABASE_URL + '/rest/v1/shared_kv?select=value&key=eq.'
+            + encodeURIComponent(key);
+  let res;
+  try{
+    res = await fetch(url, {
+      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:'Bearer ' + SUPABASE_ANON_KEY }
+    });
+  }catch(e){
+    throw new LookupError('network');
+  }
+  /* 401/403 means the shared_kv row exists but anonymous reads are not
+     permitted. That is a Supabase policy problem, not a bad code, and
+     conflating the two would send you hunting for a typo that is not
+     there. See the deploy notes. */
+  if(res.status === 401 || res.status === 403) throw new LookupError('forbidden', res.status);
+  if(!res.ok) throw new LookupError('http', res.status);
+
+  let rows;
+  try{ rows = await res.json(); }
+  catch(e){ throw new LookupError('http', res.status); }
+
+  if(!Array.isArray(rows) || rows.length === 0) throw new LookupError('notfound');
+
+  let data;
+  try{ data = JSON.parse(rows[0].value); }
+  catch(e){ throw new LookupError('corrupt'); }
+
+  if(!data || typeof data !== 'object') throw new LookupError('corrupt');
+  const points = Array.isArray(data.points) ? data.points.filter(
+    p => p && typeof p.lat === 'number' && typeof p.lng === 'number'
+  ) : [];
+  return { name: data.name || 'Untitled hunt', points };
+}
+
+/* ---------- render ---------- */
+function renderHunt(code, hunt){
+  const n = hunt.points.length;
+
+  $('hunt-name').textContent = hunt.name;
+  $('hunt-sub').textContent = n === 0
+    ? 'This hunt has a name and a code, but no stops in it yet.'
+    : n + (n === 1 ? ' place to stand in front of.' : ' places to stand in front of.')
+      + ' You collect them by being there.';
+
+  $('cta-code').textContent = code;
+  const appHref = APP_URL + '?code=' + encodeURIComponent(code);
+  $('open-btn').href = appHref;
+  $('bounce-link').href = appHref;
+
+  /* Passport strip */
+  const stampsEl = $('stamps');
+  stampsEl.innerHTML = '';
+  const shown = Math.min(n, MAX_STAMPS_SHOWN);
+  for(let i = 0; i < shown; i++){
+    const d = document.createElement('div');
+    d.className = 'stamp';
+    d.style.animationDelay = (i * 45) + 'ms';
+    d.innerHTML = FLAG_SVG;
+    stampsEl.appendChild(d);
+  }
+  if(n > shown){
+    const more = document.createElement('div');
+    more.className = 'stamp more';
+    more.style.animationDelay = (shown * 45) + 'ms';
+    more.textContent = '+' + (n - shown);
+    stampsEl.appendChild(more);
+  }
+  $('passport-note').textContent = n === 0
+    ? 'Nothing to collect yet — ask whoever sent you this to add some stops.'
+    : 'None of these are yours yet. They fill in on your phone, one at a time, '
+      + 'when you are actually standing there.';
+
+  /* Stop list */
+  const stopsEl = $('stops');
+  stopsEl.innerHTML = hunt.points.map(p =>
+    '<li class="stop"><span class="stop-mark">' + FLAG_SVG + '</span>'
+    + '<div><h3>' + esc(p.name || 'Unnamed stop') + '</h3>'
+    + (p.desc ? '<p>' + esc(p.desc) + '</p>' : '')
+    + '</div></li>'
+  ).join('');
+
+  renderMap(hunt.points);
+  show('view-hunt');
+  document.title = hunt.name + ' — a hunt on Localy';
+}
+
+function renderMap(points){
+  const mapEl = $('map');
+  if(points.length === 0){
+    mapEl.style.display = 'none';
+    $('map-note').textContent = '';
+    return;
+  }
+  if(typeof L === 'undefined'){
+    /* Leaflet blocked or offline: the stop list above is still the real
+       content, so say what is missing rather than leaving a grey box. */
+    mapEl.style.display = 'none';
+    $('map-note').textContent = 'The map could not load, but the stops are listed here.';
+    return;
+  }
+
+  /* No geolocation, no player marker, no recentre-on-me. The map is
+     framed on the HUNT, which is also the shape item 7 wants. */
+  const map = L.map('map', { zoomControl:true, scrollWheelZoom:false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom:19,
+    attribution:'&copy; OpenStreetMap contributors &copy; CARTO'
+  }).addTo(map);
+
+  const icon = L.divIcon({
+    className:'',
+    html:'<div style="width:22px;height:22px;border-radius:50%;background:#9A7FBF;'
+       + 'border:2px solid #EDE9DD;box-shadow:0 2px 6px rgba(0,0,0,.5)"></div>',
+    iconSize:[22,22], iconAnchor:[11,11]
+  });
+
+  const latlngs = [];
+  points.forEach(p=>{
+    L.marker([p.lat, p.lng], {icon}).addTo(map)
+      .bindPopup('<strong>' + esc(p.name || 'Unnamed stop') + '</strong>');
+    latlngs.push([p.lat, p.lng]);
+  });
+
+  if(latlngs.length === 1){
+    map.setView(latlngs[0], 15);
+  }else{
+    map.fitBounds(L.latLngBounds(latlngs).pad(0.18));
+  }
+  $('map-note').textContent = 'Scroll-zoom is off so the page still scrolls. Drag to pan.';
+}
+
+/* ---------- errors ---------- */
+function showLookupError(err, code){
+  show('view-entry');
+  if(code) $('code-input').value = code;
+
+  switch(err.kind){
+    case 'network':
+      setEntryError('Could not reach Localy from this network. Check your '
+        + 'connection and try again.');
+      break;
+    case 'forbidden':
+      setEntryError('This page is not allowed to read shared hunts. That is a '
+        + 'server setting, not a bad code — shared hunt data needs to be '
+        + 'readable without signing in. <code>HTTP ' + esc(err.detail) + '</code>');
+      break;
+    case 'http':
+      setEntryError('Localy answered with an error. Try again in a moment. '
+        + '<code>HTTP ' + esc(err.detail) + '</code>');
+      break;
+    case 'corrupt':
+      setEntryError('That code exists, but its hunt data is unreadable. Ask '
+        + 'whoever shared it to open the hunt and save it once, which writes '
+        + 'a fresh copy.');
+      break;
+    case 'notfound':
+    default:
+      setEntryError('No hunt found for that code. Codes are six characters and '
+        + 'never use the letters I or O, or the digits 0 or 1 — those are easy '
+        + 'to mistake for each other.');
+  }
+}
+
+/* ---------- flow ---------- */
+async function go(code){
+  show('view-loading');
+  try{
+    const hunt = await lookupHunt(code);
+    renderHunt(code, hunt);
+    /* Reflect the code in the URL so the page is shareable from here on. */
+    try{
+      const u = new URL(window.location.href);
+      if(u.searchParams.get('code') !== code){
+        u.searchParams.set('code', code);
+        history.replaceState(null, '', u.toString());
+      }
+    }catch(e){/* non-fatal */}
+  }catch(err){
+    showLookupError(err, code);
+  }
+}
+
+function submitTypedCode(){
+  $('entry-msg').classList.remove('show');
+  const code = normaliseCode($('code-input').value);
+  if(!code){
+    setEntryError('That does not look like a hunt code. They are six characters '
+      + 'long, letters and numbers, with no I, O, 0 or 1.');
+    return;
+  }
+  go(code);
+}
+
+function init(){
+  if(detectMobile()) document.body.classList.add('is-mobile');
+
+  $('code-go').addEventListener('click', submitTypedCode);
+  $('code-input').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') submitTypedCode();
+  });
+
+  $('copy-btn').addEventListener('click', async ()=>{
+    const code = $('cta-code').textContent;
+    const btn  = $('copy-btn');
+    let ok = false;
+    try{
+      await navigator.clipboard.writeText(code);
+      ok = true;
+    }catch(e){ ok = false; }
+    btn.textContent = ok ? 'Copied' : 'Copy blocked — select it';
+    setTimeout(()=>{ btn.textContent = 'Copy code'; }, 2200);
+  });
+
+  let param = null;
+  try{ param = new URL(window.location.href).searchParams.get('code'); }
+  catch(e){ param = null; }
+
+  if(param){
+    const code = normaliseCode(param);
+    if(code){ go(code); return; }
+    show('view-entry');
+    $('code-input').value = String(param).toUpperCase().slice(0,6);
+    setEntryError('The code in this link is not a valid hunt code. Check it '
+      + 'against the one you were sent.');
+    return;
+  }
+  show('view-entry');
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+}else{
+  init();
+}
+</script>
+</body>
+</html>
