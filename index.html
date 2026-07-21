@@ -4473,7 +4473,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21e';
+const APP_VERSION = '2026.07.21f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6913,14 +6913,24 @@ function visibleTargetsSorted(){
   const pinned = [];
   const rest = [];
   all.forEach(t=>{
-    /* THE LOAD-BEARING HALF. A pin inside capture range is in the list no
-       matter where the viewport is or how far out you have zoomed, and it can
-       never be the thing the cap evicts — it claims its budget first, and the
-       viewport rows fill what is left. This is the entire reason it is safe to let the viewport
-       decide list membership at all: without it, a zoomed-out view can evict
-       the thing you are standing next to, and the core loop is the thing the
-       whole product is built on. */
-    if(typeof t.dist === 'number' && t.dist <= captureRange){ pinned.push(t); return; }
+    /* THE LOAD-BEARING HALF. An UNCAPTURED pin inside capture range is in the
+       list no matter where the viewport is or how far out you have zoomed, and
+       it can never be the thing the cap evicts — it claims its budget first,
+       and the viewport rows fill what is left. This is the entire reason it is
+       safe to let the viewport decide list membership at all: without it, a
+       zoomed-out view can evict the thing you are standing next to, and the
+       core loop is the thing the whole product is built on.
+
+       `!t.found` IS LOAD-BEARING TOO, and leaving it out was the defect in
+       2026.07.21e — reported as "6 pins on screen, 7 in the menu", the seventh
+       being a captured pin 32 ft away and off-screen. The exemption exists to
+       protect a capture that is ABOUT TO HAPPEN. A pin already captured has no
+       capture left to protect, so it has no claim on an exemption from the
+       viewport and obeys the filter like everything else. Reading the
+       exemption as "things near me" rather than "things I can still capture"
+       is what widened it too far. If it is captured and on screen it still
+       shows, through the ordinary path below. */
+    if(typeof t.dist === 'number' && t.dist <= captureRange && !t.found){ pinned.push(t); return; }
     if(t.dist > LIST_RANGE_M) return;
     if(!bounds.contains(L.latLng(t.lat, t.lng))) return;
     rest.push(t);
