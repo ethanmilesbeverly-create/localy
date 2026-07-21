@@ -1546,7 +1546,6 @@
     </div>
 
     <div id="my-hunts-section"></div>
-    <div id="gem-submissions-section"></div>
     <div id="hunt-card-menu">
       <button id="hunt-menu-edit" onclick="huntCardMenuAction('edit')">Edit hunt</button>
       <button onclick="huntCardMenuAction('copy')">Copy code</button>
@@ -1555,16 +1554,17 @@
     </div>
 
     <p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">More ways to explore</p>
-    <div class="code-entry-row" onclick="openSuggestGemScreen()" style="margin-bottom:12px;">
-      <div class="code-entry-icon" style="background:rgba(212,175,55,0.15);color:#D4AF37;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.4 2.4 7.2L12 16.4l-6.4 4.4 2.4-7.2-6-4.4h7.6z"/></svg>
-      </div>
-      <div class="code-entry-text">
-        <strong>Know a hidden gem?</strong>
-        <span>Suggest it — approved spots join Hidden Gems for everyone to find</span>
-      </div>
-      <svg class="code-entry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
+    <!-- #62 — THE "Know a hidden gem?" ROW WAS HERE AND IS DELETED, NOT MOVED.
+         It is now the Submit tab. Kept as a gravestone rather than a comment-out
+         because the obvious next thought is "leave it as a shortcut too", and
+         that was considered and rejected: this row's whole complaint is that
+         Explore is a junk drawer doing three unrelated jobs, and a second
+         entrance to a thing that now has a permanent tab adds a fourth. If it
+         ever comes back, it owes a setNavActive('screen-suggest-gem').
+
+         #gem-submissions-section MOVED OUT to #screen-suggest-gem in the same
+         change. It is the user-facing side of #38's review queue and it is what
+         makes the new tab a destination rather than a bare form. -->
     <div class="code-entry-row" onclick="showScreen('screen-code')">
       <div class="code-entry-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a5 5 0 0 1 10 0v2"/></svg>
@@ -1621,8 +1621,14 @@
     </div>
     <button class="btn" onclick="submitGem()">Submit for Review</button>
     <div class="edit-links-row">
-      <button class="link-btn" onclick="goToModeSelect()">Cancel</button>
+      <button class="link-btn" onclick="cancelSuggestGem()">Cancel</button>
     </div>
+    <!-- #62 — MOVED HERE FROM #screen-modes. This list is the reason the tab is
+         a destination and not a form: "did my gem get approved?" is a genuine
+         reason to come back. It renders empty until you have submitted
+         something, which is correct — a first-time user sees the form and
+         nothing else. -->
+    <div id="gem-submissions-section"></div>
   </div>
 
   <!-- CODE ENTRY -->
@@ -1955,15 +1961,34 @@
   </div>
 
   <div id="bottomnav">
-    <button class="nav-btn active" data-screen="screen-map" onclick="setTab('screen-map')">
+    <button class="nav-btn active" data-screen="screen-map" onclick="navTo('screen-map')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg>
       Map
     </button>
-    <button class="nav-btn" data-screen="screen-modes" onclick="setTab('screen-modes')">
+    <button class="nav-btn" data-screen="screen-modes" onclick="navTo('screen-modes')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/></svg>
       Explore
     </button>
-    <button class="nav-btn" data-screen="screen-passport" onclick="setTab('screen-passport')">
+    <!-- #62 — SUBMIT IS A TAB AS OF 2026.07.21k. It was a .code-entry-row buried
+         under "More ways to explore", below six cards, #my-hunts-section and
+         #gem-submissions-section — well below the fold on a tab most users do
+         not open. This is the flow that produces the content the product runs
+         on, so it gets a permanent seat.
+
+         FOUR IS FINE, FIVE IS THE CEILING. Do not add a fifth without moving
+         something out.
+
+         THE LABEL NAMES AN ACTION AND THAT IS A KNOWN TENSION, not an oversight.
+         Tabs are destinations you return to; "Submit" is a thing you finish and
+         leave. What earns it the seat is #gem-submissions-section living on the
+         screen — "did my gem get approved?" is a real reason to come back. If
+         that list is ever moved off this screen, this tab stops being a
+         destination and should become a centre create-button instead. -->
+    <button class="nav-btn" data-screen="screen-suggest-gem" onclick="navTo('screen-suggest-gem')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.4 2.4 7.2L12 16.4l-6.4 4.4 2.4-7.2-6-4.4h7.6z"/></svg>
+      Submit
+    </button>
+    <button class="nav-btn" data-screen="screen-passport" onclick="navTo('screen-passport')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M9 17h6"/></svg>
       Passport
     </button>
@@ -4601,6 +4626,68 @@ function setTab(id){
 }
 
 /* =========================================================
+   #62 / #100 — THE NAV IS A ROUTER, AND IT IS THE ONE PLACE THAT GUARDS EXITS
+   ---------------------------------------------------------
+   All four .nav-btn elements call navTo() rather than setTab(). Two reasons,
+   and only the second is about the new tab.
+
+   (1) #screen-suggest-gem cannot be entered by setTab() alone. It has a lazily
+   built Leaflet map on a 60ms timeout and four fields that need seeding, all
+   of which live in openSuggestGemScreen(). setTab() special-cases screen-map
+   for fixMapSize() and would have needed a second special case here; routing
+   through the opener instead keeps ONE entry path for the screen no matter
+   which of its three entrances you used. #99's lesson, applied forward.
+
+   (2) #100 — THE RESTORED NAV IS AN UNGUARDED EXIT FROM TWO FORMS THAT DISCARD
+   EVERYTHING ON THE WAY OUT, and making Submit a tab turns that from an edge
+   case into the primary flow. openSuggestGemScreen() blanks all four fields and
+   nulls state.gemDraftPin ON ENTRY; openCreateScreen() rebuilds state.createPins.
+   Before this, leaving mid-form required a deliberate Cancel. Now one tap on a
+   tab you are already looking at does it.
+
+   THE GUARD IS ON THE NAV ONLY, DELIBERATELY. Cancel is a deliberate abandon
+   and #100 says so explicitly — it keeps its existing behaviour and does not
+   prompt. A confirm on Cancel would be asking "are you sure?" about a button
+   whose entire meaning is "I am sure".
+
+   NATIVE confirm() RATHER THAN A CUSTOM MODAL, and this is a decision with a
+   gravestone. Nothing else in this file uses confirm(); the house pattern is a
+   fixed-position card (#save-to-hunt-modal). That pattern was considered and
+   rejected here: this app has three shipped defects (#95, #97, #98) caused by
+   fixed-position elements fighting over stacking and offsets, and #98 in
+   particular was a sheet that never fully closed sitting on top of THIS
+   screen's Submit button for the life of the file. A blocking browser dialog
+   has no z-index, no offsets and no dismissal animation to get wrong. If the
+   copy ever needs to be branded, build the modal then and read #98 first.
+
+   THE GUARD IS DIRTY-CHECKED, NOT UNCONDITIONAL. A clean tab tap is
+   unimpeded — that is what keeps this a tab rather than a trap. */
+function isGemFormDirty(){
+  if(document.getElementById('screen-suggest-gem').classList.contains('active') === false) return false;
+  const v = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : '');
+  return !!(v('gem-name') || v('gem-desc') || v('gem-address-search') || state.gemDraftPin);
+}
+function isCreateFormDirty(){
+  if(document.getElementById('screen-create').classList.contains('active') === false) return false;
+  const named = (document.getElementById('create-hunt-name') || {value:''}).value.trim();
+  /* Pins are dirty relative to what the screen was SEEDED with, not to zero —
+     opening an existing hunt to look at it and leaving is not a loss. */
+  const seeded = (typeof state.createSeedCount === 'number') ? state.createSeedCount : 0;
+  const pins = (state.createPins || []).length;
+  return !!(pins !== seeded || (named && !state.editingHuntId));
+}
+function navTo(id){
+  if(id !== 'screen-suggest-gem' && isGemFormDirty()){
+    if(!confirm('Discard this gem? What you have typed here will not be saved.')) return;
+  }
+  if(id !== 'screen-create' && isCreateFormDirty()){
+    if(!confirm('Discard this hunt? Pins you have dropped will not be saved.')) return;
+  }
+  if(id === 'screen-suggest-gem'){ openSuggestGemScreen(); return; }
+  setTab(id);
+}
+
+/* =========================================================
    #81 — SETTINGS SURFACE
    ---------------------------------------------------------
    Item 5 (location privacy) has read as "decide it" for four passes while
@@ -4645,7 +4732,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21j';
+const APP_VERSION = '2026.07.21k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4922,6 +5009,7 @@ window.localyInvariants = function(){
 
   console.log('%c[invariants] ' + APP_VERSION, 'font-weight:700');
   assertExploreRoutesHaveCards();
+  assertNavButtonsHaveScreens();
   assertGemBucketsAgree();
   assertBadgeMatchesList();
   assertNoDuplicatePoints();
@@ -6386,6 +6474,25 @@ function assertExploreRoutesHaveCards(){
     if(!noCard.length && !noRoute.length) console.log('[#67] explore routes/cards agree (' + cards.length + ')');
   }catch(e){ console.warn('[#67] route check failed', e); }
 }
+/* #62 — A NAV BUTTON THAT POINTS AT NOTHING LIGHTS NOTHING, SILENTLY. This is
+   the failure this tab could introduce and the one #81/#91/#99 kept hitting
+   from the other direction: setNavActive() toggles on dataset.screen === id, so
+   a typo'd or stale data-screen produces a footer with no active button and no
+   error. Reads the live DOM on both sides for #67's reason — a hardcoded list
+   of expected tabs is a third thing that drifts. It also states the ceiling,
+   because "four is fine, five is the ceiling" is a decision that currently
+   lives only in a comment and in this file. */
+function assertNavButtonsHaveScreens(){
+  try{
+    const btns = Array.from(document.querySelectorAll('.nav-btn'));
+    const bad = btns.map(b=>b.dataset.screen)
+      .filter(id => !id || !document.getElementById(id) ||
+                    !document.getElementById(id).classList.contains('screen'));
+    if(bad.length) console.warn('[#62] nav buttons pointing at no screen:', bad);
+    else console.log('[#62] nav buttons resolve (' + btns.length + ')');
+    if(btns.length > 4) console.warn('[#62] ' + btns.length + ' tabs — four is fine, five is the ceiling');
+  }catch(e){ console.warn('[#62] nav check failed', e); }
+}
 /* #66 — THE ONE CLAIM THIS BUILD MAKES, ASSERTED. The badge, the rendered rows
    and visibleTargetsSorted() are three views of one array and they are allowed
    to disagree with the HUNT but never with each other. This is the first
@@ -6595,7 +6702,15 @@ function jumpSuggestMapTo(place){
    for Settings) would NOT have done here without also rewriting Cancel. */
 function openSuggestGemScreen(){
   showScreen('screen-suggest-gem');
-  setNavActive('screen-modes');
+  /* #62 — WAS setNavActive('screen-modes') UNTIL 2026.07.21k. A nav button now
+     carries screen-suggest-gem, so this screen lights itself. The explicit call
+     stays rather than being dropped in favour of setTab's inheritance: this
+     screen has THREE entrances (the tab, #hunt-empty's "Add the first one", and
+     any future one), and #91's trap is that a screen entered from elsewhere
+     keeps whatever tab was lit on arrival. Stating it here means every entrance
+     is correct by construction rather than by each caller remembering. */
+  setNavActive('screen-suggest-gem');
+  renderGemSubmissions();
   document.getElementById('gem-name').value = '';
   document.getElementById('gem-desc').value = '';
   document.getElementById('gem-category').value = 'park';
@@ -6619,6 +6734,17 @@ function openSuggestGemScreen(){
       if(state.suggestMarker){ state.suggestMap.removeLayer(state.suggestMarker); state.suggestMarker=null; }
     }
   }, 60);
+}
+/* #100 — Cancel is a DELIBERATE abandon and does not prompt; see navTo(). It
+   clears the draft explicitly rather than relying on openSuggestGemScreen() to
+   blank on the next entry, so state.gemDraftPin cannot survive as a stale pin
+   on a screen you have left. */
+function cancelSuggestGem(){
+  document.getElementById('gem-name').value = '';
+  document.getElementById('gem-desc').value = '';
+  document.getElementById('gem-address-search').value = '';
+  state.gemDraftPin = null;
+  goToModeSelect();
 }
 async function submitGem(){
   const name = document.getElementById('gem-name').value.trim();
@@ -6711,6 +6837,10 @@ function openCreateScreen(existingHunt, seedPoint){
   } else {
     state.createPins = [];
   }
+  /* #100 — the dirty check compares against what this screen was SEEDED with,
+     not against zero. Opening an existing eight-stop hunt to look at it and
+     tapping a tab is not a loss and must not prompt. */
+  state.createSeedCount = state.createPins.length;
   renderCreatePinList();
   if(existingHunt && existingHunt.code){
     document.getElementById('generated-code').textContent = existingHunt.code;
