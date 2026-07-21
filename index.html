@@ -3671,9 +3671,72 @@ function buildAllThingsLocal(base){
   });
   return pts;
 }
+/* #104 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
+   blendCategory() dedupes by name, but `usedNames` is LOCAL TO ONE CALL. Any
+   branch below that concatenates two blends is therefore undeduped across the
+   seam, and the barsrest_ arm passes the SAME gem bucket ('barsrest') to both
+   of its calls — so nearbyApprovedGems returns the same gems twice, stamped
+   'bars' by one arm and 'restaurants' by the other.
+
+   NOT COSMETIC, for two reasons the report didn't have to name.
+   (1) gemToPoint builds the id as 'catgem'+g.id, so both copies carry the SAME
+       ID. isFound() matches on id, so capturing one flips both rows to Found,
+       and openPinSheetById() returns whichever .find() reaches first. A
+       duplicate id is never legitimate, whatever produced it.
+   (2) MODE_COLOR.bars is #C1587A and MODE_COLOR.restaurants is #E8622C, so the
+       two copies render as two DIFFERENT-COLOURED pins at identical
+       coordinates — #16's "colour IS the category" broken on the map.
+
+   Real places cannot do this: groupRealByCat gives each place exactly one
+   p.category, so a place is in `bars` or `restaurants`, never both. This is a
+   gems-only defect, which is why it presents as the nearest rows doubling
+   rather than as scattered duplicates.
+
+   ID FIRST, THEN NAME. The name rule is the one blendCategory already applies
+   inside a single arm, extended across the seam rather than invented here.
+   ACCEPTED RISK, stated rather than discovered later: two genuinely distinct
+   places sharing a name across the two arms of one tab collapse to one. That
+   is already true within an arm, chains are excluded upstream by
+   EXCLUDE_CHAINS, and the alternative is keeping a duplicate id.
+
+   WHICH COPY SURVIVES IS NOT A COIN FLIP. First arm wins, so a barsrest gem
+   renders 'bars' — and MODE_COLOR.barsrest === MODE_COLOR.bars === '#C1587A',
+   so the survivor carries the colour the bucket maps to anyway. If the arms
+   are ever reordered, that stops being true; this comment is the warning.
+
+   NOT FIXED HERE, DELIBERATELY: the underlying shape, which is that a gem
+   lookup runs once PER DISPLAY ARM when the bucket is a property of the
+   CATEGORY. Fixing it there means restructuring blendCategory's contract on
+   every caller, and this build is a defect fix. Filed as its own row. */
+function dedupePoints(points){
+  const seenIds = new Set();
+  const seenNames = new Set();
+  const out = [];
+  (points||[]).forEach(p=>{
+    if(!p) return;
+    if(p.id != null){
+      if(seenIds.has(p.id)) return;
+      seenIds.add(p.id);
+    }
+    const k = normName(p.name);
+    if(k){
+      if(seenNames.has(k)) return;
+      seenNames.add(k);
+    }
+    out.push(p);
+  });
+  return out;
+}
+
 function buildPointsForKey(key, base){
   if(key.startsWith('local_'))      return buildAllThingsLocal(base);
-  if(key.startsWith('parkstrails_'))return [
+  /* #104 — no duplicate is known on this branch today (its two arms pass
+     DIFFERENT buckets, 'park' and 'trail', so the gem lookups cannot collide).
+     Wrapped anyway because the defect is a property of the SHAPE — two blends
+     concatenated with no shared dedup — not of the buckets that happen to be
+     passed today. Leaving it unwrapped means the next person to align two
+     buckets re-ships this bug with no signal. */
+  if(key.startsWith('parkstrails_'))return dedupePoints([
     ...blendCategory(base,'park',6,()=>generateLocalParks(base),'park'),
     /* #68 — was null, which did NOT mean "filter trail gems out". blendCategory
        guards its gem lookup with `if(gemBucket)`, so null skips
@@ -3681,15 +3744,16 @@ function buildPointsForKey(key, base){
        slot. Passing 'trail' is what the row asked for; the skip is what was
        actually happening. */
     ...blendCategory(base,'trail',6,()=>generateTrails(base),'trail')
-  ];
+  ]);
   if(key.startsWith('shops_'))      return blendCategory(base,'shops',8,()=>generateShops(base),'shops');
   /* #67 — 'bars_' and 'restaurants_' arms deleted. Only startBarsHunt and
      startRestaurantsHunt ever produced those keys and neither had a caller;
      the live Bars & Restaurants card produces 'barsrest_', below. */
-  if(key.startsWith('barsrest_'))   return [
+  /* #104 — THE REPORTED ONE. Both arms pass 'barsrest'. */
+  if(key.startsWith('barsrest_'))   return dedupePoints([
     ...blendCategory(base,'bars',5,()=>generateBars(base),'barsrest'),
     ...blendCategory(base,'restaurants',5,()=>generateRestaurants(base),'barsrest')
-  ];
+  ]);
   if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
   // No blendCategory here on purpose: blending would let OSM/Wikipedia places
   // leak into a tab whose entire premise is that everything in it is human.
@@ -4473,7 +4537,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21f';
+const APP_VERSION = '2026.07.21g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4752,6 +4816,7 @@ window.localyInvariants = function(){
   assertExploreRoutesHaveCards();
   assertGemBucketsAgree();
   assertBadgeMatchesList();
+  assertNoDuplicatePoints();
   console.log(out);
   return out;
 };
@@ -6220,6 +6285,32 @@ function assertExploreRoutesHaveCards(){
    or a list's membership, which is the #95/#97 boundary being widened a little
    rather than a new category of thing. It reads the live DOM on purpose — a
    hardcoded expectation is a fourth view that drifts too (#67's lesson). */
+/* #104 — A DUPLICATE ID IS NEVER LEGITIMATE, whatever produced it. This watches
+   the SHIPPED point list rather than any one builder, so it covers authored and
+   redeemed hunts and #40b's injection too, not just the branch fixed today.
+   Name collisions are reported separately and only as a note: two genuinely
+   distinct places can share a name, and dedupePoints only collapses them where
+   blendCategory's existing rule already did. */
+function assertNoDuplicatePoints(){
+  try{
+    const h = state.currentHunt;
+    if(!h || !Array.isArray(h.points)){ console.log('[#104] no hunt — dup check skipped'); return; }
+    const ids = {}, names = {};
+    h.points.forEach(p=>{
+      if(!p) return;
+      if(p.id != null) ids[p.id] = (ids[p.id]||0) + 1;
+      const k = normName(p.name);
+      if(k) names[k] = (names[k]||0) + 1;
+    });
+    const dupIds = Object.keys(ids).filter(k=>ids[k] > 1);
+    const dupNames = Object.keys(names).filter(k=>names[k] > 1);
+    if(dupIds.length) console.warn('[#104] DUPLICATE POINT IDS in ' + h.key + ' — capture will flip every copy:', dupIds);
+    if(dupNames.length) console.log('[#104] note — repeated names in ' + h.key + ':', dupNames);
+    if(!dupIds.length && !dupNames.length){
+      console.log('[#104] ' + h.points.length + ' points in ' + h.key + ', no duplicates');
+    }
+  }catch(e){ console.warn('[#104] dup check failed', e); }
+}
 function assertBadgeMatchesList(){
   try{
     if(!state.currentHunt){ console.log('[#66] no hunt — list check skipped'); return; }
