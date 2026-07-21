@@ -535,9 +535,6 @@
   }
   .gem-subs[open] summary .gs-chev{transform:rotate(90deg);}
   .gem-subs .gs-body{padding:0 14px 14px;}
-  .gem-subs .gs-reason{
-    margin:6px 0 0;font-size:12px;color:var(--text-dim);line-height:1.45;
-  }
   #hunt-card-menu{
     position:fixed;
     display:none;
@@ -1611,16 +1608,6 @@
   <div class="screen" id="screen-suggest-gem">
     <h1 class="page-title">Suggest a Hidden Gem</h1>
     <p class="page-sub">Search the address, or tap the map to drop a pin right where it is. Then tell us why it's worth finding.</p>
-    <!-- #62 — MOVED HERE FROM #screen-modes, and ABOVE the form on purpose.
-         Below the form it was under a map, four fields and three lines of
-         helper text — i.e. below the fold, which is the exact burial this row
-         exists to fix, reintroduced one screen over. renderGemSubmissions()
-         emits NOTHING when the list is empty, so a first-time user still sees
-         the form and only the form; a returning user sees their submissions
-         first, which is right, because someone coming back is usually checking
-         status rather than filing another one.
-         COLLAPSED BY DEFAULT — see renderGemSubmissions() for why. -->
-    <div id="gem-submissions-section"></div>
     <!-- #17 — same shared component as the map header pill and the hunt builder
          (#88's attachPlaceSuggest). .location-search-row is reused ONLY for its
          position:relative host + flex sizing; there is no Go button here on
@@ -1663,6 +1650,16 @@
     <div class="edit-links-row">
       <button class="link-btn" onclick="cancelSuggestGem()">Cancel</button>
     </div>
+    <!-- #62 — BELOW THE FORM, BY DIRECTIVE, AND IT MOVED HERE FROM ABOVE IT.
+         The above-the-form version shipped for one build on the reasoning that
+         below a map, four fields and three lines of helper text is below the
+         fold — the same burial this row exists to fix. Overruled: submitting a
+         NEW gem is the priority of this screen and the form should be what you
+         land on, not a list of what you already did. What makes that safe is
+         the collapse — this is a single 44px bar, not a list, so "below the
+         form" costs one scroll rather than hiding a screenful. If it is ever
+         expanded by default again, this placement stops being defensible. -->
+    <div id="gem-submissions-section"></div>
   </div>
 
   <!-- CODE ENTRY -->
@@ -2019,7 +2016,7 @@
          that list is ever moved off this screen, this tab stops being a
          destination and should become a centre create-button instead. -->
     <button class="nav-btn" data-screen="screen-suggest-gem" onclick="navTo('screen-suggest-gem')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.4 2.4 7.2L12 16.4l-6.4 4.4 2.4-7.2-6-4.4h7.6z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M10 3 8 9l4 12 4-12-2-6"/></svg>
       Submit
     </button>
     <button class="nav-btn" data-screen="screen-passport" onclick="navTo('screen-passport')">
@@ -4477,20 +4474,24 @@ async function loadMyGems(){
     if(!uid){ state.gemSubmissions = []; return; }
     const { data, error } = await sb
       .from('submissions')
-      /* #62 — ai_reason ADDED 2026.07.21l. review-submission has written a
-         one-sentence explanation to this column on every single review since
-         it shipped, capped at 300 chars, with an explicit guard so it can
-         never be blank — and no client has ever read it. Same shape as #3's
-         ai_status and #85's share string: a value maintained by one side and
-         consumed by nobody. It is rendered ONLY on rejected rows; see
-         renderGemSubmissions() for why that is the safe subset. */
-      .select('id,name,description,category,lat,lng,status,ai_reason,created_at')
+      /* #62 — ai_reason WAS ADDED HERE AND WAS REMOVED THE SAME DAY, BY
+         DIRECTIVE, AND THIS IS A GRAVESTONE RATHER THAN A DELETION.
+         review-submission writes a one-sentence explanation to submissions.
+         ai_reason on every review — capped at 300 chars, guarded so it can
+         never be blank — and NO CLIENT HAS EVER READ IT. That is a real
+         unconsumed value of the same shape as #3's ai_status and #85's share
+         string, and noticing it is worth keeping even though showing it was
+         rejected. The rejection is a product call, not an oversight: a
+         moderation verdict written for an operator is not copy written for the
+         person who was rejected. If a reason is ever surfaced it should be
+         authored for the submitter, not forwarded from the reviewer. */
+      .select('id,name,description,category,lat,lng,status,created_at')
       .eq('submitted_by', uid)
       .order('created_at', { ascending:false });
     if(error) throw error;
     state.gemSubmissions = (data||[]).map(r=>({
       id:r.id, name:r.name, desc:r.description, bucket:r.category,
-      lat:r.lat, lng:r.lng, status:r.status, aiReason:r.ai_reason || ''
+      lat:r.lat, lng:r.lng, status:r.status
     }));
   }catch(e){
     /* #62 — WAS A SILENT [] AND STILL DEGRADES TO ONE, but it now says so.
@@ -4783,7 +4784,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21l';
+const APP_VERSION = '2026.07.21m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6852,18 +6853,14 @@ async function submitGem(){
    to check. "9 not approved" in the collapsed header would defeat the entire
    reason for collapsing it. Anyone who wants the breakdown can open it.
 
-   REJECTIONS NOW CARRY THEIR REASON, which is what makes the expanded view
-   feedback rather than a scolding. ai_reason has been written by
-   review-submission on every review since it shipped and read by nothing.
-
-   WHY ONLY REJECTED ROWS ARE SAFE TO SHOW IT ON: status is 'rejected' only when
-   decision === 'reject', which only happens when the model's response parsed
-   AND the decision was one of the three valid values. Every failure path in
-   that function — HTTP error, unparseable output, off-schema decision — falls
-   back to 'review', which lands as 'pending'. So a rejected row's ai_reason is
-   always the model's own sentence, never "unparseable model output: ..." or
-   "gemini 503 (model ...)". Rendering it on pending rows WOULD leak those.
-   If that fallback logic ever changes, this rule changes with it. */
+   REJECTIONS SHOW NO REASON, BY DIRECTIVE, AND THE ALTERNATIVE WAS BUILT AND
+   CUT THE SAME DAY. submissions.ai_reason holds a one-sentence verdict for
+   every review and it was briefly rendered here. Cut because a moderation
+   reason is written for an operator, not for the person it is about; a
+   forwarded verdict reads as an argument with the submitter. This is a
+   gravestone, not an unstarted idea — do not re-propose it as-is. The version
+   that could ship is submitter-facing copy chosen from a small fixed set, not
+   a model sentence passed through. See loadMyGems() for the other half. */
 function renderGemSubmissions(){
   const el = document.getElementById('gem-submissions-section');
   if(!el) return;
@@ -6888,14 +6885,11 @@ function renderGemSubmissions(){
     const line = isApproved ? 'Approved — visible in Hidden Gems'
                : isRejected ? "This one wasn't approved"
                : 'Pending review';
-    const reason = (isRejected && g.aiReason)
-      ? `<p class="gs-reason">${escapeHtml(g.aiReason)}</p>` : '';
     return `<div class="mode-card" style="cursor:default;">
       <div class="icon-wrap"><div class="blaze">${pinSVG(pinColor, isApproved)}</div></div>
       <div style="flex:1;min-width:0;">
         <h3>${escapeHtml(g.name)}${tag}</h3>
         <p>${line}</p>
-        ${reason}
       </div>
     </div>`;
   }).join('');
