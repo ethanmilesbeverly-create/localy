@@ -3155,8 +3155,24 @@ function currentTileState(){
 }
 
 /* Map an OSM element's tags to one of the app's categories (priority order). */
+/* #101 — kept in lockstep with index.js. DEAD PATH (nothing calls the client
+   parseOverpass since #37); the OSM half of #101 is enforced server-side. Left
+   in sync anyway because #77's rule is that a mirror allowed to drift is how
+   the next reader fixes the wrong file. */
+function isTransitStop(t){
+  if(!t) return false;
+  if(t.tourism==='museum') return false;
+  if(t.historic==='railway_station' || t.historic==='station') return true;
+  if(t.railway) return true;
+  if(t.public_transport) return true;
+  if(t.highway==='bus_stop' || t.highway==='platform') return true;
+  if(t.amenity==='bus_station' || t.amenity==='ferry_terminal' || t.amenity==='taxi') return true;
+  if(t.aeroway || t.aerialway==='station') return true;
+  return false;
+}
 function categorizeOsm(t){
   if(!t) return null;
+  if(isTransitStop(t)) return null; // #101
   if(t.historic || t.memorial || t.tourism==='museum' || t.tourism==='artwork') return 'history';
   if(t.amenity==='bar' || t.amenity==='pub' || t.amenity==='biergarten') return 'bars';
   if(t.amenity==='restaurant' || t.amenity==='cafe' || t.amenity==='fast_food') return 'restaurants';
@@ -3303,7 +3319,7 @@ async function fetchOverpass(base){
    server tile is cleaned on the way in even before CACHE_VERSION v8 orphans it.
    Bump the server constant anyway; this is a second net, not the fix. */
 const WIKI_RELEVANCE_FILTER = true;
-const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|of|on|to|at|for|by|with|from|near|within|the|a|an|and)\b)[^\s.]+\s+){0,3}?(?:census[-\u2010-\u2015 ]designated\s+places?|unincorporated\s+(?:communit(?:y|ies)|areas?|towns?)|(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar|prep(?:aratory)?)\s+schools?|school\s+districts?|community\s+areas?|ghost\s+towns?|home\s+rule\s+municipalit(?:y|ies)|municipalit(?:y|ies)|cit(?:y|ies)|towns?|villages?|hamlets?|boroughs?|townships?|suburbs?|neighbou?rhoods?|count(?:y|ies)|parish(?:es)?|states?|provinces?|settlements?|localit(?:y|ies)|capitals?|communit(?:y|ies))(?=\s*(?:[,.;:()\[\]{}"\u201c\u201d\u2014]|$)|\s+(?:in|of|on|and|within|near|located|situated|serving|which|that|for|between)\b)/i;
+const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|of|on|to|at|for|by|with|from|near|within|the|a|an|and)\b)[^\s.]+\s+){0,3}?(?:census[-\u2010-\u2015 ]designated\s+places?|unincorporated\s+(?:communit(?:y|ies)|areas?|towns?)|(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar|prep(?:aratory)?)\s+schools?|school\s+districts?|community\s+areas?|ghost\s+towns?|home\s+rule\s+municipalit(?:y|ies)|municipalit(?:y|ies)|cit(?:y|ies)|towns?|villages?|hamlets?|boroughs?|townships?|suburbs?|neighbou?rhoods?|count(?:y|ies)|parish(?:es)?|states?|provinces?|settlements?|localit(?:y|ies)|capitals?|communit(?:y|ies)|(?:railway|railroad|rail|train|subway|metro|tram|streetcar|light\\s+rail|rapid\\s+transit|commuter\\s+rail|bus|transit|ferry|monorail)\\s+(?:stations?|stops?|terminals?|depots?|halts?)|transit\\s+cent(?:er|re)s?|park[\\s-]and[\\s-]rides?|stations?|stops?|halts?|terminals?|termini|depots?)(?=\s*(?:[,.;:()\[\]{}"\u201c\u201d\u2014]|$)|\s+(?:in|of|on|and|within|near|located|situated|serving|which|that|for|between)\b)/i;
 
 /* #96b — TITLE RULES. The opener stoplist reads the extract, and there are two
    ways an article reaches the pin with no usable extract to read:
@@ -3325,6 +3341,32 @@ const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|o
    comma-then-state convention is what makes this safe. A UK village
    ("Chipping Norton, Oxfordshire") is not caught by the title rule and still
    depends on its opener. */
+
+/* #101 — TRANSIT STOPS. Every geotagged rail and bus stop in a US city has a
+   Wikipedia article, so #96's geosearch handed us the whole transit network as
+   category:'history' — "Wellington station (CTA)" and every stop down the line.
+   Real, correctly placed, and failing #13's bar completely: nobody walks
+   somewhere to discover the train stop they are standing on. They also cluster
+   along the corridors the app routes people down, so they crowd real history
+   off a distance-sorted list.
+
+   THIS FILE'S COPY IS THE ONE THAT RUNS ON A PHONE. Same split #96 documented:
+   fetchWikipedia() below is a dead mirror, and the live guard is in
+   applyRealPlaces(), which is the single write point for real places from
+   `nearby-places` AND its server cache. So this catches a station arriving from
+   a tile cached before the Edge Function was redeployed, even before
+   CACHE_VERSION v11 orphans it. Bump the server constant anyway; this is the
+   second net, not the fix.
+
+   Three nets, cheapest first — (A) title modifier form, (B) title
+   disambiguation form "<Name> station (<Operator>)", which is the one that
+   catches the reported pin, (C) opener nouns folded into WIKI_STOP_RE so they
+   inherit #96's three guards rather than adding an unanchored regex.
+   See index.js for the two accepted trades (fire/police/power stations go too;
+   Chicago Union Station deliberately stays). */
+const WIKI_TITLE_TRANSIT_RE = /\b(?:railway|railroad|rail|train|subway|metro|tram|streetcar|light\s+rail|rapid\s+transit|commuter|bus|coach|transit|ferry|monorail|funicular|cable\s+car|interurban)\s+(?:stations?|stops?|terminals?|depots?|halts?|cent(?:er|re)s?)\b/i;
+const WIKI_TITLE_STATION_PAREN_RE = /\bstation\b[^()]*\([^)]*\)\s*$|\([^)]*\bstation\b[^)]*\)\s*$/i;
+
 const WIKI_TITLE_SCHOOL_RE = /\b(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar)\s+school\b/i;
 const WIKI_TITLE_SETTLEMENT_RE = /^[^()\[\]]+,\s+(?:[^,()\[\]]+,\s+)?(?:Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New\s+Hampshire|New\s+Jersey|New\s+Mexico|New\s+York|North\s+Carolina|North\s+Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode\s+Island|South\s+Carolina|South\s+Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West\s+Virginia|Wisconsin|Wyoming|District\s+of\s+Columbia|D\.C\.|Puerto\s+Rico|Guam|American\s+Samoa|U\.S\.\s+Virgin\s+Islands|Northern\s+Mariana\s+Islands)$/i;
 
@@ -3345,7 +3387,8 @@ function isLowValueWikiArticle(title, extract){
   if(!WIKI_RELEVANCE_FILTER) return false;
   const t = String(title||'');
   /* #96b — title first: it is the only signal that survives a missing extract. */
-  if(t && (WIKI_TITLE_SCHOOL_RE.test(t) || WIKI_TITLE_SETTLEMENT_RE.test(t))) return true;
+  if(t && (WIKI_TITLE_SCHOOL_RE.test(t) || WIKI_TITLE_SETTLEMENT_RE.test(t) ||
+           WIKI_TITLE_TRANSIT_RE.test(t) || WIKI_TITLE_STATION_PAREN_RE.test(t))) return true;
   const opener = wikiOpener(extract);
   if(!opener) return false;   // no extract AND no title tell = no evidence; keep it
   return WIKI_STOP_RE.test(opener);
@@ -4430,7 +4473,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21c';
+const APP_VERSION = '2026.07.21d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
