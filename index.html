@@ -3317,7 +3317,30 @@ async function fetchOverpass(base){
    server tile is cleaned on the way in even before CACHE_VERSION v8 orphans it.
    Bump the server constant anyway; this is a second net, not the fix. */
 const WIKI_RELEVANCE_FILTER = true;
-const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|of|on|to|at|for|by|with|from|near|within|the|a|an|and)\b)[^\s.]+\s+){0,3}?(?:census[-\u2010-\u2015 ]designated\s+places?|unincorporated\s+(?:communit(?:y|ies)|areas?|towns?)|(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar|prep(?:aratory)?)\s+schools?|school\s+districts?|community\s+areas?|ghost\s+towns?|home\s+rule\s+municipalit(?:y|ies)|municipalit(?:y|ies)|cit(?:y|ies)|towns?|villages?|hamlets?|boroughs?|townships?|suburbs?|neighbou?rhoods?|count(?:y|ies)|parish(?:es)?|states?|provinces?|settlements?|localit(?:y|ies)|capitals?|communit(?:y|ies))(?=\s*(?:[,.;:)]|$)|\s+(?:in|of|on|and|within|near|located|situated|serving|which|that)\b)/i;
+const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|of|on|to|at|for|by|with|from|near|within|the|a|an|and)\b)[^\s.]+\s+){0,3}?(?:census[-\u2010-\u2015 ]designated\s+places?|unincorporated\s+(?:communit(?:y|ies)|areas?|towns?)|(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar|prep(?:aratory)?)\s+schools?|school\s+districts?|community\s+areas?|ghost\s+towns?|home\s+rule\s+municipalit(?:y|ies)|municipalit(?:y|ies)|cit(?:y|ies)|towns?|villages?|hamlets?|boroughs?|townships?|suburbs?|neighbou?rhoods?|count(?:y|ies)|parish(?:es)?|states?|provinces?|settlements?|localit(?:y|ies)|capitals?|communit(?:y|ies))(?=\s*(?:[,.;:()\[\]{}"\u201c\u201d\u2014]|$)|\s+(?:in|of|on|and|within|near|located|situated|serving|which|that|for|between)\b)/i;
+
+/* #96b — TITLE RULES. The opener stoplist reads the extract, and there are two
+   ways an article reaches the pin with no usable extract to read:
+     - MediaWiki caps `exlimit` at 20 and the geosearch asked for 25, so on any
+       tile with more than 20 articles at least five arrived with NO extract
+       field at all. The query is now aligned at 20/20, but a cached tile, a
+       future limit change or an article whose intro is a bare infobox all
+       reproduce it, and a filter that is blind by construction is worse than
+       one that is merely wrong.
+     - Some stubs genuinely have an empty intro.
+   Wikipedia's own title conventions are diagnostic for exactly the two classes
+   this row is about, cost nothing, and survive a missing extract:
+     - Settlements use the comma form: "Northwood, Logan County, Ohio".
+       Non-settlements disambiguate with PARENTHESES instead — which is why the
+       rule excludes any title containing brackets, and why "Central High School
+       (Columbus, Ohio)" is not caught here but by the school rule below.
+     - Schools carry the school type in the title itself.
+   Scope, stated so it is a decision and not an oversight: US-only, because the
+   comma-then-state convention is what makes this safe. A UK village
+   ("Chipping Norton, Oxfordshire") is not caught by the title rule and still
+   depends on its opener. */
+const WIKI_TITLE_SCHOOL_RE = /\b(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar)\s+school\b/i;
+const WIKI_TITLE_SETTLEMENT_RE = /^[^()\[\]]+,\s+(?:[^,()\[\]]+,\s+)?(?:Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New\s+Hampshire|New\s+Jersey|New\s+Mexico|New\s+York|North\s+Carolina|North\s+Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode\s+Island|South\s+Carolina|South\s+Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West\s+Virginia|Wisconsin|Wyoming|District\s+of\s+Columbia|D\.C\.|Puerto\s+Rico|Guam|American\s+Samoa|U\.S\.\s+Virgin\s+Islands|Northern\s+Mariana\s+Islands)$/i;
 
 /* First sentence only. No lookbehind — this has to run in older iOS Safari — so
    the "is this really a sentence end?" test is folded into a lazy match: a
@@ -3332,10 +3355,13 @@ function wikiOpener(extract){
   const m = s.match(/^[\s\S]*?(?:[a-z]{2}|[0-9)\]"'\u201d\u2019])\.(?=\s+["'(\u201c]?[A-Z])/);
   return (m ? m[0] : s).slice(0, 300);
 }
-function isLowValueWikiArticle(extract){
+function isLowValueWikiArticle(title, extract){
   if(!WIKI_RELEVANCE_FILTER) return false;
+  const t = String(title||'');
+  /* #96b — title first: it is the only signal that survives a missing extract. */
+  if(t && (WIKI_TITLE_SCHOOL_RE.test(t) || WIKI_TITLE_SETTLEMENT_RE.test(t))) return true;
   const opener = wikiOpener(extract);
-  if(!opener) return false;   // no extract = no evidence; keep it and let #13 judge
+  if(!opener) return false;   // no extract AND no title tell = no evidence; keep it
   return WIKI_STOP_RE.test(opener);
 }
 
@@ -3347,8 +3373,8 @@ function isLowValueWikiArticle(extract){
 async function fetchWikipedia(base){
   const url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*'
     + '&generator=geosearch&ggscoord='+base.lat+'%7C'+base.lng
-    + '&ggsradius=6000&ggslimit=25'
-    + '&prop=coordinates%7Cextracts&exintro=1&explaintext=1&exsentences=2&colimit=max';
+    + '&ggsradius=6000&ggslimit=20'   /* #96b — MediaWiki caps exlimit at 20; 25 meant 5 pages with no extract */
+    + '&prop=coordinates%7Cextracts&exintro=1&explaintext=1&exsentences=2&exlimit=20&colimit=max';
   const ctrl = new AbortController();
   const timer = setTimeout(()=>ctrl.abort(), 12000);
   const res = await fetch(url, {signal:ctrl.signal});
@@ -3363,7 +3389,7 @@ async function fetchWikipedia(base){
     const raw = (pg.extract||'').trim();
     /* #96 — drop BEFORE truncation: truncation can cut mid-sentence and the
        opener is what the stoplist reads. */
-    if(isLowValueWikiArticle(raw)) return;
+    if(isLowValueWikiArticle(pg.title, raw)) return;
     let desc = raw;
     if(desc.length>220) desc = desc.slice(0,217).replace(/\s+\S*$/,'')+'…';
     out.push({
@@ -3436,7 +3462,7 @@ function applyRealPlaces(key, base, list){
   let wikiDropped = 0;
   const filtered = chainFiltered.filter(p => {
     if(!p || p.source !== 'wiki') return true;
-    if(isLowValueWikiArticle(p.desc)){ wikiDropped++; return false; }
+    if(isLowValueWikiArticle(p.name, p.desc)){ wikiDropped++; return false; }
     return true;
   });
   if(wikiDropped) console.log('[localy] #96 dropped '+wikiDropped+' settlement/school wiki pin(s) from tile '+key);
@@ -3518,7 +3544,10 @@ async function ensureRealPlaces(base){
            by applyRealPlaces(). On a warm cache row this is undefined, which is
            itself the useful reading: it means nothing was filtered this pass
            because nothing was fetched this pass. */
-        (data && data.wikiDropped != null) ? ('wikiDropped(server): '+data.wikiDropped) : 'wikiDropped(server): n/a (cached)');
+        (data && data.wikiDropped != null) ? ('wikiDropped(server): '+data.wikiDropped) : 'wikiDropped(server): n/a (cached)',
+        /* #96b — should be 0 on a cold tile. Anything else means articles are
+           arriving with no extract again and the title rules are load-bearing. */
+        (data && data.wikiNoExtract) ? ('wikiNoExtract(server): '+data.wikiNoExtract+' — CHECK exlimit') : '');
     } else {
       // NB: the old wording here said "procedural fallback stays", which stopped
       // being true at #37 — there is no fallback now, the area just renders empty.
@@ -4384,7 +4413,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21a';
+const APP_VERSION = '2026.07.21b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
