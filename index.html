@@ -1515,7 +1515,21 @@
   <!-- SUGGEST HIDDEN GEM -->
   <div class="screen" id="screen-suggest-gem">
     <h1 class="page-title">Suggest a Hidden Gem</h1>
-    <p class="page-sub">Tap the map to drop a pin right where it is, then tell us why it's worth finding.</p>
+    <p class="page-sub">Search the address, or tap the map to drop a pin right where it is. Then tell us why it's worth finding.</p>
+    <!-- #17 — same shared component as the map header pill and the hunt builder
+         (#88's attachPlaceSuggest). .location-search-row is reused ONLY for its
+         position:relative host + flex sizing; there is no Go button here on
+         purpose. On the other two surfaces Go is the Photon-is-down escape
+         hatch that moves a camera. Here a pick WRITES DATA (the draft pin a
+         moderator will act on), and a blind Nominatim first-hit is exactly the
+         "Wrigley resolved to whichever of five" defect #88 existed to kill.
+         Photon down here degrades to map-tap, which still works. -->
+    <div class="field">
+      <label class="field-label">Where is it? (optional — you can just tap the map)</label>
+      <div class="location-search-row">
+        <input type="text" id="gem-address-search" placeholder="Address, place name, or zip code" enterkeyhint="search">
+      </div>
+    </div>
     <div id="suggest-gem-map"></div>
     <div class="field" style="margin-top:14px;">
       <label class="field-label">What is it?</label>
@@ -4113,7 +4127,7 @@ function showToast(msg){
    outside-tap listener does not fire for a programmatic navigation (bottom
    nav routes through showScreen, not through a tap on the map), so without
    this the dropdown survives underneath the next screen. */
-const placeSuggest = {map:null, create:null};
+const placeSuggest = {map:null, create:null, gem:null};
 function wirePlaceSuggest(){
   placeSuggest.map = attachPlaceSuggest('map-search-input', place=>{
     document.getElementById('map-search-input').value = '';
@@ -4122,10 +4136,17 @@ function wirePlaceSuggest(){
   placeSuggest.create = attachPlaceSuggest('create-location-search', place=>{
     jumpCreateMapTo(place);
   });
+  /* #17 — third host. Unlike the other two, this callback LEAVES the query in
+     the input: the user is describing a real place on a form they are about to
+     submit, and blanking the field they just filled reads as "it didn't take". */
+  placeSuggest.gem = attachPlaceSuggest('gem-address-search', place=>{
+    jumpSuggestMapTo(place);
+  });
 }
 function closeAllPlaceSuggest(){
   if(placeSuggest.map) placeSuggest.map.close();
   if(placeSuggest.create) placeSuggest.create.close();
+  if(placeSuggest.gem) placeSuggest.gem.close();
 }
 function showScreen(id){
   closeAllPlaceSuggest();
@@ -4208,7 +4229,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20m';
+const APP_VERSION = '2026.07.20n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5701,12 +5722,32 @@ function jumpCreateMapTo(place){
   }
   showToast(`Showing ${place.name}`);
 }
+/* #17 — the ONE place the gem draft pin is written, so a map tap and a geocode
+   pick cannot disagree about marker state the way they would as two copies.
+   Note the pin stays fully re-tappable after a geocode: a geocoded centroid is
+   right for a storefront and wrong for "the mural behind the laundromat", so
+   search FILLS the pin, it does not lock it. */
+function setGemDraftPin(lat, lng){
+  state.gemDraftPin = {lat, lng};
+  if(!state.suggestMap) return;
+  if(state.suggestMarker) state.suggestMap.removeLayer(state.suggestMarker);
+  state.suggestMarker = L.marker([lat, lng], {icon:createPinDivIcon()}).addTo(state.suggestMap);
+}
+/* Camera + pin for a dropdown pick. Zoom 17, not the hunt builder's 14 — that
+   one is "show me this city", this one is "is that the right doorway". */
+function jumpSuggestMapTo(place){
+  closeAllPlaceSuggest();
+  setGemDraftPin(place.lat, place.lng);
+  if(state.suggestMap) state.suggestMap.setView([place.lat, place.lng], 17);
+  showToast(`Pin dropped at ${place.name} — drag the map and tap to adjust`);
+}
 function openSuggestGemScreen(){
   showScreen('screen-suggest-gem');
   document.getElementById('bottomnav').classList.add('hidden');
   document.getElementById('gem-name').value = '';
   document.getElementById('gem-desc').value = '';
   document.getElementById('gem-category').value = 'park';
+  document.getElementById('gem-address-search').value = '';
   state.gemDraftPin = null;
   setTimeout(()=>{
     if(!state.suggestMap){
@@ -5714,9 +5755,11 @@ function openSuggestGemScreen(){
       state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false}).setView([start.lat,start.lng], 16);
       addBaseLayer(state.suggestMap);
       state.suggestMap.on('click', e=>{
-        state.gemDraftPin = {lat:e.latlng.lat, lng:e.latlng.lng};
-        if(state.suggestMarker) state.suggestMap.removeLayer(state.suggestMarker);
-        state.suggestMarker = L.marker([e.latlng.lat, e.latlng.lng], {icon:createPinDivIcon()}).addTo(state.suggestMap);
+        /* #17 — routed through setGemDraftPin so tap and geocode share one
+           marker path. Also closes the dropdown: a list left open over the map
+           swallows the next tap. */
+        closeAllPlaceSuggest();
+        setGemDraftPin(e.latlng.lat, e.latlng.lng);
       });
     } else {
       state.suggestMap.invalidateSize();
@@ -5730,7 +5773,7 @@ async function submitGem(){
   const bucket = document.getElementById('gem-category').value;
   if(!name){ showToast('Give it a name first'); return; }
   if(!desc){ showToast("Add a quick reason it's worth finding"); return; }
-  if(!state.gemDraftPin){ showToast('Tap the map to drop a pin at its location'); return; }
+  if(!state.gemDraftPin){ showToast('Search the address above, or tap the map to drop a pin'); return; }
   const uid = state.user && state.user.id;
   if(!uid){ showToast('Please log in again to submit'); return; }
   let newId = null;
