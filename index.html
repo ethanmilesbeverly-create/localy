@@ -1333,6 +1333,13 @@
     padding:8px 6px calc(8px + env(safe-area-inset-bottom));
     z-index:600;
   }
+  /* #98b — AS OF 2026.07.20r NOTHING ADDS THIS CLASS. The two callers that did
+     (openSuggestGemScreen, openCreateScreen) no longer hide the footer. Kept
+     rather than deleted because it is a one-line general capability and the
+     restore calls in goToModeSelect() / enterHuntMode() are harmless no-ops —
+     but do NOT read the existence of this rule as evidence that the app has
+     modal screens, because it does not. If a future flow uses it, it owes a
+     setNavActive() call on the way back in; see openSuggestGemScreen. */
   #bottomnav.hidden{display:none;}
   .nav-btn{
     flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -4287,7 +4294,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20q';
+const APP_VERSION = '2026.07.20r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6076,9 +6083,37 @@ function jumpSuggestMapTo(place){
   if(state.suggestMap) state.suggestMap.setView([place.lat, place.lng], 17);
   showToast(`Pin dropped at ${place.name} — drag the map and tap to adjust`);
 }
+/* #98b — THE NAV STAYS. It used to be hidden here, which made this a modal
+   flow with Cancel as the only exit. Two consequences, and the second is the
+   one that actually cost something:
+
+   1. It read as a dead end. Every other screen in the app has a footer; two did
+      not, for no reason a user could infer.
+   2. IT WAS COVERING A RENDERING BUG. #pin-sheet never fully cleared the frame
+      (see #98 at the CSS rule) and #bottomnav's z-index 600 painted over the
+      sliver everywhere the nav existed. These two screens were the only place
+      the sliver was visible — which is how it got reported at all, after
+      surviving the entire life of the file. Restoring the nav here WITHOUT the
+      #pin-sheet fix would have put the sliver back under the carpet on all
+      seven screens and closed #98 on a symptom. Both changes ship together on
+      purpose; the order matters and the nav is not the fix.
+
+   #91's TRAP, and this is why setNavActive is called explicitly rather than
+   left to inherit: setTab() lights the footer from dataset.screen, and no nav
+   button carries screen-suggest-gem. Showing the footer without saying which
+   tab is current leaves whatever was lit when you arrived — Map if you came
+   from the empty card, Explore if you came from the Explore row — so the
+   footer would claim you were on a screen you had left. That is #81's exact
+   defect, and it broke there the moment a second entrance appeared.
+
+   EXPLORE is the answer for both this screen and the hunt builder: the
+   permanent entry points for both live in #screen-modes, and Cancel on both
+   already routes to goToModeSelect(). Lighting Explore makes the footer agree
+   with where Back actually goes, which a return-target scheme (#91's approach
+   for Settings) would NOT have done here without also rewriting Cancel. */
 function openSuggestGemScreen(){
   showScreen('screen-suggest-gem');
-  document.getElementById('bottomnav').classList.add('hidden');
+  setNavActive('screen-modes');
   document.getElementById('gem-name').value = '';
   document.getElementById('gem-desc').value = '';
   document.getElementById('gem-category').value = 'park';
@@ -6182,7 +6217,7 @@ function renderGemSubmissions(){
    back by accident. */
 function openCreateScreen(existingHunt, seedPoint){
   showScreen('screen-create');
-  document.getElementById('bottomnav').classList.add('hidden');
+  setNavActive('screen-modes');   // #98b — see openSuggestGemScreen for why explicitly
   state.editingHuntId = existingHunt ? existingHunt.id : null;
   document.getElementById('create-screen-title').textContent = existingHunt ? 'Edit hunt' : 'Create a hunt';
   document.getElementById('delete-hunt-btn').style.display = existingHunt ? 'block' : 'none';
