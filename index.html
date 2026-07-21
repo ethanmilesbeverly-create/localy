@@ -508,6 +508,36 @@
     font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;
     padding:2px 7px;border-radius:999px;
   }
+  /* #62 — COLLAPSED SUBMISSIONS. Native <details>/<summary>, no JS toggle and
+     no state: the same call as the confirm() in navTo(). This app has three
+     shipped defects (#95/#97/#98) from hand-built overlays and offsets, and a
+     disclosure widget is not worth a fourth. <details> also survives the screen
+     being hidden and reshown, which a JS open-flag on a re-rendered node would
+     not — renderGemSubmissions() rewrites this innerHTML on every entry. */
+  .gem-subs{
+    margin:0 0 18px;
+    border:1px solid var(--line);border-radius:12px;
+    background:var(--surface);overflow:hidden;
+  }
+  .gem-subs summary{
+    list-style:none;cursor:pointer;
+    padding:12px 14px;
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;color:var(--text);
+  }
+  .gem-subs summary::-webkit-details-marker{display:none;}
+  .gem-subs summary .gs-sub{
+    font-weight:400;color:var(--text-dim);font-size:12px;
+  }
+  .gem-subs summary .gs-chev{
+    margin-left:auto;width:16px;height:16px;color:var(--text-dim);
+    transition:transform .18s ease;flex:none;
+  }
+  .gem-subs[open] summary .gs-chev{transform:rotate(90deg);}
+  .gem-subs .gs-body{padding:0 14px 14px;}
+  .gem-subs .gs-reason{
+    margin:6px 0 0;font-size:12px;color:var(--text-dim);line-height:1.45;
+  }
   #hunt-card-menu{
     position:fixed;
     display:none;
@@ -1581,6 +1611,16 @@
   <div class="screen" id="screen-suggest-gem">
     <h1 class="page-title">Suggest a Hidden Gem</h1>
     <p class="page-sub">Search the address, or tap the map to drop a pin right where it is. Then tell us why it's worth finding.</p>
+    <!-- #62 — MOVED HERE FROM #screen-modes, and ABOVE the form on purpose.
+         Below the form it was under a map, four fields and three lines of
+         helper text — i.e. below the fold, which is the exact burial this row
+         exists to fix, reintroduced one screen over. renderGemSubmissions()
+         emits NOTHING when the list is empty, so a first-time user still sees
+         the form and only the form; a returning user sees their submissions
+         first, which is right, because someone coming back is usually checking
+         status rather than filing another one.
+         COLLAPSED BY DEFAULT — see renderGemSubmissions() for why. -->
+    <div id="gem-submissions-section"></div>
     <!-- #17 — same shared component as the map header pill and the hunt builder
          (#88's attachPlaceSuggest). .location-search-row is reused ONLY for its
          position:relative host + flex sizing; there is no Go button here on
@@ -1623,12 +1663,6 @@
     <div class="edit-links-row">
       <button class="link-btn" onclick="cancelSuggestGem()">Cancel</button>
     </div>
-    <!-- #62 — MOVED HERE FROM #screen-modes. This list is the reason the tab is
-         a destination and not a form: "did my gem get approved?" is a genuine
-         reason to come back. It renders empty until you have submitted
-         something, which is correct — a first-time user sees the form and
-         nothing else. -->
-    <div id="gem-submissions-section"></div>
   </div>
 
   <!-- CODE ENTRY -->
@@ -4443,15 +4477,32 @@ async function loadMyGems(){
     if(!uid){ state.gemSubmissions = []; return; }
     const { data, error } = await sb
       .from('submissions')
-      .select('id,name,description,category,lat,lng,status,created_at')
+      /* #62 — ai_reason ADDED 2026.07.21l. review-submission has written a
+         one-sentence explanation to this column on every single review since
+         it shipped, capped at 300 chars, with an explicit guard so it can
+         never be blank — and no client has ever read it. Same shape as #3's
+         ai_status and #85's share string: a value maintained by one side and
+         consumed by nobody. It is rendered ONLY on rejected rows; see
+         renderGemSubmissions() for why that is the safe subset. */
+      .select('id,name,description,category,lat,lng,status,ai_reason,created_at')
       .eq('submitted_by', uid)
       .order('created_at', { ascending:false });
     if(error) throw error;
     state.gemSubmissions = (data||[]).map(r=>({
       id:r.id, name:r.name, desc:r.description, bucket:r.category,
-      lat:r.lat, lng:r.lng, status:r.status
+      lat:r.lat, lng:r.lng, status:r.status, aiReason:r.ai_reason || ''
     }));
-  }catch(e){ state.gemSubmissions = []; }
+  }catch(e){
+    /* #62 — WAS A SILENT [] AND STILL DEGRADES TO ONE, but it now says so.
+       #1 records that this function swallows failures into an empty array,
+       which renders as "you have submitted nothing" rather than "couldn't
+       check". Adding ai_reason to the select above is exactly the kind of
+       change that can start failing here (missing column, RLS), and a
+       regression that presents as an empty list with a clean console is the
+       worst version of it. Not the full #1 treatment — that is still owed. */
+    console.warn('[#62] loadMyGems failed — submissions list will render empty', e);
+    state.gemSubmissions = [];
+  }
 }
 
 /* Load ALL approved submissions (from everyone) so they can be discovered. */
@@ -4732,7 +4783,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21k';
+const APP_VERSION = '2026.07.21l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6790,31 +6841,71 @@ async function submitGem(){
   else if(decision==='reject')  showToast("That one couldn't be approved.");
   else                          showToast('Submitted — pending review.');
 }
+/* #62 — COLLAPSED BY DEFAULT, AND THE COLLAPSE IS THE POINT.
+   Expanded, this list is a running tally of your rejections sitting directly
+   above the form that asks you to try again — and the person reading it is the
+   contributor whose repeat submissions the whole positioning bet (#35) depends
+   on. Twelve rows of "This one wasn't approved" is a scoreboard of failures.
+
+   THE SUMMARY LINE DELIBERATELY DOES NOT COUNT REJECTIONS. It states the total
+   and, if any, how many are pending or live — the two facts someone opens this
+   to check. "9 not approved" in the collapsed header would defeat the entire
+   reason for collapsing it. Anyone who wants the breakdown can open it.
+
+   REJECTIONS NOW CARRY THEIR REASON, which is what makes the expanded view
+   feedback rather than a scolding. ai_reason has been written by
+   review-submission on every review since it shipped and read by nothing.
+
+   WHY ONLY REJECTED ROWS ARE SAFE TO SHOW IT ON: status is 'rejected' only when
+   decision === 'reject', which only happens when the model's response parsed
+   AND the decision was one of the three valid values. Every failure path in
+   that function — HTTP error, unparseable output, off-schema decision — falls
+   back to 'review', which lands as 'pending'. So a rejected row's ai_reason is
+   always the model's own sentence, never "unparseable model output: ..." or
+   "gemini 503 (model ...)". Rendering it on pending rows WOULD leak those.
+   If that fallback logic ever changes, this rule changes with it. */
 function renderGemSubmissions(){
   const el = document.getElementById('gem-submissions-section');
-  if(!state.gemSubmissions || state.gemSubmissions.length===0){ el.innerHTML=''; return; }
-  el.innerHTML = `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Hidden Gem Submissions</p>
-    <div class="mode-grid">` +
-    state.gemSubmissions.map(g=>{
-      const isApproved = g.status==='approved';
-      const isRejected = g.status==='rejected';
-      const pinColor = isApproved ? '#D4AF37' : (isRejected ? '#C0524C' : '#EDE9DD');
-      let tag = '';
-      if(isApproved) tag = ' <span class="external-tag" style="background:rgba(212,175,55,0.2);color:#D4AF37;">Live</span>';
-      else if(isRejected) tag = ' <span class="external-tag" style="background:rgba(192,82,76,0.2);color:#C0524C;">Not approved</span>';
-      else tag = ' <span class="external-tag" style="background:rgba(159,179,164,0.2);color:#9FB3A4;">Pending</span>';
-      const sub = isApproved ? 'Approved — visible in Hidden Gems'
-                : isRejected ? 'This one wasn\'t approved'
-                : 'Pending review';
-      return `<div class="mode-card" style="cursor:default;">
-        <div class="icon-wrap"><div class="blaze">${pinSVG(pinColor, isApproved)}</div></div>
-        <div style="flex:1;min-width:0;">
-          <h3>${escapeHtml(g.name)}${tag}</h3>
-          <p>${sub}</p>
-        </div>
-      </div>`;
-    }).join('') +
-    `</div>`;
+  if(!el) return;
+  const subs = state.gemSubmissions || [];
+  if(subs.length === 0){ el.innerHTML=''; return; }
+
+  const pending  = subs.filter(g=>g.status!=='approved' && g.status!=='rejected').length;
+  const approved = subs.filter(g=>g.status==='approved').length;
+  const bits = [];
+  if(pending)  bits.push(pending + ' pending');
+  if(approved) bits.push(approved + ' live');
+  const sub = bits.length ? ' <span class="gs-sub">· ' + bits.join(' · ') + '</span>' : '';
+
+  const rows = subs.map(g=>{
+    const isApproved = g.status==='approved';
+    const isRejected = g.status==='rejected';
+    const pinColor = isApproved ? '#D4AF37' : (isRejected ? '#C0524C' : '#EDE9DD');
+    let tag = '';
+    if(isApproved)      tag = ' <span class="external-tag" style="background:rgba(212,175,55,0.2);color:#D4AF37;">Live</span>';
+    else if(isRejected) tag = ' <span class="external-tag" style="background:rgba(192,82,76,0.2);color:#C0524C;">Not approved</span>';
+    else                tag = ' <span class="external-tag" style="background:rgba(159,179,164,0.2);color:#9FB3A4;">Pending</span>';
+    const line = isApproved ? 'Approved — visible in Hidden Gems'
+               : isRejected ? "This one wasn't approved"
+               : 'Pending review';
+    const reason = (isRejected && g.aiReason)
+      ? `<p class="gs-reason">${escapeHtml(g.aiReason)}</p>` : '';
+    return `<div class="mode-card" style="cursor:default;">
+      <div class="icon-wrap"><div class="blaze">${pinSVG(pinColor, isApproved)}</div></div>
+      <div style="flex:1;min-width:0;">
+        <h3>${escapeHtml(g.name)}${tag}</h3>
+        <p>${line}</p>
+        ${reason}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<details class="gem-subs">
+    <summary>My submissions (${subs.length})${sub}
+      <svg class="gs-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </summary>
+    <div class="gs-body"><div class="mode-grid">${rows}</div></div>
+  </details>`;
 }
 /* Gem moderation is deliberately NOT in the client. Approvals happen admin-side
    in Supabase (see moderation.sql): the `pending_review` view is the queue, and
