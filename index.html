@@ -4243,7 +4243,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20o';
+const APP_VERSION = '2026.07.20p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4270,6 +4270,258 @@ const APP_VERSION = '2026.07.20o';
    second destructive control that account deletion then has to either absorb or
    coexist with, and one honest control beats two overlapping ones. */
 const SHOW_CLEAR_MY_DATA = false;
+
+/* =========================================================
+   #97 — INVARIANT ASSERTIONS ("enforced by nothing", 5th sighting)
+   =========================================================
+   THE PATTERN, not one bug: code that depends on a condition nothing in the
+   code checks, states, or sets. Five sightings on this file — #81 (settings
+   nav was correct only because the gear was the sole entrance, until #91 added
+   a second), #88 and the #78 comment sweep (IDs asserted from memory), #91,
+   #95 (two cards centre correctly only because #app carries no transform), and
+   #97 (a shared dropdown needs its host to win a stacking fight and neither
+   documents nor enforces it). Every time, a CAPITALISED COMMENT was the only
+   thing holding the invariant up, and every time the next caller did not read
+   it. Three separate rows recommended the same fix and none of them shipped.
+
+   WHAT SHIPPED IS NOT WHAT THOSE ROWS RECOMMENDED, and the difference matters.
+   They asked for getComputedStyle checks — read the host's position and
+   z-index, warn if they look wrong. That is a claim about the MECHANISM, and
+   on this app it produces false alarms: the map-header host legitimately sits
+   inside #map-top-row at z-index:500, which is "too low" by any fixed
+   threshold and works perfectly because the Leaflet panes it competes with sit
+   lower still. An assertion that cries wolf gets muted, which would leave this
+   file with a sixth sighting and a disabled alarm.
+
+   So these read OUTCOMES instead. Is the dropdown actually receiving the tap?
+   Is the card actually centred on the window? Did Leaflet actually get a box
+   with a size in it? That is #81's own lesson applied to instrumentation: a
+   button is a claim, only an effect is a reading. It also means these keep
+   working when the mechanism changes — a fourth host that fails for a reason
+   nobody has thought of yet still trips the same wire.
+
+   They are console-only, cost one requestAnimationFrame on surfaces that open
+   by hand, and are deliberately left ON in the shipped build. The point is to
+   catch the NEXT caller, and the next caller is not running a debug build. */
+const ASSERT_INVARIANTS = true;
+
+function invariantWarn(ids, msg, detail){
+  if(!ASSERT_INVARIANTS) return;
+  if(detail === undefined) console.warn('[invariant ' + ids + '] ' + msg);
+  else console.warn('[invariant ' + ids + '] ' + msg, detail);
+}
+
+function elDesc(el){
+  if(!el) return '(none)';
+  if(el === document.documentElement) return '<html>';
+  if(el === document.body) return '<body>';
+  var cls = (el.className && typeof el.className === 'string') ? el.className.trim() : '';
+  return '<' + el.tagName.toLowerCase() +
+         (el.id ? '#' + el.id : '') +
+         (cls ? '.' + cls.split(/\s+/).join('.') : '') + '>';
+}
+
+/* Properties that re-base position:fixed onto an ancestor AND create a
+   stacking context. #95's invariant is the absence of every one of these on
+   #app; #97's is about the stacking half of the same list. */
+const REBASE_PROPS = ['transform','filter','perspective','backdropFilter','willChange','contain'];
+
+function rebaseHits(cs){
+  return REBASE_PROPS.filter(function(prop){
+    var v = cs[prop];
+    return v && v !== 'none' && v !== 'auto';
+  }).map(function(prop){ return prop + ':' + cs[prop]; });
+}
+
+/* Nearest ancestor that establishes a stacking context, so a failure can name
+   the element to fix rather than just saying something is wrong. */
+function nearestStackingContext(el){
+  var n = el && el.parentElement;
+  while(n && n !== document.documentElement){
+    var cs = getComputedStyle(n);
+    var why = rebaseHits(cs);
+    if(cs.position !== 'static' && cs.zIndex !== 'auto') why.unshift('position:' + cs.position + ' + z-index:' + cs.zIndex);
+    if(cs.isolation === 'isolate') why.push('isolation:isolate');
+    if(parseFloat(cs.opacity) < 1) why.push('opacity:' + cs.opacity);
+    if(cs.mixBlendMode && cs.mixBlendMode !== 'normal') why.push('mix-blend-mode:' + cs.mixBlendMode);
+    if(why.length) return { el:n, z:(cs.zIndex === 'auto' ? null : parseInt(cs.zIndex, 10)), why:why.join(', ') };
+    n = n.parentElement;
+  }
+  return null;
+}
+
+/* Nearest ancestor that would re-base a fixed descendant. Same walk, narrower
+   list — position+z-index makes a stacking context but does NOT capture fixed. */
+function nearestFixedRebase(el){
+  var n = el && el.parentElement;
+  while(n && n !== document.documentElement){
+    var hits = rebaseHits(getComputedStyle(n));
+    if(hits.length) return { el:n, why:hits.join(', ') };
+    n = n.parentElement;
+  }
+  return null;
+}
+
+/* An element on an inactive .screen is display:none and measures zero for
+   reasons that are not a defect. Gating on this is what keeps the map
+   assertion from firing on every boot and training everyone to ignore it. */
+function onActiveScreen(el){
+  var s = el && el.closest ? el.closest('.screen') : null;
+  return !s || s.classList.contains('active');
+}
+
+/* #97 — IS THIS THING ACTUALLY RECEIVING TAPS? Hit-tests the element's own top
+   edge. If anything else answers, the element is painted under something, and
+   the warning names both the covering element and the stacking context to fix.
+   This is the check that catches host number four regardless of WHY it fails. */
+function assertNotCovered(el, ids, label){
+  if(!ASSERT_INVARIANTS || !el) return;
+  requestAnimationFrame(function(){
+    if(!el.isConnected) return;
+    var r = el.getBoundingClientRect();
+    if(r.width < 2 || r.height < 2){
+      invariantWarn(ids, label + ' is open but measures ' + Math.round(r.width) + '\u00d7' + Math.round(r.height) + '.', el);
+      return;
+    }
+    var x = r.left + r.width / 2;
+    var y = r.top + 6;
+    // Off-screen is a layout question, not an occlusion one — say nothing.
+    if(x < 1 || y < 1 || x > window.innerWidth - 1 || y > window.innerHeight - 1) return;
+    var hit = document.elementFromPoint(x, y);
+    if(!hit || hit === el || el.contains(hit)) return;
+    var ctx = nearestStackingContext(el);
+    invariantWarn(ids,
+      label + ' is COVERED \u2014 a tap at its top edge lands on ' + elDesc(hit) + ' instead. ' +
+      'Nearest stacking context is ' + elDesc(ctx && ctx.el) +
+      (ctx && ctx.z !== null ? ' at z-index ' + ctx.z : '') +
+      (ctx ? ' (created by ' + ctx.why + ')' : '') +
+      '. Fix the HOST, not the child \u2014 raising the child wins this fight and re-opens it one layer down.',
+      { covered:el, hitInstead:hit, stackingContext:(ctx && ctx.el) || null });
+  });
+}
+
+/* #95 — IS THIS CARD ACTUALLY CENTRED ON THE WINDOW? #hunt-empty and
+   #hunt-loading are position:fixed, which is correct only while no ancestor
+   carries a transform/filter/perspective/backdrop-filter/will-change/contain.
+   The failure mode is the nastiest kind: nothing errors, and on a phone #app
+   and the window are the same box so it looks perfect. It drifts on desktop
+   only. Measuring the actual centre catches it on whichever surface you open. */
+function assertViewportCentred(el, ids, label){
+  if(!ASSERT_INVARIANTS || !el) return;
+  requestAnimationFrame(function(){
+    if(!el.isConnected) return;
+    var r = el.getBoundingClientRect();
+    if(r.width < 2 || r.height < 2) return;
+    var dx = Math.round((r.left + r.width / 2) - window.innerWidth / 2);
+    var dy = Math.round((r.top + r.height / 2) - window.innerHeight / 2);
+    if(Math.abs(dx) <= 2 && Math.abs(dy) <= 2) return;
+    var reb = nearestFixedRebase(el);
+    invariantWarn(ids,
+      label + ' is position:fixed but is NOT centred on the viewport \u2014 off by ' + dx + 'px x, ' + dy + 'px y. ' +
+      (reb ? elDesc(reb.el) + ' carries ' + reb.why + ', which re-bases fixed positioning onto it.'
+           : 'No re-basing ancestor found, so something else moved it.'),
+      { card:el, rebasedOnto:(reb && reb.el) || null });
+  });
+}
+
+/* #87 — DID LEAFLET GET A BOX WITH A SIZE IN IT? A map constructed against a
+   container that is still display:none requests one column of tiles and fits
+   bounds against a viewport that does not exist \u2014 the narrow-strip-of-tiles
+   bug #49a hit on landing.html, and a live suspicion for the two form maps
+   here, which are built inside a setTimeout after showScreen() and have no
+   invalidateSize on the construction path. This is a READING, not a fix: #87
+   is its own row and this only makes it observable rather than suspected. */
+function assertContainerMeasured(id, ids, label){
+  if(!ASSERT_INVARIANTS) return;
+  var el = document.getElementById(id);
+  if(!el || !onActiveScreen(el)) return;
+  var r = el.getBoundingClientRect();
+  if(r.width >= 2 && r.height >= 2) return;
+  invariantWarn(ids,
+    label + ' measured ' + Math.round(r.width) + '\u00d7' + Math.round(r.height) +
+    ' while its screen is active. Leaflet will request one column of tiles and fit bounds against a viewport that does not exist.',
+    el);
+}
+
+/* #95 — THE BOOT WARNING THE ROW ASKED FOR WAS BUILT AND CUT. Gravestone, not
+   a deletion, because it is a good idea that this codebase specifically cannot
+   take.
+
+   The row's recommendation was a one-line boot check reading
+   getComputedStyle(#app).transform. Building it surfaced that THE INVARIANT IS
+   ALREADY BROKEN AND THE ROW NAMED THE WRONG ELEMENT: #screen-map.active
+   carries `perspective:800px` (for the compass/AR framing), and perspective
+   establishes a containing block for fixed descendants exactly the way a
+   transform does. So #hunt-empty and #hunt-loading have NEVER been anchored to
+   the window — they are anchored to #screen-map, which is the #app column.
+
+   It is invisible today because that column is `margin:0 auto` and full-height,
+   so its box and the viewport coincide to within a pixel on both phone and
+   desktop. The cards are in the right place for the wrong reason.
+
+   A boot warning would therefore have fired on EVERY start, for a condition
+   that is currently harmless, which is precisely how an alarm channel gets
+   muted — and a muted alarm is a sixth sighting of this pattern rather than a
+   fix for it. The outcome check (assertViewportCentred) stays as the alarm: it
+   is silent while the geometry is right and fires the moment it is not, and it
+   names #screen-map when it does. The standing state is readable on demand via
+   localyInvariants() below instead of being shouted at boot.
+
+   WHAT THIS DOES NOT DO IS DECIDE #95. Whether to re-anchor the cards to a
+   known containing block or to accept and document the coincidence is that
+   row's call, and it now has a fact it did not have. */
+
+/* Console helper: run `localyInvariants()` in DevTools for a one-shot reading
+   of every invariant this file assumes but cannot see. Deliberately a REPORT
+   and not a warning — nothing here is necessarily wrong, and asking is free. */
+window.localyInvariants = function(){
+  var out = {};
+
+  var anchorOf = function(id){
+    var el = document.getElementById(id);
+    if(!el) return '(element missing)';
+    var reb = nearestFixedRebase(el);
+    var r = reb ? reb.el.getBoundingClientRect() : null;
+    return {
+      fixedAnchoredTo: reb ? elDesc(reb.el) : 'the viewport (correct)',
+      because: reb ? reb.why : null,
+      anchorBox: r ? Math.round(r.width) + '\u00d7' + Math.round(r.height) : null,
+      viewport: window.innerWidth + '\u00d7' + window.innerHeight,
+      coincides: r ? (Math.abs(r.width - window.innerWidth) <= 2 && Math.abs(r.height - window.innerHeight) <= 2) : true
+    };
+  };
+  out['#95 hunt-empty']   = anchorOf('hunt-empty');
+  out['#95 hunt-loading'] = anchorOf('hunt-loading');
+
+  out['#97 suggest hosts'] = ['map-search-input','create-location-search','gem-address-search'].map(function(id){
+    var input = document.getElementById(id);
+    if(!input) return id + ': (missing)';
+    var host = input.parentElement;
+    var cs = getComputedStyle(host);
+    var ctx = nearestStackingContext(host);
+    return {
+      input: '#' + id,
+      host: elDesc(host),
+      hostPosition: cs.position,
+      hostZIndexWhileOpen: '1050 via .suggest-open',
+      stackingContext: elDesc(ctx && ctx.el),
+      contextZIndex: ctx ? ctx.z : null,
+      contextCreatedBy: ctx ? ctx.why : null
+    };
+  });
+
+  out['#87 map containers'] = ['leaflet-map','suggest-gem-map','create-map'].map(function(id){
+    var el = document.getElementById(id);
+    if(!el) return id + ': (missing)';
+    var r = el.getBoundingClientRect();
+    return '#' + id + ': ' + Math.round(r.width) + '\u00d7' + Math.round(r.height) +
+           (onActiveScreen(el) ? ' (screen active)' : ' (screen inactive \u2014 zero is expected)');
+  });
+
+  console.log('%c[invariants] ' + APP_VERSION, 'font-weight:700');
+  console.log(out);
+  return out;
+};
 
 function openSettings(returnTo){
   const u = state.user || {};
@@ -4528,7 +4780,15 @@ function fixMapSize(){
   state.leafletMap.invalidateSize();
   requestAnimationFrame(()=>state.leafletMap.invalidateSize());
   setTimeout(()=>state.leafletMap.invalidateSize(), 120);
-  setTimeout(()=>state.leafletMap.invalidateSize(), 400);
+  setTimeout(()=>{
+    state.leafletMap.invalidateSize();
+    /* #87 — asserted AFTER the last repair tick rather than at construction.
+       setupBaseMap() legitimately builds against a hidden container at boot and
+       this function is what fixes it, so warning at construction would fire on
+       every cold start and teach everyone to ignore the channel. 400ms in, with
+       the map screen active, a zero-size container is a real defect. */
+    assertContainerMeasured('leaflet-map', '#87', '#leaflet-map');
+  }, 400);
 }
 window.addEventListener('resize', ()=>{ if(document.getElementById('screen-map').classList.contains('active')) fixMapSize(); });
 window.addEventListener('orientationchange', ()=>{ setTimeout(fixMapSize, 200); });
@@ -5039,6 +5299,14 @@ function attachPlaceSuggest(inputId, onPick){
   input._suggestBound = true;
 
   const host = input.parentElement;
+  /* #97 (b) — MAKE THE REQUIREMENT CODE RATHER THAN CONVENTION. The list is
+     position:absolute and hangs off this host; a static host means it resolves
+     against whatever ancestor happens to be positioned instead, which is a
+     silent, layout-dependent failure. All three current hosts satisfy this via
+     .location-search-row's CSS — host number four would have had to know to,
+     and nothing would have told it. Written only when it is actually missing,
+     so a host that deliberately chooses sticky or fixed is left alone. */
+  if(getComputedStyle(host).position === 'static') host.style.position = 'relative';
   const list = document.createElement('div');
   list.className = 'place-suggest';
   list.id = inputId + '-suggest';
@@ -5078,6 +5346,11 @@ function attachPlaceSuggest(inputId, onPick){
                                           // fight with Leaflet, not the child
     st.open = true;
     input.setAttribute('aria-expanded', 'true');
+    /* #97 — the wire. #88 shipped this dropdown to two surfaces and its QA
+       passed while one of them was broken, because nobody had opened the hunt
+       builder's list far enough down to overlap #create-map. A hit test on
+       every open would have said so on day one. */
+    assertNotCovered(list, '#97', 'The place-suggest list for #' + inputId);
   }
 
   function renderStatus(msg){
@@ -5769,6 +6042,7 @@ function openSuggestGemScreen(){
   state.gemDraftPin = null;
   setTimeout(()=>{
     if(!state.suggestMap){
+      assertContainerMeasured('suggest-gem-map', '#87', '#suggest-gem-map');
       const start = state.me || FALLBACK_LOCATION;
       state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false}).setView([start.lat,start.lng], 16);
       addBaseLayer(state.suggestMap);
@@ -5885,6 +6159,7 @@ function openCreateScreen(existingHunt, seedPoint){
   }
   setTimeout(()=>{
     if(!state.createMap){
+      assertContainerMeasured('create-map', '#87', '#create-map');
       const start = state.me || {lat:41.8827,lng:-87.6233};
       state.createMap = L.map('create-map', {zoomControl:false, attributionControl:false}).setView([start.lat,start.lng], 14);
       addBaseLayer(state.createMap);
@@ -6640,6 +6915,7 @@ function updateHuntEmptyState(count){
       document.getElementById('hunt-loading-title').textContent = LOADING_COPY.title;
       document.getElementById('hunt-loading-body').textContent  = LOADING_COPY.body;
       load.classList.add('show');
+      assertViewportCentred(load, '#95', '#hunt-loading');
     }
     return;
   }
@@ -6650,6 +6926,7 @@ function updateHuntEmptyState(count){
   document.getElementById('hunt-empty-title').textContent = copy.title;
   document.getElementById('hunt-empty-body').textContent = copy.body;
   el.classList.add('show');
+  assertViewportCentred(el, '#95', '#hunt-empty');
 }
 
 function blazeSVGsized(color, filled, w, h){
