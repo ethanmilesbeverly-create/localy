@@ -3127,7 +3127,7 @@ const OVERPASS_ENDPOINTS = [
   'https://overpass.private.coffee/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
 ];
-const _realDebug = { lastOverpassError:null, lastOverpassStatus:null, lastCounts:null };
+const _realDebug = { lastOverpassError:null, lastOverpassStatus:null, lastCounts:null, lastWikiDropped:0 }; // #96: lastWikiDropped
 
 function normName(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
 function realTileKey(base){ return Math.round(base.lat/REAL_TILE_DEG)+'_'+Math.round(base.lng/REAL_TILE_DEG); }
@@ -3282,8 +3282,68 @@ async function fetchOverpass(base){
   }
 }
 
+/* --- #96: Wikipedia relevance filter (MIRROR of index.js — keep identical) ---
+   The geosearch below returns EVERY coordinate-bearing article within 6 km and
+   pushed all of them through as category:'history'. Two things came out of that
+   which should never have been pins:
+     1. Settlements (city / village / CDP / unincorporated community). A CATEGORY
+        ERROR, not a taste one: the article is geotagged at the centroid of the
+        area you are standing in, so the app drew a pin on top of the user and
+        invited them to walk to the town they were already in. It survives
+        dedupeReal() (nothing else shares the name) and, being a centroid, sorts
+        near the top of any distance-ordered list. Every dense tile got one.
+     2. High schools. Real places, no story — they fail #13's bar.
+
+   The match is anchored to the copula predicate ('<X> is a <...> city in ...'),
+   NOT to a bare mention of the words. An unanchored /high school/ would drop
+   'Old Main is a building on the campus of Central High School' — exactly the
+   pin worth keeping. Three guards do that work: it must follow 'is/was a|an|the'
+   (or 'one of the'); at most three adjectives may intervene and none of them may
+   be a function word (kills 'is a memorial to the city of ...'); and the noun
+   must be FOLLOWED by in/of/on/and/near/... or punctuation (keeps 'is a city
+   landmark', 'is a state park', and Hull House's 'was a settlement house in
+   Chicago').
+
+   ACCEPTED TRADE, gravestone not deletion: this drops genuinely historic schools
+   too — NRHP-listed buildings are frequently schools. If that turns out to be
+   the wrong bet the fix is #96's option (b), Wikidata P31 instance-of, NOT a
+   longer regex.
+
+   WHERE THIS ACTUALLY BITES ON THE CLIENT: fetchWikipedia() below is a DEAD
+   MIRROR — nothing calls it since #37 moved fetching into the `nearby-places`
+   Edge Function — so patching it alone would have changed nothing on a phone.
+   The live client guard is in applyRealPlaces(), the single write point for
+   real places from the function AND its cache, which means an already-cached
+   server tile is cleaned on the way in even before CACHE_VERSION v8 orphans it.
+   Bump the server constant anyway; this is a second net, not the fix. */
+const WIKI_RELEVANCE_FILTER = true;
+const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|of|on|to|at|for|by|with|from|near|within|the|a|an|and)\b)[^\s.]+\s+){0,3}?(?:census[-\u2010-\u2015 ]designated\s+places?|unincorporated\s+(?:communit(?:y|ies)|areas?|towns?)|(?:junior\s+high|senior\s+high|high|middle|elementary|primary|secondary|grammar|prep(?:aratory)?)\s+schools?|school\s+districts?|community\s+areas?|ghost\s+towns?|home\s+rule\s+municipalit(?:y|ies)|municipalit(?:y|ies)|cit(?:y|ies)|towns?|villages?|hamlets?|boroughs?|townships?|suburbs?|neighbou?rhoods?|count(?:y|ies)|parish(?:es)?|states?|provinces?|settlements?|localit(?:y|ies)|capitals?|communit(?:y|ies))(?=\s*(?:[,.;:)]|$)|\s+(?:in|of|on|and|within|near|located|situated|serving|which|that)\b)/i;
+
+/* First sentence only. No lookbehind — this has to run in older iOS Safari — so
+   the "is this really a sentence end?" test is folded into a lazy match: a
+   period only ends the opener when it follows two lowercase letters, a digit or
+   a closing bracket/quote AND is followed by a space and a capital. That keeps
+   'the U.S. state of Illinois' and 'Whitney M. Young Magnet High School' in one
+   piece; splitting naively on '. [A-Z]' truncated the latter to 'Whitney M' and
+   let it straight through. */
+function wikiOpener(extract){
+  const s = String(extract||'').trim();
+  if(!s) return '';
+  const m = s.match(/^[\s\S]*?(?:[a-z]{2}|[0-9)\]"'\u201d\u2019])\.(?=\s+["'(\u201c]?[A-Z])/);
+  return (m ? m[0] : s).slice(0, 300);
+}
+function isLowValueWikiArticle(extract){
+  if(!WIKI_RELEVANCE_FILTER) return false;
+  const opener = wikiOpener(extract);
+  if(!opener) return false;   // no extract = no evidence; keep it and let #13 judge
+  return WIKI_STOP_RE.test(opener);
+}
+
 /* --- Wikipedia GeoSearch: nearby articles → real landmark/history points,
-   with genuine intro-sentence descriptions, all in one request. --- */
+   with genuine intro-sentence descriptions, all in one request.
+   DEAD PATH since #37 — kept in lockstep with index.js so the two never drift.
+   See the #96 note above: the guard that runs on a phone is in
+   applyRealPlaces(), not here. --- */
 async function fetchWikipedia(base){
   const url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*'
     + '&generator=geosearch&ggscoord='+base.lat+'%7C'+base.lng
@@ -3300,7 +3360,11 @@ async function fetchWikipedia(base){
   Object.values(pages).forEach(pg=>{
     const co = pg.coordinates && pg.coordinates[0];
     if(!co) return;
-    let desc = (pg.extract||'').trim();
+    const raw = (pg.extract||'').trim();
+    /* #96 — drop BEFORE truncation: truncation can cut mid-sentence and the
+       opener is what the stoplist reads. */
+    if(isLowValueWikiArticle(raw)) return;
+    let desc = raw;
     if(desc.length>220) desc = desc.slice(0,217).replace(/\s+\S*$/,'')+'…';
     out.push({
       id:'wiki_'+pg.pageid, name:pg.title, lat:co.lat, lng:co.lon,
@@ -3359,7 +3423,24 @@ function applyRealPlaces(key, base, list){
   // Drop franchise chains here — this is the single write point for real places
   // from the server `nearby-places` function AND its cache, so filtering here
   // catches them regardless of source (the client Overpass path is unused).
-  const filtered = EXCLUDE_CHAINS ? list.filter(p => !isChainPlace(p, p && p.name)) : list;
+  const chainFiltered = EXCLUDE_CHAINS ? list.filter(p => !isChainPlace(p, p && p.name)) : list;
+  /* #96 — THE LIVE CLIENT GUARD. Same reasoning as the chain filter one line up:
+     this is the single write point for real places from `nearby-places` AND its
+     server-side cache, so it is the only place that catches a city or high
+     school arriving from a tile that was cached before the Edge Function was
+     redeployed. Restricted to source:'wiki' — the OSM side is not guilty here
+     (categorizeOsm() returns null for place=* and amenity=school), and running
+     the opener regex over osmDesc() strings would be testing text this filter
+     was never tuned against. Counted, not silent: a filter you cannot measure
+     is a filter nobody can tell is over-firing (#94). */
+  let wikiDropped = 0;
+  const filtered = chainFiltered.filter(p => {
+    if(!p || p.source !== 'wiki') return true;
+    if(isLowValueWikiArticle(p.desc)){ wikiDropped++; return false; }
+    return true;
+  });
+  if(wikiDropped) console.log('[localy] #96 dropped '+wikiDropped+' settlement/school wiki pin(s) from tile '+key);
+  _realDebug.lastWikiDropped = wikiDropped;
   /* #78c — AN AREA THAT IS ALL CHAINS IS EMPTY *TO THIS APP*, and it must say
      so. This early return used to be the quietest path in the file: a strip mall
      with twelve franchises came back as a full list, got filtered to nothing,
@@ -3368,7 +3449,11 @@ function applyRealPlaces(key, base, list){
      precision, and it is the one case where "nothing mapped here" is arguably
      the wrong words for a place with plenty mapped. Left as generic empty copy
      for now rather than inventing a third message; noted so it is a decision
-     and not an oversight. */
+     and not an oversight. #96 ADDS A SECOND WAY TO REACH THIS LINE: a thin
+     rural tile whose only "history" pin was the town it sits in now filters to
+     zero and correctly says so, where before it showed one pin pointing at the
+     user. That is the intended outcome, not a regression — but it is the
+     reading that will look like one on a phone, so it is written down here. */
   if(!filtered.length){ setTileState(key, 'empty'); return; }
   const byCat = groupRealByCat(filtered);
   state.realPlaces = { tile:key, center:base, all:filtered, byCat };
@@ -3428,7 +3513,12 @@ async function ensureRealPlaces(base){
     if(places.length){
       applyRealPlaces(key, base, places); // sets _realDebug.lastCounts + tile state
       const src = data.cached ? (data.stale ? 'cache(stale)' : 'cache') : 'live';
-      console.log('[localy] real places for tile '+key+' ('+places.length+' places, '+src+')', _realDebug.lastCounts);
+      console.log('[localy] real places for tile '+key+' ('+places.length+' places, '+src+')', _realDebug.lastCounts,
+        /* #96 — the SERVER's drop count, distinct from the client-side one logged
+           by applyRealPlaces(). On a warm cache row this is undefined, which is
+           itself the useful reading: it means nothing was filtered this pass
+           because nothing was fetched this pass. */
+        (data && data.wikiDropped != null) ? ('wikiDropped(server): '+data.wikiDropped) : 'wikiDropped(server): n/a (cached)');
     } else {
       // NB: the old wording here said "procedural fallback stays", which stopped
       // being true at #37 — there is no fallback now, the area just renders empty.
@@ -4294,7 +4384,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20r';
+const APP_VERSION = '2026.07.21a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
