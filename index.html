@@ -19,6 +19,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   :root{
+    /* #98 — THE OFFSET #pin-sheet IS ANCHORED BY AND THE DISTANCE IT MUST TRAVEL
+       TO CLEAR ARE THE SAME FACT, AND THEY USED TO BE TWO NUMBERS IN DIFFERENT
+       UNITS. Stated once here so they cannot disagree again. See #pin-sheet. */
+    --sheet-offset:calc(56px + env(safe-area-inset-bottom));
     --bg:#10231C;
     --surface:#173229;
     --surface-2:#1F3F32;
@@ -836,9 +840,48 @@
   .map-popup-dist{font-size:12px;color:var(--orange);font-weight:700;}
 
   /* ---------- Pin detail sheet (flight-tracker style) ---------- */
+  /* #98 — THIS SHEET HAS NEVER FULLY CLOSED, ON ANY SCREEN, SINCE IT WAS
+     WRITTEN. The dismissal was `translateY(130%)` — a percentage of the
+     element's OWN HEIGHT — while the anchor is `bottom:56px + safe-area`, an
+     ABSOLUTE offset. The two are in different units and nothing could ever
+     check that one cleared the other.
+
+     The arithmetic, because it is worth being able to redo: after dismissal the
+     sheet's top edge sits at (app_bottom - 56 + 0.3H). It is only clipped by
+     #app's overflow:hidden once 0.3H >= 56, i.e. H >= 187px. A CLOSED sheet is
+     nowhere near that — grabber 5px + 10/12px margins + an empty peek row +
+     #pin-sheet-expand at max-height:0 + 22px bottom padding is roughly 49-66px.
+     So ~36-41px of sheet was permanently poking above the bottom of the frame,
+     and even after a pin had been opened (closePinSheet removes the classes but
+     never clears the text, so H grows to ~150px) about 11px still showed.
+
+     WHY NOBODY SAW IT FOR THE ENTIRE LIFE OF THE FILE: #bottomnav is z-index
+     600 and roughly 68px tall; this sheet is 590. 68 > 41, so the nav painted
+     over the sliver on every screen that has a nav. #screen-suggest-gem and
+     #screen-create are the only two that hide it, and hiding it revealed a
+     rendering bug that was always there. THE NAV WAS NOT A LAYOUT NEIGHBOUR, IT
+     WAS A COVER.
+
+     AND IT WAS NOT COSMETIC. There is no pointer-events:none here and
+     #pin-sheet-drag carries live drag handlers, so the sliver was INTERACTIVE
+     and sat exactly where "Submit for Review" and "Save Hunt" sit. On a screen
+     with a nav that costs nothing, because the nav is tappable too and owns
+     that band legitimately. On these two it was eating taps on the primary
+     action.
+
+     THE FIX IS THE UNITS, NOT THE NUMBER. The travel is now `100% + the same
+     offset the sheet is anchored by`, both read from --sheet-offset, so the
+     dismissal clears at ANY content height and the two facts cannot drift apart
+     again. Raising 130% to some larger percentage would have "worked" today and
+     re-opened the identical bug the first time the closed sheet got shorter.
+
+     RECORDED, NOT FIXED, because it is a visual tuning decision and not this
+     defect: 56px is about 12px SHORT of the nav's real height (8 + 51 + 8 + 1),
+     so an OPEN sheet overlaps the nav's top edge — invisibly, because 590 loses
+     to 600 there too. Same cover, second thing under it. See #98. */
   #pin-sheet{
     position:absolute;left:0;right:0;
-    bottom:calc(56px + env(safe-area-inset-bottom));
+    bottom:var(--sheet-offset);
     max-width:480px;margin:0 auto;
     z-index:590;
     background:rgba(18,32,27,0.86);
@@ -847,12 +890,13 @@
     border-radius:20px 20px 0 0;
     box-shadow:0 -12px 34px rgba(0,0,0,0.42);
     /* #61(b) — 14px -> 22px. This edge is pinned above the nav at
-       bottom:calc(56px + env(safe-area-inset-bottom)), so there is no safe-area
-       slack quietly absorbing it and the last button sat right on the edge.
-       Left unresolved on purpose: #target-drawer reserves 90px at its bottom.
-       Two bottom sheets, 22px vs 90px, neither derived from the other. */
+       --sheet-offset, so there is no safe-area slack quietly absorbing it and
+       the last button sat right on the edge. Left unresolved on purpose:
+       #target-drawer reserves 90px at its bottom. Two bottom sheets, 22px vs
+       90px, neither derived from the other — see #98, which is that finding
+       generalised to four offsets. */
     padding:0 16px 22px;
-    transform:translateY(130%);
+    transform:translateY(calc(100% + var(--sheet-offset)));
     transition:transform .3s cubic-bezier(.22,.61,.36,1);
     will-change:transform;
   }
@@ -4243,7 +4287,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20p';
+const APP_VERSION = '2026.07.20q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
