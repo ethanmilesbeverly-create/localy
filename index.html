@@ -2869,16 +2869,31 @@ function gemPoint(g, idPrefix, ctxCategory, extra){
    supplied already-placed points for spacing. Used to replace a single
    Discover Local spot that's drifted too far, rather than regenerating the
    whole batch. */
-function generateOneCategoryPoint(category, base, placed, excludeGemIds){
+function generateOneCategoryPoint(category, base, placed, excludeGemIds, excludeNames, excludeIds){
   const uid = Date.now()+'_'+Math.floor(Math.random()*10000);
   // Prefer a real internet place for this slot before falling back to procedural.
   if(category!=='gems'){
+    /* #111 — `usedReal` reads state.currentHunt.points, which the caller has
+       NOT yet reassigned, so it is the PRE-refresh list for every call in a
+       pass. Two replacements in one pass therefore saw identical exclusions and
+       could both select the same place. The caller now passes accumulated sets;
+       this list is kept as the floor, not the whole rule.
+
+       It also filters on `p.source`, so it has only ever excluded OSM and Wiki
+       records — gems and #40b's injected captures were never in it. */
     const usedReal = (state.currentHunt && state.currentHunt.points || [])
       .filter(p=>p.source && p.id).map(p=>p.id);
-    const real = nearbyRealPlaces(base, category, 3, usedReal);
-    if(real.length){
-      const r = real[0];
-      return {...r, category};
+    const real = nearbyRealPlaces(base, category, 5, usedReal);
+    /* NAME is the operative test, not id. Two ids for one place is the normal
+       case this is here to catch; the id test below is the cheap belt. */
+    const pick = real.find(r=>{
+      if(excludeIds && r.id != null && excludeIds.has(r.id)) return false;
+      const k = normName(r.name);
+      if(k && excludeNames && excludeNames.has(k)) return false;
+      return true;
+    });
+    if(pick){
+      return {...pick, category};
     }
   }
   // No fabrication when filler is disabled: return a real gem if one exists,
@@ -3022,6 +3037,33 @@ function refreshDiscoverLocalIfNeeded(lat, lng){
      caring what category it renders as. Provenance is what #16 said to carry
      invisibly and never render; this is exactly the kind of thing it is for. */
   const usedGemIds = hunt.points.filter(p=>p.gemId).map(p=>p.gemId);
+
+  /* #111 — THE REPORTED DUPLICATE, AND THIS IS THE ONLY PATH IN THE FILE THAT
+     COULD PRODUCE IT. Every other way a point reaches a list checks the NAME:
+     blendCategory's `usedNames`, buildAllThingsLocal's `seen`,
+     reblendHuntInPlace's `keptNames`, injectCapturedPins' twin test, and #107's
+     dedupePoints. This path checked neither name nor id — only gemIds and, one
+     level down, ids of points carrying `source`. So a replacement could be a
+     place ALREADY IN THE LIST under a different id.
+
+     Different ids for one place are ordinary, not exotic: OSM records mint as
+     'osm_' + el.type + el.id, so the same business mapped both as a POI node
+     and as a building way is two records with two ids and one name. The build
+     path collapses that pair on name and never sees it; this path selects on
+     id and cannot.
+
+     `survivingNames` is seeded BEFORE the loop from every point that will be
+     kept, not accumulated as we go — a replacement generated at index 2 must
+     not collide with a survivor at index 9 that has not been visited yet.
+     Getting this wrong is why the check has to be seeded rather than built. */
+  const survivingNames = new Set();
+  const survivingIds = new Set();
+  hunt.points.forEach(p=>{
+    if(haversine(lat, lng, p.lat, p.lng) > DISCOVER_FALLOFF_M) return;
+    const k = normName(p.name); if(k) survivingNames.add(k);
+    if(p.id != null) survivingIds.add(p.id);
+  });
+
   let anyChanged = false;
   const newPoints = [];
   hunt.points.forEach(p=>{
@@ -3029,14 +3071,27 @@ function refreshDiscoverLocalIfNeeded(lat, lng){
     if(d > DISCOVER_FALLOFF_M){
       anyChanged = true;
       const placed = newPoints.map(np=>({lat:np.lat, lng:np.lng}));
-      const np = generateOneCategoryPoint(p.category, base, placed, usedGemIds);
-      if(np) newPoints.push(np); // null when no real replacement exists → slot drops
+      /* Passed down rather than filtered on return so that a collision picks
+         the NEXT real candidate instead of dropping the slot. Dropping would
+         have fixed the duplicate by making the list shorter, which is the
+         cheap fix and the wrong one — #58's argument that a screen should not
+         quietly show less than it claims. */
+      const np = generateOneCategoryPoint(p.category, base, placed, usedGemIds, survivingNames, survivingIds);
+      if(np){
+        const k = normName(np.name); if(k) survivingNames.add(k);
+        if(np.id != null) survivingIds.add(np.id);
+        newPoints.push(np);
+      } // null when no real replacement exists → slot drops
     } else {
       newPoints.push(p);
     }
   });
   if(anyChanged){
     hunt.points = newPoints;
+    /* #111 — the mutation the boot-time invariant never saw. See
+       assertNoDuplicatePoints(): it ran once at startup and this function
+       rewrites the list for the rest of the session. */
+    if(typeof assertNoDuplicatePoints === 'function') assertNoDuplicatePoints();
   }
 }
 
@@ -3729,7 +3784,14 @@ function dedupePoints(points){
 }
 
 function buildPointsForKey(key, base){
-  if(key.startsWith('local_'))      return buildAllThingsLocal(base);
+  /* #111 — the third multi-blend branch, and the only one #107 left unwrapped.
+     buildAllThingsLocal() dedupes by NAME via its own `seen` set, which is why
+     it did not present the barsrest defect — but it passes 'barsrest' as the
+     gem bucket to BOTH its bars and restaurants slots, exactly as the
+     barsrest_ arm did, so it is one unnamed gem away from a duplicate ID that
+     nothing here would catch. Wrapped for the same reason parkstrails_ was:
+     the defect is a property of the shape, not of today's inputs. */
+  if(key.startsWith('local_'))      return dedupePoints(buildAllThingsLocal(base));
   /* #107 — no duplicate is known on this branch today (its two arms pass
      DIFFERENT buckets, 'park' and 'trail', so the gem lookups cannot collide).
      Wrapped anyway because the defect is a property of the SHAPE — two blends
@@ -3893,6 +3955,8 @@ function reblendHuntInPlace(h){
   // twin of a capture that had to be injected standalone on a cold start, and
   // this is the pass that merges the two instead of leaving a duplicate.
   injectCapturedPins(h, base);
+  // #111 — second mutation path; the boot-time check never saw this either.
+  if(typeof assertNoDuplicatePoints === 'function') assertNoDuplicatePoints();
 }
 function onRealPlacesReady(){
   const h = state.currentHunt;
@@ -4537,7 +4601,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21h';
+const APP_VERSION = '2026.07.21i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6291,6 +6355,15 @@ function assertExploreRoutesHaveCards(){
    Name collisions are reported separately and only as a note: two genuinely
    distinct places can share a name, and dedupePoints only collapses them where
    blendCategory's existing rule already did. */
+/* #111 — THE INVARIANT WAS CORRECT AND RAN ONCE. It fires in the boot
+   invariants block, and the point list is rewritten for the rest of the
+   session by refreshDiscoverLocalIfNeeded(), reblendHuntInPlace() and
+   injectCapturedPins(). So the duplicate that prompted this row appeared on a
+   list the check had already approved and never looked at again. A check that
+   runs once guards a moment, not a property. It is now called after every
+   mutation path, and memoised on the reported signature so a steady-state
+   duplicate is logged once rather than on every GPS tick. */
+let _dupSig = null;
 function assertNoDuplicatePoints(){
   try{
     const h = state.currentHunt;
@@ -6304,8 +6377,11 @@ function assertNoDuplicatePoints(){
     });
     const dupIds = Object.keys(ids).filter(k=>ids[k] > 1);
     const dupNames = Object.keys(names).filter(k=>names[k] > 1);
+    const sig = h.key + '|' + dupIds.sort().join(',') + '|' + dupNames.sort().join(',');
+    if(sig === _dupSig) return;   // #111 — same verdict as last time, stay quiet
+    _dupSig = sig;
     if(dupIds.length) console.warn('[#107] DUPLICATE POINT IDS in ' + h.key + ' — capture will flip every copy:', dupIds);
-    if(dupNames.length) console.log('[#107] note — repeated names in ' + h.key + ':', dupNames);
+    if(dupNames.length) console.warn('[#111] REPEATED NAMES in ' + h.key + ' — one place, two ids, or two places one name:', dupNames);
     if(!dupIds.length && !dupNames.length){
       console.log('[#107] ' + h.points.length + ' points in ' + h.key + ', no duplicates');
     }
