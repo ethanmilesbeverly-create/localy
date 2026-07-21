@@ -4473,7 +4473,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21d';
+const APP_VERSION = '2026.07.21e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4751,6 +4751,7 @@ window.localyInvariants = function(){
   console.log('%c[invariants] ' + APP_VERSION, 'font-weight:700');
   assertExploreRoutesHaveCards();
   assertGemBucketsAgree();
+  assertBadgeMatchesList();
   console.log(out);
   return out;
 };
@@ -5375,11 +5376,22 @@ function setupBaseMap(){
     document.getElementById('locate-btn').classList.remove('following');
   });
   state.leafletMap.on('moveend', maybeShowSearchHere);
+  /* #66 — list membership is viewport AND range, so the viewport changing IS a
+     content change. renderNearbyList() is the cheap half of refreshTargetsUI()
+     (no marker teardown), which is why it can ride on moveend without
+     fighting the drag. `move` is deliberately NOT used: re-rendering mid-drag
+     rebuilds the drawer's innerHTML under the user's thumb. */
+  state.leafletMap.on('moveend', renderNearbyList);
   // pinch/scroll zoom can shift the center point away from the player — snap back
   // to center immediately after, so zooming never drifts you off-center. Skipped when
   // the zoom came from a deliberate programmatic view change (like the overview fit),
   // so this doesn't fight that intentional framing.
   state.leafletMap.on('zoomend', ()=>{
+    /* #66 — BEFORE the _programmaticViewChange early return, deliberately. A
+       programmatic fit still changes what is on screen, and returning early
+       here would leave the list describing the previous viewport with no event
+       left to correct it. */
+    renderNearbyList();
     if(state._programmaticViewChange){
       state._programmaticViewChange = false;
       return;
@@ -6201,6 +6213,36 @@ function assertExploreRoutesHaveCards(){
     if(!noCard.length && !noRoute.length) console.log('[#67] explore routes/cards agree (' + cards.length + ')');
   }catch(e){ console.warn('[#67] route check failed', e); }
 }
+/* #66 — THE ONE CLAIM THIS BUILD MAKES, ASSERTED. The badge, the rendered rows
+   and visibleTargetsSorted() are three views of one array and they are allowed
+   to disagree with the HUNT but never with each other. This is the first
+   instrument in this file that watches a NUMBER rather than a box's geometry
+   or a list's membership, which is the #95/#97 boundary being widened a little
+   rather than a new category of thing. It reads the live DOM on purpose — a
+   hardcoded expectation is a fourth view that drifts too (#67's lesson). */
+function assertBadgeMatchesList(){
+  try{
+    if(!state.currentHunt){ console.log('[#66] no hunt — list check skipped'); return; }
+    const badge = document.getElementById('list-toggle-badge');
+    const list  = document.getElementById('target-list');
+    if(!badge || !list){ console.warn('[#66] badge or list element missing'); return; }
+    const computed = visibleTargetsSorted().length;
+    const rows = list.querySelectorAll('.target-row').length;
+    const shown = badge.style.display === 'none' ? 0 : parseInt(badge.textContent, 10);
+    const total = currentTargetsSorted().length;
+    if(rows !== computed || shown !== computed){
+      console.warn('[#66] badge/list/computed disagree — badge:', shown, 'rows:', rows, 'computed:', computed);
+    } else {
+      console.log('[#66] badge = rows = computed = ' + computed + ' (hunt holds ' + total + ')');
+    }
+    if(computed > LIST_CAP){
+      /* Cannot happen: capture-range pins claim cap budget first rather than
+         sitting above it, so the total is capped unconditionally. If this ever
+         fires, the slice in visibleTargetsSorted() has stopped being applied. */
+      console.warn('[#66] cap not applied — ' + computed + ' rows over a cap of ' + LIST_CAP);
+    }
+  }catch(e){ console.warn('[#66] list check failed', e); }
+}
 function assertGemBucketsAgree(){
   try{
     const sel = document.getElementById('gem-category');
@@ -6779,6 +6821,115 @@ function currentTargetsSorted(){
     found: isFound(p.id)
   })).sort((a,b)=>a.dist-b.dist);
 }
+
+/* =========================================================
+   #66 — WHAT THE NEARBY LIST CONTAINS
+   =========================================================
+   currentTargetsSorted() is the HUNT. visibleTargetsSorted() is the LIST.
+   Keep them separate. Everything that drives the capture loop — the compass,
+   the guide line, the AR HUD, the markers on the map, refreshTrackUI's
+   `nearest` — reads the HUNT and must keep reading the HUNT. Scope any of
+   those to the viewport and panning away silently disarms capture.
+
+   Membership is VIEWPORT **AND** RANGE, recomputed on moveend, on zoomend and
+   on every position update. A fluctuating count is the CORRECT behaviour here,
+   not a bug to smooth over: nothing stays in this list because it was once
+   nearby. Zoom in until one pin is on screen and the list is one row and the
+   badge reads 1, even with twenty more pins just outside the frame.
+
+   Captured pins leaving the list is NOT a regression of #40 or #55. #40
+   persists captures on the map and across sessions; #55 keeps the distance on
+   a captured row while it is shown. Neither claims this list is where capture
+   history lives — that is #22 and the passport. Pushing history there is what
+   lets this list answer one question well.
+
+   DISTANCE STAYS ANCHORED TO state.me, AND THAT IS A DELIBERATE DEPARTURE FROM
+   WHAT ROW 66 GESTURED AT. The row opened with the "0.1 mi while looking 12 km
+   away" absurdity and proposed re-anchoring distances to the view centre when
+   panned away. That absurdity was never caused by the anchor — it was caused
+   by those rows being in the list at all, and the viewport filter dissolves it
+   without touching distance. Re-anchoring would then CREATE a worse defect:
+   pan to the next town and every row reads "0.3 mi" while the capture button
+   beside it refuses to fire, because capture gates on effectiveCaptureRange()
+   against your REAL distance. A number that contradicts the control next to it
+   is #75's defect class — a display decision rendering as truth. Body-anchored
+   "8.2 mi" is honest and it tells you this is a browsing list right now. */
+
+/* DERIVED, NOT A SEVENTH NUMBER. #65 inventories six radius constants none of
+   which are derived from each other; this deliberately does not add one. The
+   hunt's points were already range-filtered when the hunt was BUILT, so the
+   only thing a second gate here changes is the gem-vs-real gap #65 flagged:
+   gems reach GEM_INCLUDE_RADIUS_M (15 km) while real places stop at
+   REAL_INCLUDE_RADIUS_M (9 km), so between those two distances the list was
+   user-submissions-only — which inverts #16's rule that a gem should be
+   indistinguishable from any other pin, since out there it is the only kind of
+   pin there is. One range for the list closes that. If this ever needs to stop
+   tracking REAL_INCLUDE_RADIUS_M, it becomes a real constant and goes into
+   #65's inventory with the question it answers written next to it. */
+const LIST_RANGE_M = REAL_INCLUDE_RADIUS_M;
+
+/* THIS IS A GUESS AND IT IS LABELLED AS ONE. The question it answers is "how
+   many rows is still a list rather than a wall" — nobody has measured it. It
+   is in #65's inventory as of this build. */
+const LIST_CAP = 25;
+
+/* SELECTION IS ISOLATED HERE ON PURPOSE, AS ONE NAMED FUNCTION APPLIED AT ONE
+   POINT. Nearest-first is correct at close zoom and it is QUIETLY WRONG at
+   exactly the zoom where the cap engages: zoom out over a metro and the 25
+   nearest pins are all within a few blocks of your feet, so you get a dense
+   clump in one corner and an empty map everywhere else while the list claims
+   to describe the frame. That is a guaranteed outcome, not a risk, and it is
+   filed as its own roadmap row BEFORE anyone sees it (#95's pattern: record
+   the defect on the day the dependency ships). The intended answer is written
+   down there — bucket the viewport into a coarse grid, take the best pin per
+   cell, widen until the cap is met — and it is NOT built here, because
+   bundling it into this build gives a QA failure two candidate causes.
+
+   Consensus count (#54) plugs in as "best pin in this cell", INSIDE a cell,
+   never as a global sort. That stays a one-function change only as long as the
+   ranking lives in here and not scattered through the filter. */
+function rankForList(a, b){
+  if(a.dist !== b.dist) return a.dist - b.dist;
+  /* Stable, and that matters more than which pin wins. This recomputes on
+     every moveend; a non-deterministic tiebreak reshuffles rows when you nudge
+     the map ten feet. Never Math.random(), never insertion order. */
+  return String(a.id) < String(b.id) ? -1 : 1;
+}
+
+function visibleTargetsSorted(){
+  const all = currentTargetsSorted();
+  if(!all.length) return [];
+  const map = state.leafletMap;
+  /* No map yet (first paint, or the Map screen has never been opened) — show
+     the unfiltered hunt rather than an empty drawer. An empty list caused by
+     missing plumbing is indistinguishable from an empty list caused by an
+     empty viewport, which is #28(c)'s whole lesson. */
+  if(!map || typeof map.getBounds !== 'function') return all.slice(0, LIST_CAP);
+  let bounds;
+  try{ bounds = map.getBounds(); }catch(e){ return all.slice(0, LIST_CAP); }
+  if(!bounds || !bounds.isValid || !bounds.isValid()) return all.slice(0, LIST_CAP);
+
+  const captureRange = effectiveCaptureRange();
+  const pinned = [];
+  const rest = [];
+  all.forEach(t=>{
+    /* THE LOAD-BEARING HALF. A pin inside capture range is in the list no
+       matter where the viewport is or how far out you have zoomed, and it can
+       never be the thing the cap evicts — it claims its budget first, and the
+       viewport rows fill what is left. This is the entire reason it is safe to let the viewport
+       decide list membership at all: without it, a zoomed-out view can evict
+       the thing you are standing next to, and the core loop is the thing the
+       whole product is built on. */
+    if(typeof t.dist === 'number' && t.dist <= captureRange){ pinned.push(t); return; }
+    if(t.dist > LIST_RANGE_M) return;
+    if(!bounds.contains(L.latLng(t.lat, t.lng))) return;
+    rest.push(t);
+  });
+  pinned.sort(rankForList);
+  rest.sort(rankForList);
+  return pinned.concat(rest.slice(0, Math.max(0, LIST_CAP - pinned.length)));
+}
+
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 const CHEVRON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
 
@@ -7082,14 +7233,11 @@ function refreshTargetsUI(){
   const nearestUnfound = targets.find(t=>!t.found);
   const selectedTarget = state.selectedPinId && targets.find(t=>t.id===state.selectedPinId);
   const haloTarget = selectedTarget || nearestUnfound;
-  const remaining = targets.filter(t=>!t.found).length;
-
-  if(remaining > 0){
-    badge.style.display = 'flex';
-    badge.textContent = remaining;
-  } else {
-    badge.style.display = 'none';
-  }
+  /* #66 — the badge used to be computed here as
+     `targets.filter(t=>!t.found).length` off the WHOLE hunt, which is why it
+     never changed on zoom. It now lives in renderNearbyList(), derived from
+     the same array the rows are built from. See the note there on why it
+     counts rows rather than remaining captures. */
 
   state.markersLayer.clearLayers();
   state.guideLayer.clearLayers();
@@ -7122,7 +7270,53 @@ function refreshTargetsUI(){
 
   refreshGuideLine();
 
-  document.getElementById('target-list').innerHTML = targets.map(t=>{
+  renderNearbyList();
+}
+
+/* #66 — THE LIST AND THE BADGE, AND NOTHING ELSE. Cheap enough to run on every
+   moveend and zoomend, which is the point of splitting it out of
+   refreshTargetsUI(): that function tears down and rebuilds every Leaflet
+   marker, and doing that on every pan would flicker the map and fight the
+   drag. Markers are NOT rebuilt here — the map already clips them to the
+   viewport by drawing them, which is the whole reason the list disagreeing
+   with the map was visible in the first place. */
+function renderNearbyList(){
+  const badge = document.getElementById('list-toggle-badge');
+  const list = document.getElementById('target-list');
+  if(!badge || !list) return;
+  if(!state.currentHunt){
+    badge.style.display = 'none';
+    return;
+  }
+  const targets = visibleTargetsSorted();
+
+  /* THE BADGE IS THE ROW COUNT, NOT THE REMAINING-CAPTURES COUNT, and that is
+     a change of meaning rather than a change of source. It used to exclude
+     found pins, so it could never equal the number of rows behind it — "12"
+     over a list of 15. "How many left to capture" already has a home in the
+     hunt progress UI; duplicating it on a chrome badge is what let the two
+     numbers disagree. A badge on a menu counts what is behind the menu. */
+  if(targets.length > 0){
+    badge.style.display = 'flex';
+    badge.textContent = targets.length;
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const defaultColor = MODE_COLOR[state.currentHunt.mode] || '#E8622C';
+  const colorFor = t => (t.category && MODE_COLOR[t.category]) || defaultColor;
+
+  if(!targets.length){
+    /* Distinct from the hunt-level empty card (updateHuntEmptyState), which
+       still speaks for "this hunt has no points anywhere" and is deliberately
+       NOT driven off this array — panning to a blank patch must not claim the
+       category is empty. This copy says only what is true: nothing is in view.
+       Per EMPTY_COPY's rule it does not describe the machinery. */
+    list.innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:10px 0;">Nothing in view right now — pan or zoom out to see more spots.</p>';
+    return;
+  }
+
+  list.innerHTML = targets.map(t=>{
     const color = colorFor(t);
     return `
     <div class="target-row">
