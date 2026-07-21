@@ -168,6 +168,20 @@
     touch-action:manipulation;
   }
   .place-suggest.show{display:block;}
+  /* #17 (fix) — THE DROPDOWN-BEHIND-THE-MAP BUG, and it was never about the
+     dropdown's own z-index. Both hosts are position:relative with NO z-index,
+     so they are z-index:auto and create NO stacking context. That leaves
+     .place-suggest's z-index:20 competing directly against Leaflet's panes in
+     the SAME context — tiles 200, overlay 400, markers 600, popups 700,
+     controls 1000. 20 loses to all of them, so the list painted under the map
+     and swallowed every tap. Raising 20 to 2000 would also have "worked" and
+     would have been the wrong fix: the host, not the child, is what has to win.
+     Applied on a class rather than permanently so the input row is not parked
+     above the app's own layers when idle. 1050 is deliberate — clears
+     Leaflet's 1000 ceiling, stays UNDER the modals at 1100/1150, the toast at
+     2000, and auth at 5000, so all of those still cover it. NOTE this also
+     fixes the hunt builder, which had the identical latent bug from #88. */
+  .suggest-open{z-index:1050;}
   .place-suggest-row{
     display:block;width:100%;text-align:left;
     background:transparent;border:0;
@@ -4229,7 +4243,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.20n';
+const APP_VERSION = '2026.07.20o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5048,6 +5062,8 @@ function attachPlaceSuggest(inputId, onPick){
                        // synthetic click after a committed pointerup finds
                        // nothing to commit, independent of any timing window.
     list.classList.remove('show');
+    host.classList.remove('suggest-open');   // #17 — drop the host back under
+                                             // the app's own layers when idle
     list.innerHTML = '';
     input.setAttribute('aria-expanded', 'false');
     input.removeAttribute('aria-activedescendant');
@@ -5058,6 +5074,8 @@ function attachPlaceSuggest(inputId, onPick){
   function openWith(html){
     list.innerHTML = html;
     list.classList.add('show');
+    host.classList.add('suggest-open');   // #17 — the HOST wins the stacking
+                                          // fight with Leaflet, not the child
     st.open = true;
     input.setAttribute('aria-expanded', 'true');
   }
