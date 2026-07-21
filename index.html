@@ -3155,8 +3155,8 @@ function currentTileState(){
 }
 
 /* Map an OSM element's tags to one of the app's categories (priority order). */
-/* #101 — kept in lockstep with index.js. DEAD PATH (nothing calls the client
-   parseOverpass since #37); the OSM half of #101 is enforced server-side. Left
+/* #105 — kept in lockstep with index.js. DEAD PATH (nothing calls the client
+   parseOverpass since #37); the OSM half of #105 is enforced server-side. Left
    in sync anyway because #77's rule is that a mirror allowed to drift is how
    the next reader fixes the wrong file. */
 function isTransitStop(t){
@@ -3172,7 +3172,7 @@ function isTransitStop(t){
 }
 function categorizeOsm(t){
   if(!t) return null;
-  if(isTransitStop(t)) return null; // #101
+  if(isTransitStop(t)) return null; // #105
   if(t.historic || t.memorial || t.tourism==='museum' || t.tourism==='artwork') return 'history';
   if(t.amenity==='bar' || t.amenity==='pub' || t.amenity==='biergarten') return 'bars';
   if(t.amenity==='restaurant' || t.amenity==='cafe' || t.amenity==='fast_food') return 'restaurants';
@@ -3342,7 +3342,7 @@ const WIKI_STOP_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|o
    ("Chipping Norton, Oxfordshire") is not caught by the title rule and still
    depends on its opener. */
 
-/* #101 — TRANSIT STOPS. Every geotagged rail and bus stop in a US city has a
+/* #105 — TRANSIT STOPS. Every geotagged rail and bus stop in a US city has a
    Wikipedia article, so #96's geosearch handed us the whole transit network as
    category:'history' — "Wellington station (CTA)" and every stop down the line.
    Real, correctly placed, and failing #13's bar completely: nobody walks
@@ -3671,7 +3671,7 @@ function buildAllThingsLocal(base){
   });
   return pts;
 }
-/* #104 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
+/* #107 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
    blendCategory() dedupes by name, but `usedNames` is LOCAL TO ONE CALL. Any
    branch below that concatenates two blends is therefore undeduped across the
    seam, and the barsrest_ arm passes the SAME gem bucket ('barsrest') to both
@@ -3730,7 +3730,7 @@ function dedupePoints(points){
 
 function buildPointsForKey(key, base){
   if(key.startsWith('local_'))      return buildAllThingsLocal(base);
-  /* #104 — no duplicate is known on this branch today (its two arms pass
+  /* #107 — no duplicate is known on this branch today (its two arms pass
      DIFFERENT buckets, 'park' and 'trail', so the gem lookups cannot collide).
      Wrapped anyway because the defect is a property of the SHAPE — two blends
      concatenated with no shared dedup — not of the buckets that happen to be
@@ -3749,7 +3749,7 @@ function buildPointsForKey(key, base){
   /* #67 — 'bars_' and 'restaurants_' arms deleted. Only startBarsHunt and
      startRestaurantsHunt ever produced those keys and neither had a caller;
      the live Bars & Restaurants card produces 'barsrest_', below. */
-  /* #104 — THE REPORTED ONE. Both arms pass 'barsrest'. */
+  /* #107 — THE REPORTED ONE. Both arms pass 'barsrest'. */
   if(key.startsWith('barsrest_'))   return dedupePoints([
     ...blendCategory(base,'bars',5,()=>generateBars(base),'barsrest'),
     ...blendCategory(base,'restaurants',5,()=>generateRestaurants(base),'barsrest')
@@ -4537,7 +4537,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21g';
+const APP_VERSION = '2026.07.21h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6285,7 +6285,7 @@ function assertExploreRoutesHaveCards(){
    or a list's membership, which is the #95/#97 boundary being widened a little
    rather than a new category of thing. It reads the live DOM on purpose — a
    hardcoded expectation is a fourth view that drifts too (#67's lesson). */
-/* #104 — A DUPLICATE ID IS NEVER LEGITIMATE, whatever produced it. This watches
+/* #107 — A DUPLICATE ID IS NEVER LEGITIMATE, whatever produced it. This watches
    the SHIPPED point list rather than any one builder, so it covers authored and
    redeemed hunts and #40b's injection too, not just the branch fixed today.
    Name collisions are reported separately and only as a note: two genuinely
@@ -6294,7 +6294,7 @@ function assertExploreRoutesHaveCards(){
 function assertNoDuplicatePoints(){
   try{
     const h = state.currentHunt;
-    if(!h || !Array.isArray(h.points)){ console.log('[#104] no hunt — dup check skipped'); return; }
+    if(!h || !Array.isArray(h.points)){ console.log('[#107] no hunt — dup check skipped'); return; }
     const ids = {}, names = {};
     h.points.forEach(p=>{
       if(!p) return;
@@ -6304,12 +6304,12 @@ function assertNoDuplicatePoints(){
     });
     const dupIds = Object.keys(ids).filter(k=>ids[k] > 1);
     const dupNames = Object.keys(names).filter(k=>names[k] > 1);
-    if(dupIds.length) console.warn('[#104] DUPLICATE POINT IDS in ' + h.key + ' — capture will flip every copy:', dupIds);
-    if(dupNames.length) console.log('[#104] note — repeated names in ' + h.key + ':', dupNames);
+    if(dupIds.length) console.warn('[#107] DUPLICATE POINT IDS in ' + h.key + ' — capture will flip every copy:', dupIds);
+    if(dupNames.length) console.log('[#107] note — repeated names in ' + h.key + ':', dupNames);
     if(!dupIds.length && !dupNames.length){
-      console.log('[#104] ' + h.points.length + ' points in ' + h.key + ', no duplicates');
+      console.log('[#107] ' + h.points.length + ' points in ' + h.key + ', no duplicates');
     }
-  }catch(e){ console.warn('[#104] dup check failed', e); }
+  }catch(e){ console.warn('[#107] dup check failed', e); }
 }
 function assertBadgeMatchesList(){
   try{
