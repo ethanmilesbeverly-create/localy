@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy — Localy</title>
+<meta name="description" content="What Localy stores, who receives it, how long it is kept, and how to have it erased.">
+
+<!-- DELIBERATELY CRAWLABLE. landing.html carries noindex/nofollow because it
+     renders a named list of places somebody walks to near where they live.
+     This page is the opposite object: a policy nobody can find is halfway to
+     a policy that does not exist, and notice has to be reachable BEFORE
+     somebody creates an account. Do not copy landing.html's robots tag here. -->
+
+<!-- ============================================================
+     privacy.html — CANONICAL PRIVACY POLICY (roadmap item #5)
+
+     THIS FILE IS THE ONLY COPY OF THE POLICY TEXT.
+
+     index.html's Settings screen carries a SHORT SUMMARY and a link to
+     here. It must never restate the policy. Two full copies of a legal
+     document is the one-fact-two-deploy-targets bug this project already
+     has a scar from (#77, #70), except the drift would be in the one
+     document nobody thinks to diff.
+
+     EVERY FACTUAL CLAIM BELOW WAS READ OUT OF THE CODE, NOT OUT OF THE
+     ROADMAP ROW. Item #5 spent five passes asserting that the app stores
+     "precise capture coordinates tied to a user identity". It does not:
+     capture() writes `lat: target.lat, lng: target.lng` — the PIN's
+     coordinates — and setCaptureAnchor() does the same. The `cap` block
+     carries no coordinates at all. The user's own position is never
+     persisted by any path. If you change what capture() writes, this file
+     becomes false and has to change in the same build.
+
+     "#N" = a row in localy-roadmap.md. Stable IDs, never renumbered.
+     ============================================================ -->
+
+<style>
+  /* Tokens lifted verbatim from index.html / landing.html. Same reasoning as
+     landing.html: this page's job is to be recognised as the same product,
+     and a separate look here would be a worse page that looked more designed. */
+  :root{
+    --bg:#10231C;
+    --surface:#173229;
+    --surface-2:#1F3F32;
+    --surface-3:#264a3a;
+    --text:#EDE9DD;
+    --text-dim:#9FB3A4;
+    --line:rgba(237,233,221,0.12);
+    --orange:#E8622C;
+    --yellow:#D9B44A;
+    --blue:#4C8FC0;
+    --violet:#9A7FBF;
+    --moss:#6FA85C;
+    --danger:#C0524C;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .display{
+    font-family:Futura,"Century Gothic","Trebuchet MS",sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-weight:700;
+  }
+  a{color:var(--yellow);}
+
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, rgba(111,168,92,0.10), transparent 60%),
+      radial-gradient(900px 600px at 105% 20%, rgba(76,143,192,0.08), transparent 60%);
+  }
+
+  .wrap{position:relative; z-index:1; max-width:760px; margin:0 auto; padding:0 24px 88px;}
+
+  .masthead{display:flex; align-items:center; gap:10px; padding:26px 0 0;}
+  .mark{width:26px; height:26px; flex:none;}
+  .wordmark{font-size:17px;}
+  .masthead .eyebrow{
+    margin-left:auto; font-size:11px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--text-dim);
+  }
+
+  .hero{padding:46px 0 0;}
+  .kicker{
+    font-size:12px; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--moss); margin:0 0 14px;
+  }
+  h1.title{
+    font-family:Futura,"Century Gothic","Trebuchet MS",sans-serif;
+    font-weight:700; letter-spacing:0.01em;
+    font-size:clamp(30px, 5vw, 46px); line-height:1.06; margin:0;
+  }
+  .subline{color:var(--text-dim); font-size:17px; margin:16px 0 0; max-width:56ch;}
+  .updated{
+    margin:22px 0 0; font-size:12px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--text-dim);
+  }
+
+  h2{
+    font-family:Futura,"Century Gothic","Trebuchet MS",sans-serif;
+    font-size:20px; letter-spacing:0.02em; margin:44px 0 12px;
+  }
+  h3{font-size:15px; margin:22px 0 8px; color:var(--text);}
+  p{margin:0 0 13px; font-size:15px; line-height:1.62;}
+  p.lead{color:var(--text-dim);}
+  ul{margin:0 0 13px; padding-left:20px;}
+  li{margin:0 0 8px; font-size:15px; line-height:1.6;}
+  strong{color:var(--text); font-weight:600;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 18px 6px;
+    margin:0 0 14px;
+  }
+  .card.accent{border-color:rgba(232,98,44,0.42);}
+
+  /* The recipient table. On a phone it collapses to stacked blocks — a
+     four-column table at 380px is unreadable and this is the section a
+     privacy-conscious reader is most likely to actually read. */
+  .who{margin:0 0 14px;}
+  .who-row{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:15px 16px;
+    margin:0 0 10px;
+  }
+  .who-row h4{
+    margin:0 0 6px; font-size:15px;
+    font-family:Futura,"Century Gothic","Trebuchet MS",sans-serif;
+    letter-spacing:0.02em;
+  }
+  .who-row p{margin:0 0 6px; font-size:14px; color:var(--text-dim);}
+  .who-row p:last-child{margin-bottom:0;}
+  .who-row .gets{color:var(--text);}
+
+  .note{
+    border-left:3px solid var(--moss);
+    padding:2px 0 2px 14px;
+    margin:0 0 14px;
+    color:var(--text-dim);
+    font-size:14px;
+  }
+
+  footer{
+    margin:56px 0 0; padding:22px 0 0;
+    border-top:1px solid var(--line);
+    color:var(--text-dim); font-size:13px;
+  }
+  footer a{color:var(--yellow);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="#E8622C" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M5 21V4c4-2 8 2 12 0v9c-4 2-8-2-12 0"/>
+    </svg>
+    <span class="wordmark display">Localy</span>
+    <span class="eyebrow">Privacy</span>
+  </header>
+
+  <section class="hero">
+    <p class="kicker">Privacy policy</p>
+    <h1 class="title">What we keep, and what we don't.</h1>
+    <p class="subline">Localy is an app about walking to real places. That means it is
+      an app that could very easily know too much about where you go. This page is
+      the specific, checkable version of what it actually stores.</p>
+    <p class="updated">Last updated 21 July 2026</p>
+  </section>
+
+  <h2>The short version</h2>
+
+  <div class="card accent">
+    <p><strong>Localy does not store your location.</strong> Not your GPS coordinates,
+      not a trail, not a history of where you have been standing.</p>
+    <p>What it stores is <strong>which public places you captured, and when</strong> —
+      the coordinates saved against a capture are the <em>place's</em> coordinates,
+      the same ones on the public map, not yours.</p>
+    <p>Your live position is used in the moment to draw the map, measure how far away
+      a pin is, and ask what is nearby. Then it is gone. Nothing writes it down.</p>
+  </div>
+
+  <p class="lead">That distinction is the whole of this policy, so it is worth being
+    plain about the part that is still sensitive: a list of places you were within
+    25 metres of, each with a timestamp, is a record of where you have been — even
+    though it is assembled out of public coordinates rather than your own. It is
+    treated that way below.</p>
+
+  <h2>What is stored in your account</h2>
+
+  <h3>Your account itself</h3>
+  <p>An email address and a password. The password is handled by our authentication
+    provider and is never visible to us in a readable form.</p>
+
+  <h3>Your captures</h3>
+  <p>For each place you capture:</p>
+  <ul>
+    <li>The place's name, description and coordinates — <strong>the pin's, not yours</strong> —
+      saved so a captured spot can be put back on the map later, even if the source
+      data stops returning it.</li>
+    <li>The date and time you captured it.</li>
+    <li>Which guide it belonged to, and the category it was filed under.</li>
+  </ul>
+  <p>Plus the totals built out of those: how far you have travelled, and which stamps
+    you have earned. Guides you have made or saved, and gems you have submitted, are
+    stored against your account too.</p>
+  <p>This is readable only by you. It sits in your own row, protected by
+    row-level security, and <strong>nothing in the app shows one person's captures to
+    another person</strong>. That is a design rule, not just a current fact.</p>
+
+  <h3>A short-lived integrity record</h3>
+  <p>To tell a real capture from a faked one, each capture also records how accurate
+    your GPS reading was at that moment, how far from the pin you were, whether the
+    app was in simulate mode, and a timestamp. <strong>None of these are coordinates.</strong></p>
+  <p>This is <strong>deleted after 30 days</strong>, automatically, leaving only two
+    values: a version number, and whether simulate mode was used. It is evidence with
+    an expiry, not history.</p>
+
+  <h2>Who else receives anything</h2>
+
+  <p class="lead">A map app cannot work without asking other people's servers for
+    things. Here is every one of them, and what it sees.</p>
+
+  <div class="who">
+    <div class="who-row">
+      <h4>CARTO — map images</h4>
+      <p class="gets">Sees: your IP address, and which square of the map you are
+        looking at, continuously while the map is open.</p>
+      <p>This is the largest one, and it is inherent to showing you a map: the images
+        are fetched by your phone as you pan and zoom.</p>
+    </div>
+
+    <div class="who-row">
+      <h4>Photon, by Komoot — search suggestions</h4>
+      <p class="gets">Sees: what you type into search, and your approximate position
+        — rounded to about 11 metres — as you type it.</p>
+      <p>The position is sent so that searching "main street" finds the one near you
+        rather than the first one on earth.</p>
+    </div>
+
+    <div class="who-row">
+      <h4>Nominatim, by the OpenStreetMap Foundation — addresses</h4>
+      <p class="gets">Sees: the coordinates of a pin you tapped, which are public
+        coordinates, and your IP address. Also what you type, if search falls back
+        to it.</p>
+      <p>Used to turn a pin into a street address you can read.</p>
+    </div>
+
+    <div class="who-row">
+      <h4>Supabase — accounts, database and the nearby-places service</h4>
+      <p class="gets">Sees: your account, everything listed above as stored, and your
+        exact position at the moment the app asks what is nearby.</p>
+      <p>That position is rounded to a roughly 5.5 km square as soon as it arrives, and
+        the results are cached against that square in a shared table that carries
+        <strong>no user identifier at all</strong> — so the cache cannot say who asked.</p>
+    </div>
+  </div>
+
+  <p class="note">Place data itself comes from OpenStreetMap and Wikipedia. Those are
+    read-only: the app fetches from them through the service above, so they receive
+    nothing from your device and never see your IP address.</p>
+
+  <p>We do not use advertising networks, third-party analytics, or tracking pixels.
+    Nothing here is sold, and nothing here is shared for advertising.</p>
+
+  <h2>How long it is kept</h2>
+
+  <div class="card">
+    <p><strong>Your captures, stamps, guides and totals:</strong> for as long as your
+      account is open. They are the point of the app — a passport that quietly erased
+      your stamps after a year would be a broken product rather than a privacy
+      improvement. They stay until you ask for them to go.</p>
+    <p><strong>The integrity record:</strong> 30 days, then automatically stripped to
+      two non-locational values.</p>
+    <p><strong>The nearby-places cache:</strong> about three weeks, keyed to a 5.5 km
+      square, with no user attached.</p>
+  </div>
+
+  <h2>Asking for your data, or its deletion</h2>
+
+  <p>You can ask us what is held on your account, ask for a copy of it, or ask for it
+    to be erased. Depending on where you live you may have these as legal rights; we
+    will honour the request either way.</p>
+
+  <p data-contact-slot>
+    <!-- Filled by the script at the foot of this file. If PRIVACY_CONTACT is
+         left unset, an honest sentence renders here instead of a dead address. -->
+  </p>
+
+  <p><strong>Two things a deletion does not automatically reach</strong>, stated here
+    because the app states them too:</p>
+  <ul>
+    <li><strong>Gems you have submitted.</strong> Once approved, a gem is a public
+      place on a shared map that other people navigate to. Removing your account does
+      not remove it by default — tell us if you want a submission taken down as well,
+      and we will handle it as part of the same request.</li>
+    <li><strong>Guide codes you have already shared.</strong> A code you sent to
+      somebody keeps working for them after your own copy is gone.</li>
+  </ul>
+
+  <h2>Changes to this policy</h2>
+  <p>If what the app stores changes, this page changes in the same release, and the
+    date at the top moves. It is written from the code rather than alongside it, so
+    a change to one is meant to be a change to both.</p>
+
+  <footer>
+    <p>Localy — ask a local.
+       <span data-contact-slot-footer></span></p>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   THE ONE LINE TO CHANGE WHEN A CONTACT ADDRESS EXISTS.
+
+   Set PRIVACY_CONTACT to the address and every reference on this page fills
+   in. Leave it empty and the page renders an honest sentence instead.
+
+   WHY A SENTINEL RATHER THAN A PLACEHOLDER ADDRESS: a policy that names a
+   mailbox which silently drops mail is worse than one that admits it has no
+   channel yet — the reader believes they exercised a right and nothing
+   happened. privacy@example.com would ship exactly that failure. This cannot.
+
+   The address belongs HERE and nowhere else. index.html's Settings screen
+   links to this page rather than restating it. See #77 for why one fact in
+   two files is the recurring bug in this project.
+   ============================================================ */
+const PRIVACY_CONTACT = '';   /* e.g. 'privacy@example-domain.com' */
+
+(function fillContact(){
+  var addr = (typeof PRIVACY_CONTACT === 'string' ? PRIVACY_CONTACT : '').trim();
+  var body = document.querySelector('[data-contact-slot]');
+  var foot = document.querySelector('[data-contact-slot-footer]');
+
+  if(addr){
+    var safe = addr.replace(/[<>"']/g, '');
+    if(body){
+      body.innerHTML = 'Email <a href="mailto:' + safe + '">' + safe + '</a> from the '
+        + 'address on your account and we will confirm what has been done. If you '
+        + 'write from a different address we may ask you to verify the account first '
+        + '— that check exists to stop somebody else deleting your passport.';
+    }
+    if(foot){
+      foot.innerHTML = 'Privacy questions: <a href="mailto:' + safe + '">' + safe + '</a>';
+    }
+  } else {
+    if(body){
+      body.innerHTML = '<strong>A dedicated contact address is not live yet.</strong> '
+        + 'Localy is in early testing with a small number of accounts, all of whom '
+        + 'have a direct line to the developer — so requests are handled personally, '
+        + 'and this page will name the address the moment it exists rather than '
+        + 'listing one that does not answer.';
+    }
+    if(foot){ foot.textContent = ''; }
+  }
+})();
+</script>
+</body>
+</html>

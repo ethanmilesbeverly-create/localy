@@ -1809,26 +1809,52 @@
       <button class="settings-btn" style="margin-top:10px;" onclick="logout()">Log out</button>
     </div>
 
+    <!-- #5 — THIS CARD WAS FACTUALLY WRONG UNTIL 2026-07-21 AND WRONG IN THE
+         OVER-CLAIMING DIRECTION. It said the app keeps "where you were standing
+         when you captured them". It does not, and never did: capture() writes
+         `lat: target.lat, lng: target.lng` — the PIN's coordinates, which are
+         the public ones already on the map — and setCaptureAnchor() does the
+         same. The `cap` telemetry block carries no coordinates at all. The
+         user's own position is never persisted by any path.
+
+         The roadmap row asserted the opposite for five passes, so this was
+         written from the row rather than the code. If capture() ever starts
+         storing a user coordinate, this card AND privacy.html become false in
+         the same instant and both have to change in that build.
+
+         SUMMARY ONLY. The full policy lives in privacy.html and this must not
+         restate it — see #77 for why one fact in two files is the recurring
+         defect here. The link is relative because privacy.html sits beside
+         index.html at the Pages root; there is no base URL to configure. -->
     <div class="settings-section">
       <h2>Your data</h2>
       <div class="settings-card">
+        <p><strong class="val">Localy doesn't store your location.</strong> Your position is used in the moment — to draw the map and measure how far away a pin is — and then it's gone.</p>
         <p>What's kept in your account:</p>
         <ul class="data-list">
-          <li>The spots you've captured, and <strong>where you were standing</strong> when you captured them</li>
+          <li>Which spots you've captured and <strong>when</strong> — the coordinates saved are <strong>the place's own</strong>, the same ones on the public map</li>
           <li>How far you've traveled, and the stamps you've earned</li>
           <li>Guides you've made or saved</li>
           <li>Gems you've submitted</li>
         </ul>
         <p style="margin-top:11px;">Only you can read your capture history. It is never shown to another user.</p>
+        <p>Kept for as long as your account is open. A separate integrity record — GPS accuracy at capture, no coordinates — is deleted after 30 days.</p>
+        <p style="margin-top:11px;"><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> — including every service that receives anything, and how to ask for your data or its deletion.</p>
       </div>
     </div>
 
     <div class="settings-section" id="clear-data-section" style="display:none;">
       <h2>Clear my data</h2>
       <div class="settings-card">
-        <p>Erases everything you've built up in Localy — your captures and the locations they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Erases everything you've built up in Localy — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
         <p>Two things this does <strong class="val">not</strong> do. Gems you've submitted stay — once approved they're public spots other people use. And guide codes you've already shared keep working for the people you sent them to, even after your copy is gone.</p>
-        <p>Your account stays open. To remove the account itself, contact support.</p>
+        <!-- #5 — "contact support" pointed at nothing: there is no support address
+             anywhere in this file, and there was none when this copy was written.
+             A stated route that does not exist is the failure this row exists to
+             prevent, so it now points at privacy.html, which is where the erasure
+             route is described and where the contact address will appear when it
+             exists. Do NOT restate an address here. -->
+        <p>Your account stays open. To remove the account itself, see <a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">the privacy policy</a>.</p>
       </div>
       <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Clear my data</button>
       <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
@@ -1986,6 +2012,18 @@
       <div id="auth-back-row" class="auth-hidden">
         <button id="auth-back-btn" type="button">Back to log in</button>
       </div>
+
+      <!-- #5 — NOTICE HAS TO PRECEDE COLLECTION, and until this build the only
+           route to the privacy policy was Settings, which is behind the account
+           you are being asked to create here. A policy you can only read after
+           agreeing is not notice. Deliberately quiet — it is a standing
+           availability, not a consent gate, and this app has no consent flow
+           to hang one on. Shown on BOTH log in and create-account rather than
+           toggled with the mode: an existing user is equally entitled to it,
+           and a conditional here is one more thing to keep in sync. -->
+      <div id="auth-legal">
+        <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a>
+      </div>
     </div>
   </div>
 
@@ -2028,6 +2066,12 @@
   #auth-msg.err{ display:block; color:#f0a9a4; }
   #auth-msg.ok{ display:block; color:#b9dcae; }
   #auth-switch{ margin-top:20px; text-align:center; font-size:13px; color:var(--text-dim); }
+  /* #5 — quieter than #auth-switch on purpose: available, not competing with
+     the primary action. 12px is safe here because it is an anchor, not an
+     editable control — #11's 16px rule targets inputs, which are what trigger
+     iOS focus-zoom. */
+  #auth-legal{ margin-top:18px; text-align:center; font-size:12px; }
+  #auth-legal a{ color:var(--text-dim); text-decoration:underline; text-underline-offset:2px; }
   .auth-hidden{ display:none !important; }
   #auth-forgot-row{ margin-top:14px; text-align:center; }
   #auth-back-row{ margin-top:16px; text-align:center; }
@@ -4601,7 +4645,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21i';
+const APP_VERSION = '2026.07.21j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
