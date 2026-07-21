@@ -2611,7 +2611,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* =========================================================
    DATA
    ========================================================= */
-const MODE_COLOR = { tourist:'#E8622C', discover:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', gems:'#D4AF37' };
+/* #67 — 'gems' and 'discover' removed. This map is read for BOTH hunt.mode and
+   point.category, so park/trail/bars/restaurants stay: they are live point
+   categories even though their standalone hunt starters are gone. 'gems' can no
+   longer be either — gemDisplayCategory has never returned it since #16, and
+   startHiddenGemsHunt was the last thing that set mode:'gems'. 'discover' went
+   with startDiscoverHunt. 'discoverlocal' is All Things Local and stays. */
+const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F' };
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 const BUILTIN = {
@@ -2713,10 +2719,6 @@ function generateBars(base){ return generateCategorySpots(base, BAR_NAMES, BAR_F
 function generateRestaurants(base){ return generateCategorySpots(base, RESTAURANT_NAMES, RESTAURANT_FAR_NAMES, 'rs', 'A local restaurant nearby.', 'restaurants'); }
 const PARK_ADJ = ['Maple','Willow','Sunset','Overlook','Meadow','Riverside','Cedar','Hillside','Birchwood','Prairie','Oakhurst','Lantern'];
 const PARK_NOUN = ['Park','Green','Commons','Gardens','Playground','Nature Area'];
-const STATE_PARK_ADJ = ['Blue Ridge','Silver Creek','Eagle Point','Cedar Hollow','Stonebridge','Whispering Pines','Redrock','Falcon Ridge'];
-const NATIONAL_PARK_ADJ = ['Great Bear','Timberline','Canyon Rim','Windriver','Ancient Grove'];
-const PARK_LANDMARKS = ['Visitor Center','Main Overlook','Falls Trailhead','Picnic Grounds','Lakeside Access','Historic Cabin','Summit Trail'];
-const NP_LANDMARKS = ['Main Visitor Center','Scenic Overlook','Backcountry Trailhead','Historic Ranger Station','Waterfall Viewpoint','Summit Point'];
 
 function shuffled(arr){ return [...arr].sort(()=>Math.random()-0.5); }
 function randBetween(a,b){ return a + Math.random()*(b-a); }
@@ -2751,28 +2753,11 @@ function generateLocalParks(base){
   pts.push({id:'lp5', name:genParkName(), lat:far.lat, lng:far.lng, desc:'A larger park a bit further out.'});
   return pts;
 }
-function generateBigParkCluster(base, adjPool, landmarkPool, distRange, name, count){
-  const pts = [];
-  const placed = [];
-  const centerDist = randBetween(distRange[0], distRange[1]);
-  const centerBrg = Math.random()*360;
-  const center = offsetPoint(base, centerDist, centerBrg);
-  const parkName = `${shuffled(adjPool)[0]} ${name}`;
-  shuffled(landmarkPool).slice(0,count).forEach((lm,i)=>{
-    const p = offsetPointSpaced(center, randBetween(150,1500), placed, 150);
-    placed.push(p);
-    pts.push({id:name.slice(0,2).toLowerCase()+i, name:lm, lat:p.lat, lng:p.lng, desc:`Part of ${parkName}.`});
-  });
-  return {parkName, points:pts};
-}
-function generateStateParks(base){
-  const c1 = generateBigParkCluster(base, STATE_PARK_ADJ, PARK_LANDMARKS, [8000,40000], 'State Park', 4);
-  return c1.points;
-}
-function generateNationalParks(base){
-  const c1 = generateBigParkCluster(base, NATIONAL_PARK_ADJ, NP_LANDMARKS, [60000,220000], 'National Park', 5);
-  return c1.points;
-}
+/* #67 — generateBigParkCluster(), generateStateParks() and
+   generateNationalParks() deleted with the two hunt starters that were their
+   only callers. All three were unreachable twice over: no card routed to the
+   starters, and SHOW_PROCEDURAL_FILLER (#37) meant blendCategory never invoked
+   the generators even when it was handed them. */
 
 const TRAIL_ADJ = ['Ridge','Creekside','Woodland','Hollow','Bluff','Meadowbrook','Timber','Fox Hollow','Cattail','Sandstone'];
 const TRAIL_NOUN = ['Trail','Loop','Footpath','Nature Walk','Rail-Trail','Greenway'];
@@ -2843,9 +2828,27 @@ function approvedGemPoints(base, bucket, limit){
    `ctxCategory` lets a caller pin down the finer split the bucket can't express
    — the single `barsrest` bucket becomes 'bars' or 'restaurants' depending on
    which list the gem is being blended into. */
+/* #68 — 'bars' and 'restaurants' COLLAPSED OUT, deliberately, rather than the
+   matcher being taught to accept them.
+
+   nearbyApprovedGems matches with `g.bucket === bucket` and every live blend
+   passes 'barsrest', so a gem stored as 'bars' could never match. Two fixes
+   were available: widen the match, or stop accepting the values. Widening keeps
+   a stored value that no form writes and no blend reads — an accepted value
+   that cannot render, which is the same defect class as #67's routes with no
+   card. Fixing one by creating another is not a fix.
+
+   'barsrest' is the value the submit form writes and the blends read. The other
+   two were vestigial. A pre-existing row stored as 'bars' (none known — #16's
+   live check returned history/park/park/barsrest/barsrest/lore) degrades to the
+   neutral 'local' pin via gemDisplayCategory rather than disappearing.
+
+   THESE KEYS, THE #gem-category OPTION VALUES, AND EVERY gemBucket ARGUMENT ARE
+   THREE LISTS THAT MUST AGREE. Nothing checked that they did, which is the
+   whole of #68. assertGemBucketsAgree() below now does. */
 const GEM_BUCKET_CATEGORY = {
   park:'park', trail:'trail', shops:'shops',
-  barsrest:'barsrest', bars:'bars', restaurants:'restaurants', history:'history',
+  barsrest:'barsrest', history:'history',
   lore:'lore'
 };
 function gemDisplayCategory(g, ctxCategory){
@@ -2880,13 +2883,11 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
   }
   // No fabrication when filler is disabled: return a real gem if one exists,
   // otherwise null so the caller drops the slot instead of inventing a place.
-  if(!SHOW_PROCEDURAL_FILLER){
-    if(category==='gems'){
-      const g = nearbyApprovedGems(base, excludeGemIds||[], 1)[0];
-      return g ? gemPoint(g, 'dlg', null, {id:'dlg'+g.id+'_'+uid}) : null;
-    }
-    return null;
-  }
+  /* #67 — the category==='gems' branch that sat here is deleted. It could only
+     fire for a point whose category was 'gems', and gemDisplayCategory has not
+     produced that value since #16. Approved gems still reach this function
+     under their OWN bucket category, which is the behaviour #16 wanted. */
+  if(!SHOW_PROCEDURAL_FILLER) return null;
   if(category==='park'){
     const p = offsetPointSpaced(base, randBetween(150,1600), placed, 150);
     return {id:'dlp'+uid, name:genParkName(), lat:p.lat, lng:p.lng, desc:'A nearby local park.', category:'park'};
@@ -2906,16 +2907,6 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds){
   if(category==='history'){
     const p = offsetPointSpaced(base, randBetween(150,1600), placed, 150);
     return {id:'dlh'+uid, name:shuffled(HISTORY_NAMES)[0], lat:p.lat, lng:p.lng, desc:shuffled(HISTORY_FACTS)[0], category:'history'};
-  }
-  if(category==='gems'){
-    const candidates = nearbyApprovedGems(base, excludeGemIds||[], 1);
-    if(candidates.length>0){
-      const g = candidates[0];
-      return gemPoint(g, 'dlg', null, {id:'dlg'+g.id+'_'+uid});
-    }
-    // no other unused gem nearby — fall back to a different category so the slot isn't just lost
-    const fallbackCats = ['park','trail','shops','bars','restaurants','history'];
-    return generateOneCategoryPoint(fallbackCats[Math.floor(Math.random()*fallbackCats.length)], base, placed, excludeGemIds);
   }
   const p = offsetPointSpaced(base, randBetween(150,1400), placed, 150);
   return {id:'dlr'+uid, name:shuffled(RESTAURANT_NAMES)[0], lat:p.lat, lng:p.lng, desc:'A local restaurant nearby.', category:'restaurants'};
@@ -3020,7 +3011,17 @@ function refreshDiscoverLocalIfNeeded(lat, lng){
   const hunt = state.currentHunt;
   if(!hunt || hunt.mode!=='discoverlocal') return;
   const base = {lat,lng};
-  const usedGemIds = hunt.points.filter(p=>p.category==='gems' && p.gemId).map(p=>p.gemId);
+  /* #68 — FOUND WHILE SWEEPING, NOT ON THE ROW, AND IT IS THE SAME DEFECT SHAPE.
+     This filtered on category==='gems', which #16 made permanently false: a gem
+     now carries its SUBMITTER'S category, never 'gems'. So usedGemIds has been
+     empty on every call since, and a gem already on the map could be re-picked
+     to replace a dropped slot — the duplicate-pin problem #54 is about,
+     arriving through the refresh path.
+
+     gemPoint() always sets gemId, so that flag alone identifies a gem without
+     caring what category it renders as. Provenance is what #16 said to carry
+     invisibly and never render; this is exactly the kind of thing it is for. */
+  const usedGemIds = hunt.points.filter(p=>p.gemId).map(p=>p.gemId);
   let anyChanged = false;
   const newPoints = [];
   hunt.points.forEach(p=>{
@@ -3085,23 +3086,8 @@ function dismissStaleHunt(){
 
 /* "Discover" — a Tourist Mode that works anywhere, not just Chicago: skews toward
    fewer, more spread-out, more iconic-feeling stops rather than everyday local spots. */
-const DISCOVER_NAMES = [
-  'Old Town Square','Riverfront Promenade','Historic District Walk','Skyline Viewpoint',
-  'Landmark Bridge','Central Market Hall','Founders\u2019 Monument','Botanical Garden',
-  'Waterfront Boardwalk','Heritage Museum Row','Grand Plaza','Cathedral Overlook'
-];
-function generateDiscoverSpots(base){
-  const pts = [];
-  const placed = [];
-  shuffled(DISCOVER_NAMES).slice(0,5).forEach((name,i)=>{
-    const p = offsetPointSpaced(base, randBetween(400,4000), placed, 150);
-    placed.push(p);
-    pts.push({id:'ds'+i, name, lat:p.lat, lng:p.lng, desc:'A notable stop for first-time visitors.'});
-  });
-  const bigOne = offsetPointSpaced(base, randBetween(6000,15000), placed, 150);
-  pts.push({id:'ds5', name:'Signature Landmark', lat:bigOne.lat, lng:bigOne.lng, desc:'The big one — worth a special trip.'});
-  return pts;
-}
+/* #67 — DISCOVER_NAMES and generateDiscoverSpots() deleted with
+   startDiscoverHunt(), their only caller. */
 
 /* =========================================================
    REAL PLACE DATA  (OpenStreetMap Overpass + Wikipedia)
@@ -3620,8 +3606,18 @@ function buildAllThingsLocal(base){
   const pts = [];
   const seen = new Set();
   const take = arr => arr.forEach(p=>{ const k=normName(p.name); if(k&&seen.has(k))return; if(k)seen.add(k); pts.push(p); });
-  take(blendCategory(base,'park',3,()=>generateLocalParks(base).slice(0,3), null));
-  take(blendCategory(base,'trail',3,()=>generateTrails(base).slice(0,3), null));
+  /* #68 — THE LIVE HALF OF THIS ROW, and it was not in the row's text.
+     Both of these passed null while buildPointsForKey's parkstrails_ arm passed
+     'park' for the identical category — two functions written to stay identical,
+     disagreeing about the same bucket. `park` is a bucket the submit form
+     OFFERS, so this was not latent: a park gem submitted today appeared in
+     Parks & Trails and was skipped by All Things Local's park slot.
+
+     The unbucketed tail at the end of this function is not the safety net it
+     looks like — limit 2, nearest-first, competing against every bucket across
+     six categories. That is a lottery, not a fallback. */
+  take(blendCategory(base,'park',3,()=>generateLocalParks(base).slice(0,3), 'park'));
+  take(blendCategory(base,'trail',3,()=>generateTrails(base).slice(0,3), 'trail'));
   take(blendCategory(base,'shops',3,()=>generateShops(base).slice(0,3), 'shops'));
   take(blendCategory(base,'bars',3,()=>generateBars(base).slice(0,3), 'barsrest'));
   take(blendCategory(base,'restaurants',3,()=>generateRestaurants(base).slice(0,3), 'barsrest'));
@@ -3636,11 +3632,17 @@ function buildPointsForKey(key, base){
   if(key.startsWith('local_'))      return buildAllThingsLocal(base);
   if(key.startsWith('parkstrails_'))return [
     ...blendCategory(base,'park',6,()=>generateLocalParks(base),'park'),
-    ...blendCategory(base,'trail',6,()=>generateTrails(base),null)
+    /* #68 — was null, which did NOT mean "filter trail gems out". blendCategory
+       guards its gem lookup with `if(gemBucket)`, so null skips
+       nearbyApprovedGems ENTIRELY and no gem of any bucket could reach this
+       slot. Passing 'trail' is what the row asked for; the skip is what was
+       actually happening. */
+    ...blendCategory(base,'trail',6,()=>generateTrails(base),'trail')
   ];
   if(key.startsWith('shops_'))      return blendCategory(base,'shops',8,()=>generateShops(base),'shops');
-  if(key.startsWith('bars_'))       return blendCategory(base,'bars',8,()=>generateBars(base),'barsrest');
-  if(key.startsWith('restaurants_'))return blendCategory(base,'restaurants',8,()=>generateRestaurants(base),'barsrest');
+  /* #67 — 'bars_' and 'restaurants_' arms deleted. Only startBarsHunt and
+     startRestaurantsHunt ever produced those keys and neither had a caller;
+     the live Bars & Restaurants card produces 'barsrest_', below. */
   if(key.startsWith('barsrest_'))   return [
     ...blendCategory(base,'bars',5,()=>generateBars(base),'barsrest'),
     ...blendCategory(base,'restaurants',5,()=>generateRestaurants(base),'barsrest')
@@ -3649,8 +3651,8 @@ function buildPointsForKey(key, base){
   // No blendCategory here on purpose: blending would let OSM/Wikipedia places
   // leak into a tab whose entire premise is that everything in it is human.
   if(key.startsWith('lore_'))       return nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
-  if(key.startsWith('trails_'))     return blendCategory(base,'trail',6,()=>generateTrails(base),null);
-  if(key.startsWith('discover_'))   return blendCategory(base,'history',6,()=>generateDiscoverSpots(base),null);
+  /* #67 — 'trails_' and 'discover_' arms deleted with startTrailsHunt() and
+     startDiscoverHunt(). */
   return null;
 }
 
@@ -3948,6 +3950,21 @@ async function loadKey(key, apply, fallback){
    MIGRATION: fold any old timestamped buckets into the stable one so captures
    made before this fix still show as found. Whitelisted by prefix on purpose —
    `custom_<id>` can also be numeric, and must never be swept up by this. */
+/* #67 — DELIBERATELY NOT SHRUNK, AND THE ROW'S RECOMMENDATION TO SHRINK IT IS
+   WRONG. The row reads this as the "we generate this" set and asks for it to be
+   made to match what the app offers. It is not that set — it is a MIGRATION
+   WHITELIST, and migrateTimestampedProgress() gates on it to fold legacy
+   `<prefix>_<timestamp>` progress buckets into `<prefix>_v1`.
+
+   Removing 'gems', 'stateparks', 'nationalparks', 'trails', 'bars',
+   'restaurants' or 'localparks' would therefore not tidy anything — it would
+   strand any un-migrated capture history filed under those keys, permanently
+   and silently, which is the one outcome worth more than the tidiness. Captures
+   are the thing in this app that must never be lost.
+
+   Every retired entry is now inert rather than wrong: no hunt with those keys
+   can be started, so injectCapturedPins() will never test them. Inert costs a
+   few bytes. The alternative costs somebody's passport. */
 const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
   'restaurants','barsrest','history','gems','lore','stateparks','nationalparks',
   'trails','discover','random'];
@@ -4413,7 +4430,7 @@ function setTab(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21b';
+const APP_VERSION = '2026.07.21c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4689,6 +4706,8 @@ window.localyInvariants = function(){
   });
 
   console.log('%c[invariants] ' + APP_VERSION, 'font-weight:700');
+  assertExploreRoutesHaveCards();
+  assertGemBucketsAgree();
   console.log(out);
   return out;
 };
@@ -5336,8 +5355,10 @@ function regenerateCurrentHuntAt(base){
   else if(key.startsWith('shops_')) startShopsHunt(base);
   else if(key.startsWith('barsrest_')) startBarsAndRestaurantsHunt(base);
   else if(key.startsWith('history_')) startHistoryHunt(base);
-  else if(key.startsWith('stateparks_')) startStateParksHunt(base);
-  else if(key.startsWith('nationalparks_')) startNationalParksHunt(base);
+  /* #67 — stateparks_ / nationalparks_ arms deleted. They could only fire on an
+     already-active hunt with that key, which became unreachable when the cards
+     went. Their presence here is the strongest evidence those cards once
+     shipped: nobody writes a regeneration path for a hunt nobody can start. */
   else {
     // fixed-content hunt (custom/shared code, or nothing active) — spots don't regenerate, just move the map
     if(state.leafletMap) state.leafletMap.setView([base.lat, base.lng], ZOOM_WALK);
@@ -5866,9 +5887,9 @@ const EXPLORE_CAT_KEYPREFIX = {
   shops: 'shops_',
   bars_restaurants: 'barsrest_',
   history: 'history_',
-  lore: 'lore_',
-  gems: 'gems_',
-  national_parks: 'nationalparks_'
+  lore: 'lore_'
+  /* #67 — gems and national_parks entries deleted; neither has a card, so
+     updateExploreSelectionIcons() could never match them. */
 };
 const EXPLORE_CAT_COLOR = {
   local: '#EDE9DD',
@@ -5876,9 +5897,8 @@ const EXPLORE_CAT_COLOR = {
   shops: '#4C8FC0',
   bars_restaurants: '#C1587A',
   history: '#B08D57',
-  lore: '#3E9C8F',
-  gems: '#D4AF37',
-  national_parks: '#6FA85C'
+  lore: '#3E9C8F'
+  /* #67 — gems and national_parks deleted with their cards. */
 };
 const EXPLORE_ICON_DEFS = {
   local: {vb:'0 0 24 24', body:'M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z'},
@@ -5990,6 +6010,13 @@ function centerOnPlayer(opts){
   });
 }
 
+/* #67 — ORPHANED, FLAGGED, NOT DELETED. startBuiltinHunt() and startRandomHunt()
+   below both have zero callers anywhere in this file — the same condition that
+   retired the eight starters this pass removed. They are left in place because
+   they were not part of the reviewed list, and deleting a feature the reviewer
+   has not been told exists is how a decision gets made by omission. Random
+   Nearby in particular is a real product idea with working code, not a
+   leftover. Decide both explicitly. */
 function startBuiltinHunt(id){
   const src = BUILTIN[id];
   setCurrentHunt({ key:id, name:src.name, mode:src.mode, points:src.points });
@@ -6008,29 +6035,11 @@ function startParksAndTrailsHunt(base){
   const key = 'parkstrails_v1';
   setCurrentHunt({key, name:'Parks & Trails', mode:'park', points:buildPointsForKey(key, base)});
 }
-function startLocalParksHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'localparks_v1';
-  setCurrentHunt({key, name:'Local Parks', mode:'park', points:blendCategory(base,'park',8,()=>generateLocalParks(base),'park')});
-}
 function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'shops_v1';
   setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
-}
-function startBarsHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'bars_v1';
-  setCurrentHunt({key, name:'Bars', mode:'bars', points:buildPointsForKey(key, base)});
-}
-function startRestaurantsHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'restaurants_v1';
-  setCurrentHunt({key, name:'Restaurants', mode:'restaurants', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
@@ -6044,16 +6053,15 @@ function startHistoryHunt(base){
   const key = 'history_v1';
   setCurrentHunt({key, name:'History', mode:'history', points:buildPointsForKey(key, base)});
 }
-function startHiddenGemsHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  const approved = (state.approvedGems||[]).filter(g=>g.status==='approved');
-  const points = approved.map(g=> gemPoint(g, 'gem'));
-  const key = 'gems_v1';
-  setCurrentHunt({key, name:'Hidden Gems', mode:'gems', points});
-  if(points.length===0){
-    showToast('No hidden gems yet — be the first to suggest one!');
-  }
-}
+/* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
+   #16 settled that a gem must be indistinguishable from any other pin: the end
+   state is that every pin is user-submitted and OSM/Wikipedia scaffolding fills
+   in behind it, so any UI separating "ours" from "theirs" advertises a gap that
+   is meant to close. A Hidden Gems tab is exactly that UI — a filter on
+   PROVENANCE wearing a category's clothes. It was also the last surface where
+   the gems category could reach a pin, which is why MODE_COLOR.gems and
+   PIN_CAT_LABEL.gems go with it. If a "recently added" surface is ever wanted,
+   that is a new decision about recency, not this function coming back. */
 /* Lore & Stories is the one category that is USER-SUBMITTED ONLY, and that is
    structural rather than a policy choice. There is no OSM tag for "the bridge
    the tour bus emptied its tank over" and Wikipedia doesn't mark which articles
@@ -6071,35 +6079,24 @@ function startLoreHunt(base){
   setCurrentHunt({key, name:'Lore & Stories', mode:'lore', points});
 }
 
-function startStateParksHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'stateparks_v1';
-  const points = blendCategory(base,'park',8,()=>generateStateParks(base),'park');
-  setCurrentHunt({key, name:'State Park', mode:'park', points});
-  showToast(points.length ? 'Showing real parks near you' : 'No park data loaded here yet — pan the map or try again shortly');
-}
-function startNationalParksHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'nationalparks_v1';
-  const points = blendCategory(base,'park',8,()=>generateNationalParks(base),'park');
-  setCurrentHunt({key, name:'National Park', mode:'park', points});
-  showToast(points.length ? 'Showing real parks near you' : 'No national/state park data wired up for this area yet');
-}
-function startTrailsHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'trails_v1';
-  setCurrentHunt({key, name:'Trails Nearby', mode:'trail', points:buildPointsForKey(key, base)});
-}
-function startDiscoverHunt(base){
-  base = base || state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base);
-  const key = 'discover_v1';
-  setCurrentHunt({key, name:'Discover — First Visit', mode:'discover', points:buildPointsForKey(key, base)});
-  showToast('Good for a first visit anywhere — built around wherever you are now');
-}
+/* #67 — startStateParksHunt(), startNationalParksHunt(), startTrailsHunt() and
+   startDiscoverHunt() DELETED, with their exclusive generators.
+
+   State Parks and National Parks were already indistinguishable from Local
+   Parks in the shipped build and nobody could see it. Their ONLY difference
+   was the procedural filler they passed (generateStateParks /
+   generateNationalParks), and SHOW_PROCEDURAL_FILLER has been false since #37 —
+   so blendCategory never called either one. Three routes, one behaviour.
+
+   startDiscoverHunt was hollow for the same reason: its distinguishing content
+   was generateDiscoverSpots, also filler, also never called. What survived was
+   a history blend with gems switched OFF — strictly worse than the History
+   card that already ships.
+
+   startTrailsHunt was unreachable from anywhere, including from the dead
+   branches of selectExplore. It is the reason buildPointsForKey carried a
+   'trails_' arm, and that arm is why #68 reads as though there are two trail
+   blends to fix. There is one. */
 
 function toggleDrawer(){
   const drawer = document.getElementById('target-drawer');
@@ -6110,20 +6107,90 @@ function toggleDrawer(){
   // then show a stale list against a query the user has forgotten typing.
   if(!nowCollapsed) closeAllPlaceSuggest();
 }
+/* #67 — ONE BRANCH PER CARD, AND THAT IS NOW AN ENFORCED INVARIANT.
+   This function used to dispatch twelve categories against a grid of six
+   `.mode-card` elements, so half of it was unreachable: discover, gems,
+   local_parks, state_parks, national_parks and full_menu had no door. The six
+   dead branches were not stubs — five complete hunt starters and three
+   procedural generators sat behind them, and the file kept maintaining
+   downstream support (regenerateCurrentHuntAt, EXPLORE_CAT_* chrome) for
+   features no user could reach.
+
+   THE REMOVAL WAS A REGRESSION BEING RECORDED, NOT FUTURE WORK BEING CUT.
+   Those cards existed once. regenerateCurrentHuntAt carried stateparks_ /
+   nationalparks_ branches that can only fire on an ALREADY-ACTIVE hunt with
+   that key, and CURATED_REGEN_FNS carries a written product decision about
+   National/State Parks being excluded from stale-distance refresh. Nobody
+   writes that for a feature that never shipped. The Explore grid was rebuilt
+   down to six cards and these were not carried over; this pass makes the code
+   say so instead of implying they are pending.
+
+   The cost of the ambiguity was real: #16's second half was scoped as "verify
+   the Hidden Gems tab isn't uniformly gold", against a tab that had been gone
+   the whole time.
+
+   assertExploreRoutesHaveCards() below is the guard, and it reads the DOM
+   rather than a hardcoded list — a second list would drift from the grid the
+   same way this function did. */
+/* =========================================================
+   #67 / #68 — THE TWO LISTS-THAT-DISAGREE GUARDS
+   =========================================================
+   Both rows this pass closed are the same defect: two or three lists that must
+   agree, with nothing checking that they do, drifting apart at the moment some
+   OTHER change edited one of them. #67 was selectExplore vs the card grid. #68
+   was GEM_BUCKET_CATEGORY vs the submit form vs the gemBucket arguments.
+
+   These read OUTCOMES rather than mechanisms, per the rule from #97: they query
+   the live DOM and the live constants instead of comparing against a hardcoded
+   expectation, because a hardcoded expectation is a fourth list that drifts too.
+
+   They warn; they never throw. A boot-blocking assertion on a cosmetic mismatch
+   is worse than the mismatch. */
+function assertExploreRoutesHaveCards(){
+  try{
+    const cards = Array.from(document.querySelectorAll('.mode-card[data-cat]'))
+      .map(c => c.dataset.cat);
+    const routed = ['local','parks_trails','shops','bars_restaurants','history','lore'];
+    const noCard = routed.filter(r => cards.indexOf(r) === -1);
+    const noRoute = cards.filter(c => routed.indexOf(c) === -1);
+    if(noCard.length)  console.warn('[#67] selectExplore routes with no card:', noCard);
+    if(noRoute.length) console.warn('[#67] Explore cards with no route:', noRoute);
+    if(!noCard.length && !noRoute.length) console.log('[#67] explore routes/cards agree (' + cards.length + ')');
+  }catch(e){ console.warn('[#67] route check failed', e); }
+}
+function assertGemBucketsAgree(){
+  try{
+    const sel = document.getElementById('gem-category');
+    const formValues = sel ? Array.from(sel.options).map(o => o.value) : [];
+    const accepted   = Object.keys(GEM_BUCKET_CATEGORY);
+    /* The third list. Kept here rather than derived, because the gemBucket
+       arguments are literals scattered across blendCategory calls and there is
+       no runtime handle on them — so this one IS a maintained list, and it is
+       the only one. Update it in the same edit that changes a blend. */
+    const consumed = ['park','trail','shops','barsrest','history','lore'];
+    const unreachable   = accepted.filter(b => consumed.indexOf(b) === -1);
+    const unaccepted    = formValues.filter(v => accepted.indexOf(v) === -1);
+    /* Accepted AND consumed but not offered by the form. NOT a defect — a
+       bucket can be legitimately reachable by legacy data while no longer being
+       offered, which is exactly 'trail' today. Reported as a note, never as a
+       warning, or this channel gets muted for a condition that is fine. */
+    const notOffered = accepted.filter(b => formValues.indexOf(b) === -1 && consumed.indexOf(b) !== -1);
+    if(unaccepted.length)  console.warn('[#68] form offers buckets GEM_BUCKET_CATEGORY rejects:', unaccepted);
+    if(unreachable.length) console.warn('[#68] accepted buckets no blend consumes (would submit, approve, then vanish):', unreachable);
+    if(notOffered.length)  console.log('[#68] note — reachable but not offered on the form:', notOffered);
+    if(!unaccepted.length && !unreachable.length){
+      console.log('[#68] gem buckets agree (' + accepted.length + ' accepted, ' + formValues.length + ' offered)');
+    }
+  }catch(e){ console.warn('[#68] bucket check failed', e); }
+}
 function selectExplore(cat){
   const base = state.me || FALLBACK_LOCATION;
   if(cat==='local'){ startLocalHunt(base); }
   else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
-  else if(cat==='discover'){ startDiscoverHunt(base); }
   else if(cat==='shops'){ startShopsHunt(base); }
   else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
   else if(cat==='history'){ startHistoryHunt(base); }
   else if(cat==='lore'){ startLoreHunt(base); }
-  else if(cat==='gems'){ startHiddenGemsHunt(base); }
-  else if(cat==='local_parks'){ startLocalParksHunt(base); }
-  else if(cat==='state_parks'){ startStateParksHunt(base); }
-  else if(cat==='national_parks'){ startNationalParksHunt(base); }
-  else if(cat==='full_menu'){ goToModeSelect(); }
 }
 
 function startRandomHunt(){
@@ -6687,7 +6754,9 @@ const CHEVRON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
    Peek preview on pin tap; drag up / tap to expand for more.
    ========================================================= */
 const PIN_CAT_LABEL = {
-  gems:'Hidden Gem', park:'Park & Trail', parks_trails:'Park & Trail', trail:'Trail',
+  /* #67 — 'Hidden Gem' label retired with the tab. No pin can carry the gems
+     category any more (#16), so this only ever mislabelled a data anomaly. */
+  park:'Park & Trail', parks_trails:'Park & Trail', trail:'Trail',
   shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
   barsrest:'Bar & Restaurant', lore:'Lore & Story',
   history:'History', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
@@ -7037,10 +7106,8 @@ const EMPTY_COPY = {
     title: 'No stories here yet',
     body: "Nobody's shared what happened around here. If you know a story about this area, yours would be the first."
   },
-  gems: {
-    title: 'No hidden gems here yet',
-    body: "Nothing's turned up around here yet. Know somewhere worth finding? Put it on the map."
-  }
+  /* #67 — the gems entry is gone with the tab it spoke for. Keyed by
+     hunt mode, and no hunt can carry mode:'gems' now. */
 };
 /* #78c — Copy rule from EMPTY_COPY still applies: do not describe the
    machinery. "Checking Overpass" means nothing to anyone. What the user needs
@@ -7082,7 +7149,7 @@ function dismissHuntEmpty(){
    hunt with no stories is not "still loading" just because an unrelated
    Overpass call happens to be in flight, and saying so would be a new lie in
    the place we just removed one. */
-const REALPLACE_BACKED = k => k !== 'lore' && k !== 'gems';
+const REALPLACE_BACKED = k => k !== 'lore'; // #67 — 'gems' mode retired with its tab
 
 function updateHuntEmptyState(count){
   const el   = document.getElementById('hunt-empty');
