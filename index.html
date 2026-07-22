@@ -3807,38 +3807,40 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
 /* ---- Point builders (shared by the hunt starters AND the in-place
    re-blend that runs when real data arrives), so both stay identical. ---- */
 function buildAllThingsLocal(base){
-  /* #114 — FLOOR + NEAREST-FIRST BACKFILL, replacing the flat 3-per-category quota.
+  /* #114 — ROUND-ROBIN DIVERSIFICATION, replacing the flat 3-per-category quota.
      WHAT WAS WRONG. The old body took exactly 3 from each of six buckets and
-     stopped. So a place with only ONE category in range — a cemetery: history
-     and nothing else — rendered ~3 pins under All Things Local, while the
-     History tab (blendCategory(...,8)) showed up to 8 of the SAME graves. The
-     per-category quota, not LIST_CAP (25), was the ceiling: the blend never
-     emitted enough points to reach the cap, so "not hitting 25" was a symptom of
-     starvation upstream, not of the cap doing its job.
+     stopped, so a place with only ONE category in range — a cemetery, where
+     history is everything and the rest is empty — rendered ~3 pins under All
+     Things Local while the History tab (blendCategory(...,8)) showed up to 8 of
+     the SAME graves. The per-category quota, not LIST_CAP, was the ceiling.
 
-     WHAT IT DOES NOW. Two passes:
-       Pass 1 (FLOOR): up to ATL_FLOOR per category, so diversity is preserved
-         whenever several categories actually have stock nearby.
-       Pass 2 (BACKFILL): every category's LEFTOVER candidates are pooled and
-         sorted nearest-first, filling up to ATL_TARGET. When only one category
-         has surplus, it absorbs the empty slots — the ratio dissolves toward
-         whatever is genuinely in range instead of leaving the map sparse.
+     WHY NOT THE OBVIOUS FIX (floor + nearest-first backfill). That was built and
+     REJECTED after live testing, and the gravestone matters: a floor of N per
+     category plus a nearest-first backfill still starves a SPARSE category that
+     happens to be FARTHER than the dense ones. Standing at home ~1.4mi from a
+     cemetery, the nearest backfill candidates are the shops and bars around you,
+     so they take every backfill slot and the graves never get past their floor.
+     Nearest-first is wrong the moment a cap has to choose — the same defect
+     item 108 names in rankForList, arriving here by a different door.
 
-     ATL_POOL is how many candidates we ASK each category for so pass 2 has a
-     pool to draw from — a per-category ceiling, not a guarantee. It is set to
-     the single-category tab cap (8) on purpose: a category can never contribute
-     MORE to the blend than its own dedicated tab would show, so All Things Local
-     never out-shows History for graves. In a pure cemetery ATL_TARGET (15) is
-     deliberately NOT reached — we surface the 8 that exist, we do not invent to
-     fill (SHOW_PROCEDURAL_FILLER is off, so backfill draws only real gems and
-     real internet places).
+     WHAT IT DOES NOW. Round-robin: each round takes one candidate from every
+     category that still has stock, rotating which category leads so a partial
+     final round doesn't systematically favour the same buckets. A category with
+     nothing in range is simply skipped — so when only history has anything (a
+     cemetery you're standing in) it absorbs every slot up to ATL_POOL, and when
+     several categories have stock they share the target evenly regardless of
+     which one's nearest. This is the "diversify when there's a surplus of all,
+     but let one category fill when it's the only surplus" behaviour this row was
+     opened for. It does NOT make a distant cemetery fill All Things Local while
+     you stand at home — the content is still anchored on you, not on what you're
+     looking at; that's the viewport-anchoring row, tracked separately.
 
-     #68 lives on: every bucket below is passed explicitly ('park' for the park
-     slot, etc.), never null — a null bucket skips nearbyApprovedGems entirely,
-     which is the grave the old comment was marking. */
+     ATL_POOL is the per-category ceiling on candidates fetched, set to the
+     single-tab cap (8) so a category can never contribute MORE to the blend than
+     its own dedicated tab would show. #68 lives on: every bucket below is passed
+     explicitly, never null — a null bucket skips nearbyApprovedGems entirely. */
   const ATL_TARGET = 15;   // total pins All Things Local aims to surface
-  const ATL_FLOOR  = 2;    // guaranteed per category when available (diversity floor)
-  const ATL_POOL   = 8;    // candidates fetched per category to feed the backfill (mirrors single-tab cap)
+  const ATL_POOL   = 8;    // per-category candidate ceiling (mirrors the single-tab cap)
   const CATS = [
     ['park',        ()=>generateLocalParks(base).slice(0,ATL_POOL),  'park'],
     ['trail',       ()=>generateTrails(base).slice(0,ATL_POOL),      'trail'],
@@ -3847,9 +3849,7 @@ function buildAllThingsLocal(base){
     ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_POOL), 'barsrest'],
     ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'],
   ];
-  const lists = CATS.map(([cat,procFn,bucket]) =>
-    blendCategory(base, cat, ATL_POOL, procFn, bucket)
-      .map(p => ({...p, _atlDist: haversine(base.lat, base.lng, p.lat, p.lng)})));
+  const lists = CATS.map(([cat,procFn,bucket]) => blendCategory(base, cat, ATL_POOL, procFn, bucket));
 
   const pts = [];
   const seen = new Set();
@@ -3859,24 +3859,26 @@ function buildAllThingsLocal(base){
     pts.push(p); return true;
   };
 
-  // Pass 1 — diversity floor. Remember how far each list was consumed so pass 2
-  // does not re-offer a point the floor already took.
-  const offset = lists.map(()=>0);
-  lists.forEach((list, li) => {
-    let n = 0, i = 0;
-    for(; i < list.length && n < ATL_FLOOR; i++){ if(push(list[i])) n++; }
-    offset[li] = i;
-  });
+  // Round-robin. ptr[li] is how far each category has been consumed. Each round
+  // visits every category once, starting from a rotating offset; within a turn a
+  // category advances past any duplicate until it lands one new point or runs
+  // out. The round loop ends as soon as a whole pass adds nothing new.
+  const ptr = lists.map(()=>0);
+  let progressed = true;
+  for(let round = 0; pts.length < ATL_TARGET && progressed; round++){
+    progressed = false;
+    for(let j = 0; j < lists.length && pts.length < ATL_TARGET; j++){
+      const li = (round + j) % lists.length;
+      const list = lists[li];
+      while(ptr[li] < list.length && pts.length < ATL_TARGET){
+        if(push(list[ptr[li]++])){ progressed = true; break; }
+      }
+    }
+  }
 
-  // Pass 2 — pool every list's remainder, nearest-first, fill to the target.
-  const rest = [];
-  lists.forEach((list, li) => { for(let i = offset[li]; i < list.length; i++) rest.push(list[i]); });
-  rest.sort((a,b) => a._atlDist - b._atlDist);
-  for(const p of rest){ if(pts.length >= ATL_TARGET) break; push(p); }
-
-  // Loose gems tail (any bucket, nearest-first). Kept from the pre-#114 body but
-  // now bounded by the target rather than a flat 2, so it fills real remaining
-  // room instead of always adding on top.
+  // Loose gems tail (any bucket, nearest-first), bounded by the target. Kept
+  // from the pre-#114 body but no longer a flat 2 added on top — it only fills
+  // room the categories left, so it can't push the count past ATL_TARGET.
   if(pts.length < ATL_TARGET){
     nearbyApprovedGems(base, [], ATL_TARGET - pts.length).forEach(g=>{
       if(pts.length >= ATL_TARGET) return;
@@ -3884,10 +3886,7 @@ function buildAllThingsLocal(base){
       pts.push(gemPoint(g, 'dlg'));
     });
   }
-
-  // Strip the transient sort key so downstream points stay identical in shape
-  // to every other builder's output.
-  return pts.map(p => { const { _atlDist, ...rest } = p; return rest; });
+  return pts;
 }
 /* #107 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
    blendCategory() dedupes by name, but `usedNames` is LOCAL TO ONE CALL. Any
@@ -4847,7 +4846,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21o';
+const APP_VERSION = '2026.07.21p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
