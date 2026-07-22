@@ -4864,7 +4864,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21t';
+const APP_VERSION = '2026.07.22a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7427,10 +7427,42 @@ function visibleTargetsSorted(){
   try{ bounds = map.getBounds(); }catch(e){ return all.slice(0, LIST_CAP); }
   if(!bounds || !bounds.isValid || !bounds.isValid()) return all.slice(0, LIST_CAP);
 
+  /* #119 — WHEN THE CONTENT IS DELIBERATELY ELSEWHERE, GATE THE LIST TO THERE,
+     NOT TO YOUR BODY. Browsing (search box) or searching-this-area sets an
+     anchor and hides your marker and range circle: you are "not really here",
+     and the hunt was rebuilt around that anchor (#8/#117 precedence). But the
+     range gate below measures `t.dist` from `state.me`, so every pin now on the
+     map is either excluded because it is >LIST_RANGE_M from your real feet
+     (the reported symptom: search a place with pins, the drawer + badge read
+     empty over a map full of pins) OR — the #118 half — a stray gem near your
+     real feet leaks IN even though it is off the browsed frame. Same root: the
+     browse list is anchored to your body instead of to the area you are looking
+     at. When an anchor is set, the membership gate uses distance from THAT
+     anchor and the capture-range exemption is dropped (there is no capture
+     while browsing — the range circle is gone — and keeping it is exactly what
+     re-admitted the near-you "Home" gem). The VIEWPORT test is unchanged, so
+     the list becomes "the pins in this frame", which is what the map shows.
+     WHAT IS DELIBERATELY NOT TOUCHED: `t.dist` itself, and therefore every
+     rendered distance. A browsed row still reads its honest body distance
+     ("312 mi away"), which #19 leans on as the signal that you are not really
+     there and #66 fought to keep. Only membership moves; the number does not.
+     Why "interact with a pin then updated it" was the tell: openPinSheet() ends
+     in refreshTargetsUI() → renderNearbyList(), so a tap forced a recompute at
+     a moment the view had settled — but through the SAME body-anchored gate,
+     which is why it only ever helped when the search happened to land within
+     range. The gate, not the refresh, was the bug. */
+  const browseAnchor = state.browsingLocation || state.searchedArea || null;
   const captureRange = effectiveCaptureRange();
   const pinned = [];
   const rest = [];
   all.forEach(t=>{
+    if(browseAnchor){
+      const gateDist = haversine(browseAnchor.lat, browseAnchor.lng, t.lat, t.lng);
+      if(gateDist > LIST_RANGE_M) return;
+      if(!bounds.contains(L.latLng(t.lat, t.lng))) return;
+      rest.push(t);
+      return;
+    }
     /* THE LOAD-BEARING HALF. An UNCAPTURED pin inside capture range is in the
        list no matter where the viewport is or how far out you have zoomed, and
        it can never be the thing the cap evicts — it claims its budget first,
