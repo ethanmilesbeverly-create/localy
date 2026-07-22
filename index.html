@@ -1898,25 +1898,25 @@
       </div>
     </div>
 
+    <!-- #82 — repurposed from the local-only "Clear my data" wipe into full
+         account erasure. The wipe alone left the account (and the email #69 is
+         about) in place, which served neither a fresh start nor a real erasure;
+         this deletes the account itself server-side. The element ids below still
+         read "clear-progress" for continuity with askClearProgress /
+         cancelClearProgress — internal only, not user-visible. -->
     <div class="settings-section" id="clear-data-section" style="display:none;">
-      <h2>Clear my data</h2>
+      <h2>Delete my account</h2>
       <div class="settings-card">
-        <p>Erases everything you've built up in Localy — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
-        <p>Two things this does <strong class="val">not</strong> do. Gems you've submitted stay — once approved they're public spots other people use. And guide codes you've already shared keep working for the people you sent them to, even after your copy is gone.</p>
-        <!-- #5 — "contact support" pointed at nothing: there is no support address
-             anywhere in this file, and there was none when this copy was written.
-             A stated route that does not exist is the failure this row exists to
-             prevent, so it now points at privacy.html, which is where the erasure
-             route is described and where the contact address will appear when it
-             exists. Do NOT restate an address here. -->
-        <p>Your account stays open. To remove the account itself, see <a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">the privacy policy</a>.</p>
+        <p>Permanently deletes your Localy account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Two things this does <strong class="val">not</strong> remove. Gems you've submitted stay on the map — once approved they're public spots other people use — but they're unlinked from you, so nothing shows you as their submitter. And guide codes you've already shared keep working for the people you sent them to.</p>
+        <p><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> for how the rest of your data is handled.</p>
       </div>
-      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Clear my data</button>
+      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Delete my account</button>
       <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
-        <p>This permanently erases every capture, stamp and guide on your account. There is no undo and no backup.</p>
+        <p>This permanently deletes your account and erases every capture, stamp and guide. There is no undo and no backup.</p>
         <div class="confirm-row">
           <button onclick="cancelClearProgress()">Keep it</button>
-          <button class="go" id="clear-progress-go" onclick="clearMyProgress()">Erase everything</button>
+          <button class="go" id="clear-progress-go" onclick="deleteMyAccount()">Delete account</button>
         </div>
       </div>
     </div>
@@ -4890,7 +4890,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22f';
+const APP_VERSION = '2026.07.22g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -4916,7 +4916,12 @@ const APP_VERSION = '2026.07.22f';
    over" and move it under a non-privacy heading. It works, but it ships a
    second destructive control that account deletion then has to either absorb or
    coexist with, and one honest control beats two overlapping ones. */
-const SHOW_CLEAR_MY_DATA = false;
+/* #82 — SHIPPED. "Delete my account" (deleteMyAccount() + the delete-account
+   edge function) now ships beside this control, which is the condition the
+   comment above set for flipping it on. The section it gates has been
+   repurposed from the local-only "Clear my data" wipe into full account
+   erasure — see the #clear-data-section markup and deleteMyAccount(). */
+const SHOW_CLEAR_MY_DATA = true;
 
 /* =========================================================
    #97 — INVARIANT ASSERTIONS ("enforced by nothing", 5th sighting)
@@ -5260,13 +5265,13 @@ function cancelClearProgress(){
   const b = document.getElementById('clear-progress-btn');
   const g = document.getElementById('clear-progress-go');
   if(c) c.style.display = 'none';
-  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Clear my data'; }
+  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Delete my account'; }
   /* THE STUCK BUTTON. This one was reset nowhere, so after a single attempt it
-     stayed disabled reading "Erasing…" for the rest of the session — which
+     stayed disabled reading "Deleting…" for the rest of the session — which
      looks identical to a hang whether or not anything actually hung, and sent
      the diagnosis at the storage layer instead of at four lines of DOM. Reset
      both, always, and only from here so there is one place that owns it. */
-  if(g){ g.disabled = false; g.textContent = 'Erase everything'; }
+  if(g){ g.disabled = false; g.textContent = 'Delete account'; }
 }
 
 /* THE KEYS THIS OWNS. Enumerated here rather than derived, because the cost of
@@ -5334,6 +5339,15 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
+/* #82 — RETAINED, INTENTIONALLY UNWIRED. This local-only wipe was #81's data
+   control. #82 replaced the settings button with full account deletion
+   (deleteMyAccount + the delete-account edge function), which erases server-side,
+   so nothing calls clearMyProgress() today. Kept rather than deleted because
+   WIPE_KEYS / survivingAchievementIds are the documented shape of "what a local
+   wipe clears" and the obvious reuse if a non-destructive "start over" is ever
+   wanted — the two-control alternative #82 explicitly weighed and set aside. Not
+   an orphan; a gravestone with a purpose. If it is ever wired to a button again,
+   re-read #82's rejected-two-controls note first. */
 async function clearMyProgress(){
   /* BLOCKED ON A FAILED LOAD, and this is the #1a rule applied to a deliberate
      action rather than an accidental one. If a key failed to read, in-memory
@@ -5427,6 +5441,65 @@ async function clearMyProgress(){
     cancelClearProgress();
   }
 }
+
+/* #82 — DELETE MY ACCOUNT. Distinct from clearMyProgress() above: that wiped
+   local + server DATA but left the account open and did NOT sign out; this
+   removes the account itself. The server does the real work (the delete-account
+   edge function: anonymise submissions, delete user_state, delete the auth
+   user). The client only drops its local mirror and signs out AFTER the server
+   confirms success, so a failed server call never signs you out of an account
+   that still exists — and a retry is safe because every server step is
+   idempotent. */
+async function deleteMyAccount(){
+  /* Same #1a guard as clearMyProgress: if a key failed to load, in-memory state
+     is a fallback default, not your data. The server reads the real rows
+     regardless, but refusing here keeps the two controls consistent and avoids
+     acting off a broken load. */
+  if(loadFailedKeys().size){
+    showToast("Can't delete right now — your data hasn't loaded. Reconnect and try again.");
+    cancelClearProgress();
+    return;
+  }
+
+  const go = document.getElementById('clear-progress-go');
+  if(go){ go.disabled = true; go.textContent = 'Deleting…'; }
+
+  try{
+    /* invoke attaches the caller's auth token, so the function deletes THIS
+       user and no other. Body is empty on purpose — the server derives the uid
+       from the JWT, never from anything the client sends. Raced against the
+       same timeout as the wipe so a call that never settles becomes a named
+       failure instead of a button stuck reading "Deleting…". */
+    const { data, error } = await withTimeout(
+      sb.functions.invoke('delete-account', { body:{} }),
+      WIPE_WRITE_TIMEOUT_MS,
+      'delete-account'
+    );
+    if(error || !data || data.ok !== true){
+      const msg = (data && data.error) ? data.error
+                : (error && error.message ? error.message : 'unknown error');
+      console.error('[#82] account delete failed:', msg, error, data);
+      showToast('Delete failed: ' + msg);
+      cancelClearProgress();   // re-arms the button so it can be retried
+      return;
+    }
+  }catch(e){
+    console.error('[#82] account delete aborted:', e);
+    showToast('Delete failed: ' + (e && e.message ? e.message : 'unknown error'));
+    cancelClearProgress();
+    return;
+  }
+
+  /* Server delete succeeded: the account and its server data are gone. Drop the
+     local mirror so a shared browser profile can't hand this account's cached
+     progress to the next person (#1b / #120), then sign out and reload to the
+     login screen. Same tail as logout(). */
+  try{ purgeMirror(); }catch(e){ console.error('[#82] purgeMirror failed:', e); }
+  try{ await sb.auth.signOut(); }catch(e){ console.error('[#82] signOut failed:', e); }
+  showToast('Your account has been deleted.');
+  setTimeout(()=>location.reload(), 700);
+}
+
 function fixMapSize(){
   if(!state.leafletMap) return;
   state.leafletMap.invalidateSize();
