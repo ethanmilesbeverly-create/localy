@@ -4864,7 +4864,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22a';
+const APP_VERSION = '2026.07.22b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5588,6 +5588,7 @@ function onLocation(lat,lng,sim,accuracy){
       }
     } else if(state.followMe){
       state.leafletMap.panTo([lat,lng], {animate:true, duration:0.4});
+      rememberMapViewThrottled(lat,lng); // #90 — track the walker so a mid-session reload opens where they now are, not the boot frame
     }
   }
 
@@ -5748,13 +5749,65 @@ function playerIcon(){
     iconAnchor:[32,50]
   });
 }
+/* #90 — LAST-VIEW MEMORY, so a hard reload opens where you were, not downtown.
+   THE DEFECT: setupBaseMap() opened at a hardcoded downtown-Chicago point at
+   zoom 16 because the real GPS fix is always a few seconds out. A returning user
+   south of downtown therefore watched the map load NORTH of them and then jump
+   south once the fix landed and centerOnPlayer() fired. The default frame was
+   never "their" frame.
+
+   THE FIX: replay the exact view centerOnPlayer() last settled on — same
+   location, same overview framing zoom — so the late fix lands on top of where
+   the map already is and the correction is imperceptible instead of a visible
+   northward snap.
+
+   WHY THE PER-USER MIRROR AND NOT A GLOBAL KEY: last location is the user's own
+   data, and mirrorNS() namespaces by user id precisely so a shared browser
+   profile can't hand it to the next account (same reasoning as #1b's purge on
+   logout). state.user is set before init() runs, so the mirror is readable here.
+
+   WHY state.me IS NOT SET FROM THIS: it is a cosmetic opening frame, not a fix.
+   Treating it as a fix would poison walk-distance tracking, effectiveCaptureRange
+   (#51's acc<=0 guard), and the real-vs-sim mode switch — all of which must keep
+   waiting for genuine GPS. The marker and range circle are drawn at the cached
+   point only so they don't flash in from downtown; state.me stays null. */
+const LAST_VIEW_KEY = 'lastMapView';
+const LAST_VIEW_TTL_MS = 30 * 24 * 60 * 60 * 1000; // a truly ancient frame (post-move) shouldn't anchor a reload; a normal returning session is well inside this
+function rememberedMapView(){
+  const rec = mirrorGet(LAST_VIEW_KEY); // {value, ts} | null
+  if(!rec || !rec.value) return null;
+  if(typeof rec.ts === 'number' && (Date.now() - rec.ts) > LAST_VIEW_TTL_MS) return null;
+  const v = rec.value;
+  if(typeof v.lat !== 'number' || typeof v.lng !== 'number') return null;
+  return {lat:v.lat, lng:v.lng, zoom:(typeof v.zoom === 'number' ? v.zoom : 16)};
+}
+/* Persist a frame. NEVER while simulating (meIsSim) — a tapped demo point must
+   not become the reload anchor — and callers pass explicit coords so a mid-flight
+   animated panTo can't have us read a half-way getCenter(). */
+function rememberMapView(coords){
+  if(!state.leafletMap || state.meIsSim) return;
+  const c = coords || state.leafletMap.getCenter();
+  if(!c || typeof c.lat !== 'number' || typeof c.lng !== 'number') return;
+  mirrorSet(LAST_VIEW_KEY, {lat:c.lat, lng:c.lng, zoom:state.leafletMap.getZoom()});
+}
+/* Walking fires onLocation continuously; don't hammer localStorage on every tick. */
+function rememberMapViewThrottled(lat,lng){
+  const now = Date.now();
+  if(rememberMapViewThrottled._last && (now - rememberMapViewThrottled._last) < 10000) return;
+  rememberMapViewThrottled._last = now;
+  rememberMapView({lat,lng});
+}
 function setupBaseMap(){
-  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false}).setView([41.8827,-87.6233], 16);
+  // Replay last session's settled frame; fall back to downtown only on a device
+  // that has genuinely never had a real fix (true first launch), which the
+  // reload complaint never was.
+  const start = rememberedMapView() || {lat:41.8827, lng:-87.6233, zoom:16};
+  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false}).setView([start.lat, start.lng], start.zoom);
   addBaseLayer(state.leafletMap);
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
   state.guideLayer = L.layerGroup().addTo(state.leafletMap);
-  state.meMarker = L.marker([41.8827,-87.6233], {icon:playerIcon(), zIndexOffset:1000}).addTo(state.leafletMap);
-  state.rangeCircle = L.circle([41.8827,-87.6233], {
+  state.meMarker = L.marker([start.lat, start.lng], {icon:playerIcon(), zIndexOffset:1000}).addTo(state.leafletMap);
+  state.rangeCircle = L.circle([start.lat, start.lng], {
     radius: FOUND_THRESHOLD_M, color:'#6FA85C', weight:1.5, opacity:0.55,
     fillColor:'#6FA85C', fillOpacity:0.06, dashArray:'4,6'
   }).addTo(state.leafletMap);
@@ -6455,6 +6508,12 @@ function centerOnPlayer(opts){
     state._programmaticViewChange = true;
     state.leafletMap.setView([center.lat, center.lng], targetZoom);
     state.leafletMap.setMinZoom(targetZoom - 2); // real headroom to pinch out from the default framing, instead of being frozen half a level below it
+    // #90 — remember ONLY a genuine self-centering frame. `center` is
+    // browsingLocation||me, so when browsing we must not persist it: a reload has
+    // to reopen on the user, never on a place they were merely looking at. Passing
+    // targetZoom's frame (the overview) also means the next reload's first fix
+    // reframes to the SAME zoom, so there's no zoom jump either.
+    if(!state.browsingLocation && state.me) rememberMapView(state.me);
   });
 }
 
