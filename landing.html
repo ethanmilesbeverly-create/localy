@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A hunt on Localy</title>
+<title>A guide on Localy</title>
 <!-- A shared hunt is a named list of places somebody walks to, often near where
      they live. The data is already reachable with the anon key, but an HTML page
      a crawler can index is a different kind of findable than a REST row you need
@@ -254,12 +254,12 @@
       <path d="M5 21V4c4-2 8 2 12 0v9c-4 2-8-2-12 0"/>
     </svg>
     <span class="wordmark display">Localy</span>
-    <span class="eyebrow">Shared hunt</span>
+    <span class="eyebrow">Shared guide</span>
   </header>
 
   <!-- Phone visitors get the app, not the preview. -->
   <div class="bounce" id="bounce">
-    <a class="display" id="bounce-link" href="#">Open this hunt in the app</a>
+    <a class="display" id="bounce-link" href="#">Open this guide in the app</a>
   </div>
 
   <!-- ===== loading ===== -->
@@ -271,13 +271,13 @@
       <p class="kicker">Someone sent you a walk</p>
       <h1 class="title">Enter the code<br>you were given</h1>
       <p class="subline">Six letters and numbers. It opens the list of places
-        the person who made this hunt thinks are worth standing in front of.</p>
+        the person who made this guide thinks are worth standing in front of.</p>
     </div>
     <div class="entry">
       <div class="row">
         <input type="text" id="code-input" maxlength="6" placeholder="e.g. K7M2QP"
                autocomplete="off" autocapitalize="characters" spellcheck="false"
-               aria-label="Hunt code">
+               aria-label="Guide code">
         <button class="btn primary" id="code-go">Look it up</button>
       </div>
       <div class="msg" id="entry-msg" role="alert"></div>
@@ -287,20 +287,20 @@
   <!-- ===== the hunt ===== -->
   <section id="view-hunt" class="hidden">
     <div class="hero">
-      <p class="kicker" id="hunt-kicker">A hunt someone made</p>
+      <p class="kicker" id="hunt-kicker">A guide someone made</p>
       <h1 class="title" id="hunt-name"></h1>
       <p class="subline" id="hunt-sub"></p>
     </div>
 
     <div class="passport">
-      <p class="passport-label">Stamps in this hunt</p>
+      <p class="passport-label">Stamps in this guide</p>
       <div class="stamps" id="stamps"></div>
       <p class="passport-note" id="passport-note"></p>
     </div>
 
     <div class="cta">
       <div class="cta-code">
-        <p class="lbl">Hunt code</p>
+        <p class="lbl">Guide code</p>
         <div class="code-value display" id="cta-code"></div>
       </div>
       <div class="cta-actions">
@@ -312,7 +312,7 @@
     <div class="cols">
       <div>
         <p class="panel-label">Where the stops are</p>
-        <div id="map" role="img" aria-label="Map of this hunt's stops"></div>
+        <div id="map" role="img" aria-label="Map of this guide's stops"></div>
         <p class="map-note" id="map-note"></p>
       </div>
       <div>
@@ -420,7 +420,7 @@ async function lookupHunt(code){
   const points = Array.isArray(data.points) ? data.points.filter(
     p => p && typeof p.lat === 'number' && typeof p.lng === 'number'
   ) : [];
-  return { name: data.name || 'Untitled hunt', points };
+  return { name: data.name || 'Untitled guide', points };
 }
 
 /* ---------- render ---------- */
@@ -429,7 +429,7 @@ function renderHunt(code, hunt){
 
   $('hunt-name').textContent = hunt.name;
   $('hunt-sub').textContent = n === 0
-    ? 'This hunt has a name and a code, but no stops in it yet.'
+    ? 'This guide has a name and a code, but no stops in it yet.'
     : n + (n === 1 ? ' place to stand in front of.' : ' places to stand in front of.')
       + ' You collect them by being there.';
 
@@ -482,7 +482,7 @@ function renderHunt(code, hunt){
      mobile version of this. */
   show('view-hunt');
   renderMap(hunt.points);
-  document.title = hunt.name + ' — a hunt on Localy';
+  document.title = hunt.name + ' — a guide on Localy';
 }
 
 function renderMap(points){
@@ -561,8 +561,8 @@ function showLookupError(err, code){
         + 'connection and try again.');
       break;
     case 'forbidden':
-      setEntryError('This page is not allowed to read shared hunts. That is a '
-        + 'server setting, not a bad code — shared hunt data needs to be '
+      setEntryError('This page is not allowed to read shared guides. That is a '
+        + 'server setting, not a bad code — shared guide data needs to be '
         + 'readable without signing in. <code>HTTP ' + esc(err.detail) + '</code>');
       break;
     case 'http':
@@ -570,13 +570,13 @@ function showLookupError(err, code){
         + '<code>HTTP ' + esc(err.detail) + '</code>');
       break;
     case 'corrupt':
-      setEntryError('That code exists, but its hunt data is unreadable. Ask '
-        + 'whoever shared it to open the hunt and save it once, which writes '
+      setEntryError('That code exists, but its guide data is unreadable. Ask '
+        + 'whoever shared it to open the guide and save it once, which writes '
         + 'a fresh copy.');
       break;
     case 'notfound':
     default:
-      setEntryError('No hunt found for that code. Codes are six characters and '
+      setEntryError('No guide found for that code. Codes are six characters and '
         + 'never use the letters I or O, or the digits 0 or 1 — those are easy '
         + 'to mistake for each other.');
   }
@@ -605,7 +605,7 @@ function submitTypedCode(){
   $('entry-msg').classList.remove('show');
   const code = normaliseCode($('code-input').value);
   if(!code){
-    setEntryError('That does not look like a hunt code. They are six characters '
+    setEntryError('That does not look like a guide code. They are six characters '
       + 'long, letters and numbers, with no I, O, 0 or 1.');
     return;
   }
@@ -641,7 +641,7 @@ function init(){
     if(code){ go(code); return; }
     show('view-entry');
     $('code-input').value = String(param).toUpperCase().slice(0,6);
-    setEntryError('The code in this link is not a valid hunt code. Check it '
+    setEntryError('The code in this link is not a valid guide code. Check it '
       + 'against the one you were sent.');
     return;
   }

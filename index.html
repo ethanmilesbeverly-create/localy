@@ -1531,9 +1531,9 @@
       <button id="save-to-hunt-close" onclick="closeSaveToHuntModal()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <h2 style="font-size:17px;">Save to which hunt?</h2>
+      <h2 style="font-size:17px;">Save to which guide?</h2>
       <div id="save-to-hunt-list" style="max-height:220px;overflow-y:auto;text-align:left;margin-bottom:14px;"></div>
-      <button class="btn secondary" onclick="createNewHuntWithPoint()">+ Create New Hunt</button>
+      <button class="btn secondary" onclick="createNewHuntWithPoint()">+ Create New Guide</button>
     </div>
   </div>
 
@@ -1574,13 +1574,12 @@
 
     <div id="my-hunts-section"></div>
     <div id="hunt-card-menu">
-      <button id="hunt-menu-edit" onclick="huntCardMenuAction('edit')">Edit hunt</button>
+      <button id="hunt-menu-edit" onclick="huntCardMenuAction('edit')">Edit guide</button>
       <button onclick="huntCardMenuAction('copy')">Copy code</button>
       <button onclick="huntCardMenuAction('share')">Share</button>
-      <button onclick="huntCardMenuAction('delete')" style="color:var(--danger);">Delete hunt</button>
+      <button onclick="huntCardMenuAction('delete')" style="color:var(--danger);">Delete guide</button>
     </div>
 
-    <p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">More ways to explore</p>
     <!-- #62 — THE "Know a hidden gem?" ROW WAS HERE AND IS DELETED, NOT MOVED.
          It is now the Submit tab. Kept as a gravestone rather than a comment-out
          because the obvious next thought is "leave it as a shortcut too", and
@@ -1591,14 +1590,24 @@
 
          #gem-submissions-section MOVED OUT to #screen-suggest-gem in the same
          change. It is the user-facing side of #38's review queue and it is what
-         makes the new tab a destination rather than a bare form. -->
+         makes the new tab a destination rather than a bare form.
+
+         #56 — "More ways to explore" HEADING IS NOW GONE, AND THAT WAS THE MOVE.
+         It last held exactly one row (Have a code?). By directive that row now
+         sits directly under the My Guides grid (rendered into #my-hunts-section
+         above), so the card is grouped WITH your guides rather than under a
+         separate header. A lone "More ways to explore" heading over a single
+         row was item 14's orphaned-label defect, so the heading was removed
+         rather than kept empty. The gravestone above stays because it records
+         WHY the gem row left Explore; the header it sat under does not. The card
+         markup itself is unchanged apart from its copy. -->
     <div class="code-entry-row" onclick="showScreen('screen-code')">
       <div class="code-entry-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a5 5 0 0 1 10 0v2"/></svg>
       </div>
       <div class="code-entry-text">
         <strong>Have a code?</strong>
-        <span>Redeem a curated hunt someone shared with you</span>
+        <span>Redeem a curated guide someone shared with you</span>
       </div>
       <svg class="code-entry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
@@ -1665,22 +1674,22 @@
   <!-- CODE ENTRY -->
   <div class="screen" id="screen-code">
     <h1 class="page-title">Enter a code</h1>
-    <p class="page-sub">Bar crawl list, a friend's vacation hunt, a scout troop challenge — if someone gave you a code, it goes here.</p>
+    <p class="page-sub">Bar crawl list, a friend's vacation guide, a scout troop challenge — if someone gave you a code, it goes here.</p>
     <div class="field">
-      <label class="field-label">Hunt code</label>
+      <label class="field-label">Guide code</label>
       <input type="text" id="code-input" placeholder="e.g. RIVERNORTH" style="text-transform:uppercase;">
     </div>
-    <button class="btn" onclick="redeemCode()">Unlock hunt</button>
+    <button class="btn" onclick="redeemCode()">Unlock guide</button>
     <button class="btn ghost" onclick="goToModeSelect()">Back</button>
     <p id="code-error" style="color:var(--danger);font-size:13px;display:none;margin-top:10px;"></p>
   </div>
 
   <!-- CREATE HUNT -->
   <div class="screen" id="screen-create">
-    <h1 class="page-title" id="create-screen-title">Create a hunt</h1>
+    <h1 class="page-title" id="create-screen-title">Create a guide</h1>
     <p class="page-sub">Tap the map to drop pins. Move around (or use simulate mode) to set each spot.</p>
     <div class="field">
-      <label class="field-label">Hunt name</label>
+      <label class="field-label">Guide name</label>
       <input type="text" id="create-hunt-name" placeholder="e.g. Sam's Bachelorette Crawl">
     </div>
     <div class="field">
@@ -1697,15 +1706,15 @@
     </div>
     <p class="page-sub" style="margin:6px 0 14px;font-size:12px;">Type a name above, then tap the map where that spot is.</p>
     <div id="create-pin-list"></div>
-    <button class="btn" onclick="saveCustomHunt()">Save Hunt</button>
+    <button class="btn" onclick="saveCustomHunt()">Save Guide</button>
     <div id="code-result">
       <div style="font-size:12px;color:var(--text-dim);">Share this code</div>
       <div class="code-text" id="generated-code">------</div>
-      <div style="font-size:12px;color:var(--text-dim);">Anyone who enters it gets your hunt.</div>
+      <div style="font-size:12px;color:var(--text-dim);">Anyone who enters it gets your guide.</div>
     </div>
     <div class="edit-links-row">
       <button class="link-btn" onclick="goToModeSelect()">Cancel</button>
-      <button class="link-btn" id="delete-hunt-btn" onclick="deleteCurrentHunt()" style="display:none;color:var(--danger);">Delete this hunt</button>
+      <button class="link-btn" id="delete-hunt-btn" onclick="deleteCurrentHunt()" style="display:none;color:var(--danger);">Delete this guide</button>
     </div>
   </div>
 
@@ -1726,7 +1735,7 @@
         <input type="text" id="map-search-input" placeholder="Search a place" enterkeyhint="search">
       </div>
       <div id="hunt-chip" onclick="goToModeSelect()">
-        <span class="name" id="hunt-chip-name">Choose a hunt</span>
+        <span class="name" id="hunt-chip-name">Choose a guide</span>
       </div>
     </div>
     <div id="browsing-indicator" onclick="recenterMap()" role="button" aria-label="Return to your real location">
@@ -1757,7 +1766,7 @@
       <span>Capture</span>
     </button>
     <div id="stale-hunt-banner">
-      <span>You've moved pretty far from this hunt.</span>
+      <span>You've moved pretty far from this guide.</span>
       <div class="stale-actions">
         <button onclick="refreshStaleHunt()">Refresh for here</button>
         <button onclick="dismissStaleHunt()" aria-label="Dismiss">✕</button>
@@ -4821,7 +4830,7 @@ function navTo(id){
     if(!confirm('Discard this gem? What you have typed here will not be saved.')) return;
   }
   if(id !== 'screen-create' && isCreateFormDirty()){
-    if(!confirm('Discard this hunt? Pins you have dropped will not be saved.')) return;
+    if(!confirm('Discard this guide? Pins you have dropped will not be saved.')) return;
   }
   if(id === 'screen-suggest-gem'){ openSuggestGemScreen(); return; }
   setTab(id);
@@ -4872,7 +4881,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22d';
+const APP_VERSION = '2026.07.22e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5871,7 +5880,7 @@ function regenerateCurrentHuntAt(base){
   else {
     // fixed-content hunt (custom/shared code, or nothing active) — spots don't regenerate, just move the map
     if(state.leafletMap) state.leafletMap.setView([base.lat, base.lng], ZOOM_WALK);
-    if(state.currentHunt) showToast("This hunt's spots are fixed — showing the area, but the list won't change");
+    if(state.currentHunt) showToast("This guide's spots are fixed — showing the area, but the list won't change");
   }
 }
 /* =========================================================
@@ -6824,7 +6833,7 @@ function startRandomHunt(){
   }
   const key = 'random_v1';
   setCurrentHunt({key, name:'Random Nearby', mode:'random', points});
-  showToast('Random hunt from real spots near you');
+  showToast('Random guide from real spots near you');
 }
 
 /* #88 — this is now ONLY the Go button. The dropdown does the real work; Go is
@@ -7071,7 +7080,7 @@ function openCreateScreen(existingHunt, seedPoint){
   showScreen('screen-create');
   setNavActive('screen-modes');   // #98b — see openSuggestGemScreen for why explicitly
   state.editingHuntId = existingHunt ? existingHunt.id : null;
-  document.getElementById('create-screen-title').textContent = existingHunt ? 'Edit hunt' : 'Create a hunt';
+  document.getElementById('create-screen-title').textContent = existingHunt ? 'Edit guide' : 'Create a guide';
   document.getElementById('delete-hunt-btn').style.display = existingHunt ? 'block' : 'none';
   document.getElementById('create-hunt-name').value = existingHunt ? existingHunt.name : '';
   if(existingHunt){
@@ -7166,7 +7175,7 @@ function openSaveToHuntPicker(pointId){
   const ownHunts = (state.myHunts||[]).filter(h=>!h.external);
   const listEl = document.getElementById('save-to-hunt-list');
   if(ownHunts.length===0){
-    listEl.innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:4px 0 8px;">You don\'t have any hunts yet — create one below.</p>';
+    listEl.innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:4px 0 8px;">You don\'t have any guides yet — create one below.</p>';
   } else {
     listEl.innerHTML = ownHunts.map(h=>`
       <button class="save-hunt-option" onclick="saveDiscoveredPointToHunt('${h.id}')">${escapeHtml(h.name)} <span style="color:var(--text-dim);font-size:12px;">(${h.points.length} stop${h.points.length===1?'':'s'})</span></button>
@@ -7204,7 +7213,7 @@ async function deleteMyHuntDirect(id){
   }
   renderMyHunts();
   renderPassport();
-  showToast('Hunt deleted');
+  showToast('Guide deleted');
 }
 async function copyHuntCode(id){
   const h = state.myHunts.find(x=>x.id===id);
@@ -7253,7 +7262,7 @@ function deleteCurrentHunt(){
   state.editingHuntId = null;
   renderMyHunts();
   renderPassport();
-  showToast('Hunt deleted');
+  showToast('Guide deleted');
   goToModeSelect();
 }
 function renderCreatePinList(){
@@ -7293,7 +7302,7 @@ function randomCode(){
 }
 async function saveCustomHunt(){
   const name = document.getElementById('create-hunt-name').value.trim();
-  if(!name){ showToast('Give your hunt a name first'); return; }
+  if(!name){ showToast('Give your guide a name first'); return; }
   if(state.createPins.length===0){ showToast('Drop at least one pin'); return; }
   const points = state.createPins.map(p=>({...p, desc:p.desc||''}));
   let hunt;
@@ -7322,22 +7331,22 @@ async function saveCustomHunt(){
     await window.storage.set('hunt-code:'+hunt.code, JSON.stringify({name, points:hunt.points}), true);
     document.getElementById('generated-code').textContent = hunt.code;
     document.getElementById('code-result').classList.add('show');
-    showToast('Hunt saved — start exploring!');
+    showToast('Guide saved — start exploring!');
   }catch(e){
-    showToast('Hunt saved locally, but the share code couldn\'t sync');
+    showToast('Guide saved locally, but the share code couldn\'t sync');
   }
   startMyHunt(hunt.id);
 }
 
 function renderMyHunts(){
   const el = document.getElementById('my-hunts-section');
-  el.innerHTML = `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Hunts</p>
+  el.innerHTML = `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Guides</p>
     <div class="mode-grid">` +
     state.myHunts.map(h=>`
       <div class="mode-card" data-hunt-id="${h.id}" onclick="startMyHunt('${h.id}')">
         <div class="icon-wrap"><div class="blaze">${flagSVG('#9A7FBF',false)}</div></div>
         <div style="flex:1;min-width:0;"><h3>${escapeHtml(h.name)}${h.external?' <span class="external-tag">Shared</span>':''}</h3><p>${h.points.length} stop${h.points.length===1?'':'s'}${h.code?' · Code: '+h.code:''}</p></div>
-        <button class="hunt-card-menu-btn" onclick="toggleHuntCardMenu(event, '${h.id}')" aria-label="Hunt options">
+        <button class="hunt-card-menu-btn" onclick="toggleHuntCardMenu(event, '${h.id}')" aria-label="Guide options">
           <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
         </button>
       </div>`).join('') +
@@ -7345,7 +7354,7 @@ function renderMyHunts(){
         <div class="icon-wrap plus-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
-        <div><h3>Create Your Own</h3><p>Drop pins, name your hunt, get a shareable code.</p></div>
+        <div><h3>Create Your Own</h3><p>Drop pins, name your guide, get a shareable code.</p></div>
       </div>
     </div>`;
 }
@@ -7370,7 +7379,7 @@ async function redeemCode(){
     return;
   }
   if(!res){
-    errEl.textContent = "No hunt found for that code. Double-check it and try again.";
+    errEl.textContent = "No guide found for that code. Double-check it and try again.";
     errEl.style.display='block';
     return;
   }
@@ -7384,7 +7393,7 @@ async function redeemCode(){
       renderMyHunts();
     }
     setCurrentHunt({key:'code_'+code, name:data.name+' (code: '+code+')', mode:'code', points:data.points});
-    showToast('Hunt unlocked — saved to My Hunts');
+    showToast('Guide unlocked — saved to My Guides');
   }catch(e){
     errEl.textContent = "That code's data looks corrupted — try generating a new one.";
     errEl.style.display='block';
@@ -7719,7 +7728,7 @@ function fillPinSheet(t){
      The identical copy in the capture toast is deliberately KEPT: that is the
      path where nothing else on screen explains the failure, and it is the case
      #51 was really about. Deleting both would reintroduce the silence. */
-  actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>`;
+  actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a guide</button>`;
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   document.getElementById('pin-sheet-expand').innerHTML =
     /* #101 — render NO description block when there is no real description,
@@ -7853,7 +7862,7 @@ function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
   if(!state.currentHunt){
     updateHuntEmptyState(null);
-    document.getElementById('target-list').innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:10px 0;">No hunt active — choose one from the hunt menu up top.</p>';
+    document.getElementById('target-list').innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:10px 0;">No guide active — choose one from the guide menu up top.</p>';
     badge.style.display = 'none';
     state.markersLayer && state.markersLayer.clearLayers();
     state.guideLayer && state.guideLayer.clearLayers();
@@ -8092,7 +8101,7 @@ function refreshTrackUI(){
 
   if(!state.currentHunt || (!focused && unfoundTargets.length===0)){
     if(distEl) distEl.innerHTML = '-- <span>away</span>';
-    if(nameEl) nameEl.textContent = state.currentHunt ? 'All stops found! 🎉' : 'Pick a hunt to start tracking';
+    if(nameEl) nameEl.textContent = state.currentHunt ? 'All stops found! 🎉' : 'Pick a guide to start tracking';
     if(cameraBtn) cameraBtn.classList.remove('ready');
     if(mapCameraBtn) mapCameraBtn.classList.remove('show');
     if(wrap) wrap.classList.remove('in-range');
@@ -8287,7 +8296,7 @@ function stopArSync(){
   if(state._arSyncTimer){ clearInterval(state._arSyncTimer); state._arSyncTimer = null; }
 }
 async function openAR(){
-  if(!state.currentHunt){ showToast('Pick a hunt first'); return; }
+  if(!state.currentHunt){ showToast('Pick a guide first'); return; }
   maybeRequestCompassPermission();
   document.getElementById('ar-overlay').classList.add('show');
   const msg = document.getElementById('ar-permission-msg');
@@ -8347,10 +8356,10 @@ function huntDisplayName(key){
   if(BUILTIN[key]) return BUILTIN[key].name;
   if(key.startsWith('custom_')){
     const h = state.myHunts.find(x=>'custom_'+x.id===key);
-    return h ? h.name : 'Custom hunt';
+    return h ? h.name : 'Custom guide';
   }
   if(key.startsWith('random_')) return 'Random Nearby';
-  if(key.startsWith('code_')) return 'Code hunt';
+  if(key.startsWith('code_')) return 'Code guide';
   if(key.startsWith('local_')) return 'All Things Local';
   if(key.startsWith('localparks_')) return 'Local Parks';
   if(key.startsWith('stateparks_')) return 'State Park';
@@ -8402,9 +8411,9 @@ const ACHIEVEMENTS = [
   {id:'stamps_50', label:'50 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=50},
   {id:'mile_1', label:'First Mile', color:'#9A7FBF', icon:'footprints', check:s=>s.totalWalkedMeters>=1609},
   {id:'mile_5', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', check:s=>s.totalWalkedMeters>=8047},
-  {id:'hunt_maker', label:'Hunt Maker', color:'#9A7FBF', icon:'plus', check:s=>s.myHuntsCount>=1},
-  {id:'hunts_5', label:'5 Hunts Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=5},
-  {id:'hunts_10', label:'10 Hunts Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=10}
+  {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', check:s=>s.myHuntsCount>=1},
+  {id:'hunts_5', label:'5 Guides Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=5},
+  {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=10}
 ];
 function computeAchievementStats(){
   const catCounts = {parks:0, shops:0, barsrest:0, history:0};
