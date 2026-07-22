@@ -3578,7 +3578,13 @@ async function fetchWikipedia(base){
     if(desc.length>220) desc = desc.slice(0,217).replace(/\s+\S*$/,'')+'…';
     out.push({
       id:'wiki_'+pg.pageid, name:pg.title, lat:co.lat, lng:co.lon,
-      desc: desc || 'A notable local landmark.',
+      /* #101 — invented "A notable local landmark." fallback deleted; emit null,
+         render no block. Mirrors index.js in lockstep so a resurrected mirror
+         does not ship the defect (#99→#98 shape). NOTE: this dead mirror still
+         truncates above (exsentences=2 + the 220-char slice) while the live
+         index.js copy does not — that divergence is #113's to reconcile, not
+         this change's. */
+      desc: desc || null,
       category:'history', source:'wiki', real:true
     });
   });
@@ -4784,7 +4790,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21m';
+const APP_VERSION = '2026.07.21n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7531,7 +7537,13 @@ function fillPinSheet(t){
   actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a hunt</button>`;
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   document.getElementById('pin-sheet-expand').innerHTML =
-    `<p class="ps-desc">${escapeHtml(t.desc || 'No description yet.')}</p>
+    /* #101 — render NO description block when there is no real description,
+       rather than the invented "A notable local landmark." (now null upstream)
+       OR the "No description yet." filler that used to sit here. Both are
+       "a sentence that says nothing" by #53's rule; #21(a) proved the empty
+       layout renders fine. The location row + actions carry the sheet on their
+       own, so nothing collapses. */
+    `${t.desc ? `<p class="ps-desc">${escapeHtml(t.desc)}</p>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
 
