@@ -4591,11 +4591,16 @@ async function loadApprovedGems(){
   try{
     const { data, error } = await sb
       .from('submissions')
-      .select('id,name,description,category,lat,lng')
+      .select('id,name,description,category,lat,lng,name_clean,description_clean')
       .eq('status', 'approved');
     if(error) throw error;
+    // #12 display: prefer the mechanics-only cleaned text for what the map
+    // SHOWS, falling back to the raw words when there is no clean value (the
+    // guard discarded it, or nothing needed fixing). The raw name/description
+    // stay canonical in the DB and are never overwritten — this is a display
+    // preference only, so reverting this map restores the raw text everywhere.
     state.approvedGems = (data||[]).map(r=>({
-      id:r.id, name:r.name, desc:r.description, bucket:r.category,
+      id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
       lat:r.lat, lng:r.lng, status:'approved'
     }));
   }catch(e){ state.approvedGems = []; }
@@ -4864,7 +4869,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22b';
+const APP_VERSION = '2026.07.22c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
