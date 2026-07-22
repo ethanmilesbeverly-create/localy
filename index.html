@@ -3807,30 +3807,87 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
 /* ---- Point builders (shared by the hunt starters AND the in-place
    re-blend that runs when real data arrives), so both stay identical. ---- */
 function buildAllThingsLocal(base){
+  /* #114 — FLOOR + NEAREST-FIRST BACKFILL, replacing the flat 3-per-category quota.
+     WHAT WAS WRONG. The old body took exactly 3 from each of six buckets and
+     stopped. So a place with only ONE category in range — a cemetery: history
+     and nothing else — rendered ~3 pins under All Things Local, while the
+     History tab (blendCategory(...,8)) showed up to 8 of the SAME graves. The
+     per-category quota, not LIST_CAP (25), was the ceiling: the blend never
+     emitted enough points to reach the cap, so "not hitting 25" was a symptom of
+     starvation upstream, not of the cap doing its job.
+
+     WHAT IT DOES NOW. Two passes:
+       Pass 1 (FLOOR): up to ATL_FLOOR per category, so diversity is preserved
+         whenever several categories actually have stock nearby.
+       Pass 2 (BACKFILL): every category's LEFTOVER candidates are pooled and
+         sorted nearest-first, filling up to ATL_TARGET. When only one category
+         has surplus, it absorbs the empty slots — the ratio dissolves toward
+         whatever is genuinely in range instead of leaving the map sparse.
+
+     ATL_POOL is how many candidates we ASK each category for so pass 2 has a
+     pool to draw from — a per-category ceiling, not a guarantee. It is set to
+     the single-category tab cap (8) on purpose: a category can never contribute
+     MORE to the blend than its own dedicated tab would show, so All Things Local
+     never out-shows History for graves. In a pure cemetery ATL_TARGET (15) is
+     deliberately NOT reached — we surface the 8 that exist, we do not invent to
+     fill (SHOW_PROCEDURAL_FILLER is off, so backfill draws only real gems and
+     real internet places).
+
+     #68 lives on: every bucket below is passed explicitly ('park' for the park
+     slot, etc.), never null — a null bucket skips nearbyApprovedGems entirely,
+     which is the grave the old comment was marking. */
+  const ATL_TARGET = 15;   // total pins All Things Local aims to surface
+  const ATL_FLOOR  = 2;    // guaranteed per category when available (diversity floor)
+  const ATL_POOL   = 8;    // candidates fetched per category to feed the backfill (mirrors single-tab cap)
+  const CATS = [
+    ['park',        ()=>generateLocalParks(base).slice(0,ATL_POOL),  'park'],
+    ['trail',       ()=>generateTrails(base).slice(0,ATL_POOL),      'trail'],
+    ['shops',       ()=>generateShops(base).slice(0,ATL_POOL),       'shops'],
+    ['bars',        ()=>generateBars(base).slice(0,ATL_POOL),        'barsrest'],
+    ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_POOL), 'barsrest'],
+    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'],
+  ];
+  const lists = CATS.map(([cat,procFn,bucket]) =>
+    blendCategory(base, cat, ATL_POOL, procFn, bucket)
+      .map(p => ({...p, _atlDist: haversine(base.lat, base.lng, p.lat, p.lng)})));
+
   const pts = [];
   const seen = new Set();
-  const take = arr => arr.forEach(p=>{ const k=normName(p.name); if(k&&seen.has(k))return; if(k)seen.add(k); pts.push(p); });
-  /* #68 — THE LIVE HALF OF THIS ROW, and it was not in the row's text.
-     Both of these passed null while buildPointsForKey's parkstrails_ arm passed
-     'park' for the identical category — two functions written to stay identical,
-     disagreeing about the same bucket. `park` is a bucket the submit form
-     OFFERS, so this was not latent: a park gem submitted today appeared in
-     Parks & Trails and was skipped by All Things Local's park slot.
+  const push = p => {
+    if(pts.length >= ATL_TARGET) return false;
+    const k = normName(p.name); if(k && seen.has(k)) return false; if(k) seen.add(k);
+    pts.push(p); return true;
+  };
 
-     The unbucketed tail at the end of this function is not the safety net it
-     looks like — limit 2, nearest-first, competing against every bucket across
-     six categories. That is a lottery, not a fallback. */
-  take(blendCategory(base,'park',3,()=>generateLocalParks(base).slice(0,3), 'park'));
-  take(blendCategory(base,'trail',3,()=>generateTrails(base).slice(0,3), 'trail'));
-  take(blendCategory(base,'shops',3,()=>generateShops(base).slice(0,3), 'shops'));
-  take(blendCategory(base,'bars',3,()=>generateBars(base).slice(0,3), 'barsrest'));
-  take(blendCategory(base,'restaurants',3,()=>generateRestaurants(base).slice(0,3), 'barsrest'));
-  take(blendCategory(base,'history',3,()=>generateLocalHistory(base).slice(0,3), 'history'));
-  nearbyApprovedGems(base, [], 2).forEach(g=>{
-    const k=normName(g.name); if(k&&seen.has(k))return; if(k)seen.add(k);
-    pts.push(gemPoint(g, 'dlg'));
+  // Pass 1 — diversity floor. Remember how far each list was consumed so pass 2
+  // does not re-offer a point the floor already took.
+  const offset = lists.map(()=>0);
+  lists.forEach((list, li) => {
+    let n = 0, i = 0;
+    for(; i < list.length && n < ATL_FLOOR; i++){ if(push(list[i])) n++; }
+    offset[li] = i;
   });
-  return pts;
+
+  // Pass 2 — pool every list's remainder, nearest-first, fill to the target.
+  const rest = [];
+  lists.forEach((list, li) => { for(let i = offset[li]; i < list.length; i++) rest.push(list[i]); });
+  rest.sort((a,b) => a._atlDist - b._atlDist);
+  for(const p of rest){ if(pts.length >= ATL_TARGET) break; push(p); }
+
+  // Loose gems tail (any bucket, nearest-first). Kept from the pre-#114 body but
+  // now bounded by the target rather than a flat 2, so it fills real remaining
+  // room instead of always adding on top.
+  if(pts.length < ATL_TARGET){
+    nearbyApprovedGems(base, [], ATL_TARGET - pts.length).forEach(g=>{
+      if(pts.length >= ATL_TARGET) return;
+      const k = normName(g.name); if(k && seen.has(k)) return; if(k) seen.add(k);
+      pts.push(gemPoint(g, 'dlg'));
+    });
+  }
+
+  // Strip the transient sort key so downstream points stay identical in shape
+  // to every other builder's output.
+  return pts.map(p => { const { _atlDist, ...rest } = p; return rest; });
 }
 /* #107 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
    blendCategory() dedupes by name, but `usedNames` is LOCAL TO ONE CALL. Any
@@ -4790,7 +4847,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21n';
+const APP_VERSION = '2026.07.21o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
