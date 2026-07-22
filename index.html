@@ -3807,85 +3807,29 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
 /* ---- Point builders (shared by the hunt starters AND the in-place
    re-blend that runs when real data arrives), so both stay identical. ---- */
 function buildAllThingsLocal(base){
-  /* #114 — ROUND-ROBIN DIVERSIFICATION, replacing the flat 3-per-category quota.
-     WHAT WAS WRONG. The old body took exactly 3 from each of six buckets and
-     stopped, so a place with only ONE category in range — a cemetery, where
-     history is everything and the rest is empty — rendered ~3 pins under All
-     Things Local while the History tab (blendCategory(...,8)) showed up to 8 of
-     the SAME graves. The per-category quota, not LIST_CAP, was the ceiling.
-
-     WHY NOT THE OBVIOUS FIX (floor + nearest-first backfill). That was built and
-     REJECTED after live testing, and the gravestone matters: a floor of N per
-     category plus a nearest-first backfill still starves a SPARSE category that
-     happens to be FARTHER than the dense ones. Standing at home ~1.4mi from a
-     cemetery, the nearest backfill candidates are the shops and bars around you,
-     so they take every backfill slot and the graves never get past their floor.
-     Nearest-first is wrong the moment a cap has to choose — the same defect
-     item 108 names in rankForList, arriving here by a different door.
-
-     WHAT IT DOES NOW. Round-robin: each round takes one candidate from every
-     category that still has stock, rotating which category leads so a partial
-     final round doesn't systematically favour the same buckets. A category with
-     nothing in range is simply skipped — so when only history has anything (a
-     cemetery you're standing in) it absorbs every slot up to ATL_POOL, and when
-     several categories have stock they share the target evenly regardless of
-     which one's nearest. This is the "diversify when there's a surplus of all,
-     but let one category fill when it's the only surplus" behaviour this row was
-     opened for. It does NOT make a distant cemetery fill All Things Local while
-     you stand at home — the content is still anchored on you, not on what you're
-     looking at; that's the viewport-anchoring row, tracked separately.
-
-     ATL_POOL is the per-category ceiling on candidates fetched, set to the
-     single-tab cap (8) so a category can never contribute MORE to the blend than
-     its own dedicated tab would show. #68 lives on: every bucket below is passed
-     explicitly, never null — a null bucket skips nearbyApprovedGems entirely. */
-  const ATL_TARGET = 15;   // total pins All Things Local aims to surface
-  const ATL_POOL   = 8;    // per-category candidate ceiling (mirrors the single-tab cap)
-  const CATS = [
-    ['park',        ()=>generateLocalParks(base).slice(0,ATL_POOL),  'park'],
-    ['trail',       ()=>generateTrails(base).slice(0,ATL_POOL),      'trail'],
-    ['shops',       ()=>generateShops(base).slice(0,ATL_POOL),       'shops'],
-    ['bars',        ()=>generateBars(base).slice(0,ATL_POOL),        'barsrest'],
-    ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_POOL), 'barsrest'],
-    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'],
-  ];
-  const lists = CATS.map(([cat,procFn,bucket]) => blendCategory(base, cat, ATL_POOL, procFn, bucket));
-
   const pts = [];
   const seen = new Set();
-  const push = p => {
-    if(pts.length >= ATL_TARGET) return false;
-    const k = normName(p.name); if(k && seen.has(k)) return false; if(k) seen.add(k);
-    pts.push(p); return true;
-  };
+  const take = arr => arr.forEach(p=>{ const k=normName(p.name); if(k&&seen.has(k))return; if(k)seen.add(k); pts.push(p); });
+  /* #68 — THE LIVE HALF OF THIS ROW, and it was not in the row's text.
+     Both of these passed null while buildPointsForKey's parkstrails_ arm passed
+     'park' for the identical category — two functions written to stay identical,
+     disagreeing about the same bucket. `park` is a bucket the submit form
+     OFFERS, so this was not latent: a park gem submitted today appeared in
+     Parks & Trails and was skipped by All Things Local's park slot.
 
-  // Round-robin. ptr[li] is how far each category has been consumed. Each round
-  // visits every category once, starting from a rotating offset; within a turn a
-  // category advances past any duplicate until it lands one new point or runs
-  // out. The round loop ends as soon as a whole pass adds nothing new.
-  const ptr = lists.map(()=>0);
-  let progressed = true;
-  for(let round = 0; pts.length < ATL_TARGET && progressed; round++){
-    progressed = false;
-    for(let j = 0; j < lists.length && pts.length < ATL_TARGET; j++){
-      const li = (round + j) % lists.length;
-      const list = lists[li];
-      while(ptr[li] < list.length && pts.length < ATL_TARGET){
-        if(push(list[ptr[li]++])){ progressed = true; break; }
-      }
-    }
-  }
-
-  // Loose gems tail (any bucket, nearest-first), bounded by the target. Kept
-  // from the pre-#114 body but no longer a flat 2 added on top — it only fills
-  // room the categories left, so it can't push the count past ATL_TARGET.
-  if(pts.length < ATL_TARGET){
-    nearbyApprovedGems(base, [], ATL_TARGET - pts.length).forEach(g=>{
-      if(pts.length >= ATL_TARGET) return;
-      const k = normName(g.name); if(k && seen.has(k)) return; if(k) seen.add(k);
-      pts.push(gemPoint(g, 'dlg'));
-    });
-  }
+     The unbucketed tail at the end of this function is not the safety net it
+     looks like — limit 2, nearest-first, competing against every bucket across
+     six categories. That is a lottery, not a fallback. */
+  take(blendCategory(base,'park',3,()=>generateLocalParks(base).slice(0,3), 'park'));
+  take(blendCategory(base,'trail',3,()=>generateTrails(base).slice(0,3), 'trail'));
+  take(blendCategory(base,'shops',3,()=>generateShops(base).slice(0,3), 'shops'));
+  take(blendCategory(base,'bars',3,()=>generateBars(base).slice(0,3), 'barsrest'));
+  take(blendCategory(base,'restaurants',3,()=>generateRestaurants(base).slice(0,3), 'barsrest'));
+  take(blendCategory(base,'history',3,()=>generateLocalHistory(base).slice(0,3), 'history'));
+  nearbyApprovedGems(base, [], 2).forEach(g=>{
+    const k=normName(g.name); if(k&&seen.has(k))return; if(k)seen.add(k);
+    pts.push(gemPoint(g, 'dlg'));
+  });
   return pts;
 }
 /* #107 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
@@ -4846,7 +4790,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21p';
+const APP_VERSION = '2026.07.21q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
