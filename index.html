@@ -3807,35 +3807,36 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
 /* ---- Point builders (shared by the hunt starters AND the in-place
    re-blend that runs when real data arrives), so both stay identical. ---- */
 function buildAllThingsLocal(base){
-  /* #114 — ROUND-ROBIN DIVERSIFICATION, replacing the flat 3-per-category quota.
+  /* #114 — ROUND-ROBIN DIVERSIFICATION + IN-VIEW PREFERENCE.
      WHAT WAS WRONG. The old body took exactly 3 from each of six buckets and
-     stopped, so a place with only ONE category in range — a cemetery, where
-     history is everything and the rest is empty — rendered ~3 pins under All
-     Things Local while the History tab (blendCategory(...,8)) showed up to 8 of
-     the SAME graves. The per-category quota, not LIST_CAP, was the ceiling.
+     stopped, so a cemetery — history everything, the rest empty — rendered ~3
+     pins while the History tab showed up to 8 of the same graves.
 
-     WHY NOT FLOOR + NEAREST-FIRST BACKFILL. Built and REJECTED after live
-     testing: a floor of N plus nearest-first backfill still starves a SPARSE
-     category that is FARTHER than the dense ones. Nearest-first is wrong the
-     moment a cap has to choose — item 108's rankForList defect by another door.
+     WHY NOT FLOOR + NEAREST-FIRST BACKFILL. Built and REJECTED: a floor plus
+     nearest-first backfill starves a SPARSE category that is FARTHER than the
+     dense ones — item 108's rankForList defect by another door.
 
-     THIS SHIPPED, WAS REVERTED, AND IS BACK — the revert was a misdiagnosis and
-     that is the note worth keeping. Round-robin first shipped in 2026.07.21p and
-     appeared to collapse All Things Local to a single pin over a cemetery. The
-     real cause was #116: the hunt was anchored on GPS instead of the browsed
-     area, so it was built miles from what was on screen and round-robin was
-     dividing up the wrong neighbourhood. Reverting this was treating the symptom
-     on the wrong row. With #116 fixed, round-robin is the half that actually
-     fills the view; the two are complementary and neither does the job alone.
+     ROUND-ROBIN, AND WHY IT WASN'T ENOUGH ALONE. Round-robin shares the target
+     across categories that have stock. But "stock" was measured over the whole
+     REAL_INCLUDE_RADIUS_M (9km) blend radius, so anchored AT a cemetery the
+     surrounding city fills every non-history bucket within 9km, round-robin
+     splits the 15 slots six ways, history gets ~2-3, and ~1 lands inside a tight
+     cemetery frame. Correct diversification of the wrong scope. (First shipped
+     2026.07.21p, looked like it collapsed to 1 pin, was REVERTED on a
+     misdiagnosis — the 1-pin was actually #116's GPS-vs-browse anchor bug, not
+     this. Restored once #116 landed.)
 
-     WHAT IT DOES. Round-robin: each round takes one candidate from every category
-     that still has stock, rotating which category leads so a partial final round
-     doesn't systematically favour the same buckets. An empty category is skipped
-     — so when only history has anything in range it absorbs every slot up to
-     ATL_POOL, and when several categories have stock they share the target evenly
-     regardless of which is nearest. ATL_POOL is the per-category ceiling (8),
-     matching the single-tab cap so a category never out-shows its own tab. #68
-     lives on: every bucket below is passed explicitly, never null. */
+     IN-VIEW PREFERENCE — the piece that fills the frame. Fill FIRST from
+     candidates inside the current map bounds, category by category; then top up
+     from everything else in range (off-screen) so a sparse or zoomed-out view is
+     never left empty. A frame that is all cemetery has only history in-view, so
+     it fills with graves; a mixed neighbourhood in view diversifies as before.
+     Bounds are read ONCE here, at build time (Search here / hunt start) — NOT on
+     pan: item 66 keeps content stable while you move, and the capture loop reads
+     the hunt as built. No map / invalid bounds ⇒ degrades to plain round-robin
+     over the full lists, i.e. exactly the pre-#116 behaviour. ATL_POOL (8) is the
+     per-category ceiling, matching the single-tab cap so a category never
+     out-shows its own tab. #68 lives on: every bucket is passed explicitly. */
   const ATL_TARGET = 15;   // total pins All Things Local aims to surface
   const ATL_POOL   = 8;    // per-category candidate ceiling (mirrors the single-tab cap)
   const CATS = [
@@ -3848,6 +3849,20 @@ function buildAllThingsLocal(base){
   ];
   const lists = CATS.map(([cat,procFn,bucket]) => blendCategory(base, cat, ATL_POOL, procFn, bucket));
 
+  // Read the current frame once. Guarded: no map, or bounds not yet valid, means
+  // no in-view split and the passes below collapse to plain round-robin.
+  let bounds = null;
+  try {
+    if(state.leafletMap && typeof state.leafletMap.getBounds === 'function'){
+      const b = state.leafletMap.getBounds();
+      if(b && b.isValid && b.isValid()) bounds = b;
+    }
+  } catch(e){ bounds = null; }
+  const inView = p => {
+    if(!bounds || typeof p.lat !== 'number' || typeof p.lng !== 'number') return false;
+    try { return bounds.contains([p.lat, p.lng]); } catch(e){ return false; }
+  };
+
   const pts = [];
   const seen = new Set();
   const push = p => {
@@ -3856,26 +3871,32 @@ function buildAllThingsLocal(base){
     pts.push(p); return true;
   };
 
-  // Round-robin. ptr[li] is how far each category has been consumed. Each round
-  // visits every category once, starting from a rotating offset; within a turn a
-  // category advances past any duplicate until it lands one new point or runs
-  // out. The round loop ends as soon as a whole pass adds nothing new.
-  const ptr = lists.map(()=>0);
-  let progressed = true;
-  for(let round = 0; pts.length < ATL_TARGET && progressed; round++){
-    progressed = false;
-    for(let j = 0; j < lists.length && pts.length < ATL_TARGET; j++){
-      const li = (round + j) % lists.length;
-      const list = lists[li];
-      while(ptr[li] < list.length && pts.length < ATL_TARGET){
-        if(push(list[ptr[li]++])){ progressed = true; break; }
+  // Round-robin over an array of per-category candidate arrays: each round visits
+  // every category once from a rotating offset, taking its next non-duplicate.
+  // Ends as soon as a full pass adds nothing. `seen`/`pts` are shared across
+  // calls, so pass 2 never re-offers a point pass 1 already placed.
+  const roundRobin = ls => {
+    const ptr = ls.map(()=>0);
+    let progressed = true;
+    for(let round = 0; pts.length < ATL_TARGET && progressed; round++){
+      progressed = false;
+      for(let j = 0; j < ls.length && pts.length < ATL_TARGET; j++){
+        const li = (round + j) % ls.length;
+        const list = ls[li];
+        while(ptr[li] < list.length && pts.length < ATL_TARGET){
+          if(push(list[ptr[li]++])){ progressed = true; break; }
+        }
       }
     }
-  }
+  };
 
-  // Loose gems tail (any bucket, nearest-first), bounded by the target. Kept
-  // from the pre-#114 body but no longer a flat 2 added on top — it only fills
-  // room the categories left, so it can't push the count past ATL_TARGET.
+  // Pass 1 — what's actually in the current frame. Pass 2 — top up from the rest
+  // (in range but off-screen). With no bounds, pass 1 is empty and pass 2 runs
+  // the full lists, which is plain round-robin.
+  roundRobin(lists.map(list => bounds ? list.filter(inView) : []));
+  roundRobin(lists.map(list => bounds ? list.filter(p => !inView(p)) : list));
+
+  // Loose gems tail (any bucket, nearest-first), bounded by the target.
   if(pts.length < ATL_TARGET){
     nearbyApprovedGems(base, [], ATL_TARGET - pts.length).forEach(g=>{
       if(pts.length >= ATL_TARGET) return;
@@ -4843,7 +4864,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21s';
+const APP_VERSION = '2026.07.21t';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
