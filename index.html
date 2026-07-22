@@ -4790,7 +4790,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.21q';
+const APP_VERSION = '2026.07.21r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6645,7 +6645,19 @@ function assertGemBucketsAgree(){
   }catch(e){ console.warn('[#68] bucket check failed', e); }
 }
 function selectExplore(cat){
-  const base = state.me || FALLBACK_LOCATION;
+  /* #116 — HONOUR THE BROWSE/SEARCH ANCHOR, don't hardcode GPS.
+     This hardcoded state.me, so picking a category from the hunt-name list while
+     browsing or searching an area you are NOT standing in built the hunt around
+     your real position instead of the area on screen. Symptom: search to a
+     cemetery, switch to All Things Local through the picker, and the hunt anchors
+     at your feet — its pins cluster where you physically are and the area you are
+     looking at comes back all but empty, while a tab you had ALREADY searched
+     into (rebuilt via searchThisArea → regenerateCurrentHuntAt, which passes the
+     map centre) still shows that area's content. Two entry paths, two anchors.
+     Precedence matches item 8's content anchor (applyRealPlaces / reblend) so a
+     deliberate relocation outranks GPS; state.me is the fallback when neither is
+     set, i.e. when you really are here. */
+  const base = state.browsingLocation || state.searchedArea || state.me || FALLBACK_LOCATION;
   if(cat==='local'){ startLocalHunt(base); }
   else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
   else if(cat==='shops'){ startShopsHunt(base); }
