@@ -4565,12 +4565,15 @@ async function loadMyGems(){
          moderation verdict written for an operator is not copy written for the
          person who was rejected. If a reason is ever surfaced it should be
          authored for the submitter, not forwarded from the reviewer. */
-      .select('id,name,description,category,lat,lng,status,created_at')
+      .select('id,name,description,category,lat,lng,status,created_at,name_clean,description_clean')
       .eq('submitted_by', uid)
       .order('created_at', { ascending:false });
     if(error) throw error;
+    // #12 display: mirror loadApprovedGems — show the cleaned text where it
+    // exists, fall back to the submitter's raw words otherwise. Raw stays
+    // canonical in the DB; this is display-only and reverts cleanly.
     state.gemSubmissions = (data||[]).map(r=>({
-      id:r.id, name:r.name, desc:r.description, bucket:r.category,
+      id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
       lat:r.lat, lng:r.lng, status:r.status
     }));
   }catch(e){
@@ -4869,7 +4872,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22c';
+const APP_VERSION = '2026.07.22d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
