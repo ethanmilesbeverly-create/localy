@@ -37,6 +37,10 @@
     --moss:#6FA85C;
     --danger:#C0524C;
     --radius:14px;
+    /* #56 — ONE NUMBER for the space between stacked cards. .mode-grid's
+       gap and the standalone "Have a code?" card's top offset are the SAME
+       fact; stated once here so they cannot disagree (see --sheet-offset). */
+    --card-gap:12px;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -460,7 +464,7 @@
   /* ---------- Mode cards ---------- */
   .mode-grid{
     display:grid;
-    gap:12px;
+    gap:var(--card-gap);
   }
   .mode-card{
     background:var(--surface);
@@ -566,6 +570,11 @@
   }
   .code-entry-row:hover{background:var(--surface);}
   .code-entry-row:active{transform:scale(0.98);}
+  /* #56 — mirrors the inter-card grid gap. This card lives OUTSIDE the
+     guide grid (it must stay independent of renderMyHunts so a failed guide
+     load can never hide the redeem entry point), so its spacing is a margin
+     rather than a grid gap — same value, same var. */
+  #screen-modes .code-entry-row{margin-top:var(--card-gap);}
   .code-entry-icon{
     width:40px;height:40px;border-radius:50%;flex-shrink:0;
     background:rgba(154,127,191,0.15);
@@ -4881,7 +4890,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22e';
+const APP_VERSION = '2026.07.22f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
