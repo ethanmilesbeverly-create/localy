@@ -5044,7 +5044,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23c';
+const APP_VERSION = '2026.07.23d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8077,15 +8077,31 @@ function fillPinSheet(t){
    business holding copy. #68's rule about lists that must agree applies, and
    assertReportReasonsAgree() below is this file's half of that check.
 
-   ORDER IS DELIBERATE: the three that can actually remove a pin come first,
-   because they are the ones someone standing at a wrong address is looking for.
-   `unsafe` is last and is the only one where the label had to promise less than
-   the others — it goes to a human, it does not move the map. Saying "we'll take
-   a look" rather than implying removal is the honest version, and the reason is
-   in the Edge Function comment: automating removal on this signal is redlining
-   with a counter attached. */
+   ORDER WAS "the three that can remove a pin come first", AND #132 BROKE THAT
+   RULE ON PURPOSE. `moved` does not remove anything, and it is second.
+
+   The old rule optimised for the person who wants the pin gone. The defect
+   #132 records is that the menu had no way to say a place RELOCATED, so
+   somebody standing at 2426 N Racine in front of the bar that replaced
+   Gaslight taps "It's not here / permanently closed" — an honest report,
+   because it is true that it is not here, and the only option they were
+   offered. Three of those and the pin was deleted by a counter, with nothing
+   put in its place. A menu that offers only one nearby answer does not collect
+   a signal, it manufactures one.
+
+   So `moved` sits directly under `gone`, where the person about to tap `gone`
+   will actually read it. Adjacency IS the intervention — at the bottom of the
+   list it would be a code that exists and never gets picked, which is what
+   #131 calls unreachable and is worth about as much as not shipping it.
+
+   `unsafe` is still last and is still the only label that had to promise less
+   than the others — it goes to a human, it does not move the map. Saying
+   "we'll take a look" rather than implying removal is the honest version, and
+   the reason is in the Edge Function comment: automating removal on this
+   signal is redlining with a counter attached. */
 const REPORT_REASONS = [
   { key:'gone',           label:"It's not here / permanently closed" },
+  { key:'moved',          label:"It moved somewhere else" },
   { key:'chain',          label:"It's a chain, not a local spot" },
   { key:'bogus',          label:"Inappropriate or fake" },
   { key:'wrong_location', label:"The pin is in the wrong place" },
@@ -8093,6 +8109,21 @@ const REPORT_REASONS = [
   { key:'private',        label:"Private property — can't get to it" },
   { key:'unsafe',         label:"This felt unsafe — please take a look" },
 ];
+
+/* #132 — the note prompt is REASON-SPECIFIC for exactly one reason, and that
+   is not decoration. A report of `moved` is the only one where the reporter
+   routinely holds the single most valuable fact this app can collect: where
+   the place went. "Anything else? (optional)" does not ask for it and mostly
+   gets nothing back; "Do you know where it moved to?" gets an address roughly
+   as often as someone knows one.
+
+   Kept as a sparse map rather than a field on every reason, so the default
+   stays the default and there is one place to look when a second reason
+   eventually earns its own prompt. */
+const REPORT_NOTE_PROMPTS = {
+  moved: "Do you know where it moved to? (optional)",
+};
+const REPORT_NOTE_PROMPT_DEFAULT = "Anything else? (optional)";
 
 /* What a pin is, for reporting purposes, or null if it isn't reportable.
 
@@ -8177,6 +8208,10 @@ function openReportPin(pinId){
   ).join('');
   const note = document.getElementById('report-pin-note');
   note.value = '';
+  /* #132 — reset with the value. The modal element is reused across every pin,
+     so a placeholder left over from a `moved` report would ask the next person
+     where their unsafe alley moved to. */
+  note.placeholder = REPORT_NOTE_PROMPT_DEFAULT;
   const send = document.getElementById('report-pin-send');
   send.disabled = true;
   send.textContent = 'Send report';
@@ -8192,6 +8227,14 @@ function chooseReportReason(key){
   document.querySelectorAll('#report-pin-options .report-option').forEach(b=>{
     b.classList.toggle('selected', b.getAttribute('data-reason') === key);
   });
+  /* #132 — placeholder only, never the value. Writing into the textarea would
+     put words in the reporter's mouth and they would be submitted verbatim by
+     anyone who did not notice, which is worse than an empty note. Re-applied
+     on every choice rather than only on the way in, so switching away from
+     `moved` puts the generic prompt back instead of leaving a stale question
+     over the wrong reason. */
+  const note = document.getElementById('report-pin-note');
+  if(note) note.placeholder = REPORT_NOTE_PROMPTS[key] || REPORT_NOTE_PROMPT_DEFAULT;
   document.getElementById('report-pin-send').disabled = false;
 }
 async function submitPinReport(){
