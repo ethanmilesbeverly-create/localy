@@ -1445,6 +1445,63 @@
     color:var(--text);font-size:14px;font-family:inherit;cursor:pointer;
   }
   .save-hunt-option:hover{background:var(--surface-3);}
+
+  /* #25 — REPORT A PIN.
+     Clones #save-to-hunt-modal's geometry deliberately rather than inventing a
+     third modal language: same overlay, same card, same close button, so the
+     only new thing on screen is the list of reasons. The reason rows are
+     .save-hunt-option with a selected state — a radio group in everything but
+     markup, because a real <input type=radio> would need its own focus ring,
+     label association and reset-on-close, and none of that buys anything on a
+     surface where every option is one tap. */
+  #report-pin-modal{
+    position:absolute;inset:0;z-index:1150;
+    background:rgba(6,16,12,0.55);
+    backdrop-filter:blur(5px);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  #report-pin-modal.show{display:flex;}
+  #report-pin-modal .modal-card{position:relative;padding-top:24px;text-align:left;}
+  #report-pin-close{
+    position:absolute;top:14px;right:14px;
+    width:30px;height:30px;border-radius:50%;
+    background:var(--surface-2);border:1px solid var(--line);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  #report-pin-close svg{width:15px;height:15px;}
+  .report-target{
+    font-size:12.5px;color:var(--text-dim);margin:0 0 14px;line-height:1.45;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .report-option{
+    display:block;width:100%;text-align:left;
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:10px;padding:11px 13px;margin-bottom:7px;
+    color:var(--text);font-size:13.5px;font-family:inherit;cursor:pointer;
+    line-height:1.35;
+  }
+  .report-option.selected{
+    border-color:var(--orange);
+    background:rgba(232,98,44,0.12);
+  }
+  #report-pin-note{
+    width:100%;box-sizing:border-box;resize:none;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin:4px 0 12px;
+    color:var(--text);font-size:13.5px;font-family:inherit;line-height:1.45;
+  }
+  #report-pin-note::placeholder{color:var(--text-dim);}
+  #report-pin-send:disabled{opacity:0.45;cursor:default;}
+  /* The report button is the LAST action on the sheet and the quietest one.
+     It sits below "Save to a guide" and carries no accent colour: it is a
+     maintenance affordance, not something the product wants people doing. */
+  .ps-btn-report{
+    font-size:13px;font-weight:500;padding:10px;
+    background:none;border-color:transparent;color:var(--text-dim);
+  }
+  .ps-btn-report.reported{color:var(--moss);}
   #achievement-popup .modal-card{position:relative;padding-top:20px;}
   #achievement-popup-close, #save-to-hunt-close{
     position:absolute;top:14px;right:14px;
@@ -1543,6 +1600,23 @@
       <h2 style="font-size:17px;">Save to which guide?</h2>
       <div id="save-to-hunt-list" style="max-height:220px;overflow-y:auto;text-align:left;margin-bottom:14px;"></div>
       <button class="btn secondary" onclick="createNewHuntWithPoint()">+ Create New Guide</button>
+    </div>
+  </div>
+
+  <!-- #25 — report a pin. Options are rendered from REPORT_REASONS in JS rather
+       than written here, so the client's list and the Edge Function's validator
+       are one ordered vocabulary in two files instead of a menu and a schema
+       that can drift apart silently. -->
+  <div id="report-pin-modal">
+    <div class="modal-card" style="max-width:330px;">
+      <button id="report-pin-close" onclick="closeReportPinModal()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2 style="font-size:17px;margin-bottom:6px;">What's wrong here?</h2>
+      <p class="report-target" id="report-pin-target"></p>
+      <div id="report-pin-options" style="max-height:238px;overflow-y:auto;margin-bottom:10px;"></div>
+      <textarea id="report-pin-note" rows="2" maxlength="500" placeholder="Anything else? (optional)"></textarea>
+      <button class="btn" id="report-pin-send" onclick="submitPinReport()" disabled>Send report</button>
     </div>
   </div>
 
@@ -3779,6 +3853,13 @@ async function ensureRealPlaces(base){
     const places = (data && data.places) || [];
     _realDebug.lastOverpassStatus = (data && data.overpassStatus != null) ? data.overpassStatus : null;
     _realDebug.lastOverpassError  = (data && data.overpassError) || null;
+    /* #25 — runs before the length check on purpose. An empty tile is exactly
+       when you most want to know whether the report machinery is healthy: if
+       suppression has taken everything, "empty" and "we hid it all" are
+       different diagnoses and the old response could not tell them apart. */
+    assertReportReasonsAgree(data && data.reasonCodes);
+    if(data && data.suppressed) console.log('[#25] ' + data.suppressed + ' pin(s) hidden by user reports on tile ' + key);
+    if(data && data.suppressionFailed) console.warn('[#25] suppression list could not be read — reported pins are showing this pass');
     if(places.length){
       applyRealPlaces(key, base, places); // sets _realDebug.lastCounts + tile state
       const src = data.cached ? (data.stale ? 'cache(stale)' : 'cache') : 'live';
@@ -4235,6 +4316,12 @@ let state = {
   realPlaces: null,     // {tile, center, all[], byCat{}} — real OSM/Wikipedia places for the current tile
   gemDraftPin: null,
   pendingSavePoint: null,
+  /* #25 — session-only. See submitPinReport() for why this is not persisted:
+     the server holds one row per (target, person), so the worst a lost set
+     costs is a button that offers to report something you already reported,
+     and the resulting upsert changes nothing. */
+  reportedPins: new Set(),
+  pendingReport: null,
   browsingLocation: null,
   searchedArea: null,   // #8 — set while content is anchored to a panned-to area
   _addrCache: new Map(),   // #18 — rounded coords -> short address (or null after a failed lookup)
@@ -4945,7 +5032,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23a';
+const APP_VERSION = '2026.07.23b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7923,6 +8010,16 @@ function fillPinSheet(t){
      path where nothing else on screen explains the failure, and it is the case
      #51 was really about. Deleting both would reintroduce the silence. */
   actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a guide</button>`;
+  /* #25 — last, quietest, and only on pins that have somewhere for a report to
+     go (see reportTargetFor). Once reported in this session it becomes inert
+     text rather than disappearing: a button that vanishes reads as a failed tap,
+     and the acknowledgement is the point. */
+  const rKey = reportKeyFor(t);
+  if(rKey){
+    actions += state.reportedPins.has(rKey)
+      ? `<div class="ps-btn ps-btn-report reported" style="text-align:center;">✓ Reported — thanks</div>`
+      : `<button class="ps-btn ps-btn-report" onclick="openReportPin('${t.id}')">Report a problem</button>`;
+  }
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   document.getElementById('pin-sheet-expand').innerHTML =
     /* #101 — render NO description block when there is no real description,
@@ -7949,6 +8046,186 @@ function fillPinSheet(t){
       const btn = document.querySelector('#pin-sheet-expand .ps-loc-copy');
       if(btn) btn.setAttribute('data-copy', addr);
     });
+  }
+}
+/* =========================================================
+   #25 — REPORT A PIN
+   ---------------------------------------------------------
+   The map already asserts things that are not true — a shop that closed in
+   2019, a node nobody retired upstream — and since #37 removed procedural
+   filler there is no "obviously decorative" category left for a wrong pin to
+   fall into. Every pin now claims to be real, so a wrong one is a lie rather
+   than scenery. This is the affordance that lets someone standing in front of
+   the wrong thing say so.
+
+   THIS LIST IS ONE OF TWO COPIES AND THE OTHER ONE IS AUTHORITATIVE. The keys
+   here must exist in REPORT_REASONS in the nearby-places Edge Function, which
+   validates them and owns which ones can hide a pin; an unknown key is a 400,
+   never a row. The labels live only here — they are copy, and the server has no
+   business holding copy. #68's rule about lists that must agree applies, and
+   assertReportReasonsAgree() below is this file's half of that check.
+
+   ORDER IS DELIBERATE: the three that can actually remove a pin come first,
+   because they are the ones someone standing at a wrong address is looking for.
+   `unsafe` is last and is the only one where the label had to promise less than
+   the others — it goes to a human, it does not move the map. Saying "we'll take
+   a look" rather than implying removal is the honest version, and the reason is
+   in the Edge Function comment: automating removal on this signal is redlining
+   with a counter attached. */
+const REPORT_REASONS = [
+  { key:'gone',           label:"It's not here / permanently closed" },
+  { key:'chain',          label:"It's a chain, not a local spot" },
+  { key:'bogus',          label:"Inappropriate or fake" },
+  { key:'wrong_location', label:"The pin is in the wrong place" },
+  { key:'wrong_info',     label:"Wrong name or category" },
+  { key:'private',        label:"Private property — can't get to it" },
+  { key:'unsafe',         label:"This felt unsafe — please take a look" },
+];
+
+/* What a pin is, for reporting purposes, or null if it isn't reportable.
+
+   #25 SAID "EVERY PIN SHEET" AND THIS IS A NARROWING OF THAT, ON PURPOSE. The
+   row was written when the only things on the map were OSM, Wikipedia and gems,
+   and for those three "every" is exactly right. It is wrong for the fourth
+   thing: a stop in a guide YOU created. Reporting your own hand-typed stop to
+   us is a support ticket addressed to yourself — there is no upstream to
+   correct, no crowd to reach a threshold, and the row would sit in the queue
+   forever. Those pins get no button rather than a button that goes nowhere.
+
+   The three ids are the STABLE ones the code already emits (#25's own storage
+   note): `osm_<type><id>` and `wiki_<pageid>` come straight off parseOverpass,
+   and a gem carries `gemId` — the submissions row id — separately from its
+   display id, which is prefixed per blend ('dlg', 'catgem') and is therefore
+   NOT stable across two renders of the same gem. Reporting on the display id
+   would scatter one place's reports across several target_ids and no threshold
+   would ever be reached. */
+function reportTargetFor(t){
+  if(!t) return null;
+  if(t.isGem && t.gemId) return { id:String(t.gemId), source:'gem' };
+  if(t.source === 'osm'  && t.id) return { id:String(t.id), source:'osm'  };
+  if(t.source === 'wiki' && t.id) return { id:String(t.id), source:'wiki' };
+  return null;
+}
+function reportKeyFor(t){
+  const tg = reportTargetFor(t);
+  return tg ? tg.source + ':' + tg.id : null;
+}
+/* #25/#68 — the two halves of the reason vocabulary, compared against each
+   other for real rather than asserted in a comment.
+
+   nearby-places echoes `reasonCodes` on every places response, so this runs on
+   data the app is already fetching: no extra request, no extra deploy target.
+   It reports BOTH directions because they fail differently. A key this client
+   sends that the server does not know is a dead button — the report 400s and
+   the person is told to try again forever. A key the server knows that this
+   client never offers is the quieter one: a reason nobody can select, which
+   looks like nothing at all and would only ever be found by reading both files
+   side by side.
+
+   Memoised on the joined signature so a steady-state mismatch is logged once
+   per change rather than on every tile fetch — #111's lesson, that a check
+   which shouts on every pass gets scrolled past. */
+let _reasonSig = null;
+function assertReportReasonsAgree(serverCodes){
+  try{
+    if(!Array.isArray(serverCodes) || !serverCodes.length){
+      /* Not a failure. A cached tile row written before this shipped carries no
+         reasonCodes, and that is "did not ask", not "server has none" — the
+         #104 osmTs distinction, on a much smaller surface. Stay silent. */
+      return;
+    }
+    const mine = REPORT_REASONS.map(r=>r.key);
+    const theirs = serverCodes.map(String);
+    const sig = mine.join(',') + '|' + theirs.slice().sort().join(',');
+    if(sig === _reasonSig) return;
+    _reasonSig = sig;
+    const unknown = mine.filter(k=>!theirs.includes(k));
+    const unoffered = theirs.filter(k=>!mine.includes(k));
+    if(unknown.length) console.error('[#25] reasons THIS CLIENT SENDS that the function rejects — these buttons 400:', unknown);
+    if(unoffered.length) console.warn('[#25] reasons the function accepts that nothing here offers — unreachable:', unoffered);
+    if(!unknown.length && !unoffered.length) console.log('[#25] reason vocabulary agrees (' + mine.length + ' codes)');
+  }catch(e){ console.warn('[#25] reason check failed', e); }
+}
+function openReportPin(pinId){
+  const t = currentTargetsSorted().find(x=>x.id===pinId);
+  const tg = t && reportTargetFor(t);
+  if(!tg) return;
+  /* Demo mode has no real session, so the JWT carries no user and the function
+     would answer 401 — which would arrive as "something went wrong" after the
+     person had already picked a reason and typed a note. Fail before the work,
+     not after it. */
+  if(demoBypassActive() || !state.user || !state.user.id){
+    showToast('Sign in to report a spot');
+    return;
+  }
+  state.pendingReport = { pinId, target:tg, name:t.name || 'this spot', lat:t.lat, lng:t.lng, reason:null };
+  document.getElementById('report-pin-target').textContent = t.name || 'Unnamed spot';
+  document.getElementById('report-pin-options').innerHTML = REPORT_REASONS.map(r=>
+    `<button type="button" class="report-option" data-reason="${r.key}" onclick="chooseReportReason('${r.key}')">${escapeHtml(r.label)}</button>`
+  ).join('');
+  const note = document.getElementById('report-pin-note');
+  note.value = '';
+  const send = document.getElementById('report-pin-send');
+  send.disabled = true;
+  send.textContent = 'Send report';
+  document.getElementById('report-pin-modal').classList.add('show');
+}
+function closeReportPinModal(){
+  document.getElementById('report-pin-modal').classList.remove('show');
+  state.pendingReport = null;
+}
+function chooseReportReason(key){
+  if(!state.pendingReport) return;
+  state.pendingReport.reason = key;
+  document.querySelectorAll('#report-pin-options .report-option').forEach(b=>{
+    b.classList.toggle('selected', b.getAttribute('data-reason') === key);
+  });
+  document.getElementById('report-pin-send').disabled = false;
+}
+async function submitPinReport(){
+  const p = state.pendingReport;
+  if(!p || !p.reason) return;
+  const send = document.getElementById('report-pin-send');
+  send.disabled = true;
+  send.textContent = 'Sending…';
+  try{
+    const { data, error } = await sb.functions.invoke('nearby-places', { body:{
+      action:'report',
+      target_id:p.target.id, target_source:p.target.source,
+      reason:p.reason,
+      note:(document.getElementById('report-pin-note').value || '').trim(),
+      target_name:p.name, lat:p.lat, lng:p.lng
+    }});
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+    /* Session-only, and deliberately not persisted. The server holds the real
+       record — one row per (target, person), so a re-report after a reload is
+       an upsert, not a duplicate, and cannot inflate the threshold. Persisting
+       this would add a boot load path and a failure mode to save a button
+       label from being wrong once. */
+    const key = reportKeyFor({ isGem:p.target.source==='gem', gemId:p.target.id, source:p.target.source, id:p.target.id });
+    if(key) state.reportedPins.add(key);
+    closeReportPinModal();
+    /* The toast never says the pin has been removed, even when the response
+       says it just crossed the threshold. Suppression is memoised for up to
+       five minutes per isolate, so "removed" would be a claim the map can
+       visibly contradict for the next few minutes — and for the four
+       non-suppressing reasons it would be false permanently. One honest line
+       covers all seven. */
+    showToast('Thanks — we\'ll take a look');
+    console.log('[#25] report accepted', data);
+    /* Redraw the sheet if it is still open on this pin, so the button reflects
+       the new state without the person having to close and reopen it. */
+    if(state.selectedPinId === p.pinId){
+      const t = currentTargetsSorted().find(x=>x.id===p.pinId);
+      if(t) fillPinSheet(t);
+    }
+  }catch(e){
+    const msg = (e && e.message) || String(e);
+    console.warn('[#25] report failed', msg);
+    showToast(msg === 'sign_in_required' ? 'Sign in to report a spot' : 'Couldn\'t send that — try again');
+    send.disabled = false;
+    send.textContent = 'Send report';
   }
 }
 function openPinSheet(t){
