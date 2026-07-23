@@ -40,6 +40,80 @@
      "#N" = a row in localy-roadmap.md. Stable IDs, never renumbered.
      ============================================================ -->
 
+<script>
+/* ============================================================
+   #85 — PRE-PAINT MOBILE BOUNCE. THIS BLOCK IS IN <head>, ABOVE
+   THE LEAFLET TAGS, AND THE POSITION IS THE WHOLE POINT.
+
+   A share link arrives by text message and is opened on a phone,
+   and a phone recipient wants the MAP with the guide already in
+   it — not a preview of the thing they then have to tap again.
+   Running this at the end of <body>, where the rest of this
+   page's script lives, would mean waiting on a 150 KB Leaflet
+   download before redirecting away from a page we never intended
+   to show. So it runs first and it loads nothing.
+
+   DESKTOP KEEPS THE PREVIEW, and that is not a hedge. This page
+   exists because index.html renders as a 480px column on a
+   monitor (#49a, and see the block above for why that column is
+   currently the only thing containing desktop capture). Bouncing
+   a laptop recipient into the app hands them the bad version of
+   both pages. Phones go straight through; desktops stay here.
+
+   location.replace(), NEVER location.href — this page must not
+   enter session history, or Back from the app lands here and is
+   immediately bounced forward again, trapping the recipient in a
+   loop whose only exit is closing the tab.
+
+   THE CODE IS NOT VERIFIED BEFORE BOUNCING, deliberately. Checking
+   it means the shared_kv fetch, which is the latency this block
+   exists to skip. index.html already lands an unknown or
+   malformed code on its Unlock-guide screen with the code
+   prefilled and the reason shown, so the error surface is not
+   lost by leaving early — it moves one page later.
+
+   ?preview=1 SUPPRESSES THE BOUNCE. Without it this page becomes
+   untestable from the only device that matters, because every
+   attempt to look at it redirects away. Four lines, and it is the
+   difference between a QA step you can run and one you cannot.
+
+   detectMobile() and normaliseCode() are DEFINED HERE rather than
+   copied: the main script below calls these same two globals.
+   One definition, moved earlier — not a second copy that drifts.
+   ============================================================ */
+const LANDING_VERSION = '2026.07.23a';
+console.log('%c[landing] ' + LANDING_VERSION, 'font-weight:700');
+
+/* Coarse pointer OR narrow viewport. Deliberately generous: a false
+   positive sends a borderline device to the app, which is where a
+   borderline device should go; a false negative strands a phone user
+   on a preview page, which is the failure this row is fixing. */
+function detectMobile(){
+  const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+  return coarse || window.innerWidth < 760;
+}
+
+/* Alphabet matches randomCode() in index.html: no I, O, 0, 1. */
+function normaliseCode(raw){
+  const c = String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return /^[A-HJ-NP-Z2-9]{6}$/.test(c) ? c : null;
+}
+
+(function bounceToApp(){
+  try{
+    const q = new URL(window.location.href).searchParams;
+    if(q.get('preview') === '1') return;      // QA hatch
+    const code = normaliseCode(q.get('code'));
+    if(!code) return;                          // no code, or malformed — this page handles it
+    if(!detectMobile()) return;                // desktop keeps the preview
+    /* ?guide=, not ?code= — index.html runs supabase-js with
+       detectSessionInUrl on and `code` is the PKCE parameter it claims
+       at boot. See the renderHunt() comment below. */
+    window.location.replace('./index.html?guide=' + encodeURIComponent(code));
+  }catch(e){ /* a broken URL must never stop this page rendering */ }
+})();
+</script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   /* Tokens lifted verbatim from index.html. Deliberate: this page's job is
@@ -102,9 +176,23 @@
   }
 
   /* ---------- mobile bounce bar (#49a) ---------- */
-  /* Someone opening a share link ON A PHONE should not be reading a preview
-     page. Prominent, top, not an auto-redirect — auto-redirect breaks the
-     back button and hides the fact that a page existed at all. */
+  /* #85 REVERSES #49a's DECISION HERE, and the original is kept rather than
+     deleted because it was argued, not assumed. #49a said: "Prominent, top,
+     NOT an auto-redirect — auto-redirect breaks the back button and hides the
+     fact that a page existed at all."
+
+     Both objections were correct and only one survives contact with a real
+     share link. The back-button one is answered by location.replace() in the
+     <head> block: this page never enters history, so Back from the app goes
+     where the recipient came from rather than bouncing forward again. The
+     second objection is CONCEDED — on a phone this page is now genuinely
+     invisible — and that is the intent, not a cost we missed. A person who
+     was texted a guide is not shopping for a product page; they are trying to
+     see the thing their friend sent, and #49a's own comment two lines up
+     already said they "should not be reading a preview page."
+
+     So the bar survives for the two cases that still reach this page on a
+     phone: ?preview=1, and a mobile browser that lies about pointer type. */
   .bounce{display:none; margin:20px 0 0;}
   .bounce a{
     display:flex; align-items:center; justify-content:center; gap:10px;
@@ -325,6 +413,7 @@
   <footer>
     <span>Localy — walks made by people who live there.</span>
     <span>Capturing a stop happens on your phone, in front of the place.</span>
+    <span id="landing-build" style="opacity:.45;font-size:11px;"></span>
   </footer>
 </div>
 
@@ -366,21 +455,13 @@ function setEntryError(html){
   el.classList.add('show');
 }
 
-/* ---------- mobile bounce ---------- */
-/* Coarse pointer OR narrow viewport. Deliberately generous: a false
-   positive shows one extra button, a false negative strands a phone
-   user on a preview page. */
-function detectMobile(){
-  const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
-  return coarse || window.innerWidth < 760;
-}
-
-/* ---------- code parsing ---------- */
-/* Alphabet matches randomCode() in index.html: no I, O, 0, 1. */
-function normaliseCode(raw){
-  const c = String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  return /^[A-HJ-NP-Z2-9]{6}$/.test(c) ? c : null;
-}
+/* ---------- mobile bounce / code parsing ---------- */
+/* #85 — detectMobile() and normaliseCode() MOVED to the <head> block,
+   because the bounce has to run before Leaflet loads and it needs both.
+   They are still the same two globals this file has always used; there
+   is exactly one definition of each and it is now earlier in the file,
+   not duplicated here. If you are adding a third caller, call them —
+   do not re-derive the alphabet. */
 
 /* ---------- lookup ---------- */
 class LookupError extends Error{
@@ -620,6 +701,16 @@ function submitTypedCode(){
 }
 
 function init(){
+  /* #85 — this page had no version marker of any kind, so there was no
+     way to tell which build of it was live. index.html has had one on
+     Settings -> About since the beginning. */
+  const buildEl = $('landing-build');
+  if(buildEl) buildEl.textContent = 'build ' + LANDING_VERSION;
+
+  /* #85 — reachable on a phone only via ?preview=1 now; the bounce in
+     <head> takes every other mobile arrival. The class still matters
+     here because the manual "Open this guide in the app" affordance is
+     the only way out of preview mode. */
   if(detectMobile()) document.body.classList.add('is-mobile');
 
   $('code-go').addEventListener('click', submitTypedCode);
