@@ -4735,7 +4735,19 @@ async function loadApprovedGems(){
     const { data, error } = await sb
       .from('submissions')
       .select('id,name,description,category,lat,lng,name_clean,description_clean')
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
+         makes the whole thing work: a merged submission keeps a REAL status
+         (it mirrors the pin it was folded into), so without this filter an
+         approved duplicate would render as a second pin at the same spot —
+         precisely the defect the feature exists to remove.
+
+         `merged_into IS NULL` is the single discriminator. Any future consumer
+         that must not double-count submissions filters on it: a leaderboard, a
+         contributor count, app-report's by_status totals (which DO currently
+         count merged rows inside their mirrored status — noted, not fixed
+         here, since that function is not in this repo). */
+      .is('merged_into', null);
     if(error) throw error;
     // #12 display: prefer the mechanics-only cleaned text for what the map
     // SHOWS, falling back to the raw words when there is no clean value (the
@@ -5032,7 +5044,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23b';
+const APP_VERSION = '2026.07.23c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
