@@ -434,7 +434,14 @@ function renderHunt(code, hunt){
       + ' You collect them by being there.';
 
   $('cta-code').textContent = code;
-  const appHref = APP_URL + '?code=' + encodeURIComponent(code);
+  /* #85 — `?guide=`, NOT `?code=`. index.html runs supabase-js with
+     detectSessionInUrl on, and `?code=` is the PKCE authorization-code
+     parameter it claims at boot. This page has been emitting the colliding
+     name since it shipped; it never fired because nothing linked here. It
+     does now. This page's OWN inbound param stays `code` — it has no auth
+     client, so there is nothing here for it to collide with, and renaming it
+     would break the URL this page already tells people is shareable. */
+  const appHref = APP_URL + '?guide=' + encodeURIComponent(code);
   $('open-btn').href = appHref;
   $('bounce-link').href = appHref;
 

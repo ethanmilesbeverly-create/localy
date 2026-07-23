@@ -2411,8 +2411,43 @@ function resetLinkActive(){
   try{ return new URLSearchParams(location.search).get('mode') === 'reset'; }
   catch(e){ return false; }
 }
+/* Also clears ?guide=. AUTH_REDIRECT_BASE is the clean URL for every param this
+   app writes, so there is deliberately ONE function rather than a second copy
+   of the same replaceState under a different name — #77's one-fact-one-place
+   rule applied to a two-line helper. */
 function clearResetParam(){
   try{ history.replaceState(null, '', AUTH_REDIRECT_BASE); }catch(e){}
+}
+
+/* #85 — SHARE LINK PLUMBING.
+   Derived from AUTH_REDIRECT_BASE and never written independently: #65's rule
+   is that a constant which can be computed from another one must be, or the two
+   drift and nothing says so. Replacing the final path segment resolves for both
+   /repo/index.html and /repo/ on Pages, which are the two shapes this app is
+   actually served under.
+   NOTE FOR #50: this URL is the Pages URL. A repo rename or a custom domain
+   changes it, and every link already sitting in somebody's text messages 404s.
+   That is the real reason to keep the six-character code in the share message
+   beside the link — see shareHunt(). The code is stable forever; the URL is not. */
+const GUIDE_LINK_BASE = AUTH_REDIRECT_BASE.replace(/[^\/]*$/, 'landing.html');
+
+/* #85 — THE INBOUND PARAM IS `guide`, NOT `code`, AND THAT IS NOT A STYLE CHOICE.
+   supabase-js runs with detectSessionInUrl ON (see the #2 comment further down)
+   and `?code=` is the PKCE authorization-code parameter it looks for at boot.
+   landing.html has been emitting ./index.html?code=XXXXXX since #49a — a live
+   collision that has never fired for one reason only: nothing linked to
+   landing.html, which is precisely what this row changes. supabase-js v2 gates
+   the exchange on a stored PKCE verifier as well as the param, and an abandoned
+   password reset leaves exactly that verifier behind, so the failure would have
+   been intermittent, device-specific and blamed on the guide code.
+   #2 already wrote the rule this obeys: a param we write ourselves is
+   flow-agnostic and cannot be claimed by an unpinned @2 CDN alias that moves
+   between implicit and PKCE without notice. `guide` is ours. */
+function pendingGuideCode(){
+  try{
+    const c = new URLSearchParams(location.search).get('guide');
+    return c ? c.trim().toUpperCase() : null;
+  }catch(e){ return null; }
 }
 
 function show(id, on){
@@ -4690,6 +4725,26 @@ async function init(){
   });
   flushPendingWrites(); // anything queued by a previous session
 
+  /* #85 — LAST, and every part of that is load-bearing.
+     After loadPersonal(), so state.myHunts is real and the "you already have
+     this guide" branch can match instead of adding a duplicate copy.
+     After startLocalHunt(), so the guide is what survives rather than what gets
+     overwritten a line later.
+     Both GPS orderings converge on the guide: if the first fix lands before
+     this resolves, onLocation() rebuilds local_v1 and this replaces it; if it
+     lands after, onLocation()'s `key.startsWith('local_')` guard sees `code_`
+     and leaves it alone. regenerateCurrentHuntAt() already carries the matching
+     arm for fixed-content guides, so a browse-elsewhere does not regenerate it
+     either. Neither guard was added here — both already existed, which is what
+     makes this placement safe rather than lucky.
+     KNOWN GAP, AND IT ARRIVES WITH #69: when Confirm Email is switched on, the
+     confirmation link redirects to AUTH_REDIRECT_BASE, which carries no
+     ?guide= — so an invited NEW user loses the invite between signing up and
+     landing in the app. It survives today only because signup returns a session
+     directly. Whoever flips that toggle has to carry the code through the
+     redirect or hand it back on arrival. */
+  await consumePendingGuideInvite();
+
 }
 
 /* Console helper: run `localyDebug()` in DevTools to see what real data loaded
@@ -4890,7 +4945,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.22g';
+const APP_VERSION = '2026.07.23a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7242,11 +7297,30 @@ function huntCardMenuAction(action){
   else if(action==='share') shareHunt(id);
   else if(action==='delete') deleteMyHuntDirect(id);
 }
+/* #85 — THE SHARE MESSAGE NOW CONTAINS A URL, WHICH IS THE WHOLE ROW.
+   landing.html has been live, correct and QA-passed since #49a and UNREACHABLE
+   the entire time, because this string was the only thing the product generates
+   that could ever have pointed at it. A recipient without the app was being
+   told to open an app they do not have and type a code into a screen they
+   cannot find. #3's finding on a front-end surface: a page nothing links to is
+   stored, not installed.
+   THE CODE STAYS IN THE MESSAGE ALONGSIDE THE LINK, DELIBERATELY. The URL is a
+   Pages URL and #50's rename or a custom domain invalidates it; the six
+   characters are stable forever and are the only recovery path for a link that
+   has already been sent. It costs one line of text and it is the difference
+   between a stale invite that is annoying and one that is dead.
+   #56 GRAVESTONE, AND IT IS A CORRECTION TO THE ROADMAP RATHER THAN TO THIS
+   CODE: item 85's row records this exact string as already rewritten to
+   "guide"/"explore it" in build 2026.07.22g. It was not. Build g shipped
+   `hunt` and `play it`, and this was the ONLY user-facing "hunt" token left in
+   this file — the re-grep #56 describes did find the miss, and the fix never
+   landed. Verify the effect, not the report (#4's rule, on the copy surface). */
 function shareHunt(id){
   const h = state.myHunts.find(x=>x.id===id);
   if(!h){ return; }
   if(!h.code){ showToast('No code yet — edit and save once to generate one'); return; }
-  const text = `Check out my hunt "${h.name}" on Localy! Enter code ${h.code} in the app to play it.`;
+  const link = GUIDE_LINK_BASE + '?code=' + encodeURIComponent(h.code);
+  const text = `Check out my guide "${h.name}" on Localy!\n${link}\n(Or enter code ${h.code} in the app.)`;
   window.location.href = 'sms:&body=' + encodeURIComponent(text);
 }
 function openSaveToHuntPicker(pointId){
@@ -7446,25 +7520,22 @@ function startMyHunt(id){
   setCurrentHunt({key:'custom_'+h.id, name:h.name, mode:'custom', points:h.points});
 }
 
-async function redeemCode(){
-  const codeEl = document.getElementById('code-input');
-  const code = codeEl.value.trim().toUpperCase();
-  const errEl = document.getElementById('code-error');
-  errEl.style.display='none';
-  if(!code){ return; }
+/* #85 — THE ONE REDEMPTION PATH. The typed form and the ?guide= invite both
+   land here. A second copy of this lookup was the obvious way to write the
+   auto-redeem and it is the wrong one: two copies drift the first time either
+   is touched, which is the dead-mirror shape #113 already has a row for.
+   Returns an error STRING or null and renders nothing itself, because the two
+   callers have different surfaces for failure — the code screen owns a field
+   for it, a boot-time invite does not. */
+async function redeemCodeValue(code){
+  if(!code) return null;
   let res;
   try{
     res = await window.storage.get('hunt-code:'+code, true);
   }catch(e){
-    errEl.textContent = "Couldn't reach shared storage on this device right now. This can happen inconsistently between devices/browsers — try again, or try from a different one.";
-    errEl.style.display='block';
-    return;
+    return "Couldn't reach shared storage on this device right now. This can happen inconsistently between devices/browsers — try again, or try from a different one.";
   }
-  if(!res){
-    errEl.textContent = "No guide found for that code. Double-check it and try again.";
-    errEl.style.display='block';
-    return;
-  }
+  if(!res) return "No guide found for that code. Double-check it and try again.";
   try{
     const data = JSON.parse(res.value);
     let hunt = state.myHunts.find(h=>h.external && h.code===code);
@@ -7476,10 +7547,51 @@ async function redeemCode(){
     }
     setCurrentHunt({key:'code_'+code, name:data.name+' (code: '+code+')', mode:'code', points:data.points});
     showToast('Guide unlocked — saved to My Guides');
+    return null;
   }catch(e){
-    errEl.textContent = "That code's data looks corrupted — try generating a new one.";
+    return "That code's data looks corrupted — try generating a new one.";
+  }
+}
+async function redeemCode(){
+  const codeEl = document.getElementById('code-input');
+  const code = codeEl.value.trim().toUpperCase();
+  const errEl = document.getElementById('code-error');
+  errEl.style.display='none';
+  if(!code){ return; }
+  const err = await redeemCodeValue(code);
+  if(err){
+    errEl.textContent = err;
     errEl.style.display='block';
   }
+}
+
+/* #85 — the invite path. Called from init() and nowhere else. */
+async function consumePendingGuideInvite(){
+  const invite = pendingGuideCode();
+  if(!invite) return;
+  /* Clear FIRST and unconditionally. The param has been read into a local;
+     leaving it in the URL means every subsequent reload re-enters the guide and
+     the user can never get back to their own map — a navigation hijack that
+     survives the tab. */
+  clearResetParam();
+  /* Alphabet matches randomCode() here and normaliseCode() in landing.html: no
+     I, O, 0 or 1. Validated at the boundary rather than inside
+     redeemCodeValue(), so the typed path's behaviour is byte-for-byte what it
+     was before this row. */
+  const err = /^[A-HJ-NP-Z2-9]{6}$/.test(invite)
+    ? await redeemCodeValue(invite)
+    : "The code in that invite link isn't a valid guide code. Check it against the one you were sent.";
+  if(!err) return;
+  /* A failed invite lands on the surface that can retry it, with the code
+     already typed in. A toast would state the problem and then remove it from
+     the screen two seconds later, leaving a person who arrived from a text
+     message on a map with no explanation — #58's argument that a screen must
+     not present a failure as if it were an ordinary state. */
+  const ci = document.getElementById('code-input');
+  if(ci) ci.value = invite;
+  const ee = document.getElementById('code-error');
+  if(ee){ ee.textContent = err; ee.style.display = 'block'; }
+  showScreen('screen-code');
 }
 
 /* =========================================================
