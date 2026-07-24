@@ -1216,8 +1216,20 @@
     border-radius:14px;
     padding:8px 14px;
     max-width:65%;
+    /* #75 — min-width:0 IS PART OF THE FIX AND IS THE HALF THE ROW DID NOT NAME.
+       This is a flex item in .ar-top. A flex item's default min-width:auto is a
+       content-based floor that BEATS max-width, so a long unbroken name pushed
+       the card past 65% and off the screen edge no matter what the text inside
+       did. #75 said "the fix is copying #track-name's three properties" — but
+       #track-name only works because its parent .nearest-info already carries
+       flex:1;min-width:0. The rule that exists in the app is FOUR properties
+       across two elements, not three on one. Copy the parent too. */
+    min-width:0;
   }
-  #ar-target-card .t-name{font-size:13px;font-weight:700;}
+  /* #75 — same three properties as #track-name (~1160), same reason: a name cut
+     off with no ellipsis reads as the real name rather than as a display limit,
+     which is worse than a visible truncation. */
+  #ar-target-card .t-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   #ar-target-card .t-dist{font-size:11px;color:var(--text-dim);}
   #ar-marker-zone{
     flex:1;display:flex;align-items:center;justify-content:center;
@@ -3181,9 +3193,86 @@ function generateDiscoverLocal(base){
   });
   return pts;
 }
+/* =========================================================
+   #65 — THE DISTANCE REGISTER. Read this before adding a radius.
+
+   Every one of these numbers was chosen independently, and together they define
+   a single thing nobody had written down: how far away is still "here". This
+   block is that write-down. It is documentation, NOT a new indirection — the
+   constants stay declared at their point of use so nothing moves and nothing is
+   evaluated in a new order. What changed is that there is now ONE place that
+   says what each answers and which of them are the same question.
+
+   THE STANDING RULE, which #66 set by example and #108 is expected to follow:
+   when a new distance is needed, derive it from the one that answers the same
+   question — at the moment it is created, which is the only moment it is free.
+   Two constants that are the same question and are declared separately WILL
+   drift, and the drift is invisible because both readings look reasonable.
+
+   CONTENT SELECTION — "what goes in the pool"
+     GEM_INCLUDE_RADIUS_M   15000  (~9.3 mi)  here
+       Approved user gems pulled into a blend around the anchor.
+     REAL_INCLUDE_RADIUS_M   9000  (~5.6 mi)  ~#3564
+       OSM/Wikipedia places pulled into the same blend.
+     OVERPASS_RADIUS_M       4200  (~2.6 mi)  ~#3565
+       Query radius asked of Overpass. NOT a display filter — it is the outer
+       bound of what the server could ever have, so REAL_INCLUDE_RADIUS_M can
+       only ever filter DOWN from tiles built at this size.
+
+     >>> THE GEM-VS-REAL GAP IS AN OPEN DECISION, NOT A SETTING. <<<
+     Between 9 km and 15 km the blend contains user gems and NOTHING ELSE, which
+     quietly inverts #16's rule that a gem must be indistinguishable from any
+     other pin: out there it is the only kind of pin there is. #66 hid the
+     symptom from the nearby LIST (membership is now viewport AND range) but the
+     map and the blend still have it. Neither number is defended by anything;
+     they are two independent guesses at the same question. Deciding this is
+     #65's remaining scope and it is deliberately NOT decided here — changing
+     either value changes what is on the map, and that is not a documentation
+     pass's call to make.
+
+   FRAMING — "what the camera does"
+     FRAME_RADIUS_M          3000  (~1.9 mi)  ~#6257
+       The default map view around you (#47). Deliberately much smaller than the
+       blend radius: it frames what is walkable, not what is loaded. Roughly a
+       third of REAL_INCLUDE_RADIUS_M, and that ratio has never been examined.
+
+   CAPTURE — "what counts as being there"
+     FOUND_THRESHOLD_M         25  (~82 ft)   ~#6181
+       The capture floor. #51 settled it after real testing. DO NOT WIDEN — #146
+       is a MOVING-radius bug, not a too-tight-radius bug, and widening the floor
+       hides it at the cost of the thing #51 was careful about. The effective
+       range is Math.min(Math.max(this, accuracy), 75), so accuracy widens it and
+       75 m is the hard ceiling.
+
+   RESTORING PAST CAPTURES — "what to put back on the map"
+     CAPTURED_INJECT_RADIUS_M  = REAL_INCLUDE_RADIUS_M   ~#4359
+       DERIVED, and the precedent this row asks for. Same question as real-place
+       inclusion, so it is not a seventh number.
+     CAPTURED_TWIN_M          150   ~#4361
+       Not a range at all — a same-place tolerance for id churn. Different
+       question, correctly independent.
+
+   THE LIST — "what belongs in the drawer"
+     LIST_RANGE_M            = REAL_INCLUDE_RADIUS_M   ~#8291
+       DERIVED by #66 at the moment it was created, rather than declared as a
+       seventh independent number. The worked example of the standing rule.
+
+   PROCEDURAL / UI NUDGES
+     DISCOVER_FALLOFF_M      2500   ~#3332
+       A Discover Local spot this far from you is swapped for a fresh one.
+       Largely inert while SHOW_PROCEDURAL_FILLER is false (#37).
+     SEARCH_HERE_DIST_M       600   ~#3333
+       Map drift before the "Search this area" pill appears (#8, #59). A UI
+       trigger, not a content radius. Correctly independent.
+
+   NOT IN THIS REGISTER ON PURPOSE: LIST_CAP (a count, not a distance) and the
+   90 m / 75 m / 25 m match tolerances inside dedup rules (#31, #54), which are
+   "is this the same place" questions rather than "is this near me" questions.
+   ========================================================= */
+
 /* Real, user-submitted hidden gems (approved ones only) near a point, closest
    first — no procedural filler. Returns [] if none exist nearby yet. */
-const GEM_INCLUDE_RADIUS_M = 15000; // ~9mi
+const GEM_INCLUDE_RADIUS_M = 15000; // ~9mi — see the #65 distance register above
 function nearbyApprovedGems(base, excludeIds, limit, bucket){
   return (state.approvedGems||[])
     .filter(g=>g.status==='approved' && !excludeIds.includes(g.id) && (!bucket || g.bucket===bucket))
@@ -3317,8 +3406,8 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds, exclude
   return {id:'dlr'+uid, name:shuffled(RESTAURANT_NAMES)[0], lat:p.lat, lng:p.lng, desc:'A local restaurant nearby.', category:'restaurants'};
 }
 
-const DISCOVER_FALLOFF_M = 2500; // a Discover Local spot this far from you gets swapped for a fresh nearby one
-const SEARCH_HERE_DIST_M = 600; // tune: lower = more eager, higher = calmer
+const DISCOVER_FALLOFF_M = 2500; // #65 register: procedural nudge, not a content radius. Swaps a stale Discover Local spot for a fresh nearby one.
+const SEARCH_HERE_DIST_M = 600;  // #65 register: UI trigger for the "Search this area" pill (#8/#59). Lower = more eager, higher = calmer.
 function huntAnchor(){
   /* #59 (correction) — the centroid is the right anchor ONLY when content is
      deliberately anchored somewhere other than you. In the ordinary case it is
@@ -3549,8 +3638,16 @@ function dismissStaleHunt(){
    inside the sandboxed in-app preview pane, same as Supabase.
    ========================================================= */
 const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse one fetch
-const REAL_INCLUDE_RADIUS_M = 9000;  // only surface real places within ~5.5mi of you
-const OVERPASS_RADIUS_M = 4200;      // query radius sent to Overpass
+/* #65 register — CONTENT SELECTION. Surfaces real places within ~5.6 mi of the
+   anchor, and is the source two other constants DERIVE from rather than
+   restate: CAPTURED_INJECT_RADIUS_M and LIST_RANGE_M. Anything that is the same
+   question joins them here instead of becoming a new number.
+   The 9000-vs-GEM_INCLUDE_RADIUS_M(15000) gap is an OPEN DECISION — see the
+   register block above nearbyApprovedGems(). */
+const REAL_INCLUDE_RADIUS_M = 9000;
+// #65 register — the OUTER BOUND of what a tile can contain, not a display
+// filter. REAL_INCLUDE_RADIUS_M can only ever filter down from this.
+const OVERPASS_RADIUS_M = 4200;
 const OVERPASS_TIMEOUT_MS = 25000;   // Overpass cold queries can take 15-30s
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
@@ -4344,6 +4441,7 @@ function buildPointsForKey(key, base){
    Live repro that caught this: a search 9.4km from home surfaced three
    captured spots via the blend, which the injection radius would have refused
    to restore on its own. If the blend radius moves, this moves with it. */
+// #65 register — DERIVED, not declared. Same question as real-place inclusion.
 const CAPTURED_INJECT_RADIUS_M = REAL_INCLUDE_RADIUS_M;
 const CAPTURED_INJECT_MAX = 40;
 const CAPTURED_TWIN_M = 150;
@@ -4933,6 +5031,11 @@ async function loadPersonal(quiet){
     v=>{ state.captureAnchor = v ? JSON.parse(v) : null; },
     ()=>{ state.captureAnchor = null; });
 
+  /* #145(1) — runs here because it needs BOTH 'my-hunts' and
+     'unlocked-achievements' in memory, and both are read above. It is
+     self-guarding on read failure; see the function. */
+  reconcileHuntMakerLedger();
+
   if(loadFailedKeys().size && !quiet) warnLoadFailed();
   return loadFailedKeys().size === 0;
 }
@@ -5062,9 +5165,35 @@ async function saveDisplayName(raw){
    separate lookup can only ever fail into "no credit line".
    Filters status='ok' at the source, so a blocked name is not merely hidden by
    the renderer: it never arrives on the client. */
+/* #154 — THE FAILURE AND THE EMPTY RESULT USED TO BE THE SAME OBSERVABLE STATE,
+   and that is the whole of this row. `catch → return {}` produces exactly the
+   object a successful lookup returns when nobody has set a name, so a dead
+   `profiles` table, a revoked SELECT policy and a map full of anonymous
+   contributors all render identically: every gem with no credit line, no error,
+   no signal. #58's shape ("stop rendering zeros as if they were real") arriving
+   on a read nobody was watching, and #70's rule for it — where a value cannot be
+   proven right, add the instrument rather than the check.
+
+   `state.gemCredits` is that instrument. It is a RECORD OF THE LAST LOOKUP, not
+   a cache: {status, asked, resolved, at}. `status` is the part that matters —
+   'skipped' (no gem carried a submitter uid, so nothing was asked and an empty
+   map is correct), 'ok' (the query answered, and `resolved < asked` is a real
+   negative result: those users genuinely have no renderable name), or 'failed'
+   (the query threw, and EVERY missing credit on the map is unexplained).
+
+   DELIBERATELY NO TOAST, and this is #4's asymmetry rule rather than laziness.
+   The user cannot act on this — it is not their data, not their name, and not
+   their connection that has to be fixed — so a toast would be alarm with no
+   action attached. The reader who needs it is whoever is in the console, and
+   assertGemCreditsResolved() puts it in front of them on every boot. If a
+   user-facing treatment is ever wanted it belongs in #58's couldn't-load
+   family, phrased about the credit line, not bolted on here. */
 async function fetchGemCredits(uids){
   const ids = [...new Set((uids||[]).filter(Boolean))];
-  if(!ids.length) return {};
+  if(!ids.length){
+    state.gemCredits = { status:'skipped', asked:0, resolved:0, at:Date.now() };
+    return {};
+  }
   try{
     const { data, error } = await sb
       .from('profiles')
@@ -5075,9 +5204,13 @@ async function fetchGemCredits(uids){
     if(error) throw error;
     const map = {};
     (data||[]).forEach(r=>{ if(r.display_name) map[r.user_id] = r.display_name; });
+    state.gemCredits = { status:'ok', asked:ids.length, resolved:Object.keys(map).length, at:Date.now() };
     return map;
   }catch(e){
-    console.warn('[#23] fetchGemCredits failed — gems render with no credit line', e);
+    state.gemCredits = { status:'failed', asked:ids.length, resolved:0, at:Date.now(), error:String(e && e.message || e) };
+    console.warn('[#154] fetchGemCredits FAILED — ' + ids.length +
+      ' submitter(s) unresolved, so EVERY gem renders with no credit line. This is' +
+      ' indistinguishable on screen from nobody having set a name.', e);
     return {};
   }
 }
@@ -5409,7 +5542,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23h';
+const APP_VERSION = '2026.07.24a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5693,6 +5826,7 @@ window.localyInvariants = function(){
   assertExploreRoutesHaveCards();
   assertNavButtonsHaveScreens();
   assertGemBucketsAgree();
+  assertGemCreditsResolved();
   assertBadgeMatchesList();
   assertNoDuplicatePoints();
   console.log(out);
@@ -6130,6 +6264,9 @@ function fmtDist(m){
 // that, OSM `out center` pins a building at its CENTROID, so a storefront or a
 // garden sits 20-50m behind the door you are standing at. The two errors add, and
 // the result was a user at the front door unable to capture. (#51)
+// #65 register — THE CAPTURE FLOOR. Do not widen it: #146 is a MOVING-radius
+// bug, not a too-tight one, and raising this hides #146 at the cost of what
+// #51 was careful about.
 const FOUND_THRESHOLD_M = 25;
 const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this doesn't count as continuous travel
 // Real GPS is rarely accurate to 3m on its own — this widens the effective range to at
@@ -6206,6 +6343,8 @@ const ZOOM_OVERVIEW = 16;
    reproduces the overview framing the recenter button used to produce by
    accident. Want it wider? Raise this. Tighter? Lower it. Nothing else needs
    to change. */
+// #65 register — FRAMING, not content. Deliberately far smaller than the blend
+// radius: it frames what is walkable, not what is loaded.
 const FRAME_RADIUS_M = 3000;
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
@@ -7426,6 +7565,32 @@ function assertBadgeMatchesList(){
     }
   }catch(e){ console.warn('[#66] list check failed', e); }
 }
+/* #154 — report the last credit lookup, so "no credit lines anywhere" has a
+   cause attached to it at boot instead of being read as a fact about the users.
+   Reports the negative result explicitly (asked N, resolved 0, status ok) as a
+   NOTE rather than a warning: that is the honest state of a map whose
+   contributors have not set names, and warning on it would mute the channel for
+   the condition this row actually cares about. */
+function assertGemCreditsResolved(){
+  try{
+    const c = state.gemCredits;
+    if(!c){ console.log('[#154] credit lookup has not run yet'); return; }
+    if(c.status === 'failed'){
+      console.warn('[#154] credit lookup FAILED — ' + c.asked + ' submitter(s) unresolved, ' +
+                   'every gem is rendering with no credit line for a reason that is NOT "no name set":', c.error);
+      return;
+    }
+    if(c.status === 'skipped'){
+      console.log('[#154] credit lookup skipped — no approved gem carries a submitter uid');
+      return;
+    }
+    const gems = (state.approvedGems || []).length;
+    const shown = (state.approvedGems || []).filter(g => g && g.by).length;
+    console.log('[#154] credit lookup ok — asked ' + c.asked + ', resolved ' + c.resolved +
+                '; ' + shown + ' of ' + gems + ' approved gems carry a credit line' +
+                (c.resolved < c.asked ? ' (' + (c.asked - c.resolved) + ' submitter(s) have no renderable name — a real negative, see #153)' : ''));
+  }catch(e){ console.warn('[#154] credit check failed', e); }
+}
 function assertGemBucketsAgree(){
   try{
     const sel = document.getElementById('gem-category');
@@ -7614,9 +7779,24 @@ function openSuggestGemScreen(){
         setGemDraftPin(e.latlng.lat, e.latlng.lng);
       });
     } else {
-      state.suggestMap.invalidateSize();
       if(state.suggestMarker){ state.suggestMap.removeLayer(state.suggestMarker); state.suggestMarker=null; }
     }
+    /* #87 — AUDIT FINDING, AND IT IS A REAL ONE RATHER THAN A CLEAN BILL.
+       invalidateSize() used to live in the ELSE branch only, so the map was
+       re-measured every time you came BACK to this screen and never on the
+       visit that built it — which is exactly backwards. A freshly constructed
+       Leaflet map is the one that has never measured anything; a returning one
+       already holds a correct size from last time. The 60 ms timeout was doing
+       the whole job on the construction path, and a timeout is a guess about
+       when layout finished, not a fact about it.
+
+       Hoisted so BOTH paths measure, plus a next-frame re-measure on the
+       #49a/#73 pattern: reveal first, then measure on the following frame.
+       assertContainerMeasured() above stays — it reports the condition, it has
+       never fixed it, and a warning that fires while the bug still ships is the
+       muted-alarm shape this file keeps finding. */
+    state.suggestMap.invalidateSize();
+    requestAnimationFrame(()=>{ if(state.suggestMap) state.suggestMap.invalidateSize(); });
   }, 60);
 }
 /* #100 — Cancel is a DELIBERATE abandon and does not prompt; see navTo(). It
@@ -7799,14 +7979,27 @@ function openCreateScreen(existingHunt, seedPoint){
         L.marker([e.latlng.lat,e.latlng.lng], {icon:createPinDivIcon()}).addTo(state.createMarkersLayer);
         renderCreatePinList();
       });
-    } else {
-      state.createMap.invalidateSize();
     }
+    /* #87 — same finding as #suggest-gem-map, and here it had a second, worse
+       consequence. invalidateSize() sat in the ELSE branch only, so on the
+       visit that CONSTRUCTED this map fitBounds() below ran against whatever
+       size Leaflet had measured at construction — and fitting bounds to a
+       viewport that does not exist is #49a's defect verbatim, the one that
+       rendered the landing page's map as a strip of tiles down the left edge.
+       It has been latent here the whole time and only hides because editing a
+       guide with pins is usually a RETURN visit, which took the else branch.
+
+       Measure on both paths, then fit on the NEXT FRAME once the size is real. */
+    state.createMap.invalidateSize();
     state.createMarkersLayer.clearLayers();
     state.createPins.forEach(p=> L.marker([p.lat,p.lng], {icon:createPinDivIcon()}).addTo(state.createMarkersLayer));
-    if(state.createPins.length>0){
-      state.createMap.fitBounds(L.latLngBounds(state.createPins.map(p=>[p.lat,p.lng])), {padding:[40,40], maxZoom:16});
-    }
+    requestAnimationFrame(()=>{
+      if(!state.createMap) return;
+      state.createMap.invalidateSize();
+      if(state.createPins.length>0){
+        state.createMap.fitBounds(L.latLngBounds(state.createPins.map(p=>[p.lat,p.lng])), {padding:[40,40], maxZoom:16});
+      }
+    });
   }, 60);
 }
 function editMyHunt(id){
@@ -8214,6 +8407,8 @@ function currentTargetsSorted(){
    pin there is. One range for the list closes that. If this ever needs to stop
    tracking REAL_INCLUDE_RADIUS_M, it becomes a real constant and goes into
    #65's inventory with the question it answers written next to it. */
+// #65 register — DERIVED by #66 at the moment it was created, which is the only
+// moment it was free. The worked example of the standing rule.
 const LIST_RANGE_M = REAL_INCLUDE_RADIUS_M;
 
 /* THIS IS A GUESS AND IT IS LABELLED AS ONE. The question it answers is "how
@@ -8342,7 +8537,14 @@ const PIN_CAT_LABEL = {
      category any more (#16), so this only ever mislabelled a data anomaly. */
   park:'Park & Trail', parks_trails:'Park & Trail', trail:'Trail',
   shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
-  barsrest:'Bar & Restaurant', lore:'Lore & Story',
+  /* #152 — 'Lore & Story' → 'Lore & Legend'. #151 renamed the Explore card, the
+     submit-form option, the explainer and the hunt header to "Lore & Legends"
+     and swept for the PLURAL ('Stories'), which is every form the label takes on
+     those surfaces. This map is singular by construction — Park & Trail, Shop,
+     Bar & Restaurant, History — so no grep written from the expected form of the
+     label could have found it. Singular here, plural on the card: that is the
+     map's rule, not an inconsistency. Do not pluralise this to match. */
+  barsrest:'Bar & Restaurant', lore:'Lore & Legend',
   history:'History', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
 };
 /* ---- #33: address ----
@@ -9423,7 +9625,15 @@ const ACHIEVEMENTS = [
   {id:'stamps_50', label:'50 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=50},
   {id:'mile_1', label:'First Mile', color:'#9A7FBF', icon:'footprints', check:s=>s.totalWalkedMeters>=1609},
   {id:'mile_5', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', check:s=>s.totalWalkedMeters>=8047},
-  {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', check:s=>s.myHuntsCount>=1},
+  /* #145(1) — reads authoredHuntsCount, NOT myHuntsCount. `state.myHunts` holds
+     guides you MADE and guides you REDEEMED in one array (redeemGuideCode()
+     pushes {external:true}, and #85's ?guide= links land there too), so the old
+     `myHuntsCount>=1` awarded Guide Maker for opening someone else's share link.
+     The correct predicate was already written elsewhere in this file —
+     openSaveToHuntPicker() filters `h => !h.external`. The distinction existed
+     and one consumer honoured it. The ID is NOT renamed: #56 records that
+     'hunt_maker' is load-bearing in the saved ledger. */
+  {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', check:s=>s.authoredHuntsCount>=1},
   {id:'hunts_5', label:'5 Guides Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=5},
   {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=10}
 ];
@@ -9448,9 +9658,53 @@ function computeAchievementStats(){
   return {
     totalFound, catCounts,
     totalWalkedMeters: state.totalWalkedMeters,
+    /* #145(1) — TWO COUNTS, and the split is the fix. `myHuntsCount` is the raw
+       array length and is retained ONLY because it is an honest description of
+       state.myHunts; nothing reads it today. `authoredHuntsCount` excludes
+       redeemed guides and is what Guide Maker asks about.
+       completedHuntsCount is deliberately NOT split: finishing someone else's
+       guide IS a completion, so hunts_5/hunts_10 keep counting external ones —
+       #145's row says so explicitly. Note it keys progress on 'custom_'+h.id for
+       external guides too, which is correct: redeemed guides are stored with an
+       'ext…' id under the same key shape. */
     myHuntsCount: (state.myHunts||[]).length,
+    authoredHuntsCount: (state.myHunts||[]).filter(h => h && !h.external).length,
     completedHuntsCount
   };
+}
+/* #145(1) — ONE-TIME LEDGER CORRECTION, SCOPED TO hunt_maker AND NOTHING ELSE.
+   Fixing the predicate makes the GRID go dark for anyone who was awarded Guide
+   Maker for redeeming a share link — renderAchievements() recomputes live, so
+   that happens on its own. The saved ledger (state.unlockedAchievements) does
+   NOT recompute, so without this the wrong id sits in it forever, and the cost
+   is not cosmetic: checkNewAchievements() only fires for ids NOT already in the
+   ledger, so the day that user authors a REAL guide they earn the badge and get
+   no popup, because the ledger says they already had it. The wrongly-granted
+   entry steals the legitimate celebration.
+
+   THIS IS NOT #83's DECISION AND MUST NOT BE READ AS ONE. #83 asks whether a
+   badge is earnable-once (a record) or continuously true (a query), and that
+   question is still open and still gates #148 and #24. This corrects ONE id
+   that was never earned under any reading — #148's distinction, where a wipe
+   un-earns a badge WRONGLY and a correction un-earns one CORRECTLY. It is
+   deliberately not written as a general reconcile-all loop, because a general
+   loop IS #83's answer and would be smuggling a decision in as a defect fix.
+
+   GUARDED ON A SUCCESSFUL READ OF BOTH KEYS (#1a). If 'my-hunts' failed to
+   load, state.myHunts is [] and every user looks like they authored nothing —
+   evicting on that reading would destroy a genuinely earned badge because the
+   network blinked. Do not remove this guard. */
+function reconcileHuntMakerLedger(){
+  try{
+    const failed = loadFailedKeys();
+    if(failed.has('my-hunts') || failed.has('unlocked-achievements')) return;
+    if(!state.unlockedAchievements || !state.unlockedAchievements.has('hunt_maker')) return;
+    const authored = (state.myHunts||[]).filter(h => h && !h.external).length;
+    if(authored >= 1) return;                    // genuinely earned, leave it
+    state.unlockedAchievements.delete('hunt_maker');
+    saveUnlockedAchievements();
+    console.log('[#145] hunt_maker removed from the saved ledger — it was awarded for a redeemed guide, not an authored one');
+  }catch(e){ console.warn('[#145] ledger reconcile failed', e); }
 }
 function checkNewAchievements(){
   const stats = computeAchievementStats();
