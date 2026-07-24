@@ -5542,7 +5542,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.24a';
+const APP_VERSION = '2026.07.24b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8231,6 +8231,33 @@ async function saveCustomHunt(){
     showToast('Guide saved locally, but the share code couldn\'t sync');
   }
   startMyHunt(hunt.id);
+  /* #145(2) — THE GUIDE BADGE FIRES HERE, AND THE POSITION IS THE POINT.
+     startMyHunt() sets the current hunt and hands you to the map, so this runs
+     once you have LANDED rather than while the create form is still up: the
+     card appears over the thing you just made. Before this, checkNewAchievements()
+     had exactly one call site in the whole file — immediately after a capture —
+     so Guide Maker sat pending until your next capture and popped alongside a
+     pin that had nothing to do with it.
+
+     THIS IS THE ONLY ONE OF FIVE saveMyHunts() WRITERS THAT GETS THE CALL, and
+     the other four are excluded on purpose, not by omission:
+       saveDiscoveredPointToHunt  — adds a stop, which can only make a guide LESS
+                                    complete; checking could un-earn (#83).
+       deleteMyHuntDirect         — count goes down (#83).
+       deleteCurrentHunt          — count goes down (#83).
+       redeemGuideCode            — pushes {external:true}, which is exactly what
+                                    #145(1) stopped counting. Awarding here would
+                                    reintroduce the defect through the back door.
+     If a sixth writer is ever added, decide it against this list.
+
+     renderPassport() is called alongside so the Passport grid is already correct
+     if you go straight there. Strictly speaking it is redundant — #83 established
+     renderAchievements() is a live query recomputed on every render, so the stamp
+     lights on its own the next time that screen is drawn — but the cost is one
+     re-render of an inactive screen and it removes any dependence on that
+     property staying true. */
+  renderPassport();
+  checkNewAchievements(GUIDE_ACHIEVEMENT_IDS);
 }
 
 function renderMyHunts(){
@@ -9633,10 +9660,17 @@ const ACHIEVEMENTS = [
      openSaveToHuntPicker() filters `h => !h.external`. The distinction existed
      and one consumer honoured it. The ID is NOT renamed: #56 records that
      'hunt_maker' is load-bearing in the saved ledger. */
-  {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', check:s=>s.authoredHuntsCount>=1},
-  {id:'hunts_5', label:'5 Guides Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=5},
-  {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', check:s=>s.completedHuntsCount>=10}
+  {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
+  {id:'hunts_5', label:'5 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=5},
+  {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=10}
 ];
+/* #145(2) — DERIVED, NOT A SECOND LIST. `reads:'guides'` tags every badge whose
+   inputs come out of state.myHunts, and this set is computed from the tag rather
+   than typed out beside it. A hardcoded ['hunt_maker','hunts_5','hunts_10'] is a
+   third copy of a fact and would silently omit the next guide badge somebody
+   adds — #40's and #147's reasoning about reusing an existing set instead of
+   inventing a parallel one, applied at the moment the set is created. */
+const GUIDE_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='guides').map(a=>a.id);
 function computeAchievementStats(){
   const catCounts = {parks:0, shops:0, barsrest:0, history:0};
   let totalFound = 0;
@@ -9706,9 +9740,29 @@ function reconcileHuntMakerLedger(){
     console.log('[#145] hunt_maker removed from the saved ledger — it was awarded for a redeemed guide, not an authored one');
   }catch(e){ console.warn('[#145] ledger reconcile failed', e); }
 }
-function checkNewAchievements(){
+/* #145(2) — OPTIONAL SCOPING, AND THE DEFAULT IS BYTE-FOR-BYTE THE OLD BEHAVIOUR.
+   Called with no argument this checks every badge exactly as it always has, so
+   the capture path (the single call site this function had for the life of the
+   file) is untouched and carries zero regression risk. Called with a list, it
+   checks only those badges.
+
+   WHY SCOPING RATHER THAN JUST ADDING A SECOND UNSCOPED CALL: an unscoped check
+   at guide-save would fire every OTHER deferred badge at that moment too — most
+   visibly First Mile, whose stat updates on every GPS tick and is never checked
+   anywhere. You would save a guide and be told you had walked a mile. That is
+   the same "why did this pop now?" confusion this fix exists to remove, just
+   relocated to a new screen.
+
+   WHY NOT SCOPE THE CAPTURE CALL AS WELL: because the mileage badges have no
+   writer-side call of their own, the unscoped capture check is currently the
+   ONLY thing that ever fires them. Scoping it would mean they never fire at all.
+   That is a separate row and it is not this one — leave the old path alone and
+   make the new one strictly additive, so the blast radius is exactly the new
+   case (#147's rule). */
+function checkNewAchievements(onlyIds){
   const stats = computeAchievementStats();
-  const newlyUnlocked = ACHIEVEMENTS.filter(a => a.check(stats) && !state.unlockedAchievements.has(a.id));
+  const pool = onlyIds ? ACHIEVEMENTS.filter(a => onlyIds.indexOf(a.id) !== -1) : ACHIEVEMENTS;
+  const newlyUnlocked = pool.filter(a => a.check(stats) && !state.unlockedAchievements.has(a.id));
   if(newlyUnlocked.length===0) return;
   newlyUnlocked.forEach(a => state.unlockedAchievements.add(a.id));
   saveUnlockedAchievements();
