@@ -1527,7 +1527,28 @@
     background:none;border-color:transparent;color:var(--text-dim);
   }
   .ps-btn-report.reported{color:var(--moss);}
-  #achievement-popup .modal-card{position:relative;padding-top:20px;}
+  /* #158 — THE EYEBROW USED TO SIT INSIDE THE CLOSE BUTTON'S BAND.
+     #achievement-popup-close is absolute at top:14px with height:30px, so it
+     occupies y=14..44 inside the card. padding-top was 20px, which started
+     "Achievement Unlocked" at y=20 — squarely inside that band. The two only
+     ever missed each other HORIZONTALLY, and that clearance is not a constant:
+     the eyebrow is centred while the button is pinned right, so as .modal-card
+     shrinks below its 340px max-width the centred text grows toward the button
+     from the left and eventually runs under it. Reported as the X covering the
+     word "Unlocked", which is exactly the narrow-screen end of that.
+
+     REJECTED: horizontal padding on .achievement-popup-eyebrow to reserve the
+     button's footprint on both sides. It preserves centring and it is the more
+     obvious fix, but it converts an overlap into a WRAP — "Achievement /
+     Unlocked" on two lines on a small phone — which is a worse artefact on a
+     celebration card and would have been reported next.
+
+     50px clears the button's 44px bottom edge with 6px to spare, so the eyebrow
+     is below it at EVERY card width and the collision cannot come back on a
+     narrower device. The button itself is untouched: its rule is shared with
+     #save-to-hunt-close, and moving it would have silently restyled a second
+     modal to fix a first. */
+  #achievement-popup .modal-card{position:relative;padding-top:50px;}
   #achievement-popup-close, #save-to-hunt-close{
     position:absolute;top:14px;right:14px;
     width:30px;height:30px;border-radius:50%;
@@ -5542,7 +5563,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.24b';
+const APP_VERSION = '2026.07.24c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
