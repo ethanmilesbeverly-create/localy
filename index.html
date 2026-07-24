@@ -962,6 +962,19 @@
     border-top:1px solid var(--line);
   }
   .ps-desc{font-size:13.5px;line-height:1.55;color:var(--text-dim);margin:0 0 14px;}
+  /* #23 — the credit line. Sits under the description, above the location row:
+     it is about the words you just read, not about the address.
+     QUIET BY SIZE AND WEIGHT, NEVER BY CONTRAST — #91 established that floor
+     and it applies to anything meant to recede. This is dimmed text at normal
+     opacity on the sheet's own background, not a faded overlay on map tiles, so
+     it stays legible while reading as a footnote rather than a badge. */
+  .ps-by{
+    display:flex; align-items:center; gap:7px;
+    font-size:12px; line-height:1.4; color:var(--text-dim);
+    margin:0 0 13px;
+  }
+  .ps-by-name{color:var(--text);font-weight:600;}
+  .ps-by-icon{width:13px;height:13px;flex:0 0 13px;opacity:.75;}
   /* #61(b) — padding-bottom lives HERE as well as on #pin-sheet, and the reason
      is not redundancy. #pin-sheet.expanded #pin-sheet-expand is
      max-height:44vh; overflow-y:auto, so on a short screen with a long
@@ -1738,6 +1751,29 @@
         from the film, the bar where the band got its name. Not sure? Pick either, we'll sort it out.
       </p>
     </div>
+    <!-- #23 — REQUIRED HERE, AND THIS IS THE LOAD-BEARING CAPTURE POINT.
+         The signup field is optional and exists only to front-load this one.
+         Required is a deliberate trade with a named cost: it is friction on the
+         flow the whole positioning bet depends on. It is accepted because the
+         alternative is worse than uniform silence — an optional name produces a
+         map where SOME gems carry a credit and some do not, which reads as
+         "these particular ones are vouched for" and reopens #16's seam a second
+         time INSIDE the gem set, on top of the gems-vs-scaffolded seam the
+         feature already pays for. One seam, not two.
+         WHAT MAKES REQUIRED SAFE: nothing is verified and nothing claims to be.
+         #69 leaves email unverified, so any name here is self-asserted and no
+         copy anywhere may imply otherwise. It is also editable forever from
+         Settings, and editing it there rewrites the credit on every gem at once.
+         REVERSIBLE: make this optional by deleting the guard in submitGem().
+         Nothing else in the feature assumes a name exists. -->
+    <div class="field">
+      <label class="field-label">Your name</label>
+      <input type="text" id="gem-submitter-name" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
+      <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
+        Shown on this gem, so the people who find it know a real person picked it.
+        Change it any time in Settings — it updates everywhere.
+      </p>
+    </div>
     <button class="btn" onclick="submitGem()">Submit for Review</button>
     <div class="edit-links-row">
       <button class="link-btn" onclick="cancelSuggestGem()">Cancel</button>
@@ -1934,6 +1970,20 @@
       <h2>Account</h2>
       <div class="settings-card">
         <p>Signed in as <span class="val" id="settings-email">—</span></p>
+      </div>
+      <!-- #23 — #81's surface earning its keep again. This is the ONLY place a
+           name can be changed after the fact, and it rewrites the credit on
+           every gem the account has ever submitted at once, because credit is
+           resolved from submitted_by at read time rather than copied onto each
+           row. Clearing it is a supported action and removes the credit line
+           everywhere — it is not a way to delete a gem, and the copy says so. -->
+      <div class="settings-card" style="margin-top:10px;">
+        <label class="field-label" for="settings-name" style="margin-top:0;">Your name</label>
+        <input type="text" id="settings-name" class="auth-input" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
+        <p style="margin:8px 0 0;">Shown as <strong class="val">Submitted by</strong> on every gem you've had approved. Change it here and it updates on all of them.</p>
+        <p style="margin:6px 0 0;">Leave it empty and no name is shown — your gems stay on the map either way.</p>
+        <button class="settings-btn" style="margin-top:10px;" id="settings-name-btn" onclick="saveSettingsName()">Save name</button>
+        <p id="settings-name-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
       <button class="settings-btn" style="margin-top:10px;" onclick="logout()">Log out</button>
     </div>
@@ -2134,6 +2184,24 @@
         <input id="auth-email" class="auth-input" type="email" autocomplete="email" placeholder="you@example.com" spellcheck="false">
       </div>
 
+      <!-- #23 — OPTIONAL HERE, REQUIRED AT SUBMIT, and the asymmetry is the whole
+           capture design. This screen gates the entire app and every account has
+           to pass through it, so a mandatory field here is friction on the one
+           form that can lose a user before they have seen anything. It is also
+           the highest-risk region in this file (#2's pinned emailRedirectTo,
+           #69's open verification hole, #50's pending rename moving the Site URL
+           under it) — worth touching once, lightly. The place a name is actually
+           NEEDED is the gem form, where it is required, so credit lands on every
+           gem rather than a scattered subset. This field only front-loads it for
+           people who will submit later.
+           The label says "name", never "username". A field called Username
+           produces handles; this one produces names. Same column. See #23 notes. -->
+      <div id="auth-name-row" class="auth-hidden">
+        <label class="auth-label" for="auth-name">Your name <span style="opacity:.6;font-weight:400;">(optional)</span></label>
+        <input id="auth-name" class="auth-input" type="text" autocomplete="name" placeholder="Sarah M." maxlength="24" spellcheck="false">
+        <p class="auth-hint">Shown on gems you submit. You can change it any time in Settings.</p>
+      </div>
+
       <div id="auth-password-row">
         <label class="auth-label" id="auth-password-label" for="auth-password">Password</label>
         <input id="auth-password" class="auth-input" type="password" autocomplete="current-password" placeholder="At least 6 characters">
@@ -2221,6 +2289,9 @@
   #auth-legal{ margin-top:18px; text-align:center; font-size:12px; }
   #auth-legal a{ color:var(--text-dim); text-decoration:underline; text-underline-offset:2px; }
   .auth-hidden{ display:none !important; }
+  /* #23 — helper under the optional name field. Sits tight to its input so it
+     reads as part of that field, not as a new paragraph in the card. */
+  .auth-hint{ font-size:11.5px; line-height:1.45; color:var(--text-dim); opacity:.75; margin:5px 0 0; }
   #auth-forgot-row{ margin-top:14px; text-align:center; }
   #auth-back-row{ margin-top:16px; text-align:center; }
   #auth-forgot-btn, #auth-back-btn{
@@ -2528,6 +2599,73 @@ function show(id, on){
   const el = document.getElementById(id);
   if(el) el.classList.toggle('auth-hidden', !on);
 }
+/* =========================================================
+   #23 — DISPLAY NAMES
+   ---------------------------------------------------------
+   THE CHECKS BELOW ARE NOT MODERATION AND MUST NOT BE MISTAKEN FOR IT.
+   They are a length cap, a character class and a reserved-word list —
+   synchronous, cheap, and honest about their reach. Deliberately absent:
+
+   (a) A PROFANITY BLOCKLIST. Brittle in the specific way that is worst in a
+       NAME field: blocklists have a long history of rejecting real surnames,
+       and once leetspeak, spacing and non-English are added it is an arms race
+       that also insults people with ordinary names.
+
+   (b) A MODEL GATE AT WRITE TIME. #71 is exactly this shape — nothing notices
+       when a gate fails open, and #3 records model aliases retiring with no
+       changelog, twice in a month. A gate that fails open on a name means the
+       name ships. If a model ever reviews names it belongs BEHIND the
+       `status` column, where failing open just means the credit line stays
+       dark, which is harmless.
+
+   (c) EXTENDING #25's REPORTS. That table is keyed on place ids with
+       suppression derived from location-bearing rows. A name has no location
+       and no pin. Forcing it in would be a third local fix to a relation
+       nobody has modelled — see #107's note.
+
+   WHAT ACTUALLY MODERATES A NAME IS `profiles.status` PLUS A HUMAN. One UPDATE
+   to 'blocked' darkens that person's credit line on every gem they have ever
+   submitted, instantly, because the read filters on status='ok'. A DB trigger
+   stops the client touching that column, and blocked survives a rename.
+
+   THE ONE THING THESE CHECKS DO CATCH IS THE REAL RISK, WHICH IS NOT PROFANITY:
+   a name that claims AUTHORITY. "Localy Official" or "Verified Local" next to a
+   place recommendation asserts something the app cannot back — the same line
+   #14 drew against fabricated attribution and #33 drew against a self-declared
+   verified-local badge. Non-letters are stripped before comparison so
+   "L0caly 0fficial" collapses to "localyofficial".
+
+   THIS LIST IS ONE OF TWO COPIES AND profiles.sql IS AUTHORITATIVE. The copy
+   here exists so the user gets an instant inline message instead of a Postgres
+   constraint error; the DB is what actually enforces it. Same shape as #25's
+   REPORT_REASONS. If you add a word, add it in both places.
+   ========================================================= */
+const DISPLAY_NAME_MIN = 2;
+const DISPLAY_NAME_MAX = 24;
+const RESERVED_DISPLAY_NAMES = new Set([
+  'localy','localyapp','localyteam','localyofficial','localystaff',
+  'admin','administrator','moderator','mod','staff','support','helpdesk',
+  'official','verified','verifiedlocal','team','system','root','owner'
+]);
+/* Collapses runs of whitespace and trims. Stored exactly as rendered — there is
+   no separate "clean" name and no First+Initial reformatting. Storing a full
+   name in order to display an abbreviated one would hold MORE identity than is
+   ever shown, which is the opposite of what #5 asks for. */
+function normalizeDisplayName(s){
+  return String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+}
+/* Returns a user-facing problem string, or null when the name is acceptable.
+   Null for empty input on purpose: empty is a valid state everywhere except the
+   gem form, and that caller checks for it separately. */
+function displayNameProblem(raw){
+  const n = normalizeDisplayName(raw);
+  if(!n) return null;
+  if(n.length < DISPLAY_NAME_MIN) return 'That name is too short.';
+  if(n.length > DISPLAY_NAME_MAX) return 'Names can be up to ' + DISPLAY_NAME_MAX + ' characters.';
+  if(!/^[\p{L}\p{N} '.\-]+$/u.test(n)) return 'Letters, numbers, spaces, apostrophes, periods and hyphens only.';
+  if(RESERVED_DISPLAY_NAMES.has(n.toLowerCase().replace(/[^a-z]/g, ''))) return 'That name is reserved. Pick another.';
+  return null;
+}
 function setAuthMode(mode){
   authMode = mode;
   const submit = document.getElementById('auth-submit');
@@ -2541,6 +2679,7 @@ function setAuthMode(mode){
 
   // Email is meaningless on the reset screen — the link already identifies you.
   show('auth-email-row',     mode!=='reset');
+  show('auth-name-row',      mode==='signup'); // #23 — signup only; nothing to name on login/forgot/reset
   show('auth-password-row',  mode!=='forgot');
   show('auth-password2-row', mode==='reset');
   show('auth-forgot-row',    mode==='login');
@@ -2560,6 +2699,9 @@ function setAuthMode(mode){
   }
 
   if(mode!=='reset'){ pw.value = ''; document.getElementById('auth-password2').value = ''; }
+  // #23 — the name is only meaningful on signup, so leaving a typed value behind
+  // when the card switches to login would silently carry it into the next signup.
+  if(mode!=='signup'){ const nm = document.getElementById('auth-name'); if(nm) nm.value = ''; }
   authMsg('', '');
 }
 function authMsg(text, kind){
@@ -2574,7 +2716,7 @@ function wireAuthUI(){
   document.getElementById('auth-forgot-btn').addEventListener('click', ()=> setAuthMode('forgot'));
   document.getElementById('auth-back-btn').addEventListener('click', ()=> setAuthMode('login'));
   document.getElementById('auth-submit').addEventListener('click', submitAuth);
-  ['auth-email','auth-password','auth-password2'].forEach(id=>{
+  ['auth-email','auth-name','auth-password','auth-password2'].forEach(id=>{
     document.getElementById(id).addEventListener('keydown', e=>{
       if(e.key==='Enter') submitAuth();
     });
@@ -2629,12 +2771,27 @@ async function submitAuth(){
     }
 
     if(authMode==='signup'){
+      /* #23 — the name rides in as user metadata rather than a second write.
+         A client-side INSERT into `profiles` is not available here at all:
+         with email confirmation on, signUp returns with NO SESSION, so there
+         is no authenticated request to insert under and the RLS policy
+         (user_id = auth.uid()) would correctly refuse it. The on_auth_user_created
+         trigger in profiles.sql reads raw_user_meta_data and creates the row
+         server-side, which works identically on both the confirmed and
+         unconfirmed paths — and picks up Google's given_name/family_name for
+         free if #77 ever ships. */
+      const displayName = normalizeDisplayName(document.getElementById('auth-name').value);
+      const nameErr = displayNameProblem(displayName);
+      if(nameErr){ authMsg(nameErr); return; }
       /* #2 — emailRedirectTo pinned explicitly. Without it the confirmation link
          resolves against whatever Site URL happens to be set, which is the exact
          footgun in the Auth URLs row of the roadmap header — and item 50's
          rename is going to move that value. */
       const { data, error } = await sb.auth.signUp({
-        email, password, options: { emailRedirectTo: AUTH_REDIRECT_BASE }
+        email, password, options: {
+          emailRedirectTo: AUTH_REDIRECT_BASE,
+          data: displayName ? { display_name: displayName } : {}
+        }
       });
       if(error){ authMsg(error.message); return; }
       if(!data.session){
@@ -3088,7 +3245,13 @@ function gemDisplayCategory(g, ctxCategory){
 function gemPoint(g, idPrefix, ctxCategory, extra){
   return Object.assign({
     id:(idPrefix||'gem')+g.id, name:g.name, lat:g.lat, lng:g.lng, desc:g.desc,
-    category:gemDisplayCategory(g, ctxCategory), bucket:g.bucket, gemId:g.id, isGem:true
+    category:gemDisplayCategory(g, ctxCategory), bucket:g.bucket, gemId:g.id, isGem:true,
+    /* #23 — the submitter's display name, or undefined. This is the ONE piece
+       of provenance that #16's "never surface where content comes from" rule is
+       knowingly overridden for; see fillPinSheet() for the argument and the
+       cost. Undefined on every scaffolded pin, and on any gem without a
+       renderable name. */
+    by:g.by
   }, extra||{});
 }
 
@@ -4316,6 +4479,7 @@ function onRealPlacesReady(){
    ========================================================= */
 let state = {
   me: null,            // {lat,lng}
+  profile: null,       // #23 — {display_name, status} for THIS user, or null if never loaded
   simulating: false,
   currentHunt: null,    // {key, name, mode, points:[{id,name,lat,lng,desc}]}
   progress: {},         // { huntKey: { foundIds:[...], foundAt:{id:ts} } }
@@ -4841,11 +5005,92 @@ async function loadMyGems(){
 }
 
 /* Load ALL approved submissions (from everyone) so they can be discovered. */
+/* #23 — THIS user's own profile row. Degrades to a null profile on any failure,
+   which the whole feature treats as "no name yet": the gem form asks for one,
+   Settings shows an empty field, and no credit line renders. That is the same
+   posture as a genuinely nameless account, so a transient read failure costs a
+   re-typed name rather than a broken screen.
+   Unlike #62's loadMyGems this cannot present as false data — an empty name is
+   indistinguishable from an unset one by design — but it is still logged, for
+   the reason #62 logs: a silent empty with a clean console is the worst version
+   of an RLS or missing-column regression. */
+async function loadMyProfile(){
+  const uid = state.user && state.user.id;
+  if(!uid){ state.profile = null; return; }
+  try{
+    const { data, error } = await sb
+      .from('profiles')
+      .select('display_name,status')
+      .eq('user_id', uid)
+      .maybeSingle();
+    if(error) throw error;
+    state.profile = data || { display_name:null, status:'ok' };
+  }catch(e){
+    console.warn('[#23] loadMyProfile failed — treating as no name set', e);
+    state.profile = null;
+  }
+}
+/* Upsert this user's display name. Returns true on success.
+   `status` is NEVER sent, and could not be honoured if it were: profiles_guard()
+   overwrites it from the existing row on any request carrying a user JWT. That
+   is what stops a blocked account unblocking itself with one PATCH from the
+   browser console, and it is why the client is allowed to write this table at
+   all. */
+async function saveDisplayName(raw){
+  const uid = state.user && state.user.id;
+  if(!uid) return false;
+  const name = normalizeDisplayName(raw);
+  try{
+    const { error } = await sb
+      .from('profiles')
+      .upsert({ user_id: uid, display_name: name || null }, { onConflict:'user_id' });
+    if(error) throw error;
+    state.profile = Object.assign({ status:'ok' }, state.profile||{}, { display_name: name || null });
+    return true;
+  }catch(e){
+    console.warn('[#23] saveDisplayName failed', e);
+    return false;
+  }
+}
+/* #23 — resolve submitter uids to display names for the credit line.
+   TWO QUERIES, NOT A POSTGREST EMBED, and that is deliberate. Embedding
+   (`profiles!submissions_submitted_by_fkey(display_name)`) requires PostgREST to
+   see a foreign key from submissions.submitted_by, and this roadmap records in
+   #82 that nobody has verified that FK's existence or its ON DELETE behaviour.
+   A join built on an unverified constraint fails as a 400 that takes the WHOLE
+   gem load with it — every pin on the map disappears to add a line of text. A
+   separate lookup can only ever fail into "no credit line".
+   Filters status='ok' at the source, so a blocked name is not merely hidden by
+   the renderer: it never arrives on the client. */
+async function fetchGemCredits(uids){
+  const ids = [...new Set((uids||[]).filter(Boolean))];
+  if(!ids.length) return {};
+  try{
+    const { data, error } = await sb
+      .from('profiles')
+      .select('user_id,display_name')
+      .in('user_id', ids)
+      .eq('status', 'ok')
+      .not('display_name', 'is', null);
+    if(error) throw error;
+    const map = {};
+    (data||[]).forEach(r=>{ if(r.display_name) map[r.user_id] = r.display_name; });
+    return map;
+  }catch(e){
+    console.warn('[#23] fetchGemCredits failed — gems render with no credit line', e);
+    return {};
+  }
+}
 async function loadApprovedGems(){
   try{
     const { data, error } = await sb
       .from('submissions')
-      .select('id,name,description,category,lat,lng,name_clean,description_clean')
+      /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
+         only to look a display name up. A null here is a real and reachable
+         value the moment #82 is live (account deletion anonymises gems by
+         nulling this column), and it must render NO credit line — never
+         "Submitted by Unknown". See #124. */
+      .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
       .eq('status', 'approved')
       /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
          makes the whole thing work: a merged submission keeps a REAL status
@@ -4865,9 +5110,17 @@ async function loadApprovedGems(){
     // guard discarded it, or nothing needed fixing). The raw name/description
     // stay canonical in the DB and are never overwritten — this is a display
     // preference only, so reverting this map restores the raw text everywhere.
-    state.approvedGems = (data||[]).map(r=>({
+    const rows = data || [];
+    // #23 — one extra round trip for the whole map, not one per pin.
+    const credits = await fetchGemCredits(rows.map(r=>r.submitted_by));
+    state.approvedGems = rows.map(r=>({
       id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
-      lat:r.lat, lng:r.lng, status:'approved'
+      lat:r.lat, lng:r.lng, status:'approved',
+      // #23 — `by` is the RENDERABLE name or undefined. Anything that cannot
+      // produce a name (null submitted_by from #82's anonymisation, a blocked
+      // profile, a user who never set one, a failed lookup) lands here as
+      // undefined and the sheet renders nothing at all.
+      by: credits[r.submitted_by] || undefined
     }));
   }catch(e){ state.approvedGems = []; }
 }
@@ -4916,6 +5169,7 @@ async function init(){
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   pruneCaptureTelemetry(); // #4/#5 — after the migration, so it sees final hunt keys
   pruneCaptureAnchor();    // #4 phase 2 — same TTL, same reasoning
+  await loadMyProfile(); // #23 — before loadApprovedGems so the gem form prefills on first open
   await loadMyGems();
   await loadApprovedGems();
   renderMyHunts();
@@ -5155,7 +5409,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23f';
+const APP_VERSION = '2026.07.23g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5445,10 +5699,60 @@ window.localyInvariants = function(){
   return out;
 };
 
+/* #23 — Settings is the after-the-fact editor for the credit line.
+   Re-reads the profile on every open rather than trusting state, because this
+   is the screen someone lands on specifically BECAUSE they think the name is
+   wrong, and showing them a stale in-memory value on that screen is the one
+   place it would actively mislead. The refresh is fire-and-forget: the field is
+   populated from state immediately so the screen is never empty while waiting,
+   then corrected if the server disagrees. */
+async function saveSettingsName(){
+  const el  = document.getElementById('settings-name');
+  const btn = document.getElementById('settings-name-btn');
+  const msg = document.getElementById('settings-name-msg');
+  if(!el) return;
+  const showMsg = (text, ok)=>{
+    if(!msg) return;
+    msg.textContent = text;
+    msg.style.display = text ? '' : 'none';
+    msg.style.color = ok ? 'var(--accent-2, #9FB3A4)' : 'var(--danger)';
+  };
+  const name = normalizeDisplayName(el.value);
+  const problem = displayNameProblem(name);
+  if(problem){ showMsg(problem, false); return; }
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Saving…';
+  showMsg('', true);
+  try{
+    const ok = await saveDisplayName(name);
+    if(!ok){ showMsg("Couldn't save that — check your connection and try again.", false); return; }
+    el.value = name;
+    showMsg(name ? 'Saved. Your gems now show ' + name + '.' : 'Saved. No name is shown on your gems.', true);
+    /* Refresh the discovery pool so the change is visible on the map without a
+       reload — the credit lives on the point, and the points are built at load. */
+    await loadApprovedGems();
+  }finally{
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
 function openSettings(returnTo){
   const u = state.user || {};
   document.getElementById('settings-email').textContent = u.email || 'unknown';
   document.getElementById('settings-version').textContent = APP_VERSION;
+  const nameEl = document.getElementById('settings-name');
+  if(nameEl){
+    nameEl.value = (state.profile && state.profile.display_name) || '';
+    const msg = document.getElementById('settings-name-msg');
+    if(msg){ msg.textContent = ''; msg.style.display = 'none'; }
+    loadMyProfile().then(()=>{
+      // Only overwrite if the user hasn't started typing in the meantime.
+      if(document.activeElement !== nameEl){
+        nameEl.value = (state.profile && state.profile.display_name) || '';
+      }
+    });
+  }
   cancelClearProgress(); // never open with a destructive confirm already armed
   /* Gated, not deleted — see SHOW_CLEAR_MY_DATA. Toggled here rather than left
      to the inline style so flipping the constant is genuinely the only edit. */
@@ -7282,6 +7586,13 @@ function openSuggestGemScreen(){
   document.getElementById('gem-desc').value = '';
   document.getElementById('gem-category').value = 'park';
   document.getElementById('gem-address-search').value = '';
+  /* #23 — PREFILLED, NOT BLANKED, and it is the one field on this screen that
+     survives a reset. Everything above describes THIS gem and must clear; the
+     name describes the person and is the same on every submission. Blanking it
+     would ask a returning contributor to retype it on every gem, which is the
+     fastest way to end up with three spellings of one person on the map. */
+  const submitterEl = document.getElementById('gem-submitter-name');
+  if(submitterEl) submitterEl.value = (state.profile && state.profile.display_name) || '';
   state.gemDraftPin = null;
   setTimeout(()=>{
     if(!state.suggestMap){
@@ -7322,6 +7633,25 @@ async function submitGem(){
   if(!state.gemDraftPin){ showToast('Search the address above, or tap the map to drop a pin'); return; }
   const uid = state.user && state.user.id;
   if(!uid){ showToast('Please log in again to submit'); return; }
+
+  /* #23 — the name is saved BEFORE the submission row is inserted, and the
+     ordering is deliberate. If the profile write fails we stop and the user
+     retries with everything still in the form; if it were the other way round a
+     failed name write would leave a submitted gem that can never be credited,
+     and there is no screen anywhere that would show that as a problem.
+     THE NAME IS NOT COPIED ONTO THE SUBMISSION ROW. Credit is resolved through
+     `submitted_by` at read time (see fetchGemCredits) so that editing the name
+     in Settings updates every gem at once, and so #82's anonymisation — which
+     nulls submitted_by — actually removes the credit rather than leaving a
+     denormalised copy of the departed user's name sitting on the pin. */
+  const submitterName = normalizeDisplayName(document.getElementById('gem-submitter-name').value);
+  if(!submitterName){ showToast('Add your name so people know who found this'); return; }
+  const nameProblem = displayNameProblem(submitterName);
+  if(nameProblem){ showToast(nameProblem); return; }
+  if(!state.profile || state.profile.display_name !== submitterName){
+    const saved = await saveDisplayName(submitterName);
+    if(!saved){ showToast("Couldn't save your name — check your connection"); return; }
+  }
   let newId = null;
   try{
     const { data, error } = await sb.from('submissions').insert({
@@ -8165,7 +8495,29 @@ function fillPinSheet(t){
        "a sentence that says nothing" by #53's rule; #21(a) proved the empty
        layout renders fine. The location row + actions carry the sheet on their
        own, so nothing collapses. */
+    /* #23 — THE CREDIT LINE, AND IT IS A KNOWING PARTIAL OVERRIDE OF #16.
+       #16's rule is "never describe where content comes from", because a marker
+       that can only ever appear on user-submitted pins permanently stamps every
+       scaffolded OSM/Wikipedia pin as lacking it. That cost is REAL and is not
+       being denied here — it is being paid on purpose, by directive, because
+       the product thesis (#35) is that a recommendation traces back to a real
+       person, and a credit only a stranger can see is the only thing that
+       delivers it. #23's own scope agreed: "that asymmetry is the point".
+       WHAT KEEPS THE SEAM AS SMALL AS IT CAN BE: this renders in the EXPANDED
+       sheet only. Nothing about the map pin, its colour, its label or the peek
+       row changes, so two pins side by side are still identical and the
+       difference only appears once you have chosen to open one. A badge on the
+       pin itself would have been the version #16 rightly forbids.
+       THE ONE-WAY COST TO KNOW ABOUT: the honest fix for the seam is fewer
+       scaffolded pins (#9, #57), not quieter credits. Every pass that does not
+       thin the scaffolding leaves this line marking more absences than presences.
+       NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
+       #23 decision (2) and #82's null submitted_by. */
     `${t.desc ? `<p class="ps-desc">${escapeHtml(t.desc)}</p>` : ''}
+     ${t.by ? `<div class="ps-by">
+       <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+       <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
+     </div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
 
