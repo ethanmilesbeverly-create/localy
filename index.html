@@ -5409,7 +5409,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23g';
+const APP_VERSION = '2026.07.23h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5728,7 +5728,13 @@ async function saveSettingsName(){
     const ok = await saveDisplayName(name);
     if(!ok){ showMsg("Couldn't save that — check your connection and try again.", false); return; }
     el.value = name;
-    showMsg(name ? 'Saved. Your gems now show ' + name + '.' : 'Saved. No name is shown on your gems.', true);
+    /* #23 — ONE WORD, BY DIRECTIVE. The earlier version echoed the new name back
+       ("Saved. Your gems now show Sarah M.") and branched on empty for a second
+       sentence about nothing being shown. Cut: the field directly above already
+       displays exactly what was saved, so the echo restated the screen, and the
+       empty-case sentence explained a consequence the user had just chosen on
+       purpose. Confirmation is the job here, not narration. */
+    showMsg('Saved', true);
     /* Refresh the discovery pool so the change is visible on the map without a
        reload — the credit lives on the point, and the points are built at load. */
     await loadApprovedGems();
