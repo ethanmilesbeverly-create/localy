@@ -1651,7 +1651,7 @@
       </div>
       <div class="mode-card" data-cat="lore" onclick="selectExplore('lore')">
         <div class="icon-wrap"></div>
-        <div><h3>Lore &amp; Stories</h3><p>Ordinary places where something happened. The diner from the film, the bar where the band got its name, etc.</p></div>
+        <div><h3>Lore &amp; Legends</h3><p>Ordinary places where something happened. The diner from the film, the bar where the band got its name, etc.</p></div>
       </div>
     </div>
 
@@ -1730,11 +1730,11 @@
         <option value="shops">Shops</option>
         <option value="barsrest">Bars &amp; Restaurants</option>
         <option value="history">History</option>
-        <option value="lore">Lore &amp; Stories</option>
+        <option value="lore">Lore &amp; Legends</option>
       </select>
       <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
         <b>History</b> is a place that matters — a landmark, a monument, somewhere old.
-        <b>Lore &amp; Stories</b> is an ordinary place where something <i>happened</i> — the diner
+        <b>Lore &amp; Legends</b> is an ordinary place where something <i>happened</i> — the diner
         from the film, the bar where the band got its name. Not sure? Pick either, we'll sort it out.
       </p>
     </div>
@@ -5155,7 +5155,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23e';
+const APP_VERSION = '2026.07.23f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6947,7 +6947,7 @@ function startLoreHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   const points = nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
   const key = 'lore_v1';
-  setCurrentHunt({key, name:'Lore & Stories', mode:'lore', points});
+  setCurrentHunt({key, name:'Lore & Legends', mode:'lore', points});
 }
 
 /* #67 — startStateParksHunt(), startNationalParksHunt(), startTrailsHunt() and
@@ -7353,7 +7353,7 @@ async function submitGem(){
   await loadApprovedGems();
   renderGemSubmissions();
 
-  if(decision==='approve')      showToast("Approved — it's live in Hidden Gems!");
+  if(decision==='approve')      showToast("Approved!");
   else if(decision==='reject')  showToast("That one couldn't be approved.");
   else                          showToast('Submitted — pending review.');
 }
@@ -7397,7 +7397,7 @@ function renderGemSubmissions(){
     if(isApproved)      tag = ' <span class="external-tag" style="background:rgba(212,175,55,0.2);color:#D4AF37;">Live</span>';
     else if(isRejected) tag = ' <span class="external-tag" style="background:rgba(192,82,76,0.2);color:#C0524C;">Not approved</span>';
     else                tag = ' <span class="external-tag" style="background:rgba(159,179,164,0.2);color:#9FB3A4;">Pending</span>';
-    const line = isApproved ? 'Approved — visible in Hidden Gems'
+    const line = isApproved ? 'Approved'
                : isRejected ? "This one wasn't approved"
                : 'Pending review';
     return `<div class="mode-card" style="cursor:default;">
@@ -9023,6 +9023,9 @@ function huntDisplayName(key){
   if(key.startsWith('restaurants_')) return 'Restaurants';
   if(key.startsWith('barsrest_')) return 'Bars & Restaurants';
   if(key.startsWith('history_')) return 'History';
+  /* lore_ was never in this list, so a lore find rendered its raw key
+     ('lore_v1') in the Passport. Added with the Lore & Legends rename. */
+  if(key.startsWith('lore_')) return 'Lore & Legends';
   if(key.startsWith('gems_')) return 'Hidden Gems';
   return key;
 }
