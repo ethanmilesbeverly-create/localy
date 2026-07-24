@@ -4186,18 +4186,44 @@ const CAPTURED_INJECT_MAX = 40;
 const CAPTURED_TWIN_M = 150;
 function injectCapturedPins(hunt, base){
   if(!hunt || !Array.isArray(hunt.points)) return;
-  if(STABLE_HUNT_PREFIXES.indexOf(String(hunt.key).split('_')[0]) === -1) return;
-  const prog = state.progress[hunt.key];
-  if(!prog || !prog.foundMeta) return;
+  if(!isSharedProgressKey(hunt.key)) return;
   const anchor = base || state.browsingLocation || state.searchedArea
               || state.localHuntOrigin || state.me;
   if(!anchor) return;
 
+  /* #147 — this used to read state.progress[hunt.key].foundMeta, ONE bucket,
+     which is the second half of the same defect isFound() carried: a park
+     captured under All Things Local was not merely rendered as uncaptured on
+     Parks & Trails, it could be ABSENT from that card entirely whenever the
+     generator did not happen to produce it again. Both readers had to move or
+     the fix would only work for pins the blend re-produced by chance.
+
+     ORDER IS LOAD-BEARING. The hunt's OWN bucket goes in first and UNFILTERED
+     — that is byte-for-byte the pre-#147 behaviour and nothing about it
+     changes, so this cannot regress #40b. Only captures BORROWED from other
+     buckets are mode-filtered, which also means a legacy capture with no
+     `mode` still restores onto its own card exactly as it does today. */
+  const accepts = capturedModeFilterFor(hunt.key);
+  const meta = {};
+  const own = (state.progress[hunt.key] || {}).foundMeta || {};
+  Object.keys(own).forEach(id=>{ meta[id] = own[id] || {}; });
+  Object.keys(state.progress || {}).forEach(k=>{
+    if(k === hunt.key || !isSharedProgressKey(k)) return;
+    const fm = (state.progress[k] || {}).foundMeta;
+    if(!fm) return;
+    Object.keys(fm).forEach(id=>{
+      if(Object.prototype.hasOwnProperty.call(meta, id)) return; // same place, same id
+      const m = fm[id] || {};
+      if(!accepts(m.mode)) return;
+      meta[id] = m;
+    });
+  });
+
   const presentIds = new Set(hunt.points.map(p=>p.id));
   const claimed = new Set();
 
-  const near = Object.keys(prog.foundMeta).map(id=>{
-    const m = prog.foundMeta[id] || {};
+  const near = Object.keys(meta).map(id=>{
+    const m = meta[id] || {};
     if(typeof m.lat !== 'number' || typeof m.lng !== 'number') return null;
     return {id, m, dist: haversine(anchor.lat, anchor.lng, m.lat, m.lng)};
   }).filter(e => e && e.dist <= CAPTURED_INJECT_RADIUS_M)
@@ -4459,6 +4485,91 @@ async function loadKey(key, apply, fallback){
 const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
   'restaurants','barsrest','history','gems','lore','stateparks','nationalparks',
   'trails','discover','random'];
+
+/* =========================================================
+   #147 — ONE PLACE, ONE CAPTURE, ACROSS EVERY EXPLORE CARD
+   ---------------------------------------------------------
+   REPORTED: capture a park under All Things Local, switch to Parks & Trails,
+   the same pin reads uncaptured; switch back and it is captured again.
+
+   THE CAUSE WAS THE DESIGN WORKING AS DOCUMENTED. progress is keyed by HUNT
+   KEY and each explore card owns a key (local_v1, parkstrails_v1, shops_v1,
+   barsrest_v1, history_v1, lore_v1). isFound() read exactly one of those —
+   the SELECTED card's — and injectCapturedPins() read the same single bucket.
+   Nothing was ever lost; the app was looking in the wrong drawer. The comment
+   above injectCapturedPins() states the premise plainly ("progress is keyed by
+   CATEGORY, not by city"); it was written to justify an injection radius and
+   was never joined to the fact that TWO CARDS CAN SHOW THE SAME PIN.
+
+   THE MEASUREMENT #147's ROW ASKED FOR, TAKEN BEFORE ANY CODE WAS WRITTEN.
+   The row said the fix depends on whether the same place captured under two
+   cards yields the same id or two different ids. It yields THE SAME ID, and
+   not by luck — every id in play is derived from the place's own identity:
+     · OSM        `osm_<type><id>`   (buildRealPoints)
+     · Wikipedia  `wiki_<pageid>`
+     · gems       `catgem<gemId>`    (gemToPoint's prefix is a CONSTANT, and it
+                                      is the only prefix any blend card uses)
+   and All Things Local calls blendCategory() with the SAME category and the
+   SAME gem bucket the single-category cards do, so it is literally the same
+   point objects. Procedural filler is the one unstable-id source and
+   SHOW_PROCEDURAL_FILLER has been false since #37, so it never runs.
+   CONSEQUENCE: a plain id union is sound here and the twin-adoption rule below
+   is NOT needed for the cross-card case. Do not reopen this without re-taking
+   the measurement — if a future card ever mints its own id prefix (the `lore`
+   card's `gemPoint(g,'lore')` is the one prefix that differs, and it is safe
+   only because no blend card is passed the 'lore' bucket), this stops holding.
+
+   SCOPE, AND IT IS DELIBERATELY NARROW. Only AUTO-GENERATED category hunts
+   share a capture set. An authored guide (`custom_`/`code_`) and BUILTIN keep
+   their own private ledger, because a guide's progress is progress THROUGH
+   THAT GUIDE — union them and "5 Guides Completed" would start counting
+   captures made on the open map. STABLE_HUNT_PREFIXES is already exactly the
+   "we generate this" set, so it is reused rather than a second list being
+   invented to drift from it — #40's own reasoning, applied to a second reader. */
+function isSharedProgressKey(key){
+  return STABLE_HUNT_PREFIXES.indexOf(String(key).split('_')[0]) !== -1;
+}
+/* Every id captured under ANY auto-generated card. Built fresh rather than
+   cached on purpose: a cache needs invalidating at every writer of
+   state.progress, and a missed writer here shows up as a capture that vanishes
+   — the exact bug this function exists to fix. It is O(total captures) and the
+   hot path calls it ONCE per render (see currentTargetsSorted), not per point. */
+function sharedCapturedIds(){
+  const out = new Set();
+  Object.keys(state.progress || {}).forEach(k=>{
+    if(!isSharedProgressKey(k)) return;
+    ((state.progress[k] || {}).foundIds || []).forEach(id => out.add(id));
+  });
+  return out;
+}
+/* #147 — which capture MODES may be RESTORED onto which card. Reading captures
+   across buckets without this puts a captured bar back on Parks & Trails, which
+   is a worse bug than the one being fixed: the card's whole promise is its
+   category. `null` means "accepts everything", which is what All Things Local
+   is for. Per #67's standing instruction, retired prefixes stay in this table:
+   an inert entry costs a few bytes, a missing one silently strands a capture. */
+const CAPTURED_MODE_ACCEPT = {
+  local:         null,
+  discover:      null,
+  random:        null,
+  gems:          null,
+  parkstrails:   ['park','trail'],
+  localparks:    ['park'],
+  stateparks:    ['park'],
+  nationalparks: ['park'],
+  trails:        ['trail'],
+  shops:         ['shops'],
+  bars:          ['bars'],
+  restaurants:   ['restaurants'],
+  barsrest:      ['bars','restaurants','barsrest'],
+  history:       ['history'],
+  lore:          ['lore']
+};
+function capturedModeFilterFor(key){
+  const allow = CAPTURED_MODE_ACCEPT[String(key).split('_')[0]];
+  if(!allow) return ()=>true;
+  return mode => !!mode && allow.indexOf(mode) !== -1;
+}
 
 function migrateTimestampedProgress(){
   let changed = false;
@@ -5044,7 +5155,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.23d';
+const APP_VERSION = '2026.07.23e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7696,16 +7807,30 @@ async function consumePendingGuideInvite(){
 /* =========================================================
    TARGET LIST / MAP RENDER
    ========================================================= */
-function isFound(id){
-  const p = state.progress[state.currentHunt?.key];
-  return p && p.foundIds.includes(id);
+/* #147 — the explore cards are six VIEWS OF ONE PLACE LIST, so a capture under
+   any of them is a capture of that place, full stop. An authored guide is not:
+   it keeps its own private ledger, because progress through a guide means
+   progress through THAT guide. See isSharedProgressKey() for the full note and
+   for the id-stability measurement this union rests on.
+   `sharedIds` is an optional prebuilt set — the hot path passes one so the
+   Set is built once per render instead of once per point. */
+function isFound(id, sharedIds){
+  const key = state.currentHunt?.key;
+  if(!key) return false;
+  if(!isSharedProgressKey(key)){
+    const p = state.progress[key];
+    return !!(p && p.foundIds.includes(id));
+  }
+  return (sharedIds || sharedCapturedIds()).has(id);
 }
 function currentTargetsSorted(){
   if(!state.currentHunt || !state.me) return [];
+  // #147 — once per call, not once per point. This runs on every GPS tick.
+  const sharedIds = isSharedProgressKey(state.currentHunt.key) ? sharedCapturedIds() : null;
   return state.currentHunt.points.map(p=>({
     ...p,
     dist: haversine(state.me.lat, state.me.lng, p.lat, p.lng),
-    found: isFound(p.id)
+    found: isFound(p.id, sharedIds)
   })).sort((a,b)=>a.dist-b.dist);
 }
 
