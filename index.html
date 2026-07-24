@@ -4637,6 +4637,12 @@ let state = {
   settingsReturn: null,    // #91 — which tab Settings' Back button returns to
   _programmaticViewChange: false,
   meAccuracy: null,
+  /* #146 — {m, t}: the widest capture range seen recently and when it was seen.
+     Session-only and deliberately not persisted: it is a smoothing window over
+     live GPS jitter, and a stale one restored from storage would hand a user a
+     wide capture radius on a fix that has not arrived yet. See
+     effectiveCaptureRange(). */
+  _captureRangeHold: null,
   lastWalkPos: null,
   lastWalkTime: null,
   hasCapturedOnce: false,
@@ -5563,7 +5569,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.24c';
+const APP_VERSION = '2026.07.24d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6294,10 +6300,68 @@ const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this d
 // least match the phone's own reported accuracy, so normal GPS wobble doesn't make an
 // otherwise-correct capture impossible. A capped ceiling keeps it from becoming trivial
 // when GPS is very imprecise (e.g. indoors).
+/* #146 — HOW LONG A WIDE READING KEEPS ITS WINDOW OPEN.
+   A time constant, not a distance, so it is deliberately NOT in #65's register —
+   that register inventories "how far away is still here", and this answers "how
+   long ago is still now". ~15 GPS ticks on a phone that is reporting once a
+   second: long enough to outlast the jitter that produced #146, short enough
+   that walking away still revokes the window promptly (distance grows on the
+   very next tick; only the RANGE is held). */
+const CAPTURE_RANGE_HOLD_MS = 15000;
+/* #146 — THE DEFECT AND WHY THE FIX LIVES HERE RATHER THAN AT THE HUD.
+   effectiveCaptureRange() tracked state.meAccuracy LIVE, and onLocation()
+   rewrites that on every watch tick. Stand still 30 m from a pin: a tick
+   reporting 40 m accuracy gives a 40 m range and you are IN; the next tick
+   reporting 12 m gives a 25 m range and you are OUT. You have not moved a step.
+   That flashed "You've moved out of range" and — the expensive half — flipped
+   #ar-mark-btn.disabled, #map-camera-btn's `show` and #open-camera-btn's
+   `ready`, so Capture could vanish from under a thumb already moving toward it.
+   #51's original complaint ("standing out front and it wouldn't take") arriving
+   by a route #51's fix does not cover.
+
+   THE FIX IS THE HOLD BELOW: return the WIDEST range seen in the last
+   CAPTURE_RANGE_HOLD_MS, so an IMPROVING fix cannot revoke a window a worse fix
+   already granted. It is applied inside this function on purpose, so every
+   consumer — the HUD, both camera buttons, the range circle, attemptMarkFound()'s
+   authoritative re-check and #4's cap.range — reads the SAME number. A
+   display-only hysteresis would have left the button saying "ready" while the
+   gate refused, which is a worse artefact than the flicker: the button would lie.
+
+   REJECTED: freezing the range for the lifetime of an open AR session (#146's
+   own candidate (c), and the one recommended before this was scoped against the
+   source). It only covers the AR overlay. #map-camera-btn and #open-camera-btn
+   flip on the MAP screen with no AR session open at all — they are the ENTRY
+   points into AR — so (c) fixes the banner and leaves the half #146 itself calls
+   "the expensive one" live. Candidate (a), held here, covers every surface.
+
+   WHAT THIS DOES NOT DO, STATED SO IT IS NOT READ AS A LOOSENING OF #51:
+   FOUND_THRESHOLD_M is untouched at 25 m and the 75 m ceiling is untouched, so
+   the band this function can return is EXACTLY what it could return before —
+   no reachable range is new. What changed is only WHEN the wide end applies:
+   a reading that was legitimately 60 m keeps its window for 15 s instead of
+   being revoked mid-thumb-movement. #4's cap.range therefore still records the
+   range that actually gated the capture, which is what it is evidence of.
+
+   THE SIM BYPASS IS LOAD-BEARING (#4, #73). When there is no usable accuracy
+   reading — simulate mode writes meAccuracy 0 — this returns the constant floor
+   and CLEARS the hold, so a real 60 m fix cannot leak a wide radius into a
+   session that has dropped to tapping the map. Without that clear, the hold
+   would be a 15-second spoofing window opened by a fix that was real. */
 function effectiveCaptureRange(){
   const acc = state.meAccuracy;
-  if(typeof acc !== 'number' || acc<=0) return FOUND_THRESHOLD_M;
-  return Math.min(Math.max(FOUND_THRESHOLD_M, acc), 75);
+  if(typeof acc !== 'number' || acc<=0){
+    state._captureRangeHold = null;
+    return FOUND_THRESHOLD_M;
+  }
+  const raw = Math.min(Math.max(FOUND_THRESHOLD_M, acc), 75);
+  const hold = state._captureRangeHold;
+  const now = Date.now();
+  /* Still inside the window AND still wider than the live reading: keep it, and
+     deliberately do NOT refresh the timestamp — the hold expires 15 s after the
+     WIDE reading was taken, not 15 s after the last time somebody asked. */
+  if(hold && hold.m > raw && (now - hold.t) <= CAPTURE_RANGE_HOLD_MS) return hold.m;
+  state._captureRangeHold = {m: raw, t: now};
+  return raw;
 }
 
 /* =========================================================
@@ -6393,10 +6457,12 @@ function onLocation(lat,lng,sim,accuracy){
   const now = Date.now();
   const idleGapMs = state.lastWalkTime ? (now - state.lastWalkTime) : 0;
   const tooStale = idleGapMs > WALK_IDLE_TIMEOUT_MS;
+  let walkAdvanced = false;
   if(state.lastWalkPos && state.hasCapturedOnce && !tooStale){
     const d = haversine(state.lastWalkPos.lat, state.lastWalkPos.lng, lat, lng);
     if(d > 2 && d < 250){
       state.totalWalkedMeters += d;
+      walkAdvanced = true;   // #159 — consumed at the END of this function, not here. See below.
       saveStats();
       if(document.getElementById('screen-passport').classList.contains('active')) renderPassport();
     }
@@ -6431,6 +6497,28 @@ function onLocation(lat,lng,sim,accuracy){
   checkCuratedStaleness(lat, lng);
   refreshTargetsUI();
   refreshTrackUI();
+
+  /* #159 — THE WALKING HALF OF #145, AND THE SCOPING IS THE WHOLE FIX.
+     Before this, checkNewAchievements() had exactly one call site — after a
+     capture — so mile_1 and mile_5 were DEFERRED until your next capture and
+     popped beside a pin that had nothing to do with them. #145 closed the guide
+     half by calling at the writer; distance has no discrete writer, its writer
+     is the accumulator above, and this is that call.
+
+     SCOPED TO WALK_ACHIEVEMENT_IDS, AND #145's ROW IS EMPHATIC ABOUT WHY: an
+     UNSCOPED check from a GPS tick re-fires the guide and capture badges from
+     the walk path and reintroduces #145 from a third direction. The capture call
+     site stays unscoped and untouched — it is still the only thing that fires
+     the capture and category badges, and scoping it would mean they never fire.
+
+     WHY IT SITS HERE RATHER THAN BESIDE saveStats() IN THE ACCUMULATOR, and it
+     is not stylistic. onLocation() writes state.meAccuracy at its TOP and
+     state.me at its BOTTOM; #146's row flags that window as real and unmarked,
+     with renderPassport() the only call inside it. Putting this call in the
+     accumulator would have put a SECOND call in that window. It reads stats and
+     never position, so it would be harmless today — but "harmless today" is how
+     #149 got written, and the end of the function is free. Do not move it up. */
+  if(walkAdvanced && hasUnearnedWalkBadge()) checkNewAchievements(WALK_ACHIEVEMENT_IDS);
 }
 
 /* =========================================================
@@ -9402,10 +9490,21 @@ function refreshTrackUI(){
        block's assumptions, corrected below.
 
        CONSEQUENCE: the only way to be here is to open AR in range and then move
-       out of it — walking off, or a widening accuracy figure shrinking
-       effectiveCaptureRange() under you. So the copy is "you left", never
-       "keep walking": the user is standing where they just were and needs to be
-       told they drifted, not given directions.
+       out of it. So the copy is "you left", never "keep walking": the user is
+       standing where they just were and needs to be told they drifted, not
+       given directions.
+
+       #146 — THIS BLOCK USED TO NAME A SECOND WAY TO GET HERE AND IT STATED IT
+       BACKWARDS, WHICH IS THE WHOLE REASON NOBODY CHASED IT. It read "a widening
+       accuracy figure shrinking effectiveCaptureRange() under you". A widening
+       accuracy figure WIDENS the range. It is a NARROWING one — a GPS fix
+       getting BETTER — that shrinks the radius under a stationary user, and this
+       block then told them they had moved when they had not. The scenario was
+       considered, written down, and written down inverted, so the block read as
+       though the case was covered. Fixed at the source: effectiveCaptureRange()
+       now holds its widest recent reading (see CAPTURE_RANGE_HOLD_MS), so an
+       improving fix can no longer revoke a window, and "you left" is true by
+       construction again rather than by hope. Do not restore the old sentence.
 
        The simulate-mode branch that used to sit here is DELETED as unreachable,
        and recording why matters more than the deletion: in simulate mode
@@ -9500,6 +9599,15 @@ async function attemptMarkFound(){
          entire reason the field exists.
          See pruneCaptureTelemetry(): everything here except v/sim is stripped
          after 30 days, and that INCLUDES the velocity flag, deliberately. */
+      /* #146 — acc AND range CAN NOW LEGITIMATELY DISAGREE, AND THAT IS NOT A
+         DEFECT. `acc` is what the phone REPORTED on the tick of capture; `range`
+         is what the app ALLOWED. effectiveCaptureRange() holds its widest recent
+         reading for CAPTURE_RANGE_HOLD_MS, so a capture taken seconds after a
+         fix sharpened can honestly record acc:12 alongside range:40. Both are
+         true and both are the evidence they were always meant to be — the
+         measurement and the rule applied to it. Before #146 they were locked
+         together, so a reader used to seeing range derivable from acc should
+         not "fix" this. */
       cap: Object.assign({
         v: 2,
         acc:   state.meIsSim ? null : state.meAccuracy,
@@ -9671,8 +9779,8 @@ const ACHIEVEMENTS = [
   {id:'stamps_10', label:'10 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=10},
   {id:'stamps_25', label:'25 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=25},
   {id:'stamps_50', label:'50 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=50},
-  {id:'mile_1', label:'First Mile', color:'#9A7FBF', icon:'footprints', check:s=>s.totalWalkedMeters>=1609},
-  {id:'mile_5', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', check:s=>s.totalWalkedMeters>=8047},
+  {id:'mile_1', label:'First Mile', color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
+  {id:'mile_5', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
   /* #145(1) — reads authoredHuntsCount, NOT myHuntsCount. `state.myHunts` holds
      guides you MADE and guides you REDEEMED in one array (redeemGuideCode()
      pushes {external:true}, and #85's ?guide= links land there too), so the old
@@ -9692,6 +9800,24 @@ const ACHIEVEMENTS = [
    adds — #40's and #147's reasoning about reusing an existing set instead of
    inventing a parallel one, applied at the moment the set is created. */
 const GUIDE_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='guides').map(a=>a.id);
+/* #159 — THE SAME PATTERN, EXTENDED RATHER THAN COPIED, which is what #159's
+   row asked for in as many words: "tag the mileage badges reads:'walk' and
+   derive, do not type a second list." `reads:'walk'` tags every badge whose only
+   input is state.totalWalkedMeters. */
+const WALK_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='walk').map(a=>a.id);
+/* #159 — THE GATE THAT MAKES THE WRITER-SIDE CHECK FREE ONCE IT HAS DONE ITS JOB.
+   The walk check runs from the distance accumulator, which fires on genuine
+   movement — so unlike a save or a capture there is no discrete "one event, one
+   check" moment, and running computeAchievementStats() on every qualifying tick
+   forever would be a real cost for nothing. Both mileage badges are permanent
+   once earned, so a Set lookup retires the whole path: after 5 miles this is two
+   `has()` calls per tick and never touches the stats again. Derived from
+   WALK_ACHIEVEMENT_IDS so a third mileage badge is covered without an edit. */
+function hasUnearnedWalkBadge(){
+  const led = state.unlockedAchievements;
+  if(!led) return true;
+  return WALK_ACHIEVEMENT_IDS.some(id => !led.has(id));
+}
 function computeAchievementStats(){
   const catCounts = {parks:0, shops:0, barsrest:0, history:0};
   let totalFound = 0;
