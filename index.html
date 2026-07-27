@@ -5569,7 +5569,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.24d';
+const APP_VERSION = '2026.07.24e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -5855,6 +5855,8 @@ window.localyInvariants = function(){
   assertGemBucketsAgree();
   assertGemCreditsResolved();
   assertBadgeMatchesList();
+  assertAchievementRecord();
+  reportCrossBucketDoubles();
   assertNoDuplicatePoints();
   console.log(out);
   return out;
@@ -6018,12 +6020,26 @@ function cancelClearProgress(){
    content, not capture history, and the on-screen copy says so. */
 /* Which badges still legitimately pass once everything the wipe clears is gone.
    With guides now included in the wipe this returns an empty list in practice —
-   but it stays DERIVED rather than hardcoded to [], because renderAchievements()
-   recomputes every badge live from computeAchievementStats() and never reads the
-   stored set. If a badge is ever added that keys off something the wipe
-   preserves (a submitted-gem stamp, item 24, is the obvious candidate), an
-   emptied ledger would desync from a still-lit grid and re-fire its popup on the
-   next capture. That is the exact defect this file's QA caught with hunt_maker.
+   but it stays DERIVED rather than hardcoded to [].
+
+   #83 (2026-07-24) — THE REASON IN THIS COMMENT WAS REPLACED, NOT THE CODE.
+   It used to read "because renderAchievements() recomputes every badge live and
+   never reads the stored set". That is now FALSE: #83 ruled a badge is a RECORD
+   and the grid renders `ledger ∪ live-true`. The stored set is no longer a
+   popup ledger that happens to be written; it is half of what the screen shows.
+   So this function got MORE load-bearing, not less — whatever it returns after a
+   wipe is what stays lit, permanently, because nothing ever subtracts from the
+   ledger again. If a badge is ever added that keys off something the wipe
+   preserves (a submitted-gem stamp, item 24, is the obvious candidate), it must
+   appear here or the wipe will put out a badge the user still legitimately owns,
+   which the ruling forbids. Under the old query behaviour that mistake self-
+   corrected on the next render; under the record ruling it is permanent.
+
+   THE DISTINCTION THE RULING RESTS ON, WRITTEN DOWN HERE BECAUSE THIS IS THE
+   ONE PLACE IT LOOKS LIKE A CONTRADICTION: a wipe is ERASURE, not un-earning.
+   The user asked for their history to be gone and the badges are part of the
+   history. "A badge never goes out" governs what the app does to you; it does
+   not govern what you do to yourself on purpose.
 
    Declared before its callers on purpose: it is a function declaration, so
    hoisting covers the reference, and ACHIEVEMENTS / computeAchievementStats are
@@ -6047,12 +6063,13 @@ const WIPE_KEYS = [
      from the submissions table on the next load, because the server copy is the
      real one and the client cannot delete it. The on-screen copy says so. */
   ['gem-submissions',       ()=>JSON.stringify([])],
-  /* Recomputed rather than emptied. renderAchievements() never reads this — it
-     re-derives every badge live from computeAchievementStats() — so this is a
-     popup ledger, not a record. Writing the surviving set keeps the ledger
-     equal to the screen. With guides now going too, this lands empty in
-     practice; it stays derived so a future badge built on something the wipe
-     preserves cannot silently desync. Evaluated at WRITE time, after the
+  /* Recomputed rather than emptied, and after #83 this is the strong version of
+     that choice rather than the cautious one. THIS IS A RECORD, NOT A POPUP
+     LEDGER — renderAchievements() reads it (see earnedAchievementIds), so what
+     is written here is literally what the grid will show afterwards. Emptying it
+     outright would be correct only for as long as no badge survives a wipe, and
+     item 24 is the badge that breaks that. With guides now going too this lands
+     empty in practice; it stays derived. Evaluated at WRITE time, after the
      in-memory reset. */
   ['unlocked-achievements', ()=>JSON.stringify(survivingAchievementIds())],
   /* 'null' tombstone, not a delete: there is NO window.storage.delete in this
@@ -7700,6 +7717,92 @@ function assertGemCreditsResolved(){
                 (c.resolved < c.asked ? ' (' + (c.asked - c.resolved) + ' submitter(s) have no renderable name — a real negative, see #153)' : ''));
   }catch(e){ console.warn('[#154] credit check failed', e); }
 }
+/* #83 — MAKE THE DIVERGENCE VISIBLE, AND DO NOT WARN ON IT.
+   Under the record ruling a badge in the ledger that no longer passes its live
+   check is LEGAL and is the entire point of the row — a dedupe (#148) or a
+   corrected count is supposed to leave the badge lit. So this reports that set
+   as a NOTE. Warning on it would fire by design and mute the channel, which is
+   #154's reasoning about the negative credit result applied to a second surface.
+
+   THE ONE THING THAT IS A REAL VIOLATION, AND IT IS THE ONLY console.warn HERE:
+   the grid rendering FEWER lit badges than the resolved set holds. That means
+   renderAchievements() has stopped reading earnedAchievementIds() — the
+   regression this row exists to prevent — and it is checked against the live DOM
+   rather than a hardcoded expectation, per #97's rule.
+
+   Reports live-true-but-not-in-the-ledger as a note too. That set is not an
+   error: it is badges whose popup has not fired yet, which is normal for any
+   predicate that goes true on a path with no checkNewAchievements() call. It is
+   also exactly the set that STRICT ledger-only rendering would have un-lit, so
+   seeing it non-empty on a real account is the evidence for why the union
+   shipped instead. */
+function assertAchievementRecord(){
+  try{
+    const stats  = computeAchievementStats();
+    const ledger = state.unlockedAchievements || new Set();
+    const live   = new Set(ACHIEVEMENTS.filter(a=>a.check(stats)).map(a=>a.id));
+    const earned = earnedAchievementIds(stats);
+    const heldOnly = [...ledger].filter(id => !live.has(id));
+    const liveOnly = [...live].filter(id => !ledger.has(id));
+
+    if(loadFailedKeys().has('unlocked-achievements')){
+      console.warn('[#83] the record FAILED TO LOAD — the grid is falling back to the live query, ' +
+                   'which is pre-#83 behaviour. Badges may read as un-earned until a successful re-read.');
+    }
+    console.log('[#83] record ' + ledger.size + ' + live ' + live.size + ' = ' + earned.size + ' lit' +
+                (heldOnly.length ? ' | held by the record only (legal, this is the ruling): ' + heldOnly.join(', ') : '') +
+                (liveOnly.length ? ' | live but no popup fired yet: ' + liveOnly.join(', ') : ''));
+
+    const grid = document.getElementById('achievements-section');
+    if(grid){
+      const items = grid.querySelectorAll('.achievement-item');
+      if(items.length){
+        const lit = grid.querySelectorAll('.achievement-item:not(.locked)').length;
+        if(lit < earned.size){
+          console.warn('[#83] the grid is lighting ' + lit + ' badges but the record resolves ' + earned.size +
+                       ' — renderAchievements() has stopped reading earnedAchievementIds(). A badge has been un-earned.');
+        }
+      } else {
+        console.log('[#83] achievements grid not drawn yet — open the Passport and re-run');
+      }
+    }
+  }catch(e){ console.warn('[#83] record check failed', e); }
+}
+/* #148 — THE MEASUREMENT THAT ROW ASKS FOR BEFORE ANY CODE IS WRITTEN, and it
+   may close the row as a no-op. Counts ids captured under more than one
+   AUTO-GENERATED bucket. Reuses isSharedProgressKey() rather than re-deriving
+   the prefix set, which is what #148's scope note says to do: custom_/code_ are
+   excluded on purpose, because a stop captured on a guide AND on the open map is
+   two legitimate events and not a duplicate.
+
+   ALSO REPORTS #148's OTHER FINDING, WHICH IS THE ONE ITS TITLE DOES NOT CARRY:
+   renderPassport() sums foundIds and computeAchievementStats() iterates
+   foundMeta, and nothing guarantees they agree within a bucket. Reported per
+   bucket so a disagreement names the bucket rather than a total. Both are NOTES
+   — this function measures, it does not fix, and #148 is still 🔴. */
+function reportCrossBucketDoubles(){
+  try{
+    const seen = {};
+    let idsTotal = 0, metaTotal = 0;
+    const mismatched = [];
+    Object.keys(state.progress || {}).forEach(k=>{
+      if(!isSharedProgressKey(k)) return;
+      const p = state.progress[k] || {};
+      const ids  = (p.foundIds || []);
+      const meta = Object.keys(p.foundMeta || {});
+      idsTotal += ids.length; metaTotal += meta.length;
+      if(ids.length !== meta.length) mismatched.push(k + ' (foundIds ' + ids.length + ' vs foundMeta ' + meta.length + ')');
+      ids.forEach(id=>{ (seen[id] = seen[id] || []).push(k); });
+    });
+    const doubles = Object.keys(seen).filter(id => seen[id].length > 1);
+    console.log('[#148] ' + doubles.length + ' id(s) banked under more than one auto bucket' +
+                (doubles.length ? ': ' + doubles.slice(0,10).map(id=>id + ' [' + seen[id].join('+') + ']').join(', ') +
+                                   (doubles.length > 10 ? ' …' : '')
+                                : ' — if this is 0 on a real account, #148 closes as "nothing to reconcile"'));
+    console.log('[#148] passport counter (foundIds) ' + idsTotal + ' vs badge counter (foundMeta) ' + metaTotal +
+                (mismatched.length ? ' — DISAGREE in: ' + mismatched.join('; ') : ' — agree'));
+  }catch(e){ console.warn('[#148] measurement failed', e); }
+}
 function assertGemBucketsAgree(){
   try{
     const sel = document.getElementById('gem-category');
@@ -8360,11 +8463,20 @@ async function saveCustomHunt(){
      If a sixth writer is ever added, decide it against this list.
 
      renderPassport() is called alongside so the Passport grid is already correct
-     if you go straight there. Strictly speaking it is redundant — #83 established
-     renderAchievements() is a live query recomputed on every render, so the stamp
-     lights on its own the next time that screen is drawn — but the cost is one
-     re-render of an inactive screen and it removes any dependence on that
-     property staying true. */
+     if you go straight there.
+
+     #83 (2026-07-24) — THIS COMMENT CITED A PROPERTY THAT HAS SINCE BEEN
+     REVERSED, AND THE PRECAUTION IT DESCRIBES IS NOW THE LOAD-BEARING PART.
+     It used to read "strictly speaking it is redundant — #83 established
+     renderAchievements() is a live query, so the stamp lights on its own".
+     #83 ruled the opposite: the grid renders `ledger ∪ live-true`. The union
+     means the badge would still light on its own, so the call is still not
+     strictly required — but the sentence explaining why has changed underneath
+     it, and the ordering now matters for a second reason: checkNewAchievements()
+     below is what puts the id in the RECORD, and a record entry is permanent.
+     Leaving the call in, exactly as the old comment's closing argument said to:
+     the cost is one re-render of an inactive screen and it removes any
+     dependence on a property that has now demonstrably not stayed true. */
   renderPassport();
   checkNewAchievements(GUIDE_ACHIEVEMENT_IDS);
 }
@@ -9853,23 +9965,106 @@ function computeAchievementStats(){
     completedHuntsCount
   };
 }
+
+/* =========================================================
+   #83 — A BADGE IS A RECORD. RULED 2026-07-24, BY DIRECTIVE.
+
+   The question this row carried for four passes: is a badge earnable-once (a
+   RECORD) or continuously true (a QUERY)? The code implemented query —
+   renderAchievements() recomputed every badge from computeAchievementStats()
+   on each render and never read the stored set. A stamp collection implies
+   record, #63 assumed record in writing, and record is now the ruling.
+
+   THE RULE, AND IT IS THE WHOLE ROW: A BADGE THAT HAS BEEN EARNED NEVER GOES
+   OUT. Not on a dedupe, not on a delete, not on a stat that legitimately falls.
+
+   THE IMPLEMENTATION IS A UNION AND IT IS DELIBERATELY NOT A REWRITE OF THE
+   POPUP PATH. The grid renders `ledger ∪ live-true`. Three consequences, and
+   each one is why this shape was chosen over the two alternatives:
+
+     1. IT CANNOT LOSE A BADGE. Ledger membership is permanent, so anything
+        that has ever fired is lit forever regardless of what the stats do
+        afterwards. That is the ruling, enforced by the data structure rather
+        than by everyone remembering it.
+
+     2. IT CANNOT STEAL A CELEBRATION. This function does NOT write. Promoting
+        live-true ids into the ledger here was built and cut: checkNewAchievements()
+        fires a popup only for ids NOT already in the ledger, so a silent
+        promotion at render time would put the badge in the ledger and then
+        suppress its own popup on the next capture. That is precisely the defect
+        #145(1) exists to undo, re-created from the other direction. The ledger
+        still grows through exactly one door — checkNewAchievements() — and this
+        function is a read.
+
+     3. IT DEGRADES TO TODAY'S BEHAVIOUR ON A FAILED READ, FOR FREE. If
+        'unlocked-achievements' fails to load, state.unlockedAchievements is an
+        empty Set, the union collapses to live-true, and the grid renders
+        exactly as it did before this change. No guard was needed and none was
+        written — but do not "simplify" this to read the ledger alone, because
+        that is the version where a network blink darkens every badge you own.
+
+   REJECTED: STRICT LEDGER-ONLY RENDERING. Smaller and wrong. The mileage badges
+   had no writer-side check at all until #159, and any badge whose predicate goes
+   true on a path with no checkNewAchievements() call is live-true and absent
+   from the ledger. Ledger-only would un-light those on the deploy that shipped
+   it — un-earning a badge in the name of a rule against un-earning badges.
+
+   REJECTED: A GENERAL reconcile-the-ledger-to-the-stats LOOP. #145(1)'s comment
+   warned that writing one would be smuggling this decision in as a defect fix.
+   The decision is now made and it forbids the loop outright: a general reconcile
+   subtracts, and subtraction is the thing being ruled out. See
+   reconcileHuntMakerLedger() below for the ONE sanctioned subtraction and why it
+   is not an exception to the rule.
+
+   WHAT THIS UNBLOCKS, AND IT IS THE REASON THE ROW MATTERED. #148 (reconciling
+   captures banked twice under two explore cards) needs totalFound and catCounts
+   to go DOWN under a predicate that was always right. Under the record ruling
+   that is now safe: the counters correct themselves and not one badge darkens.
+   #24 (a stamp for SUBMITTING a gem) is likewise unblocked — it keys off data a
+   wipe does not clear, which was the desync #81's QA found with hunt_maker.
+   Neither is done here and neither should be read as done.
+
+   A NOTED SIDE EFFECT, NOT A FIX FOR #58. If 'progress' fails to read while the
+   ledger loads, the grid now stays lit instead of going dark — one surface of
+   #58's "renders zeros as if they were real" improves as a by-product. The
+   passport counters above it still render zeros. #58 stays 🔴.
+   ========================================================= */
+function earnedAchievementIds(stats){
+  const out = new Set(state.unlockedAchievements || []);
+  ACHIEVEMENTS.forEach(a=>{ if(a.check(stats)) out.add(a.id); });
+  return out;
+}
+
 /* #145(1) — ONE-TIME LEDGER CORRECTION, SCOPED TO hunt_maker AND NOTHING ELSE.
    Fixing the predicate makes the GRID go dark for anyone who was awarded Guide
-   Maker for redeeming a share link — renderAchievements() recomputes live, so
-   that happens on its own. The saved ledger (state.unlockedAchievements) does
-   NOT recompute, so without this the wrong id sits in it forever, and the cost
-   is not cosmetic: checkNewAchievements() only fires for ids NOT already in the
-   ledger, so the day that user authors a REAL guide they earn the badge and get
-   no popup, because the ledger says they already had it. The wrongly-granted
-   entry steals the legitimate celebration.
+   Maker for redeeming a share link. The cost is not cosmetic:
+   checkNewAchievements() only fires for ids NOT already in the ledger, so the
+   day that user authors a REAL guide they earn the badge and get no popup,
+   because the ledger says they already had it. The wrongly-granted entry steals
+   the legitimate celebration.
 
-   THIS IS NOT #83's DECISION AND MUST NOT BE READ AS ONE. #83 asks whether a
-   badge is earnable-once (a record) or continuously true (a query), and that
-   question is still open and still gates #148 and #24. This corrects ONE id
-   that was never earned under any reading — #148's distinction, where a wipe
-   un-earns a badge WRONGLY and a correction un-earns one CORRECTLY. It is
-   deliberately not written as a general reconcile-all loop, because a general
-   loop IS #83's answer and would be smuggling a decision in as a defect fix.
+   #83 IS NOW DECIDED, AND IT PROMOTED THIS FUNCTION FROM A DEFECT FIX TO THE
+   ONLY SANCTIONED SUBTRACTION IN THE FILE. The ruling is RECORD: an earned badge
+   never goes out. This deletes a ledger entry, so it needs to say plainly why it
+   is not a violation — a wrong PREDICATE means the badge was never earned under
+   any reading, and correcting an award is not the same act as revoking one. That
+   is #148's distinction and it survives the ruling intact.
+
+   TWO THINGS THIS COMMENT USED TO SAY THAT ARE NOW FALSE, CORRECTED RATHER THAN
+   DELETED SO THE NEXT READER SEES THE CHANGE. (1) "renderAchievements()
+   recomputes live, so that happens on its own" — it does not; the grid resolves
+   against the union, and the grid goes dark for that user only BECAUSE this
+   eviction runs. Under the record ruling this function became the load-bearing
+   half of #145(1) rather than the tidy-up half. (2) "#83 is still open and still
+   gates #148 and #24" — decided, and both are unblocked.
+
+   IT IS STILL NOT A GENERAL RECONCILE LOOP, AND NOW IT NEVER CAN BE. The old
+   comment said a general loop would be smuggling in #83's decision. The decision
+   arrived and it forbids the loop: reconciling the ledger to the stats subtracts
+   whenever a stat falls, which is the exact behaviour the ruling exists to stop.
+   ONE ID, ONE WRONG PREDICATE, ONE CORRECTION. If a second predicate is ever
+   found to be wrong, it gets its own named eviction beside this one and its own
+   sentence explaining why the badge was never earned — never a loop.
 
    GUARDED ON A SUCCESSFUL READ OF BOTH KEYS (#1a). If 'my-hunts' failed to
    load, state.myHunts is [] and every user looks like they authored nothing —
@@ -9941,11 +10136,15 @@ function renderAchievementIcon(iconKey, unlocked, size){
 }
 function renderAchievements(){
   const stats = computeAchievementStats();
+  /* #83 — THE ONE LINE THAT CHANGED THE ANSWER. Was `a.check(stats)` per badge,
+     which made this grid a live query and let a falling stat put an earned badge
+     out. It now resolves against the record. See earnedAchievementIds(). */
+  const earned = earnedAchievementIds(stats);
   const el = document.getElementById('achievements-section');
   el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>
     <div class="achievement-grid">` +
     ACHIEVEMENTS.map(a=>{
-      const unlocked = a.check(stats);
+      const unlocked = earned.has(a.id);
       return `<div class="achievement-item ${unlocked?'':'locked'}">
         <div class="stamp-circle"${unlocked ? ` style="color:${a.color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
