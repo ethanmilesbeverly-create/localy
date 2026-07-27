@@ -1666,8 +1666,21 @@
     </div>
   </div>
 
+  <!-- #50 — THE WORDMARK, AND WHY THE <span> SPLITS WHERE IT DOES.
+       The old mark was LOCAL<span>Y</span>: the accent sat on the one letter
+       that turned the word "local" into a name. Stowmark has no such letter —
+       it is two real morphemes — so the accent moves to the second element,
+       STOW|MARK. This is a judgement call, not a derivation.
+
+       THE SPAN IS ALSO WHY THIS LINE SURVIVED THE FIRST RENAME PASS. A grep
+       for "Localy" cannot match "LOCAL<span>Y</span>", so both wordmarks in
+       this file — here and #auth-brand — came through a full sweep untouched
+       and were caught only by eye. That is #56's gravestone and #152's
+       repeat of it arriving a third time. The instrument that finds this is a
+       TAG-STRIPPED search of the rendered text, not a search of the source.
+       If the name ever changes again, run that one first. -->
   <div id="topbar">
-    <div class="brand">LOCAL<span>Y</span></div>
+    <div class="brand">STOW<span>MARK</span></div>
   </div>
 
   <!-- MODE SELECT -->
@@ -2205,7 +2218,9 @@
   <!-- ================= AUTH OVERLAY ================= -->
   <div id="auth-overlay">
     <div id="auth-card">
-      <div id="auth-brand" class="display">Local<span>y</span></div>
+      <!-- .display uppercases this, so it renders STOWMARK. Same STOW|MARK
+           accent split as #topbar's .brand — see the comment there. -->
+      <div id="auth-brand" class="display">Stow<span>mark</span></div>
       <p id="auth-tagline">Ask a local. Discover anywhere.</p>
 
       <!-- #2 — four modes share this one card: login / signup / forgot / reset.
@@ -5602,7 +5617,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.27a';
+const APP_VERSION = '2026.07.27b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
