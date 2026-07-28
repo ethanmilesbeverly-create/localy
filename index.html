@@ -2270,6 +2270,22 @@
         <button id="auth-forgot-btn" type="button">Forgot password?</button>
       </div>
 
+      <!-- #69(c) — RESEND CONFIRMATION. A lost confirmation email dead-ends an
+           account exactly the way a forgotten password did before #2 built the
+           reset path; this is the same door on the other side. Deliberately a
+           quiet action on the LOGIN screen rather than its own mode: the person
+           who needs it typed their email, hit "Create account", was told to
+           check their inbox, and came back here when nothing arrived — so the
+           email field is already the one they want. Uses the same
+           anti-enumeration message shape as forgot (see resendConfirmation()).
+           INERT WHILE CONFIRM EMAIL IS OFF: sb.auth.resend(type:'signup') has
+           nothing to resend for an already-confirmed account and 400s, which is
+           swallowed — so shipping this before #69's toggle flip changes nothing
+           a user can trigger. It becomes live the moment the toggle is on. -->
+      <div id="auth-resend-row" class="auth-hidden">
+        <button id="auth-resend-btn" type="button">Didn't get the confirmation email? Resend it</button>
+      </div>
+
       <div id="auth-switch">
         <span id="auth-switch-text">New here?</span>
         <button id="auth-switch-btn" type="button">Create an account</button>
@@ -2344,11 +2360,17 @@
   .auth-hint{ font-size:11.5px; line-height:1.45; color:var(--text-dim); opacity:.75; margin:5px 0 0; }
   #auth-forgot-row{ margin-top:14px; text-align:center; }
   #auth-back-row{ margin-top:16px; text-align:center; }
-  #auth-forgot-btn, #auth-back-btn{
+  /* #69(c) — sits tighter to the forgot row than a fresh block, since the two
+     are the same kind of "I'm stuck getting in" recovery affordance. */
+  #auth-resend-row{ margin-top:8px; text-align:center; }
+  #auth-forgot-btn, #auth-back-btn, #auth-resend-btn{
     background:none; border:none; color:var(--text-dim);
     font-weight:600; font-size:13px; cursor:pointer; font-family:inherit;
     padding:4px; text-decoration:underline;
   }
+  /* #69(c) — one notch smaller than forgot: it is the rarer path and should
+     read as secondary to it, not compete. */
+  #auth-resend-btn{ font-size:12px; font-weight:500; line-height:1.4; }
   #auth-switch-btn{
     background:none; border:none; color:var(--orange);
     font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;
@@ -2654,6 +2676,51 @@ function pendingGuideCode(){
   }catch(e){ return null; }
 }
 
+/* #128 — AN INVITE MUST SURVIVE ANY NAVIGATION THE AUTH FLOW PERFORMS.
+   Today the invite survives ONLY because Confirm Email is OFF: signUp() returns
+   a session directly, the tab never navigates, and `?guide=` is still in the URL
+   when init() runs. The moment #69's toggle flips, the round trip goes out to an
+   inbox and comes back through AUTH_REDIRECT_BASE — which carries no `?guide=` —
+   and the invited stranger, the exact user this product needs, lands on a
+   generic map with no idea what became of the guide they were sent.
+
+   The fix is a STASH, per #128's directive, NOT emailRedirectTo: a per-invite
+   redirect URL would need every variant in Supabase's Redirect URL allow list,
+   the setting #70 filed as the class of value nothing observes. Two carriers,
+   because no single one survives every navigation:
+
+     • sessionStorage — survives a SAME-TAB round trip (the OAuth redirect #76
+       will perform; the implicit-flow reset). Set at boot before any auth
+       action, so #76 inherits it for free when it ships. Does NOT cross tabs.
+     • user metadata `pending_guide` — carried through signUp options.data, the
+       only carrier that survives a CROSS-TAB or CROSS-DEVICE email-confirmation
+       landing, where the confirm link opens a fresh tab with no sessionStorage.
+
+   consumePendingGuideInvite() reads URL → sessionStorage → metadata in that
+   order and clears all three, so the confirm-OFF path stays byte-for-byte what
+   #85 shipped (URL wins, nothing else is ever consulted) and the confirm-ON
+   path is covered by the fallbacks. */
+const GUIDE_STASH_KEY = 'nahgoo_pending_guide';
+function stashGuideInvite(){
+  // Only writes when a code is actually present, so a plain reload with no
+  // param never clobbers a real stash with a null.
+  try{ const c = pendingGuideCode(); if(c) sessionStorage.setItem(GUIDE_STASH_KEY, c); }catch(e){}
+}
+function readStashedGuide(){
+  try{ const c = sessionStorage.getItem(GUIDE_STASH_KEY); return c ? c.trim().toUpperCase() : null; }catch(e){ return null; }
+}
+function clearStashedGuide(){
+  try{ sessionStorage.removeItem(GUIDE_STASH_KEY); }catch(e){}
+}
+/* Drop the carried invite from user metadata after it has been read, so it
+   fires exactly once. Fire-and-forget: if this write fails the worst case is
+   the same invite re-offered next boot, and redeemCodeValue() treats an
+   already-owned guide as a no-op (it finds the existing hunt and adds nothing).
+   Never blocks the redemption path on it. */
+function clearGuideMeta(){
+  try{ sb.auth.updateUser({ data: { pending_guide: null } }); }catch(e){}
+}
+
 function show(id, on){
   const el = document.getElementById(id);
   if(el) el.classList.toggle('auth-hidden', !on);
@@ -2769,6 +2836,7 @@ function setAuthMode(mode){
   show('auth-password-row',  mode!=='forgot');
   show('auth-password2-row', mode==='reset');
   show('auth-forgot-row',    mode==='login');
+  show('auth-resend-row',    mode==='login'); // #69(c) — same audience as forgot: someone stuck getting in
   show('auth-switch',        mode==='login' || mode==='signup');
   // No escape hatch out of 'reset': leaving it half-done is what strands people.
   show('auth-back-row',      mode==='forgot');
@@ -2800,6 +2868,7 @@ function wireAuthUI(){
     setAuthMode(authMode==='login' ? 'signup' : 'login');
   });
   document.getElementById('auth-forgot-btn').addEventListener('click', ()=> setAuthMode('forgot'));
+  document.getElementById('auth-resend-btn').addEventListener('click', resendConfirmation); // #69(c)
   document.getElementById('auth-back-btn').addEventListener('click', ()=> setAuthMode('login'));
   document.getElementById('auth-submit').addEventListener('click', submitAuth);
   ['auth-email','auth-name','auth-password','auth-password2'].forEach(id=>{
@@ -2869,6 +2938,17 @@ async function submitAuth(){
       const displayName = normalizeDisplayName(document.getElementById('auth-name').value);
       const nameErr = displayNameProblem(displayName);
       if(nameErr){ authMsg(nameErr); return; }
+      /* #128 — if this signup is happening under an invite, carry the code in
+         user metadata so it survives the email-confirmation round trip. The URL
+         param and sessionStorage are both gone by the time a cross-tab confirm
+         link lands; metadata is the only carrier that reaches the far side. On
+         the confirm-OFF path this is redundant (the URL still wins in
+         consumePendingGuideInvite) and gets cleared there — one harmless extra
+         write per invited signup, the price of the toggle being safe to flip. */
+      const pendingInvite = pendingGuideCode() || readStashedGuide();
+      const meta = {};
+      if(displayName) meta.display_name = displayName;
+      if(pendingInvite) meta.pending_guide = pendingInvite;
       /* #2 — emailRedirectTo pinned explicitly. Without it the confirmation link
          resolves against whatever Site URL happens to be set, which is the exact
          footgun in the Auth URLs row of the roadmap header — and item 50's
@@ -2876,7 +2956,7 @@ async function submitAuth(){
       const { data, error } = await sb.auth.signUp({
         email, password, options: {
           emailRedirectTo: AUTH_REDIRECT_BASE,
-          data: displayName ? { display_name: displayName } : {}
+          data: meta
         }
       });
       if(error){ authMsg(error.message); return; }
@@ -2892,6 +2972,51 @@ async function submitAuth(){
       if(error){ authMsg(error.message); return; }
       onAuthed(data.session);
     }
+  }catch(e){
+    authMsg("Something went wrong reaching the server. Check your connection.");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+/* #69(c) — resend a signup confirmation email. Mirrors the 'forgot' path #2
+   built, because it is the same failure on the other door: a confirmation email
+   that never arrived strands an account exactly the way a forgotten password
+   did. Uses the email already typed into the login field — the person who needs
+   this just tried to create an account and was told to check their inbox.
+   ANTI-ENUMERATION, deliberately identical to forgot: the message never reveals
+   whether the address exists or is already confirmed. sb.auth.resend 400s for
+   an already-confirmed or unknown address; that is swallowed into the same
+   neutral "on its way" line so this door cannot be used to probe which emails
+   have accounts — the stance #2 adopted and #69's own "known wrinkle" note
+   protects. emailRedirectTo is pinned to AUTH_REDIRECT_BASE, the same constant
+   #2 pinned, so #50's rename still has one place to change.
+   INERT WHILE CONFIRM EMAIL IS OFF: with the toggle off there is nothing to
+   confirm, so every call 400s and returns the neutral line — no email sent,
+   nothing a user can trigger. This goes live the moment #69's toggle flips. */
+async function resendConfirmation(){
+  const email = document.getElementById('auth-email').value.trim();
+  if(!email){ authMsg("Type your email above first, then tap resend."); return; }
+  const btn = document.getElementById('auth-resend-btn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  authMsg('', '');
+  try{
+    const { error } = await sb.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: AUTH_REDIRECT_BASE }
+    });
+    if(error && error.status === 429){
+      authMsg("Too many requests just now — wait a minute, then tap resend again.");
+      return;
+    }
+    /* 400 = already confirmed, unknown address, or nothing to resend. Swallowed
+       into the neutral line, same as forgot's 400 handling, so existence never
+       leaks. Only real transport/5xx errors surface. */
+    if(error && error.status !== 400){ authMsg(error.message); return; }
+    authMsg("If that email is waiting on confirmation, a fresh link is on its way. It expires in an hour.", 'ok');
   }catch(e){
     authMsg("Something went wrong reaching the server. Check your connection.");
   }finally{
@@ -2917,6 +3042,11 @@ async function logout(){
   location.reload(); // simplest clean reset back to the login screen
 }
 async function checkAuthAndBoot(){
+  // #128 — capture the invite BEFORE any auth action can navigate the tab away.
+  // Runs first, unconditionally, on every entry (including the recovery-link and
+  // already-logged-in returns below), so no auth path can strip the param before
+  // it is saved. Harmless when there is no ?guide= — stashGuideInvite() no-ops.
+  stashGuideInvite();
   if(demoBypassActive()){
     // Skip login: use a throwaway local user and boot straight into the app.
     state.user = { id: 'demo-user', email: 'demo@nahgoo.com' };
@@ -5414,12 +5544,12 @@ async function init(){
      arm for fixed-content guides, so a browse-elsewhere does not regenerate it
      either. Neither guard was added here — both already existed, which is what
      makes this placement safe rather than lucky.
-     KNOWN GAP, AND IT ARRIVES WITH #69: when Confirm Email is switched on, the
-     confirmation link redirects to AUTH_REDIRECT_BASE, which carries no
-     ?guide= — so an invited NEW user loses the invite between signing up and
-     landing in the app. It survives today only because signup returns a session
-     directly. Whoever flips that toggle has to carry the code through the
-     redirect or hand it back on arrival. */
+     #128 CLOSED THE #69 GAP THAT USED TO BE NOTED HERE: consumePendingGuideInvite
+     now reads the invite from the URL, sessionStorage, or user metadata, so an
+     invited NEW user no longer loses the code when Confirm Email is on and the
+     confirmation link returns through AUTH_REDIRECT_BASE with no ?guide=. The
+     metadata carrier (set in submitAuth's signup branch) survives that
+     cross-tab round trip; see the #128 note by pendingGuideCode(). */
   await consumePendingGuideInvite();
 
 }
@@ -5622,7 +5752,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28a';
+const APP_VERSION = '2026.07.28b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8605,14 +8735,29 @@ async function redeemCode(){
   }
 }
 
-/* #85 — the invite path. Called from init() and nowhere else. */
+/* #85 — the invite path. Called from init() and nowhere else.
+   #128 — the code can now arrive by three routes, read in descending immediacy:
+     1. the URL param `?guide=` — the confirm-OFF path, still the only route
+        consulted when it is present, so #85's behaviour is byte-for-byte intact;
+     2. sessionStorage — stashed at boot, survives a same-tab auth navigation
+        (OAuth #76, implicit-flow reset);
+     3. user metadata `pending_guide` — carried through the email-confirmation
+        round trip, the only route that survives a cross-tab / cross-device
+        confirmation landing.
+   Whichever route supplies it, redemption and the failure UI are identical, and
+   every carrier is cleared up front so a redeemed invite never re-fires. */
 async function consumePendingGuideInvite(){
-  const invite = pendingGuideCode();
-  if(!invite) return;
-  /* Clear FIRST and unconditionally. The param has been read into a local;
-     leaving it in the URL means every subsequent reload re-enters the guide and
-     the user can never get back to their own map — a navigation hijack that
-     survives the tab. */
+  const fromUrl   = pendingGuideCode();
+  const fromStash = readStashedGuide();
+  const fromMeta  = (state.user && state.user.user_metadata && state.user.user_metadata.pending_guide) || null;
+  const invite = fromUrl || fromStash || (fromMeta ? String(fromMeta).trim().toUpperCase() : null);
+  /* Clear EVERY carrier FIRST and unconditionally, before any await. Leaving the
+     URL param re-enters the guide on every reload — #85's original navigation
+     hijack. Leaving the stash or the metadata re-fires the invite on the next
+     boot even after it succeeded or was dismissed, so both are cleared too. */
+  clearStashedGuide();
+  if(fromMeta) clearGuideMeta();
+  if(!invite){ clearResetParam(); return; }
   clearResetParam();
   /* Alphabet matches randomCode() here and normaliseCode() in landing.html: no
      I, O, 0 or 1. Validated at the boundary rather than inside
