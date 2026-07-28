@@ -3473,10 +3473,13 @@ function generateDiscoverLocal(base){
      pass's call to make.
 
    FRAMING — "what the camera does"
-     FRAME_RADIUS_M          3000  (~1.9 mi)  ~#6257
+     FRAME_RADIUS_M          1500  (~0.9 mi)  ~#6257
        The default map view around you (#47). Deliberately much smaller than the
-       blend radius: it frames what is walkable, not what is loaded. Roughly a
-       third of REAL_INCLUDE_RADIUS_M, and that ratio has never been examined.
+       blend radius: it frames what is walkable, not what is loaded. Was 3000m
+       (~zoom 12); lowered to 1500m (~zoom 13) so the pin cluster fills the
+       viewport width on open instead of sitting in the center third. Now
+       roughly a sixth of REAL_INCLUDE_RADIUS_M, and that ratio has never been
+       examined.
 
    CAPTURE — "what counts as being there"
      FOUND_THRESHOLD_M         25  (~82 ft)   ~#6181
@@ -5790,7 +5793,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28c';
+const APP_VERSION = '2026.07.28d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6719,13 +6722,16 @@ const ZOOM_WALK = 18;
 /* Safety floor only — the real framing is computed from FRAME_RADIUS_M below. */
 const ZOOM_OVERVIEW = 16;
 /* THE knob for how wide the map opens. The player is always centered and this
-   many meters are guaranteed visible in the narrower screen dimension. 3000m
-   reproduces the overview framing the recenter button used to produce by
-   accident. Want it wider? Raise this. Tighter? Lower it. Nothing else needs
-   to change. */
+   many meters are guaranteed visible in the narrower screen dimension. Was
+   3000m (~1.9mi), which framed the whole north-side overview (~zoom 12) and
+   left the pin cluster occupying only the center third of the width. Lowered
+   to 1500m (~0.9mi, ~zoom 13) so the walkable pin spread reaches most of the
+   viewport width on open — the framing users expected from the pins they see.
+   Want it wider? Raise this. Tighter? Lower it. Nothing else needs to
+   change. */
 // #65 register — FRAMING, not content. Deliberately far smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
-const FRAME_RADIUS_M = 3000;
+const FRAME_RADIUS_M = 1500;
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
   /* #73 — a real fix takes over the input mode; #4's flag does not come back.
