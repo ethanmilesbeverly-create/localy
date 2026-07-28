@@ -5793,7 +5793,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28d';
+const APP_VERSION = '2026.07.28e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7546,12 +7546,27 @@ function recenterMap(){
     if(state.me) regenerateCurrentHuntAt(state.me);
     return; // regenerate -> setCurrentHunt already recenters
   }
-  // #60 — plain local recentre is the ONLY keep-zoom caller. Browse-exit above
-  // routes through exitLocationBrowseMode()'s own centerOnPlayer() and keeps the
-  // fixed frame: coming back from another city is a re-framing, not a nudge, and
-  // since #19 retired the banner this button is the only door out of browse mode,
-  // so landing on a known frame is the honest reset.
-  centerOnPlayer({keepZoom:true});
+  // #60 kept your zoom on EVERY plain press so a street-level look survived a
+  // recenter — but zooming OUT and then pressing locate left you stranded wide,
+  // panning to you without ever bringing you home. #174 makes the default frame
+  // a CEILING on how wide this button leaves you, resolving both directions:
+  //   - currently WIDER than the default frame -> reframe (zoom back in);
+  //   - currently AT or TIGHTER than default   -> keep your zoom (still #60), so
+  //     zooming into a block and tapping locate does not yank you out to the
+  //     overview — the exact case #60 was protecting.
+  // Compared against defaultFrameZoom() — the same number centerOnPlayer would
+  // pick — so the threshold and the destination can never disagree. The map is
+  // already visible and sized here (the user is looking at it and just tapped a
+  // button on it), so the synchronous getBoundsZoom inside defaultFrameZoom is
+  // reliable WITHOUT the invalidateSize/rAF dance centerOnPlayer needs on a
+  // container that may have only just been shown.
+  const curZoom = state.leafletMap.getZoom();
+  const defZoom = defaultFrameZoom(state.me);
+  if(Number.isFinite(curZoom) && Number.isFinite(defZoom) && curZoom < defZoom){
+    centerOnPlayer();                 // wider than default -> re-frame and zoom in
+  }else{
+    centerOnPlayer({keepZoom:true});  // at/tighter than default -> just recenter, keep zoom
+  }
 }
 function toggleTilt(){
   state.is3D = !state.is3D;
@@ -7672,6 +7687,25 @@ function fitMapToHunt(hunt){
   state.leafletMap.fitBounds(bounds, {padding:[48,48], maxZoom:15});
   state.leafletMap.setMinZoom(state.leafletMap.getZoom());
 }
+/* #174 — the zoom centerOnPlayer() settles on for a given center: the FIXED
+   FRAME_RADIUS_M frame, same padding and same ZOOM_OVERVIEW ceiling. Factored
+   out so recenterMap() can ask "is the user currently WIDER than the default
+   frame?" using the exact number centerOnPlayer would pick, instead of a second
+   copy of the math that would silently drift from it — the standing rule the
+   distance register states for constants, applied to a derived zoom. ZOOM_OVERVIEW
+   is only a guard for the degenerate case where the container measures zero and
+   getBoundsZoom returns something nonsensical. */
+function defaultFrameZoom(center){
+  if(!state.leafletMap || !center) return ZOOM_OVERVIEW;
+  const latOffset = FRAME_RADIUS_M / 111320;
+  const lngOffset = FRAME_RADIUS_M / (111320 * Math.cos(center.lat * Math.PI/180));
+  const bounds = L.latLngBounds(
+    [center.lat - latOffset, center.lng - lngOffset],
+    [center.lat + latOffset, center.lng + lngOffset]
+  );
+  const fitZoom = state.leafletMap.getBoundsZoom(bounds, false, L.point(48,48));
+  return Number.isFinite(fitZoom) ? Math.min(fitZoom, ZOOM_OVERVIEW) : ZOOM_OVERVIEW;
+}
 /* You are always the center of the map — pins come and go around you based on
    proximity, rather than the map ever reframing itself to show "everything." */
 function centerOnPlayer(opts){
@@ -7681,7 +7715,9 @@ function centerOnPlayer(opts){
   /* #60 — position and zoom are two different requests, and this button used to
      answer both: zoom into a block, press locate, and you got your position back
      at the cost of the zoom you chose. Keep-zoom is passed ONLY from
-     recenterMap()'s plain local branch.
+     recenterMap()'s plain local branch — and since #174, only its tighter-than-
+     default arm; when the user is wider than the default frame that branch calls
+     centerOnPlayer() with no opts so the reframe below runs instead.
      Three things are deliberately skipped on this path, and the last is the trap:
        - the zoom computation: there is no zoom to compute, so panTo is enough
          and is smoother than setView;
@@ -7718,16 +7754,10 @@ function centerOnPlayer(opts){
     // function, same call, two completely different results depending on network
     // timing. A constant radius makes first boot, explore-card taps, and the
     // recenter button all identical, and immune to when the fetch resolves.
-    const latOffset = FRAME_RADIUS_M / 111320;
-    const lngOffset = FRAME_RADIUS_M / (111320 * Math.cos(center.lat * Math.PI/180));
-    const bounds = L.latLngBounds(
-      [center.lat - latOffset, center.lng - lngOffset],
-      [center.lat + latOffset, center.lng + lngOffset]
-    );
-    const fitZoom = state.leafletMap.getBoundsZoom(bounds, false, L.point(48,48));
-    // ZOOM_OVERVIEW is only a floor for the degenerate case where the container
-    // still measures zero and getBoundsZoom returns something nonsensical.
-    let targetZoom = Number.isFinite(fitZoom) ? Math.min(fitZoom, ZOOM_OVERVIEW) : ZOOM_OVERVIEW;
+    // #174 — single source of truth for the frame zoom (see defaultFrameZoom).
+    // recenterMap() compares the live zoom against this very number to decide
+    // whether a press should reframe, so the two can never disagree.
+    let targetZoom = defaultFrameZoom(center);
     state._programmaticViewChange = true;
     state.leafletMap.setView([center.lat, center.lng], targetZoom);
     state.leafletMap.setMinZoom(targetZoom - 2); // real headroom to pinch out from the default framing, instead of being frozen half a level below it
