@@ -1434,6 +1434,24 @@
     padding:24px;
   }
   #location-modal.show{display:flex;}
+  /* #52 — first-run onboarding: a full-screen 3-step flow (location, camera,
+     add-to-home) shown once per device after sign-in. Reuses .modal-card, .btn
+     and .modal-icon; adds only the overlay, step-switching and the dots. */
+  #onboard-overlay{
+    position:absolute;inset:0;z-index:2000;
+    background:rgba(6,16,12,0.94);
+    backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  #onboard-overlay.show{display:flex;}
+  #onboard-overlay .modal-card{max-width:360px;}
+  .onboard-step{display:none;}
+  .onboard-step.active{display:block;}
+  .onboard-dots{display:flex;gap:7px;justify-content:center;margin-top:18px;}
+  .onboard-dots span{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s;}
+  .onboard-dots span.on{background:var(--orange);}
+  .onboard-hint{color:var(--text-dim);font-size:12.5px;line-height:1.5;margin-top:12px;}
   .modal-card{
     background:var(--surface);border:1px solid var(--line);
     border-radius:20px;padding:30px 24px 22px;text-align:center;max-width:340px;
@@ -1621,6 +1639,57 @@
       <p>This app is built around real places near you — finding them, walking to them, and checking in only once you're actually there. Without location access, that core loop can't work.</p>
       <button class="btn" onclick="grantLocationAccess()">Share My Location</button>
       <button class="btn ghost" onclick="declineLocationAccess()">Not now — demo mode only</button>
+    </div>
+  </div>
+
+  <!-- #52 — first-run onboarding. Shown once per device by startOnboarding()
+       after auth, gated on ONBOARDED_KEY + demoBypassActive(). Each step fires a
+       real OS prompt (location, camera) with a reason shown first; every step is
+       skippable and no denial is a dead end. Step 3 nudges Add-to-Home-Screen,
+       as a convenience. Making that install ALSO persist the iOS camera grant
+       needs a PWA manifest + apple-mobile-web-app meta this file does not yet
+       have (tracked as a follow-up), so step 3's copy promises the icon, not the
+       permission. -->
+  <div id="onboard-overlay">
+    <div class="modal-card">
+
+      <div class="onboard-step active" id="onboard-step-1">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        </div>
+        <h2>Find what's near you</h2>
+        <p>Nahgoo is built around real places around you — finding them, walking to them, and checking in once you're actually there. It needs your location for that core loop to work.</p>
+        <button class="btn" onclick="onboardEnableLocation()">Enable location</button>
+        <button class="btn ghost" onclick="onboardNext()">Not now</button>
+      </div>
+
+      <div class="onboard-step" id="onboard-step-2">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <h2>Check in with your camera</h2>
+        <p>When you reach a place, you capture it through an AR camera view — that's how a check-in works. Enabling the camera now means we won't interrupt you for it later, mid-walk.</p>
+        <button class="btn" onclick="onboardEnableCamera()">Enable camera</button>
+        <button class="btn ghost" onclick="onboardNext()">Not now</button>
+      </div>
+
+      <div class="onboard-step" id="onboard-step-3">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </div>
+        <h2>You're all set</h2>
+        <p id="onboard-step-3-body">Add Nahgoo to your home screen so it's one tap away and opens without the browser bar.</p>
+        <button class="btn" id="onboard-install-btn" onclick="onboardInstall()" style="display:none;">Add to Home Screen</button>
+        <p class="onboard-hint" id="onboard-ios-hint" style="display:none;">On iPhone: tap the Share button, then <strong>Add to Home Screen</strong>.</p>
+        <button class="btn ghost" onclick="finishOnboarding()">Start exploring</button>
+      </div>
+
+      <div class="onboard-dots">
+        <span id="onboard-dot-1" class="on"></span>
+        <span id="onboard-dot-2"></span>
+        <span id="onboard-dot-3"></span>
+      </div>
+
     </div>
   </div>
 
@@ -5548,6 +5617,115 @@ function notePersistenceIssue(e){
 /* =========================================================
    INIT
    ========================================================= */
+/* =========================================================
+   #52 — FIRST-RUN ONBOARDING (location · camera · add-to-home)
+   Shown once per DEVICE (ONBOARDED_KEY in localStorage, NOT per-user, because a
+   camera/location grant is a property of the browser+origin, not the account).
+   Skipped in demo mode and for anyone already onboarded on this device. Every
+   step fires a real OS prompt with a reason shown first and is fully skippable;
+   a denial drops into the recoverable fallbacks the app already has (demo /
+   tap-to-locate; openAR()'s camera-off message). We never re-show these screens.
+   The OS itself may still re-ask on iOS Safari (camera is page-load scoped there)
+   — the step-3 Add-to-Home-Screen nudge is the only fix for that, and it is a
+   platform limit, not a bug.
+   ========================================================= */
+const ONBOARDED_KEY = 'nahgoo:onboarded:v1';
+
+function onboardingDone(){
+  try{ return localStorage.getItem(ONBOARDED_KEY) === '1'; }catch(e){ return false; }
+}
+function shouldRunOnboarding(){
+  return !demoBypassActive() && !onboardingDone();
+}
+/* #52/#73 — startLocating() must run exactly once whether it is kicked off by
+   onboarding step 1 or by init()'s normal path. watchLocation() already guards
+   its own double-register; this guards the getCurrentPosition re-fire so the two
+   entry points cannot double-prompt. */
+function ensureLocating(){
+  if(state._locatingStarted) return;
+  state._locatingStarted = true;
+  startLocating();
+}
+
+/* Android fires this before offering install; capture and defer it so step 3's
+   button can trigger the real prompt. Registered at parse time so it is never
+   missed. iOS Safari never fires it — step 3 shows a manual instruction there. */
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  state._installPrompt = e;
+});
+
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent || '') && !window.MSStream;
+}
+
+function startOnboarding(){
+  showOnboardStep(1);
+  document.getElementById('onboard-overlay').classList.add('show');
+}
+function showOnboardStep(n){
+  state._onboardStep = n;
+  for(let i=1;i<=3;i++){
+    document.getElementById('onboard-step-'+i).classList.toggle('active', i===n);
+    document.getElementById('onboard-dot-'+i).classList.toggle('on', i<=n);
+  }
+  if(n===3) prepareInstallStep();
+}
+function onboardNext(){
+  const next = (state._onboardStep||1) + 1;
+  if(next > 3){ finishOnboarding(); return; }
+  // Skip the install step entirely when it can do nothing useful (already
+  // installed) — there is nothing to add to a home screen from inside the app.
+  if(next === 3 && isStandalone()){ finishOnboarding(); return; }
+  showOnboardStep(next);
+}
+function onboardEnableLocation(){
+  ensureLocating();   // fires the real OS location prompt via startLocating()
+  onboardNext();
+}
+async function onboardEnableCamera(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    /* #52 — do NOT hold the stream open past this point: it burns battery and
+       leaves the recording indicator lit. The grant persists on its own on
+       Chrome/Android (per origin); on iOS Safari it is page-load scoped and this
+       is the honest ceiling. We only needed to trigger and bank the permission. */
+    stream.getTracks().forEach(t=>t.stop());
+  }catch(e){ /* denied or unavailable — non-blocking; openAR() handles it later */ }
+  onboardNext();
+}
+function prepareInstallStep(){
+  const btn = document.getElementById('onboard-install-btn');
+  const iosHint = document.getElementById('onboard-ios-hint');
+  const body = document.getElementById('onboard-step-3-body');
+  btn.style.display = 'none';
+  iosHint.style.display = 'none';
+  if(state._installPrompt){
+    btn.style.display = '';            // Android: a real install prompt is queued
+  } else if(isIOSDevice() && !isStandalone()){
+    iosHint.style.display = '';        // iOS: manual Add to Home Screen
+  } else {
+    // Nothing to install (desktop, unsupported, or already standalone) — keep
+    // the reassurance but drop the home-screen line so it is not a dead promise.
+    body.textContent = "You're ready to go. Head out and start capturing places near you.";
+  }
+}
+async function onboardInstall(){
+  const p = state._installPrompt;
+  if(!p) return;
+  state._installPrompt = null;
+  try{ p.prompt(); await p.userChoice; }catch(e){}
+  document.getElementById('onboard-install-btn').style.display = 'none';
+}
+function finishOnboarding(){
+  try{ localStorage.setItem(ONBOARDED_KEY, '1'); }catch(e){}
+  document.getElementById('onboard-overlay').classList.remove('show');
+  ensureLocating();   // safety net: guarantees locating starts even if step 1 was skipped
+}
+
 async function init(){
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
@@ -5564,7 +5742,12 @@ async function init(){
   wirePlaceSuggest();   // #88 — both location search fields get the dropdown
   startLocalHunt(FALLBACK_LOCATION); // content immediately, refined once real location resolves
   fixMapSize();
-  startLocating();
+  /* #52 — first-run onboarding, when present, owns the first location prompt
+     (step 1) so it arrives with a reason instead of cold. Otherwise locate now.
+     ensureLocating() is idempotent, so finishOnboarding()'s safety-net call and
+     this one cannot double-register or double-prompt. */
+  if(shouldRunOnboarding()){ startOnboarding(); }
+  else { ensureLocating(); }
   // #1a — retry the blocked read when the connection returns, so a bad boot is a
   // temporary condition rather than a dead session.
   window.addEventListener('online', ()=>{ flushPendingWrites(); retryLoadPersonal(); });
@@ -5793,7 +5976,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28e';
+const APP_VERSION = '2026.07.28f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10117,7 +10300,13 @@ async function openAR(){
   }catch(e){
     document.getElementById('ar-marker').style.display='none';
     msg.style.display='block';
-    msg.textContent = "Camera access isn't available here (permissions, or blocked by this preview environment) — the compass and distance above still work, and Capture is ready since you're in range.";
+    // #52 — tell a user who tapped Deny that it is undoable, instead of blaming
+    // the environment for every failure. NotAllowedError/SecurityError == the
+    // user (or a prior denial) blocked it; anything else is genuinely unavailable.
+    const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+    msg.textContent = denied
+      ? "Camera is off for Nahgoo. You can turn it back on in your browser's site settings for this page — meanwhile the compass and distance above still work, and Capture is ready since you're in range."
+      : "Camera isn't available here (it may be blocked by this browser or a preview environment) — the compass and distance above still work, and Capture is ready since you're in range.";
   }
   refreshTrackUI();
   startArSync();
