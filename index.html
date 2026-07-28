@@ -2019,6 +2019,28 @@
       <div class="settings-card">
         <p>Signed in as <span class="val" id="settings-email">—</span></p>
       </div>
+      <!-- #69(c) — RESEND CONFIRMATION lives here, in Settings, not on the login
+           screen. Settings is behind the session, so the email address is always
+           known without asking, and account plumbing belongs on the account
+           screen. DELIBERATELY NO "verified ✓" BADGE: the only client-visible
+           signal is email_confirmed_at, and per #69(a) Supabase stamps that
+           column at signup while Confirm Email is OFF — so every account,
+           including the five legacy ones, reads confirmed whether or not any
+           confirmation happened. A badge built on it would show "verified" for
+           everyone and would be a FALSE disclosure on the settings screen, the
+           category #5 already had to remediate once. The badge ships in the same
+           session the toggle flips, when the column finally means something (with
+           the legacy-account caveat annotated). Until then this card offers the
+           ACTION without asserting the STATUS.
+           INERT WHILE CONFIRM EMAIL IS OFF: sb.auth.resend(type:'signup') has
+           nothing to resend for an already-confirmed account and 400s, swallowed
+           into the neutral line — so shipping ahead of the flip does nothing a
+           user can trigger. It goes live the moment the toggle is on. -->
+      <div class="settings-card" style="margin-top:10px;">
+        <p style="margin:0 0 8px;">If you signed up and never got a confirmation email, send yourself a fresh one.</p>
+        <button class="settings-btn" id="settings-resend-btn" onclick="resendConfirmationForAccount()">Resend confirmation email</button>
+        <p id="settings-resend-msg" style="margin:8px 0 0;display:none;"></p>
+      </div>
       <!-- #23 — #81's surface earning its keep again. This is the ONLY place a
            name can be changed after the fact, and it rewrites the credit on
            every gem the account has ever submitted at once, because credit is
@@ -2270,22 +2292,6 @@
         <button id="auth-forgot-btn" type="button">Forgot password?</button>
       </div>
 
-      <!-- #69(c) — RESEND CONFIRMATION. A lost confirmation email dead-ends an
-           account exactly the way a forgotten password did before #2 built the
-           reset path; this is the same door on the other side. Deliberately a
-           quiet action on the LOGIN screen rather than its own mode: the person
-           who needs it typed their email, hit "Create account", was told to
-           check their inbox, and came back here when nothing arrived — so the
-           email field is already the one they want. Uses the same
-           anti-enumeration message shape as forgot (see resendConfirmation()).
-           INERT WHILE CONFIRM EMAIL IS OFF: sb.auth.resend(type:'signup') has
-           nothing to resend for an already-confirmed account and 400s, which is
-           swallowed — so shipping this before #69's toggle flip changes nothing
-           a user can trigger. It becomes live the moment the toggle is on. -->
-      <div id="auth-resend-row" class="auth-hidden">
-        <button id="auth-resend-btn" type="button">Didn't get the confirmation email? Resend it</button>
-      </div>
-
       <div id="auth-switch">
         <span id="auth-switch-text">New here?</span>
         <button id="auth-switch-btn" type="button">Create an account</button>
@@ -2360,17 +2366,11 @@
   .auth-hint{ font-size:11.5px; line-height:1.45; color:var(--text-dim); opacity:.75; margin:5px 0 0; }
   #auth-forgot-row{ margin-top:14px; text-align:center; }
   #auth-back-row{ margin-top:16px; text-align:center; }
-  /* #69(c) — sits tighter to the forgot row than a fresh block, since the two
-     are the same kind of "I'm stuck getting in" recovery affordance. */
-  #auth-resend-row{ margin-top:8px; text-align:center; }
-  #auth-forgot-btn, #auth-back-btn, #auth-resend-btn{
+  #auth-forgot-btn, #auth-back-btn{
     background:none; border:none; color:var(--text-dim);
     font-weight:600; font-size:13px; cursor:pointer; font-family:inherit;
     padding:4px; text-decoration:underline;
   }
-  /* #69(c) — one notch smaller than forgot: it is the rarer path and should
-     read as secondary to it, not compete. */
-  #auth-resend-btn{ font-size:12px; font-weight:500; line-height:1.4; }
   #auth-switch-btn{
     background:none; border:none; color:var(--orange);
     font-weight:700; font-size:13px; cursor:pointer; font-family:inherit;
@@ -2836,7 +2836,6 @@ function setAuthMode(mode){
   show('auth-password-row',  mode!=='forgot');
   show('auth-password2-row', mode==='reset');
   show('auth-forgot-row',    mode==='login');
-  show('auth-resend-row',    mode==='login'); // #69(c) — same audience as forgot: someone stuck getting in
   show('auth-switch',        mode==='login' || mode==='signup');
   // No escape hatch out of 'reset': leaving it half-done is what strands people.
   show('auth-back-row',      mode==='forgot');
@@ -2868,7 +2867,6 @@ function wireAuthUI(){
     setAuthMode(authMode==='login' ? 'signup' : 'login');
   });
   document.getElementById('auth-forgot-btn').addEventListener('click', ()=> setAuthMode('forgot'));
-  document.getElementById('auth-resend-btn').addEventListener('click', resendConfirmation); // #69(c)
   document.getElementById('auth-back-btn').addEventListener('click', ()=> setAuthMode('login'));
   document.getElementById('auth-submit').addEventListener('click', submitAuth);
   ['auth-email','auth-name','auth-password','auth-password2'].forEach(id=>{
@@ -2972,51 +2970,6 @@ async function submitAuth(){
       if(error){ authMsg(error.message); return; }
       onAuthed(data.session);
     }
-  }catch(e){
-    authMsg("Something went wrong reaching the server. Check your connection.");
-  }finally{
-    btn.disabled = false;
-    btn.textContent = original;
-  }
-}
-/* #69(c) — resend a signup confirmation email. Mirrors the 'forgot' path #2
-   built, because it is the same failure on the other door: a confirmation email
-   that never arrived strands an account exactly the way a forgotten password
-   did. Uses the email already typed into the login field — the person who needs
-   this just tried to create an account and was told to check their inbox.
-   ANTI-ENUMERATION, deliberately identical to forgot: the message never reveals
-   whether the address exists or is already confirmed. sb.auth.resend 400s for
-   an already-confirmed or unknown address; that is swallowed into the same
-   neutral "on its way" line so this door cannot be used to probe which emails
-   have accounts — the stance #2 adopted and #69's own "known wrinkle" note
-   protects. emailRedirectTo is pinned to AUTH_REDIRECT_BASE, the same constant
-   #2 pinned, so #50's rename still has one place to change.
-   INERT WHILE CONFIRM EMAIL IS OFF: with the toggle off there is nothing to
-   confirm, so every call 400s and returns the neutral line — no email sent,
-   nothing a user can trigger. This goes live the moment #69's toggle flips. */
-async function resendConfirmation(){
-  const email = document.getElementById('auth-email').value.trim();
-  if(!email){ authMsg("Type your email above first, then tap resend."); return; }
-  const btn = document.getElementById('auth-resend-btn');
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  authMsg('', '');
-  try{
-    const { error } = await sb.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: AUTH_REDIRECT_BASE }
-    });
-    if(error && error.status === 429){
-      authMsg("Too many requests just now — wait a minute, then tap resend again.");
-      return;
-    }
-    /* 400 = already confirmed, unknown address, or nothing to resend. Swallowed
-       into the neutral line, same as forgot's 400 handling, so existence never
-       leaks. Only real transport/5xx errors surface. */
-    if(error && error.status !== 400){ authMsg(error.message); return; }
-    authMsg("If that email is waiting on confirmation, a fresh link is on its way. It expires in an hour.", 'ok');
   }catch(e){
     authMsg("Something went wrong reaching the server. Check your connection.");
   }finally{
@@ -6084,6 +6037,63 @@ async function saveSettingsName(){
     /* Refresh the discovery pool so the change is visible on the map without a
        reload — the credit lives on the point, and the points are built at load. */
     await loadApprovedGems();
+  }finally{
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+/* #69(c) — resend a signup confirmation email from Settings → Account, using the
+   signed-in user's own address (state.user.email). No email field to fill,
+   because Settings is behind the session. Same failure this closes as #2's
+   reset path: a confirmation email that never arrived strands an account
+   exactly the way a forgotten password did.
+   NO existence question to manage, unlike a login-screen version: the caller is
+   already authenticated as this address, so the anti-enumeration concern that
+   shapes forgot/signup messaging does not apply. A 400 means "nothing to
+   confirm" (already confirmed, or the toggle is off) and is reported honestly
+   rather than as a false success — the user owns this account and is entitled
+   to the truth about it, which is the same reason a badge built on the
+   unreliable email_confirmed_at column is NOT shown (see the card markup) while
+   this plain action is.
+   INERT WHILE CONFIRM EMAIL IS OFF: every call 400s and says there was nothing
+   to send, so shipping ahead of the flip does nothing. Live with the toggle. */
+async function resendConfirmationForAccount(){
+  const email = (state.user && state.user.email) || '';
+  const btn = document.getElementById('settings-resend-btn');
+  const msg = document.getElementById('settings-resend-msg');
+  const showMsg = (text, ok)=>{
+    if(!msg) return;
+    msg.textContent = text;
+    msg.style.display = text ? '' : 'none';
+    msg.style.color = ok ? 'var(--accent-2, #9FB3A4)' : 'var(--danger)';
+  };
+  if(!email){ showMsg("Couldn't read your account email — try reopening Settings.", false); return; }
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  showMsg('', true);
+  try{
+    const { error } = await sb.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: AUTH_REDIRECT_BASE }
+    });
+    if(error && error.status === 429){
+      showMsg("Too many requests just now — wait a minute, then try again.", false);
+      return;
+    }
+    /* 400 = nothing to confirm (already confirmed, or Confirm Email is off).
+       Reported plainly, not as a fake success: the user owns this account and
+       asked a direct question about it. */
+    if(error && error.status === 400){
+      showMsg("This account's email is already confirmed — nothing to resend.", true);
+      return;
+    }
+    if(error){ showMsg(error.message, false); return; }
+    showMsg("Sent. Check your inbox for a fresh confirmation link — it expires in an hour.", true);
+  }catch(e){
+    showMsg("Something went wrong reaching the server. Check your connection and try again.", false);
   }finally{
     btn.disabled = false;
     btn.textContent = original;
