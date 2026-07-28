@@ -6,9 +6,9 @@
      low-vision users. iOS input auto-zoom (the reason #46 reached for the lock)
      is now prevented the correct way, by 16px font-size on every input below. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Stowmark</title>
+<title>Nahgoo</title>
 <!-- ============================================================
-     "#N" IN COMMENTS = a row number in stowmark-roadmap.md.
+     "#N" IN COMMENTS = a row number in nahgoo-roadmap.md.
      Those numbers used to double as the priority rank, so reordering the
      table silently rewrote every reference in here — seven comments had
      rotted by the time anyone checked, each one pointing confidently at the
@@ -993,7 +993,7 @@
      text plus a copy icon — no background or border, because the filled surface
      read as a tappable button and competed with the real actions below it.
      Copy rather than an outbound maps link: the point is to keep people inside
-     Stowmark, so the address is available to paste without handing the session off
+     Nahgoo, so the address is available to paste without handing the session off
      to Google/Apple Maps mid-hunt. */
   .ps-loc{
     display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;
@@ -1617,7 +1617,7 @@
       <div class="modal-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
       </div>
-      <h2>Stowmark needs your location</h2>
+      <h2>Nahgoo needs your location</h2>
       <p>This app is built around real places near you — finding them, walking to them, and checking in only once you're actually there. Without location access, that core loop can't work.</p>
       <button class="btn" onclick="grantLocationAccess()">Share My Location</button>
       <button class="btn ghost" onclick="declineLocationAccess()">Not now — demo mode only</button>
@@ -1668,9 +1668,11 @@
 
   <!-- #50 — THE WORDMARK, AND WHY THE <span> SPLITS WHERE IT DOES.
        The old mark was LOCAL<span>Y</span>: the accent sat on the one letter
-       that turned the word "local" into a name. Stowmark has no such letter —
-       it is two real morphemes — so the accent moves to the second element,
-       STOW|MARK. This is a judgement call, not a derivation.
+       that turned the word "local" into a name. Nahgoo has no such letter, and
+       unlike Stowmark it is not two morphemes either: it is a single word, an
+       English phonetic spelling of Akkadian nagu. The split at NAH|GOO is
+       therefore purely syllabic — it falls where the voice already breaks.
+       This is a judgement call, not a derivation.
 
        THE SPAN IS ALSO WHY THIS LINE SURVIVED THE FIRST RENAME PASS. A grep
        for "Localy" cannot match "LOCAL<span>Y</span>", so both wordmarks in
@@ -1680,7 +1682,7 @@
        TAG-STRIPPED search of the rendered text, not a search of the source.
        If the name ever changes again, run that one first. -->
   <div id="topbar">
-    <div class="brand">STOW<span>MARK</span></div>
+    <div class="brand display">NAH<span>GOO</span></div>
   </div>
 
   <!-- MODE SELECT -->
@@ -2054,7 +2056,7 @@
     <div class="settings-section">
       <h2>Your data</h2>
       <div class="settings-card">
-        <p><strong class="val">Stowmark doesn't store your location.</strong> Your position is used in the moment — to draw the map and measure how far away a pin is — and then it's gone.</p>
+        <p><strong class="val">Nahgoo doesn't store your location.</strong> Your position is used in the moment — to draw the map and measure how far away a pin is — and then it's gone.</p>
         <p>What's kept in your account:</p>
         <ul class="data-list">
           <li>Which spots you've captured and <strong>when</strong> — the coordinates saved are <strong>the place's own</strong>, the same ones on the public map</li>
@@ -2077,7 +2079,7 @@
     <div class="settings-section" id="clear-data-section" style="display:none;">
       <h2>Delete my account</h2>
       <div class="settings-card">
-        <p>Permanently deletes your Stowmark account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Permanently deletes your Nahgoo account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
         <p>Two things this does <strong class="val">not</strong> remove. Gems you've submitted stay on the map — once approved they're public spots other people use — but they're unlinked from you, so nothing shows you as their submitter. And guide codes you've already shared keep working for the people you sent them to.</p>
         <p><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> for how the rest of your data is handled.</p>
       </div>
@@ -2091,7 +2093,7 @@
       </div>
     </div>
 
-    <!-- #91 — every third-party source in one place. Stowmark pulls OSM data
+    <!-- #91 — every third-party source in one place. Nahgoo pulls OSM data
          through THREE separate doors (tiles, place pins, geocoding) and the
          obligation is one credit, not three, so they are listed together
          rather than scattered next to each feature. Wikipedia is here for the
@@ -2127,7 +2129,7 @@
     <div class="settings-section">
       <h2>About</h2>
       <div class="settings-card">
-        <p>Stowmark — <span class="val" id="settings-version">—</span></p>
+        <p>Nahgoo — <span class="val" id="settings-version">—</span></p>
         <p>Ask a local.</p>
       </div>
     </div>
@@ -2218,9 +2220,9 @@
   <!-- ================= AUTH OVERLAY ================= -->
   <div id="auth-overlay">
     <div id="auth-card">
-      <!-- .display uppercases this, so it renders STOWMARK. Same STOW|MARK
+      <!-- .display uppercases this, so it renders NAHGOO. Same NAH|GOO
            accent split as #topbar's .brand — see the comment there. -->
-      <div id="auth-brand" class="display">Stow<span>mark</span></div>
+      <div id="auth-brand" class="display">Nah<span>goo</span></div>
       <p id="auth-tagline">Ask a local. Discover anywhere.</p>
 
       <!-- #2 — four modes share this one card: login / signup / forgot / reset.
@@ -2475,7 +2477,7 @@ const supabaseStorage = {
    ========================================================= */
 /* THE OLD BRAND NAME IN THIS STRING IS DELIBERATE AND MUST NOT BE "FIXED".
    This is a PERSISTED localStorage key prefix, not copy. Renaming it to
-   `stowmark:v1:` on the #50 rename would orphan every mirror already written
+   `nahgoo:v1:` on the #50 rename would orphan every mirror already written
    on every device — a walk captured offline before the rename would flush
    into nowhere, and the pre-rename mirror would sit unreadable until Safari
    evicted it. Same ruling #56 made for `'my-hunts'`, `'hunt-code:'` and the
@@ -2686,7 +2688,7 @@ function show(id, on){
    stops the client touching that column, and blocked survives a rename.
 
    THE ONE THING THESE CHECKS DO CATCH IS THE REAL RISK, WHICH IS NOT PROFANITY:
-   a name that claims AUTHORITY. "Stowmark Official" or "Verified Local" next to a
+   a name that claims AUTHORITY. "Nahgoo Official" or "Verified Local" next to a
    place recommendation asserts something the app cannot back — the same line
    #14 drew against fabricated attribution and #33 drew against a self-declared
    verified-local badge.
@@ -2696,10 +2698,10 @@ function show(id, on){
    stripping non-letters made "L0caly 0fficial" collapse to "localyofficial".
    It does not. `.replace(/[^a-z]/g,'')` DELETES the digit rather than folding
    it back to the letter it imitates, so "L0caly 0fficial" collapses to
-   "lcalyfficial" and passes, and "St0wmark 0fficial" collapses to
-   "stwmarkfficial" and passes for the same reason. What the strip genuinely
-   catches is SPACING AND PUNCTUATION: "Stowmark Official", "stowmark-official"
-   and "Stowmark.Official" all land on "stowmarkofficial" and are refused.
+   "lcalyfficial" and passes, and "N4hgoo 0fficial" collapses to
+   "nhgoofficial" and passes for the same reason. What the strip genuinely
+   catches is SPACING AND PUNCTUATION: "Nahgoo Official", "nahgoo-official"
+   and "Nahgoo.Official" all land on "nahgoofficial" and are refused.
 
    THE LEETSPEAK HOLE IS THEREFORE REAL, KNOWN, AND DELIBERATELY LEFT OPEN HERE
    rather than patched inside a rename pass. Folding digits to letters is a
@@ -2709,11 +2711,13 @@ function show(id, on){
    about. `profiles.status` plus a human is still what moderates a name, and
    that path is unaffected by this gap. Tracked as its own row.
 
-   BOTH BRANDS ARE RESERVED AND THAT IS NOT AN OVERSIGHT (#50). The Localy
-   names stay blocked because links, screenshots and word-of-mouth carrying the
+   ALL THREE BRANDS ARE RESERVED AND THAT IS NOT AN OVERSIGHT (#50). Localy and
+   Stowmark stay blocked because links, screenshots and word-of-mouth carrying an
    old name outlive the rename, and "Localy Official" claims exactly the same
-   authority the day after the rename as the day before. Reserving a name costs
-   nothing; unreserving one is only ever discovered by someone taking it.
+   authority the day after the rename as the day before. Stowmark earned its place
+   here by reaching a real deployed build on 2026-07-27, however briefly. Reserving
+   a name costs nothing; unreserving one is only ever discovered by someone taking
+   it.
 
    THIS LIST IS ONE OF TWO COPIES AND profiles.sql IS AUTHORITATIVE. The copy
    here exists so the user gets an instant inline message instead of a Postgres
@@ -2723,6 +2727,7 @@ function show(id, on){
 const DISPLAY_NAME_MIN = 2;
 const DISPLAY_NAME_MAX = 24;
 const RESERVED_DISPLAY_NAMES = new Set([
+  'nahgoo','nahgooapp','nahgooteam','nahgoofficial','nahgoostaff',
   'stowmark','stowmarkapp','stowmarkteam','stowmarkofficial','stowmarkstaff',
   'localy','localyapp','localyteam','localyofficial','localystaff',
   'admin','administrator','moderator','mod','staff','support','helpdesk',
@@ -2914,7 +2919,7 @@ async function logout(){
 async function checkAuthAndBoot(){
   if(demoBypassActive()){
     // Skip login: use a throwaway local user and boot straight into the app.
-    state.user = { id: 'demo-user', email: 'demo@stowmark.app' };
+    state.user = { id: 'demo-user', email: 'demo@nahgoo.com' };
     document.getElementById('auth-overlay').classList.add('hidden');
     if(!state._booted){ state._booted = true; init(); }
     return;
@@ -5617,7 +5622,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.27c';
+const APP_VERSION = '2026.07.28a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8319,7 +8324,7 @@ function shareHunt(id){
   if(!h){ return; }
   if(!h.code){ showToast('No code yet — edit and save once to generate one'); return; }
   const link = GUIDE_LINK_BASE + '?code=' + encodeURIComponent(h.code);
-  const text = `Check out my guide "${h.name}" on Stowmark!\n${link}\n(Or enter code ${h.code} in the app.)`;
+  const text = `Check out my guide "${h.name}" on Nahgoo!\n${link}\n(Or enter code ${h.code} in the app.)`;
   window.location.href = 'sms:&body=' + encodeURIComponent(text);
 }
 function openSaveToHuntPicker(pointId){
@@ -8856,7 +8861,7 @@ const PIN_CAT_LABEL = {
 
    No outbound maps link by design — handing someone off to Google/Apple Maps
    mid-hunt is the one tap most likely to end the session. Copying gives them
-   the same information without leaving Stowmark. */
+   the same information without leaving Nahgoo. */
 function fmtCoords(lat, lng){
   return lat.toFixed(5) + ', ' + lng.toFixed(5);
 }

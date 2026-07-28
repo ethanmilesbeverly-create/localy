@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A guide on Stowmark</title>
+<title>A guide on Nahgoo</title>
 <!-- A shared hunt is a named list of places somebody walks to, often near where
      they live. The data is already reachable with the anon key, but an HTML page
      a crawler can index is a different kind of findable than a REST row you need
@@ -37,7 +37,7 @@
      If a future pass wants desktop capture, it inherits item 4 phase 2
      (the judging layer) as a hard prerequisite. Do not add it here.
 
-     "#N" = a row in stowmark-roadmap.md. Stable IDs, never renumbered.
+     "#N" = a row in nahgoo-roadmap.md. Stable IDs, never renumbered.
      ============================================================ -->
 
 <script>
@@ -341,7 +341,7 @@ function normaliseCode(raw){
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M5 21V4c4-2 8 2 12 0v9c-4 2-8-2-12 0"/>
     </svg>
-    <span class="wordmark display">Stowmark</span>
+    <span class="wordmark display">Nahgoo</span>
     <span class="eyebrow">Shared guide</span>
   </header>
 
@@ -411,7 +411,7 @@ function normaliseCode(raw){
   </section>
 
   <footer>
-    <span>Stowmark — walks made by people who live there.</span>
+    <span>Nahgoo — walks made by people who live there.</span>
     <span>Capturing a stop happens on your phone, in front of the place.</span>
     <span id="landing-build" style="opacity:.45;font-size:11px;"></span>
   </footer>
@@ -570,7 +570,7 @@ function renderHunt(code, hunt){
      mobile version of this. */
   show('view-hunt');
   renderMap(hunt.points);
-  document.title = hunt.name + ' — a guide on Stowmark';
+  document.title = hunt.name + ' — a guide on Nahgoo';
 }
 
 function renderMap(points){
@@ -645,7 +645,7 @@ function showLookupError(err, code){
 
   switch(err.kind){
     case 'network':
-      setEntryError('Could not reach Stowmark from this network. Check your '
+      setEntryError('Could not reach Nahgoo from this network. Check your '
         + 'connection and try again.');
       break;
     case 'forbidden':
@@ -654,7 +654,7 @@ function showLookupError(err, code){
         + 'readable without signing in. <code>HTTP ' + esc(err.detail) + '</code>');
       break;
     case 'http':
-      setEntryError('Stowmark answered with an error. Try again in a moment. '
+      setEntryError('Nahgoo answered with an error. Try again in a moment. '
         + '<code>HTTP ' + esc(err.detail) + '</code>');
       break;
     case 'corrupt':

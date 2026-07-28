@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy — Stowmark</title>
-<meta name="description" content="What Stowmark stores, who receives it, how long it is kept, and how to have it erased.">
+<title>Privacy — Nahgoo</title>
+<meta name="description" content="What Nahgoo stores, who receives it, how long it is kept, and how to have it erased.">
 
 <!-- DELIBERATELY CRAWLABLE. landing.html carries noindex/nofollow because it
      renders a named list of places somebody walks to near where they live.
@@ -32,7 +32,7 @@
      persisted by any path. If you change what capture() writes, this file
      becomes false and has to change in the same build.
 
-     "#N" = a row in stowmark-roadmap.md. Stable IDs, never renumbered.
+     "#N" = a row in nahgoo-roadmap.md. Stable IDs, never renumbered.
      ============================================================ -->
 
 <style>
@@ -171,14 +171,14 @@
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M5 21V4c4-2 8 2 12 0v9c-4 2-8-2-12 0"/>
     </svg>
-    <span class="wordmark display">Stowmark</span>
+    <span class="wordmark display">Nahgoo</span>
     <span class="eyebrow">Privacy</span>
   </header>
 
   <section class="hero">
     <p class="kicker">Privacy policy</p>
     <h1 class="title">What we keep, and what we don't.</h1>
-    <p class="subline">Stowmark is an app about walking to real places. That means it is
+    <p class="subline">Nahgoo is an app about walking to real places. That means it is
       an app that could very easily know too much about where you go. This page is
       the specific, checkable version of what it actually stores.</p>
     <p class="updated">Last updated 21 July 2026</p>
@@ -187,7 +187,7 @@
   <h2>The short version</h2>
 
   <div class="card accent">
-    <p><strong>Stowmark does not store your location.</strong> Not your GPS coordinates,
+    <p><strong>Nahgoo does not store your location.</strong> Not your GPS coordinates,
       not a trail, not a history of where you have been standing.</p>
     <p>What it stores is <strong>which public places you captured, and when</strong> —
       the coordinates saved against a capture are the <em>place's</em> coordinates,
@@ -320,7 +320,7 @@
     a change to one is meant to be a change to both.</p>
 
   <footer>
-    <p>Stowmark — ask a local.
+    <p>Nahgoo — ask a local.
        <span data-contact-slot-footer></span></p>
   </footer>
 
@@ -342,7 +342,7 @@
    links to this page rather than restating it. See #77 for why one fact in
    two files is the recurring bug in this project.
    ============================================================ */
-const PRIVACY_CONTACT = '';   /* e.g. 'privacy@example-domain.com' */
+const PRIVACY_CONTACT = 'privacy@nahgoo.com';   /* #5 — forwarding address on the domain bought 2026-07-28 */
 
 (function fillContact(){
   var addr = (typeof PRIVACY_CONTACT === 'string' ? PRIVACY_CONTACT : '').trim();
@@ -363,7 +363,7 @@ const PRIVACY_CONTACT = '';   /* e.g. 'privacy@example-domain.com' */
   } else {
     if(body){
       body.innerHTML = '<strong>A dedicated contact address is not live yet.</strong> '
-        + 'Stowmark is in early testing with a small number of accounts, all of whom '
+        + 'Nahgoo is in early testing with a small number of accounts, all of whom '
         + 'have a direct line to the developer — so requests are handled personally, '
         + 'and this page will name the address the moment it exists rather than '
         + 'listing one that does not answer.';
