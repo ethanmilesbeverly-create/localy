@@ -2247,6 +2247,30 @@
       <div id="auth-brand" class="display">Nah<span>goo</span></div>
       <p id="auth-tagline">Ask a local. Discover anywhere.</p>
 
+      <!-- #76 — GOOGLE SIGN-IN. Shown on login + signup only (setAuthMode toggles
+           #auth-oauth); forgot/reset have no account to create or a link that
+           already identifies the user. The button is neutral, NOT orange: the
+           orange #auth-submit is the primary action on this card and a second
+           orange button would compete with it. The invite (#128) survives the
+           OAuth round trip via the sessionStorage stash set in checkAuthAndBoot()
+           — this button performs a same-tab navigation, exactly the case route 2
+           of consumePendingGuideInvite() was written for, so nothing here has to
+           carry the code itself. A Google identity arrives with a verified email
+           and, via handle_new_user() in profiles.sql, a display name for free —
+           so there is no name field on this path (see #23). -->
+      <div id="auth-oauth">
+        <button id="auth-google-btn" class="auth-oauth-btn" type="button">
+          <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
+            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.02-3.7H.96v2.34A9 9 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.98 10.72a5.4 5.4 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.02-2.34z"/>
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.47.9 11.43 0 9 0A9 9 0 0 0 .96 4.94l3.02 2.34C4.68 5.16 6.66 3.58 9 3.58z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+        <div id="auth-oauth-divider"><span>or continue with</span></div>
+      </div>
+
       <!-- #2 — four modes share this one card: login / signup / forgot / reset.
            setAuthMode() is the single place that decides what is visible; every
            field below is addressed by id there, so nothing is hidden by CSS
@@ -2350,6 +2374,29 @@
   }
   .auth-btn:active{ transform:scale(0.99); }
   .auth-btn:disabled{ opacity:0.6; cursor:default; }
+  /* #76 — neutral secondary button. Deliberately NOT var(--orange): the orange
+     #auth-submit below is the primary action and the two must not compete. 16px
+     text is safe (it is a button, not an input) but kept to match card weight. */
+  .auth-oauth-btn{
+    width:100%;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:var(--surface-2); color:var(--text);
+    border:1px solid var(--line); border-radius:10px;
+    padding:12px; font-size:15px; font-weight:700;
+    cursor:pointer; font-family:inherit;
+  }
+  .auth-oauth-btn:active{ transform:scale(0.99); }
+  .auth-oauth-btn:disabled{ opacity:0.6; cursor:default; }
+  .auth-oauth-btn svg{ flex:0 0 auto; }
+  /* Line with centred label. The rule is drawn with two flexible borders so the
+     text sits mid-line without a background swatch to keep in sync with --surface. */
+  #auth-oauth-divider{
+    display:flex; align-items:center; gap:10px;
+    margin:16px 0 2px; color:var(--text-dim); font-size:11.5px;
+  }
+  #auth-oauth-divider::before, #auth-oauth-divider::after{
+    content:""; flex:1 1 auto; height:1px; background:var(--line);
+  }
   #auth-msg{ margin-top:14px; font-size:13px; line-height:1.45; display:none; }
   #auth-msg.err{ display:block; color:#f0a9a4; }
   #auth-msg.ok{ display:block; color:#b9dcae; }
@@ -2830,6 +2877,9 @@ function setAuthMode(mode){
     mode==='forgot' ? 'Send reset link' :
                       'Set new password';
 
+  // #76 — Google is offered only where there is an account to create or enter.
+  // forgot sends a link; reset already identifies the user by that link.
+  show('auth-oauth',         mode==='login' || mode==='signup');
   // Email is meaningless on the reset screen — the link already identifies you.
   show('auth-email-row',     mode!=='reset');
   show('auth-name-row',      mode==='signup'); // #23 — signup only; nothing to name on login/forgot/reset
@@ -2869,11 +2919,46 @@ function wireAuthUI(){
   document.getElementById('auth-forgot-btn').addEventListener('click', ()=> setAuthMode('forgot'));
   document.getElementById('auth-back-btn').addEventListener('click', ()=> setAuthMode('login'));
   document.getElementById('auth-submit').addEventListener('click', submitAuth);
+  document.getElementById('auth-google-btn').addEventListener('click', signInWithGoogle); // #76
   ['auth-email','auth-name','auth-password','auth-password2'].forEach(id=>{
     document.getElementById(id).addEventListener('keydown', e=>{
       if(e.key==='Enter') submitAuth();
     });
   });
+}
+/* #76 — GOOGLE OAUTH. redirectTo is AUTH_REDIRECT_BASE, the SAME clean origin
+   +pathname that emailRedirectTo already uses (#2), so the URL Google returns to
+   is already in Supabase's Redirect URL allow list if password reset works —
+   this button adds no new allow-list entry. On return, supabase-js exchanges the
+   ?code= PKCE param during checkAuthAndBoot()'s getSession(), onAuthed() → init()
+   runs, and consumePendingGuideInvite() redeems any stashed invite and strips the
+   leftover ?code= via clearResetParam(). Account linking (one identity vs a second
+   passport for the same email) is a Supabase dashboard decision, NOT code — see
+   the delivery notes; captures must never fork, so linking-on-verified-email is
+   the intended setting.
+   stashGuideInvite() also runs at boot; the redundant call here is belt-and-braces
+   so a future refactor that moves the boot call cannot silently drop the invite on
+   the OAuth path. It no-ops when there is no ?guide=. */
+async function signInWithGoogle(){
+  const btn = document.getElementById('auth-google-btn');
+  const original = btn.innerHTML;
+  authMsg('', '');
+  stashGuideInvite();
+  btn.disabled = true;
+  btn.innerHTML = '<span>Redirecting to Google…</span>';
+  try{
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: AUTH_REDIRECT_BASE }
+    });
+    // A successful call navigates the tab to Google and never returns here.
+    // Only an error (misconfigured provider, blocked popup-less redirect) falls
+    // through, so restore the button and say so rather than leaving it spinning.
+    if(error){ authMsg(error.message); btn.disabled = false; btn.innerHTML = original; }
+  }catch(e){
+    authMsg("Couldn't reach Google sign-in. Check your connection and try again.");
+    btn.disabled = false; btn.innerHTML = original;
+  }
 }
 async function submitAuth(){
   const email = document.getElementById('auth-email').value.trim();
@@ -5705,7 +5790,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28b';
+const APP_VERSION = '2026.07.28c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
