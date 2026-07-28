@@ -1642,14 +1642,12 @@
     </div>
   </div>
 
-  <!-- #52 — first-run onboarding. Shown once per device by startOnboarding()
-       after auth, gated on ONBOARDED_KEY + demoBypassActive(). Each step fires a
-       real OS prompt (location, camera) with a reason shown first; every step is
-       skippable and no denial is a dead end. Step 3 nudges Add-to-Home-Screen,
-       as a convenience. Making that install ALSO persist the iOS camera grant
-       needs a PWA manifest + apple-mobile-web-app meta this file does not yet
-       have (tracked as a follow-up), so step 3's copy promises the icon, not the
-       permission. -->
+  <!-- #52 — first-run onboarding. Shown once per account per device by
+       startOnboarding() after auth, gated on onboardedKey() + demoBypassActive().
+       Step 1 (location) is required and has no skip; step 2 (camera) is optional
+       because capture still works on compass+distance without it. Each fires the
+       real OS prompt with a reason shown first; the OS only shows a prompt if the
+       permission is not already granted for the origin. -->
   <div id="onboard-overlay">
     <div class="modal-card">
 
@@ -1660,7 +1658,6 @@
         <h2>Find what's near you</h2>
         <p>Nahgoo is built around real places around you — finding them, walking to them, and checking in once you're actually there. It needs your location for that core loop to work.</p>
         <button class="btn" onclick="onboardEnableLocation()">Enable location</button>
-        <button class="btn ghost" onclick="onboardNext()">Not now</button>
       </div>
 
       <div class="onboard-step" id="onboard-step-2">
@@ -1670,24 +1667,12 @@
         <h2>Check in with your camera</h2>
         <p>When you reach a place, you capture it through an AR camera view — that's how a check-in works. Enabling the camera now means we won't interrupt you for it later, mid-walk.</p>
         <button class="btn" onclick="onboardEnableCamera()">Enable camera</button>
-        <button class="btn ghost" onclick="onboardNext()">Not now</button>
-      </div>
-
-      <div class="onboard-step" id="onboard-step-3">
-        <div class="modal-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        </div>
-        <h2>You're all set</h2>
-        <p id="onboard-step-3-body">Add Nahgoo to your home screen so it's one tap away and opens without the browser bar.</p>
-        <button class="btn" id="onboard-install-btn" onclick="onboardInstall()" style="display:none;">Add to Home Screen</button>
-        <p class="onboard-hint" id="onboard-ios-hint" style="display:none;">On iPhone: tap the Share button, then <strong>Add to Home Screen</strong>.</p>
-        <button class="btn ghost" onclick="finishOnboarding()">Start exploring</button>
+        <button class="btn ghost" onclick="finishOnboarding()">Not now</button>
       </div>
 
       <div class="onboard-dots">
         <span id="onboard-dot-1" class="on"></span>
         <span id="onboard-dot-2"></span>
-        <span id="onboard-dot-3"></span>
       </div>
 
     </div>
@@ -5618,21 +5603,24 @@ function notePersistenceIssue(e){
    INIT
    ========================================================= */
 /* =========================================================
-   #52 — FIRST-RUN ONBOARDING (location · camera · add-to-home)
-   Shown once per DEVICE (ONBOARDED_KEY in localStorage, NOT per-user, because a
-   camera/location grant is a property of the browser+origin, not the account).
-   Skipped in demo mode and for anyone already onboarded on this device. Every
-   step fires a real OS prompt with a reason shown first and is fully skippable;
-   a denial drops into the recoverable fallbacks the app already has (demo /
-   tap-to-locate; openAR()'s camera-off message). We never re-show these screens.
-   The OS itself may still re-ask on iOS Safari (camera is page-load scoped there)
-   — the step-3 Add-to-Home-Screen nudge is the only fix for that, and it is a
-   platform limit, not a bug.
+   #52 — FIRST-RUN ONBOARDING (location · camera)
+   Two steps, shown once per ACCOUNT per DEVICE. The flag is keyed by user id and
+   kept in localStorage (device-local, NOT synced), so: a new account on a device
+   sees it; the same account sees it again on a genuinely new device (where the
+   permissions actually need granting); and it never re-shows for a settled
+   account+device pair. Skipped entirely in demo mode.
+   Step 1 (location) is required — no in-app skip. Step 2 (camera) is optional
+   because capture still works on compass+distance without it. Each step fires the
+   real OS prompt, but the OS only shows a prompt when the permission is NOT
+   already granted for the origin; an already-granted permission resolves silently
+   and the flow advances, which is correct, not a dead button.
    ========================================================= */
-const ONBOARDED_KEY = 'nahgoo:onboarded:v1';
-
+const ONBOARDED_KEY_BASE = 'nahgoo:onboarded:v1:';
+function onboardedKey(){
+  return ONBOARDED_KEY_BASE + ((state.user && state.user.id) || 'anon');
+}
 function onboardingDone(){
-  try{ return localStorage.getItem(ONBOARDED_KEY) === '1'; }catch(e){ return false; }
+  try{ return localStorage.getItem(onboardedKey()) === '1'; }catch(e){ return false; }
 }
 function shouldRunOnboarding(){
   return !demoBypassActive() && !onboardingDone();
@@ -5647,83 +5635,36 @@ function ensureLocating(){
   startLocating();
 }
 
-/* Android fires this before offering install; capture and defer it so step 3's
-   button can trigger the real prompt. Registered at parse time so it is never
-   missed. iOS Safari never fires it — step 3 shows a manual instruction there. */
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  state._installPrompt = e;
-});
-
-function isStandalone(){
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-function isIOSDevice(){
-  return /iPad|iPhone|iPod/.test(navigator.userAgent || '') && !window.MSStream;
-}
-
 function startOnboarding(){
   showOnboardStep(1);
   document.getElementById('onboard-overlay').classList.add('show');
 }
 function showOnboardStep(n){
   state._onboardStep = n;
-  for(let i=1;i<=3;i++){
+  for(let i=1;i<=2;i++){
     document.getElementById('onboard-step-'+i).classList.toggle('active', i===n);
     document.getElementById('onboard-dot-'+i).classList.toggle('on', i<=n);
   }
-  if(n===3) prepareInstallStep();
-}
-function onboardNext(){
-  const next = (state._onboardStep||1) + 1;
-  if(next > 3){ finishOnboarding(); return; }
-  // Skip the install step entirely when it can do nothing useful (already
-  // installed) — there is nothing to add to a home screen from inside the app.
-  if(next === 3 && isStandalone()){ finishOnboarding(); return; }
-  showOnboardStep(next);
 }
 function onboardEnableLocation(){
-  ensureLocating();   // fires the real OS location prompt via startLocating()
-  onboardNext();
+  ensureLocating();          // fires the real OS location prompt via startLocating()
+  showOnboardStep(2);        // advance regardless — an already-granted grant has no prompt
 }
 async function onboardEnableCamera(){
   try{
     const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
     /* #52 — do NOT hold the stream open past this point: it burns battery and
        leaves the recording indicator lit. The grant persists on its own on
-       Chrome/Android (per origin); on iOS Safari it is page-load scoped and this
+       Chrome/Android (per origin); on iOS Safari it is page-load scoped and that
        is the honest ceiling. We only needed to trigger and bank the permission. */
     stream.getTracks().forEach(t=>t.stop());
   }catch(e){ /* denied or unavailable — non-blocking; openAR() handles it later */ }
-  onboardNext();
-}
-function prepareInstallStep(){
-  const btn = document.getElementById('onboard-install-btn');
-  const iosHint = document.getElementById('onboard-ios-hint');
-  const body = document.getElementById('onboard-step-3-body');
-  btn.style.display = 'none';
-  iosHint.style.display = 'none';
-  if(state._installPrompt){
-    btn.style.display = '';            // Android: a real install prompt is queued
-  } else if(isIOSDevice() && !isStandalone()){
-    iosHint.style.display = '';        // iOS: manual Add to Home Screen
-  } else {
-    // Nothing to install (desktop, unsupported, or already standalone) — keep
-    // the reassurance but drop the home-screen line so it is not a dead promise.
-    body.textContent = "You're ready to go. Head out and start capturing places near you.";
-  }
-}
-async function onboardInstall(){
-  const p = state._installPrompt;
-  if(!p) return;
-  state._installPrompt = null;
-  try{ p.prompt(); await p.userChoice; }catch(e){}
-  document.getElementById('onboard-install-btn').style.display = 'none';
+  finishOnboarding();
 }
 function finishOnboarding(){
-  try{ localStorage.setItem(ONBOARDED_KEY, '1'); }catch(e){}
+  try{ localStorage.setItem(onboardedKey(), '1'); }catch(e){}
   document.getElementById('onboard-overlay').classList.remove('show');
-  ensureLocating();   // safety net: guarantees locating starts even if step 1 was skipped
+  ensureLocating();          // safety net: guarantees locating starts no matter how step 2 ended
 }
 
 async function init(){
@@ -5976,7 +5917,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28f';
+const APP_VERSION = '2026.07.28g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
