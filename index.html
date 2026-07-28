@@ -2116,7 +2116,7 @@
       <div class="settings-card" style="margin-top:10px;">
         <label class="field-label" for="settings-name" style="margin-top:0;">Your name</label>
         <input type="text" id="settings-name" class="auth-input" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
-        <p style="margin:8px 0 0;">Shown as <strong class="val">Submitted by</strong> on every gem you've had approved. Change it here and it updates on all of them.</p>
+        <p style="margin:8px 0 0;">Shown <strong class="val">publicly</strong> as <strong class="val">Submitted by</strong> on every gem you've had approved — visible to anyone who sees that place, not just to you. Change it here and it updates on all of them.</p>
         <p style="margin:6px 0 0;">Leave it empty and no name is shown — your gems stay on the map either way.</p>
         <button class="settings-btn" style="margin-top:10px;" id="settings-name-btn" onclick="saveSettingsName()">Save name</button>
         <p id="settings-name-msg" style="margin:8px 0 0;display:none;"></p>
@@ -5933,7 +5933,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28i';
+const APP_VERSION = '2026.07.28j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
