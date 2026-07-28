@@ -1439,8 +1439,11 @@
      and .modal-icon; adds only the overlay, step-switching and the dots. */
   #onboard-overlay{
     position:absolute;inset:0;z-index:2000;
-    background:rgba(6,16,12,0.94);
-    backdrop-filter:blur(6px);
+    /* #52 — a light scrim + soft blur over the LIVE map behind, not an opaque
+       screen. The map (built by init() before startOnboarding) shows through as
+       an enticing backdrop; the solid .modal-card keeps the copy readable. */
+    background:rgba(6,16,12,0.5);
+    backdrop-filter:blur(2px);
     display:none;align-items:center;justify-content:center;
     padding:24px;
   }
@@ -1667,7 +1670,6 @@
         <h2>Check in with your camera</h2>
         <p>When you reach a place, you capture it through an AR camera view — that's how a check-in works. Enabling the camera now means we won't interrupt you for it later, mid-walk.</p>
         <button class="btn" onclick="onboardEnableCamera()">Enable camera</button>
-        <button class="btn ghost" onclick="finishOnboarding()">Not now</button>
       </div>
 
       <div class="onboard-dots">
@@ -5609,9 +5611,11 @@ function notePersistenceIssue(e){
    sees it; the same account sees it again on a genuinely new device (where the
    permissions actually need granting); and it never re-shows for a settled
    account+device pair. Skipped entirely in demo mode.
-   Step 1 (location) is required — no in-app skip. Step 2 (camera) is optional
-   because capture still works on compass+distance without it. Each step fires the
-   real OS prompt, but the OS only shows a prompt when the permission is NOT
+   Step 1 (location) and step 2 (camera) are both required in-flow — neither has
+   an in-app skip, so the only way through is to tap the enable button on each.
+   (A user can still hard-deny at the OS level; we don't trap them — onboarding
+   finishes and openAR() surfaces the camera-off message later.) Each step fires
+   the real OS prompt, but the OS only shows a prompt when the permission is NOT
    already granted for the origin; an already-granted permission resolves silently
    and the flow advances, which is correct, not a dead button.
    ========================================================= */
@@ -5917,7 +5921,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28g';
+const APP_VERSION = '2026.07.28h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
