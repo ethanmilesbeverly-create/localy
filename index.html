@@ -1330,6 +1330,13 @@
     font-size:11px;font-weight:600;color:var(--text);line-height:1.25;
   }
   .achievement-item.locked .ach-label{color:var(--text-dim);}
+  /* #24 revamp — family sub-headers group the ladders (Stamps / Gems / Guides /
+     each category / Wanderer). Each family renders its own .achievement-grid, so
+     the grid's own margin-bottom spaces the families apart. */
+  .ach-family{
+    font-size:12px;font-weight:800;letter-spacing:.04em;
+    color:var(--text-dim);margin:2px 0 12px;
+  }
   .empty-state{
     text-align:center;padding:60px 20px;color:var(--text-dim);
   }
@@ -5953,7 +5960,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29d';
+const APP_VERSION = '2026.07.29e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10477,54 +10484,91 @@ const ACH_ICONS = {
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
      body/accent split bag/bust already use. */
-  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'}
+  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'},
+  /* #24 revamp — an open book for Lore & Legends (the one map category that had
+     no badge). accent is the centre spine. */
+  book: {vb:'0 0 24 24', body:'M12 6 C10 4 6 4 4 5 V19 C6 18 10 18 12 20 C14 18 18 18 20 19 V5 C18 4 14 4 12 6 Z', accent:'M12 6 V20'}
 };
+/* #24 REVAMP — ORDERED BY FAMILY, AND THE ORDER IS THE GROUPING. renderAchievements()
+   emits a sub-header whenever `family` changes, so the array order below IS the
+   on-screen order — there is no second family list to drift (#40/#67: reuse the
+   existing ordering, never invent a parallel one). Four rules held across this:
+     • IDs ARE LOAD-BEARING (#56/#83). Every id that already existed keeps its
+       string; only labels/colours/order move. New tiers get fresh ids.
+     • RETIRED, NOT REUSED: 'hunts_5'/'hunts_10' (the old "Guides Completed"
+       badges) are GONE from the grid — Guides is now MAKING only, laddered
+       1/10/25 on authoredHuntsCount. Their ids are reserved: do not reassign them.
+       A user who had them simply stops seeing them; that is a product retirement,
+       not an #83 un-earn (the stat did not fall — the badge was removed).
+     • EVERY TIER IS MONOTONIC-UP, so the whole set is #83-clean: no check reads a
+       stat that can fall, so nothing can un-earn.
+     • CATEGORY LADDERS ADD 25 ON TOP OF THE EXISTING 5/10, so no category badge
+       resets — 5s and 10s already earned stay lit. The only visible loss is the
+       two retired Guides-Completed badges.
+   `reads` tags route writer-side checks: 'submissions' → submitGem, 'guides' →
+   saveCustomHunt, 'walk' → the walk accumulator. Untagged families (Stamps and
+   every category, incl. Lore) fire on the unscoped capture check. */
 const ACHIEVEMENTS = [
-  {id:'first_stamp', label:'First Stamp', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=1},
-  {id:'park_5', label:'5 Parks & Trails', color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=5},
-  {id:'park_10', label:'10 Parks & Trails', color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=10},
-  {id:'shop_5', label:'5 Shops', color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=5},
-  {id:'shop_10', label:'10 Shops', color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=10},
-  {id:'barrest_5', label:'5 Bars & Restaurants', color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=5},
-  {id:'barrest_10', label:'10 Bars & Restaurants', color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=10},
-  {id:'history_5', label:'5 History Spots', color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=5},
-  {id:'history_10', label:'10 History Spots', color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=10},
-  {id:'stamps_10', label:'10 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=10},
-  {id:'stamps_25', label:'25 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=25},
-  {id:'stamps_50', label:'50 Stamps', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=50},
-  {id:'mile_1', label:'First Mile', color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
-  {id:'mile_5', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
-  /* #145(1) — reads authoredHuntsCount, NOT myHuntsCount. `state.myHunts` holds
-     guides you MADE and guides you REDEEMED in one array (redeemGuideCode()
-     pushes {external:true}, and #85's ?guide= links land there too), so the old
-     `myHuntsCount>=1` awarded Guide Maker for opening someone else's share link.
-     The correct predicate was already written elsewhere in this file —
-     openSaveToHuntPicker() filters `h => !h.external`. The distinction existed
-     and one consumer honoured it. The ID is NOT renamed: #56 records that
-     'hunt_maker' is load-bearing in the saved ledger. */
-  {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
-  {id:'hunts_5', label:'5 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=5},
-  {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=10},
-  /* #24 — REWARDS THE ACT OF SUBMITTING, NOT APPROVAL, and the choice is the fix.
-     APPENDED, never inserted: #63's ladder-order argument is about not REORDERING
-     the grid at runtime, so a new entry at the end preserves every existing
-     badge's position. Keyed off gemsSubmittedCount = state.gemSubmissions.length,
-     which is the user's own rows from the submissions table (loadMyGems), so it
-     counts a submission WHATEVER its status — pending, approved, or rejected —
-     because the reward is the contribution (#35's positioning bet), and because
-     that count only ever goes UP: you cannot un-submit. Monotonic-up is exactly
-     what #83's RECORD ruling wants; approval-gating would make it a deferred,
-     un-earnable/re-earnable stat that a moderator decision could push DOWN, which
-     is the collision #83 exists to avoid. `reads:'submissions'` so a future
-     gems_5/gems_10 ladder is derived, not typed a second time (#145(2)/#159). */
-  {id:'gem_submitted', label:'First Gem Submitted', color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1}
+  // STAMPS — total captures, any category. Fires on capture (unscoped).
+  {id:'first_stamp', family:'Stamps', label:'First Stamp', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=1},
+  {id:'stamps_10',   family:'Stamps', label:'10 Stamps',   color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=10},
+  {id:'stamps_25',   family:'Stamps', label:'25 Stamps',   color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=25},
+  {id:'stamps_50',   family:'Stamps', label:'50 Stamps',   color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=50},
+
+  /* GEMS — the ACT of submitting, not approval (see #24). gemsSubmittedCount is
+     state.gemSubmissions.length, the user's own submission rows, counted at every
+     status because the reward is the contribution and the count only goes UP. */
+  {id:'gem_submitted', family:'Gems', label:'First Gem', color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1},
+  {id:'gems_10',       family:'Gems', label:'10 Gems',   color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=10},
+  {id:'gems_25',       family:'Gems', label:'25 Gems',   color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=25},
+  {id:'gems_50',       family:'Gems', label:'50 Gems',   color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=50},
+
+  /* GUIDES — MAKING only (authoredHuntsCount, #145's !external count), laddered
+     1/10/25. 'hunt_maker' keeps its load-bearing id (#56). authoredHuntsCount
+     excludes redeemed/shared guides, so completing someone else's route no longer
+     earns anything here — that concept (old hunts_5/hunts_10) is retired. */
+  {id:'hunt_maker', family:'Guides', label:'First Guide', color:'#C9A227', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
+  {id:'guides_10',  family:'Guides', label:'10 Guides',   color:'#C9A227', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=10},
+  {id:'guides_25',  family:'Guides', label:'25 Guides',   color:'#C9A227', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=25},
+
+  // PARKS & TRAILS — 5/10 existing, 25 new. Colour echoes the map (MODE_COLOR.park).
+  {id:'park_5',  family:'Parks & Trails', label:'5 Parks & Trails',  color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=5},
+  {id:'park_10', family:'Parks & Trails', label:'10 Parks & Trails', color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=10},
+  {id:'park_25', family:'Parks & Trails', label:'25 Parks & Trails', color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=25},
+
+  // SHOPS
+  {id:'shop_5',  family:'Shops', label:'5 Shops',  color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=5},
+  {id:'shop_10', family:'Shops', label:'10 Shops', color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=10},
+  {id:'shop_25', family:'Shops', label:'25 Shops', color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=25},
+
+  // BARS & RESTAURANTS
+  {id:'barrest_5',  family:'Bars & Restaurants', label:'5 Bars & Restaurants',  color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=5},
+  {id:'barrest_10', family:'Bars & Restaurants', label:'10 Bars & Restaurants', color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=10},
+  {id:'barrest_25', family:'Bars & Restaurants', label:'25 Bars & Restaurants', color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=25},
+
+  // HISTORY
+  {id:'history_5',  family:'History', label:'5 History Spots',  color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=5},
+  {id:'history_10', family:'History', label:'10 History Spots', color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=10},
+  {id:'history_25', family:'History', label:'25 History Spots', color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=25},
+
+  /* LORE & LEGENDS — NEW FAMILY. This was the one map category with no badge, and
+     computeAchievementStats() ignored the 'lore' mode entirely until this pass.
+     Colour echoes the map (MODE_COLOR.lore = #3E9C8F). */
+  {id:'lore_5',  family:'Lore & Legends', label:'5 Lore & Legends',  color:'#3E9C8F', icon:'book', check:s=>s.catCounts.lore>=5},
+  {id:'lore_10', family:'Lore & Legends', label:'10 Lore & Legends', color:'#3E9C8F', icon:'book', check:s=>s.catCounts.lore>=10},
+  {id:'lore_25', family:'Lore & Legends', label:'25 Lore & Legends', color:'#3E9C8F', icon:'book', check:s=>s.catCounts.lore>=25},
+
+  // WANDERER — miles walked. Left exactly as #159 shipped them; fires on the walk accumulator.
+  {id:'mile_1', family:'Wanderer', label:'First Mile',      color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
+  {id:'mile_5', family:'Wanderer', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=8047}
 ];
 /* #145(2) — DERIVED, NOT A SECOND LIST. `reads:'guides'` tags every badge whose
    inputs come out of state.myHunts, and this set is computed from the tag rather
-   than typed out beside it. A hardcoded ['hunt_maker','hunts_5','hunts_10'] is a
-   third copy of a fact and would silently omit the next guide badge somebody
-   adds — #40's and #147's reasoning about reusing an existing set instead of
-   inventing a parallel one, applied at the moment the set is created. */
+   than typed out beside it. A hardcoded ['hunt_maker','guides_10','guides_25']
+   would be a third copy of a fact and would silently omit the next guide badge
+   somebody adds — #40's and #147's reasoning about reusing an existing set
+   instead of inventing a parallel one. (This is why adding the 1/10/25 Guides
+   ladder needed zero change here: the tag carried the two new tiers in for free.) */
 const GUIDE_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='guides').map(a=>a.id);
 /* #159 — THE SAME PATTERN, EXTENDED RATHER THAN COPIED, which is what #159's
    row asked for in as many words: "tag the mileage badges reads:'walk' and
@@ -10552,7 +10596,12 @@ function hasUnearnedWalkBadge(){
   return WALK_ACHIEVEMENT_IDS.some(id => !led.has(id));
 }
 function computeAchievementStats(){
-  const catCounts = {parks:0, shops:0, barsrest:0, history:0};
+  /* #24 revamp — `lore` ADDED. Until this pass the Lore & Legends mode was
+     captured, coloured and rendered on the map but silently uncounted here, so it
+     was the one category that could never earn a badge. effectiveMode stores
+     'lore' for a lore capture (target.category || currentHunt.mode='lore'), same
+     shape as the other four. */
+  const catCounts = {parks:0, shops:0, barsrest:0, history:0, lore:0};
   let totalFound = 0;
   Object.values(state.progress).forEach(p=>{
     if(!p.foundMeta) return;
@@ -10562,31 +10611,23 @@ function computeAchievementStats(){
       else if(m.mode==='shops') catCounts.shops++;
       else if(m.mode==='bars' || m.mode==='restaurants') catCounts.barsrest++;
       else if(m.mode==='history') catCounts.history++;
+      else if(m.mode==='lore') catCounts.lore++;
     });
-  });
-  let completedHuntsCount = 0;
-  (state.myHunts||[]).forEach(h=>{
-    const prog = state.progress['custom_'+h.id];
-    if(prog && h.points.length>0 && prog.foundIds.length>=h.points.length) completedHuntsCount++;
   });
   return {
     totalFound, catCounts,
     totalWalkedMeters: state.totalWalkedMeters,
-    /* #145(1) — TWO COUNTS, and the split is the fix. `myHuntsCount` is the raw
-       array length and is retained ONLY because it is an honest description of
-       state.myHunts; nothing reads it today. `authoredHuntsCount` excludes
-       redeemed guides and is what Guide Maker asks about.
-       completedHuntsCount is deliberately NOT split: finishing someone else's
-       guide IS a completion, so hunts_5/hunts_10 keep counting external ones —
-       #145's row says so explicitly. Note it keys progress on 'custom_'+h.id for
-       external guides too, which is correct: redeemed guides are stored with an
-       'ext…' id under the same key shape. */
+    /* #145(1) / #24 revamp — `myHuntsCount` is the raw array length, retained
+       ONLY as an honest description of state.myHunts; nothing reads it.
+       `authoredHuntsCount` excludes redeemed guides and is what the Guides family
+       (First/10/25 Guides) asks about. completedHuntsCount was REMOVED this pass:
+       its only consumers were the retired hunts_5/hunts_10 "Guides Completed"
+       badges, and Guides is now MAKING only, so the count and its loop are gone
+       rather than left computed-and-unread (the #3/#115 unconsumed-value smell). */
     myHuntsCount: (state.myHunts||[]).length,
     authoredHuntsCount: (state.myHunts||[]).filter(h => h && !h.external).length,
-    completedHuntsCount,
     /* #24 — the user's own submissions, server-backed via loadMyGems(). Counts
-       every status; see the gem_submitted badge for why the ACT, not approval,
-       is what earns the stamp. */
+       every status; see the Gems family for why the ACT, not approval, earns it. */
     gemsSubmittedCount: (state.gemSubmissions||[]).length
   };
 }
@@ -10766,18 +10807,33 @@ function renderAchievements(){
      out. It now resolves against the record. See earnedAchievementIds(). */
   const earned = earnedAchievementIds(stats);
   const el = document.getElementById('achievements-section');
-  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>
-    <div class="achievement-grid">` +
-    ACHIEVEMENTS.map(a=>{
-      const unlocked = earned.has(a.id);
-      return `<div class="achievement-item ${unlocked?'':'locked'}">
+  /* #24 revamp — GROUPED BY FAMILY, and the grouping is driven by consecutive
+     runs of `family` in the ACHIEVEMENTS array itself, NOT by a separate ordered
+     list of family names. That is the #40/#67 rule: the order already lives in
+     one place, so re-deriving it here would be a second copy that drifts. A new
+     family or a re-order is made ENTIRELY by editing the array — this function
+     needs no edit. All .achievement-item tiles still live under
+     #achievements-section, so #83's assertAchievementRecord() DOM count is
+     unaffected by the extra .achievement-grid wrappers. */
+  let html = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>`;
+  let lastFamily = null;
+  ACHIEVEMENTS.forEach(a=>{
+    const fam = a.family || 'Achievements';
+    if(fam !== lastFamily){
+      if(lastFamily !== null) html += `</div>`;                 // close the previous family's grid
+      html += `<p class="ach-family">${escapeHtml(fam)}</p><div class="achievement-grid">`;
+      lastFamily = fam;
+    }
+    const unlocked = earned.has(a.id);
+    html += `<div class="achievement-item ${unlocked?'':'locked'}">
         <div class="stamp-circle"${unlocked ? ` style="color:${a.color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
         </div>
         <div class="ach-label">${escapeHtml(a.label)}</div>
       </div>`;
-    }).join('') +
-    `</div>`;
+  });
+  if(lastFamily !== null) html += `</div>`;                      // close the last family's grid
+  el.innerHTML = html;
 }
 function renderPassport(){
   document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
