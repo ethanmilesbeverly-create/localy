@@ -1330,6 +1330,20 @@
     font-size:11px;font-weight:600;color:var(--text);line-height:1.25;
   }
   .achievement-item.locked .ach-label{color:var(--text-dim);}
+  /* #24 revamp v2 — family sub-headers (Stamps / Gems / … / Wanderer). Each family
+     renders its own .achievement-grid so the grid's margin-bottom spaces them. */
+  .ach-family{
+    font-size:12px;font-weight:800;letter-spacing:.04em;
+    color:var(--text-dim);margin:2px 0 12px;
+  }
+  /* #24 revamp v2 — an EARNED badge is "minted": solid ring in its tier colour,
+     with a faint fill of the same colour behind the icon. Locked stays dashed and
+     dim. Together with the bronze → master colour ramp this makes each rung read
+     as a distinct tier. currentColor is the tier colour set inline in the render. */
+  .achievement-item:not(.locked) .stamp-circle{
+    border-style:solid;
+    background:color-mix(in srgb, currentColor 14%, transparent);
+  }
   .empty-state{
     text-align:center;padding:60px 20px;color:var(--text-dim);
   }
@@ -5953,7 +5967,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29f';
+const APP_VERSION = '2026.07.29g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10482,80 +10496,112 @@ const ACH_ICONS = {
      no badge). accent is the centre spine. */
   book: {vb:'0 0 24 24', body:'M12 6 C10 4 6 4 4 5 V19 C6 18 10 18 12 20 C14 18 18 18 20 19 V5 C18 4 14 4 12 6 Z', accent:'M12 6 V20'}
 };
-/* #24 REVAMP — ORDERED BY FAMILY, RENDERED AS ONE FLAT LIST. The badges read in
-   family order (Stamps → Gems → Guides → each category → Wanderer) purely because
-   this array is ordered that way; renderAchievements() maps it straight into a
-   single grid with NO sub-headers. Re-ordering a family = moving its block here.
-   The `family` field is kept as inline documentation of the grouping, not as a
-   render input. Four rules held across this:
+/* #24 REVAMP v2 — TIER RAMP. The six rungs of every family map to these six tiers
+   by POSITION (tier 1 = the family's easiest rung, tier 6 = its hardest). The tier
+   carries the badge COLOUR, so the ladder reads as a bronze → master progression;
+   families are told apart by icon + sub-header, not by colour. Single source of
+   truth: badges carry `tier` and never a colour, and both the grid and the popup
+   look the colour up here — so re-tinting a tier is one edit. */
+const TIER_COLORS = {1:'#B5793A', 2:'#9BA4AD', 3:'#E0A526', 4:'#56B0B8', 5:'#4B93E0', 6:'#9B5DE0'};
+const TIER_NAMES  = {1:'Bronze', 2:'Silver', 3:'Gold', 4:'Platinum', 5:'Diamond', 6:'Master'};
+/* #24 REVAMP v2 — SIX BADGES PER FAMILY, TIERED. Every family is exactly 6 rungs
+   so it fills two clean rows of 3 in the grid (no ragged partial rows), and the
+   6 rungs map to a fixed tier ramp: Bronze → Silver → Gold → Platinum → Diamond →
+   Master. The TIER carries the COLOUR now (see TIER_COLORS); the FAMILY is told
+   apart by its ICON + its sub-header. So across the grid: icon = which family,
+   colour = how far up. renderAchievements() groups by consecutive `family` runs,
+   so the array order below IS the on-screen order and there is no second list to
+   drift (#40/#67). Rules held across this:
      • IDs ARE LOAD-BEARING (#56/#83). Every id that already existed keeps its
-       string; only labels/colours/order move. New tiers get fresh ids.
-     • RETIRED, NOT REUSED: 'hunts_5'/'hunts_10' (the old "Guides Completed"
-       badges) are GONE from the grid — Guides is now MAKING only, laddered
-       1/10/25 on authoredHuntsCount. Their ids are reserved: do not reassign them.
-       A user who had them simply stops seeing them; that is a product retirement,
-       not an #83 un-earn (the stat did not fall — the badge was removed).
-     • EVERY TIER IS MONOTONIC-UP, so the whole set is #83-clean: no check reads a
-       stat that can fall, so nothing can un-earn.
-     • CATEGORY LADDERS ADD 25 ON TOP OF THE EXISTING 5/10, so no category badge
-       resets — 5s and 10s already earned stay lit. The only visible loss is the
-       two retired Guides-Completed badges.
+       string; only tier/label/order move. New rungs get fresh ids.
+     • RETIRED, NOT REUSED: 'hunts_5'/'hunts_10' (old "Guides Completed") stay
+       gone; their ids are reserved. Guides is MAKING only (authoredHuntsCount).
+     • EVERY RUNG IS MONOTONIC-UP → #83-clean, nothing can un-earn.
+     • NO RESETS: every previously-shipped threshold (stamps 1/10/25/50, gems
+       1/10/25/50, category 5/10/25, miles 1/5, guide 1/10/25) keeps its id and
+       its number; the new rungs are added ABOVE and BELOW, never in place of.
+   Ladders (position → threshold): Stamps/Gems/Guides = 1·5·10·25·50·100;
+   categories = 3·5·10·25·50·100; miles = 1·5·10·25·50·100 (miles). The category
+   and guide tops (100) are deliberately aspirational; thresholds are one-number
+   edits if you want them gentler.
    `reads` tags route writer-side checks: 'submissions' → submitGem, 'guides' →
    saveCustomHunt, 'walk' → the walk accumulator. Untagged families (Stamps and
    every category, incl. Lore) fire on the unscoped capture check. */
 const ACHIEVEMENTS = [
   // STAMPS — total captures, any category. Fires on capture (unscoped).
-  {id:'first_stamp', family:'Stamps', label:'First Stamp', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=1},
-  {id:'stamps_10',   family:'Stamps', label:'10 Stamps',   color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=10},
-  {id:'stamps_25',   family:'Stamps', label:'25 Stamps',   color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=25},
-  {id:'stamps_50',   family:'Stamps', label:'50 Stamps',   color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=50},
+  {id:'first_stamp', family:'Stamps', tier:1, label:'First Stamp', icon:'stamp', check:s=>s.totalFound>=1},
+  {id:'stamps_5',    family:'Stamps', tier:2, label:'5 Stamps',    icon:'stamp', check:s=>s.totalFound>=5},
+  {id:'stamps_10',   family:'Stamps', tier:3, label:'10 Stamps',   icon:'stamp', check:s=>s.totalFound>=10},
+  {id:'stamps_25',   family:'Stamps', tier:4, label:'25 Stamps',   icon:'stamp', check:s=>s.totalFound>=25},
+  {id:'stamps_50',   family:'Stamps', tier:5, label:'50 Stamps',   icon:'stamp', check:s=>s.totalFound>=50},
+  {id:'stamps_100',  family:'Stamps', tier:6, label:'100 Stamps',  icon:'stamp', check:s=>s.totalFound>=100},
 
   /* GEMS — the ACT of submitting, not approval (see #24). gemsSubmittedCount is
-     state.gemSubmissions.length, the user's own submission rows, counted at every
-     status because the reward is the contribution and the count only goes UP. */
-  {id:'gem_submitted', family:'Gems', label:'First Gem', color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1},
-  {id:'gems_10',       family:'Gems', label:'10 Gems',   color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=10},
-  {id:'gems_25',       family:'Gems', label:'25 Gems',   color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=25},
-  {id:'gems_50',       family:'Gems', label:'50 Gems',   color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=50},
+     state.gemSubmissions.length, counted at every status. */
+  {id:'gem_submitted', family:'Gems', tier:1, label:'First Gem', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1},
+  {id:'gems_5',        family:'Gems', tier:2, label:'5 Gems',    icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=5},
+  {id:'gems_10',       family:'Gems', tier:3, label:'10 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=10},
+  {id:'gems_25',       family:'Gems', tier:4, label:'25 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=25},
+  {id:'gems_50',       family:'Gems', tier:5, label:'50 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=50},
+  {id:'gems_100',      family:'Gems', tier:6, label:'100 Gems',  icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=100},
 
-  /* GUIDES — MAKING only (authoredHuntsCount, #145's !external count), laddered
-     1/10/25. 'hunt_maker' keeps its load-bearing id (#56). authoredHuntsCount
-     excludes redeemed/shared guides, so completing someone else's route no longer
-     earns anything here — that concept (old hunts_5/hunts_10) is retired. */
-  {id:'hunt_maker', family:'Guides', label:'First Guide', color:'#C9A227', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
-  {id:'guides_10',  family:'Guides', label:'10 Guides',   color:'#C9A227', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=10},
-  {id:'guides_25',  family:'Guides', label:'25 Guides',   color:'#C9A227', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=25},
+  /* GUIDES — MAKING only (authoredHuntsCount, #145's !external count). 'hunt_maker'
+     keeps its load-bearing id (#56). Top tiers (50/100) are aspirational. */
+  {id:'hunt_maker', family:'Guides', tier:1, label:'First Guide', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
+  {id:'guides_5',   family:'Guides', tier:2, label:'5 Guides',    icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=5},
+  {id:'guides_10',  family:'Guides', tier:3, label:'10 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=10},
+  {id:'guides_25',  family:'Guides', tier:4, label:'25 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=25},
+  {id:'guides_50',  family:'Guides', tier:5, label:'50 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=50},
+  {id:'guides_100', family:'Guides', tier:6, label:'100 Guides',  icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=100},
 
-  // PARKS & TRAILS — 5/10 existing, 25 new. Colour echoes the map (MODE_COLOR.park).
-  {id:'park_5',  family:'Parks & Trails', label:'5 Parks & Trails',  color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=5},
-  {id:'park_10', family:'Parks & Trails', label:'10 Parks & Trails', color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=10},
-  {id:'park_25', family:'Parks & Trails', label:'25 Parks & Trails', color:'#6FA85C', icon:'tree', check:s=>s.catCounts.parks>=25},
+  // PARKS & TRAILS — 5/10/25 existing (ids preserved); 3/50/100 new. catCounts.parks.
+  {id:'park_3',   family:'Parks & Trails', tier:1, label:'3 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=3},
+  {id:'park_5',   family:'Parks & Trails', tier:2, label:'5 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=5},
+  {id:'park_10',  family:'Parks & Trails', tier:3, label:'10 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=10},
+  {id:'park_25',  family:'Parks & Trails', tier:4, label:'25 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=25},
+  {id:'park_50',  family:'Parks & Trails', tier:5, label:'50 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=50},
+  {id:'park_100', family:'Parks & Trails', tier:6, label:'100 Parks & Trails', icon:'tree', check:s=>s.catCounts.parks>=100},
 
   // SHOPS
-  {id:'shop_5',  family:'Shops', label:'5 Shops',  color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=5},
-  {id:'shop_10', family:'Shops', label:'10 Shops', color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=10},
-  {id:'shop_25', family:'Shops', label:'25 Shops', color:'#4C8FC0', icon:'bag', check:s=>s.catCounts.shops>=25},
+  {id:'shop_3',   family:'Shops', tier:1, label:'3 Shops',   icon:'bag', check:s=>s.catCounts.shops>=3},
+  {id:'shop_5',   family:'Shops', tier:2, label:'5 Shops',   icon:'bag', check:s=>s.catCounts.shops>=5},
+  {id:'shop_10',  family:'Shops', tier:3, label:'10 Shops',  icon:'bag', check:s=>s.catCounts.shops>=10},
+  {id:'shop_25',  family:'Shops', tier:4, label:'25 Shops',  icon:'bag', check:s=>s.catCounts.shops>=25},
+  {id:'shop_50',  family:'Shops', tier:5, label:'50 Shops',  icon:'bag', check:s=>s.catCounts.shops>=50},
+  {id:'shop_100', family:'Shops', tier:6, label:'100 Shops', icon:'bag', check:s=>s.catCounts.shops>=100},
 
   // BARS & RESTAURANTS
-  {id:'barrest_5',  family:'Bars & Restaurants', label:'5 Bars & Restaurants',  color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=5},
-  {id:'barrest_10', family:'Bars & Restaurants', label:'10 Bars & Restaurants', color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=10},
-  {id:'barrest_25', family:'Bars & Restaurants', label:'25 Bars & Restaurants', color:'#C1587A', icon:'glass', check:s=>s.catCounts.barsrest>=25},
+  {id:'barrest_3',   family:'Bars & Restaurants', tier:1, label:'3 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=3},
+  {id:'barrest_5',   family:'Bars & Restaurants', tier:2, label:'5 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=5},
+  {id:'barrest_10',  family:'Bars & Restaurants', tier:3, label:'10 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=10},
+  {id:'barrest_25',  family:'Bars & Restaurants', tier:4, label:'25 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=25},
+  {id:'barrest_50',  family:'Bars & Restaurants', tier:5, label:'50 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=50},
+  {id:'barrest_100', family:'Bars & Restaurants', tier:6, label:'100 Bars & Restaurants', icon:'glass', check:s=>s.catCounts.barsrest>=100},
 
   // HISTORY
-  {id:'history_5',  family:'History', label:'5 History Spots',  color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=5},
-  {id:'history_10', family:'History', label:'10 History Spots', color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=10},
-  {id:'history_25', family:'History', label:'25 History Spots', color:'#B08D57', icon:'bust', check:s=>s.catCounts.history>=25},
+  {id:'history_3',   family:'History', tier:1, label:'3 History Spots',   icon:'bust', check:s=>s.catCounts.history>=3},
+  {id:'history_5',   family:'History', tier:2, label:'5 History Spots',   icon:'bust', check:s=>s.catCounts.history>=5},
+  {id:'history_10',  family:'History', tier:3, label:'10 History Spots',  icon:'bust', check:s=>s.catCounts.history>=10},
+  {id:'history_25',  family:'History', tier:4, label:'25 History Spots',  icon:'bust', check:s=>s.catCounts.history>=25},
+  {id:'history_50',  family:'History', tier:5, label:'50 History Spots',  icon:'bust', check:s=>s.catCounts.history>=50},
+  {id:'history_100', family:'History', tier:6, label:'100 History Spots', icon:'bust', check:s=>s.catCounts.history>=100},
 
-  /* LORE & LEGENDS — NEW FAMILY. This was the one map category with no badge, and
-     computeAchievementStats() ignored the 'lore' mode entirely until this pass.
-     Colour echoes the map (MODE_COLOR.lore = #3E9C8F). */
-  {id:'lore_5',  family:'Lore & Legends', label:'5 Lore & Legends',  color:'#3E9C8F', icon:'book', check:s=>s.catCounts.lore>=5},
-  {id:'lore_10', family:'Lore & Legends', label:'10 Lore & Legends', color:'#3E9C8F', icon:'book', check:s=>s.catCounts.lore>=10},
-  {id:'lore_25', family:'Lore & Legends', label:'25 Lore & Legends', color:'#3E9C8F', icon:'book', check:s=>s.catCounts.lore>=25},
+  /* LORE & LEGENDS — the map category that had no badge until the revamp; the
+     'lore' mode is now counted in computeAchievementStats(). */
+  {id:'lore_3',   family:'Lore & Legends', tier:1, label:'3 Lore & Legends',   icon:'book', check:s=>s.catCounts.lore>=3},
+  {id:'lore_5',   family:'Lore & Legends', tier:2, label:'5 Lore & Legends',   icon:'book', check:s=>s.catCounts.lore>=5},
+  {id:'lore_10',  family:'Lore & Legends', tier:3, label:'10 Lore & Legends',  icon:'book', check:s=>s.catCounts.lore>=10},
+  {id:'lore_25',  family:'Lore & Legends', tier:4, label:'25 Lore & Legends',  icon:'book', check:s=>s.catCounts.lore>=25},
+  {id:'lore_50',  family:'Lore & Legends', tier:5, label:'50 Lore & Legends',  icon:'book', check:s=>s.catCounts.lore>=50},
+  {id:'lore_100', family:'Lore & Legends', tier:6, label:'100 Lore & Legends', icon:'book', check:s=>s.catCounts.lore>=100},
 
-  // WANDERER — miles walked. Left exactly as #159 shipped them; fires on the walk accumulator.
-  {id:'mile_1', family:'Wanderer', label:'First Mile',      color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
-  {id:'mile_5', family:'Wanderer', label:'5 Miles Traveled', color:'#9A7FBF', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=8047}
+  // WANDERER — miles walked. mile_1/mile_5 preserved (#159); 10/25/50/100 new. reads:'walk'.
+  {id:'mile_1',   family:'Wanderer', tier:1, label:'First Mile', icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
+  {id:'mile_5',   family:'Wanderer', tier:2, label:'5 Miles',    icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
+  {id:'mile_10',  family:'Wanderer', tier:3, label:'10 Miles',   icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=16093},
+  {id:'mile_25',  family:'Wanderer', tier:4, label:'25 Miles',   icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=40234},
+  {id:'mile_50',  family:'Wanderer', tier:5, label:'50 Miles',   icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=80467},
+  {id:'mile_100', family:'Wanderer', tier:6, label:'100 Miles',  icon:'footprints', reads:'walk', check:s=>s.totalWalkedMeters>=160934}
 ];
 /* #145(2) — DERIVED, NOT A SECOND LIST. `reads:'guides'` tags every badge whose
    inputs come out of state.myHunts, and this set is computed from the tag rather
@@ -10777,9 +10823,15 @@ function checkNewAchievements(onlyIds){
 function showNextAchievementPopup(){
   const next = state.pendingAchievementPopups.shift();
   if(!next) return;
+  /* #24 revamp v2 — colour and tier name come from the tier, the single source of
+     truth (badges carry no colour). Eyebrow reads e.g. "Gold Achievement". */
+  const color = TIER_COLORS[next.tier] || '#E8622C';
+  const tierName = TIER_NAMES[next.tier] || '';
+  const eyebrow = document.querySelector('#achievement-popup .achievement-popup-eyebrow');
+  if(eyebrow) eyebrow.textContent = (tierName ? tierName + ' Achievement' : 'Achievement Unlocked');
   document.getElementById('achievement-popup-label').textContent = next.label;
   document.getElementById('achievement-popup-icon').innerHTML = renderAchievementIcon(next.icon, true, 40);
-  document.getElementById('achievement-popup-badge').style.color = next.color;
+  document.getElementById('achievement-popup-badge').style.color = color;
   document.getElementById('achievement-popup').classList.add('show');
 }
 function closeAchievementPopup(){
@@ -10797,31 +10849,38 @@ function renderAchievementIcon(iconKey, unlocked, size){
 }
 function renderAchievements(){
   const stats = computeAchievementStats();
-  /* #83 — THE ONE LINE THAT CHANGED THE ANSWER. Was `a.check(stats)` per badge,
-     which made this grid a live query and let a falling stat put an earned badge
-     out. It now resolves against the record. See earnedAchievementIds(). */
+  /* #83 — resolves against the RECORD (ledger ∪ live-true), not a live per-badge
+     query. See earnedAchievementIds(). */
   const earned = earnedAchievementIds(stats);
   const el = document.getElementById('achievements-section');
-  /* #24 revamp — ONE CONTINUOUS GRID, no family sub-headers. Badges still read in
-     family order because the ACHIEVEMENTS array is ORDERED by family (Stamps →
-     Gems → Guides → each category → Wanderer); this just maps that order straight
-     into a single grid. The `family` field on each badge is kept as inline
-     documentation of that ordering — re-ordering a family is done by moving its
-     block in the array, and this function needs no edit. All tiles live under
-     #achievements-section, so #83's assertAchievementRecord() DOM count is
-     unaffected. */
-  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>
-    <div class="achievement-grid">` +
-    ACHIEVEMENTS.map(a=>{
-      const unlocked = earned.has(a.id);
-      return `<div class="achievement-item ${unlocked?'':'locked'}">
-        <div class="stamp-circle"${unlocked ? ` style="color:${a.color}"` : ''}>
+  /* #24 revamp v2 — GROUPED BY FAMILY with sub-headers, driven by consecutive
+     `family` runs in the ACHIEVEMENTS array (the order IS the grouping — no second
+     list to drift, #40/#67). Every family is 6 rungs = two full rows of 3, so no
+     grid has a ragged partial row. Colour comes from TIER_COLORS[tier], so the
+     bronze → master ramp shows the rung; the icon + header show the family. All
+     tiles stay under #achievements-section, so #83's assertAchievementRecord()
+     DOM count is unaffected by the extra grid wrappers. */
+  let html = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>`;
+  let lastFamily = null;
+  ACHIEVEMENTS.forEach(a=>{
+    const fam = a.family || 'Achievements';
+    if(fam !== lastFamily){
+      if(lastFamily !== null) html += `</div>`;
+      html += `<p class="ach-family">${escapeHtml(fam)}</p><div class="achievement-grid">`;
+      lastFamily = fam;
+    }
+    const unlocked = earned.has(a.id);
+    const color = TIER_COLORS[a.tier] || '#E8622C';
+    const tierName = TIER_NAMES[a.tier] || '';
+    html += `<div class="achievement-item ${unlocked?'':'locked'}" title="${escapeHtml(tierName ? tierName + ' — ' + a.label : a.label)}">
+        <div class="stamp-circle"${unlocked ? ` style="color:${color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
         </div>
         <div class="ach-label">${escapeHtml(a.label)}</div>
       </div>`;
-    }).join('') +
-    `</div>`;
+  });
+  if(lastFamily !== null) html += `</div>`;
+  el.innerHTML = html;
 }
 function renderPassport(){
   document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
