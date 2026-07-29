@@ -1330,13 +1330,6 @@
     font-size:11px;font-weight:600;color:var(--text);line-height:1.25;
   }
   .achievement-item.locked .ach-label{color:var(--text-dim);}
-  /* #24 revamp — family sub-headers group the ladders (Stamps / Gems / Guides /
-     each category / Wanderer). Each family renders its own .achievement-grid, so
-     the grid's own margin-bottom spaces the families apart. */
-  .ach-family{
-    font-size:12px;font-weight:800;letter-spacing:.04em;
-    color:var(--text-dim);margin:2px 0 12px;
-  }
   .empty-state{
     text-align:center;padding:60px 20px;color:var(--text-dim);
   }
@@ -5960,7 +5953,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29e';
+const APP_VERSION = '2026.07.29f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10489,10 +10482,12 @@ const ACH_ICONS = {
      no badge). accent is the centre spine. */
   book: {vb:'0 0 24 24', body:'M12 6 C10 4 6 4 4 5 V19 C6 18 10 18 12 20 C14 18 18 18 20 19 V5 C18 4 14 4 12 6 Z', accent:'M12 6 V20'}
 };
-/* #24 REVAMP — ORDERED BY FAMILY, AND THE ORDER IS THE GROUPING. renderAchievements()
-   emits a sub-header whenever `family` changes, so the array order below IS the
-   on-screen order — there is no second family list to drift (#40/#67: reuse the
-   existing ordering, never invent a parallel one). Four rules held across this:
+/* #24 REVAMP — ORDERED BY FAMILY, RENDERED AS ONE FLAT LIST. The badges read in
+   family order (Stamps → Gems → Guides → each category → Wanderer) purely because
+   this array is ordered that way; renderAchievements() maps it straight into a
+   single grid with NO sub-headers. Re-ordering a family = moving its block here.
+   The `family` field is kept as inline documentation of the grouping, not as a
+   render input. Four rules held across this:
      • IDs ARE LOAD-BEARING (#56/#83). Every id that already existed keeps its
        string; only labels/colours/order move. New tiers get fresh ids.
      • RETIRED, NOT REUSED: 'hunts_5'/'hunts_10' (the old "Guides Completed"
@@ -10807,33 +10802,26 @@ function renderAchievements(){
      out. It now resolves against the record. See earnedAchievementIds(). */
   const earned = earnedAchievementIds(stats);
   const el = document.getElementById('achievements-section');
-  /* #24 revamp — GROUPED BY FAMILY, and the grouping is driven by consecutive
-     runs of `family` in the ACHIEVEMENTS array itself, NOT by a separate ordered
-     list of family names. That is the #40/#67 rule: the order already lives in
-     one place, so re-deriving it here would be a second copy that drifts. A new
-     family or a re-order is made ENTIRELY by editing the array — this function
-     needs no edit. All .achievement-item tiles still live under
+  /* #24 revamp — ONE CONTINUOUS GRID, no family sub-headers. Badges still read in
+     family order because the ACHIEVEMENTS array is ORDERED by family (Stamps →
+     Gems → Guides → each category → Wanderer); this just maps that order straight
+     into a single grid. The `family` field on each badge is kept as inline
+     documentation of that ordering — re-ordering a family is done by moving its
+     block in the array, and this function needs no edit. All tiles live under
      #achievements-section, so #83's assertAchievementRecord() DOM count is
-     unaffected by the extra .achievement-grid wrappers. */
-  let html = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>`;
-  let lastFamily = null;
-  ACHIEVEMENTS.forEach(a=>{
-    const fam = a.family || 'Achievements';
-    if(fam !== lastFamily){
-      if(lastFamily !== null) html += `</div>`;                 // close the previous family's grid
-      html += `<p class="ach-family">${escapeHtml(fam)}</p><div class="achievement-grid">`;
-      lastFamily = fam;
-    }
-    const unlocked = earned.has(a.id);
-    html += `<div class="achievement-item ${unlocked?'':'locked'}">
+     unaffected. */
+  el.innerHTML = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>
+    <div class="achievement-grid">` +
+    ACHIEVEMENTS.map(a=>{
+      const unlocked = earned.has(a.id);
+      return `<div class="achievement-item ${unlocked?'':'locked'}">
         <div class="stamp-circle"${unlocked ? ` style="color:${a.color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
         </div>
         <div class="ach-label">${escapeHtml(a.label)}</div>
       </div>`;
-  });
-  if(lastFamily !== null) html += `</div>`;                      // close the last family's grid
-  el.innerHTML = html;
+    }).join('') +
+    `</div>`;
 }
 function renderPassport(){
   document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
