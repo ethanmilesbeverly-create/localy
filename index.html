@@ -5975,7 +5975,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29j';
+const APP_VERSION = '2026.07.29k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9292,7 +9292,66 @@ function rankForList(a, b){
   return String(a.id) < String(b.id) ? -1 : 1;
 }
 
+/* #108 — GRID-DISTRIBUTED SELECTION. The cap (LIST_CAP) has to drop rows once a
+   zoomed-out viewport admits more than it can show. Plain nearest-first (the old
+   `rest.slice(0, budget)`) hands back the budget rows closest to your feet, so
+   over a metro the drawer is a clump in one corner of a frame it claims to
+   summarise. This spreads the survivors across the frame instead.
+
+   HOW: divide the current viewport into GRID_N×GRID_N cells, keep the best
+   candidate per OCCUPIED cell (rankForList — nearest within the cell), then spend
+   any leftover budget by distance. GRID_N is DERIVED from LIST_CAP
+   (⌈√LIST_CAP⌉ = 5 at 25), never a seventh independent constant — #65's rule,
+   the same one that made LIST_RANGE_M derive from REAL_INCLUDE_RADIUS_M.
+
+   WHAT IT MUST NOT TOUCH: the capture-range `pinned` array is chosen in
+   visibleTargetsSorted() BEFORE this runs and is never passed in here, so the
+   grid can never evict the pin you are standing next to. That exemption is the
+   whole reason it is safe to let the viewport pick list membership at all (#66).
+
+   PLACEHOLDER, LABELLED AS ONE (the way LIST_CAP is): "best in cell" is
+   nearest-within-cell today. #54's consensus count is the intended per-cell
+   tiebreak once it exists — used only to rank inside a cell, never rendered, so
+   it sidesteps the #16 provenance seam. */
+const GRID_N = Math.max(1, Math.ceil(Math.sqrt(LIST_CAP)));
+function selectAcrossFrame(rest, bounds, budget){
+  if(budget <= 0) return [];
+  if(rest.length <= budget) return rest.slice().sort(rankForList);
+  const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+  const latSpan = (ne.lat - sw.lat) || 1e-9;
+  const lngSpan = (ne.lng - sw.lng) || 1e-9;
+  const cellOf = t => {
+    let r = Math.floor(((t.lat - sw.lat) / latSpan) * GRID_N);
+    let c = Math.floor(((t.lng - sw.lng) / lngSpan) * GRID_N);
+    r = Math.min(GRID_N - 1, Math.max(0, r));
+    c = Math.min(GRID_N - 1, Math.max(0, c));
+    return r * GRID_N + c;
+  };
+  /* One representative per occupied cell — the nearest pin in that cell. */
+  const cells = new Map();
+  rest.forEach(t => {
+    const k = cellOf(t);
+    const cur = cells.get(k);
+    if(!cur || rankForList(t, cur) < 0) cells.set(k, t);
+  });
+  /* If occupied cells still exceed the budget (many small clusters, small
+     budget because pinned took some), keep the nearest cell-reps. If they fall
+     short of the budget, fill the remainder by distance from the pins the grid
+     did not already take — so a sparse frame still uses its full budget. */
+  const chosen = Array.from(cells.values()).sort(rankForList).slice(0, budget);
+  if(chosen.length < budget){
+    const taken = new Set(chosen.map(t => String(t.id)));
+    const remainder = rest.filter(t => !taken.has(String(t.id))).sort(rankForList);
+    for(let i = 0; i < remainder.length && chosen.length < budget; i++) chosen.push(remainder[i]);
+  }
+  return chosen.sort(rankForList);
+}
+
 function visibleTargetsSorted(){
+  /* #108 — real in-view total (pre-cap membership) is set only in the viewport
+     path below; the degenerate early returns leave it null so renderNearbyList
+     shows no "X of Y" note when there is no real viewport to count against. */
+  state._listInViewTotal = null;
   const all = currentTargetsSorted();
   if(!all.length) return [];
   const map = state.leafletMap;
@@ -9364,8 +9423,15 @@ function visibleTargetsSorted(){
     rest.push(t);
   });
   pinned.sort(rankForList);
-  rest.sort(rankForList);
-  return pinned.concat(rest.slice(0, Math.max(0, LIST_CAP - pinned.length)));
+  /* #108 — pre-cap membership is what the "X of Y in view" note counts against:
+     everything that passed the viewport+range gate, before the cap drops any. */
+  state._listInViewTotal = pinned.length + rest.length;
+  /* #108 — grid-distributed rest instead of nearest-first slice. pinned claims
+     its budget first and is never handed to the grid, so the core-loop pin can
+     never be evicted; the viewport rows fill what is left, spread across the
+     frame. */
+  const budget = Math.max(0, LIST_CAP - pinned.length);
+  return pinned.concat(selectAcrossFrame(rest, bounds, budget));
 }
 
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -10087,7 +10153,18 @@ function renderNearbyList(){
     return;
   }
 
-  list.innerHTML = targets.map(t=>{
+  /* #108/#58 — when the cap has dropped rows, say so. A drawer that shows 25 of
+     340 and looks like the whole answer is the "truncated presented as complete"
+     lie #58 names. Only shown in the real viewport path (state._listInViewTotal
+     is null on the degenerate early returns) and only when more is in view than
+     is shown. Deliberately NOT a .target-row, so assertBadgeMatchesList's row
+     count is unaffected. */
+  const inView = state._listInViewTotal;
+  const note = (typeof inView === 'number' && inView > targets.length)
+    ? `<div style="color:var(--text-dim);font-size:12px;padding:8px 0 4px;">Showing ${targets.length} of ${inView} in view · zoom in for the rest</div>`
+    : '';
+
+  list.innerHTML = note + targets.map(t=>{
     const color = colorFor(t);
     return `
     <div class="target-row">
