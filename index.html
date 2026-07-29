@@ -5953,7 +5953,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29c';
+const APP_VERSION = '2026.07.29d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6487,7 +6487,24 @@ function cancelClearProgress(){
    only touched when it RUNS — long after the script has finished evaluating. */
 function survivingAchievementIds(){
   const stats = computeAchievementStats();
-  return ACHIEVEMENTS.filter(a=>a.check(stats)).map(a=>a.id);
+  const live = ACHIEVEMENTS.filter(a=>a.check(stats)).map(a=>a.id);
+  /* #24 — A SUBMIT STAMP IS BACKED BY A SERVER ROW A LOCAL WIPE DOES NOT ERASE.
+     WIPE_KEYS clears only the LOCAL 'gem-submissions' cache (its own comment says
+     it refills from the submissions table on the next load), so during a wipe the
+     in-memory state.gemSubmissions is momentarily empty and gem_submitted.check
+     would read false right here — which would drop an earned stamp for a
+     submission the server still holds. So any submission badge already in the
+     ledger is carried through, ORDER-INDEPENDENTLY (this does not care whether
+     state.gemSubmissions was reset before or after this call). This is exactly
+     the "add its id to the surviving set" the WIPE_KEYS comment and #24 call for,
+     and it is #83's RECORD ruling applied to a durable server fact: a self-wipe
+     is "start over", not erasure of a contribution the server still records. The
+     one path that DOES erase the submission — full account deletion (#82) —
+     deletes the server rows and does not run this function, so nothing here keeps
+     a stamp alive past a real deletion. */
+  const led = state.unlockedAchievements;
+  const carried = led ? SUBMISSION_ACHIEVEMENT_IDS.filter(id=>led.has(id)) : [];
+  return Array.from(new Set([...live, ...carried]));
 }
 
 const WIPE_KEYS = [
@@ -8620,6 +8637,18 @@ async function submitGem(){
   await loadApprovedGems();
   renderGemSubmissions();
 
+  /* #24 — WRITER-SIDE, SCOPED, AND AFTER loadMyGems() ON PURPOSE. The freshly
+     loaded state.gemSubmissions now includes the row just inserted, so the stamp
+     fires here — over the submission you just made — rather than being deferred
+     to your next capture (the single unscoped call site, #145/#159's lesson).
+     Scoped to SUBMISSION_ACHIEVEMENT_IDS so it cannot mis-fire an unrelated
+     deferred badge. renderPassport() alongside, exactly as the guide-save writer
+     does, so the grid is already correct if you go straight to the Passport. Runs
+     for every outcome — approve/reject/pending — because the ACT of submitting is
+     what earns it. */
+  renderPassport();
+  checkNewAchievements(SUBMISSION_ACHIEVEMENT_IDS);
+
   if(decision==='approve')      showToast("Approved!");
   else if(decision==='reject')  showToast("That one couldn't be approved.");
   else                          showToast('Submitted — pending review.');
@@ -10444,7 +10473,11 @@ const ACH_ICONS = {
   bust: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
   footprints: {vb:'0 0 24 24', body:'M9 3c-2 0-3.5 2-3.5 5s1 6 3.5 6 3.5-3 3.5-6-1.5-5-3.5-5z M15 12c-1.5 0-2.5 1.5-2.5 3.5s.8 4.5 2.5 4.5 2.5-2.5 2.5-4.5-1-3.5-2.5-3.5z'},
   plus: {vb:'0 0 24 24', body:'M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z'},
-  trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'}
+  trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'},
+  /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
+     when earned); accent draws the crown facets as stroke-only lines, same
+     body/accent split bag/bust already use. */
+  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'}
 };
 const ACHIEVEMENTS = [
   {id:'first_stamp', label:'First Stamp', color:'#E8622C', icon:'stamp', check:s=>s.totalFound>=1},
@@ -10471,7 +10504,20 @@ const ACHIEVEMENTS = [
      'hunt_maker' is load-bearing in the saved ledger. */
   {id:'hunt_maker', label:'Guide Maker', color:'#9A7FBF', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
   {id:'hunts_5', label:'5 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=5},
-  {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=10}
+  {id:'hunts_10', label:'10 Guides Completed', color:'#EDE9DD', icon:'trophy', reads:'guides', check:s=>s.completedHuntsCount>=10},
+  /* #24 — REWARDS THE ACT OF SUBMITTING, NOT APPROVAL, and the choice is the fix.
+     APPENDED, never inserted: #63's ladder-order argument is about not REORDERING
+     the grid at runtime, so a new entry at the end preserves every existing
+     badge's position. Keyed off gemsSubmittedCount = state.gemSubmissions.length,
+     which is the user's own rows from the submissions table (loadMyGems), so it
+     counts a submission WHATEVER its status — pending, approved, or rejected —
+     because the reward is the contribution (#35's positioning bet), and because
+     that count only ever goes UP: you cannot un-submit. Monotonic-up is exactly
+     what #83's RECORD ruling wants; approval-gating would make it a deferred,
+     un-earnable/re-earnable stat that a moderator decision could push DOWN, which
+     is the collision #83 exists to avoid. `reads:'submissions'` so a future
+     gems_5/gems_10 ladder is derived, not typed a second time (#145(2)/#159). */
+  {id:'gem_submitted', label:'First Gem Submitted', color:'#2E9E82', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1}
 ];
 /* #145(2) — DERIVED, NOT A SECOND LIST. `reads:'guides'` tags every badge whose
    inputs come out of state.myHunts, and this set is computed from the tag rather
@@ -10485,6 +10531,13 @@ const GUIDE_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='guides').map(a=>
    derive, do not type a second list." `reads:'walk'` tags every badge whose only
    input is state.totalWalkedMeters. */
 const WALK_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='walk').map(a=>a.id);
+/* #24 — SAME DERIVE PATTERN, THIRD TAG. `reads:'submissions'` tags every badge
+   whose only input is the count of the user's own submission rows. submitGem()
+   fires checkNewAchievements(SUBMISSION_ACHIEVEMENT_IDS) at submit time so the
+   stamp pops over the thing you just did instead of being deferred to your next
+   capture — the #145/#159 "why did this pop now?" lesson. A gems_5 ladder added
+   later inherits the writer-side call for free. */
+const SUBMISSION_ACHIEVEMENT_IDS = ACHIEVEMENTS.filter(a=>a.reads==='submissions').map(a=>a.id);
 /* #159 — THE GATE THAT MAKES THE WRITER-SIDE CHECK FREE ONCE IT HAS DONE ITS JOB.
    The walk check runs from the distance accumulator, which fires on genuine
    movement — so unlike a save or a capture there is no discrete "one event, one
@@ -10530,7 +10583,11 @@ function computeAchievementStats(){
        'ext…' id under the same key shape. */
     myHuntsCount: (state.myHunts||[]).length,
     authoredHuntsCount: (state.myHunts||[]).filter(h => h && !h.external).length,
-    completedHuntsCount
+    completedHuntsCount,
+    /* #24 — the user's own submissions, server-backed via loadMyGems(). Counts
+       every status; see the gem_submitted badge for why the ACT, not approval,
+       is what earns the stamp. */
+    gemsSubmittedCount: (state.gemSubmissions||[]).length
   };
 }
 
