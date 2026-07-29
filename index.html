@@ -3546,6 +3546,17 @@ function generateDiscoverLocal(base){
        viewport width on open instead of sitting in the center third. Now
        roughly a sixth of REAL_INCLUDE_RADIUS_M, and that ratio has never been
        examined.
+     HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
+       "Is this hunt somewhere I can walk to?" One number, three uses, all the
+       same question (#7): (1) fitMapToHunt() frames YOU together with the pins
+       only when the nearest one is inside it; (2) setCurrentHunt()/onLocation()
+       center on you when a hunt is inside it and frame the PINS when it is not
+       (a remote/redeemed guide in another city); (3) refreshGuideLine() draws
+       the dotted line to the target only inside it, since a line to a pin in
+       another state spans off-screen and reads as noise. Was a bare 5000 literal
+       in fitMapToHunt (flagged by #65 as an undeclared tenth distance); declared
+       here at the moment #7 made it load-bearing in a second and third place,
+       which is the only moment it is free.
 
    CAPTURE — "what counts as being there"
      FOUND_THRESHOLD_M         25  (~82 ft)   ~#6181
@@ -5933,7 +5944,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.28j';
+const APP_VERSION = '2026.07.29a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6872,6 +6883,7 @@ const ZOOM_OVERVIEW = 16;
 // #65 register — FRAMING, not content. Deliberately far smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
 const FRAME_RADIUS_M = 1500;
+const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). One number for fitMapToHunt / remote-hunt routing / the guide line.
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
   /* #73 — a real fix takes over the input mode; #4's flag does not come back.
@@ -6922,7 +6934,17 @@ function onLocation(lat,lng,sim,accuracy){
   if(state.leafletMap){
     if(!state._centeredOnce){
       state._centeredOnce = true;
-      if(state.currentHunt && state.currentHunt.key.startsWith('local_')){
+      if(state.currentHunt && isRemoteHunt(state.currentHunt)){
+        // #7 — a remote guide opened BEFORE the first fix would otherwise be
+        // snapped to the player here on arrival, re-creating the exact "landed
+        // on my own block" bug for the pre-fix timing. state.me is already set
+        // above (line ~6914), so isRemoteHunt is meaningful now. Mirror the
+        // setCurrentHunt remote arm: frame the pins, stop following.
+        fitMapToHunt(state.currentHunt);
+        state.followMe = false;
+        const lb = document.getElementById('locate-btn');
+        if(lb) lb.classList.remove('following');
+      } else if(state.currentHunt && state.currentHunt.key.startsWith('local_')){
         startLocalHunt({lat,lng}); // regenerates around the real position, and centers itself
       } else {
         centerOnPlayer();
@@ -7756,8 +7778,24 @@ function setCurrentHunt(hunt){
   saveProgress();
   // #8 — skip the snap-home when the hunt was rebuilt for an area the user
   // deliberately panned to. Every other path still recenters as before.
-  if(state._preserveViewOnNextHunt) state._preserveViewOnNextHunt = false;
-  else centerOnPlayer();
+  if(state._preserveViewOnNextHunt){
+    state._preserveViewOnNextHunt = false;
+  } else if(isRemoteHunt(hunt)){
+    // #7 — an invited/redeemed guide whose pins are in another city. The old
+    // unconditional centerOnPlayer() framed a fixed radius around the USER, so
+    // the invited stranger — the exact audience the sharing path exists for —
+    // landed on their own empty block. Frame the PINS instead, and drop
+    // followMe so onLocation()'s next GPS tick doesn't pan straight back to the
+    // user (fitMapToHunt's programmatic zoomend is already guarded, but the
+    // periodic fix is not). Tapping locate re-enables followMe and snaps home
+    // via recenterMap() — the "sticky until you ask" behaviour the row wanted.
+    fitMapToHunt(hunt);
+    state.followMe = false;
+    const lb = document.getElementById('locate-btn');
+    if(lb) lb.classList.remove('following');
+  } else {
+    centerOnPlayer();
+  }
   updateExploreSelectionIcons();
 }
 const EXPLORE_CAT_KEYPREFIX = {
@@ -7820,12 +7858,26 @@ function fitMapToHunt(hunt){
   const bounds = L.latLngBounds(hunt.points.map(p=>[p.lat,p.lng]));
   if(state.me){
     const nearestDist = Math.min(...hunt.points.map(p=>haversine(state.me.lat, state.me.lng, p.lat, p.lng)));
-    if(nearestDist < 5000) bounds.extend([state.me.lat, state.me.lng]); // walkable-range — frame you together with the spots
+    if(nearestDist < HUNT_NEAR_M) bounds.extend([state.me.lat, state.me.lng]); // #7/#65 — walkable-range (HUNT_NEAR_M): frame you together with the spots
   }
   state._programmaticViewChange = true;
   state.leafletMap.setMinZoom(2); // clear any previous floor before recomputing, so fitBounds isn't constrained by the last hunt's limit
   state.leafletMap.fitBounds(bounds, {padding:[48,48], maxZoom:15});
   state.leafletMap.setMinZoom(state.leafletMap.getZoom());
+}
+/* #7 — "is this hunt somewhere else?" A hunt is REMOTE when we have a fix and
+   its NEAREST pin is beyond walkable range (HUNT_NEAR_M — the same threshold
+   fitMapToHunt uses to decide whether to include you in the frame, so "near
+   enough to frame with you", "near enough to center on you", and "near enough
+   to draw a line to" are one number, per #65). With NO fix we cannot tell where
+   the pins are relative to the user, so we return false and let the caller take
+   the pre-#7 path (centerOnPlayer no-ops until a fix lands; onLocation re-checks
+   on the first fix). Empty/point-less hunts are never remote. */
+function isRemoteHunt(hunt){
+  if(!hunt || !hunt.points || hunt.points.length===0) return false;
+  if(!state.me) return false;
+  const nearest = Math.min(...hunt.points.map(p=>haversine(state.me.lat, state.me.lng, p.lat, p.lng)));
+  return nearest >= HUNT_NEAR_M;
 }
 /* #174 — the zoom centerOnPlayer() settles on for a given center: the FIXED
    FRAME_RADIUS_M frame, same padding and same ZOOM_OVERVIEW ceiling. Factored
@@ -9781,6 +9833,14 @@ function refreshGuideLine(){
   const selected = state.selectedPinId && targets.find(t=>t.id===state.selectedPinId);
   const guideTarget = selected || targets.find(t=>!t.found);
   if(!guideTarget) return;
+  // #7 — on a remote guide the target is in another city, so a line from you to
+  // it stretches across the whole world and reads as noise over a map framed on
+  // the pins. Suppress it above walkable range (HUNT_NEAR_M — the same number
+  // that decided to frame the pins in the first place). DEFERRED, not rejected:
+  // option (ii), clamp the far end to the viewport edge with a "312 mi back to
+  // you" label, reads better but is net-new rendering; revisit if the missing
+  // line is ever confusing rather than merely absent.
+  if(haversine(state.me.lat, state.me.lng, guideTarget.lat, guideTarget.lng) >= HUNT_NEAR_M) return;
   L.polyline([[state.me.lat,state.me.lng],[guideTarget.lat,guideTarget.lng]], {
     color:'#E8622C', weight:2, opacity:0.5, dashArray:'2,10', lineCap:'round'
   }).addTo(state.guideLayer);
