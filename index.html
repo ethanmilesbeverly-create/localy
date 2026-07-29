@@ -825,6 +825,7 @@
   }
 
   #screen-map.drawer-open #locate-btn,
+  #screen-map.drawer-open #frame-guide-btn,
   #screen-map.drawer-open #tilt-toggle-btn,
   #screen-map.drawer-open #list-toggle-btn,
   #screen-map.drawer-open #stale-hunt-banner,
@@ -1034,7 +1035,7 @@
       rgba(16,35,28,0.4) 20%,
       rgba(16,35,28,0) 38%);
   }
-  #locate-btn, #tilt-toggle-btn{
+  #locate-btn, #tilt-toggle-btn, #frame-guide-btn{
     position:absolute;right:14px;z-index:500;
     width:44px;height:44px;border-radius:50%;
     background:rgba(23,50,41,0.92);border:1px solid var(--line);
@@ -1042,6 +1043,7 @@
     cursor:pointer;
   }
   #locate-btn{bottom:calc(96px + env(safe-area-inset-bottom));}
+  #frame-guide-btn{bottom:calc(148px + env(safe-area-inset-bottom));} /* #7 — the tilt slot; tilt is display:none */
   #tilt-toggle-btn{bottom:calc(148px + env(safe-area-inset-bottom));font-size:12px;font-weight:700;letter-spacing:0.02em;display:none;}
   #list-toggle-btn{
     position:absolute;left:14px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:500;
@@ -1050,7 +1052,7 @@
     color:var(--text);display:flex;align-items:center;justify-content:center;
     cursor:pointer;
   }
-  #locate-btn svg, #list-toggle-btn svg{width:20px;height:20px;}
+  #locate-btn svg, #list-toggle-btn svg, #frame-guide-btn svg{width:20px;height:20px;}
   #tilt-toggle-btn.is-2d{color:var(--text-dim);}
   .badge-dot{
     position:absolute;top:-3px;right:-3px;
@@ -1988,6 +1990,12 @@
     <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · CARTO</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    </button>
+    <!-- #7 — reframe the whole guide. The locate button only ever goes "to me",
+         so once you recenter on yourself and walk around there is no way back to
+         the guide's pins. Shown only while a guide (custom_/code_) is active. -->
+    <button id="frame-guide-btn" onclick="frameCurrentGuide()" aria-label="Show the whole guide" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 0-1-1h-4"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>
     </button>
     <button id="search-here-btn" onclick="searchThisArea()" aria-label="Search this area"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>Search this area</button>
     <button id="list-toggle-btn" onclick="toggleDrawer()" aria-label="Show nearby list">
@@ -5945,7 +5953,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29b';
+const APP_VERSION = '2026.07.29c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7797,6 +7805,7 @@ function setCurrentHunt(hunt){
     centerOnPlayer();
   }
   updateExploreSelectionIcons();
+  updateFrameGuideBtn(); // #7 — show the "frame guide" control only while a guide is active
 }
 const EXPLORE_CAT_KEYPREFIX = {
   local: 'local_',
@@ -7882,6 +7891,26 @@ function fitMapToHunt(hunt){
    HUNT_NEAR_M and just the pins when they are not. */
 function isGuideHunt(hunt){
   return !!(hunt && hunt.key && (hunt.key.startsWith('custom_') || hunt.key.startsWith('code_')));
+}
+/* #7 — reframe the active guide's pins on demand. recenterMap()/the locate
+   button only ever go "to me", so after you recenter and walk around there is
+   no route back to the guide's spread. This is that route: frame the pins again
+   and go sticky (followMe off) exactly as opening the guide did, so a GPS tick
+   won't immediately pan back off it. Tapping locate afterwards resumes
+   following, as before — the two buttons are the two directions. */
+function frameCurrentGuide(){
+  if(!isGuideHunt(state.currentHunt)) return;
+  fitMapToHunt(state.currentHunt);
+  state.followMe = false;
+  const lb = document.getElementById('locate-btn');
+  if(lb) lb.classList.remove('following');
+}
+/* Shown only while a guide is active — for an explore card ("what's around me")
+   there is nothing to reframe TO that the locate button doesn't already do. */
+function updateFrameGuideBtn(){
+  const btn = document.getElementById('frame-guide-btn');
+  if(!btn) return;
+  btn.style.display = isGuideHunt(state.currentHunt) ? 'flex' : 'none';
 }
 /* #174 — the zoom centerOnPlayer() settles on for a given center: the FIXED
    FRAME_RADIUS_M frame, same padding and same ZOOM_OVERVIEW ceiling. Factored
