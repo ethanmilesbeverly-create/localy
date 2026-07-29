@@ -376,36 +376,6 @@
   #browsing-exit:active{background:rgba(217,180,74,0.15);}
   #browsing-exit svg{width:13px;height:13px;flex-shrink:0;}
 
-  /* #27 — the "unexplored near you" pill. Same top-pill slot as
-     #browsing-indicator (top:108px) and that is safe: the two are mutually
-     exclusive by construction — this one requires you to be centred on
-     yourself (!state.browsingLocation) and the browsing bar requires you not
-     to be. Orange rather than the browsing bar's yellow so the two never read
-     as the same control. It is a RETURN TRIGGER, not chrome state: an
-     invitation to go explore, tap-to-open-drawer, dismissible for the session.
-     Deliberately NOT the #list-toggle-badge — that badge counts rows-in-view
-     by a shipped decision (#66) with a guard behind it (assertBadgeMatchesList),
-     and "how many left to capture" was explicitly ruled off a chrome badge
-     there. This pill is a different surface with a different question. */
-  #freshness-pill{
-    position:absolute;top:108px;left:16px;right:16px;z-index:500;
-    display:none;align-items:center;gap:10px;
-    background:var(--surface);border:1px solid var(--orange);color:var(--text);
-    border-radius:10px;padding:9px 8px 9px 12px;font-size:12.5px;cursor:pointer;
-    box-shadow:0 6px 18px rgba(0,0,0,0.4);
-  }
-  #freshness-pill.show{display:flex;}
-  #freshness-pill .fp-spark{width:15px;height:15px;flex-shrink:0;color:var(--orange);}
-  #freshness-pill-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  #freshness-pill-text b{color:var(--orange);font-weight:700;}
-  #freshness-exit{
-    flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    background:none;border:none;color:var(--text-dim);padding:4px 6px;
-    cursor:pointer;border-radius:8px;
-  }
-  #freshness-exit:active{background:rgba(232,98,44,0.15);}
-  #freshness-exit svg{width:13px;height:13px;flex-shrink:0;}
-
   /* ---------- Screens ---------- */
   .screen{
     flex:1;
@@ -861,7 +831,6 @@
   #screen-map.drawer-open #stale-hunt-banner,
   #screen-map.drawer-open #map-search-row,
   #screen-map.drawer-open #browsing-indicator,
-  #screen-map.drawer-open #freshness-pill,
   #screen-map.drawer-open #search-here-btn,
   #screen-map.sheet-open #search-here-btn,
   #screen-map.drawer-open #map-attrib,
@@ -2024,15 +1993,6 @@
       <button id="browsing-exit" type="button" onclick="event.stopPropagation();exitLocationBrowseMode();" aria-label="Stop browsing and return to your location">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         Exit
-      </button>
-    </div>
-    <!-- #27 — unexplored-near-you pill. Body opens the drawer; the × dismisses
-         for the session only. Show/hide is driven from updateFreshnessPill(). -->
-    <div id="freshness-pill" onclick="openFreshnessDrawer()" role="button" aria-label="See spots near you to explore">
-      <svg class="fp-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.1L5.5 9l4.6-1.4z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
-      <span id="freshness-pill-text"></span>
-      <button id="freshness-exit" type="button" onclick="event.stopPropagation();dismissFreshnessPill();" aria-label="Dismiss">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <button id="tilt-toggle-btn" class="is-2d" onclick="toggleTilt()" aria-label="Toggle 3D view">2D</button>
@@ -4965,8 +4925,7 @@ let state = {
   profile: null,       // #23 — {display_name, status} for THIS user, or null if never loaded
   simulating: false,
   currentHunt: null,    // {key, name, mode, points:[{id,name,lat,lng,desc}]}
-  freshnessDismissed: false, // #27 — session-only; the pill stays down until reload
-  lastSeenAt: null,     // #27 — ms epoch of the previous app-open, from user_state 'freshness:lastSeen'. Stored now, consumed later by push (#175); not used to filter the in-app pill (definition is "unexplored", not "new since").
+  lastSeenAt: null,     // #27 — ms epoch of the previous app-open, from user_state 'freshness:lastSeen'. Stored now, consumed later by push (#175). Cannot be backfilled, which is why it is written from day one.
   progress: {},         // { huntKey: { foundIds:[...], foundAt:{id:ts} } }
   myHunts: [],          // custom hunts saved personally
   createPins: [],
@@ -6016,7 +5975,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29i';
+const APP_VERSION = '2026.07.29j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10029,67 +9988,32 @@ function refreshTargetsUI(){
 }
 
 /* ========================================================================
-   #27 — FRESHNESS ("new to you" / unexplored near you). IN-APP ONLY.
-   This is the reusable signal + one in-app surface. Push notification is the
-   DEFERRED consumer (see notifyFreshness() and #175): the weekly nudge, when
-   it ships, reads unexploredNearbyCount() rather than re-deriving anything.
+   #27 — FRESHNESS ("new to you" / unexplored near you). NO UI, NO NOTIFICATIONS.
+   What lives here is INFRASTRUCTURE toward a future weekly push nudge:
+     - markFreshnessSeen(): records each app-open time in user_state. This is
+       the one piece that CANNOT be backfilled later (past open-times are gone
+       once unrecorded), which is the whole reason it ships now.
+     - unexploredNearbyCount(): a client-side signal, kept as the near-term
+       "worth nudging?" predicate. HONEST LIMIT: it runs in the browser off the
+       current map view, so a server-side scheduled sender (#175) cannot call
+       it as-is — push will need its own server-side location+count query. It is
+       kept because it is cheap and names the shape of that query, not because
+       it transfers.
+     - notifyFreshness(): the deferred push consumer, a no-op stub.
+   NO in-app surface was shipped by request; the earlier pill was removed.
 
-   "New" here means "unexplored", NOT "created since your last visit", and that
-   is deliberate: OSM scaffolding is dense so unexplored is non-zero from day
-   one, whereas a created-since count reads 0 most weeks until gem supply
-   thickens (#9) — a return trigger that fires "0 new" is worse than none (#28).
-   As real submissions arrive they show up here for free (a fresh gem you
-   haven't captured is both new AND unexplored). The copy therefore says
-   "explore", never "new", so it stays honest about which it means.
-
-   The count reads the SAME array the nearby list is built from, so it can never
-   disagree with the list or the #66 badge — no new radius constant (#65), no
-   second source of truth. */
+   "New" means "unexplored", not "created since last visit": OSM scaffolding is
+   dense so unexplored is non-zero from day one, whereas created-since reads 0
+   until gem supply thickens (#9/#28). The count reads the SAME array the nearby
+   list is built from, so it can never disagree with the list or the #66 badge —
+   no new radius constant (#65), no second source of truth. */
 
 /* Pure read. Count of currently-in-view pins on an explore surface that this
-   user has not captured. External callers (the push stub, console QA) use this;
-   the pill itself counts off the array renderNearbyList already has. */
+   user has not captured. Consumed by notifyFreshness() / console QA. */
 function unexploredNearbyCount(){
   if(!state.currentHunt || !state.me) return 0;
   if(!isSharedProgressKey(state.currentHunt.key)) return 0; // explore cards only, not guides/lore-only surfaces
   return visibleTargetsSorted().filter(t=>!t.found).length;
-}
-
-/* Show/hide the pill. Called from renderNearbyList with the count it already
-   computed, so there is no recompute and no way to drift from the list. */
-function updateFreshnessPill(count){
-  const pill = document.getElementById('freshness-pill');
-  if(!pill) return;
-  const show =
-    count > 0 &&
-    !!state.me &&
-    !state.browsingLocation &&              // "near YOU" — meaningless while panned elsewhere; also avoids the browsing bar's slot
-    !state.freshnessDismissed &&
-    !!state.currentHunt &&
-    isSharedProgressKey(state.currentHunt.key); // explore surface, not a guide
-  if(!show){ pill.classList.remove('show'); return; }
-  document.getElementById('freshness-pill-text').innerHTML =
-    `<b>${count}</b> ${count === 1 ? 'spot' : 'spots'} near you to explore`;
-  pill.classList.add('show');
-  // NOTE: the CSS rule #screen-map.drawer-open #freshness-pill hides it while
-  // the drawer is open even with .show set, so opening the list does not fight
-  // this. Closing the drawer reveals it again if it still qualifies.
-}
-
-/* Body tap — open the nearby drawer (reusing toggleDrawer's open path) so the
-   invitation lands the user in the list of what to explore. */
-function openFreshnessDrawer(){
-  const drawer = document.getElementById('target-drawer');
-  if(drawer && drawer.classList.contains('collapsed')) toggleDrawer();
-}
-
-/* × — down for this session only. Not persisted: a per-session nag ceiling is
-   the right dose, and persisting "dismissed" would silently kill the return
-   trigger forever the first time someone taps it. */
-function dismissFreshnessPill(){
-  state.freshnessDismissed = true;
-  const pill = document.getElementById('freshness-pill');
-  if(pill) pill.classList.remove('show');
 }
 
 /* THE SEAM. Records this app-open time in user_state so a future "new since
@@ -10097,9 +10021,9 @@ function dismissFreshnessPill(){
    the #128 move: build the stash now, name the consumer, let it inherit for
    free later. Best-effort and fire-and-forget: it must never trip the
    load-failure guards (#1a), so a failed write costs one missing timestamp and
-   nothing else. Reads the PREVIOUS value into state.lastSeenAt before
-   overwriting, so the moment a consumer wants it, "since last visit" is one
-   subtraction away. */
+   nothing else. The PREVIOUS value is read into state.lastSeenAt in
+   loadPersonal BEFORE this overwrites it, so "since last visit" is one
+   subtraction away the moment a consumer wants it. */
 async function markFreshnessSeen(){
   if(!canPersist('freshness:lastSeen')) return;
   try{
@@ -10110,9 +10034,8 @@ async function markFreshnessSeen(){
 }
 
 /* DEFERRED CONSUMER — the weekly push nudge lands here, on top of #175's PWA
-   plumbing. It is a no-op today by design (the user asked for the
-   infrastructure without notifications). When push exists, this reads the
-   SAME signal the pill does and fires only when it is worth firing. Kept as a
+   plumbing. It is a no-op today by design (infrastructure without
+   notifications). Kept as a
    stub rather than deleted so the wiring point is named and discoverable
    rather than re-derived. */
 function notifyFreshness(){
@@ -10134,11 +10057,9 @@ function renderNearbyList(){
   if(!badge || !list) return;
   if(!state.currentHunt){
     badge.style.display = 'none';
-    updateFreshnessPill(0); // #27 — no hunt, no invitation
     return;
   }
   const targets = visibleTargetsSorted();
-  updateFreshnessPill(targets.filter(t=>!t.found).length); // #27 — same array as the rows below
 
   /* THE BADGE IS THE ROW COUNT, NOT THE REMAINING-CAPTURES COUNT, and that is
      a change of meaning rather than a change of source. It used to exclude
