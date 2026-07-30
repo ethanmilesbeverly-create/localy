@@ -450,7 +450,7 @@
      off the main settings screen. */
   .settings-nav{
     width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
-    background:none;border:1px solid var(--line);border-radius:10px;
+    background:var(--surface);border:1px solid var(--line);border-radius:10px;
     padding:14px;font-size:14px;font-weight:600;color:var(--text);
     cursor:pointer;font-family:inherit;text-align:left;
   }
@@ -6032,7 +6032,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30c';
+const APP_VERSION = '2026.07.30d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
