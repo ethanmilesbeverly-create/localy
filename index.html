@@ -6095,7 +6095,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30e';
+const APP_VERSION = '2026.07.30f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8621,10 +8621,16 @@ function assertAchievementRecord(){
    two legitimate events and not a duplicate.
 
    ALSO REPORTS #148's OTHER FINDING, WHICH IS THE ONE ITS TITLE DOES NOT CARRY:
-   renderPassport() sums foundIds and computeAchievementStats() iterates
-   foundMeta, and nothing guarantees they agree within a bucket. Reported per
-   bucket so a disagreement names the bucket rather than a total. Both are NOTES
-   — this function measures, it does not fix, and #148 is still 🔴. */
+   the passport total and the badge total used to read foundIds vs foundMeta and
+   could disagree. Reported per bucket so a disagreement names the bucket rather
+   than a total.
+
+   #148 SHIPPED 2026.07.30f: reconciledCaptures() now backs BOTH counters, so the
+   two agree by construction and cross-bucket doubles count once. This function
+   is now the VERIFICATION INSTRUMENT, not an open measurement — if it ever prints
+   a non-zero double count or a bucket disagreement again, reconciledCaptures()
+   has a regression. It reports raw state.progress deliberately, so it still sees
+   a double that the reconciled counters now collapse. */
 function reportCrossBucketDoubles(){
   try{
     const seen = {};
@@ -11052,25 +11058,65 @@ function hasUnearnedWalkBadge(){
   if(!led) return true;
   return WALK_ACHIEVEMENT_IDS.some(id => !led.has(id));
 }
+/* #148 — THE ONE RECONCILED CAPTURE SET, read by BOTH renderPassport()'s
+   "Stamps" total AND computeAchievementStats()'s badge total, so the two
+   counters cannot diverge (the finding this row's title does not carry) and a
+   place captured under several auto cards counts ONCE (the finding it does).
+
+   SCOPE, per isSharedProgressKey and DELIBERATELY narrow — reused, not
+   re-derived (#40): AUTO-generated category buckets share ONE deduped set,
+   because #147 makes the same pin render as found under every card, so the same
+   place living in All Things Local AND Parks & Trails is one capture double-
+   banked, not two. custom_/code_/BUILTIN guides keep their own per-bucket count,
+   because a stop captured on a guide AND on the open map is two legitimate
+   events. This is the exact scope reportCrossBucketDoubles() measures.
+
+   foundMeta is the RECORD OF TRUTH: it carries the mode and "is the only record
+   that outlives the point". Reading it (not foundIds) is what lets the passport
+   and the badge grid iterate the SAME construction and therefore agree by
+   build, not by luck — a foundIds entry with no foundMeta was never counted by
+   the badge grid and is not resurrected here. Returns {count, catCounts}. */
+function reconciledCaptures(){
+  const catCounts = {parks:0, shops:0, barsrest:0, history:0, lore:0};
+  const bump = m => {
+    if(!m) return;
+    if(m.mode==='park' || m.mode==='trail') catCounts.parks++;
+    else if(m.mode==='shops') catCounts.shops++;
+    else if(m.mode==='bars' || m.mode==='restaurants') catCounts.barsrest++;
+    else if(m.mode==='history') catCounts.history++;
+    else if(m.mode==='lore') catCounts.lore++;
+  };
+  let count = 0;
+  /* AUTO buckets: union across every shared key, first record per id wins.
+     (The same place in two auto buckets carries the same mode — it is the same
+     pin — so first-seen is safe; if they ever differed, first-seen is still one
+     definite answer rather than a double count.) */
+  const autoSeen = {};
+  Object.keys(state.progress || {}).forEach(k=>{
+    if(!isSharedProgressKey(k)) return;
+    const meta = (state.progress[k] || {}).foundMeta || {};
+    Object.keys(meta).forEach(id=>{ if(autoSeen[id] === undefined) autoSeen[id] = meta[id]; });
+  });
+  Object.keys(autoSeen).forEach(id=>{ count++; bump(autoSeen[id]); });
+  /* custom_/code_/BUILTIN buckets: counted per bucket, NOT deduped against the
+     auto set or each other — two legitimate events, per the scope note above. */
+  Object.keys(state.progress || {}).forEach(k=>{
+    if(isSharedProgressKey(k)) return;
+    const meta = (state.progress[k] || {}).foundMeta || {};
+    Object.keys(meta).forEach(id=>{ count++; bump(meta[id]); });
+  });
+  return {count, catCounts};
+}
 function computeAchievementStats(){
   /* #24 revamp — `lore` ADDED. Until this pass the Lore & Legends mode was
      captured, coloured and rendered on the map but silently uncounted here, so it
      was the one category that could never earn a badge. effectiveMode stores
      'lore' for a lore capture (target.category || currentHunt.mode='lore'), same
-     shape as the other four. */
-  const catCounts = {parks:0, shops:0, barsrest:0, history:0, lore:0};
-  let totalFound = 0;
-  Object.values(state.progress).forEach(p=>{
-    if(!p.foundMeta) return;
-    Object.values(p.foundMeta).forEach(m=>{
-      totalFound++;
-      if(m.mode==='park' || m.mode==='trail') catCounts.parks++;
-      else if(m.mode==='shops') catCounts.shops++;
-      else if(m.mode==='bars' || m.mode==='restaurants') catCounts.barsrest++;
-      else if(m.mode==='history') catCounts.history++;
-      else if(m.mode==='lore') catCounts.lore++;
-    });
-  });
+     shape as the other four.
+     #148 — totalFound and catCounts now come from reconciledCaptures() so this
+     counter agrees with the passport's Stamps total by construction and stops
+     double-counting cross-bucket captures. */
+  const {count: totalFound, catCounts} = reconciledCaptures();
   return {
     totalFound, catCounts,
     totalWalkedMeters: state.totalWalkedMeters,
@@ -11302,11 +11348,11 @@ function renderPassport(){
   document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
   renderAchievements();
 
-  let totalFound = 0;
-  Object.values(state.progress).forEach(p=>{
-    totalFound += (p.foundIds||[]).length;
-  });
-  document.getElementById('stat-found').textContent = totalFound;
+  /* #148 — Stamps total now reads reconciledCaptures().count, the SAME set the
+     badge grid counts, instead of summing foundIds across every bucket. Two
+     effects: a place double-banked under two auto cards counts once, and this
+     number can no longer disagree with computeAchievementStats(). */
+  document.getElementById('stat-found').textContent = reconciledCaptures().count;
 }
 </script>
 </body>
