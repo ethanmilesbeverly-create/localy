@@ -386,6 +386,32 @@
   #browsing-exit:active{background:rgba(217,180,74,0.15);}
   #browsing-exit svg{width:13px;height:13px;flex-shrink:0;}
 
+  /* #58 — the couldn't-LOAD banner. This is NOT an empty state (a genuine new
+     account) and NOT an error screen; both are already solved and must never be
+     confused with this one. It is the cheap half of #58: ONE persistent banner
+     reused on every personal-data surface while loadFailedKeys().size > 0, in
+     place of a distinct couldn't-load treatment per surface (that is #58's Med
+     half and is deferred, incl. the pin checkmarks). Styled after #19's
+     browsing-indicator — the established "the screen is not showing you what you
+     think" pattern — but in --danger, not --yellow, so it reads as a fault
+     rather than as browsing. Rendered inline at the top of the surface, so it
+     flows with the content rather than floating over the map like #19. */
+  .loadfail-banner{
+    display:flex;align-items:center;gap:10px;
+    background:var(--surface);border:1px solid var(--danger);color:var(--text);
+    border-radius:10px;padding:10px 10px 10px 12px;font-size:12.5px;
+    margin:0 0 4px;box-shadow:0 6px 18px rgba(0,0,0,0.4);
+  }
+  .loadfail-banner .lf-icon{width:17px;height:17px;flex-shrink:0;color:var(--danger);}
+  .loadfail-banner .lf-text{flex:1;min-width:0;line-height:1.35;}
+  .loadfail-banner .lf-text b{color:var(--danger);font-weight:700;}
+  .loadfail-retry{
+    flex-shrink:0;align-self:flex-start;background:none;border:1px solid var(--danger);
+    font-family:inherit;font-size:12px;font-weight:700;color:var(--danger);
+    padding:6px 12px;cursor:pointer;border-radius:8px;
+  }
+  .loadfail-retry:active{background:rgba(192,82,76,0.15);}
+
   /* ---------- Screens ---------- */
   .screen{
     flex:1;
@@ -2101,6 +2127,11 @@
         </svg>
       </button>
     </div>
+    <!-- #58 — couldn't-load banner mount. Sits ABOVE the stats and the badge
+         grid, because on a failed progress read every number below it is zero
+         and every badge is locked, which is indistinguishable from a new
+         account. renderPassport() fills or clears this. -->
+    <div id="passport-loadfail"></div>
     <p class="page-sub">Every spot you find earns a stamp here — start collecting.</p>
     <div class="stat-row">
       <div class="stat-box"><div class="num" id="stat-found">0</div><div class="lbl">Stamps</div></div>
@@ -6105,7 +6136,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30h';
+const APP_VERSION = '2026.07.30i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9356,7 +9387,11 @@ async function saveCustomHunt(){
 
 function renderMyHunts(){
   const el = document.getElementById('my-hunts-section');
-  el.innerHTML = `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Guides</p>
+  /* #58 — on a failed load state.myHunts is [], so this section renders as just
+     "Create Your Own" — indistinguishable from an author who has made nothing.
+     The same one banner sits above it, so the emptiness reads as "couldn't
+     reach" rather than "your guides are gone." */
+  el.innerHTML = loadFailBannerHTML() + `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Guides</p>
     <div class="mode-grid">` +
     state.myHunts.map(h=>`
       <div class="mode-card" data-hunt-id="${h.id}" onclick="startMyHunt('${h.id}')">
@@ -11354,7 +11389,32 @@ function renderAchievements(){
   if(lastFamily !== null) html += `</div>`;
   el.innerHTML = html;
 }
+/* #58 — the cheap half: ONE banner, reused wherever personal data renders,
+   instead of a distinct couldn't-load treatment per surface. Returns '' when
+   nothing failed, so a clean load renders byte-for-byte what it did before — the
+   banner exists ONLY while loadFailedKeys() is non-empty. Retry is wired to
+   retryLoadPersonal(), which already (a) no-ops if there is nothing to retry,
+   (b) guards against a double-tap via _retryingLoad, and (c) refuses to re-read
+   when there is an unsaved capture (#1a) — it re-warns by toast instead, so
+   pressing Retry mid-walk can't clobber finds that haven't saved yet. On a
+   successful retry that function calls renderPassport()/renderMyHunts() again,
+   so this banner clears itself; on a failed retry it stays. Copy is recoverable,
+   not final: the zeros below are what we couldn't load, not what you lost. */
+function loadFailBannerHTML(){
+  if(!loadFailedKeys().size) return '';
+  return '<div class="loadfail-banner" role="status">'
+    + '<svg class="lf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+    + '<div class="lf-text"><b>Can\'t reach your progress right now.</b> These aren\'t lost — we just couldn\'t load them. New finds won\'t save until this reconnects.</div>'
+    + '<button class="loadfail-retry" type="button" onclick="retryLoadPersonal()">Retry</button>'
+    + '</div>';
+}
+
 function renderPassport(){
+  /* #58 — fill or clear the banner first, so it's correct even if a later line
+     in this function throws. Guarded on the element in case the mount is ever
+     removed from the passport markup. */
+  const lf = document.getElementById('passport-loadfail');
+  if(lf) lf.innerHTML = loadFailBannerHTML();
   document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
   renderAchievements();
 
