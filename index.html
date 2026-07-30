@@ -2162,29 +2162,27 @@
         <button class="settings-btn" id="settings-resend-btn" onclick="resendConfirmationForAccount()">Resend confirmation email</button>
         <p id="settings-resend-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
-
-      <button class="settings-btn" style="margin-top:10px;" onclick="logout()">Log out</button>
-
-      <!-- #82 / #177 — Delete is a low-emphasis tertiary link opening a dedicated
-           screen (#screen-delete-account), rather than a red button and an inline
-           confirm on the main settings screen. Gated by SHOW_CLEAR_MY_DATA, the
-           same constant that gated the old #clear-data-section. The mechanism
-           (deleteMyAccount + the delete-account edge function) is unchanged. -->
-      <button class="link-btn" id="delete-account-entry" onclick="openDeleteAccount()" style="display:none;margin-top:12px;">Delete account</button>
     </div>
 
-    <!-- #177 — ABOUT / CREDITS / YOUR DATA moved off the main settings screen
-         into #screen-about, reached by this one chevron row. Settings now holds
-         only account ACTIONS (email, name, log out, delete); the reference
-         material — what's kept, third-party credits, version — is one tap away
-         for the few who go looking. Keeps the screen people open to DO something
-         from being mostly things to READ. The #177/#179 rationale for the "Your
-         data" collapse moved with that section into #screen-about. -->
+    <!-- #177 — ABOUT PAGE ENTRY. Reference material (Your data, credits,
+         version) lives in #screen-about, one tap off Settings via this chevron
+         row. Log out and Delete follow BELOW it, per the layout brief — the
+         terminal actions sit at the bottom of the screen. -->
     <div class="settings-section">
       <button class="settings-nav" onclick="openAbout('screen-settings')">
-        <span>About</span>
+        <span>About this app</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
+    </div>
+
+    <!-- #82 / #177 — Log out and Delete are the terminal actions, placed below
+         the About row by directive. Delete is a low-emphasis tertiary link that
+         opens #screen-delete-account (not a red button + inline confirm), gated
+         by SHOW_CLEAR_MY_DATA — the mechanism (deleteMyAccount + the
+         delete-account edge function) is unchanged. -->
+    <div class="settings-section">
+      <button class="settings-btn" onclick="logout()">Log out</button>
+      <button class="link-btn" id="delete-account-entry" onclick="openDeleteAccount()" style="display:none;margin-top:12px;">Delete account</button>
     </div>
   </div>
 
@@ -2233,7 +2231,7 @@
        or the map — via state.aboutReturn, the same pattern settings uses. -->
   <div class="screen" id="screen-about">
     <div class="title-row">
-      <h1 class="page-title">About</h1>
+      <h1 class="page-title">About this app</h1>
       <button class="icon-btn" onclick="closeAbout()" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
@@ -6034,7 +6032,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30b';
+const APP_VERSION = '2026.07.30c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
