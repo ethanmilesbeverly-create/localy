@@ -445,6 +445,17 @@
   }
   .settings-btn.danger{border-color:rgba(192,82,76,0.5);color:var(--danger);}
   .settings-btn:disabled{opacity:0.5;cursor:default;}
+  /* #177 — a tappable navigation row: label left, chevron right. Used for the
+     About entry that leads to #screen-about, so reference material lives one tap
+     off the main settings screen. */
+  .settings-nav{
+    width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:none;border:1px solid var(--line);border-radius:10px;
+    padding:14px;font-size:14px;font-weight:600;color:var(--text);
+    cursor:pointer;font-family:inherit;text-align:left;
+  }
+  .settings-nav:active{background:var(--surface-2);}
+  .settings-nav .chev{width:18px;height:18px;color:var(--text-dim);flex-shrink:0;}
   /* Two-step confirm, and the two buttons are deliberately NOT in the same
      place as the button that opened them — a destructive action confirmed by
      tapping the same pixel twice is confirmed by a double-tap. */
@@ -2128,8 +2139,10 @@
 
         <!-- #23 — the ONLY place a name changes after signup; it rewrites the
              "Submitted by" credit on every gem at once, because credit resolves
-             from submitted_by at read time. Public, and the copy says so (#156). -->
-        <label class="field-label" for="settings-name">Your name</label>
+             from submitted_by at read time. Public, and the copy says so (#156).
+             #177b — margin-top separates it from the email block above so the two
+             actions in this card don't read as one run-on field. -->
+        <label class="field-label" for="settings-name" style="margin-top:24px;">Your name</label>
         <input type="text" id="settings-name" class="auth-input" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
         <p style="margin:8px 0 0;">Shown <strong class="val">publicly</strong> as the <strong class="val">Submitted by</strong> credit on your approved gems. Leave it empty to show no name.</p>
         <button class="settings-btn" style="margin-top:10px;" id="settings-name-btn" onclick="saveSettingsName()">Save name</button>
@@ -2160,21 +2173,87 @@
       <button class="link-btn" id="delete-account-entry" onclick="openDeleteAccount()" style="display:none;margin-top:12px;">Delete account</button>
     </div>
 
-    <!-- #177 / #179 — COLLAPSED TO A POINTER. This card used to summarise the
-         policy: a bulleted list of what's kept plus "only you can read your
-         capture history." That summary is what #179 was filed against — it
-         listed submitted gems and asserted read-privacy while never noting the
-         display name is the public exception (#156), so a reader who never
-         tapped through to the full policy closed it believing everything was
-         private. Rather than patch the summary with a pointer clause, the whole
-         summary is removed: there is now ONE canonical copy of what's kept, in
-         privacy.html, which already carries every bullet AND the "Your display
-         name" public-exception section. A single trust line stays because it is
-         positioning, not policy — and it is the one thing that was never in
-         doubt (capture() writes the PIN's coordinates, never the user's; see
-         privacy.html and the capture() comments). This is #77's one-fact-one-
-         file rule taken to its conclusion, and it closes #179 by deletion rather
-         than by adding a second place the disclosure has to stay in sync. -->
+    <!-- #177 — ABOUT / CREDITS / YOUR DATA moved off the main settings screen
+         into #screen-about, reached by this one chevron row. Settings now holds
+         only account ACTIONS (email, name, log out, delete); the reference
+         material — what's kept, third-party credits, version — is one tap away
+         for the few who go looking. Keeps the screen people open to DO something
+         from being mostly things to READ. The #177/#179 rationale for the "Your
+         data" collapse moved with that section into #screen-about. -->
+    <div class="settings-section">
+      <button class="settings-nav" onclick="openAbout('screen-settings')">
+        <span>About</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- #82 / #177 — DELETE ACCOUNT, its own screen. Reached from the tertiary
+       "Delete account" link in Settings → Account, so a destructive, text-heavy
+       action is off the main screen behind a deliberate tap. Element ids
+       (clear-progress-btn / clear-progress-confirm / clear-progress-go) are kept
+       from the old inline section so askClearProgress / cancelClearProgress /
+       deleteMyAccount work unchanged — the flow moved, the mechanism did not.
+       The final "are you sure?" confirm is retained by directive: the screen
+       shows the consequences, the confirm makes the irreversible tap deliberate.
+       This must be an in-app SCREEN, not a static page like privacy.html —
+       deleting needs the authed Supabase client and the live session. -->
+  <div class="screen" id="screen-delete-account">
+    <div class="title-row">
+      <h1 class="page-title">Delete account</h1>
+      <button class="icon-btn" onclick="closeDeleteAccount()" aria-label="Back to settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">This cannot be undone.</p>
+
+    <div class="settings-section">
+      <div class="settings-card">
+        <p>Permanently deletes your Nahgoo account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Two things this does <strong class="val">not</strong> remove. Gems you've submitted stay on the map — once approved they're public spots other people use — but they're unlinked from you, so nothing shows you as their submitter. And guide codes you've already shared keep working for the people you sent them to.</p>
+        <p><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> for how the rest of your data is handled.</p>
+      </div>
+      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Delete account</button>
+      <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
+        <p>This permanently deletes your account and erases every capture, stamp and guide. There is no undo and no backup.</p>
+        <div class="confirm-row">
+          <button onclick="cancelClearProgress()">Keep it</button>
+          <button class="go" id="clear-progress-go" onclick="deleteMyAccount()">Delete account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- #177 — ABOUT PAGE. Everything users READ rather than DO: what's kept
+       (Your data), third-party credits, and version. Reached from the Settings
+       "About" chevron row, and from the map credit (openCredits scrolls here to
+       #credits-section). Back returns to wherever it was opened from — settings
+       or the map — via state.aboutReturn, the same pattern settings uses. -->
+  <div class="screen" id="screen-about">
+    <div class="title-row">
+      <h1 class="page-title">About</h1>
+      <button class="icon-btn" onclick="closeAbout()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- #177 / #179 — "Your data" COLLAPSED TO A POINTER (moved here from the
+         settings screen). This card used to summarise the policy: a bulleted
+         list of what's kept plus "only you can read your capture history." That
+         summary is what #179 was filed against — it listed submitted gems and
+         asserted read-privacy while never noting the display name is the public
+         exception (#156), so a reader who never tapped through to the full
+         policy closed it believing everything was private. The whole summary is
+         removed: ONE canonical copy of what's kept lives in privacy.html, which
+         already carries every bullet AND the "Your display name" public section.
+         A single trust line stays because it is positioning, not policy — and it
+         is the one thing never in doubt (capture() writes the PIN's coordinates,
+         never the user's). #77's one-fact-one-file rule, closing #179 by
+         deletion rather than a second place to keep in sync. -->
     <div class="settings-section">
       <h2>Your data</h2>
       <div class="settings-card">
@@ -2217,48 +2296,10 @@
     </div>
 
     <div class="settings-section">
-      <h2>About</h2>
+      <h2>About Nahgoo</h2>
       <div class="settings-card">
         <p>Nahgoo — <span class="val" id="settings-version">—</span></p>
         <p>Ask a local.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- #82 / #177 — DELETE ACCOUNT, its own screen. Reached from the tertiary
-       "Delete account" link in Settings → Account, so a destructive, text-heavy
-       action is off the main screen behind a deliberate tap. Element ids
-       (clear-progress-btn / clear-progress-confirm / clear-progress-go) are kept
-       from the old inline section so askClearProgress / cancelClearProgress /
-       deleteMyAccount work unchanged — the flow moved, the mechanism did not.
-       The final "are you sure?" confirm is retained by directive: the screen
-       shows the consequences, the confirm makes the irreversible tap deliberate.
-       This must be an in-app SCREEN, not a static page like privacy.html —
-       deleting needs the authed Supabase client and the live session. -->
-  <div class="screen" id="screen-delete-account">
-    <div class="title-row">
-      <h1 class="page-title">Delete account</h1>
-      <button class="icon-btn" onclick="closeDeleteAccount()" aria-label="Back to settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-    </div>
-    <p class="page-sub">This cannot be undone.</p>
-
-    <div class="settings-section">
-      <div class="settings-card">
-        <p>Permanently deletes your Nahgoo account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
-        <p>Two things this does <strong class="val">not</strong> remove. Gems you've submitted stay on the map — once approved they're public spots other people use — but they're unlinked from you, so nothing shows you as their submitter. And guide codes you've already shared keep working for the people you sent them to.</p>
-        <p><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> for how the rest of your data is handled.</p>
-      </div>
-      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Delete account</button>
-      <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
-        <p>This permanently deletes your account and erases every capture, stamp and guide. There is no undo and no backup.</p>
-        <div class="confirm-row">
-          <button onclick="cancelClearProgress()">Keep it</button>
-          <button class="go" id="clear-progress-go" onclick="deleteMyAccount()">Delete account</button>
-        </div>
       </div>
     </div>
   </div>
@@ -5993,7 +6034,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30a';
+const APP_VERSION = '2026.07.30b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6465,7 +6506,6 @@ async function updateSettingsEmail(){
 }
 function openSettings(returnTo){
   const u = state.user || {};
-  document.getElementById('settings-version').textContent = APP_VERSION;
 
   /* #181 — email field. Seed it from the current account email and reset any
      stale status line from a previous visit. Editability is decided by IDENTITY
@@ -6559,11 +6599,14 @@ function openSettings(returnTo){
    at the top, let the user scroll) is the zero-risk fallback and costs only a
    little discoverability. */
 function openCredits(){
-  openSettings('screen-map');
+  /* #177 — credits moved from settings into #screen-about, so the map credit
+     opens the About page and scrolls to the Credits subsection. The scroll
+     hardening below is unchanged and now measured against #screen-about. */
+  openAbout('screen-map');
   /* Deferred a frame: showScreen() sets scrollTop = 0 on the way in, so
      scrolling before it has run lands nowhere. */
   requestAnimationFrame(()=>{
-    const screen = document.getElementById('screen-settings');
+    const screen = document.getElementById('screen-about');
     const el = document.getElementById('credits-section');
     if(!screen || !el) return;
     // Offset of the section within the scroller, measured rather than assumed
@@ -6571,6 +6614,28 @@ function openCredits(){
     const delta = el.getBoundingClientRect().top - screen.getBoundingClientRect().top;
     screen.scrollTop = Math.max(0, screen.scrollTop + delta - 12);
   });
+}
+/* #177 — the About page holds reference material (Your data, credits, version)
+   and is reached from the Settings chevron row (returnTo 'screen-settings') or
+   the map credit (openCredits → 'screen-map'). Back returns to whichever, via
+   state.aboutReturn — the same pattern settings uses with settingsReturn. The
+   version is stamped here because #settings-version now lives on this screen. */
+function openAbout(returnTo){
+  const vEl = document.getElementById('settings-version');
+  if(vEl) vEl.textContent = APP_VERSION;
+  state.aboutReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-settings';
+  showScreen('screen-about');
+  setNavActive('screen-passport');
+}
+function closeAbout(){
+  const back = state.aboutReturn || 'screen-settings';
+  state.aboutReturn = null;
+  if(back === 'screen-map'){
+    setTab('screen-map');
+  }else{
+    showScreen('screen-settings');
+    setNavActive('screen-passport');
+  }
 }
 function closeSettings(){
   cancelClearProgress();
