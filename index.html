@@ -3638,25 +3638,26 @@ function generateDiscoverLocal(base){
    drift, and the drift is invisible because both readings look reasonable.
 
    CONTENT SELECTION — "what goes in the pool"
-     GEM_INCLUDE_RADIUS_M   15000  (~9.3 mi)  here
-       Approved user gems pulled into a blend around the anchor.
+     GEM_INCLUDE_RADIUS_M   = REAL_INCLUDE_RADIUS_M  ~#4090
+       Approved user gems pulled into a blend around the anchor. DERIVED from
+       real-place inclusion so a gem reaches no farther than any other pin.
      REAL_INCLUDE_RADIUS_M   9000  (~5.6 mi)  ~#3564
-       OSM/Wikipedia places pulled into the same blend.
+       OSM/Wikipedia places pulled into the same blend. The one source both this
+       group's other radii derive from.
      OVERPASS_RADIUS_M       4200  (~2.6 mi)  ~#3565
        Query radius asked of Overpass. NOT a display filter — it is the outer
        bound of what the server could ever have, so REAL_INCLUDE_RADIUS_M can
        only ever filter DOWN from tiles built at this size.
 
-     >>> THE GEM-VS-REAL GAP IS AN OPEN DECISION, NOT A SETTING. <<<
-     Between 9 km and 15 km the blend contains user gems and NOTHING ELSE, which
-     quietly inverts #16's rule that a gem must be indistinguishable from any
-     other pin: out there it is the only kind of pin there is. #66 hid the
-     symptom from the nearby LIST (membership is now viewport AND range) but the
-     map and the blend still have it. Neither number is defended by anything;
-     they are two independent guesses at the same question. Deciding this is
-     #65's remaining scope and it is deliberately NOT decided here — changing
-     either value changes what is on the map, and that is not a documentation
-     pass's call to make.
+     >>> THE GEM-VS-REAL GAP IS DECIDED: EQUALIZED. <<<
+     Formerly gems reached 15 km while real places stopped at 9 km, so between
+     those distances the blend held user gems and NOTHING ELSE — inverting #16's
+     rule that a gem must be indistinguishable from any other pin (out there it
+     was the only kind of pin). By directive, GEM_INCLUDE_RADIUS_M now DERIVES
+     from REAL_INCLUDE_RADIUS_M, so every pin type shares one inclusion radius
+     and the gems-only band no longer exists on the map or in the blend. To let
+     gems reach farther again, make GEM its own value with a stated reason — the
+     default is that they do not.
 
    FRAMING — "what the camera does"
      FRAME_RADIUS_M          1500  (~0.9 mi)  ~#6257
@@ -3715,7 +3716,10 @@ function generateDiscoverLocal(base){
 
 /* Real, user-submitted hidden gems (approved ones only) near a point, closest
    first — no procedural filler. Returns [] if none exist nearby yet. */
-const GEM_INCLUDE_RADIUS_M = 15000; // ~9mi — see the #65 distance register above
+// GEM_INCLUDE_RADIUS_M is now DERIVED from REAL_INCLUDE_RADIUS_M (declared at
+// that constant's site, ~#4090) so gems and real places share one radius — see
+// the #65 register above. It cannot be declared here: REAL_INCLUDE_RADIUS_M is
+// defined further down, and nearbyApprovedGems is only ever CALLED after load.
 function nearbyApprovedGems(base, excludeIds, limit, bucket){
   return (state.approvedGems||[])
     .filter(g=>g.status==='approved' && !excludeIds.includes(g.id) && (!bucket || g.bucket===bucket))
@@ -4085,9 +4089,17 @@ const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse 
    anchor, and is the source two other constants DERIVE from rather than
    restate: CAPTURED_INJECT_RADIUS_M and LIST_RANGE_M. Anything that is the same
    question joins them here instead of becoming a new number.
-   The 9000-vs-GEM_INCLUDE_RADIUS_M(15000) gap is an OPEN DECISION — see the
-   register block above nearbyApprovedGems(). */
+   The gem-vs-real gap is now CLOSED: GEM_INCLUDE_RADIUS_M derives from this
+   constant just below, so both radii move together — see the register block
+   above nearbyApprovedGems(). */
 const REAL_INCLUDE_RADIUS_M = 9000;
+/* #65 register — CONTENT SELECTION. DERIVED, not a second number: user gems and
+   real OSM/Wikipedia places now share ONE inclusion radius, so no pin type
+   reaches farther than another and the 9-15 km gems-only band is gone. Declared
+   here (not at nearbyApprovedGems) because REAL_INCLUDE_RADIUS_M must exist
+   first. Widen the reach of gems again only by making this its own value with a
+   stated reason — do not silently restate the number. */
+const GEM_INCLUDE_RADIUS_M = REAL_INCLUDE_RADIUS_M;
 // #65 register — the OUTER BOUND of what a tile can contain, not a display
 // filter. REAL_INCLUDE_RADIUS_M can only ever filter down from this.
 const OVERPASS_RADIUS_M = 4200;
@@ -6136,7 +6148,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30i';
+const APP_VERSION = '2026.07.30j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9570,12 +9582,12 @@ function currentTargetsSorted(){
 /* DERIVED, NOT A SEVENTH NUMBER. #65 inventories six radius constants none of
    which are derived from each other; this deliberately does not add one. The
    hunt's points were already range-filtered when the hunt was BUILT, so the
-   only thing a second gate here changes is the gem-vs-real gap #65 flagged:
-   gems reach GEM_INCLUDE_RADIUS_M (15 km) while real places stop at
-   REAL_INCLUDE_RADIUS_M (9 km), so between those two distances the list was
-   user-submissions-only — which inverts #16's rule that a gem should be
-   indistinguishable from any other pin, since out there it is the only kind of
-   pin there is. One range for the list closes that. If this ever needs to stop
+   only thing a second gate here changed was the gem-vs-real gap #65 flagged.
+   That gap is now closed at the source too — GEM_INCLUDE_RADIUS_M derives from
+   REAL_INCLUDE_RADIUS_M, so gems and real places share one radius everywhere and
+   the old 9-15 km gems-only band no longer exists on the map, in the blend, or
+   in this list. Deriving the list range from the same constant keeps it in step
+   with both. If this ever needs to stop
    tracking REAL_INCLUDE_RADIUS_M, it becomes a real constant and goes into
    #65's inventory with the question it answers written next to it. */
 // #65 register — DERIVED by #66 at the moment it was created, which is the only
