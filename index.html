@@ -4795,7 +4795,17 @@ function buildPointsForKey(key, base){
   if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
   // No blendCategory here on purpose: blending would let OSM/Wikipedia places
   // leak into a tab whose entire premise is that everything in it is human.
-  if(key.startsWith('lore_'))       return nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
+  /* #149 — was gemPoint(g,'lore'), which minted lore<gemId> while every blend
+     card mints the CONSTANT catgem<gemId>. Two ids for one place, latent until
+     the day someone routes lore into a blend card (#67 already treats a gem
+     reaching All Things Local as a win), on which day the same gem would render
+     twice — captured under one id, uncaptured under the other. Routed through
+     gemToPoint so lore mints catgem<gemId> like everything else; ctxCategory
+     'lore' keeps the pin colour, and the real:true flag it adds is inert (never
+     read anywhere). Existing lore<gemId> captures are re-keyed on load by
+     migrateLoreGemIds() — the prefix could NOT move without that backfill or it
+     strands captures, which is why #149 was a row and not a passing edit. */
+  if(key.startsWith('lore_'))       return nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemToPoint(g, 'lore'));
   /* #67 — 'trails_' and 'discover_' arms deleted with startTrailsHunt() and
      startDiscoverHunt(). */
   return null;
@@ -5178,17 +5188,19 @@ const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
    not by luck — every id in play is derived from the place's own identity:
      · OSM        `osm_<type><id>`   (buildRealPoints)
      · Wikipedia  `wiki_<pageid>`
-     · gems       `catgem<gemId>`    (gemToPoint's prefix is a CONSTANT, and it
-                                      is the only prefix any blend card uses)
+     · gems       `catgem<gemId>`    (gemToPoint's prefix is a CONSTANT, and as
+                                      of #149 it is the ONLY prefix any gem card
+                                      uses — the lore card included)
    and All Things Local calls blendCategory() with the SAME category and the
    SAME gem bucket the single-category cards do, so it is literally the same
    point objects. Procedural filler is the one unstable-id source and
    SHOW_PROCEDURAL_FILLER has been false since #37, so it never runs.
    CONSEQUENCE: a plain id union is sound here and the twin-adoption rule below
    is NOT needed for the cross-card case. Do not reopen this without re-taking
-   the measurement — if a future card ever mints its own id prefix (the `lore`
-   card's `gemPoint(g,'lore')` is the one prefix that differs, and it is safe
-   only because no blend card is passed the 'lore' bucket), this stops holding.
+   the measurement — this held with a caveat until #149: the lore card used to
+   mint its own `lore<gemId>` prefix, safe only because no blend was passed the
+   'lore' bucket. #149 routed lore through gemToPoint too, so every gem card now
+   shares the catgem prefix and the caveat is closed rather than merely dormant.
 
    SCOPE, AND IT IS DELIBERATELY NARROW. Only AUTO-GENERATED category hunts
    share a capture set. An authored guide (`custom_`/`code_`) and BUILTIN keep
@@ -5258,6 +5270,56 @@ function migrateTimestampedProgress(){
     changed = true;
   });
   if(changed) saveProgress(); // guarded by #1a's canPersist, so a failed load can't clobber
+  return changed;
+}
+
+/* #149 — RE-KEY BANKED LORE CAPTURES FROM lore<gemId> TO catgem<gemId>.
+   The two lore minting sites now emit catgem<gemId> like every blend card, but
+   captures banked before this build are filed under the OLD lore<gemId> in
+   foundIds/foundAt/foundMeta. Without this pass isFound() would look up the new
+   id, miss, and a real capture would silently read as uncaptured — the exact
+   stranding #149 refused to ship a bare prefix-swap into.
+
+   MATCH IS ON THE ID SHAPE, NOT THE BUCKET. gemPoint(g,'lore') is the ONLY
+   producer of a lore-prefixed id, and gem ids are numeric, so /^lore(?=\d)/
+   matches a lore capture and nothing else. All buckets are scanned rather than
+   just lore_v1: the faithful reading of #149's own instruction is to grep the
+   id expression, not to reason about which card wrote it.
+
+   IDEMPOTENT: after one pass no lore<digit> ids remain, so re-running on every
+   init is a no-op. COLLISION-SAFE: if catgem<id> already exists in a bucket
+   (a gem captured under both ids — not possible today, handled anyway), the old
+   entry is dropped rather than clobbering the existing capture's foundAt/meta. */
+function migrateLoreGemIds(){
+  let changed = false;
+  const toCatgem = id => (typeof id === 'string' && /^lore(?=\d)/.test(id)) ? id.replace(/^lore/, 'catgem') : null;
+  Object.values(state.progress || {}).forEach(bucket=>{
+    if(!bucket) return;
+    bucket.foundIds = bucket.foundIds || [];
+    bucket.foundAt  = bucket.foundAt  || {};
+    bucket.foundMeta = bucket.foundMeta || {};
+    // Snapshot the old ids first — we mutate the same structures below.
+    const olds = Object.keys(bucket.foundMeta).concat(bucket.foundIds)
+      .filter((v,i,a)=> a.indexOf(v)===i && toCatgem(v));
+    olds.forEach(oldId=>{
+      const newId = toCatgem(oldId);
+      // foundIds: replace old with new, but never introduce a duplicate.
+      const oi = bucket.foundIds.indexOf(oldId);
+      if(oi !== -1) bucket.foundIds.splice(oi, 1);
+      if(bucket.foundIds.indexOf(newId) === -1) bucket.foundIds.push(newId);
+      // foundAt / foundMeta: move the record only if the target is free.
+      if(bucket.foundAt[oldId] !== undefined){
+        if(bucket.foundAt[newId] === undefined) bucket.foundAt[newId] = bucket.foundAt[oldId];
+        delete bucket.foundAt[oldId];
+      }
+      if(bucket.foundMeta[oldId] !== undefined){
+        if(bucket.foundMeta[newId] === undefined) bucket.foundMeta[newId] = bucket.foundMeta[oldId];
+        delete bucket.foundMeta[oldId];
+      }
+      changed = true;
+    });
+  });
+  if(changed) saveProgress(); // canPersist-guarded, same as the migration above
   return changed;
 }
 
@@ -5784,6 +5846,7 @@ function finishOnboarding(){
 async function init(){
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
+  migrateLoreGemIds();          // #149 — same constraint: re-key lore<id>→catgem<id> before isFound() runs
   pruneCaptureTelemetry(); // #4/#5 — after the migration, so it sees final hunt keys
   pruneCaptureAnchor();    // #4 phase 2 — same TTL, same reasoning
   await loadMyProfile(); // #23 — before loadApprovedGems so the gem form prefills on first open
@@ -6032,7 +6095,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30d';
+const APP_VERSION = '2026.07.30e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8299,7 +8362,10 @@ function startHistoryHunt(base){
    never as a broken map. */
 function startLoreHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
-  const points = nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemPoint(g, 'lore'));
+  // #149 — catgem<gemId>, not lore<gemId>. Same reasoning and same backfill as
+  // buildPointsForKey's lore_ arm; both minting sites had to move together or a
+  // lore capture's id would depend on which path built the point.
+  const points = nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemToPoint(g, 'lore'));
   const key = 'lore_v1';
   setCurrentHunt({key, name:'Lore & Legends', mode:'lore', points});
 }
