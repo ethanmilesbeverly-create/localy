@@ -9,10 +9,13 @@
 <title>Nahgoo</title>
 <!-- Tab favicon. Inline SVG data URI on purpose: keeps this a single-file
      drag-and-drop deploy (no favicon.ico binary to manage as a second file).
-     The mark is landing.html's brand path (the orange flag) on the app's
-     --bg green, so the tab matches the masthead. Home-screen / PWA icons are
-     a PNG job and belong to #175, not here — this is the browser tab only. -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20width='24'%20height='24'%20rx='5'%20fill='%2310231C'/%3E%3Cpath%20d='M5%2021V4c4-2%208%202%2012%200v9c-4%202-8-2-12%200'%20fill='none'%20stroke='%23E8622C'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+     The mark is the Explore nav globe (circle + equator + meridian, see the
+     #screen-modes nav-btn below), stroked in --orange on a TRANSPARENT ground
+     so it reads on light and dark tab bars alike. If that globe path ever
+     changes, change it here too — this is a hand-copy, not a shared source.
+     Home-screen / PWA icons are a PNG job and belong to #175, not here — this
+     is the browser tab only. Same favicon lives in privacy.html + landing.html. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23E8622C'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M3%2012h18'/%3E%3Cpath%20d='M12%203c2.5%202.5%204%205.5%204%209s-1.5%206.5-4%209c-2.5-2.5-4-5.5-4-9s1.5-6.5%204-9z'/%3E%3C/svg%3E">
 
 <!-- ============================================================
      "#N" IN COMMENTS = a row number in nahgoo-roadmap.md.
@@ -6102,7 +6105,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30g';
+const APP_VERSION = '2026.07.30h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
