@@ -2102,104 +2102,84 @@
     </div>
     <p class="page-sub">Your account and what this app keeps.</p>
 
+    <!-- #177 — Account consolidated into ONE card: email and name as adjacent
+         editable rows with prose trimmed to a single line each, instead of the
+         four stacked cards this screen grew by accretion. Order is email → name
+         → Log out → Delete-as-tertiary-link, per the revamp brief. The load-
+         bearing privacy copy that used to live in the name block (#156's public-
+         name disclosure) is kept, because moving disclosure copy is the one-fact-
+         two-files hazard #77/#5 warn about — it is trimmed, not dropped. -->
     <div class="settings-section">
       <h2>Account</h2>
       <div class="settings-card">
-        <p>Signed in as <span class="val" id="settings-email">—</span></p>
+        <!-- #181 — EMAIL CHANGE. Editable only for password accounts. A Google
+             (#76) identity's email is owned by Google; updateUser({email}) on it
+             would fork the login from the identity, so an OAuth-only account gets
+             a read-only field pointing at the Google account instead. The handler
+             reads the RESULT (new_email pending vs email applied) rather than
+             assuming which path Supabase took — that depends on the Confirm-Email
+             / Secure-Email-Change dashboard config (#69), and this file must not
+             assert a toggle it cannot see (verify the effect, not the report). -->
+        <label class="field-label" for="settings-email-input" style="margin-top:0;">Email</label>
+        <input type="email" id="settings-email-input" class="auth-input" autocomplete="email" spellcheck="false" inputmode="email">
+        <p id="settings-email-managed" style="margin:8px 0 0;display:none;">Managed by Google — change it in your Google account and it updates here.</p>
+        <button class="settings-btn" style="margin-top:10px;" id="settings-email-btn" onclick="updateSettingsEmail()">Update email</button>
+        <p id="settings-email-msg" style="margin:8px 0 0;display:none;"></p>
+
+        <!-- #23 — the ONLY place a name changes after signup; it rewrites the
+             "Submitted by" credit on every gem at once, because credit resolves
+             from submitted_by at read time. Public, and the copy says so (#156). -->
+        <label class="field-label" for="settings-name">Your name</label>
+        <input type="text" id="settings-name" class="auth-input" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
+        <p style="margin:8px 0 0;">Shown <strong class="val">publicly</strong> as the <strong class="val">Submitted by</strong> credit on your approved gems. Leave it empty to show no name.</p>
+        <button class="settings-btn" style="margin-top:10px;" id="settings-name-btn" onclick="saveSettingsName()">Save name</button>
+        <p id="settings-name-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
-      <!-- #69(c) — RESEND CONFIRMATION lives here, in Settings, not on the login
-           screen. Settings is behind the session, so the email address is always
-           known without asking, and account plumbing belongs on the account
-           screen. DELIBERATELY NO "verified ✓" BADGE: the only client-visible
-           signal is email_confirmed_at, and per #69(a) Supabase stamps that
-           column at signup while Confirm Email is OFF — so every account,
-           including the five legacy ones, reads confirmed whether or not any
-           confirmation happened. A badge built on it would show "verified" for
-           everyone and would be a FALSE disclosure on the settings screen, the
-           category #5 already had to remediate once. The badge ships in the same
-           session the toggle flips, when the column finally means something (with
-           the legacy-account caveat annotated). Until then this card offers the
-           ACTION without asserting the STATUS.
-           INERT WHILE CONFIRM EMAIL IS OFF: sb.auth.resend(type:'signup') has
-           nothing to resend for an already-confirmed account and 400s, swallowed
-           into the neutral line — so shipping ahead of the flip does nothing a
-           user can trigger. It goes live the moment the toggle is on. -->
-      <div class="settings-card" style="margin-top:10px;">
+
+      <!-- #69(c) — RESEND CONFIRMATION, gated behind SHOW_RESEND_CONFIRMATION and
+           hidden today. It is inert while Confirm Email is OFF (every call 400s),
+           so on the screen it was a block of text that did nothing — exactly what
+           this revamp is clearing. Kept in place, not deleted: it goes live the
+           moment the toggle flips, the same way SHOW_CLEAR_MY_DATA gated the
+           delete control until #82. DELIBERATELY NO "verified ✓" BADGE — see the
+           resendConfirmationForAccount() comment for why email_confirmed_at is an
+           unreliable signal while the toggle is off. -->
+      <div class="settings-card" id="resend-confirm-card" style="margin-top:10px;display:none;">
         <p style="margin:0 0 8px;">If you signed up and never got a confirmation email, send yourself a fresh one.</p>
         <button class="settings-btn" id="settings-resend-btn" onclick="resendConfirmationForAccount()">Resend confirmation email</button>
         <p id="settings-resend-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
-      <!-- #23 — #81's surface earning its keep again. This is the ONLY place a
-           name can be changed after the fact, and it rewrites the credit on
-           every gem the account has ever submitted at once, because credit is
-           resolved from submitted_by at read time rather than copied onto each
-           row. Clearing it is a supported action and removes the credit line
-           everywhere — it is not a way to delete a gem, and the copy says so. -->
-      <div class="settings-card" style="margin-top:10px;">
-        <label class="field-label" for="settings-name" style="margin-top:0;">Your name</label>
-        <input type="text" id="settings-name" class="auth-input" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
-        <p style="margin:8px 0 0;">Shown <strong class="val">publicly</strong> as <strong class="val">Submitted by</strong> on every gem you've had approved — visible to anyone who sees that place, not just to you. Change it here and it updates on all of them.</p>
-        <p style="margin:6px 0 0;">Leave it empty and no name is shown — your gems stay on the map either way.</p>
-        <button class="settings-btn" style="margin-top:10px;" id="settings-name-btn" onclick="saveSettingsName()">Save name</button>
-        <p id="settings-name-msg" style="margin:8px 0 0;display:none;"></p>
-      </div>
+
       <button class="settings-btn" style="margin-top:10px;" onclick="logout()">Log out</button>
+
+      <!-- #82 / #177 — Delete is a low-emphasis tertiary link opening a dedicated
+           screen (#screen-delete-account), rather than a red button and an inline
+           confirm on the main settings screen. Gated by SHOW_CLEAR_MY_DATA, the
+           same constant that gated the old #clear-data-section. The mechanism
+           (deleteMyAccount + the delete-account edge function) is unchanged. -->
+      <button class="link-btn" id="delete-account-entry" onclick="openDeleteAccount()" style="display:none;margin-top:12px;">Delete account</button>
     </div>
 
-    <!-- #5 — THIS CARD WAS FACTUALLY WRONG UNTIL 2026-07-21 AND WRONG IN THE
-         OVER-CLAIMING DIRECTION. It said the app keeps "where you were standing
-         when you captured them". It does not, and never did: capture() writes
-         `lat: target.lat, lng: target.lng` — the PIN's coordinates, which are
-         the public ones already on the map — and setCaptureAnchor() does the
-         same. The `cap` telemetry block carries no coordinates at all. The
-         user's own position is never persisted by any path.
-
-         The roadmap row asserted the opposite for five passes, so this was
-         written from the row rather than the code. If capture() ever starts
-         storing a user coordinate, this card AND privacy.html become false in
-         the same instant and both have to change in that build.
-
-         SUMMARY ONLY. The full policy lives in privacy.html and this must not
-         restate it — see #77 for why one fact in two files is the recurring
-         defect here. The link is relative because privacy.html sits beside
-         index.html at the Pages root; there is no base URL to configure. -->
+    <!-- #177 / #179 — COLLAPSED TO A POINTER. This card used to summarise the
+         policy: a bulleted list of what's kept plus "only you can read your
+         capture history." That summary is what #179 was filed against — it
+         listed submitted gems and asserted read-privacy while never noting the
+         display name is the public exception (#156), so a reader who never
+         tapped through to the full policy closed it believing everything was
+         private. Rather than patch the summary with a pointer clause, the whole
+         summary is removed: there is now ONE canonical copy of what's kept, in
+         privacy.html, which already carries every bullet AND the "Your display
+         name" public-exception section. A single trust line stays because it is
+         positioning, not policy — and it is the one thing that was never in
+         doubt (capture() writes the PIN's coordinates, never the user's; see
+         privacy.html and the capture() comments). This is #77's one-fact-one-
+         file rule taken to its conclusion, and it closes #179 by deletion rather
+         than by adding a second place the disclosure has to stay in sync. -->
     <div class="settings-section">
       <h2>Your data</h2>
       <div class="settings-card">
-        <p><strong class="val">Nahgoo doesn't store your location.</strong> Your position is used in the moment — to draw the map and measure how far away a pin is — and then it's gone.</p>
-        <p>What's kept in your account:</p>
-        <ul class="data-list">
-          <li>Which spots you've captured and <strong>when</strong> — the coordinates saved are <strong>the place's own</strong>, the same ones on the public map</li>
-          <li>How far you've traveled, and the stamps you've earned</li>
-          <li>Guides you've made or saved</li>
-          <li>Gems you've submitted</li>
-        </ul>
-        <p style="margin-top:11px;">Only you can read your capture history. It is never shown to another user.</p>
-        <p>Kept for as long as your account is open. A separate integrity record — GPS accuracy at capture, no coordinates — is deleted after 30 days.</p>
-        <p style="margin-top:11px;"><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> — including every service that receives anything, and how to ask for your data or its deletion.</p>
-      </div>
-    </div>
-
-    <!-- #82 — repurposed from the local-only "Clear my data" wipe into full
-         account erasure. The wipe alone left the account (and the email #69 is
-         about) in place, which served neither a fresh start nor a real erasure;
-         this deletes the account itself server-side. The element ids below still
-         read "clear-progress" for continuity with askClearProgress /
-         cancelClearProgress — internal only, not user-visible. -->
-    <div class="settings-section" id="clear-data-section" style="display:none;">
-      <h2>Delete my account</h2>
-      <div class="settings-card">
-        <p>Permanently deletes your Nahgoo account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
-        <p>Two things this does <strong class="val">not</strong> remove. Gems you've submitted stay on the map — once approved they're public spots other people use — but they're unlinked from you, so nothing shows you as their submitter. And guide codes you've already shared keep working for the people you sent them to.</p>
-        <p><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> for how the rest of your data is handled.</p>
-      </div>
-      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Delete my account</button>
-      <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
-        <p>This permanently deletes your account and erases every capture, stamp and guide. There is no undo and no backup.</p>
-        <div class="confirm-row">
-          <button onclick="cancelClearProgress()">Keep it</button>
-          <button class="go" id="clear-progress-go" onclick="deleteMyAccount()">Delete account</button>
-        </div>
+        <p><strong class="val">Nahgoo doesn't store your location.</strong> Your position is used in the moment — to draw the map and measure how far a pin is — then it's gone.</p>
+        <p style="margin-top:11px;"><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> — exactly what's kept in your account, every service that receives anything, that your display name is public, and how to have it all erased.</p>
       </div>
     </div>
 
@@ -2241,6 +2221,44 @@
       <div class="settings-card">
         <p>Nahgoo — <span class="val" id="settings-version">—</span></p>
         <p>Ask a local.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- #82 / #177 — DELETE ACCOUNT, its own screen. Reached from the tertiary
+       "Delete account" link in Settings → Account, so a destructive, text-heavy
+       action is off the main screen behind a deliberate tap. Element ids
+       (clear-progress-btn / clear-progress-confirm / clear-progress-go) are kept
+       from the old inline section so askClearProgress / cancelClearProgress /
+       deleteMyAccount work unchanged — the flow moved, the mechanism did not.
+       The final "are you sure?" confirm is retained by directive: the screen
+       shows the consequences, the confirm makes the irreversible tap deliberate.
+       This must be an in-app SCREEN, not a static page like privacy.html —
+       deleting needs the authed Supabase client and the live session. -->
+  <div class="screen" id="screen-delete-account">
+    <div class="title-row">
+      <h1 class="page-title">Delete account</h1>
+      <button class="icon-btn" onclick="closeDeleteAccount()" aria-label="Back to settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">This cannot be undone.</p>
+
+    <div class="settings-section">
+      <div class="settings-card">
+        <p>Permanently deletes your Nahgoo account and erases everything tied to it — your captures and the places they were made at, your travel distance, every stamp, and every guide you've made or saved. Everywhere, not just on this phone. <strong class="val">This cannot be undone.</strong></p>
+        <p>Two things this does <strong class="val">not</strong> remove. Gems you've submitted stay on the map — once approved they're public spots other people use — but they're unlinked from you, so nothing shows you as their submitter. And guide codes you've already shared keep working for the people you sent them to.</p>
+        <p><a class="credit-link" href="privacy.html" target="_blank" rel="noopener noreferrer">Read the full privacy policy</a> for how the rest of your data is handled.</p>
+      </div>
+      <button class="settings-btn danger" style="margin-top:10px;" id="clear-progress-btn" onclick="askClearProgress()">Delete account</button>
+      <div class="confirm-panel" id="clear-progress-confirm" style="display:none;">
+        <p>This permanently deletes your account and erases every capture, stamp and guide. There is no undo and no backup.</p>
+        <div class="confirm-row">
+          <button onclick="cancelClearProgress()">Keep it</button>
+          <button class="go" id="clear-progress-go" onclick="deleteMyAccount()">Delete account</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5975,7 +5993,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.29k';
+const APP_VERSION = '2026.07.30a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6003,10 +6021,22 @@ const APP_VERSION = '2026.07.29k';
    coexist with, and one honest control beats two overlapping ones. */
 /* #82 — SHIPPED. "Delete my account" (deleteMyAccount() + the delete-account
    edge function) now ships beside this control, which is the condition the
-   comment above set for flipping it on. The section it gates has been
-   repurposed from the local-only "Clear my data" wipe into full account
-   erasure — see the #clear-data-section markup and deleteMyAccount(). */
+   comment above set for flipping it on. It began as the local-only "Clear my
+   data" wipe and was repurposed into full account erasure.
+   #177 — the control it gates is now the tertiary "Delete account" LINK in
+   Settings → Account, which opens #screen-delete-account (the old inline
+   #clear-data-section was retired). This constant still hides the whole
+   capability when false; see openSettings() and deleteMyAccount(). */
 const SHOW_CLEAR_MY_DATA = true;
+
+/* #177 — the resend-confirmation card is inert while Confirm Email is OFF (#69):
+   every sb.auth.resend() call 400s because there is nothing to confirm. On the
+   settings screen it was therefore a block of text a user could tap to no effect,
+   which is what this revamp exists to clear. Gated here, not deleted, on the
+   SHOW_CLEAR_MY_DATA precedent — flip this to true in the SAME session the
+   Confirm Email toggle flips, when the card finally does something. Until then
+   the markup and resendConfirmationForAccount() stay in place, costing nothing. */
+const SHOW_RESEND_CONFIRMATION = false;
 
 /* =========================================================
    #97 — INVARIANT ASSERTIONS ("enforced by nothing", 5th sighting)
@@ -6369,10 +6399,101 @@ async function resendConfirmationForAccount(){
     btn.textContent = original;
   }
 }
+
+/* #181 — CHANGE ACCOUNT EMAIL. Password accounts only; openSettings() makes the
+   field read-only for a Google (#76) identity and this returns early on it too.
+   The handler does NOT assume whether the change applies instantly or waits on a
+   confirmation link — that depends on the Confirm-Email / Secure-Email-Change
+   dashboard config this file cannot see (#69; "verify the effect, not the
+   report"). It reads the RETURNED user instead: a change awaiting confirmation
+   surfaces as new_email; an instant change surfaces as a changed email. So the
+   same code is correct whichever way the dashboard is set, and the copy matches
+   what actually happened. emailRedirectTo is pinned to AUTH_REDIRECT_BASE so the
+   confirmation link follows the origin — the same pin #2 relies on for reset.
+   OUTSIDE THE FILE: for the confirmation path to deliver, the "Change Email
+   Address" template and its redirect allow-list must be set in Supabase, and
+   Secure Email Change is the recommended toggle — see the pass notes. */
+async function updateSettingsEmail(){
+  const el  = document.getElementById('settings-email-input');
+  const btn = document.getElementById('settings-email-btn');
+  const msg = document.getElementById('settings-email-msg');
+  if(!el || el.readOnly) return;
+  const showMsg = (text, ok)=>{
+    if(!msg) return;
+    msg.textContent = text;
+    msg.style.display = text ? '' : 'none';
+    msg.style.color = ok ? 'var(--accent-2, #9FB3A4)' : 'var(--danger)';
+  };
+  const next    = (el.value || '').trim();
+  const current = (state.user && state.user.email) || '';
+  if(!next){ showMsg("Enter an email address.", false); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next)){ showMsg("That doesn't look like an email address.", false); return; }
+  if(next.toLowerCase() === current.toLowerCase()){ showMsg("That's already your email.", false); return; }
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Updating…';
+  showMsg('', true);
+  try{
+    const { data, error } = await sb.auth.updateUser(
+      { email: next },
+      { emailRedirectTo: AUTH_REDIRECT_BASE }
+    );
+    if(error){
+      if(error.status === 429){ showMsg("Too many requests just now — wait a minute, then try again.", false); return; }
+      showMsg(error.message, false);
+      return;
+    }
+    const nu = data && data.user;
+    if(nu && nu.new_email && nu.new_email.toLowerCase() === next.toLowerCase()){
+      // Confirmation required — the email does not change until the link is opened.
+      showMsg("Almost there — we've sent a confirmation link to " + next + ". Open it to finish the change. Until then, keep logging in with your current email.", true);
+    }else if(nu && nu.email && nu.email.toLowerCase() === next.toLowerCase()){
+      // Applied immediately (confirmation is off).
+      state.user = nu;
+      el.value = nu.email;
+      showMsg("Email updated.", true);
+    }else{
+      // Neither field reflects it yet: safest message is the confirmation path.
+      showMsg("Check your inbox to confirm the change.", true);
+    }
+  }catch(e){
+    showMsg("Something went wrong reaching the server. Check your connection and try again.", false);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
 function openSettings(returnTo){
   const u = state.user || {};
-  document.getElementById('settings-email').textContent = u.email || 'unknown';
   document.getElementById('settings-version').textContent = APP_VERSION;
+
+  /* #181 — email field. Seed it from the current account email and reset any
+     stale status line from a previous visit. Editability is decided by IDENTITY
+     PROVIDER: a Google-only (#76) account's email is owned by Google, so editing
+     it here would fork the login from the identity — render it read-only and
+     point the user at Google instead. A password account (providers includes
+     'email') gets the editable field and the Update button. app_metadata carries
+     the provider list; fall back to the singular `provider` for older sessions. */
+  const emailEl = document.getElementById('settings-email-input');
+  if(emailEl){
+    emailEl.value = u.email || '';
+    const am = u.app_metadata || {};
+    const providers = Array.isArray(am.providers) ? am.providers : (am.provider ? [am.provider] : []);
+    const canEditEmail = providers.indexOf('email') !== -1 || providers.length === 0;
+    emailEl.readOnly = !canEditEmail;
+    const emBtn = document.getElementById('settings-email-btn');
+    const emManaged = document.getElementById('settings-email-managed');
+    if(emBtn) emBtn.style.display = canEditEmail ? '' : 'none';
+    if(emManaged) emManaged.style.display = canEditEmail ? 'none' : '';
+    const emMsg = document.getElementById('settings-email-msg');
+    if(emMsg){ emMsg.textContent = ''; emMsg.style.display = 'none'; }
+  }
+
+  /* #177 — resend-confirmation card: inert while Confirm Email is off, gated
+     rather than deleted (see SHOW_RESEND_CONFIRMATION). */
+  const resendCard = document.getElementById('resend-confirm-card');
+  if(resendCard) resendCard.style.display = SHOW_RESEND_CONFIRMATION ? '' : 'none';
+
   const nameEl = document.getElementById('settings-name');
   if(nameEl){
     nameEl.value = (state.profile && state.profile.display_name) || '';
@@ -6386,10 +6507,12 @@ function openSettings(returnTo){
     });
   }
   cancelClearProgress(); // never open with a destructive confirm already armed
-  /* Gated, not deleted — see SHOW_CLEAR_MY_DATA. Toggled here rather than left
-     to the inline style so flipping the constant is genuinely the only edit. */
-  const dataSection = document.getElementById('clear-data-section');
-  if(dataSection) dataSection.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
+  /* #177 — the delete ENTRY POINT is now a tertiary link in Account that opens
+     #screen-delete-account; the old inline #clear-data-section is gone. Same
+     SHOW_CLEAR_MY_DATA gate as before, now on the link, so flipping the constant
+     is still the only edit that hides the whole capability. */
+  const delEntry = document.getElementById('delete-account-entry');
+  if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
   /* #91 — where Back goes. Defaults to the passport because the gear is still
      the primary entrance; the map credit passes 'screen-map' so the pill is a
      round trip rather than a one-way door onto a screen you weren't on. */
@@ -6457,6 +6580,21 @@ function closeSettings(){
   setTab(state.settingsReturn || 'screen-passport');
   state.settingsReturn = null;
 }
+/* #82 / #177 — the delete screen sits UNDER settings: reached from the tertiary
+   link, its Back arrow returns to settings, and settings' own Back still returns
+   to wherever settings was opened from (state.settingsReturn is left untouched
+   here). Both entry and exit reset the confirm so the destructive control is
+   never pre-armed. It stays on the Passport nav tab, like settings itself (#91). */
+function openDeleteAccount(){
+  cancelClearProgress();
+  showScreen('screen-delete-account');
+  setNavActive('screen-passport');
+}
+function closeDeleteAccount(){
+  cancelClearProgress();
+  showScreen('screen-settings');
+  setNavActive('screen-passport');
+}
 function askClearProgress(){
   document.getElementById('clear-progress-confirm').style.display = 'block';
   document.getElementById('clear-progress-btn').style.display = 'none';
@@ -6466,7 +6604,7 @@ function cancelClearProgress(){
   const b = document.getElementById('clear-progress-btn');
   const g = document.getElementById('clear-progress-go');
   if(c) c.style.display = 'none';
-  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Delete my account'; }
+  if(b){ b.style.display = ''; b.disabled = false; b.textContent = 'Delete account'; }
   /* THE STUCK BUTTON. This one was reset nowhere, so after a single attempt it
      stayed disabled reading "Deleting…" for the rest of the session — which
      looks identical to a hang whether or not anything actually hung, and sent
