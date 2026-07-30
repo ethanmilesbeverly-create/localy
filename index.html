@@ -3641,9 +3641,13 @@ function generateDiscoverLocal(base){
      GEM_INCLUDE_RADIUS_M   = REAL_INCLUDE_RADIUS_M  ~#4090
        Approved user gems pulled into a blend around the anchor. DERIVED from
        real-place inclusion so a gem reaches no farther than any other pin.
-     REAL_INCLUDE_RADIUS_M   9000  (~5.6 mi)  ~#3564
+     REAL_INCLUDE_RADIUS_M  16000  (~9.9 mi)  ~#3564
        OSM/Wikipedia places pulled into the same blend. The one source both this
-       group's other radii derive from.
+       group's other radii derive from. Widened 9000 -> 16000 by directive to
+       fill the viewport in dense areas and give sparse areas more reach; note
+       this only sets how far to INCLUDE from cached tiles, not how far Overpass
+       is queried (that is OVERPASS_RADIUS_M, unchanged), so a cold sparse tile
+       still fills as tiles accumulate rather than instantly.
      OVERPASS_RADIUS_M       4200  (~2.6 mi)  ~#3565
        Query radius asked of Overpass. NOT a display filter — it is the outer
        bound of what the server could ever have, so REAL_INCLUDE_RADIUS_M can
@@ -3665,8 +3669,8 @@ function generateDiscoverLocal(base){
        blend radius: it frames what is walkable, not what is loaded. Was 3000m
        (~zoom 12); lowered to 1500m (~zoom 13) so the pin cluster fills the
        viewport width on open instead of sitting in the center third. Now
-       roughly a sixth of REAL_INCLUDE_RADIUS_M, and that ratio has never been
-       examined.
+       roughly a tenth of REAL_INCLUDE_RADIUS_M (after the 9->16 km widening),
+       and that ratio has never been examined.
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
        "Is this pin walkable from here?" (#7). Two uses, both the same question:
        (1) fitMapToHunt() frames YOU together with the pins only when the nearest
@@ -4085,14 +4089,14 @@ function dismissStaleHunt(){
    inside the sandboxed in-app preview pane, same as Supabase.
    ========================================================= */
 const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse one fetch
-/* #65 register — CONTENT SELECTION. Surfaces real places within ~5.6 mi of the
+/* #65 register — CONTENT SELECTION. Surfaces real places within ~9.9 mi of the
    anchor, and is the source two other constants DERIVE from rather than
    restate: CAPTURED_INJECT_RADIUS_M and LIST_RANGE_M. Anything that is the same
    question joins them here instead of becoming a new number.
    The gem-vs-real gap is now CLOSED: GEM_INCLUDE_RADIUS_M derives from this
    constant just below, so both radii move together — see the register block
    above nearbyApprovedGems(). */
-const REAL_INCLUDE_RADIUS_M = 9000;
+const REAL_INCLUDE_RADIUS_M = 16000;
 /* #65 register — CONTENT SELECTION. DERIVED, not a second number: user gems and
    real OSM/Wikipedia places now share ONE inclusion radius, so no pin type
    reaches farther than another and the 9-15 km gems-only band is gone. Declared
@@ -4667,8 +4671,8 @@ function buildAllThingsLocal(base){
 
      ROUND-ROBIN, AND WHY IT WASN'T ENOUGH ALONE. Round-robin shares the target
      across categories that have stock. But "stock" was measured over the whole
-     REAL_INCLUDE_RADIUS_M (9km) blend radius, so anchored AT a cemetery the
-     surrounding city fills every non-history bucket within 9km, round-robin
+     REAL_INCLUDE_RADIUS_M (16km) blend radius, so anchored AT a cemetery the
+     surrounding city fills every non-history bucket within 16km, round-robin
      splits the 15 slots six ways, history gets ~2-3, and ~1 lands inside a tight
      cemetery frame. Correct diversification of the wrong scope. (First shipped
      2026.07.21p, looked like it collapsed to 1 pin, was REVERTED on a
@@ -5912,7 +5916,18 @@ async function init(){
   setupBaseMap();
   wirePinSheet();
   wirePlaceSuggest();   // #88 — both location search fields get the dropdown
-  startLocalHunt(FALLBACK_LOCATION); // content immediately, refined once real location resolves
+  /* Anchor the FIRST content paint to the remembered map view (#120), not the
+     downtown FALLBACK_LOCATION. setupBaseMap() already opens the map at the
+     remembered view, so anchoring content to FALLBACK left the first paint
+     blending pins around downtown while the map showed elsewhere — a wide,
+     wrong-anchored set that snapped tight only when the first GPS fix reblended.
+     The gap became obvious once #65 tightened/unified the radius. This passes
+     remembered coords as the CONTENT anchor (state.localHuntOrigin) only; it does
+     NOT set state.me, so #120's "never set state.me from cache" rule still holds
+     and onLocation()'s first fix still reblends around the real position. Falls
+     back to FALLBACK_LOCATION on a true first launch with no remembered view. */
+  const bootAnchor = rememberedMapView() || FALLBACK_LOCATION;
+  startLocalHunt(bootAnchor); // content immediately near where the map opens, refined once real location resolves
   fixMapSize();
   /* #52 — first-run onboarding, when present, owns the first location prompt
      (step 1) so it arrives with a reason instead of cold. Otherwise locate now.
@@ -6148,7 +6163,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30j';
+const APP_VERSION = '2026.07.30k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
