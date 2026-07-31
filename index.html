@@ -1956,22 +1956,28 @@
         from the film, the bar where the band got its name. Not sure? Pick either, we'll sort it out.
       </p>
     </div>
-    <!-- #23 — REQUIRED HERE, AND THIS IS THE LOAD-BEARING CAPTURE POINT.
-         The signup field is optional and exists only to front-load this one.
-         Required is a deliberate trade with a named cost: it is friction on the
-         flow the whole positioning bet depends on. It is accepted because the
-         alternative is worse than uniform silence — an optional name produces a
-         map where SOME gems carry a credit and some do not, which reads as
-         "these particular ones are vouched for" and reopens #16's seam a second
-         time INSIDE the gem set, on top of the gems-vs-scaffolded seam the
-         feature already pays for. One seam, not two.
-         WHAT MAKES REQUIRED SAFE: nothing is verified and nothing claims to be.
-         #69 leaves email unverified, so any name here is self-asserted and no
-         copy anywhere may imply otherwise. It is also editable forever from
-         Settings, and editing it there rewrites the credit on every gem at once.
-         REVERSIBLE: make this optional by deleting the guard in submitGem().
-         Nothing else in the feature assumes a name exists. -->
-    <div class="field">
+    <!-- #23 / #191 — THE LOAD-BEARING CAPTURE POINT, NOW CONDITIONALLY SHOWN.
+         The GUARANTEE is unchanged and is the whole reason this field exists: no
+         gem is inserted without a name behind it, so every gem carries a credit
+         and the credit line stays uniform. An optional-at-submit name would
+         produce a map where SOME gems carry a credit and some do not, which
+         reads as "these particular ones are vouched for" and reopens #16's seam
+         a second time INSIDE the gem set (#153). One seam, not two.
+         WHAT #191 CHANGED: the field is HIDDEN for a submitter whose profile
+         already has a name — the common path (openSuggestGemScreen sets .hidden).
+         A returning contributor submits with one less field and the credit still
+         lands, because submitGem carries their profile name through. It is SHOWN,
+         and required, ONLY to a submitter with no name yet — the one population
+         that must supply it. Editing an existing name moved fully to Settings
+         (this form no longer edits it), which is where the "Change it any time"
+         copy already points. The name gate now keys off the PROFILE, not this
+         input's value — see submitGem(); do not re-couple them.
+         WHAT MAKES IT SAFE: nothing is verified and nothing claims to be. #69
+         leaves email unverified, so any name here is self-asserted and no copy
+         anywhere may imply otherwise.
+         REVERSIBLE: to always show it, drop the show/hide in openSuggestGemScreen
+         and read the input unconditionally in submitGem's no-name branch. -->
+    <div class="field" id="gem-submitter-field">
       <label class="field-label">Your name</label>
       <input type="text" id="gem-submitter-name" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
       <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
@@ -6239,7 +6245,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31i';
+const APP_VERSION = '2026.07.31j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9032,13 +9038,21 @@ function openSuggestGemScreen(){
   document.getElementById('gem-desc').value = '';
   document.getElementById('gem-category').value = 'park';
   document.getElementById('gem-address-search').value = '';
-  /* #23 — PREFILLED, NOT BLANKED, and it is the one field on this screen that
-     survives a reset. Everything above describes THIS gem and must clear; the
-     name describes the person and is the same on every submission. Blanking it
-     would ask a returning contributor to retype it on every gem, which is the
-     fastest way to end up with three spellings of one person on the map. */
+  /* #23 / #191 — SHOW THE NAME FIELD ONLY WHEN THE PROFILE HAS NO NAME YET.
+     A submitter who already has a name never sees this field — their credit is
+     carried through by submitGem from state.profile, so asking again is pure
+     friction on the flow the positioning bet depends on. It is shown, blank,
+     ONLY to a first-time / no-name submitter, who is required to fill it.
+     We hide when we POSITIVELY know there is a name; if the profile has not
+     loaded yet (null), we SHOW it — the safe default, and submitGem's gate uses
+     the same profile check so the two never disagree. Not auto-focused: the
+     field sits below the map and the primary fields, so focusing it would scroll
+     past "What is it?" and pop the keyboard on arrival. */
   const submitterEl = document.getElementById('gem-submitter-name');
-  if(submitterEl) submitterEl.value = (state.profile && state.profile.display_name) || '';
+  const submitterField = document.getElementById('gem-submitter-field');
+  const hasName = !!(state.profile && state.profile.display_name);
+  if(submitterField) submitterField.hidden = hasName;
+  if(submitterEl) submitterEl.value = '';
   state.gemDraftPin = null;
   setTimeout(()=>{
     if(!state.suggestMap){
@@ -9095,21 +9109,27 @@ async function submitGem(){
   const uid = state.user && state.user.id;
   if(!uid){ showToast('Please log in again to submit'); return; }
 
-  /* #23 — the name is saved BEFORE the submission row is inserted, and the
-     ordering is deliberate. If the profile write fails we stop and the user
-     retries with everything still in the form; if it were the other way round a
-     failed name write would leave a submitted gem that can never be credited,
-     and there is no screen anywhere that would show that as a problem.
-     THE NAME IS NOT COPIED ONTO THE SUBMISSION ROW. Credit is resolved through
-     `submitted_by` at read time (see fetchGemCredits) so that editing the name
-     in Settings updates every gem at once, and so #82's anonymisation — which
-     nulls submitted_by — actually removes the credit rather than leaving a
-     denormalised copy of the departed user's name sitting on the pin. */
-  const submitterName = normalizeDisplayName(document.getElementById('gem-submitter-name').value);
-  if(!submitterName){ showToast('Add your name so people know who found this'); return; }
-  const nameProblem = displayNameProblem(submitterName);
-  if(nameProblem){ showToast(nameProblem); return; }
-  if(!state.profile || state.profile.display_name !== submitterName){
+  /* #23 / #191 — THE NAME GATE, KEYED OFF THE PROFILE RATHER THAN THE INPUT.
+     The guarantee is unchanged: no submission is inserted without a name behind
+     it, so every gem carries a credit (#153/#16). What changed is where the name
+     comes from. If the profile ALREADY has a name, the field was hidden
+     (openSuggestGemScreen) and we do not read it — the credit is carried by
+     submitted_by=uid and resolved through the profile at read time. If it does
+     NOT, the field was shown and required, and we save it BEFORE inserting the
+     row: a failed name write must stop the submission with everything still in
+     the form, because inserting first would leave a gem that can never be
+     credited and no screen would show that as a problem.
+     THE NAME IS NOT COPIED ONTO THE SUBMISSION ROW. Credit resolves through
+     `submitted_by` at read time (see fetchGemCredits) so editing the name in
+     Settings updates every gem at once, and so #82's anonymisation — which nulls
+     submitted_by — actually removes the credit rather than leaving a denormalised
+     copy of the departed user's name on the pin. Editing an existing name is a
+     Settings-only action now; this form no longer writes over a name it hid. */
+  if(!(state.profile && state.profile.display_name)){
+    const submitterName = normalizeDisplayName(document.getElementById('gem-submitter-name').value);
+    if(!submitterName){ showToast('Add your name so people know who found this'); return; }
+    const nameProblem = displayNameProblem(submitterName);
+    if(nameProblem){ showToast(nameProblem); return; }
     const saved = await saveDisplayName(submitterName);
     if(!saved){ showToast("Couldn't save your name — check your connection"); return; }
   }
@@ -10208,9 +10228,12 @@ function fillPinSheet(t){
        row changes, so two pins side by side are still identical and the
        difference only appears once you have chosen to open one. A badge on the
        pin itself would have been the version #16 rightly forbids.
-       THE ONE-WAY COST TO KNOW ABOUT: the honest fix for the seam is fewer
-       scaffolded pins (#9, #57), not quieter credits. Every pass that does not
-       thin the scaffolding leaves this line marking more absences than presences.
+       THE SEAM'S FIX CHANGED WITH #162: scaffolding is permanent, so "fewer
+       scaffolded pins (#9, #57)" is no longer the remedy — that thinning is not
+       coming. Under #54's layering a credit line comes to mean "a person left a
+       note on this pin" rather than "this pin came from a person", so a
+       scaffolded pin can carry one too; the seam closes by making the human
+       layer reachable everywhere, not by making the other layer scarce.
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
        #23 decision (2) and #82's null submitted_by. */
     `${t.desc ? `<p class="ps-desc">${escapeHtml(t.desc)}</p>` : ''}
