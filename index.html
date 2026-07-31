@@ -757,6 +757,9 @@
     position:relative;
     flex-shrink:0;
     display:none;
+    /* swipe surface for wireDrawer() — a vertical drag here must be a pointer
+       gesture, not a page/body scroll. Same as #pin-sheet-drag's touch-action. */
+    touch-action:none;
   }
   #target-drawer:not(.collapsed) #drawer-header{display:block;}
   #target-drawer .drawer-handle{
@@ -5951,6 +5954,7 @@ async function init(){
   markFreshnessSeen(); // #27 — record this open AFTER the previous value was read into state.lastSeenAt in loadPersonal
   setupBaseMap();
   wirePinSheet();
+  wireDrawer();         // swipe-down-to-close on the nearby drawer, mirroring wirePinSheet()
   wirePlaceSuggest();   // #88 — both location search fields get the dropdown
   /* Anchor the FIRST content paint to the remembered map view (#120), not the
      downtown FALLBACK_LOCATION. setupBaseMap() already opens the map at the
@@ -6199,7 +6203,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31c';
+const APP_VERSION = '2026.07.31d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7613,6 +7617,16 @@ function setupBaseMap(){
   }).addTo(state.leafletMap);
   // clicking map always allowed to enable simulate mode manually via long info, but auto only on geo failure
   state.leafletMap.on('click', e=>{
+    // A tap on the map behind an open bottom sheet dismisses it (backdrop tap),
+    // the same gesture that already closed the pin sheet here. The nearby drawer
+    // had no such affordance — only the X, the handle, or tapping a pin row —
+    // so it was added. The drawer and pin sheet are never open at once
+    // (openPinSheet collapses the drawer), so this closes whichever is up. A
+    // dismiss tap is treated as a dismiss and nothing else: it returns before
+    // the simulate-move so tapping the map to close the drawer does not also
+    // teleport a simulated position.
+    const drawer = document.getElementById('target-drawer');
+    if(drawer && !drawer.classList.contains('collapsed')){ toggleDrawer(); return; }
     closePinSheet();
     if(state.simulating) onLocation(e.latlng.lat, e.latlng.lng, true);
   });
@@ -10406,6 +10420,36 @@ function wirePinSheet(){
     if(dy < -28)      expandPinSheet();          // swipe up → expand
     else if(dy > 28)  expanded ? collapsePinSheet() : closePinSheet(); // swipe down
     else              togglePinSheetExpand();     // tap
+  });
+}
+/* Swipe-down-to-close for the nearby drawer, mirroring wirePinSheet(). The
+   drawer used to close only via the X, the handle's onclick, or tapping a pin
+   row; a swipe on the handle did nothing. The grab surface is the drawer HEADER
+   (the handle strip), NOT the scrollable body — a swipe on a row must still
+   scroll the list, same split the pin sheet uses (drag on the header, scroll in
+   the expand area).
+     Two collisions with the existing tap-close onclicks are handled so a swipe
+   can never toggle the drawer twice (which would reopen it):
+   - The X (#drawer-close-btn) is tap-only: a gesture STARTING on it is not read
+     as a swipe, so its onclick fires alone.
+   - The handle carries onclick=toggleDrawer for tap-close. A real tap has a
+     tiny dy so this handler no-ops and the onclick closes it once; a real
+     downward swipe moves far enough that the browser cancels the handle's
+     synthetic click, so only this handler closes it. The two never both fire. */
+function wireDrawer(){
+  const drawer = document.getElementById('target-drawer');
+  const zone = document.getElementById('drawer-header');
+  if(!drawer || !zone) return;
+  let startY = null;
+  zone.addEventListener('pointerdown', e=>{
+    if(e.target.closest('#drawer-close-btn')){ startY = null; return; }
+    startY = e.clientY;
+  });
+  window.addEventListener('pointerup', e=>{
+    if(startY === null) return;
+    const dy = e.clientY - startY;
+    startY = null;
+    if(dy > 28 && !drawer.classList.contains('collapsed')) toggleDrawer(); // swipe down → close
   });
 }
 
