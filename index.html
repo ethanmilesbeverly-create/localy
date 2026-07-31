@@ -1435,36 +1435,43 @@
   /* ---------- Create hunt screen ---------- */
   #create-map{height:220px;border-radius:12px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line);}
   #suggest-gem-map{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
-  /* #196 — the row is now two lines: a top line (index + editable name +
-     Remove) and a full-width description input beneath it. The description is
+  /* #196/#198 — each stop is one grouping CARD (the --surface-2 container, so
+     the whole thing reads as "these two belong together") holding two clearly
+     EDITABLE fields: a labelled Name well and a labelled Description well, both
+     styled like the app's standard inputs (--bg well + --line border + orange
+     focus ring) so it is obvious they can be typed into. #198 replaced the old
+     borderless transparent inputs, which did not read as editable. Both fields
+     stay 16px (#11/#46 — sub-16px triggers iOS focus-zoom). The description is
      what shows on that stop's card (the `.ps-desc` line on the pin sheet). */
   .pin-list-row{
     display:flex;flex-direction:column;gap:6px;
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:10px;padding:10px 12px;margin-bottom:8px;
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:12px;padding:12px;margin-bottom:10px;
   }
-  .pin-list-top{display:flex;align-items:center;gap:10px;}
-  .pin-list-row .pin-index{color:var(--text-dim);font-size:14px;flex-shrink:0;}
-  .pin-list-row .pin-name-input{
-    flex:1;min-width:0;
-    background:transparent;border:none;border-bottom:1px dashed transparent;
-    color:var(--text);font-size:16px;font-family:inherit; /* #11 — see note on the shared input rule */
-    padding:2px 0;
+  .pin-row-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+  .pin-row-head .pin-index{
+    color:var(--text-dim);font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.06em;
   }
-  .pin-list-row .pin-name-input:hover{border-bottom-color:var(--line);}
-  .pin-list-row .pin-name-input:focus{outline:none;}
+  .pin-row-head .pin-remove{
+    background:none;border:none;color:var(--danger);font-size:12px;
+    cursor:pointer;font-weight:600;padding:0;flex-shrink:0;
+  }
+  .pin-field-label{
+    display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;
+    color:var(--text-dim);margin:2px 0 1px 2px;
+  }
+  .pin-list-row .pin-name-input,
   .pin-list-row .pin-desc-input{
     width:100%;box-sizing:border-box;
-    background:transparent;border:none;border-bottom:1px dashed transparent;
-    color:var(--text-dim);font-size:13px;font-family:inherit; /* #11 — same shared-input reason as the name field */
-    padding:2px 0 2px 22px; /* indent under the name, clear of the index */
+    background:var(--bg);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);font-size:16px;font-family:inherit; /* #11/#46 — 16px, or iOS zooms on focus */
+    padding:10px 12px;
   }
+  .pin-list-row .pin-name-input::placeholder,
   .pin-list-row .pin-desc-input::placeholder{color:var(--text-dim);opacity:.7;}
-  .pin-list-row .pin-desc-input:hover{border-bottom-color:var(--line);}
-  .pin-list-row .pin-desc-input:focus{outline:none;color:var(--text);}
-  .pin-list-row button{
-    background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;font-weight:600;flex-shrink:0;
-  }
+  .pin-list-row .pin-name-input:focus,
+  .pin-list-row .pin-desc-input:focus{outline:1px solid var(--orange);}
   #code-result{
     background:var(--surface-2);border:1px dashed var(--yellow);border-radius:12px;
     padding:16px;text-align:center;margin-top:16px;display:none;
@@ -6300,7 +6307,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31t';
+const APP_VERSION = '2026.07.31v';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9565,12 +9572,14 @@ function renderCreatePinList(){
   }
   el.innerHTML = state.createPins.map((p,i)=>`
     <div class="pin-list-row">
-      <div class="pin-list-top">
-        <span class="pin-index">${i+1}.</span>
-        <input type="text" class="pin-name-input" value="${escapeHtml(p.name)}" onchange="renamePin('${p.id}', this.value)" placeholder="Stop name">
-        <button onclick="removeCreatePin('${p.id}')">Remove</button>
+      <div class="pin-row-head">
+        <span class="pin-index">Stop ${i+1}</span>
+        <button class="pin-remove" onclick="removeCreatePin('${p.id}')">Remove</button>
       </div>
-      <input type="text" class="pin-desc-input" value="${escapeHtml(p.desc||'')}" onchange="setPinDesc('${p.id}', this.value)" placeholder="Add a description — shows on this stop's card">
+      <label class="pin-field-label">Name</label>
+      <input type="text" class="pin-name-input" value="${escapeHtml(p.name)}" onchange="renamePin('${p.id}', this.value)" placeholder="Stop name">
+      <label class="pin-field-label">Description</label>
+      <input type="text" class="pin-desc-input" value="${escapeHtml(p.desc||'')}" onchange="setPinDesc('${p.id}', this.value)" placeholder="Shows on this stop's card">
     </div>`).join('');
 }
 function renamePin(id, newName){
