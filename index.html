@@ -6307,7 +6307,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31w';
+const APP_VERSION = '2026.07.31x';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9062,6 +9062,12 @@ function startRandomHunt(){
 function jumpCreateMapTo(place){
   closeAllPlaceSuggest();  // committed picks close the suggest list themselves;
                            // this is belt-and-braces for the Enter fallback path
+  // #200 — clear the search field after a pick (like the map pill does, unlike
+  //   the gem form). The stop is already added and named in the list below, so
+  //   the query has done its job; leaving it there reads as unfinished and hides
+  //   that the same field is ready for the next place you want to add.
+  const searchInput = document.getElementById('create-location-search');
+  if(searchInput) searchInput.value = '';
   const name = place.name || ('Pin '+(state.createPins.length+1));
   state.createPins.push({id:'p'+Date.now(), name, lat:place.lat, lng:place.lng});
   if(state.createMarkersLayer){
