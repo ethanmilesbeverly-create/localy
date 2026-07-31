@@ -6184,7 +6184,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30o';
+const APP_VERSION = '2026.07.30p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7641,6 +7641,7 @@ function regenerateCurrentHuntAt(base){
   else if(key.startsWith('shops_')) startShopsHunt(base);
   else if(key.startsWith('barsrest_')) startBarsAndRestaurantsHunt(base);
   else if(key.startsWith('history_')) startHistoryHunt(base);
+  else if(key.startsWith('lore_')) startLoreHunt(base); // lore IS location-based (nearbyApprovedGems 'lore'); without this arm it fell to the fixed-guide else below and got ZOOM_WALK + the "spots are fixed" toast while never reloading the area's stories — see startLoreHunt / buildPointsForKey's lore_ arm, the two minting sites that already exist
   /* #67 — stateparks_ / nationalparks_ arms deleted. They could only fire on an
      already-active hunt with that key, which became unreachable when the cards
      went. Their presence here is the strongest evidence those cards once
