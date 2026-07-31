@@ -1502,6 +1502,30 @@
     font-size:14px;color:var(--text);
   }
   .checkbox-row input{width:17px;height:17px;accent-color:var(--orange);flex-shrink:0;}
+  /* #202/#204 — the "let others add stops" control, styled as a switch. The
+     underlying element is still <input type="checkbox" id="create-editable">, so
+     every .checked read in the save/open code is unchanged; only the look moves. */
+  .toggle-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-top:4px;margin-bottom:16px;cursor:pointer;
+    font-size:14px;color:var(--text);
+  }
+  .toggle-row input{position:absolute;opacity:0;width:0;height:0;pointer-events:none;}
+  .toggle-switch{
+    position:relative;flex-shrink:0;
+    width:44px;height:26px;border-radius:13px;
+    background:var(--surface-3);
+    transition:background .18s ease;
+  }
+  .toggle-switch::after{
+    content:"";position:absolute;top:3px;left:3px;
+    width:20px;height:20px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.35);
+    transition:transform .18s ease;
+  }
+  .toggle-row input:checked + .toggle-switch{background:var(--orange);}
+  .toggle-row input:checked + .toggle-switch::after{transform:translateX(18px);}
+  .toggle-row input:focus-visible + .toggle-switch{outline:2px solid var(--orange);outline-offset:2px;}
   .edit-links-row{
     display:flex;justify-content:center;gap:24px;
     margin-top:18px;
@@ -2074,16 +2098,6 @@
       <label class="field-label">1. Name your guide</label>
       <input type="text" id="create-hunt-name" placeholder="e.g. Sam's Bachelorette Crawl">
     </div>
-    <!-- #202 — collaborative guides. When ON, anyone who redeems the code can add
-         their own stops and everyone (the maker included) sees them, because the
-         adds are unioned back into the shared hunt-code: blob. When OFF (default)
-         the guide behaves exactly as before: holders get view-only, no Edit in
-         the 3-dot menu. Hidden while a HOLDER is adding stops (only the owner
-         decides who-can-edit — openCreateScreen toggles create-editable-row). -->
-    <label class="checkbox-row" id="create-editable-row" style="margin-top:-4px;">
-      <input type="checkbox" id="create-editable">
-      Let others add stops to this guide
-    </label>
     <div class="field">
       <label class="field-label">2. Add your stops</label>
       <!-- #194 — no Go button, matching the gem screen (#17). A pick here now
@@ -2104,6 +2118,17 @@
     <p class="page-sub" style="margin:6px 0 14px;font-size:12px;">Search above or tap the map to add a stop.</p>
     <label class="field-label" style="display:block;margin-bottom:8px;">3. Name &amp; describe each stop</label>
     <div id="create-pin-list"></div>
+    <!-- #202 — collaborative guides. When ON, anyone who redeems the code can add
+         their own stops (and delete stops they added) and everyone — the maker
+         included — sees the changes, because they're merged into the shared
+         hunt-code: blob. OFF (default) = view-only for holders, no Edit in the
+         3-dot menu. Placed just above Save; hidden while a HOLDER is adding stops
+         (owner-only control — openCreateScreen toggles create-editable-row). -->
+    <label class="toggle-row" id="create-editable-row" style="margin-top:4px;">
+      <span>Let others add stops to this guide</span>
+      <input type="checkbox" id="create-editable">
+      <span class="toggle-switch"></span>
+    </label>
     <button class="btn" onclick="saveCustomHunt()">Save Guide</button>
     <div id="code-result">
       <span class="cr-label">Share code</span>
@@ -6335,7 +6360,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31za';
+const APP_VERSION = '2026.07.31zd';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9461,6 +9486,19 @@ function editMyHunt(id){
   openCreateScreen(h);
 }
 let huntCardMenuTargetId = null;
+let huntCardMenuBtn = null;
+/* #203 — the menu is position:fixed and used to be placed ONCE at open time from
+   the button's viewport rect, so any scroll left it pinned to the viewport while
+   the card slid away. This re-reads the button's current position; it's wired to
+   scroll + resize while the menu is open so the menu stays glued to its card. */
+function positionHuntCardMenu(){
+  const menu = document.getElementById('hunt-card-menu');
+  if(!menu.classList.contains('show') || !huntCardMenuBtn) return;
+  if(!huntCardMenuBtn.isConnected){ closeHuntCardMenu(); return; }   // card was re-rendered — drop the menu
+  const rect = huntCardMenuBtn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+}
 function toggleHuntCardMenu(event, id){
   event.stopPropagation();
   const menu = document.getElementById('hunt-card-menu');
@@ -9469,19 +9507,25 @@ function toggleHuntCardMenu(event, id){
     return;
   }
   huntCardMenuTargetId = id;
+  huntCardMenuBtn = event.currentTarget;
   const h = state.myHunts.find(x=>x.id===id);
   // #202 — Edit is offered for your own guides always, and for a REDEEMED guide
   //   only when its maker turned on "let others add stops". A view-only redeemed
   //   guide keeps its edit hidden exactly as before.
   document.getElementById('hunt-menu-edit').style.display = (h && h.external && !h.editable) ? 'none' : 'block';
-  const rect = event.currentTarget.getBoundingClientRect();
-  menu.style.top = (rect.bottom + 6) + 'px';
-  menu.style.right = (window.innerWidth - rect.right) + 'px';
   menu.classList.add('show');
+  positionHuntCardMenu();
+  // #203 — capture:true so a scroll inside any nested scroller is caught too
+  //   (scroll events don't bubble, but a capturing listener still sees them).
+  window.addEventListener('scroll', positionHuntCardMenu, true);
+  window.addEventListener('resize', positionHuntCardMenu);
 }
 function closeHuntCardMenu(){
   document.getElementById('hunt-card-menu').classList.remove('show');
   huntCardMenuTargetId = null;
+  huntCardMenuBtn = null;
+  window.removeEventListener('scroll', positionHuntCardMenu, true);   // #203
+  window.removeEventListener('resize', positionHuntCardMenu);
 }
 function huntCardMenuAction(action){
   const id = huntCardMenuTargetId;
