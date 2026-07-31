@@ -6307,7 +6307,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31v';
+const APP_VERSION = '2026.07.31w';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9071,7 +9071,8 @@ function jumpCreateMapTo(place){
   if(state.createMap){
     state.createMap.setView([place.lat, place.lng], 16);
   }
-  showToast(`Added "${name}" — rename it in the list, or tap the map for more`);
+  // #199 — no toast on a pick: the pin appearing on the map and the new row in
+  //   the list are self-evident confirmation; the toast was redundant noise.
 }
 /* #17 — the ONE place the gem draft pin is written, so a map tap and a geocode
    pick cannot disagree about marker state the way they would as two copies.
