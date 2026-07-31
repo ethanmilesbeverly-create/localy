@@ -6184,7 +6184,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30p';
+const APP_VERSION = '2026.07.30q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8824,12 +8824,25 @@ function selectExplore(cat){
      deliberate relocation outranks GPS; state.me is the fallback when neither is
      set, i.e. when you really are here. */
   const base = state.browsingLocation || state.searchedArea || state.me || FALLBACK_LOCATION;
-  if(cat==='local'){ startLocalHunt(base); }
-  else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
-  else if(cat==='shops'){ startShopsHunt(base); }
-  else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
-  else if(cat==='history'){ startHistoryHunt(base); }
-  else if(cat==='lore'){ startLoreHunt(base); }
+  /* #116 fixed the CONTENT anchor here but not the VIEW. When you are anchored to
+     a browsed/searched area (not your GPS), the map is already showing that area;
+     rebuilding the hunt must not snap the camera home. setCurrentHunt reframes via
+     centerOnPlayer, whose center is browsingLocation||me and OMITS searchedArea —
+     so without this the pins rebuild on the searched area while the view jumps to
+     your position. Mirror searchThisArea's preserve-view (#8). try/finally so the
+     flag is always cleared, even if a starter never reaches setCurrentHunt. */
+  const anchoredElsewhere = !!(state.browsingLocation || state.searchedArea);
+  if(anchoredElsewhere) state._preserveViewOnNextHunt = true;
+  try{
+    if(cat==='local'){ startLocalHunt(base); }
+    else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
+    else if(cat==='shops'){ startShopsHunt(base); }
+    else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
+    else if(cat==='history'){ startHistoryHunt(base); }
+    else if(cat==='lore'){ startLoreHunt(base); }
+  }finally{
+    state._preserveViewOnNextHunt = false;
+  }
 }
 
 function startRandomHunt(){
