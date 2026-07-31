@@ -3641,13 +3641,15 @@ function generateDiscoverLocal(base){
      GEM_INCLUDE_RADIUS_M   = REAL_INCLUDE_RADIUS_M  ~#4090
        Approved user gems pulled into a blend around the anchor. DERIVED from
        real-place inclusion so a gem reaches no farther than any other pin.
-     REAL_INCLUDE_RADIUS_M  16000  (~9.9 mi)  ~#3564
+     REAL_INCLUDE_RADIUS_M   5000  (~3.1 mi)  ~#3564
        OSM/Wikipedia places pulled into the same blend. The one source both this
-       group's other radii derive from. Widened 9000 -> 16000 by directive to
-       fill the viewport in dense areas and give sparse areas more reach; note
-       this only sets how far to INCLUDE from cached tiles, not how far Overpass
-       is queried (that is OVERPASS_RADIUS_M, unchanged), so a cold sparse tile
-       still fills as tiles accumulate rather than instantly.
+       group's other radii derive from. Set to 5000: 9000 then 16000 were tried
+       and REJECTED — with the blend capped at ATL_TARGET pins, a wider radius
+       spreads those pins across more area, thinning the neighborhood frame you
+       actually see AND pushing pins out to 5-16 km where they are invisible
+       except during the GPS-settling pan (the "flash"). Supply is not the limit
+       (a single tile returned 113 real places), so tightening concentrates the
+       cap in-frame rather than starving it.
      OVERPASS_RADIUS_M       4200  (~2.6 mi)  ~#3565
        Query radius asked of Overpass. NOT a display filter — it is the outer
        bound of what the server could ever have, so REAL_INCLUDE_RADIUS_M can
@@ -3669,8 +3671,8 @@ function generateDiscoverLocal(base){
        blend radius: it frames what is walkable, not what is loaded. Was 3000m
        (~zoom 12); lowered to 1500m (~zoom 13) so the pin cluster fills the
        viewport width on open instead of sitting in the center third. Now
-       roughly a tenth of REAL_INCLUDE_RADIUS_M (after the 9->16 km widening),
-       and that ratio has never been examined.
+       roughly a third of REAL_INCLUDE_RADIUS_M (at the 5 km setting), and that
+       ratio has never been examined.
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
        "Is this pin walkable from here?" (#7). Two uses, both the same question:
        (1) fitMapToHunt() frames YOU together with the pins only when the nearest
@@ -4089,14 +4091,14 @@ function dismissStaleHunt(){
    inside the sandboxed in-app preview pane, same as Supabase.
    ========================================================= */
 const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse one fetch
-/* #65 register — CONTENT SELECTION. Surfaces real places within ~9.9 mi of the
+/* #65 register — CONTENT SELECTION. Surfaces real places within ~3.1 mi of the
    anchor, and is the source two other constants DERIVE from rather than
    restate: CAPTURED_INJECT_RADIUS_M and LIST_RANGE_M. Anything that is the same
    question joins them here instead of becoming a new number.
    The gem-vs-real gap is now CLOSED: GEM_INCLUDE_RADIUS_M derives from this
    constant just below, so both radii move together — see the register block
    above nearbyApprovedGems(). */
-const REAL_INCLUDE_RADIUS_M = 16000;
+const REAL_INCLUDE_RADIUS_M = 5000;
 /* #65 register — CONTENT SELECTION. DERIVED, not a second number: user gems and
    real OSM/Wikipedia places now share ONE inclusion radius, so no pin type
    reaches farther than another and the 9-15 km gems-only band is gone. Declared
@@ -4679,8 +4681,8 @@ function buildAllThingsLocal(base){
 
      ROUND-ROBIN, AND WHY IT WASN'T ENOUGH ALONE. Round-robin shares the target
      across categories that have stock. But "stock" was measured over the whole
-     REAL_INCLUDE_RADIUS_M (16km) blend radius, so anchored AT a cemetery the
-     surrounding city fills every non-history bucket within 16km, round-robin
+     REAL_INCLUDE_RADIUS_M (5km) blend radius, so anchored AT a cemetery the
+     surrounding city fills every non-history bucket within 5km, round-robin
      splits the 15 slots six ways, history gets ~2-3, and ~1 lands inside a tight
      cemetery frame. Correct diversification of the wrong scope. (First shipped
      2026.07.21p, looked like it collapsed to 1 pin, was REVERTED on a
@@ -4698,7 +4700,7 @@ function buildAllThingsLocal(base){
      over the full lists, i.e. exactly the pre-#116 behaviour. ATL_POOL (8) is the
      per-category ceiling, matching the single-tab cap so a category never
      out-shows its own tab. #68 lives on: every bucket is passed explicitly. */
-  const ATL_TARGET = 15;   // total pins All Things Local aims to surface
+  const ATL_TARGET = 25;   // total pins All Things Local aims to surface (raised 15->25 to fill the tighter 5km frame; supply supports it — one tile returned 113 real places)
   const ATL_POOL   = 8;    // per-category candidate ceiling (mirrors the single-tab cap)
   const CATS = [
     ['park',        ()=>generateLocalParks(base).slice(0,ATL_POOL),  'park'],
@@ -5047,7 +5049,6 @@ function onRealPlacesReady(){
   reblendHuntInPlace(h);
   if(typeof refreshTargetsUI==='function') refreshTargetsUI();
   if(typeof refreshTrackUI==='function') refreshTrackUI();
-  logAtlPaint('onRealPlacesReady');
   /* Loaded case of the first-paint hold: this just painted the balanced set with
      real supply, so retire the pending flag and its backstop timer. The empty and
      transport-failure cases are resolved instead by paintFirstBlend() in
@@ -6180,7 +6181,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30m-debug';
+const APP_VERSION = '2026.07.30n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7331,7 +7332,6 @@ function onLocation(lat,lng,sim,accuracy){
   if(state.leafletMap){
     if(!state._centeredOnce){
       state._centeredOnce = true;
-      logAtlPaint('gps-firstfix-enter');
       if(state.currentHunt && isGuideHunt(state.currentHunt)){
         // #7 — a guide opened BEFORE the first fix would otherwise be snapped to
         // the player here on arrival, re-creating "landed on my own block" for
@@ -8396,38 +8396,6 @@ function startBuiltinHunt(id){
   setCurrentHunt({ key:id, name:src.name, mode:src.mode, points:src.points });
 }
 
-/* TEMPORARY boot-paint instrumentation (#65 flash). Inert unless the page is
-   loaded with ?atldebug=1, so normal users never see it. Records every All
-   Things Local paint — source, point count, tile state, whether GPS has fixed,
-   zoom — into a fixed overlay, to catch which paint is wide and what event
-   narrows it. Remove once the flash is understood and fixed. */
-const ATL_DEBUG = /[?&]atldebug\b/.test(location.search);
-const _atlBootT = (typeof performance!=='undefined' && performance.now) ? performance.now() : Date.now();
-const _atlPaintLog = [];
-function logAtlPaint(source){
-  if(!ATL_DEBUG) return;
-  const h = state.currentHunt;
-  const now = (typeof performance!=='undefined' && performance.now) ? performance.now() : Date.now();
-  _atlPaintLog.push({
-    t: Math.round(now - _atlBootT),
-    source,
-    pts: (h && h.points) ? h.points.length : 0,
-    real: (state.realPlaces && state.realPlaces.all) ? state.realPlaces.all.length : 0,
-    tile: (typeof currentTileState==='function' ? currentTileState() : null) || '-',
-    me: state.me ? 'Y' : 'N',
-    z: state.leafletMap ? state.leafletMap.getZoom() : '-'
-  });
-  if(_atlPaintLog.length > 14) _atlPaintLog.shift();
-  let el = document.getElementById('atl-debug');
-  if(!el){
-    el = document.createElement('div');
-    el.id = 'atl-debug';
-    el.style.cssText = 'position:fixed;top:300px;left:6px;z-index:99999;background:rgba(0,0,0,.82);color:#3f6;font:11px/1.35 ui-monospace,monospace;padding:8px 10px;border-radius:8px;max-width:94vw;white-space:pre;pointer-events:none;';
-    document.body.appendChild(el);
-  }
-  el.textContent = 'ATL paints  v'+APP_VERSION+'\n' +
-    _atlPaintLog.map(l=>`+${l.t}ms ${l.source}  pts=${l.pts} real=${l.real} tile=${l.tile} me=${l.me} z=${l.z}`).join('\n');
-}
 /* Backstop for the first-paint hold below: if the real-place fetch never settles
    (a hung invoke — a normal success/empty/failure resolves the hold through
    ensureRealPlaces' finally), paint whatever we have so the spinner cannot hang
@@ -8449,7 +8417,6 @@ function paintFirstBlend(){
     reblendHuntInPlace(h);
     if(typeof refreshTargetsUI==='function') refreshTargetsUI();
     if(typeof refreshTrackUI==='function') refreshTrackUI();
-    logAtlPaint('paintFirstBlend');
   }
 }
 function startLocalHunt(base){
@@ -8470,13 +8437,11 @@ function startLocalHunt(base){
   const haveTile = state.realPlaces && state.realPlaces.tile === realTileKey(base);
   if(haveTile){
     setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
-    logAtlPaint('startLocalHunt/have-tile');
   } else {
     setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:[]});
     state._firstBlendPending = true;
     if(state._firstBlendTimer) clearTimeout(state._firstBlendTimer);
     state._firstBlendTimer = setTimeout(paintFirstBlend, FIRST_BLEND_MAX_HOLD_MS);
-    logAtlPaint('startLocalHunt/hold');
   }
 }
 function startParksAndTrailsHunt(base){
