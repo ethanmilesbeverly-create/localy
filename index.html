@@ -3771,7 +3771,16 @@ function generateDiscoverLocal(base){
 // defined further down, and nearbyApprovedGems is only ever CALLED after load.
 function nearbyApprovedGems(base, excludeIds, limit, bucket){
   return (state.approvedGems||[])
-    .filter(g=>g.status==='approved' && !excludeIds.includes(g.id) && (!bucket || g.bucket===bucket))
+    /* #192 — a retired 'lore' gem counts as 'history' here, so the merged
+       History & Lore card surfaces it WHETHER OR NOT the DB migration
+       (lore->history) has run. Without this the blend matches g.bucket==='history'
+       exactly and every un-migrated lore gem is invisible on every surface — the
+       orphan the merge would otherwise create. The migration is now cleanup, not
+       a correctness dependency. Only 'history' absorbs 'lore'; other buckets are
+       unaffected, and querying bucket 'lore' directly (old lore_v1 hunts) still
+       matches via g.bucket===bucket. */
+    .filter(g=>g.status==='approved' && !excludeIds.includes(g.id) &&
+               (!bucket || g.bucket===bucket || (bucket==='history' && g.bucket==='lore')))
     .map(g=>({...g, dist:haversine(base.lat, base.lng, g.lat, g.lng)}))
     .filter(g=>g.dist<=GEM_INCLUDE_RADIUS_M)
     .sort((a,b)=>a.dist-b.dist)
@@ -6256,7 +6265,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31k';
+const APP_VERSION = '2026.07.31l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
