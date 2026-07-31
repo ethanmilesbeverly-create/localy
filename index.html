@@ -4531,7 +4531,11 @@ function dedupeReal(primary, secondary){
   return merged;
 }
 function groupRealByCat(list){
-  const by = {park:[], trail:[], shops:[], bars:[], restaurants:[], history:[]};
+  // #193 — 'art' MUST be here or every real artwork the function returns is
+  // dropped by the `if(by[p.category])` guard below, and the Art card stays
+  // empty no matter what the scraper sends. The keys are the function's raw
+  // categories (bars/restaurants, not the merged barsrest).
+  const by = {park:[], trail:[], shops:[], bars:[], restaurants:[], history:[], art:[]};
   list.forEach(p=>{ if(by[p.category]) by[p.category].push(p); });
   return by;
 }
@@ -6275,7 +6279,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31m';
+const APP_VERSION = '2026.07.31n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
