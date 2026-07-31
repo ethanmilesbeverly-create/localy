@@ -2074,6 +2074,16 @@
       <label class="field-label">1. Name your guide</label>
       <input type="text" id="create-hunt-name" placeholder="e.g. Sam's Bachelorette Crawl">
     </div>
+    <!-- #202 — collaborative guides. When ON, anyone who redeems the code can add
+         their own stops and everyone (the maker included) sees them, because the
+         adds are unioned back into the shared hunt-code: blob. When OFF (default)
+         the guide behaves exactly as before: holders get view-only, no Edit in
+         the 3-dot menu. Hidden while a HOLDER is adding stops (only the owner
+         decides who-can-edit — openCreateScreen toggles create-editable-row). -->
+    <label class="checkbox-row" id="create-editable-row" style="margin-top:-4px;">
+      <input type="checkbox" id="create-editable">
+      Let others add stops to this guide
+    </label>
     <div class="field">
       <label class="field-label">2. Add your stops</label>
       <!-- #194 — no Go button, matching the gem screen (#17). A pick here now
@@ -5197,6 +5207,8 @@ let state = {
   myHunts: [],          // custom hunts saved personally
   createPins: [],
   editingHuntId: null,
+  createIsHolderEdit: false,  // #202 — true while a HOLDER is adding stops to someone else's editable guide (append-only; existing stops locked)
+  createBaselineIds: null,    // #202 — Set of stop ids present when the builder opened; a holder's net-new stops are createPins minus this
   createMarkersLayer: null,
   watchId: null,
   leafletMap: null,
@@ -6323,7 +6335,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31y';
+const APP_VERSION = '2026.07.31za';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9085,7 +9097,7 @@ function jumpCreateMapTo(place){
   const searchInput = document.getElementById('create-location-search');
   if(searchInput) searchInput.value = '';
   const name = place.name || ('Pin '+(state.createPins.length+1));
-  state.createPins.push({id:'p'+Date.now(), name, lat:place.lat, lng:place.lng});
+  state.createPins.push({id:newPinId(), name, lat:place.lat, lng:place.lng});
   if(state.createMarkersLayer){
     L.marker([place.lat, place.lng], {icon:guidePinDivIcon()}).addTo(state.createMarkersLayer);
   }
@@ -9370,13 +9382,27 @@ function openCreateScreen(existingHunt, seedPoint){
   showScreen('screen-create');
   setNavActive('screen-modes');   // #98b — see openSuggestGemScreen for why explicitly
   state.editingHuntId = existingHunt ? existingHunt.id : null;
-  document.getElementById('create-screen-title').textContent = existingHunt ? 'Edit guide' : 'Create a guide';
-  document.getElementById('delete-hunt-btn').style.display = existingHunt ? 'block' : 'none';
-  document.getElementById('create-hunt-name').value = existingHunt ? existingHunt.name : '';
+  /* #202 — a HOLDER editing someone else's editable guide is append-only: they
+     add stops, they cannot rename the guide, remove/rename the maker's stops, or
+     change who-can-edit. createBaselineIds snapshots the stops that were present
+     on open, so save() can pick out just this holder's net-new additions. */
+  const holderEdit = !!(existingHunt && existingHunt.external);
+  state.createIsHolderEdit = holderEdit;
+  state.createBaselineIds = existingHunt ? new Set((existingHunt.points||[]).map(p=>p.id)) : new Set();
+  document.getElementById('create-screen-title').textContent =
+    existingHunt ? (holderEdit ? 'Add stops' : 'Edit guide') : 'Create a guide';
+  document.getElementById('delete-hunt-btn').style.display = (existingHunt && !holderEdit) ? 'block' : 'none';  // #202 — a holder removes their copy from the 3-dot menu, not here
+  const nameEl = document.getElementById('create-hunt-name');
+  nameEl.value = existingHunt ? existingHunt.name : '';
+  nameEl.readOnly = holderEdit;   // a holder can't rename another person's guide
+  const editRow = document.getElementById('create-editable-row');
+  const editBox = document.getElementById('create-editable');
+  if(editRow) editRow.style.display = holderEdit ? 'none' : 'flex';       // owner-only control
+  if(editBox) editBox.checked = !!(existingHunt && existingHunt.editable);
   if(existingHunt){
     state.createPins = existingHunt.points.map(p=>({...p}));
   } else if(seedPoint){
-    state.createPins = [{id:'p'+Date.now(), name:seedPoint.name, lat:seedPoint.lat, lng:seedPoint.lng, desc:seedPoint.desc||''}];
+    state.createPins = [{id:newPinId(), name:seedPoint.name, lat:seedPoint.lat, lng:seedPoint.lng, desc:seedPoint.desc||''}];
   } else {
     state.createPins = [];
   }
@@ -9402,7 +9428,7 @@ function openCreateScreen(existingHunt, seedPoint){
         // #195 — no "Next pin's name" field any more; a raw map tap has no place
         //   name to borrow, so it defaults to "Pin N" and is renamed in its list row.
         const name = 'Pin '+(state.createPins.length+1);
-        state.createPins.push({id:'p'+Date.now(), name, lat:e.latlng.lat, lng:e.latlng.lng});
+        state.createPins.push({id:newPinId(), name, lat:e.latlng.lat, lng:e.latlng.lng});
         L.marker([e.latlng.lat,e.latlng.lng], {icon:guidePinDivIcon()}).addTo(state.createMarkersLayer);
         renderCreatePinList();
       });
@@ -9444,7 +9470,10 @@ function toggleHuntCardMenu(event, id){
   }
   huntCardMenuTargetId = id;
   const h = state.myHunts.find(x=>x.id===id);
-  document.getElementById('hunt-menu-edit').style.display = (h && h.external) ? 'none' : 'block';
+  // #202 — Edit is offered for your own guides always, and for a REDEEMED guide
+  //   only when its maker turned on "let others add stops". A view-only redeemed
+  //   guide keeps its edit hidden exactly as before.
+  document.getElementById('hunt-menu-edit').style.display = (h && h.external && !h.editable) ? 'none' : 'block';
   const rect = event.currentTarget.getBoundingClientRect();
   menu.style.top = (rect.bottom + 6) + 'px';
   menu.style.right = (window.innerWidth - rect.right) + 'px';
@@ -9513,7 +9542,7 @@ async function saveDiscoveredPointToHunt(huntId){
   const h = state.myHunts.find(x=>x.id===huntId);
   const point = state.pendingSavePoint;
   if(!h || !point) return;
-  h.points.push({id:'p'+Date.now(), name:point.name, lat:point.lat, lng:point.lng, desc:point.desc||''});
+  h.points.push({id:newPinId(), name:point.name, lat:point.lat, lng:point.lng, desc:point.desc||''});
   await saveMyHunts();
   renderMyHunts();
   showToast(`Added to "${h.name}"`);
@@ -9587,13 +9616,44 @@ function deleteCurrentHunt(){
   showToast('Guide deleted');
   goToModeSelect();
 }
+/* #202 — per-stop builder permissions, by role. Two flags:
+     removable   — a Remove button is shown and removeCreatePin will act
+     editableText — the Name/Description inputs are shown and editable
+   THE MAKER can REMOVE ANY stop (their own or a contributor's), but only reword
+   their OWN — a contributor's words are theirs. A HOLDER can remove only stops
+   THEY authored (a fresh one this session, or their own prior contribution) and
+   reword only fresh ones; everyone else's stops are fully locked. A stop's
+   author is recorded in `addedBy` (absent = the maker's original stops). */
+function stopPerms(p){
+  if(!p) return {removable:false, editableText:false};
+  const myUid = (state.user && state.user.id) || 'anon';
+  if(state.createIsHolderEdit){
+    const inBase = (state.createBaselineIds||new Set()).has(p.id);
+    if(!inBase) return {removable:true, editableText:true};        // my fresh add this session
+    if(p.addedBy === myUid) return {removable:true, editableText:false}; // my prior contribution — deletable, not re-wordable
+    return {removable:false, editableText:false};                 // maker's / another holder's — locked
+  }
+  // maker (own guide)
+  const mine = !p.addedBy || p.addedBy === myUid;
+  return mine ? {removable:true, editableText:true}
+              : {removable:true, editableText:false};              // a holder's contribution — deletable, not re-wordable
+}
+function stopById(id){ return state.createPins.find(x=>x.id===id); }
 function renderCreatePinList(){
   const el = document.getElementById('create-pin-list');
   if(state.createPins.length===0){
     el.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">No stops yet — search a place above or tap the map.</p>';
     return;
   }
-  el.innerHTML = state.createPins.map((p,i)=>`
+  /* #202 — three row states from stopPerms():
+       editableText → full editable row (Name + Description inputs, Remove)
+       removable only → read-only text, but a Remove button (maker deleting a
+                        contributor's stop, or a holder deleting their own prior one)
+       neither → read-only text, no controls (someone else's stop, to a holder) */
+  el.innerHTML = state.createPins.map((p,i)=>{
+    const perm = stopPerms(p);
+    if(perm.editableText){
+      return `
     <div class="pin-list-row">
       <div class="pin-row-head">
         <span class="pin-index">Stop ${i+1}</span>
@@ -9603,9 +9663,21 @@ function renderCreatePinList(){
       <input type="text" class="pin-name-input" value="${escapeHtml(p.name)}" onchange="renamePin('${p.id}', this.value)" placeholder="Stop name">
       <label class="pin-field-label">Description</label>
       <input type="text" class="pin-desc-input" value="${escapeHtml(p.desc||'')}" onchange="setPinDesc('${p.id}', this.value)" placeholder="Shows on this stop's card">
-    </div>`).join('');
+    </div>`;
+    }
+    return `
+    <div class="pin-list-row">
+      <div class="pin-row-head">
+        <span class="pin-index">Stop ${i+1}</span>
+        ${perm.removable?`<button class="pin-remove" onclick="removeCreatePin('${p.id}')">Remove</button>`:''}
+      </div>
+      <div style="font-size:15px;color:var(--text);">${escapeHtml(p.name)}</div>
+      ${p.desc?`<div style="font-size:13px;color:var(--text-dim);margin-top:2px;">${escapeHtml(p.desc)}</div>`:''}
+    </div>`;
+  }).join('');
 }
 function renamePin(id, newName){
+  if(!stopPerms(stopById(id)).editableText) return;  // #202 — only your own fresh stop
   const pin = state.createPins.find(p=>p.id===id);
   if(pin) pin.name = newName.trim() || pin.name;
   renderCreatePinList();
@@ -9616,10 +9688,12 @@ function renamePin(id, newName){
    an empty value, there is nothing to normalise. saveCustomHunt already carries
    `desc` through to the saved points, so it reaches the card unchanged. */
 function setPinDesc(id, val){
+  if(!stopPerms(stopById(id)).editableText) return;  // #202 — only your own fresh stop
   const pin = state.createPins.find(p=>p.id===id);
   if(pin) pin.desc = val.trim();
 }
 function removeCreatePin(id){
+  if(!stopPerms(stopById(id)).removable) return;  // #202 — maker: any stop; holder: only their own
   state.createPins = state.createPins.filter(p=>p.id!==id);
   renderCreatePinList();
   if(state.createMarkersLayer){
@@ -9636,42 +9710,122 @@ function randomCode(){
   for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
   return c;
 }
+/* #202 — stop ids must be unique ACROSS DEVICES now that two people can add
+   stops to the same guide. The old `'p'+Date.now()` collides if two contributors
+   drop a pin in the same millisecond, and a guide stop's id is its capture-ledger
+   key (custom_/code_ progress), so a collision would merge two different stops'
+   capture state. Timestamp + random suffix makes that effectively impossible. */
+function newPinId(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 async function saveCustomHunt(){
+  if(state.createPins.length===0){ showToast('Drop at least one pin'); return; }
+  const myUid = (state.user && state.user.id) || 'anon';
+  const editing = state.editingHuntId ? state.myHunts.find(h=>h.id===state.editingHuntId) : null;
+
+  /* #202 — A HOLDER EDITING SOMEONE ELSE'S EDITABLE GUIDE. A holder may ADD stops
+     and DELETE stops THEY authored; they cannot touch the maker's stops or other
+     holders'. Read the CURRENT shared blob, drop the holder's own deleted stops,
+     union in their net-new ones, write it back — so the maker's name and everyone
+     else's stops pass through untouched. FAIL SAFE — a thrown/empty read never
+     writes, because a stale base would drop contributions we couldn't see (#190).
+     Never touches renderPassport / checkNewAchievements — a redeemed guide doesn't
+     earn the Guide-Maker badge (#145(1)). */
+  if(editing && editing.external){
+    if(!editing.code){ showToast("This guide can't be edited right now"); return; }
+    const baseline = state.createBaselineIds || new Set();
+    const nowIds = new Set(state.createPins.map(p=>p.id));
+    const myDeleted = new Set([...baseline].filter(id=>!nowIds.has(id)));   // stops removed this session (UI only let them remove their own)
+    const myNew = state.createPins
+      .filter(p=>p && p.id && !baseline.has(p.id))
+      .map(p=>({...p, desc:p.desc||'', addedBy:myUid}));
+    if(myNew.length===0 && myDeleted.size===0){ showToast('No changes to save'); return; }
+    let shared;
+    try{ const res = await window.storage.get('hunt-code:'+editing.code, true); shared = res ? JSON.parse(res.value) : null; }
+    catch(e){ shared = undefined; }
+    if(!shared){ showToast("Couldn't reach the shared guide right now — try again in a moment"); return; }
+    if(shared.editable === false){ showToast('The guide owner turned off editing'); await refreshExternalGuide(editing); return; }
+    const merged = []; const seen = new Set();
+    (Array.isArray(shared.points)?shared.points:[]).forEach(p=>{
+      if(!p || !p.id || seen.has(p.id)) return;
+      if(myDeleted.has(p.id) && p.addedBy===myUid) return;   // drop only MY OWN deleted stops — never another person's
+      merged.push(p); seen.add(p.id);
+    });
+    myNew.forEach(p=>{ if(!seen.has(p.id)){ merged.push(p); seen.add(p.id); } });
+    if(merged.length===0){ showToast('A guide needs at least one stop'); return; }
+    try{
+      await window.storage.set('hunt-code:'+editing.code, JSON.stringify({name:shared.name, points:merged, editable:true}), true);
+    }catch(e){ showToast("Your changes couldn't sync — try again"); return; }
+    editing.name = shared.name; editing.points = merged; editing.editable = true;
+    await saveMyHunts();
+    renderMyHunts();
+    showToast('Your changes were saved for everyone');
+    startMyHunt(editing.id, true);
+    return;
+  }
+
+  /* === CREATING or EDITING YOUR OWN GUIDE === */
   const name = document.getElementById('create-hunt-name').value.trim();
   if(!name){ showToast('Give your guide a name first'); return; }
-  if(state.createPins.length===0){ showToast('Drop at least one pin'); return; }
-  const points = state.createPins.map(p=>({...p, desc:p.desc||''}));
+  const ownPoints = state.createPins.map(p=>({...p, desc:p.desc||''}));
+  const editBox = document.getElementById('create-editable');
+  const editable = !!(editBox && editBox.checked);
+  const wasEditable = !!(editing && editing.editable);   // capture BEFORE we overwrite it below
   let hunt;
-  if(state.editingHuntId){
-    const existing = state.myHunts.find(h=>h.id===state.editingHuntId);
-    if(existing){
-      existing.name = name;
-      existing.points = points;
-      hunt = existing;
-    } else {
-      hunt = {id:'h'+Date.now(), name, points};
-      state.myHunts.push(hunt);
-    }
+  if(editing){
+    editing.name = name;
+    editing.points = ownPoints;
+    editing.editable = editable;
+    hunt = editing;
   } else {
-    hunt = {id:'h'+Date.now(), name, points};
+    hunt = {id:'h'+Date.now(), name, points:ownPoints, editable};
     state.myHunts.push(hunt);
   }
   // Every hunt gets a share code automatically. Once one exists it's kept stable
   // across edits, so re-saving updates the shared content without invalidating
   // a code you may have already shared with someone.
   if(!hunt.code) hunt.code = randomCode();
+
+  /* #202 — THE MAKER'S SAVE IS AUTHORITATIVE: whatever stops are in the builder
+     ARE the guide, so the maker can delete ANY stop, their own or a contributor's.
+     The one thing it must NOT do is clobber a contribution that landed AFTER the
+     maker opened the builder (which the maker never saw and so couldn't have meant
+     to delete). createBaselineIds is the set of stops present on open; a fresh
+     shared point that is a holder-add (addedBy set) and is NOT in that baseline is
+     preserved, everything else follows the maker's set. Only runs when
+     collaboration is or was in play, so a plain guide's save is one write, no read.
+     FAIL SAFE — if the read throws we abort rather than risk dropping a stop. */
+  let pointsToShare = hunt.points;
+  const collaborative = editable || wasEditable || ownPoints.some(p=>p && p.addedBy);
+  if(collaborative && editing && editing.code){
+    const baseline = state.createBaselineIds || new Set();
+    let shared;
+    try{ const res = await window.storage.get('hunt-code:'+hunt.code, true); shared = res ? JSON.parse(res.value) : null; }
+    catch(e){ shared = undefined; }
+    if(shared === undefined){ showToast("Couldn't reach the shared guide to save safely — try again"); return; }
+    const merged = []; const seen = new Set();
+    hunt.points.forEach(p=>{ if(p && p.id && !seen.has(p.id)){ merged.push(p); seen.add(p.id); } });   // maker's authoritative set
+    if(shared && Array.isArray(shared.points)){
+      shared.points.forEach(p=>{
+        if(!p || !p.id || seen.has(p.id)) return;
+        if(p.addedBy && p.addedBy!==myUid && !baseline.has(p.id)){ merged.push(p); seen.add(p.id); }  // arrived after open — keep it
+      });
+    }
+    if(merged.length===0){ showToast('A guide needs at least one stop'); return; }
+    pointsToShare = merged;
+    hunt.points = merged;   // the maker sees the union locally too
+  }
+
   await saveMyHunts();
   renderMyHunts();
 
   try{
-    await window.storage.set('hunt-code:'+hunt.code, JSON.stringify({name, points:hunt.points}), true);
+    await window.storage.set('hunt-code:'+hunt.code, JSON.stringify({name, points:pointsToShare, editable}), true);
     document.getElementById('generated-code').textContent = hunt.code;
     document.getElementById('code-result').classList.add('show');
     showToast('Guide saved — start exploring!');
   }catch(e){
     showToast('Guide saved locally, but the share code couldn\'t sync');
   }
-  startMyHunt(hunt.id);
+  startMyHunt(hunt.id, true);
   /* #145(2) — THE GUIDE BADGE FIRES HERE, AND THE POSITION IS THE POINT.
      startMyHunt() sets the current hunt and hands you to the map, so this runs
      once you have LANDED rather than while the create form is still up: the
@@ -9734,16 +9888,18 @@ function renderMyHunts(){
       </div>
     </div>`;
 }
-async function startMyHunt(id){
+async function startMyHunt(id, skipRefresh){
   const h = state.myHunts.find(x=>x.id===id);
   if(!h) return;
-  /* LIVE-UPDATE — an external (redeemed) guide is refreshed from the maker's
-     latest shared copy at the moment you open it, so the pins you walk are
-     current. Fails safe: a flaky read leaves h untouched and you open the
-     snapshot. A guide YOU made (non-external) is the source of truth and has no
-     await here, so this stays fully synchronous for the maker — which keeps
-     saveCustomHunt()'s startMyHunt() → renderPassport() ordering intact. */
-  if(h.external && h.code){ await refreshExternalGuide(h); }
+  /* LIVE-UPDATE — a redeemed guide (and, since #202, an OWN editable guide) is
+     refreshed from the shared copy at the moment you open it, so the stops you
+     walk are current — including any a holder just added. Fails safe: a flaky
+     read leaves h untouched and you open the snapshot. skipRefresh is passed by
+     saveCustomHunt(), which JUST wrote the shared blob, so it skips the redundant
+     round-trip and stays synchronous through the #145 badge ordering. A plain
+     non-editable guide you made takes no await either (guard below), so its
+     saveCustomHunt() → renderPassport() ordering is unchanged. */
+  if(!skipRefresh && h.code && (h.external || h.editable)){ await refreshExternalGuide(h); }
   setCurrentHunt({key:'custom_'+h.id, name:h.name, mode:'custom', points:h.points});
 }
 
@@ -9764,6 +9920,7 @@ async function startMyHunt(id){
 function guideContentChanged(hunt, data){
   if(!data || !Array.isArray(data.points)) return false;
   if(hunt.name !== data.name) return true;
+  if(!!hunt.editable !== (data.editable === true)) return true;   // #202 — maker flipping the toggle propagates
   if((hunt.points||[]).length !== data.points.length) return true;
   return JSON.stringify(hunt.points) !== JSON.stringify(data.points);
 }
@@ -9772,7 +9929,11 @@ function guideContentChanged(hunt, data){
    Persists and re-renders My Guides on a real change; a no-op change touches
    neither. Any read failure is swallowed and returns false — the snapshot stays. */
 async function refreshExternalGuide(hunt){
-  if(!hunt || !hunt.external || !hunt.code) return false;
+  /* #202 — this now refreshes an OWN editable guide too, not just a redeemed one,
+     so the maker sees holder-added stops land. Safe for the maker because every
+     maker save writes the union to the shared blob (see saveCustomHunt), so shared
+     is always the full truth and adopting it never drops the maker's own stops. */
+  if(!hunt || !hunt.code || !(hunt.external || hunt.editable)) return false;
   let res;
   try{
     res = await window.storage.get('hunt-code:'+hunt.code, true);
@@ -9783,6 +9944,7 @@ async function refreshExternalGuide(hunt){
   if(!guideContentChanged(hunt, data)) return false;
   hunt.name = data.name;
   hunt.points = data.points;
+  hunt.editable = data.editable === true;   // #202 — track the maker's toggle
   try{ await saveMyHunts(); }catch(e){ /* mirrored/queued — value is in memory regardless */ }
   renderMyHunts();
   return true;
@@ -9792,7 +9954,9 @@ async function refreshExternalGuide(hunt){
    Fire-and-forget from init(): sequential (one shared read each, small N), each
    guarded, and it only ever re-renders when something actually moved. */
 async function refreshAllExternalGuides(){
-  const ext = (state.myHunts||[]).filter(h=>h.external && h.code);
+  // #202 — own editable guides refresh too, so the maker's My Guides card and
+  //   open guide pick up holder-added stops on boot / Explore-nav / foreground.
+  const ext = (state.myHunts||[]).filter(h=>h.code && (h.external || h.editable));
   for(const h of ext){
     try{ await refreshExternalGuide(h); }catch(e){ /* one bad read never blocks the rest */ }
   }
@@ -9818,7 +9982,7 @@ async function redeemCodeValue(code){
     const data = JSON.parse(res.value);
     let hunt = state.myHunts.find(h=>h.external && h.code===code);
     if(!hunt){
-      hunt = {id:'ext'+Date.now(), name:data.name, points:data.points, code, external:true};
+      hunt = {id:'ext'+Date.now(), name:data.name, points:data.points, code, external:true, editable:data.editable===true};
       state.myHunts.push(hunt);
       await saveMyHunts();
       renderMyHunts();
@@ -9829,6 +9993,7 @@ async function redeemCodeValue(code){
          only this session and the My Guides card stayed stale forever. */
       hunt.name = data.name;
       hunt.points = data.points;
+      hunt.editable = data.editable===true;   // #202 — carry the maker's toggle
       await saveMyHunts();
       renderMyHunts();
     }
