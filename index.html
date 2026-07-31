@@ -743,6 +743,16 @@
     background:var(--surface);
     border-top:1px solid var(--line);
     padding:12px 16px calc(90px + env(safe-area-inset-bottom));
+    /* The 20px rounded top corners were showing the dark --bg through their
+       notches, which read as square dark wedges "filling in" the curve. The
+       drawer is a flex sibling BELOW the map, so nothing lighter sat behind the
+       corners. This negative margin overlaps the rounded top over the map's
+       bottom edge, so the notches reveal the live map (the standard bottom-sheet
+       look) instead of --bg. Keep it >= the border-radius (20px) so the whole
+       curve sits over the map; it does NOT change the drawer's visible top edge
+       or the reserved-strip math below — the map grows to compensate, so the
+       only thing that moves is what paints behind the curve. */
+    margin-top:-20px;
     /* Ceiling raised when the compass panel was removed (more rows fit), then
        pulled back so the drawer still reads as a slide-up sheet rather than a
        full-screen takeover. Expressed as a reserved strip instead of a raw vh
@@ -6203,7 +6213,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31d';
+const APP_VERSION = '2026.07.31e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
