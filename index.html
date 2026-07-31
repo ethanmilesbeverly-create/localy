@@ -5989,7 +5989,7 @@ async function init(){
   // temporary condition rather than a dead session.
   window.addEventListener('online', ()=>{ flushPendingWrites(); retryLoadPersonal(); });
   document.addEventListener('visibilitychange', ()=>{
-    if(!document.hidden){ flushPendingWrites(); retryLoadPersonal(); }
+    if(!document.hidden){ flushPendingWrites(); retryLoadPersonal(); refreshAllExternalGuides(); }
   });
   flushPendingWrites(); // anything queued by a previous session
 
@@ -6109,6 +6109,16 @@ function setTab(id){
   }
   if(id==='screen-modes'){
     updateExploreSelectionIcons();
+    /* LIVE-UPDATE — every navigation to Explore funnels through here, so this is
+       the one place to refresh redeemed guides against the makers' latest shared
+       copies. Fixes the live-session gap the boot sweep didn't cover: land on
+       Explore and the guide cards update in place, instead of only updating after
+       you open a guide (which triggered refreshExternalGuide) and came back.
+       Fire-and-forget so navigation never waits on a shared read; renderMyHunts()
+       re-renders only the guides that actually changed. NOT a push — a card you
+       are already passively staring at won't change until you leave and return
+       (or reopen the app); there is no maker→holder realtime channel. */
+    refreshAllExternalGuides();
   }
 }
 
@@ -6219,7 +6229,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31f';
+const APP_VERSION = '2026.07.31g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
