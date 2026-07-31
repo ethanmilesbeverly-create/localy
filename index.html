@@ -347,8 +347,9 @@
     transform:translateX(-50%);
     width:100%;min-width:44px;height:44px;
   }
-  /* Hunt-builder host. .location-search-row is the flex wrapper around the
-     input + Go button; the dropdown spans the whole row, button included. */
+  /* Search-row host. .location-search-row is the flex wrapper around the search
+     input; the dropdown spans the whole row. (#194 removed the last Go button,
+     so the row is now input-only on every surface.) */
   .location-search-row{position:relative;}
   /* #88a — transform removed from this keyframe. A transform plus a
      compositing filter on the same element is the iOS blank-layer pairing;
@@ -1434,11 +1435,15 @@
   /* ---------- Create hunt screen ---------- */
   #create-map{height:220px;border-radius:12px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line);}
   #suggest-gem-map{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
+  /* #196 — the row is now two lines: a top line (index + editable name +
+     Remove) and a full-width description input beneath it. The description is
+     what shows on that stop's card (the `.ps-desc` line on the pin sheet). */
   .pin-list-row{
-    display:flex;align-items:center;gap:10px;
+    display:flex;flex-direction:column;gap:6px;
     background:var(--surface);border:1px solid var(--line);
     border-radius:10px;padding:10px 12px;margin-bottom:8px;
   }
+  .pin-list-top{display:flex;align-items:center;gap:10px;}
   .pin-list-row .pin-index{color:var(--text-dim);font-size:14px;flex-shrink:0;}
   .pin-list-row .pin-name-input{
     flex:1;min-width:0;
@@ -1448,6 +1453,15 @@
   }
   .pin-list-row .pin-name-input:hover{border-bottom-color:var(--line);}
   .pin-list-row .pin-name-input:focus{outline:none;}
+  .pin-list-row .pin-desc-input{
+    width:100%;box-sizing:border-box;
+    background:transparent;border:none;border-bottom:1px dashed transparent;
+    color:var(--text-dim);font-size:13px;font-family:inherit; /* #11 — same shared-input reason as the name field */
+    padding:2px 0 2px 22px; /* indent under the name, clear of the index */
+  }
+  .pin-list-row .pin-desc-input::placeholder{color:var(--text-dim);opacity:.7;}
+  .pin-list-row .pin-desc-input:hover{border-bottom-color:var(--line);}
+  .pin-list-row .pin-desc-input:focus{outline:none;color:var(--text);}
   .pin-list-row button{
     background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;font-weight:600;flex-shrink:0;
   }
@@ -1933,11 +1947,12 @@
     <!-- #17 — same shared component as the map header pill and the hunt builder
          (#88's attachPlaceSuggest). .location-search-row is reused ONLY for its
          position:relative host + flex sizing; there is no Go button here on
-         purpose. On the other two surfaces Go is the Photon-is-down escape
-         hatch that moves a camera. Here a pick WRITES DATA (the draft pin a
-         moderator will act on), and a blind Nominatim first-hit is exactly the
-         "Wrigley resolved to whichever of five" defect #88 existed to kill.
-         Photon down here degrades to map-tap, which still works. -->
+         purpose. Here a pick WRITES DATA (the draft pin a moderator will act
+         on), and a blind Nominatim first-hit is exactly the "Wrigley resolved
+         to whichever of five" defect #88 existed to kill. #194 applied the same
+         reasoning to the hunt builder once ITS search began writing data too,
+         so no surface carries a Go button now — commit is dropdown-tap or Enter,
+         and Photon down here degrades to map-tap, which still works. -->
     <div class="field">
       <label class="field-label">Where is it? (optional — you can just tap the map)</label>
       <div class="location-search-row">
@@ -2031,24 +2046,30 @@
   <!-- CREATE HUNT -->
   <div class="screen" id="screen-create">
     <h1 class="page-title" id="create-screen-title">Create a guide</h1>
-    <p class="page-sub">Tap the map to drop pins. Move around (or use simulate mode) to set each spot.</p>
+    <p class="page-sub">Name your guide, drop your pins, and share with friends.</p>
     <div class="field">
-      <label class="field-label">Guide name</label>
+      <label class="field-label">1. Name your guide</label>
       <input type="text" id="create-hunt-name" placeholder="e.g. Sam's Bachelorette Crawl">
     </div>
     <div class="field">
-      <label class="field-label">Planning ahead? Jump the map somewhere else</label>
+      <label class="field-label">2. Add your stops</label>
+      <!-- #194 — no Go button, matching the gem screen (#17). A pick here now
+           WRITES DATA (it drops a stop), so the Go button's blind-Nominatim
+           first-hit is the "Wrigley resolved to whichever of five" defect #88
+           exists to kill. Commit is dropdown-tap or Enter (attachPlaceSuggest
+           owns both); Photon-down degrades to map-tap, which still works. -->
       <div class="location-search-row">
-        <input type="text" id="create-location-search" placeholder="City, address, or zip code" enterkeyhint="search">
-        <button type="button" id="create-location-search-btn" class="btn small" onclick="searchCreateLocation()">Go</button>
+        <input type="text" id="create-location-search" placeholder="Place name, address, or zip" enterkeyhint="search">
       </div>
     </div>
     <div id="create-map"></div>
-    <div class="field">
-      <label class="field-label">Next pin's name</label>
-      <input type="text" id="create-pin-name" placeholder="e.g. The Alibi Room">
-    </div>
-    <p class="page-sub" style="margin:6px 0 14px;font-size:12px;">Type a name above, then tap the map where that spot is.</p>
+    <!-- #195 — the standalone "Next pin's name" field was removed. It was
+         redundant: every dropped stop already gets an editable name row below,
+         so naming happened in two places. Now a search-pick names the stop after
+         the place you chose and a map-tap names it "Pin N" — either way you edit
+         it in its own row in the list. -->
+    <p class="page-sub" style="margin:6px 0 14px;font-size:12px;">Search above or tap the map to add a stop.</p>
+    <label class="field-label" style="display:block;margin-bottom:8px;">3. Name &amp; describe each stop</label>
     <div id="create-pin-list"></div>
     <button class="btn" onclick="saveCustomHunt()">Save Guide</button>
     <div id="code-result">
@@ -6279,7 +6300,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31n';
+const APP_VERSION = '2026.07.31t';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7613,6 +7634,23 @@ function createPinDivIcon(){
     iconAnchor:[13,34]
   });
 }
+/* #197 — the guide builder's map pins now match the pin a MADE guide shows on
+   the live map: the purple dropPinSVG teardrop in MODE_COLOR.custom (= .code =
+   #9A7FBF), not the wider orange createPinDivIcon. Same shape and colour the
+   holder sees, so the builder previews the real thing. Full colour (not the
+   live map's uncaptured dimColor) because a stop being built has no capture
+   state. createPinDivIcon is kept for the gem-submission draft pin — a
+   different flow the user did not ask to change. */
+function guidePinDivIcon(){
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:26px;height:37px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));">
+      ${dropPinSVG(MODE_COLOR.custom, false, 26, 37)}
+    </div>`,
+    iconSize:[26,37],
+    iconAnchor:[13,37]
+  });
+}
 function playerIcon(){
   return L.divIcon({
     className:'',
@@ -8138,9 +8176,10 @@ function attachPlaceSuggest(inputId, onPick){
    take the first hit, enterLocationBrowseMode) is now the Enter fallback branch
    inside attachPlaceSuggest. Leaving it defined would have left a
    plausible-looking global that nothing calls and that would silently diverge
-   from the real path the first time either changed. The create screen's
-   `searchCreateLocation()` survives because it still has a real caller: the
-   Go button, which the map pill does not have. */
+   from the real path the first time either changed. #194 removed the create
+   screen's Go button and deleted its `searchCreateLocation()` for the same
+   reason — so all three search surfaces now commit via dropdown-tap or Enter,
+   and none carries a Go button. */
 
 /* #19 REVERSED. The banner was kept on the argument that browse mode is signalled
    only by an ABSENCE (your marker and range circle disappear) and nobody notices
@@ -8995,42 +9034,37 @@ function startRandomHunt(){
   showToast('Random guide from real spots near you');
 }
 
-/* #88 — this is now ONLY the Go button. The dropdown does the real work; Go is
-   the escape hatch for someone who typed and never looked down, and for the
-   case where Photon is unreachable. Kept deliberately on Nominatim single-hit
-   so the two failure modes are independent — if both providers are down the
-   button says so instead of spinning. */
-async function searchCreateLocation(){
-  const input = document.getElementById('create-location-search');
-  const q = input.value.trim();
-  if(!q) return;
-  const btn = document.getElementById('create-location-search-btn');
-  const original = btn.textContent;
-  btn.textContent = '...';
-  btn.disabled = true;
-  try{
-    const hit = await geocodeFirstHit(q);
-    if(hit){
-      jumpCreateMapTo(hit);
-    } else {
-      showToast("Couldn't find that place — try a different search");
-    }
-  }catch(e){
-    showToast("Location search isn't available here — try panning the map manually instead");
-  } finally {
-    btn.textContent = original;
-    btn.disabled = false;
-  }
-}
-/* Single place the create-map camera moves, so the dropdown and the Go button
-   cannot diverge on zoom level or toast copy. */
+/* #194 — `searchCreateLocation()` is DELETED, not unwired. Its only caller was
+   the create-screen Go button, removed this pass to match the gem screen now
+   that a search WRITES DATA (it drops a stop). Leaving it defined would be the
+   plausible-looking global nothing calls that #88 deleted `searchMapLocation()`
+   to avoid. Enter still works: attachPlaceSuggest's own Enter branch commits the
+   highlighted result, or falls back to the same Nominatim single-hit lookup. */
+/* The one place a create-screen search lands, so a dropdown pick and the Enter
+   fallback cannot diverge on what a search does.
+   #194 — a picked place DROPS A STOP, it does not merely move the camera. This
+   mirrors the gem screen's jumpSuggestMapTo/setGemDraftPin: a search FILLS a
+   pin. The pin is a normal create pin — fully removable in the list below, and
+   the map-click handler still adds more stops on tap — so a wrong centroid is a
+   one-tap Remove, not a dead end.
+   #195 — the stop DEFAULTS to the selected place's name (the geocoder's short
+   title, e.g. "The Alibi Room"), editable afterward in its own list row. The
+   old standalone "Next pin's name" field was removed as redundant, so there is
+   nothing to read here but the place itself; "Pin N" is only the last-ditch
+   fallback if the geocoder returned no title. */
 function jumpCreateMapTo(place){
-  closeAllPlaceSuggest();  // Go sits INSIDE the dropdown's host, so the
-                           // outside-tap listener never fires for it
-  if(state.createMap){
-    state.createMap.setView([place.lat, place.lng], 14);
+  closeAllPlaceSuggest();  // committed picks close the suggest list themselves;
+                           // this is belt-and-braces for the Enter fallback path
+  const name = place.name || ('Pin '+(state.createPins.length+1));
+  state.createPins.push({id:'p'+Date.now(), name, lat:place.lat, lng:place.lng});
+  if(state.createMarkersLayer){
+    L.marker([place.lat, place.lng], {icon:guidePinDivIcon()}).addTo(state.createMarkersLayer);
   }
-  showToast(`Showing ${place.name}`);
+  renderCreatePinList();
+  if(state.createMap){
+    state.createMap.setView([place.lat, place.lng], 16);
+  }
+  showToast(`Added "${name}" — rename it in the list, or tap the map for more`);
 }
 /* #17 — the ONE place the gem draft pin is written, so a map tap and a geocode
    pick cannot disagree about marker state the way they would as two copies.
@@ -9335,11 +9369,11 @@ function openCreateScreen(existingHunt, seedPoint){
       addBaseLayer(state.createMap);
       state.createMarkersLayer = L.layerGroup().addTo(state.createMap);
       state.createMap.on('click', e=>{
-        const nameInput = document.getElementById('create-pin-name');
-        const name = nameInput.value.trim() || ('Pin '+(state.createPins.length+1));
+        // #195 — no "Next pin's name" field any more; a raw map tap has no place
+        //   name to borrow, so it defaults to "Pin N" and is renamed in its list row.
+        const name = 'Pin '+(state.createPins.length+1);
         state.createPins.push({id:'p'+Date.now(), name, lat:e.latlng.lat, lng:e.latlng.lng});
-        nameInput.value='';
-        L.marker([e.latlng.lat,e.latlng.lng], {icon:createPinDivIcon()}).addTo(state.createMarkersLayer);
+        L.marker([e.latlng.lat,e.latlng.lng], {icon:guidePinDivIcon()}).addTo(state.createMarkersLayer);
         renderCreatePinList();
       });
     }
@@ -9355,7 +9389,7 @@ function openCreateScreen(existingHunt, seedPoint){
        Measure on both paths, then fit on the NEXT FRAME once the size is real. */
     state.createMap.invalidateSize();
     state.createMarkersLayer.clearLayers();
-    state.createPins.forEach(p=> L.marker([p.lat,p.lng], {icon:createPinDivIcon()}).addTo(state.createMarkersLayer));
+    state.createPins.forEach(p=> L.marker([p.lat,p.lng], {icon:guidePinDivIcon()}).addTo(state.createMarkersLayer));
     requestAnimationFrame(()=>{
       if(!state.createMap) return;
       state.createMap.invalidateSize();
@@ -9526,14 +9560,17 @@ function deleteCurrentHunt(){
 function renderCreatePinList(){
   const el = document.getElementById('create-pin-list');
   if(state.createPins.length===0){
-    el.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">No pins yet.</p>';
+    el.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">No stops yet — search a place above or tap the map.</p>';
     return;
   }
   el.innerHTML = state.createPins.map((p,i)=>`
     <div class="pin-list-row">
-      <span class="pin-index">${i+1}.</span>
-      <input type="text" class="pin-name-input" value="${escapeHtml(p.name)}" onchange="renamePin('${p.id}', this.value)">
-      <button onclick="removeCreatePin('${p.id}')">Remove</button>
+      <div class="pin-list-top">
+        <span class="pin-index">${i+1}.</span>
+        <input type="text" class="pin-name-input" value="${escapeHtml(p.name)}" onchange="renamePin('${p.id}', this.value)" placeholder="Stop name">
+        <button onclick="removeCreatePin('${p.id}')">Remove</button>
+      </div>
+      <input type="text" class="pin-desc-input" value="${escapeHtml(p.desc||'')}" onchange="setPinDesc('${p.id}', this.value)" placeholder="Add a description — shows on this stop's card">
     </div>`).join('');
 }
 function renamePin(id, newName){
@@ -9541,12 +9578,21 @@ function renamePin(id, newName){
   if(pin) pin.name = newName.trim() || pin.name;
   renderCreatePinList();
 }
+/* #196 — the stop's description, which renders as the `.ps-desc` line on its
+   card. Empty is valid (no description), so unlike renamePin there is no
+   fallback and NO re-render — re-rendering on change would steal focus and, on
+   an empty value, there is nothing to normalise. saveCustomHunt already carries
+   `desc` through to the saved points, so it reaches the card unchanged. */
+function setPinDesc(id, val){
+  const pin = state.createPins.find(p=>p.id===id);
+  if(pin) pin.desc = val.trim();
+}
 function removeCreatePin(id){
   state.createPins = state.createPins.filter(p=>p.id!==id);
   renderCreatePinList();
   if(state.createMarkersLayer){
     state.createMarkersLayer.clearLayers();
-    state.createPins.forEach(p=> L.marker([p.lat,p.lng], {icon:createPinDivIcon()}).addTo(state.createMarkersLayer));
+    state.createPins.forEach(p=> L.marker([p.lat,p.lng], {icon:guidePinDivIcon()}).addTo(state.createMarkersLayer));
   }
 }
 function escapeHtml(s){
