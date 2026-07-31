@@ -3641,15 +3641,18 @@ function generateDiscoverLocal(base){
      GEM_INCLUDE_RADIUS_M   = REAL_INCLUDE_RADIUS_M  ~#4090
        Approved user gems pulled into a blend around the anchor. DERIVED from
        real-place inclusion so a gem reaches no farther than any other pin.
-     REAL_INCLUDE_RADIUS_M   5000  (~3.1 mi)  ~#3564
+     REAL_INCLUDE_RADIUS_M   2000  (~1.2 mi)  ~#3564
        OSM/Wikipedia places pulled into the same blend. The one source both this
-       group's other radii derive from. Set to 5000: 9000 then 16000 were tried
-       and REJECTED — with the blend capped at ATL_TARGET pins, a wider radius
-       spreads those pins across more area, thinning the neighborhood frame you
-       actually see AND pushing pins out to 5-16 km where they are invisible
-       except during the GPS-settling pan (the "flash"). Supply is not the limit
-       (a single tile returned 113 real places), so tightening concentrates the
-       cap in-frame rather than starving it.
+       group's other radii derive from. MUST STAY BELOW DISCOVER_FALLOFF_M (2500),
+       and that ceiling — not "how far is interesting" — is what sets it. Any pin
+       the blend places farther from you than the falloff is culled and replaced
+       with a nearer one by refreshDiscoverLocalIfNeeded() on the very next GPS
+       tick, so an include radius ABOVE the falloff guarantees a visible
+       remove-and-replace swap on the first fix (the bug behind 9000/16000/5000 —
+       all of which sat above the 2500 falloff). 2000 leaves ~500 m of headroom
+       for GPS drift so blend pins are not culled at rest. Supply is not the limit
+       (a single tile returned 113 real places); ATL_TARGET concentrates the cap
+       inside this radius.
      OVERPASS_RADIUS_M       4200  (~2.6 mi)  ~#3565
        Query radius asked of Overpass. NOT a display filter — it is the outer
        bound of what the server could ever have, so REAL_INCLUDE_RADIUS_M can
@@ -3671,8 +3674,8 @@ function generateDiscoverLocal(base){
        blend radius: it frames what is walkable, not what is loaded. Was 3000m
        (~zoom 12); lowered to 1500m (~zoom 13) so the pin cluster fills the
        viewport width on open instead of sitting in the center third. Now
-       roughly a third of REAL_INCLUDE_RADIUS_M (at the 5 km setting), and that
-       ratio has never been examined.
+       roughly three-quarters of REAL_INCLUDE_RADIUS_M (at the 2 km setting), and
+       that ratio has never been examined.
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
        "Is this pin walkable from here?" (#7). Two uses, both the same question:
        (1) fitMapToHunt() frames YOU together with the pins only when the nearest
@@ -3859,7 +3862,7 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds, exclude
   return {id:'dlr'+uid, name:shuffled(RESTAURANT_NAMES)[0], lat:p.lat, lng:p.lng, desc:'A local restaurant nearby.', category:'restaurants'};
 }
 
-const DISCOVER_FALLOFF_M = 2500; // #65 register: procedural nudge, not a content radius. Swaps a stale Discover Local spot for a fresh nearby one.
+const DISCOVER_FALLOFF_M = 2500; // #65 register: procedural nudge, not a content radius. Swaps a stale Discover Local spot for a fresh nearby one. CEILING for REAL_INCLUDE_RADIUS_M: the blend must not place a pin farther than this, or it is culled and replaced on the next GPS tick (the remove-and-replace swap). If this drops, REAL_INCLUDE_RADIUS_M must drop with it.
 const SEARCH_HERE_DIST_M = 600;  // #65 register: UI trigger for the "Search this area" pill (#8/#59). Lower = more eager, higher = calmer.
 function huntAnchor(){
   /* #59 (correction) — the centroid is the right anchor ONLY when content is
@@ -4091,14 +4094,14 @@ function dismissStaleHunt(){
    inside the sandboxed in-app preview pane, same as Supabase.
    ========================================================= */
 const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse one fetch
-/* #65 register — CONTENT SELECTION. Surfaces real places within ~3.1 mi of the
+/* #65 register — CONTENT SELECTION. Surfaces real places within ~1.2 mi of the
    anchor, and is the source two other constants DERIVE from rather than
    restate: CAPTURED_INJECT_RADIUS_M and LIST_RANGE_M. Anything that is the same
    question joins them here instead of becoming a new number.
    The gem-vs-real gap is now CLOSED: GEM_INCLUDE_RADIUS_M derives from this
    constant just below, so both radii move together — see the register block
    above nearbyApprovedGems(). */
-const REAL_INCLUDE_RADIUS_M = 5000;
+const REAL_INCLUDE_RADIUS_M = 2000;
 /* #65 register — CONTENT SELECTION. DERIVED, not a second number: user gems and
    real OSM/Wikipedia places now share ONE inclusion radius, so no pin type
    reaches farther than another and the 9-15 km gems-only band is gone. Declared
@@ -4681,8 +4684,8 @@ function buildAllThingsLocal(base){
 
      ROUND-ROBIN, AND WHY IT WASN'T ENOUGH ALONE. Round-robin shares the target
      across categories that have stock. But "stock" was measured over the whole
-     REAL_INCLUDE_RADIUS_M (5km) blend radius, so anchored AT a cemetery the
-     surrounding city fills every non-history bucket within 5km, round-robin
+     REAL_INCLUDE_RADIUS_M (2km) blend radius, so anchored AT a cemetery the
+     surrounding city fills every non-history bucket within 2km, round-robin
      splits the 15 slots six ways, history gets ~2-3, and ~1 lands inside a tight
      cemetery frame. Correct diversification of the wrong scope. (First shipped
      2026.07.21p, looked like it collapsed to 1 pin, was REVERTED on a
@@ -4700,7 +4703,7 @@ function buildAllThingsLocal(base){
      over the full lists, i.e. exactly the pre-#116 behaviour. ATL_POOL (8) is the
      per-category ceiling, matching the single-tab cap so a category never
      out-shows its own tab. #68 lives on: every bucket is passed explicitly. */
-  const ATL_TARGET = 25;   // total pins All Things Local aims to surface (raised 15->25 to fill the tighter 5km frame; supply supports it — one tile returned 113 real places)
+  const ATL_TARGET = 25;   // total pins All Things Local aims to surface (raised 15->25 to fill the tight 2km frame; supply supports it — one tile returned 113 real places)
   const ATL_POOL   = 8;    // per-category candidate ceiling (mirrors the single-tab cap)
   const CATS = [
     ['park',        ()=>generateLocalParks(base).slice(0,ATL_POOL),  'park'],
@@ -6181,7 +6184,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30n';
+const APP_VERSION = '2026.07.30o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
