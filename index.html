@@ -1876,6 +1876,13 @@
         <div class="icon-wrap"></div>
         <div><h3>History &amp; Lore</h3><p>Landmarks and where things happened.</p></div>
       </div>
+      <!-- #193 — Art: public art split out of History (murals, sculptures,
+           statues, installations). Scaffolds from OSM tourism=artwork, so unlike
+           the old Lore tab it is not empty by design. -->
+      <div class="mode-card" data-cat="art" onclick="selectExplore('art')">
+        <div class="icon-wrap"></div>
+        <div><h3>Art</h3><p>Murals, sculptures, and public art.</p></div>
+      </div>
     </div>
 
     <div id="my-hunts-section"></div>
@@ -1953,6 +1960,7 @@
         <option value="shops">Shops</option>
         <option value="barsrest">Bars &amp; Restaurants</option>
         <option value="history">History &amp; Lore</option>
+        <option value="art">Art</option>
       </select>
       <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
         <!-- #192 — History and Lore merged into one option (value stays 'history';
@@ -3481,7 +3489,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
    longer be either — gemDisplayCategory has never returned it since #16, and
    startHiddenGemsHunt was the last thing that set mode:'gems'. 'discover' went
    with startDiscoverHunt. 'discoverlocal' is All Things Local and stays. */
-const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F' };
+const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins */
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 const BUILTIN = {
@@ -3826,7 +3834,7 @@ function approvedGemPoints(base, bucket, limit){
    whole of #68. assertGemBucketsAgree() below now does. */
 const GEM_BUCKET_CATEGORY = {
   park:'park', trail:'trail', shops:'shops',
-  barsrest:'barsrest', history:'history',
+  barsrest:'barsrest', history:'history', art:'art', // #193 — Art
   // #192 — 'lore' retired and merged into 'history'. Existing rows are migrated
   // in the DB (update submissions set category='history' where category='lore'),
   // but this alias keeps any straggler (a stale client cache, a mid-migration
@@ -4776,6 +4784,7 @@ function buildAllThingsLocal(base){
     ['bars',        ()=>generateBars(base).slice(0,ATL_POOL),        'barsrest'],
     ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_POOL), 'barsrest'],
     ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'],
+    ['art',         ()=>[],                                          'art'], // #193 — real OSM artwork + art gems; no procedural filler
   ];
   const lists = CATS.map(([cat,procFn,bucket]) => blendCategory(base, cat, ATL_POOL, procFn, bucket));
 
@@ -4927,6 +4936,7 @@ function buildPointsForKey(key, base){
     ...blendCategory(base,'restaurants',5,()=>generateRestaurants(base),'barsrest')
   ]);
   if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
+  if(key.startsWith('art_'))        return blendCategory(base,'art',8,()=>[],'art'); // #193 — art gems + real OSM artwork; no procedural filler (none exists for art)
   // No blendCategory here on purpose: blending would let OSM/Wikipedia places
   // leak into a tab whose entire premise is that everything in it is human.
   /* #149 — was gemPoint(g,'lore'), which minted lore<gemId> while every blend
@@ -6265,7 +6275,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31l';
+const APP_VERSION = '2026.07.31m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7732,6 +7742,7 @@ function regenerateCurrentHuntAt(base){
   else if(key.startsWith('shops_')) startShopsHunt(base);
   else if(key.startsWith('barsrest_')) startBarsAndRestaurantsHunt(base);
   else if(key.startsWith('history_')) startHistoryHunt(base);
+  else if(key.startsWith('art_')) startArtHunt(base); // #193/#183 — art is location-based; without this arm it falls to the fixed-guide else and gets "spots are fixed"
   else if(key.startsWith('lore_')) startLoreHunt(base); // lore IS location-based (nearbyApprovedGems 'lore'); without this arm it fell to the fixed-guide else below and got ZOOM_WALK + the "spots are fixed" toast while never reloading the area's stories — see startLoreHunt / buildPointsForKey's lore_ arm, the two minting sites that already exist
   /* #67 — stateparks_ / nationalparks_ arms deleted. They could only fire on an
      already-active hunt with that key, which became unreachable when the cards
@@ -8297,9 +8308,10 @@ const EXPLORE_CAT_KEYPREFIX = {
   shops: 'shops_',
   bars_restaurants: 'barsrest_',
   history: 'history_',
-  lore: 'lore_'
+  art: 'art_' // #193
   /* #67 — gems and national_parks entries deleted; neither has a card, so
-     updateExploreSelectionIcons() could never match them. */
+     updateExploreSelectionIcons() could never match them. #192 — the 'lore'
+     entry went with its card in the History & Lore merge. */
 };
 const EXPLORE_CAT_COLOR = {
   local: '#EDE9DD',
@@ -8307,7 +8319,7 @@ const EXPLORE_CAT_COLOR = {
   shops: '#4C8FC0',
   bars_restaurants: '#C1587A',
   history: '#B08D57',
-  lore: '#3E9C8F'
+  art: '#3E9C8F' // #193 — the teal freed by the lore merge
   /* #67 — gems and national_parks deleted with their cards. */
 };
 const EXPLORE_ICON_DEFS = {
@@ -8316,8 +8328,9 @@ const EXPLORE_ICON_DEFS = {
   shops: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   bars_restaurants: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
   history: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
-  // Open book — lore is something written down and passed on, not a structure.
-  lore: {vb:'0 0 24 24', body:'M3 5h6a3 3 0 0 1 3 3v12a2.6 2.6 0 0 0-2.6-2H3z M21 5h-6a3 3 0 0 0-3 3v12a2.6 2.6 0 0 1 2.6-2H21z'}
+  // #193 — framed picture (frame + sun), for public art. The lore book def was
+  // retired with the History & Lore merge (#192); there is no lore card to key it.
+  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z M16.2 9a1.3 1.3 0 1 0 0.01 0', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4'}
 };
 function exploreCategoryIconSVG(cat, color, filled){
   const def = EXPLORE_ICON_DEFS[cat];
@@ -8563,6 +8576,16 @@ function startHistoryHunt(base){
   const key = 'history_v1';
   setCurrentHunt({key, name:'History & Lore', mode:'history', points:buildPointsForKey(key, base)}); // #192 — merged label
 }
+/* #193 — Art. Mirrors startHistoryHunt: art gems first, then real OSM artwork
+   (tourism=artwork, categorised 'art' by the nearby-places function), blended in
+   buildPointsForKey's art_ arm. Unlike the old Lore tab it scaffolds, so it is
+   not empty by design. */
+function startArtHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'art_v1';
+  setCurrentHunt({key, name:'Art', mode:'art', points:buildPointsForKey(key, base)});
+}
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
    state is that every pin is user-submitted and OSM/Wikipedia scaffolding fills
@@ -8672,7 +8695,7 @@ function assertExploreRoutesHaveCards(){
   try{
     const cards = Array.from(document.querySelectorAll('.mode-card[data-cat]'))
       .map(c => c.dataset.cat);
-    const routed = ['local','parks_trails','shops','bars_restaurants','history']; // #192 — 'lore' merged into 'history'
+    const routed = ['local','parks_trails','shops','bars_restaurants','history','art']; // #192 — 'lore' merged into 'history'; #193 — 'art' added
     const noCard = routed.filter(r => cards.indexOf(r) === -1);
     const noRoute = cards.filter(c => routed.indexOf(c) === -1);
     if(noCard.length)  console.warn('[#67] selectExplore routes with no card:', noCard);
@@ -8897,7 +8920,7 @@ function assertGemBucketsAgree(){
        arguments are literals scattered across blendCategory calls and there is
        no runtime handle on them — so this one IS a maintained list, and it is
        the only one. Update it in the same edit that changes a blend. */
-    const consumed = ['park','trail','shops','barsrest','history','lore'];
+    const consumed = ['park','trail','shops','barsrest','history','lore','art']; // #193 — art blended by buildPointsForKey's art_ arm + ATL
     const unreachable   = accepted.filter(b => consumed.indexOf(b) === -1);
     const unaccepted    = formValues.filter(v => accepted.indexOf(v) === -1);
     /* Accepted AND consumed but not offered by the form. NOT a defect — a
@@ -8942,6 +8965,7 @@ function selectExplore(cat){
     else if(cat==='shops'){ startShopsHunt(base); }
     else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
     else if(cat==='history'){ startHistoryHunt(base); } // #192 — now "History & Lore"; the lore card/route were merged in here
+    else if(cat==='art'){ startArtHunt(base); } // #193
   }finally{
     state._preserveViewOnNextHunt = false;
   }
@@ -10085,7 +10109,7 @@ const PIN_CAT_LABEL = {
      label could have found it. Singular here, plural on the card: that is the
      map's rule, not an inconsistency. Do not pluralise this to match. */
   barsrest:'Bar & Restaurant', lore:'Lore & Legend',
-  history:'History', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
+  history:'History', art:'Art', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
 };
 /* ---- #33: address ----
    Nothing in the app stores an address today, so this reverse-geocodes on
@@ -11258,6 +11282,7 @@ function huntDisplayName(key){
   if(key.startsWith('restaurants_')) return 'Restaurants';
   if(key.startsWith('barsrest_')) return 'Bars & Restaurants';
   if(key.startsWith('history_')) return 'History & Lore'; // #192 — merged label
+  if(key.startsWith('art_')) return 'Art'; // #193
   /* lore_ was never in this list, so a lore find rendered its raw key
      ('lore_v1') in the Passport. Added with the Lore & Legends rename, and
      #192 folds it into the merged name so a pre-merge lore capture reads the
