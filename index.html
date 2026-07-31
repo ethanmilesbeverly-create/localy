@@ -6239,7 +6239,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31h';
+const APP_VERSION = '2026.07.31i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8724,10 +8724,13 @@ function assertBadgeMatchesList(){
     } else {
       console.log('[#66] badge = rows = computed = ' + computed + ' (hunt holds ' + total + ')');
     }
-    if(computed > LIST_CAP){
-      /* Cannot happen: capture-range pins claim cap budget first rather than
-         sitting above it, so the total is capped unconditionally. If this ever
-         fires, the slice in visibleTargetsSorted() has stopped being applied. */
+    if(computed > LIST_CAP && !isGuideHunt(state.currentHunt)){
+      /* Cannot happen on an explore hunt: capture-range pins claim cap budget
+         first rather than sitting above it, so the total is capped
+         unconditionally. If this ever fires, the slice in visibleTargetsSorted()
+         has stopped being applied. Guides are EXEMPT — they deliberately show
+         every stop uncapped (see visibleTargetsSorted's guide branch), so >LIST_CAP
+         rows there is correct, not a cap failure. */
       console.warn('[#66] cap not applied — ' + computed + ' rows over a cap of ' + LIST_CAP);
     }
   }catch(e){ console.warn('[#66] list check failed', e); }
@@ -9907,6 +9910,23 @@ function visibleTargetsSorted(){
   state._listInViewTotal = null;
   const all = currentTargetsSorted();
   if(!all.length) return [];
+  /* GUIDE — a curated guide is an ITINERARY, not a browse surface: the list shows
+     EVERY stop with its distance from you, not a viewport+range subset. The #66
+     filter below answers "what can I capture / what is in this frame" for the
+     explore cards; a guide answers "here are the stops and how far each is", which
+     is the map's own model — the user reported (correctly) that guide pins on the
+     map were missing from the menu. So guides bypass the viewport/range gate AND
+     the LIST_CAP: return the full set, already sorted by distance from state.me
+     (#66's body-anchored distance rule is untouched — every row still reads its
+     honest distance from you). No cap because a guide is bounded by what its
+     author dropped, not by a metro's worth of POIs; if a pathological 100-stop
+     guide ever makes this a wall, add a guide-scoped cap here rather than reusing
+     LIST_CAP, which answers a different question. isGuideHunt matches ONLY
+     custom_/code_, so lore_ and every explore card fall through unchanged. */
+  if(isGuideHunt(state.currentHunt)){
+    state._listInViewTotal = all.length; // all shown → no "X of Y in view" note
+    return all;
+  }
   const map = state.leafletMap;
   /* No map yet (first paint, or the Map screen has never been opened) — show
      the unfiltered hunt rather than an empty drawer. An empty list caused by
