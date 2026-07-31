@@ -4608,7 +4608,15 @@ async function ensureRealPlaces(base){
     if(state.currentHunt) refreshTargetsUI();
     console.warn('[localy] nearby-places function failed — no real places this pass.', (e && e.message) || e);
   }
-  finally{ delete _realFetchInFlight[key]; }
+  finally{
+    delete _realFetchInFlight[key];
+    /* Resolve the first-paint hold on EVERY fetch outcome. The loaded case
+       already painted via onRealPlacesReady() and cleared the flag, so this is a
+       no-op there; empty and transport-failure reach here still pending and get
+       their gems-only paint. No-op in the normal mid-session case, since the flag
+       is only ever set by startLocalHunt's cold path. */
+    paintFirstBlend();
+  }
 }
 
 /* Nearest real internet places of a category (mirrors nearbyApprovedGems). */
@@ -5039,6 +5047,14 @@ function onRealPlacesReady(){
   reblendHuntInPlace(h);
   if(typeof refreshTargetsUI==='function') refreshTargetsUI();
   if(typeof refreshTrackUI==='function') refreshTrackUI();
+  /* Loaded case of the first-paint hold: this just painted the balanced set with
+     real supply, so retire the pending flag and its backstop timer. The empty and
+     transport-failure cases are resolved instead by paintFirstBlend() in
+     ensureRealPlaces' finally, which still finds the flag set. */
+  if(state._firstBlendPending){
+    state._firstBlendPending = false;
+    if(state._firstBlendTimer){ clearTimeout(state._firstBlendTimer); state._firstBlendTimer = null; }
+  }
 }
 
 /* =========================================================
@@ -6163,7 +6179,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30k';
+const APP_VERSION = '2026.07.30l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8378,12 +8394,53 @@ function startBuiltinHunt(id){
   setCurrentHunt({ key:id, name:src.name, mode:src.mode, points:src.points });
 }
 
+/* Backstop for the first-paint hold below: if the real-place fetch never settles
+   (a hung invoke — a normal success/empty/failure resolves the hold through
+   ensureRealPlaces' finally), paint whatever we have so the spinner cannot hang
+   forever. Longer than OVERPASS_TIMEOUT_MS on purpose — firing earlier would
+   paint the gems-only wide set WHILE the real fetch is still in flight, i.e. the
+   exact flash the hold exists to remove. (Another unregistered time constant, see
+   #161.) */
+const FIRST_BLEND_MAX_HOLD_MS = OVERPASS_TIMEOUT_MS + 8000;
+/* Paint the first All Things Local blend ONCE the real-place tile has resolved
+   (loaded / empty / failed). Reblends the shell in place so the paint is the
+   balanced set — real pins if any loaded, gems-only otherwise — instead of the
+   cold gems-to-the-horizon set the tile load would immediately evict. */
+function paintFirstBlend(){
+  if(!state._firstBlendPending) return;
+  state._firstBlendPending = false;
+  if(state._firstBlendTimer){ clearTimeout(state._firstBlendTimer); state._firstBlendTimer = null; }
+  const h = state.currentHunt;
+  if(h && REAL_UPGRADABLE_KEY.test(h.key)){
+    reblendHuntInPlace(h);
+    if(typeof refreshTargetsUI==='function') refreshTargetsUI();
+    if(typeof refreshTrackUI==='function') refreshTrackUI();
+  }
+}
 function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
   ensureRealPlaces(base);
   const key = 'local_v1';
-  setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
+  /* HOLD THE FIRST PAINT until real supply resolves. Cold, state.realPlaces is
+     empty, so buildAllThingsLocal() backfills its 15-pin target with gems out to
+     the full include radius — a wide paint the tile load then yanks narrow as
+     nearer real pins evict the far gems (the "pins vanish at the same zoom"
+     flash the user reported). If we already hold this tile's data, blend now (no
+     flash); otherwise establish a zero-point shell — which shows the existing
+     #78c/#28 loading card, because ensureRealPlaces set the tile 'loading'
+     synchronously just above — and let paintFirstBlend() paint once the fetch
+     settles. Both entry points are covered: GPS's first fix also routes through
+     startLocalHunt(), so a fix that lands before its tile does holds too. */
+  const haveTile = state.realPlaces && state.realPlaces.tile === realTileKey(base);
+  if(haveTile){
+    setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
+  } else {
+    setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:[]});
+    state._firstBlendPending = true;
+    if(state._firstBlendTimer) clearTimeout(state._firstBlendTimer);
+    state._firstBlendTimer = setTimeout(paintFirstBlend, FIRST_BLEND_MAX_HOLD_MS);
+  }
 }
 function startParksAndTrailsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
