@@ -1863,13 +1863,18 @@
         <div class="icon-wrap"></div>
         <div><h3>Bars &amp; Restaurants</h3><p>Food and drink nearby.</p></div>
       </div>
+      <!-- #192 — HISTORY AND LORE MERGED INTO ONE CARD. Formerly two cards
+           (History / Lore & Legends) split on the "landmark vs. something-happened"
+           line (#13/#15/#162). Merged because at current scale a standalone Lore
+           tab is near-empty, and the merged bucket reads cleanly as "places with a
+           past". data-cat stays 'history' so all existing history routing
+           (startHistoryHunt, history_v1, buildPointsForKey's history_ arm, ATL,
+           the route guard) is reused unchanged; the former-lore gems are migrated
+           to category 'history' in the DB so they surface here. 'lore' is retired
+           as a stored value — see the migration in this pass's notes. -->
       <div class="mode-card" data-cat="history" onclick="selectExplore('history')">
         <div class="icon-wrap"></div>
-        <div><h3>History</h3><p>Landmarks and museums.</p></div>
-      </div>
-      <div class="mode-card" data-cat="lore" onclick="selectExplore('lore')">
-        <div class="icon-wrap"></div>
-        <div><h3>Lore &amp; Legends</h3><p>Where something happened.</p></div>
+        <div><h3>History &amp; Lore</h3><p>Landmarks and where things happened.</p></div>
       </div>
     </div>
 
@@ -1947,13 +1952,14 @@
         <option value="park">Parks &amp; Trails</option>
         <option value="shops">Shops</option>
         <option value="barsrest">Bars &amp; Restaurants</option>
-        <option value="history">History</option>
-        <option value="lore">Lore &amp; Legends</option>
+        <option value="history">History &amp; Lore</option>
       </select>
       <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
-        <b>History</b> is a place that matters — a landmark, a monument, somewhere old.
-        <b>Lore &amp; Legends</b> is an ordinary place where something <i>happened</i> — the diner
-        from the film, the bar where the band got its name. Not sure? Pick either, we'll sort it out.
+        <!-- #192 — History and Lore merged into one option (value stays 'history';
+             'lore' retired). -->
+        <b>History &amp; Lore</b> is a place with a past — a landmark, a monument, or an
+        ordinary spot where something <i>happened</i> (the diner from the film, the bar
+        where the band got its name).
       </p>
     </div>
     <!-- #23 / #191 — THE LOAD-BEARING CAPTURE POINT, NOW CONDITIONALLY SHOWN.
@@ -3812,7 +3818,12 @@ function approvedGemPoints(base, bucket, limit){
 const GEM_BUCKET_CATEGORY = {
   park:'park', trail:'trail', shops:'shops',
   barsrest:'barsrest', history:'history',
-  lore:'lore'
+  // #192 — 'lore' retired and merged into 'history'. Existing rows are migrated
+  // in the DB (update submissions set category='history' where category='lore'),
+  // but this alias keeps any straggler (a stale client cache, a mid-migration
+  // read) rendering under the merged History & Lore bucket rather than the
+  // neutral 'local' fallback.
+  lore:'history'
 };
 function gemDisplayCategory(g, ctxCategory){
   /* Falls back to 'local' (the neutral cream pin), never to 'gems' — a row with
@@ -6245,7 +6256,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31j';
+const APP_VERSION = '2026.07.31k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8541,7 +8552,7 @@ function startHistoryHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'history_v1';
-  setCurrentHunt({key, name:'History', mode:'history', points:buildPointsForKey(key, base)});
+  setCurrentHunt({key, name:'History & Lore', mode:'history', points:buildPointsForKey(key, base)}); // #192 — merged label
 }
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
@@ -8562,6 +8573,15 @@ function startHistoryHunt(base){
    everywhere until people submit. The empty state below is therefore not a
    nicety, it's the feature — an empty Lore tab has to read as an invitation,
    never as a broken map. */
+/* #192 — THE LORE CARD AND ROUTE ARE RETIRED (merged into History & Lore). The
+   block above describes the old user-only, ships-empty Lore tab; that tab no
+   longer exists. This starter is NOT deleted: regenerateCurrentHuntAt still
+   dispatches lore_ keys here for any lore_v1 hunt a device already holds, and
+   removing it would break that #183 arm and strand pre-merge lore captures. It
+   is simply no longer reachable from the Explore grid. Its gem read below still
+   filters bucket 'lore' — after the DB migration no gem carries that bucket, so
+   an active pre-migration lore_v1 hunt shows the merged content on next rebuild;
+   captures already banked are unaffected (they live in progress, not this read). */
 function startLoreHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   // #149 — catgem<gemId>, not lore<gemId>. Same reasoning and same backfill as
@@ -8643,7 +8663,7 @@ function assertExploreRoutesHaveCards(){
   try{
     const cards = Array.from(document.querySelectorAll('.mode-card[data-cat]'))
       .map(c => c.dataset.cat);
-    const routed = ['local','parks_trails','shops','bars_restaurants','history','lore'];
+    const routed = ['local','parks_trails','shops','bars_restaurants','history']; // #192 — 'lore' merged into 'history'
     const noCard = routed.filter(r => cards.indexOf(r) === -1);
     const noRoute = cards.filter(c => routed.indexOf(c) === -1);
     if(noCard.length)  console.warn('[#67] selectExplore routes with no card:', noCard);
@@ -8912,8 +8932,7 @@ function selectExplore(cat){
     else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
     else if(cat==='shops'){ startShopsHunt(base); }
     else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
-    else if(cat==='history'){ startHistoryHunt(base); }
-    else if(cat==='lore'){ startLoreHunt(base); }
+    else if(cat==='history'){ startHistoryHunt(base); } // #192 — now "History & Lore"; the lore card/route were merged in here
   }finally{
     state._preserveViewOnNextHunt = false;
   }
@@ -11229,10 +11248,15 @@ function huntDisplayName(key){
   if(key.startsWith('bars_')) return 'Bars';
   if(key.startsWith('restaurants_')) return 'Restaurants';
   if(key.startsWith('barsrest_')) return 'Bars & Restaurants';
-  if(key.startsWith('history_')) return 'History';
+  if(key.startsWith('history_')) return 'History & Lore'; // #192 — merged label
   /* lore_ was never in this list, so a lore find rendered its raw key
-     ('lore_v1') in the Passport. Added with the Lore & Legends rename. */
-  if(key.startsWith('lore_')) return 'Lore & Legends';
+     ('lore_v1') in the Passport. Added with the Lore & Legends rename, and
+     #192 folds it into the merged name so a pre-merge lore capture reads the
+     same as history in the Passport. The lore_ read-machinery (this arm,
+     buildPointsForKey's lore_ arm, regenerateCurrentHuntAt's lore_ arm,
+     startLoreHunt, migrateLoreGemIds) is DELIBERATELY kept: no new lore_v1
+     hunt is created now, but existing lore_v1 captures must keep resolving. */
+  if(key.startsWith('lore_')) return 'History & Lore';
   if(key.startsWith('gems_')) return 'Hidden Gems';
   return key;
 }
