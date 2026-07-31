@@ -537,6 +537,21 @@
     width:46px;height:46px;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
   }
+  /* #187 — Explore Nearby ONLY: compact 2-column, icon on TOP, everything
+     centered, cards a little taller. Scoped to `.explore-grid` so My Guides and
+     the gem-submissions list (both plain `.mode-grid`) stay single-column
+     horizontal. flex-direction:column + align-items:center + text-align:center
+     stacks icon → title → description; justify-content:center + min-height
+     centre the stack vertically. Higher specificity than `.mode-card h3/p`
+     below, so source order is moot. */
+  .explore-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .explore-grid .mode-card{
+    flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:8px; padding:16px 12px; min-height:96px;
+  }
+  .explore-grid .mode-card .icon-wrap{ width:28px;height:28px; }
+  .explore-grid .mode-card h3{ font-size:13.5px; line-height:1.2; margin:0 0 3px; }
+  .explore-grid .mode-card p{ font-size:11px; line-height:1.3; margin:0; }
   .icon-wrap.plus-icon{
     width:40px;height:40px;border-radius:50%;
     background:rgba(154,127,191,0.15);
@@ -1818,30 +1833,30 @@
   <div class="screen" id="screen-modes">
     <h1 class="page-title">Where to today?</h1>
     <p class="page-sub" style="margin:0 0 10px;font-weight:700;color:var(--text);">Explore Nearby</p>
-    <div class="mode-grid">
+    <div class="mode-grid explore-grid">
       <div class="mode-card" data-cat="local" onclick="selectExplore('local')">
         <div class="icon-wrap"></div>
-        <div><h3>All Things Local</h3><p>A bit of everything nearby — parks, shops, bars, restaurants.</p></div>
+        <div><h3>All Things Local</h3><p>A bit of everything nearby.</p></div>
       </div>
       <div class="mode-card" data-cat="parks_trails" onclick="selectExplore('parks_trails')">
         <div class="icon-wrap"></div>
-        <div><h3>Parks &amp; Trails</h3><p>Public parks and trails close by — free places, not shops.</p></div>
+        <div><h3>Parks &amp; Trails</h3><p>Free places to walk.</p></div>
       </div>
       <div class="mode-card" data-cat="shops" onclick="selectExplore('shops')">
         <div class="icon-wrap"></div>
-        <div><h3>Shops</h3><p>Bookshops, boutiques, and other neighborhood stores nearby.</p></div>
+        <div><h3>Shops</h3><p>Shops and boutiques.</p></div>
       </div>
       <div class="mode-card" data-cat="bars_restaurants" onclick="selectExplore('bars_restaurants')">
         <div class="icon-wrap"></div>
-        <div><h3>Bars &amp; Restaurants</h3><p>Dive bars, wine bars, diners, and neighborhood spots to eat and drink.</p></div>
+        <div><h3>Bars &amp; Restaurants</h3><p>Food and drink nearby.</p></div>
       </div>
       <div class="mode-card" data-cat="history" onclick="selectExplore('history')">
         <div class="icon-wrap"></div>
-        <div><h3>History</h3><p>Landmarks, monuments, and museums close by.</p></div>
+        <div><h3>History</h3><p>Landmarks and museums.</p></div>
       </div>
       <div class="mode-card" data-cat="lore" onclick="selectExplore('lore')">
         <div class="icon-wrap"></div>
-        <div><h3>Lore &amp; Legends</h3><p>Ordinary places where something happened. The diner from the film, the bar where the band got its name, etc.</p></div>
+        <div><h3>Lore &amp; Legends</h3><p>Where something happened.</p></div>
       </div>
     </div>
 
@@ -6184,7 +6199,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.30q';
+const APP_VERSION = '2026.07.31c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
