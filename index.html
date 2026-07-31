@@ -1472,14 +1472,30 @@
   .pin-list-row .pin-desc-input::placeholder{color:var(--text-dim);opacity:.7;}
   .pin-list-row .pin-name-input:focus,
   .pin-list-row .pin-desc-input:focus{outline:1px solid var(--orange);}
+  /* #201 — compact single-row pill (was a tall centred card with 28px code and
+     two caption lines). Label + code + copy button on one line. */
   #code-result{
-    background:var(--surface-2);border:1px dashed var(--yellow);border-radius:12px;
-    padding:16px;text-align:center;margin-top:16px;display:none;
+    display:none;align-items:center;gap:10px;
+    background:var(--surface-2);border:1px dashed var(--yellow);border-radius:10px;
+    padding:8px 10px 8px 12px;margin-top:14px;
   }
-  #code-result.show{display:block;}
+  #code-result.show{display:flex;}
+  #code-result .cr-label{
+    font-size:11px;text-transform:uppercase;letter-spacing:0.05em;
+    color:var(--text-dim);flex-shrink:0;
+  }
   #code-result .code-text{
-    font-size:28px;letter-spacing:0.15em;color:var(--yellow);font-weight:700;margin:8px 0;
+    flex:1;min-width:0;
+    font-size:20px;letter-spacing:0.12em;color:var(--yellow);font-weight:700;
   }
+  #code-result .cr-copy{
+    flex-shrink:0;background:none;border:none;color:var(--text-dim);
+    width:34px;height:34px;padding:6px;cursor:pointer;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #code-result .cr-copy:hover{color:var(--text);background:var(--surface-3);}
+  #code-result .cr-copy.copied{color:var(--moss);}
+  #code-result .cr-copy svg{width:20px;height:20px;}
   .checkbox-row{
     display:flex;align-items:center;gap:10px;
     margin-bottom:16px;cursor:pointer;
@@ -2080,9 +2096,9 @@
     <div id="create-pin-list"></div>
     <button class="btn" onclick="saveCustomHunt()">Save Guide</button>
     <div id="code-result">
-      <div style="font-size:12px;color:var(--text-dim);">Share this code</div>
-      <div class="code-text" id="generated-code">------</div>
-      <div style="font-size:12px;color:var(--text-dim);">Anyone who enters it gets your guide.</div>
+      <span class="cr-label">Share code</span>
+      <span class="code-text" id="generated-code">------</span>
+      <button type="button" class="cr-copy" onclick="copyGuideCode(this)" aria-label="Copy guide code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
     </div>
     <div class="edit-links-row">
       <button class="link-btn" onclick="goToModeSelect()">Cancel</button>
@@ -6307,7 +6323,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31x';
+const APP_VERSION = '2026.07.31y';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10231,6 +10247,24 @@ function copyPinLocation(btn){
     }, 1800);
   }).catch(()=>{
     showToast('Press and hold the address to copy it');
+  });
+}
+/* #201 — copy the shared guide code from the compact code pill. Same
+   copy-then-tick-then-revert pattern as copyPinLocation, reusing copyToClipboard
+   and the shared icon constants. */
+function copyGuideCode(btn){
+  const code = (document.getElementById('generated-code').textContent || '').trim();
+  if(!code || code === '------') return;
+  copyToClipboard(code).then(()=>{
+    btn.innerHTML = CHECK_ICON_SVG;
+    btn.classList.add('copied');
+    clearTimeout(btn._copyTimer);
+    btn._copyTimer = setTimeout(()=>{
+      btn.innerHTML = COPY_ICON_SVG;
+      btn.classList.remove('copied');
+    }, 1800);
+  }).catch(()=>{
+    showToast('Press and hold the code to copy it');
   });
 }
 function addrCacheKey(lat, lng){ return lat.toFixed(4) + ',' + lng.toFixed(4); }
