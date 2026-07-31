@@ -3918,6 +3918,16 @@ function huntAnchor(){
 function maybeShowSearchHere(){
   const btn = document.getElementById('search-here-btn');
   if(!btn) return;
+  /* GUIDE — a guide's pins are authored and FIXED, so "Search this area" can
+     never load anything on this surface: regenerateCurrentHuntAt() falls to its
+     fixed-content else-branch and only recenters the map + toasts "spots are
+     fixed". The pill was therefore a dead affordance on guides — it appeared on
+     pan, invited a tap, and answered "no". Hidden for custom_/code_ guides; the
+     frame-guide button (#7) is the honest "show the whole guide" control that
+     replaces it. isGuideHunt() matches ONLY custom_/code_, so lore_ (a real
+     location-based explore category, see regenerateCurrentHuntAt's lore_ arm) and
+     every other explore card keep the pill, where a re-search is meaningful. */
+  if(isGuideHunt(state.currentHunt)){ btn.classList.remove('show'); return; }
   /* #59 — follow mode means "the view is tracking me," which is definitionally
      not a drifted view. dragstart already clears followMe, so the pill returns
      the instant you pan. Belt to the anchor fix's braces, and it is what makes
@@ -6229,7 +6239,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31g';
+const APP_VERSION = '2026.07.31h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
