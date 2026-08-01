@@ -6360,7 +6360,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.07.31zd';
+const APP_VERSION = '2026.08.01a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7599,16 +7599,40 @@ const StylizedGrid = L.GridLayer.extend({
    silently failing to load — if enough of them error out, this falls back to
    the procedural stylized map instead of leaving a blank gray screen. */
 function addBaseLayer(map){
-  const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom:19, subdomains:'abcd'
-  });
+  /* #205 — CONTINUOUS-PAN GREY BAND. A single uninterrupted swipe outran the
+     tile layer and revealed the bare container down one side as a hard-edged
+     grey half-screen (reported on all three app maps). This is NOT #87's
+     hidden-container-measures-zero bug — that renders a permanent left-edge
+     strip; this map is full-width at rest and only greys WHILE a finger drags.
+     TWO Leaflet defaults caused it, both left implicit until now:
+       (1) updateWhenIdle defaults to TRUE on mobile (L.Browser.mobile), so new
+           tiles are requested only at moveend — nothing loads DURING the drag,
+           so a long continuous swipe shows un-tiled container until you lift off.
+       (2) keepBuffer defaults to 2 (~2 tile rows, ~512px of off-screen margin),
+           which a fast swipe exhausts before the drag ends.
+     FIX: load tiles during the pan (updateWhenIdle:false) and widen the rendered
+     margin (keepBuffer:4, ~1024px each side). This is applied HERE because all
+     THREE app maps are built through this one function — #leaflet-map,
+     #suggest-gem-map and #create-map — so one change covers all three.
+     COST: more CARTO tile requests while panning. Already disclosed under #112,
+     which describes CARTO as seeing "which square, continuously while the map is
+     open" — this makes the already-continuous fetch actually continuous mid-drag,
+     so it is NOT a new disclosure category and privacy.html needs no change.
+     landing.html builds its own CARTO layer inline and does NOT route through
+     here, so it carries the same latent band and is a SEPARATE fix (flagged, not
+     bundled) — see the delivery note. */
+  const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:4, updateWhenIdle:false };
+  const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
   let errorCount = 0, fellBack = false;
   real.on('tileerror', () => {
     errorCount++;
     if(errorCount >= 4 && !fellBack){
       fellBack = true;
       map.removeLayer(real);
-      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19}).addTo(map);
+      /* Same options on the fallback grid so the stylized map matches the buffer
+         behaviour; it draws synchronously on canvas so it never showed the band,
+         but keeping the options identical avoids a future divergence. */
+      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:4, updateWhenIdle:false}).addTo(map);
       showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
     }
   });
