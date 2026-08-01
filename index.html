@@ -6360,7 +6360,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.01a';
+const APP_VERSION = '2026.08.01b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7610,10 +7610,27 @@ function addBaseLayer(map){
            so a long continuous swipe shows un-tiled container until you lift off.
        (2) keepBuffer defaults to 2 (~2 tile rows, ~512px of off-screen margin),
            which a fast swipe exhausts before the drag ends.
-     FIX: load tiles during the pan (updateWhenIdle:false) and widen the rendered
-     margin (keepBuffer:4, ~1024px each side). This is applied HERE because all
-     THREE app maps are built through this one function — #leaflet-map,
+     FIX: load tiles during the pan (updateWhenIdle:false), widen the retained
+     margin (keepBuffer:6, ~1.5k px each side — mostly kills the flash when you
+     REVERSE a swipe, since keepBuffer governs RETENTION, not lead-in), and
+     request tiles more often mid-drag (updateInterval:80, down from Leaflet's
+     200 default — so the LEADING edge is asked for ~2.5x sooner). Applied HERE
+     because all THREE app maps build through this one function — #leaflet-map,
      #suggest-gem-map and #create-map — so one change covers all three.
+     RESIDUAL FLASH IS NETWORK-BOUND, NOT AN OPTION WE LEFT UNSET. Leaflet only
+     REQUESTS a tile once it is entering the viewport (keepBuffer retains what was
+     already loaded; it does not pre-fetch a ring AHEAD of the pan). So on a very
+     fast continuous swipe the extreme leading edge is still downloading as it
+     scrolls in, and no TileLayer option removes that. updateInterval:80 shrinks
+     the window; it cannot close it. The only GUARANTEED zero-flash approach is to
+     make Leaflet's viewport physically LARGER than the screen (a bleed container:
+     #leaflet-map inset negative beyond #screen-map, clipped) so an off-screen
+     tile ring is painted before it scrolls in. That is deliberately NOT done here:
+     #screen-map carries perspective:800px for the compass/AR/3D tilt (#95's
+     containing-block, #86/#73's AR framing), and resizing the perspective'd map
+     container is a real regression surface that is untestable in simulate mode
+     (#73) — it belongs in its own dedicated, AR-QA'd pass, not bundled into a
+     tile-options change. Filed as the open half of this row.
      COST: more CARTO tile requests while panning. Already disclosed under #112,
      which describes CARTO as seeing "which square, continuously while the map is
      open" — this makes the already-continuous fetch actually continuous mid-drag,
@@ -7621,7 +7638,7 @@ function addBaseLayer(map){
      landing.html builds its own CARTO layer inline and does NOT route through
      here, so it carries the same latent band and is a SEPARATE fix (flagged, not
      bundled) — see the delivery note. */
-  const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:4, updateWhenIdle:false };
+  const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
   const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
   let errorCount = 0, fellBack = false;
   real.on('tileerror', () => {
@@ -7632,7 +7649,7 @@ function addBaseLayer(map){
       /* Same options on the fallback grid so the stylized map matches the buffer
          behaviour; it draws synchronously on canvas so it never showed the band,
          but keeping the options identical avoids a future divergence. */
-      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:4, updateWhenIdle:false}).addTo(map);
+      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
       showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
     }
   });
