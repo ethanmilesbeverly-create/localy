@@ -2015,23 +2015,16 @@
       <label class="field-label">Why is it a hidden gem?</label>
       <textarea id="gem-desc" rows="3" placeholder="What makes it worth finding?"></textarea>
     </div>
-    <div class="field">
-      <label class="field-label">What category is it?</label>
-      <select id="gem-category">
-        <option value="park">Parks &amp; Trails</option>
-        <option value="shops">Shops</option>
-        <option value="barsrest">Bars &amp; Restaurants</option>
-        <option value="history">History &amp; Lore</option>
-        <option value="art">Art</option>
-      </select>
-      <p class="page-sub" style="margin:6px 0 0;font-size:12px;">
-        <!-- #192 — History and Lore merged into one option (value stays 'history';
-             'lore' retired). -->
-        <b>History &amp; Lore</b> is a place with a past — a landmark, a monument, or an
-        ordinary spot where something <i>happened</i> (the diner from the film, the bar
-        where the band got its name).
-      </p>
-    </div>
+    <!-- #114 — the "What category is it?" <select id="gem-category"> was REMOVED.
+         review-submission now classifies the place server-side from its name and
+         description (the model picks park/shops/barsrest/history/art), so the
+         submitter no longer chooses and the History-vs-Lore/Art distinction is
+         not their job. The insert sends NO category; the gate sets it, and
+         approve_submission refuses to publish an unclassified row (#68). Removed
+         with it: the reset in openSuggestGemScreen and the read in submitGem. The
+         submit-time bucket set now lives server-side (review-submission's
+         VALID_CATEGORIES + approve_submission), mirrored by GEM_BUCKET_CATEGORY. -->
+
     <!-- #23 / #191 — THE LOAD-BEARING CAPTURE POINT, NOW CONDITIONALLY SHOWN.
          The GUARANTEE is unchanged and is the whole reason this field exists: no
          gem is inserted without a name behind it, so every gem carries a credit
@@ -3908,9 +3901,12 @@ function approvedGemPoints(base, bucket, limit){
    live check returned history/park/park/barsrest/barsrest/lore) degrades to the
    neutral 'local' pin via gemDisplayCategory rather than disappearing.
 
-   THESE KEYS, THE #gem-category OPTION VALUES, AND EVERY gemBucket ARGUMENT ARE
-   THREE LISTS THAT MUST AGREE. Nothing checked that they did, which is the
-   whole of #68. assertGemBucketsAgree() below now does. */
+   THESE KEYS, EVERY gemBucket ARGUMENT, AND THE SERVER-SIDE BUCKET SET
+   (review-submission's VALID_CATEGORIES + approve_submission's list) MUST AGREE.
+   #114 removed the #gem-category <select>, so the FORM is no longer one of the
+   lists — the AI classifies at submit now. assertGemBucketsAgree() below still
+   checks the two client-side lists; keep the server-side pair in sync by hand,
+   there is no runtime handle on them. */
 const GEM_BUCKET_CATEGORY = {
   park:'park', trail:'trail', shops:'shops',
   barsrest:'barsrest', history:'history', art:'art', // #193 — Art
@@ -6360,7 +6356,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.01b';
+const APP_VERSION = '2026.08.01c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9057,27 +9053,22 @@ function reportCrossBucketDoubles(){
 }
 function assertGemBucketsAgree(){
   try{
-    const sel = document.getElementById('gem-category');
-    const formValues = sel ? Array.from(sel.options).map(o => o.value) : [];
-    const accepted   = Object.keys(GEM_BUCKET_CATEGORY);
-    /* The third list. Kept here rather than derived, because the gemBucket
-       arguments are literals scattered across blendCategory calls and there is
-       no runtime handle on them — so this one IS a maintained list, and it is
-       the only one. Update it in the same edit that changes a blend. */
+    /* #114 — the #gem-category <select> was removed (the AI classifies now), so
+       the FORM is no longer one of the lists to reconcile and its two arms
+       (unaccepted / notOffered) went with it — an absent form would have logged
+       every bucket as "not offered" on every boot, muting the channel. What
+       remains is the check that still matters: every bucket GEM_BUCKET_CATEGORY
+       accepts must be one some blend actually CONSUMES, or a gem could be stored
+       under it, approved, then match no blend (#68). The canonical submit-time
+       bucket set now lives SERVER-SIDE in review-submission's VALID_CATEGORIES
+       and approve_submission's list — keep those in sync with these keys by hand;
+       the gemBucket arguments are literals scattered across blendCategory calls
+       with no runtime handle, so `consumed` stays a maintained list. */
+    const accepted = Object.keys(GEM_BUCKET_CATEGORY);
     const consumed = ['park','trail','shops','barsrest','history','lore','art']; // #193 — art blended by buildPointsForKey's art_ arm + ATL
-    const unreachable   = accepted.filter(b => consumed.indexOf(b) === -1);
-    const unaccepted    = formValues.filter(v => accepted.indexOf(v) === -1);
-    /* Accepted AND consumed but not offered by the form. NOT a defect — a
-       bucket can be legitimately reachable by legacy data while no longer being
-       offered, which is exactly 'trail' today. Reported as a note, never as a
-       warning, or this channel gets muted for a condition that is fine. */
-    const notOffered = accepted.filter(b => formValues.indexOf(b) === -1 && consumed.indexOf(b) !== -1);
-    if(unaccepted.length)  console.warn('[#68] form offers buckets GEM_BUCKET_CATEGORY rejects:', unaccepted);
+    const unreachable = accepted.filter(b => consumed.indexOf(b) === -1);
     if(unreachable.length) console.warn('[#68] accepted buckets no blend consumes (would submit, approve, then vanish):', unreachable);
-    if(notOffered.length)  console.log('[#68] note — reachable but not offered on the form:', notOffered);
-    if(!unaccepted.length && !unreachable.length){
-      console.log('[#68] gem buckets agree (' + accepted.length + ' accepted, ' + formValues.length + ' offered)');
-    }
+    else console.log('[#68] gem buckets agree (' + accepted.length + ' accepted, all consumed)');
   }catch(e){ console.warn('[#68] bucket check failed', e); }
 }
 function selectExplore(cat){
@@ -9234,7 +9225,6 @@ function openSuggestGemScreen(){
   renderGemSubmissions();
   document.getElementById('gem-name').value = '';
   document.getElementById('gem-desc').value = '';
-  document.getElementById('gem-category').value = 'park';
   document.getElementById('gem-address-search').value = '';
   /* #23 / #191 — SHOW THE NAME FIELD ONLY WHEN THE PROFILE HAS NO NAME YET.
      A submitter who already has a name never sees this field — their credit is
@@ -9300,7 +9290,6 @@ function cancelSuggestGem(){
 async function submitGem(){
   const name = document.getElementById('gem-name').value.trim();
   const desc = document.getElementById('gem-desc').value.trim();
-  const bucket = document.getElementById('gem-category').value;
   if(!name){ showToast('Give it a name first'); return; }
   if(!desc){ showToast("Add a quick reason it's worth finding"); return; }
   if(!state.gemDraftPin){ showToast('Search the address above, or tap the map to drop a pin'); return; }
@@ -9334,7 +9323,11 @@ async function submitGem(){
   let newId = null;
   try{
     const { data, error } = await sb.from('submissions').insert({
-      name, description:desc, category:bucket,
+      // #114 — no category is sent. review-submission classifies the place
+      // server-side (park/shops/barsrest/history/art) right after this insert,
+      // and approve_submission refuses to publish an unclassified row (#68).
+      // `category` was made nullable 2026-08-01 so this insert is valid.
+      name, description:desc,
       lat:state.gemDraftPin.lat, lng:state.gemDraftPin.lng,
       submitted_by:uid, source:'user', status:'pending'
     }).select('id').single();
