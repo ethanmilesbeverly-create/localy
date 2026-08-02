@@ -794,6 +794,15 @@
     width:36px;height:4px;background:var(--line);border-radius:2px;
     margin:0 auto 10px;cursor:pointer;
   }
+  /* Static headline for the nearby-spots drawer. Deliberately NOT a count:
+     the count already lives on #list-toggle-badge and is guarded by
+     assertBadgeMatchesList (#66); a second count here would be a fourth
+     surface that must agree with badge/rows/computed and would drift.
+     Right padding clears the absolutely-positioned #drawer-close-btn. */
+  #drawer-title{
+    margin:0;font-size:16px;font-weight:700;color:var(--text);
+    padding-right:40px;line-height:1.2;
+  }
   #drawer-close-btn{
     position:absolute;top:-2px;right:0;z-index:2;
     width:32px;height:32px;border-radius:50%;
@@ -2198,6 +2207,7 @@
     <div id="target-drawer" class="collapsed">
       <div id="drawer-header">
         <div class="drawer-handle" onclick="toggleDrawer()"></div>
+        <h2 id="drawer-title">Nearby Spots</h2>
         <button id="drawer-close-btn" onclick="toggleDrawer()" aria-label="Close list">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -6331,7 +6341,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02n';
+const APP_VERSION = '2026.08.02o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
