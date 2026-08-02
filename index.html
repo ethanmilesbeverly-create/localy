@@ -2374,12 +2374,12 @@
     </div>
   </div>
 
-  <!-- #204 — hidden input for the OPTIONAL capture photo (replaces the AR overlay).
-       triggerCapturePhoto() toggles the `capture` attribute per action: present for
-       the live camera at the moment of capture, absent for a retroactive library
-       upload. The OS handles its own permission; a denial or cancel simply leaves
-       the find without a photo (capture itself stays GPS-gated). -->
-  <input type="file" accept="image/*" id="capture-photo-input" style="display:none" onchange="handleCapturePhotoFile(event)">
+  <!-- #204 — hidden native-camera input for the OPTIONAL, LIVE-ONLY capture photo
+       (replaces the AR overlay). `capture="environment"` keeps it a live camera;
+       there is no gallery upload in this build. The OS handles its own permission;
+       a denial or cancel simply leaves the find without a photo (capture itself
+       stays GPS-gated). -->
+  <input type="file" accept="image/*" capture="environment" id="capture-photo-input" style="display:none" onchange="handleCapturePhotoFile(event)">
 
   <div id="pin-sheet" aria-hidden="true">
     <div id="pin-sheet-drag">
@@ -6240,7 +6240,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02b';
+const APP_VERSION = '2026.08.02c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11355,23 +11355,27 @@ async function attemptMarkFound(){
    Replaces the removed AR camera HUD. Capture itself is UNCHANGED and stays
    GPS-gated (see attemptMarkFound); the photo is MEMORY, NEVER PROOF, and is
    fully optional — a user who skips it, cancels, or denies the camera still
-   captures. Photos are taken with the NATIVE camera (a hidden <input capture>),
-   compressed on device, and stored as blobs in IndexedDB keyed by huntKey::pinId.
-   The capture record carries a `photo:true` flag so it rides along with progress,
-   but the BYTES are local only in this build: a cache-clear or a new device loses
-   them, and hydrate degrades to the "Add a photo" affordance when the blob is
-   absent. Durable cross-device storage is the Supabase-bucket follow-up, at which
-   point loadPhotoBlob() gains a remote fallback and the flag becomes the sync
-   signal. IndexedDB (not window.storage) on purpose: image bytes blow past the
-   KV size budget and must not tangle into #50/#172 progress persistence. */
+   captures. LIVE ONLY this build: the photo can be taken/retaken only in the
+   just-captured card (gated on _justCapturedId); there is no gallery upload and
+   no retroactive add. Photos are taken with the NATIVE camera (hidden <input
+   capture>), compressed on device, and stored as blobs in IndexedDB keyed by
+   huntKey::pinId. The capture record carries a `photo:true` flag so it rides
+   along with progress, but the BYTES are local only in this build: a cache-clear
+   or a new device loses them, and since there is no retroactive add, a later
+   reopen with the blob gone simply renders empty (the photo cannot be re-added
+   until Supabase durability lands). Durable cross-device storage is the
+   Supabase-bucket follow-up, at which point loadPhotoBlob() gains a remote
+   fallback and the flag becomes the sync signal. IndexedDB (not window.storage)
+   on purpose: image bytes blow past the KV size budget and must not tangle into
+   #50/#172 progress persistence. */
 let _pendingPhoto = null;
 let _capturePhotoURL = null;
 let _photoDBPromise = null;
-/* #204 — the live camera belongs to the CAPTURE MOMENT only. This holds the id of
+/* #204 — the live photo belongs to the CAPTURE MOMENT only. This holds the id of
    the pin whose card was just auto-opened by a fresh capture; while it matches,
-   the card offers "Take a photo" (native camera). Cleared on sheet close, so any
-   later reopen is retroactive and offers "Add a photo" (library upload) instead —
-   a photo you took while standing there vs. a photo you attach afterwards. */
+   the card offers Take / Retake (native camera). Cleared on sheet close, so a
+   later reopen shows the photo read-only and offers nothing — there is no gallery
+   upload and no retroactive add in this build. */
 let _justCapturedId = null;
 function capturePhotoKey(key, id){ return key + '::' + id; }
 function photoDB(){
@@ -11411,21 +11415,17 @@ function captureNow(){
   if(!state.currentHunt){ showToast('Pick a guide first'); return; }
   attemptMarkFound();
 }
-/* mode: 'camera' opens the native camera (capture attr, capture-moment only);
-   'library' opens the photo picker for a retroactive upload. The picker may still
-   offer the camera on some OSes — that is the browser's call, not ours; what we
-   control is that we only ASK for the camera at the moment of capture. */
-function triggerCapturePhoto(id, mode){
+/* #204 — LIVE ONLY. The photo is a live-camera artifact of the capture moment;
+   there is no gallery upload and no retroactive add (hydrateCapturePhoto gates
+   every entry point on _justCapturedId). The input keeps its `capture` attribute
+   statically, so this just opens the native camera. */
+function triggerCapturePhoto(id){
   if(!state.currentHunt) return;
   const key = state.currentHunt.key;
   const t = (state.currentHunt.points || []).find(p=>p.id===id);
   _pendingPhoto = { key: key, id: id, name: t ? t.name : '' };
   const input = document.getElementById('capture-photo-input');
-  if(!input) return;
-  if(mode === 'camera') input.setAttribute('capture', 'environment');
-  else input.removeAttribute('capture');
-  input.value = '';
-  input.click();
+  if(input){ input.value = ''; input.click(); }
 }
 function compressImageFile(file, maxDim, quality){
   return new Promise((resolve, reject)=>{
@@ -11467,14 +11467,14 @@ async function handleCapturePhotoFile(event){
   }
 }
 const CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
-const UPLOAD_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
-/* Fill #ps-capture-photo-block for a captured pin. The affordance depends on WHEN
-   we are: in the just-captured card (_justCapturedId === id) the live camera is
-   offered ("Take a photo" / "Retake"); on any later reopen it is a retroactive
-   library upload ("Add a photo" / "Replace"). No local blob (incl. the new-device
-   / evicted case) falls through to the empty state for whichever mode applies.
-   Async and re-entrancy safe: re-reads selectedPinId and the block after awaiting,
-   so a fast sheet switch cannot paint the wrong pin's photo. */
+/* Fill #ps-capture-photo-block for a captured pin. LIVE ONLY: the camera is
+   offered while this is the just-captured card (_justCapturedId === id) — "Take a
+   photo", or "Retake" once one exists. After that card closes the photo is frozen:
+   a later reopen shows it read-only, and a pin captured without one shows nothing
+   (there is no gallery upload or retroactive add this build). A missing blob later
+   (new-device / evicted) also renders empty. Async and re-entrancy safe: re-reads
+   selectedPinId and the block after awaiting, so a fast sheet switch cannot paint
+   the wrong pin's photo. */
 async function hydrateCapturePhoto(key, id, name){
   let block = document.getElementById('ps-capture-photo-block');
   if(!block) return;
@@ -11488,14 +11488,15 @@ async function hydrateCapturePhoto(key, id, name){
   if(blob){
     if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} }
     _capturePhotoURL = URL.createObjectURL(blob);
-    const changeMode  = atCapture ? 'camera' : 'library';
-    const changeLabel = atCapture ? 'Retake photo' : 'Replace photo';
-    block.innerHTML = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">'
-      + '<button class="ps-btn ps-photo-btn" onclick="triggerCapturePhoto(\'' + idEsc + '\', \'' + changeMode + '\')">' + changeLabel + '</button>';
+    let html = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">';
+    if(atCapture){
+      html += '<button class="ps-btn ps-photo-btn" onclick="triggerCapturePhoto(\'' + idEsc + '\')">Retake photo</button>';
+    }
+    block.innerHTML = html;
   } else if(atCapture){
-    block.innerHTML = '<button class="ps-btn ps-photo-add" onclick="triggerCapturePhoto(\'' + idEsc + '\', \'camera\')">' + CAMERA_ICON_SVG + ' Take a photo</button>';
+    block.innerHTML = '<button class="ps-btn ps-photo-add" onclick="triggerCapturePhoto(\'' + idEsc + '\')">' + CAMERA_ICON_SVG + ' Take a photo</button>';
   } else {
-    block.innerHTML = '<button class="ps-btn ps-photo-add" onclick="triggerCapturePhoto(\'' + idEsc + '\', \'library\')">' + UPLOAD_ICON_SVG + ' Add a photo</button>';
+    block.innerHTML = '';
   }
 }
 
