@@ -1272,6 +1272,45 @@
     display:block; width:100%; max-height:280px; object-fit:cover;
     border-radius:12px; border:1px solid var(--line);
   }
+  /* #204 — post-capture photo prompt (momentary modal). */
+  .cpp-overlay{
+    position:fixed; inset:0; z-index:4000;
+    display:none; align-items:center; justify-content:center; padding:24px;
+    background:rgba(6,16,12,0.72); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+  }
+  .cpp-overlay.show{ display:flex; animation:cppFade .18s ease; }
+  @keyframes cppFade{ from{opacity:0} to{opacity:1} }
+  .cpp-card{
+    width:100%; max-width:340px; box-sizing:border-box;
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:24px 22px 18px; text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5);
+    animation:cppPop .22s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes cppPop{ from{opacity:0; transform:translateY(12px) scale(.96)} to{opacity:1; transform:none} }
+  .cpp-badge{
+    width:52px; height:52px; margin:0 auto 12px; border-radius:50%;
+    background:var(--moss); color:#0d1f0d;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cpp-badge svg{ width:26px; height:26px; }
+  .cpp-title{ font-size:22px; font-weight:800; color:var(--text); letter-spacing:.2px; }
+  .cpp-place{ font-size:14px; color:var(--yellow); margin-top:2px; font-weight:600; }
+  .cpp-place:empty{ display:none; }
+  .cpp-body{ font-size:13.5px; line-height:1.5; color:var(--text-dim); margin:12px 4px 18px; }
+  .cpp-take{
+    width:100%; box-sizing:border-box; border:none; border-radius:12px;
+    background:var(--moss); color:#0d1f0d; font-weight:700; font-size:15px;
+    padding:14px; display:flex; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer;
+  }
+  .cpp-take svg{ width:18px; height:18px; }
+  .cpp-take:active{ transform:scale(.98); }
+  .cpp-skip{
+    width:100%; box-sizing:border-box; margin-top:8px; border:none; background:none;
+    color:var(--text-dim); font-size:14px; font-weight:600; padding:12px; cursor:pointer;
+  }
+  .cpp-skip:active{ color:var(--text); }
 
   /* ---------- Passport screen ---------- */
   .stamp-card{
@@ -2380,6 +2419,25 @@
        cancel or denial simply leaves the find without a photo (capture itself
        stays GPS-gated). -->
   <input type="file" accept="image/*" capture="environment" id="capture-photo-input" style="display:none" onchange="handleCapturePhotoFile(event)">
+
+  <!-- #204 — post-capture photo prompt. Momentary modal shown after a committed
+       capture: explains the optional photo (the native camera can't show our text)
+       and opens the camera only when the user taps Take a photo. -->
+  <div id="capture-photo-prompt" class="cpp-overlay" aria-hidden="true" onclick="if(event.target===this)closeCapturePhotoPrompt()">
+    <div class="cpp-card" role="dialog" aria-modal="true" aria-labelledby="cpp-title">
+      <div class="cpp-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div id="cpp-title" class="cpp-title">Captured!</div>
+      <div id="cpp-place" class="cpp-place"></div>
+      <div class="cpp-body">Want a photo to remember being here? It's optional — just a keepsake for your passport, saved on your phone.</div>
+      <button type="button" class="cpp-take" onclick="capturePromptTakePhoto()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Take a photo
+      </button>
+      <button type="button" class="cpp-skip" onclick="closeCapturePhotoPrompt()">Skip for now</button>
+    </div>
+  </div>
 
   <div id="pin-sheet" aria-hidden="true">
     <div id="pin-sheet-drag">
@@ -6240,7 +6298,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02f';
+const APP_VERSION = '2026.08.02g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11353,21 +11411,15 @@ async function attemptMarkFound(){
    ---------------------------------------------------------
    Replaces the removed AR camera HUD. Capture itself is UNCHANGED and stays
    GPS-gated (see attemptMarkFound); the photo is MEMORY, NEVER PROOF, and is
-   fully optional. LIVE AT CAPTURE ONLY: tapping Capture opens the native camera
-   as part of the capture action — take a shot, or cancel right there. There is NO
-   add/take/retake button anywhere in the pin sheet, and no gallery upload or
+   fully optional. FLOW: tapping Capture commits the find, then a momentary in-app
+   prompt appears ("Captured!" + place, an optional-photo explainer, Take a photo /
+   Skip). Take a photo opens the NATIVE camera from that button's own gesture; Skip
+   dismisses. The camera is never fired straight from Capture — the OS camera can't
+   show our text, so the prompt is where we explain what this is and that it's
+   optional. There is NO add/take button in the pin sheet, and no gallery upload or
    retroactive add: the sheet is always the same, showing an existing photo
-   read-only and nothing when there isn't one. This is deliberate — a
-   persistent-looking sheet with an "add photo" button implied you could come back
-   and add one later, which you cannot.
-
-   GESTURE TIMING (load-bearing): the camera must be opened SYNCHRONOUSLY inside
-   the Capture tap (captureNow), because attemptMarkFound() awaits saveProgress()
-   and iOS forfeits the user-gesture across an await, which would silently block
-   the camera. So captureNow fires input.click() first, then commits the find in
-   parallel; handleCapturePhotoFile saves the photo ONLY if the find committed
-   (foundIds guard), so a camera opened on a tap that then drifts out of range
-   leaves no stray photo on an uncaptured place.
+   read-only and nothing when there isn't one — a persistent sheet button implied
+   you could come back and add one later, which you cannot.
 
    Bytes are stored as blobs in IndexedDB keyed huntKey::pinId; the record carries
    a `photo:true` flag so it rides with progress. LOCAL ONLY this build: a
@@ -11409,22 +11461,52 @@ function loadPhotoBlob(key){
   }));
 }
 /* The capture entry point, from #map-camera-btn and the pin sheet's Capture button.
-   Opens the native camera for the optional photo SYNCHRONOUSLY (see gesture-timing
-   note), then commits the find via attemptMarkFound(), which stays the sole
-   authority for the GPS-gated capture and its "get within X ft" toast. Both live
-   entry points only appear in range, so by the time this runs we are almost
-   certainly in range; the foundIds guard in handleCapturePhotoFile covers the rare
-   tap-then-drift case. */
-function captureNow(){
+   Commits the GPS-gated find via attemptMarkFound() (still the sole authority for
+   the capture and its "get within X ft" toast), THEN — only if the capture
+   actually committed — shows the in-app photo prompt. The prompt, not this
+   function, opens the camera: the user taps "Take a photo" there, which is a fresh
+   user gesture, so there is no gesture-timing hack and no camera on a failed
+   capture. Awaiting here is fine precisely because nothing opens the camera until
+   that later tap. */
+async function captureNow(){
   if(!state.currentHunt){ showToast('Pick a guide first'); return; }
   const id = state._nearestId;
-  const target = id && state.currentHunt.points && state.currentHunt.points.find(p=>p.id===id);
-  if(target && state.me){
-    _pendingPhoto = { key: state.currentHunt.key, id: id, name: target.name };
-    const input = document.getElementById('capture-photo-input');
-    if(input){ input.value = ''; input.click(); }
+  await attemptMarkFound();
+  const key = state.currentHunt && state.currentHunt.key;
+  const prog = key && state.progress[key];
+  const committed = prog && prog.foundIds && prog.foundIds.indexOf(id) !== -1;
+  if(committed){
+    const t = state.currentHunt.points && state.currentHunt.points.find(p=>p.id===id);
+    showCapturePhotoPrompt(key, id, t ? t.name : '');
   }
-  attemptMarkFound();
+}
+/* #204 — the post-capture photo prompt. A momentary modal (NOT the pin sheet, so it
+   can't be mistaken for something you return to) that celebrates the capture, says
+   the photo is optional and why, and offers Take a photo / Skip. Take a photo opens
+   the native camera from that button's own gesture; Skip (or backdrop) dismisses.
+   _pendingPhoto is set here and consumed by handleCapturePhotoFile. */
+function showCapturePhotoPrompt(key, id, name){
+  _pendingPhoto = { key: key, id: id, name: name || '' };
+  const el = document.getElementById('capture-photo-prompt');
+  if(!el){ return; }
+  const placeEl = document.getElementById('cpp-place');
+  if(placeEl){ placeEl.textContent = name || ''; }
+  el.classList.add('show');
+  el.setAttribute('aria-hidden', 'false');
+}
+function hideCapturePromptOverlay(){
+  const el = document.getElementById('capture-photo-prompt');
+  if(el){ el.classList.remove('show'); el.setAttribute('aria-hidden', 'true'); }
+}
+function capturePromptTakePhoto(){
+  // Fresh user gesture → open the native camera synchronously.
+  hideCapturePromptOverlay();
+  const input = document.getElementById('capture-photo-input');
+  if(input){ input.value = ''; input.click(); }
+}
+function closeCapturePhotoPrompt(){
+  hideCapturePromptOverlay();
+  _pendingPhoto = null;   // Skip / dismiss: no camera opened, drop the pending target
 }
 function compressImageFile(file, maxDim, quality){
   return new Promise((resolve, reject)=>{
@@ -11450,13 +11532,12 @@ async function handleCapturePhotoFile(event){
   const pending = _pendingPhoto;
   _pendingPhoto = null;
   if(!file || !pending) return;
-  /* Keep the photo ONLY if the capture committed. captureNow() opened the camera in
-     parallel with attemptMarkFound(); if the find was declined (a GPS tick drifted
-     the user out of range between tap and commit), foundIds won't include this pin
-     and we drop the shot rather than bind it to an uncaptured place. */
+  /* Safety net: only keep the photo if the pin is actually captured. The prompt
+     only appears after a committed find, so this is normally always true — it just
+     guards against a stray onchange binding a shot to an uncaptured pin. */
   const prog = state.progress[pending.key];
   const committed = prog && prog.foundIds && prog.foundIds.indexOf(pending.id) !== -1;
-  if(!committed){ showToast('That capture didn\'t take — photo discarded.'); return; }
+  if(!committed){ return; }
   try{
     const blob = await compressImageFile(file, 1600, 0.82);
     await savePhotoBlob(capturePhotoKey(pending.key, pending.id), blob);
