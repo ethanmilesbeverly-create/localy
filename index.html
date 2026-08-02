@@ -1264,7 +1264,7 @@
   #map-camera-btn.show{display:flex;}
   #map-camera-btn svg{width:18px;height:18px;}
 
-  /* #204 — capture photo on the pin card (replaces the removed AR overlay CSS).
+  /* #209 — capture photo on the pin card (replaces the removed AR overlay CSS).
      Display-only: the photo is shown read-only; there are no photo buttons in the
      sheet (the camera opens at capture, never from here). */
   .ps-photo-block{ margin-top:10px; }
@@ -1272,7 +1272,7 @@
     display:block; width:100%; max-height:280px; object-fit:cover;
     border-radius:12px; border:1px solid var(--line);
   }
-  /* #204 — post-capture photo prompt: full-page semi-transparent overlay, kept
+  /* #209 — post-capture photo prompt: full-page semi-transparent overlay, kept
      visually distinct from the stamp/achievement card. Map stays faintly visible
      behind (0.86 + blur). X top-right and Skip both dismiss. */
   .cpp-overlay{
@@ -2419,7 +2419,7 @@
     </div>
   </div>
 
-  <!-- #204 — hidden native-camera input for the OPTIONAL, LIVE-AT-CAPTURE photo
+  <!-- #209 — hidden native-camera input for the OPTIONAL, LIVE-AT-CAPTURE photo
        (replaces the AR overlay). captureNow() clicks it synchronously inside the
        Capture tap so the camera opens; `capture="environment"` keeps it a live
        camera and there is no gallery upload. The OS handles its own permission; a
@@ -2427,7 +2427,7 @@
        stays GPS-gated). -->
   <input type="file" accept="image/*" capture="environment" id="capture-photo-input" style="display:none" onchange="handleCapturePhotoFile(event)">
 
-  <!-- #204 — post-capture photo prompt. Full-page semi-transparent overlay (kept
+  <!-- #209 — post-capture photo prompt. Full-page semi-transparent overlay (kept
        visually distinct from the stamp/achievement card) shown after a committed
        capture: explains the optional, now-or-never photo (the native camera can't
        show our text) and opens the camera only when the user taps Take a photo.
@@ -6310,7 +6310,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02i';
+const APP_VERSION = '2026.08.02k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8366,7 +8366,7 @@ function setCurrentHunt(hunt, deferCaptured){
   // #40b — every hunt starter funnels through here, so this is the one place
   // captured pins have to be restored. Must run BEFORE refreshTargetsUI(), or
   // the first render of the session is missing them and they pop in later.
-  // #205 — EXCEPTION: the cold All-Things-Local path holds the first paint behind
+  // #210 — EXCEPTION: the cold All-Things-Local path holds the first paint behind
   // an empty shell (points:[]) until real supply lands (#85/#161). Injecting here
   // would paint the captured pins ALONE, a beat ahead of everyone else — the
   // "captured pins appear first on reload" report. When the caller defers, skip
@@ -8648,7 +8648,7 @@ function startLocalHunt(base){
   if(haveTile){
     setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
   } else {
-    // #205 — defer the captured-pin restore here: this shell is intentionally
+    // #210 — defer the captured-pin restore here: this shell is intentionally
     // empty and held until real supply lands, so injecting now would paint the
     // captured pins alone, ahead of the blend. reblendHuntInPlace() (via
     // paintFirstBlend / the backstop timer) re-injects them with the real set.
@@ -10519,6 +10519,29 @@ function pinSheetColor(t){
   const def = (state.currentHunt && MODE_COLOR[state.currentHunt.mode]) || '#E8622C';
   return (t && t.category && MODE_COLOR[t.category]) || def;
 }
+/* #211 — the date a captured pin entered the passport, shown on its sheet as
+   "Added to your passport on MM/DD/YY". foundAt[id] is the capture timestamp,
+   but it is keyed PER BUCKET (a pin can be banked under a shared/auto bucket or
+   a guide bucket), so scan every bucket the way sharedCapturedIds() does and
+   take the EARLIEST stamp — the moment it first entered the passport. foundAt is
+   old but not universal (see the #4-phase-2 note that it "predates this work"),
+   so a legacy capture with no stamp returns null and the caller drops the
+   "on <date>" tail rather than rendering "on Invalid Date". */
+function capturedAtFor(id){
+  let earliest = null;
+  Object.values(state.progress || {}).forEach(b=>{
+    const ts = b && b.foundAt ? b.foundAt[id] : undefined;
+    if(typeof ts === 'number' && (earliest === null || ts < earliest)) earliest = ts;
+  });
+  return earliest;
+}
+function fmtPassportDate(ts){
+  if(typeof ts !== 'number') return null;
+  const d = new Date(ts);
+  if(isNaN(d.getTime())) return null;
+  const p = n => String(n).padStart(2,'0');
+  return p(d.getMonth()+1) + '/' + p(d.getDate()) + '/' + String(d.getFullYear()).slice(-2);
+}
 function fillPinSheet(t){
   const color = pinSheetColor(t);
   /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
@@ -10540,7 +10563,14 @@ function fillPinSheet(t){
 
   let actions = '';
   if(t.found){
-    actions += `<div class="ps-found">✓ Captured — added to your passport</div>`;
+    /* #211 — beside the checkmark, name the day it entered the passport instead
+       of the generic "Captured — added to your passport". Date drops off cleanly
+       for a legacy capture with no foundAt stamp (capturedAtFor -> null). */
+    const capDate = fmtPassportDate(capturedAtFor(t.id));
+    const passportLine = capDate
+      ? `✓ Added to your passport on ${capDate}`
+      : `✓ Added to your passport`;
+    actions += `<div class="ps-found">${passportLine}</div>`;
     actions += `<div id="ps-capture-photo-block" class="ps-photo-block"></div>`;
   } else if(inRange){
     actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
@@ -11421,7 +11451,7 @@ async function attemptMarkFound(){
     refreshTrackUI();
     renderPassport();
     checkNewAchievements();
-    /* #204 — the photo step is handled by captureNow(), which opened the native
+    /* #209 — the photo step is handled by captureNow(), which opened the native
        camera as part of the Capture tap (see the gesture-timing note in the
        CAPTURE PHOTO section). Nothing to do here: the find is fully committed, and
        if the user took a shot it attaches via handleCapturePhotoFile once the
@@ -11431,7 +11461,7 @@ async function attemptMarkFound(){
 }
 
 /* =========================================================
-   #204 — CAPTURE PHOTO (optional; live at capture; local this build)
+   #209 — CAPTURE PHOTO (optional; live at capture; local this build)
    ---------------------------------------------------------
    Replaces the removed AR camera HUD. Capture itself is UNCHANGED and stays
    GPS-gated (see attemptMarkFound); the photo is MEMORY, NEVER PROOF, and is
@@ -11504,7 +11534,7 @@ async function captureNow(){
     showCapturePhotoPrompt(key, id, t ? t.name : '');
   }
 }
-/* #204 — the post-capture photo prompt. A momentary modal (NOT the pin sheet, so it
+/* #209 — the post-capture photo prompt. A momentary modal (NOT the pin sheet, so it
    can't be mistaken for something you return to) that celebrates the capture, says
    the photo is optional and why, and offers Take a photo / Skip. Take a photo opens
    the native camera from that button's own gesture; Skip (or backdrop) dismisses.
