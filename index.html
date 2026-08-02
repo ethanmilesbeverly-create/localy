@@ -6310,7 +6310,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02h';
+const APP_VERSION = '2026.08.02i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8359,14 +8359,22 @@ async function maybeRequestCompassPermission(){
    ========================================================= */
 function huntKeyFor(hunt){ return hunt.key; }
 
-function setCurrentHunt(hunt){
+function setCurrentHunt(hunt, deferCaptured){
   state.currentHunt = hunt;
   if(!state.progress[hunt.key]) state.progress[hunt.key] = {foundIds:[], foundAt:{}, foundMeta:{}};
   if(!state.progress[hunt.key].foundMeta) state.progress[hunt.key].foundMeta = {};
   // #40b — every hunt starter funnels through here, so this is the one place
   // captured pins have to be restored. Must run BEFORE refreshTargetsUI(), or
   // the first render of the session is missing them and they pop in later.
-  injectCapturedPins(hunt);
+  // #205 — EXCEPTION: the cold All-Things-Local path holds the first paint behind
+  // an empty shell (points:[]) until real supply lands (#85/#161). Injecting here
+  // would paint the captured pins ALONE, a beat ahead of everyone else — the
+  // "captured pins appear first on reload" report. When the caller defers, skip
+  // this restore; paintFirstBlend()/onRealPlacesReady() -> reblendHuntInPlace()
+  // re-injects them so they arrive WITH the blend, and the backstop timer
+  // guarantees that runs even if the fetch hangs. Every other caller (deferCaptured
+  // falsey) restores exactly as before, so #40b is unchanged off the cold path.
+  if(!deferCaptured) injectCapturedPins(hunt);
   document.getElementById('hunt-chip-name').textContent = hunt.name;
   document.getElementById('stale-hunt-banner').classList.remove('show');
   enterHuntMode();
@@ -8640,7 +8648,11 @@ function startLocalHunt(base){
   if(haveTile){
     setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
   } else {
-    setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:[]});
+    // #205 — defer the captured-pin restore here: this shell is intentionally
+    // empty and held until real supply lands, so injecting now would paint the
+    // captured pins alone, ahead of the blend. reblendHuntInPlace() (via
+    // paintFirstBlend / the backstop timer) re-injects them with the real set.
+    setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:[]}, true);
     state._firstBlendPending = true;
     if(state._firstBlendTimer) clearTimeout(state._firstBlendTimer);
     state._firstBlendTimer = setTimeout(paintFirstBlend, FIRST_BLEND_MAX_HOLD_MS);
