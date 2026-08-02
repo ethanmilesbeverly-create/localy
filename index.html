@@ -538,21 +538,38 @@
     width:46px;height:46px;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
   }
-  /* #187 — Explore Nearby ONLY: compact 2-column, icon on TOP, everything
-     centered, cards a little taller. Scoped to `.explore-grid` so My Guides and
-     the gem-submissions list (both plain `.mode-grid`) stay single-column
-     horizontal. flex-direction:column + align-items:center + text-align:center
+  /* #187 — compact 2-column, icon on TOP, everything centered, cards a little
+     taller. flex-direction:column + align-items:center + text-align:center
      stacks icon → title → description; justify-content:center + min-height
      centre the stack vertically. Higher specificity than `.mode-card h3/p`
-     below, so source order is moot. */
+     below, so source order is moot.
+     #212 — My Guides now OPTS IN to this grid too (its `.mode-grid` carries
+     `explore-grid`), so the two lists read as one card language. The
+     gem-submissions list is the only remaining plain `.mode-grid` and stays
+     single-column horizontal. The two rules below the grid tokens exist ONLY
+     for My Guides cards — they carry a ⋮ menu and a flag icon the six explore
+     cards don't — and are inert on the explore cards themselves. */
   .explore-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .explore-grid .mode-card{
     flex-direction:column; align-items:center; justify-content:center;
     text-align:center; gap:8px; padding:16px 12px; min-height:96px;
+    position:relative; /* #212 — anchor for the absolutely-placed ⋮ menu button */
   }
   .explore-grid .mode-card .icon-wrap{ width:28px;height:28px; }
   .explore-grid .mode-card h3{ font-size:13.5px; line-height:1.2; margin:0 0 3px; }
   .explore-grid .mode-card p{ font-size:11px; line-height:1.3; margin:0; }
+  /* #212 — the guide-options ⋮ is a flex child in the horizontal card; in the
+     centered stack it's lifted into the top-right corner so it never displaces
+     the title/description. #203's scroll-tracking menu is unaffected — it
+     positions from the button's live rect, wherever that sits. */
+  .explore-grid .hunt-card-menu-btn{
+    position:absolute; top:4px; right:4px;
+    width:28px; height:28px;
+  }
+  /* #212 — the guide flag (`.blaze`, 28×40) would overflow the 28×28 icon slot;
+     scale it to sit like the explore cards' 24px category icons. Only My Guides
+     cards render a `.blaze`, so this never touches an explore card. */
+  .explore-grid .mode-card .blaze{ width:20px; height:28px; }
   .icon-wrap.plus-icon{
     width:40px;height:40px;border-radius:50%;
     background:rgba(154,127,191,0.15);
@@ -1861,7 +1878,11 @@
 
   <!-- MODE SELECT -->
   <div class="screen" id="screen-modes">
-    <h1 class="page-title">Where to today?</h1>
+    <!-- #212 — "Where to today?" h1 REMOVED by directive: it was a large, redundant
+         hero over the six category cards, and "Explore Nearby" already names the job.
+         The former sub-label is now the screen's own heading (kept bold + full text
+         colour so it reads as one). The screen's 52px top padding is the spacing to
+         the topbar, so no compensating margin is needed here. -->
     <p class="page-sub" style="margin:0 0 10px;font-weight:700;color:var(--text);">Explore Nearby</p>
     <div class="mode-grid explore-grid">
       <div class="mode-card" data-cat="local" onclick="selectExplore('local')">
@@ -6310,7 +6331,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02k';
+const APP_VERSION = '2026.08.02l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9915,11 +9936,11 @@ function renderMyHunts(){
      The same one banner sits above it, so the emptiness reads as "couldn't
      reach" rather than "your guides are gone." */
   el.innerHTML = loadFailBannerHTML() + `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Guides</p>
-    <div class="mode-grid">` +
+    <div class="mode-grid explore-grid">` +
     state.myHunts.map(h=>`
       <div class="mode-card" data-hunt-id="${h.id}" onclick="startMyHunt('${h.id}')">
         <div class="icon-wrap"><div class="blaze">${flagSVG('#9A7FBF',false)}</div></div>
-        <div style="flex:1;min-width:0;"><h3>${escapeHtml(h.name)}${h.external?' <span class="external-tag">Shared</span>':''}</h3><p>${h.points.length} stop${h.points.length===1?'':'s'}${h.code?' · Code: '+h.code:''}</p></div>
+        <div><h3>${escapeHtml(h.name)}${h.external?' <span class="external-tag">Shared</span>':''}</h3><p>${h.points.length} stop${h.points.length===1?'':'s'}${h.code?' · Code: '+h.code:''}</p></div>
         <button class="hunt-card-menu-btn" onclick="toggleHuntCardMenu(event, '${h.id}')" aria-label="Guide options">
           <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
         </button>
