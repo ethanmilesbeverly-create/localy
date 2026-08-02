@@ -1883,7 +1883,7 @@
          The former sub-label is now the screen's own heading (kept bold + full text
          colour so it reads as one). The screen's 52px top padding is the spacing to
          the topbar, so no compensating margin is needed here. -->
-    <p class="page-sub" style="margin:0 0 10px;font-weight:700;color:var(--text);">Explore Nearby</p>
+    <p class="page-sub" style="margin:14px 0 10px;font-weight:700;color:var(--text);">Explore Nearby</p>
     <div class="mode-grid explore-grid">
       <div class="mode-card" data-cat="local" onclick="selectExplore('local')">
         <div class="icon-wrap"></div>
@@ -6331,7 +6331,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02l';
+const APP_VERSION = '2026.08.02m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9934,7 +9934,14 @@ function renderMyHunts(){
   /* #58 — on a failed load state.myHunts is [], so this section renders as just
      "Create Your Own" — indistinguishable from an author who has made nothing.
      The same one banner sits above it, so the emptiness reads as "couldn't
-     reach" rather than "your guides are gone." */
+     reach" rather than "your guides are gone."
+     #212 — the guide grid carries explore-grid, so guides render as the same
+     centered 2-column cards as the Explore Nearby categories.
+     #213 — Create Your Own is rendered OUTSIDE that grid as a full-width
+     code-entry-row, so it shares one shape with the Have a code? row below it
+     (the two ACTION rows on this screen, distinct from guide/category cards).
+     It stays the last child of #my-hunts-section, directly above Have a code?,
+     and keeps the purple plus dropped into the row's icon slot. */
   el.innerHTML = loadFailBannerHTML() + `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Guides</p>
     <div class="mode-grid explore-grid">` +
     state.myHunts.map(h=>`
@@ -9945,13 +9952,17 @@ function renderMyHunts(){
           <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
         </button>
       </div>`).join('') +
-    `<div class="mode-card" onclick="openCreateScreen()">
-        <div class="icon-wrap plus-icon">
+    `</div>
+    <div class="code-entry-row create-row" onclick="openCreateScreen()">
+        <div class="code-entry-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
-        <div><h3>Create Your Own</h3><p>Drop pins, name your guide, get a shareable code.</p></div>
-      </div>
-    </div>`;
+        <div class="code-entry-text">
+          <strong>Create Your Own</strong>
+          <span>Drop pins, name your guide, get a shareable code.</span>
+        </div>
+        <svg class="code-entry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
 }
 async function startMyHunt(id, skipRefresh){
   const h = state.myHunts.find(x=>x.id===id);
