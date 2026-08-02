@@ -1264,104 +1264,15 @@
   #map-camera-btn.show{display:flex;}
   #map-camera-btn svg{width:18px;height:18px;}
 
-  /* AR camera overlay */
-  #ar-overlay{
-    position:absolute;inset:0;background:#000;z-index:900;
-    display:none;flex-direction:column;
+  /* #204 — capture photo on the pin card (replaces the removed AR overlay CSS) */
+  .ps-photo-block{ margin-top:10px; }
+  .ps-photo{
+    display:block; width:100%; max-height:280px; object-fit:cover;
+    border-radius:12px; border:1px solid var(--line); margin-bottom:8px;
   }
-  #ar-overlay.show{display:flex;}
-  #ar-video{flex:1;width:100%;object-fit:cover;}
-  #ar-hud{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;
-    justify-content:space-between;
-    padding:20px 16px calc(30px + env(safe-area-inset-bottom));
-    pointer-events:none;
+  .ps-photo-add svg, .ps-photo-btn svg{
+    width:16px; height:16px; vertical-align:-3px; margin-right:6px;
   }
-  #ar-hud .ar-top{display:flex;justify-content:space-between;align-items:flex-start;}
-  #ar-close{
-    pointer-events:auto;
-    background:rgba(0,0,0,0.55);
-    border:1px solid rgba(255,255,255,0.3);
-    color:#fff;width:38px;height:38px;border-radius:50%;
-    font-size:18px;cursor:pointer;
-  }
-  #ar-target-card{
-    pointer-events:auto;
-    background:rgba(16,35,28,0.72);
-    backdrop-filter:blur(8px);
-    border:1px solid rgba(237,233,221,0.25);
-    border-radius:14px;
-    padding:8px 14px;
-    max-width:65%;
-    /* #75 — min-width:0 IS PART OF THE FIX AND IS THE HALF THE ROW DID NOT NAME.
-       This is a flex item in .ar-top. A flex item's default min-width:auto is a
-       content-based floor that BEATS max-width, so a long unbroken name pushed
-       the card past 65% and off the screen edge no matter what the text inside
-       did. #75 said "the fix is copying #track-name's three properties" — but
-       #track-name only works because its parent .nearest-info already carries
-       flex:1;min-width:0. The rule that exists in the app is FOUR properties
-       across two elements, not three on one. Copy the parent too. */
-    min-width:0;
-  }
-  /* #75 — same three properties as #track-name (~1160), same reason: a name cut
-     off with no ellipsis reads as the real name rather than as a display limit,
-     which is worse than a visible truncation. */
-  #ar-target-card .t-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  #ar-target-card .t-dist{font-size:11px;color:var(--text-dim);}
-  #ar-marker-zone{
-    flex:1;display:flex;align-items:center;justify-content:center;
-    position:relative;
-  }
-  #ar-marker{
-    width:60px;height:80px;
-    color:var(--orange);
-    transition:transform .2s linear, opacity .2s ease, color .3s ease;
-  }
-  #ar-marker.in-range{color:var(--moss);}
-  .ar-pin-inner{
-    width:100%;height:100%;
-    filter:drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 18px currentColor);
-    animation:arPinFloat 2.2s ease-in-out infinite;
-  }
-  .ar-pin-inner svg{width:100%;height:100%;display:block;}
-  @keyframes arPinFloat{
-    0%,100%{transform:translateY(0);}
-    50%{transform:translateY(-14px);}
-  }
-  #ar-bottom{display:flex;flex-direction:column;align-items:center;gap:12px;}
-  #ar-bottom .btn{
-    width:auto;padding:14px 30px;pointer-events:auto;
-    border-radius:999px;
-    background:var(--surface-2);color:var(--text-dim);
-    box-shadow:none;
-  }
-  #ar-bottom .btn:not(:disabled){
-    background:var(--moss);color:#0d1f0d;
-    box-shadow:0 6px 20px rgba(0,0,0,0.35);
-    animation:cameraReady 1.4s ease-in-out infinite;
-  }
-  #ar-permission-msg{color:var(--text-dim);font-size:13px;text-align:center;max-width:80%;margin:0 auto;pointer-events:auto;}
-  /* #73 — the reason a disabled Capture is disabled. Hidden when empty so it
-     never reserves space in the good case.
-
-     The chip is not decoration. This sits over a LIVE CAMERA FEED whose
-     brightness is entirely outside our control — first field test was over
-     sunlit grass and a text-shadow alone was not close to enough. Matches
-     #ar-target-card deliberately: same surface, same blur, same border, so the
-     two HUD readouts read as one system rather than two. */
-  #ar-hint{
-    display:none;
-    margin:0;max-width:82%;
-    background:rgba(16,35,28,0.78);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-    border:1px solid rgba(237,233,221,0.25);
-    border-radius:12px;
-    padding:8px 14px;
-    color:var(--text);font-size:13px;font-weight:500;line-height:1.35;text-align:center;
-  }
-  #ar-hint.show{display:block;}
 
   /* ---------- Passport screen ---------- */
   .stamp-card{
@@ -2183,7 +2094,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 20S3 14.2 3 9.3a5.5 5.5 0 0 1 11 0C14 14.2 8.5 20 8.5 20z"/><circle cx="8.5" cy="9" r="1.8" fill="currentColor" stroke="none"/><line x1="14.5" y1="6" x2="21" y2="6"/><line x1="14.5" y1="11" x2="21" y2="11"/><line x1="14.5" y1="16" x2="21" y2="16"/></svg>
       <span id="list-toggle-badge" class="badge-dot" style="display:none;"></span>
     </button>
-    <button id="map-camera-btn" onclick="openAR()" aria-label="Capture">
+    <button id="map-camera-btn" onclick="captureNow()" aria-label="Capture">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       <span>Capture</span>
     </button>
@@ -2463,37 +2374,10 @@
     </div>
   </div>
 
-  <!-- AR OVERLAY -->
-  <div id="ar-overlay">
-    <video id="ar-video" autoplay playsinline muted></video>
-    <div id="ar-hud">
-      <div class="ar-top">
-        <button id="ar-close" onclick="closeAR()">✕</button>
-        <div id="ar-target-card">
-          <div class="t-name" id="ar-t-name">—</div>
-          <div class="t-dist" id="ar-t-dist">—</div>
-        </div>
-      </div>
-      <div id="ar-marker-zone">
-        <div id="ar-marker">
-          <div class="ar-pin-inner">
-            <svg viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 1C5.9 1 1 5.9 1 12c0 8.5 11 18.5 11 18.5S23 20.5 23 12C23 5.9 18.1 1 12 1z" fill="currentColor" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
-              <circle cx="12" cy="12" r="4.5" fill="#fff"/>
-            </svg>
-          </div>
-        </div>
-        <p id="ar-permission-msg" style="display:none;"></p>
-      </div>
-      <div id="ar-bottom">
-        <button class="btn" id="ar-mark-btn" onclick="attemptMarkFound()" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Capture
-        </button>
-        <p id="ar-hint" aria-live="polite"></p>
-      </div>
-    </div>
-  </div>
+  <!-- #204 — hidden native-camera input for the OPTIONAL capture photo. Replaces
+       the AR overlay. The native camera handles its own permission; a denial or
+       cancel simply leaves the find without a photo (capture stays GPS-gated). -->
+  <input type="file" accept="image/*" capture="environment" id="capture-photo-input" style="display:none" onchange="handleCapturePhotoFile(event)">
 
   <div id="pin-sheet" aria-hidden="true">
     <div id="pin-sheet-drag">
@@ -5238,7 +5122,6 @@ let state = {
   guideLayer: null,
   rangeCircle: null,
   meMarker: null,
-  arStream: null,
   heading: 0,
   followMe: true,
   is3D: false,
@@ -5299,7 +5182,6 @@ let state = {
      coordinates on their own merits. See captureVelocityFlag(). */
   captureAnchor: null,
   lastFixTime: null,   // when state.me was last written, by any path
-  _arSyncTimer: null,
   _simClickBound: false
 };
 
@@ -6019,7 +5901,7 @@ function notePersistenceIssue(e){
    the enable button on each. Step 3 is a no-permission explore/capture/passport
    card whose "Start exploring" button finishes onboarding. (A user can still
    hard-deny a permission at the OS level; we don't trap them — the flow continues
-   and openAR() surfaces the camera-off message later.) Each permission step fires
+   and the optional capture-photo step is simply skipped later.) Each permission step fires
    the real OS prompt, but the OS only shows a prompt when the permission is NOT
    already granted for the origin; an already-granted permission resolves silently
    and the flow advances, which is correct, not a dead button.
@@ -6067,7 +5949,7 @@ async function onboardEnableCamera(){
        Chrome/Android (per origin); on iOS Safari it is page-load scoped and that
        is the honest ceiling. We only needed to trigger and bank the permission. */
     stream.getTracks().forEach(t=>t.stop());
-  }catch(e){ /* denied or unavailable — non-blocking; openAR() handles it later */ }
+  }catch(e){ /* denied or unavailable — non-blocking; the optional capture-photo step is skipped */ }
   showOnboardStep(3);        // advance to the explore/capture/passport card
 }
 function finishOnboarding(){
@@ -6356,7 +6238,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.01c';
+const APP_VERSION = '2026.08.02a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10575,6 +10457,7 @@ function fillPinSheet(t){
   let actions = '';
   if(t.found){
     actions += `<div class="ps-found">✓ Captured — added to your passport</div>`;
+    actions += `<div id="ps-capture-photo-block" class="ps-photo-block"></div>`;
   } else if(inRange){
     actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
   }
@@ -10638,6 +10521,7 @@ function fillPinSheet(t){
      </div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
+  if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
 
   // Coords render instantly; the address swaps in if/when the lookup lands.
   // The copy payload has to swap with it, or a slow lookup leaves the row
@@ -10899,6 +10783,7 @@ function closePinSheet(){
   sheet.classList.remove('open','expanded');
   sheet.setAttribute('aria-hidden','true');
   document.getElementById('screen-map').classList.remove('sheet-open');
+  if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} _capturePhotoURL = null; }
   state.selectedPinId = null;
   /* #51 follow-on, fixed alongside #73 because they produce the same symptom.
      refreshTrackUI() checks expandedTargets FIRST, so a pin left in this set
@@ -10923,7 +10808,7 @@ function captureFromSheet(){
   const id = state.selectedPinId;
   closePinSheet();
   if(id){ state.expandedTargets = new Set([id]); refreshTrackUI(); }
-  openAR();
+  captureNow();
 }
 /* Open the detail sheet for a stop by id (used by the nearby list).
    Flies the map to center on the stop, pausing auto-follow so it stays put. */
@@ -11332,11 +11217,6 @@ function refreshTrackUI(){
     if(cameraBtn) cameraBtn.classList.remove('ready');
     if(mapCameraBtn) mapCameraBtn.classList.remove('show');
     if(wrap) wrap.classList.remove('in-range');
-    // #73 — this early return also owns the AR HUD when it fires with the
-    // overlay open, or the hint below keeps showing a reason for a target that
-    // no longer exists.
-    const hintEl = document.getElementById('ar-hint');
-    if(hintEl){ hintEl.textContent = ''; hintEl.classList.remove('show'); }
     return;
   }
   const nearest = focused || unfoundTargets[0];
@@ -11350,65 +11230,6 @@ function refreshTrackUI(){
   if(cameraBtn) cameraBtn.classList.toggle('ready', inRange && !nearest.found);
   if(mapCameraBtn) mapCameraBtn.classList.toggle('show', inRange && !nearest.found);
   state._nearestId = nearest.id;
-
-  // AR sync if open
-  if(document.getElementById('ar-overlay').classList.contains('show')){
-    document.getElementById('ar-t-name').textContent = nearest.name;
-    document.getElementById('ar-t-dist').textContent = fmtDist(nearest.dist);
-    document.getElementById('ar-marker').classList.toggle('in-range', inRange);
-    document.getElementById('ar-mark-btn').disabled = !inRange;
-    positionArArrow(brg);
-    /* #73 — a dead button that says nothing is the failure #51 was about. Even
-       with the watch fixed, a disabled Capture must state its reason.
-
-       DECIDED 2026-07-19 — AR OPENS ONLY WHEN IN RANGE. Do not re-propose the
-       alternative; it was raised and rejected in the same session. AR is capture
-       confirmation, not navigation — the map and drawer already navigate, and a
-       second navigator sitting behind a camera permission prompt (#52) is a worse
-       version of a screen that already exists. All three entry points already
-       gate on inRange, so the decision costs no code; what it costs is this
-       block's assumptions, corrected below.
-
-       CONSEQUENCE: the only way to be here is to open AR in range and then move
-       out of it. So the copy is "you left", never "keep walking": the user is
-       standing where they just were and needs to be told they drifted, not
-       given directions.
-
-       #146 — THIS BLOCK USED TO NAME A SECOND WAY TO GET HERE AND IT STATED IT
-       BACKWARDS, WHICH IS THE WHOLE REASON NOBODY CHASED IT. It read "a widening
-       accuracy figure shrinking effectiveCaptureRange() under you". A widening
-       accuracy figure WIDENS the range. It is a NARROWING one — a GPS fix
-       getting BETTER — that shrinks the radius under a stationary user, and this
-       block then told them they had moved when they had not. The scenario was
-       considered, written down, and written down inverted, so the block read as
-       though the case was covered. Fixed at the source: effectiveCaptureRange()
-       now holds its widest recent reading (see CAPTURE_RANGE_HOLD_MS), so an
-       improving fix can no longer revoke a window, and "you left" is true by
-       construction again rather than by hope. Do not restore the old sentence.
-
-       The simulate-mode branch that used to sit here is DELETED as unreachable,
-       and recording why matters more than the deletion: in simulate mode
-       meAccuracy is 0, so effectiveCaptureRange() is a constant 25 m, and
-       position cannot change at all while AR is open because the overlay covers
-       the map. Entering this block therefore requires real GPS. That AR is
-       untestable in simulate mode is #73's own root cause seen from the other
-       side, and it is why the QA for this row has to be done on foot. */
-    const hint = document.getElementById('ar-hint');
-    if(hint){
-      const staleMs = state.lastFixTime ? (Date.now() - state.lastFixTime) : Infinity;
-      if(inRange){
-        hint.textContent = '';
-        hint.classList.remove('show');
-      } else if(staleMs > AR_STALE_FIX_MS){
-        hint.textContent = "Your location hasn't updated in a while — GPS may have dropped.";
-        hint.classList.add('show');
-      } else {
-        const need = Math.round((nearest.dist - effectiveCaptureRange()) * 3.28084);
-        hint.textContent = `You've moved out of range — step back about ${need} ft.`;
-        hint.classList.add('show');
-      }
-    }
-  }
 }
 
 async function attemptMarkFound(){
@@ -11515,67 +11336,142 @@ async function attemptMarkFound(){
     refreshTargetsUI();
     refreshTrackUI();
     renderPassport();
-    closeAR();
     checkNewAchievements();
+    /* #204 — the find is fully committed above (GPS-gated, telemetry written).
+       Surface the captured card so the OPTIONAL photo is discoverable; skipping
+       it changes nothing about the find. openPinSheet does NOT fly the map — the
+       pin is within capture range and already on screen. */
+    const capturedT = currentTargetsSorted().find(x=>x.id===id);
+    if(capturedT){ state.expandedTargets = new Set([id]); openPinSheet(capturedT); }
   }
 }
 
 /* =========================================================
-   AR (camera passthrough HUD)
-   ========================================================= */
-/* #73 — how long without a position write before the HUD says so. Deliberately
-   generous: watchPosition on a stationary phone can go quiet for a while and
-   that is normal, so this is a "something is wrong" threshold, not a heartbeat. */
-const AR_STALE_FIX_MS = 45000;
-/* Belt and braces. The watch fix above is the real repair — this only guarantees
-   the HUD's own staleness notice can APPEAR, since nothing else would re-render
-   it while position is frozen. It must never be load-bearing for distance: if a
-   number is only correct because a timer fired, the update path is still broken. */
-const AR_SYNC_MS = 1000;
-function startArSync(){
-  stopArSync();
-  state._arSyncTimer = setInterval(()=>{
-    if(!document.getElementById('ar-overlay').classList.contains('show')){ stopArSync(); return; }
-    refreshTrackUI();
-  }, AR_SYNC_MS);
+   #204 — CAPTURE PHOTO (optional; local this build)
+   ---------------------------------------------------------
+   Replaces the removed AR camera HUD. Capture itself is UNCHANGED and stays
+   GPS-gated (see attemptMarkFound); the photo is MEMORY, NEVER PROOF, and is
+   fully optional — a user who skips it, cancels, or denies the camera still
+   captures. Photos are taken with the NATIVE camera (a hidden <input capture>),
+   compressed on device, and stored as blobs in IndexedDB keyed by huntKey::pinId.
+   The capture record carries a `photo:true` flag so it rides along with progress,
+   but the BYTES are local only in this build: a cache-clear or a new device loses
+   them, and hydrate degrades to the "Add a photo" affordance when the blob is
+   absent. Durable cross-device storage is the Supabase-bucket follow-up, at which
+   point loadPhotoBlob() gains a remote fallback and the flag becomes the sync
+   signal. IndexedDB (not window.storage) on purpose: image bytes blow past the
+   KV size budget and must not tangle into #50/#172 progress persistence. */
+let _pendingPhoto = null;
+let _capturePhotoURL = null;
+let _photoDBPromise = null;
+function capturePhotoKey(key, id){ return key + '::' + id; }
+function photoDB(){
+  if(_photoDBPromise) return _photoDBPromise;
+  _photoDBPromise = new Promise((resolve, reject)=>{
+    if(typeof indexedDB === 'undefined'){ reject(new Error('no indexeddb')); return; }
+    let req;
+    try{ req = indexedDB.open('nahgoo-photos', 1); }
+    catch(e){ reject(e); return; }
+    req.onupgradeneeded = ()=>{ try{ req.result.createObjectStore('photos'); }catch(e){} };
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
+  return _photoDBPromise;
 }
-function stopArSync(){
-  if(state._arSyncTimer){ clearInterval(state._arSyncTimer); state._arSyncTimer = null; }
+function savePhotoBlob(key, blob){
+  return photoDB().then(db=>new Promise((resolve, reject)=>{
+    const tx = db.transaction('photos','readwrite');
+    tx.objectStore('photos').put(blob, key);
+    tx.oncomplete = ()=>resolve(true);
+    tx.onerror = ()=>reject(tx.error);
+  }));
 }
-async function openAR(){
+function loadPhotoBlob(key){
+  return photoDB().then(db=>new Promise((resolve, reject)=>{
+    const tx = db.transaction('photos','readonly');
+    const r = tx.objectStore('photos').get(key);
+    r.onsuccess = ()=>resolve(r.result || null);
+    r.onerror = ()=>reject(r.error);
+  }));
+}
+/* The capture entry point, from #map-camera-btn and the pin sheet. attemptMarkFound()
+   owns the authoritative distance re-check and the "get within X ft" toast, so this
+   only guards that a guide is active. It is NOT on the photo path — the photo is
+   offered afterwards, from the captured card. */
+function captureNow(){
   if(!state.currentHunt){ showToast('Pick a guide first'); return; }
-  maybeRequestCompassPermission();
-  document.getElementById('ar-overlay').classList.add('show');
-  const msg = document.getElementById('ar-permission-msg');
-  msg.style.display='none';
+  attemptMarkFound();
+}
+function triggerCapturePhoto(id){
+  if(!state.currentHunt) return;
+  const key = state.currentHunt.key;
+  const t = (state.currentHunt.points || []).find(p=>p.id===id);
+  _pendingPhoto = { key: key, id: id, name: t ? t.name : '' };
+  const input = document.getElementById('capture-photo-input');
+  if(input){ input.value = ''; input.click(); }
+}
+function compressImageFile(file, maxDim, quality){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      try{ URL.revokeObjectURL(url); }catch(e){}
+      canvas.toBlob(b=>{ b ? resolve(b) : reject(new Error('encode failed')); }, 'image/jpeg', quality);
+    };
+    img.onerror = ()=>{ try{ URL.revokeObjectURL(url); }catch(e){} reject(new Error('decode failed')); };
+    img.src = url;
+  });
+}
+async function handleCapturePhotoFile(event){
+  const input = event && event.target;
+  const file = input && input.files && input.files[0];
+  const pending = _pendingPhoto;
+  _pendingPhoto = null;
+  if(!file || !pending) return;
   try{
-    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    state.arStream = stream;
-    document.getElementById('ar-video').srcObject = stream;
-    document.getElementById('ar-marker').style.display='';
+    const blob = await compressImageFile(file, 1600, 0.82);
+    await savePhotoBlob(capturePhotoKey(pending.key, pending.id), blob);
+    /* Flag the capture record so the "has a photo" bit rides with progress (the
+       bytes stay local this build). Guarded on the meta existing; the blob is
+       saved regardless so a Retake always works. */
+    const prog = state.progress[pending.key];
+    const meta = prog && prog.foundMeta && prog.foundMeta[pending.id];
+    if(meta && !meta.photo){ meta.photo = true; try{ await saveProgress(); }catch(e){ notePersistenceIssue(e); } }
+    showToast('Photo added.');
+    if(state.selectedPinId === pending.id){ hydrateCapturePhoto(pending.key, pending.id, pending.name); }
   }catch(e){
-    document.getElementById('ar-marker').style.display='none';
-    msg.style.display='block';
-    // #52 — tell a user who tapped Deny that it is undoable, instead of blaming
-    // the environment for every failure. NotAllowedError/SecurityError == the
-    // user (or a prior denial) blocked it; anything else is genuinely unavailable.
-    const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
-    msg.textContent = denied
-      ? "Camera is off for Nahgoo. You can turn it back on in your browser's site settings for this page — meanwhile the compass and distance above still work, and Capture is ready since you're in range."
-      : "Camera isn't available here (it may be blocked by this browser or a preview environment) — the compass and distance above still work, and Capture is ready since you're in range.";
+    showToast("Couldn't save that photo — try again.");
   }
-  refreshTrackUI();
-  startArSync();
-  window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-  window.addEventListener('deviceorientation', handleOrientation, true);
 }
-function closeAR(){
-  document.getElementById('ar-overlay').classList.remove('show');
-  stopArSync();
-  if(state.arStream){ state.arStream.getTracks().forEach(t=>t.stop()); state.arStream=null; }
-  window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
-  window.removeEventListener('deviceorientation', handleOrientation, true);
+const CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+/* Fill #ps-capture-photo-block for a captured pin: the stored photo + Retake, or
+   the Add-a-photo affordance when there is no local blob (incl. the new-device /
+   evicted case). Async and re-entrancy safe: re-reads selectedPinId and the block
+   after awaiting, so a fast sheet switch cannot paint the wrong pin's photo. */
+async function hydrateCapturePhoto(key, id, name){
+  let block = document.getElementById('ps-capture-photo-block');
+  if(!block) return;
+  let blob = null;
+  try{ blob = await loadPhotoBlob(capturePhotoKey(key, id)); }catch(e){ blob = null; }
+  if(state.selectedPinId !== id) return;
+  block = document.getElementById('ps-capture-photo-block');
+  if(!block) return;
+  if(blob){
+    if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} }
+    _capturePhotoURL = URL.createObjectURL(blob);
+    block.innerHTML = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">'
+      + '<button class="ps-btn ps-photo-btn" onclick="triggerCapturePhoto(\'' + id + '\')">Retake photo</button>';
+  } else {
+    block.innerHTML = '<button class="ps-btn ps-photo-add" onclick="triggerCapturePhoto(\'' + id + '\')">' + CAMERA_ICON_SVG + ' Add a photo</button>';
+  }
 }
+
 function handleOrientation(e){
   let heading = null;
   if(typeof e.webkitCompassHeading === 'number'){
@@ -11593,13 +11489,6 @@ function handleOrientation(e){
     if(cone) cone.style.transform = `rotate(${heading}deg)`;
     refreshTrackUI();
   }
-}
-function positionArArrow(targetBearing){
-  const marker = document.getElementById('ar-marker');
-  const rel = ((targetBearing - state.heading + 540) % 360) - 180; // -180..180
-  const clamped = Math.max(-80, Math.min(80, rel));
-  marker.style.transform = `translateX(${clamped*2}px)`;
-  marker.style.opacity = Math.abs(rel) > 95 ? '0.35' : '1';
 }
 
 /* =========================================================
