@@ -1264,14 +1264,13 @@
   #map-camera-btn.show{display:flex;}
   #map-camera-btn svg{width:18px;height:18px;}
 
-  /* #204 — capture photo on the pin card (replaces the removed AR overlay CSS) */
+  /* #204 — capture photo on the pin card (replaces the removed AR overlay CSS).
+     Display-only: the photo is shown read-only; there are no photo buttons in the
+     sheet (the camera opens at capture, never from here). */
   .ps-photo-block{ margin-top:10px; }
   .ps-photo{
     display:block; width:100%; max-height:280px; object-fit:cover;
-    border-radius:12px; border:1px solid var(--line); margin-bottom:8px;
-  }
-  .ps-photo-add svg, .ps-photo-btn svg{
-    width:16px; height:16px; vertical-align:-3px; margin-right:6px;
+    border-radius:12px; border:1px solid var(--line);
   }
 
   /* ---------- Passport screen ---------- */
@@ -2374,10 +2373,11 @@
     </div>
   </div>
 
-  <!-- #204 — hidden native-camera input for the OPTIONAL, LIVE-ONLY capture photo
-       (replaces the AR overlay). `capture="environment"` keeps it a live camera;
-       there is no gallery upload in this build. The OS handles its own permission;
-       a denial or cancel simply leaves the find without a photo (capture itself
+  <!-- #204 — hidden native-camera input for the OPTIONAL, LIVE-AT-CAPTURE photo
+       (replaces the AR overlay). captureNow() clicks it synchronously inside the
+       Capture tap so the camera opens; `capture="environment"` keeps it a live
+       camera and there is no gallery upload. The OS handles its own permission; a
+       cancel or denial simply leaves the find without a photo (capture itself
        stays GPS-gated). -->
   <input type="file" accept="image/*" capture="environment" id="capture-photo-input" style="display:none" onchange="handleCapturePhotoFile(event)">
 
@@ -6240,7 +6240,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02c';
+const APP_VERSION = '2026.08.02f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10786,7 +10786,6 @@ function closePinSheet(){
   sheet.setAttribute('aria-hidden','true');
   document.getElementById('screen-map').classList.remove('sheet-open');
   if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} _capturePhotoURL = null; }
-  _justCapturedId = null;   // #204 — the capture moment ends when the card closes; reopens are retroactive
   state.selectedPinId = null;
   /* #51 follow-on, fixed alongside #73 because they produce the same symptom.
      refreshTrackUI() checks expandedTargets FIRST, so a pin left in this set
@@ -11340,43 +11339,45 @@ async function attemptMarkFound(){
     refreshTrackUI();
     renderPassport();
     checkNewAchievements();
-    /* #204 — the find is fully committed above (GPS-gated, telemetry written).
-       Surface the captured card so the OPTIONAL photo is discoverable; skipping
-       it changes nothing about the find. openPinSheet does NOT fly the map — the
-       pin is within capture range and already on screen. */
-    const capturedT = currentTargetsSorted().find(x=>x.id===id);
-    if(capturedT){ _justCapturedId = id; state.expandedTargets = new Set([id]); openPinSheet(capturedT); }
+    /* #204 — the photo step is handled by captureNow(), which opened the native
+       camera as part of the Capture tap (see the gesture-timing note in the
+       CAPTURE PHOTO section). Nothing to do here: the find is fully committed, and
+       if the user took a shot it attaches via handleCapturePhotoFile once the
+       camera returns. The pin sheet is deliberately NOT auto-opened — it is one
+       consistent surface, never a capture-moment variant. */
   }
 }
 
 /* =========================================================
-   #204 — CAPTURE PHOTO (optional; local this build)
+   #204 — CAPTURE PHOTO (optional; live at capture; local this build)
    ---------------------------------------------------------
    Replaces the removed AR camera HUD. Capture itself is UNCHANGED and stays
    GPS-gated (see attemptMarkFound); the photo is MEMORY, NEVER PROOF, and is
-   fully optional — a user who skips it, cancels, or denies the camera still
-   captures. LIVE ONLY this build: the photo can be taken/retaken only in the
-   just-captured card (gated on _justCapturedId); there is no gallery upload and
-   no retroactive add. Photos are taken with the NATIVE camera (hidden <input
-   capture>), compressed on device, and stored as blobs in IndexedDB keyed by
-   huntKey::pinId. The capture record carries a `photo:true` flag so it rides
-   along with progress, but the BYTES are local only in this build: a cache-clear
-   or a new device loses them, and since there is no retroactive add, a later
-   reopen with the blob gone simply renders empty (the photo cannot be re-added
-   until Supabase durability lands). Durable cross-device storage is the
-   Supabase-bucket follow-up, at which point loadPhotoBlob() gains a remote
-   fallback and the flag becomes the sync signal. IndexedDB (not window.storage)
-   on purpose: image bytes blow past the KV size budget and must not tangle into
-   #50/#172 progress persistence. */
+   fully optional. LIVE AT CAPTURE ONLY: tapping Capture opens the native camera
+   as part of the capture action — take a shot, or cancel right there. There is NO
+   add/take/retake button anywhere in the pin sheet, and no gallery upload or
+   retroactive add: the sheet is always the same, showing an existing photo
+   read-only and nothing when there isn't one. This is deliberate — a
+   persistent-looking sheet with an "add photo" button implied you could come back
+   and add one later, which you cannot.
+
+   GESTURE TIMING (load-bearing): the camera must be opened SYNCHRONOUSLY inside
+   the Capture tap (captureNow), because attemptMarkFound() awaits saveProgress()
+   and iOS forfeits the user-gesture across an await, which would silently block
+   the camera. So captureNow fires input.click() first, then commits the find in
+   parallel; handleCapturePhotoFile saves the photo ONLY if the find committed
+   (foundIds guard), so a camera opened on a tap that then drifts out of range
+   leaves no stray photo on an uncaptured place.
+
+   Bytes are stored as blobs in IndexedDB keyed huntKey::pinId; the record carries
+   a `photo:true` flag so it rides with progress. LOCAL ONLY this build: a
+   cache-clear or new device loses the bytes and the sheet renders empty (no re-add
+   path until Supabase durability lands). IndexedDB (not window.storage) on
+   purpose: image bytes blow past the KV budget and must not tangle into #50/#172
+   progress persistence. */
 let _pendingPhoto = null;
 let _capturePhotoURL = null;
 let _photoDBPromise = null;
-/* #204 — the live photo belongs to the CAPTURE MOMENT only. This holds the id of
-   the pin whose card was just auto-opened by a fresh capture; while it matches,
-   the card offers Take / Retake (native camera). Cleared on sheet close, so a
-   later reopen shows the photo read-only and offers nothing — there is no gallery
-   upload and no retroactive add in this build. */
-let _justCapturedId = null;
 function capturePhotoKey(key, id){ return key + '::' + id; }
 function photoDB(){
   if(_photoDBPromise) return _photoDBPromise;
@@ -11407,25 +11408,23 @@ function loadPhotoBlob(key){
     r.onerror = ()=>reject(r.error);
   }));
 }
-/* The capture entry point, from #map-camera-btn and the pin sheet. attemptMarkFound()
-   owns the authoritative distance re-check and the "get within X ft" toast, so this
-   only guards that a guide is active. It is NOT on the photo path — the photo is
-   offered afterwards, from the captured card. */
+/* The capture entry point, from #map-camera-btn and the pin sheet's Capture button.
+   Opens the native camera for the optional photo SYNCHRONOUSLY (see gesture-timing
+   note), then commits the find via attemptMarkFound(), which stays the sole
+   authority for the GPS-gated capture and its "get within X ft" toast. Both live
+   entry points only appear in range, so by the time this runs we are almost
+   certainly in range; the foundIds guard in handleCapturePhotoFile covers the rare
+   tap-then-drift case. */
 function captureNow(){
   if(!state.currentHunt){ showToast('Pick a guide first'); return; }
+  const id = state._nearestId;
+  const target = id && state.currentHunt.points && state.currentHunt.points.find(p=>p.id===id);
+  if(target && state.me){
+    _pendingPhoto = { key: state.currentHunt.key, id: id, name: target.name };
+    const input = document.getElementById('capture-photo-input');
+    if(input){ input.value = ''; input.click(); }
+  }
   attemptMarkFound();
-}
-/* #204 — LIVE ONLY. The photo is a live-camera artifact of the capture moment;
-   there is no gallery upload and no retroactive add (hydrateCapturePhoto gates
-   every entry point on _justCapturedId). The input keeps its `capture` attribute
-   statically, so this just opens the native camera. */
-function triggerCapturePhoto(id){
-  if(!state.currentHunt) return;
-  const key = state.currentHunt.key;
-  const t = (state.currentHunt.points || []).find(p=>p.id===id);
-  _pendingPhoto = { key: key, id: id, name: t ? t.name : '' };
-  const input = document.getElementById('capture-photo-input');
-  if(input){ input.value = ''; input.click(); }
 }
 function compressImageFile(file, maxDim, quality){
   return new Promise((resolve, reject)=>{
@@ -11451,14 +11450,18 @@ async function handleCapturePhotoFile(event){
   const pending = _pendingPhoto;
   _pendingPhoto = null;
   if(!file || !pending) return;
+  /* Keep the photo ONLY if the capture committed. captureNow() opened the camera in
+     parallel with attemptMarkFound(); if the find was declined (a GPS tick drifted
+     the user out of range between tap and commit), foundIds won't include this pin
+     and we drop the shot rather than bind it to an uncaptured place. */
+  const prog = state.progress[pending.key];
+  const committed = prog && prog.foundIds && prog.foundIds.indexOf(pending.id) !== -1;
+  if(!committed){ showToast('That capture didn\'t take — photo discarded.'); return; }
   try{
     const blob = await compressImageFile(file, 1600, 0.82);
     await savePhotoBlob(capturePhotoKey(pending.key, pending.id), blob);
-    /* Flag the capture record so the "has a photo" bit rides with progress (the
-       bytes stay local this build). Guarded on the meta existing; the blob is
-       saved regardless so a Retake always works. */
-    const prog = state.progress[pending.key];
-    const meta = prog && prog.foundMeta && prog.foundMeta[pending.id];
+    // Flag the record so the "has a photo" bit rides with progress (bytes stay local).
+    const meta = prog.foundMeta && prog.foundMeta[pending.id];
     if(meta && !meta.photo){ meta.photo = true; try{ await saveProgress(); }catch(e){ notePersistenceIssue(e); } }
     showToast('Photo added.');
     if(state.selectedPinId === pending.id){ hydrateCapturePhoto(pending.key, pending.id, pending.name); }
@@ -11466,13 +11469,10 @@ async function handleCapturePhotoFile(event){
     showToast("Couldn't save that photo — try again.");
   }
 }
-const CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
-/* Fill #ps-capture-photo-block for a captured pin. LIVE ONLY: the camera is
-   offered while this is the just-captured card (_justCapturedId === id) — "Take a
-   photo", or "Retake" once one exists. After that card closes the photo is frozen:
-   a later reopen shows it read-only, and a pin captured without one shows nothing
-   (there is no gallery upload or retroactive add this build). A missing blob later
-   (new-device / evicted) also renders empty. Async and re-entrancy safe: re-reads
+/* Fill #ps-capture-photo-block for a captured pin — DISPLAY ONLY. A stored photo
+   renders read-only; a pin without one (skipped at capture, or bytes evicted / new
+   device) renders empty. No button here by design: the only way to attach a photo
+   is live, at the moment of capture. Async and re-entrancy safe: re-reads
    selectedPinId and the block after awaiting, so a fast sheet switch cannot paint
    the wrong pin's photo. */
 async function hydrateCapturePhoto(key, id, name){
@@ -11483,18 +11483,10 @@ async function hydrateCapturePhoto(key, id, name){
   if(state.selectedPinId !== id) return;
   block = document.getElementById('ps-capture-photo-block');
   if(!block) return;
-  const atCapture = (_justCapturedId === id);
-  const idEsc = String(id).replace(/'/g, "\\'");
   if(blob){
     if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} }
     _capturePhotoURL = URL.createObjectURL(blob);
-    let html = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">';
-    if(atCapture){
-      html += '<button class="ps-btn ps-photo-btn" onclick="triggerCapturePhoto(\'' + idEsc + '\')">Retake photo</button>';
-    }
-    block.innerHTML = html;
-  } else if(atCapture){
-    block.innerHTML = '<button class="ps-btn ps-photo-add" onclick="triggerCapturePhoto(\'' + idEsc + '\')">' + CAMERA_ICON_SVG + ' Take a photo</button>';
+    block.innerHTML = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">';
   } else {
     block.innerHTML = '';
   }
