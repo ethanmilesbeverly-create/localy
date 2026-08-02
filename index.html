@@ -1384,10 +1384,20 @@
     color:var(--line);
     opacity:0.55;
   }
-  .achievement-item .ach-label{
-    font-size:11px;font-weight:600;color:var(--text);line-height:1.25;
+  /* #180 — the per-tile label was the family noun repeated on every rung
+     ("25 Bars & Restaurants") directly under the family sub-header that already
+     names the category, so the noun printed 7× per family and the long ones wrapped.
+     The tile now shows ONLY the threshold in an Apple-style neutral pill (the ring
+     colour already carries the tier, the sub-header already carries the family).
+     The full label string is UNTOUCHED in ACHIEVEMENTS and still drives the earned
+     popup (showNextAchievementPopup reads a.label) and the tile `title` tooltip, so
+     celebration/hover context is preserved — only the grid tile got quieter. */
+  .achievement-item .ach-pill{
+    font-size:12px;font-weight:600;color:var(--text-dim);line-height:1.4;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:11px;padding:1px 9px;min-width:16px;text-align:center;
   }
-  .achievement-item.locked .ach-label{color:var(--text-dim);}
+  .achievement-item.locked .ach-pill{opacity:0.7;}
   /* #24 revamp v2 — family sub-headers (Stamps / Gems / … / Wanderer). Each family
      renders its own .achievement-grid so the grid's margin-bottom spaces them. */
   .ach-family{
@@ -6341,7 +6351,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02o';
+const APP_VERSION = '2026.08.02p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12197,7 +12207,7 @@ function renderAchievements(){
         <div class="stamp-circle"${unlocked ? ` style="color:${color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
         </div>
-        <div class="ach-label">${escapeHtml(a.label)}</div>
+        <div class="ach-pill">${(a.label.match(/^\d+/) || ['1'])[0]}</div>
       </div>`;
   });
   if(lastFamily !== null) html += `</div>`;
