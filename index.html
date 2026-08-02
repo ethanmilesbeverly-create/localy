@@ -6331,7 +6331,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02m';
+const APP_VERSION = '2026.08.02n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8453,16 +8453,35 @@ const EXPLORE_ICON_DEFS = {
   history: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
   // #193 — framed picture (frame + sun), for public art. The lore book def was
   // retired with the History & Lore merge (#192); there is no lore card to key it.
-  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z M16.2 9a1.3 1.3 0 1 0 0.01 0', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4'}
+  // #214 — body is the FRAME only; the sun moved to `dot` and the mountains are
+  // `accent`, so the selected (filled) state can knock the interior out of the
+  // filled frame instead of flooding it solid. See exploreCategoryIconSVG.
+  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4', dot:'M16.2 9a1.3 1.3 0 1 0 0.01 0', knockout:true}
 };
 function exploreCategoryIconSVG(cat, color, filled){
   const def = EXPLORE_ICON_DEFS[cat];
   if(!def) return `<div class="blaze">${blazeSVG(color, filled)}</div>`;
   const fill = filled ? color : 'none';
-  const accent = def.accent ? `<path d="${def.accent}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round"/>` : '';
+  /* #214 — a selected icon fills its body with `color`; interior detail drawn
+     in that same colour then vanishes. The art def is the only one whose detail
+     (the mountains accent + the sun) sits INSIDE the filled frame, so selecting
+     Art collapsed the framed-picture glyph to a solid rectangle. For a
+     `knockout` def, draw its interior in the SELECTED card surface (--surface-2,
+     #1F3F32) when filled, so the picture reads as cut into the filled frame;
+     unselected — and every other icon — keep `color`. Other defs' accents sit
+     OUTSIDE their fill (e.g. the shop handle above the bag), so this is inert
+     for them. Hex is inlined to match the literal-colour pattern the rest of
+     this builder uses (color comes in as a literal from EXPLORE_CAT_COLOR). */
+  const interior = (filled && def.knockout) ? '#1F3F32' : color;
+  const accent = def.accent ? `<path d="${def.accent}" fill="none" stroke="${interior}" stroke-width="1.6" stroke-linecap="round"/>` : '';
+  /* #214 — the art sun lives in its own `dot` path: a stroked ring when
+     unselected (identical to when it rode in `body`), a filled knockout dot when
+     the frame is filled. Only defs that set `dot` render it. */
+  const dot = def.dot ? `<path d="${def.dot}" fill="${(filled && def.knockout) ? '#1F3F32' : 'none'}" stroke="${interior}" stroke-width="1.8" stroke-linejoin="round"/>` : '';
   return `<svg viewBox="${def.vb}" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
     <path d="${def.body}" fill="${fill}" stroke="${color}" stroke-width="1.8" stroke-linejoin="round"/>
     ${accent}
+    ${dot}
   </svg>`;
 }
 function updateExploreSelectionIcons(){
