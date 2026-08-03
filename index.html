@@ -6381,7 +6381,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02z';
+const APP_VERSION = '2026.08.02za';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11824,7 +11824,12 @@ const ACH_ICONS = {
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
      body/accent split bag/bust already use. */
-  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'},
+  /* #180/#214 — knockout:true. When EARNED the gem body fills with the tier colour
+     and its facet lines (accent), drawn in that same colour, vanished — the earned
+     gem read as a solid diamond. renderAchievementIcon now draws a knockout def's
+     accent in the tile background (#10231C) when filled, so the facets read as cuts
+     and the gem keeps its definition. Locked/unfilled is unchanged. */
+  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21', knockout:true},
   /* #180 — ART: a framed landscape (the universal "picture" glyph) for the Art
      family (#193's public-art category). The scene — mountains + sun — is the
      FILLED body so it reads when earned; the frame is the stroke-only accent, so
@@ -12296,7 +12301,12 @@ function renderAchievementIcon(iconKey, unlocked, size){
   size = size || 28;
   const def = ACH_ICONS[iconKey] || ACH_ICONS.stamp;
   const fill = unlocked ? 'currentColor' : 'none';
-  const accent = def.accent ? `<path d="${def.accent}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>` : '';
+  /* #180/#214 — a filled body hides any accent drawn in the same colour. For a
+     `knockout` def (the gem's facets sit inside its fill), draw the accent in the
+     tile background (#10231C, --bg) when filled so the interior detail reads as a
+     cut; unfilled and every non-knockout def keep currentColor. */
+  const accentStroke = (unlocked && def.knockout) ? '#10231C' : 'currentColor';
+  const accent = def.accent ? `<path d="${def.accent}" fill="none" stroke="${accentStroke}" stroke-width="1.6" stroke-linecap="round"/>` : '';
   return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;" fill="${fill}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="${def.body}"/>${accent}</svg>`;
 }
 function renderAchievements(){
