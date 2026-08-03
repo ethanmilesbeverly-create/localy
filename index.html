@@ -2848,7 +2848,16 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- #173 — PINNED, do not revert to the bare `@2` alias. `@2` resolves to
+     whatever the latest 2.x is on each page load, and supabase-js has shifted
+     PKCE / `detectSessionInUrl` behaviour WITHIN the 2.x line (see #2, #85).
+     Since #76 made `signInWithOAuth` a primary front-door login, a silent 2.x
+     bump could break sign-in for everyone at once with no deploy of ours to
+     bisect against. 2.111.0 is what `@2` resolved to at pin time (2026-08-03),
+     so this froze the exact bytes already live — no behavioural change on this
+     deploy, just no more drift. A bump is now a deliberate change with a QA
+     pass (OAuth + password reset + password login), never a silent upgrade. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0"></script>
 <script>
 /* =========================================================
    SUPABASE CONFIG  ← your project's connection details
@@ -3092,10 +3101,10 @@ let authMode = 'login'; // 'login' | 'signup' | 'forgot' | 'reset'
 
 /* #2 — where a recovery link lands. We append our OWN marker rather than
    reading Supabase's, because the SDK's recovery URL format differs between
-   the implicit flow (`#type=recovery`) and PKCE (`?code=`, no marker at all),
-   and the CDN tag `@supabase/supabase-js@2` is an unpinned alias that can move
-   between them without notice — the same class of bug as item 3(a). A param we
-   write ourselves is flow-agnostic and readable synchronously at boot, before
+   the implicit flow (`#type=recovery`) and PKCE (`?code=`, no marker at all).
+   The CDN tag is now PINNED to an exact version (#173), so it can no longer
+   move between flows without notice — but a param we write ourselves is still
+   the right shape: flow-agnostic and readable synchronously at boot, before
    any await, so nothing depends on SDK event ordering.
    REQUIRES: this URL in Supabase → Authentication → URL Configuration →
    Redirect URLs, or the redirect silently falls back to Site URL, the marker
@@ -6494,7 +6503,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03a';
+const APP_VERSION = '2026.08.03b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7487,7 +7496,45 @@ function fmtDist(m){
 // bug, not a too-tight one, and raising this hides #146 at the cost of what
 // #51 was careful about.
 const FOUND_THRESHOLD_M = 25;
-const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this doesn't count as continuous travel
+/* =========================================================
+   #161 — THE ELAPSED-TIME REGISTER: "how long ago is still 'now'?"
+   =========================================================
+   #65 built the DISTANCE register ("how far away is still here"). This is its
+   companion on the TIME axis, and the two are deliberately kept apart — a
+   register that means two things means neither (#65). This register inventories
+   only the durations that judge whether a live fact about the USER'S PRESENCE
+   or MOVEMENT is still current. It is documentation, not tuning: no value here
+   changes, and none is derived from another — they do NOT interact, so unlike
+   #65's gem-vs-real pair there is no tension to resolve.
+
+   LIVE ENTRIES (each is declared below with a back-pointer to this block):
+     • WALK_IDLE_TIMEOUT_MS  (45 min) — a gap longer than this ends a continuous
+       journey; the next step starts a new one. A SETTING (product judgement).
+     • CAPTURE_RANGE_HOLD_MS (15 s)   — how long a wide accuracy reading keeps
+       its capture window open before a fresh (tighter) reading revokes it.
+       A GUESS, NOT A SETTING: untuned, validated by exactly one walk (#146) —
+       the LIST_CAP (#108) situation. Labelled here so it is never mistaken for
+       a measured value; re-derive it if it ever misbehaves, don't nudge it.
+
+   RETIRED (kept as a gravestone so "#161 named four" resolves honestly):
+     • AR_STALE_FIX_MS (45 s) and AR_SYNC_MS (1 s) — the two AR-HUD staleness
+       constants #161 named at filing. Both were DELETED with the AR camera
+       overlay in #209 (2026-08-02). AR_STALE_FIX_MS was #161's second
+       flagged-guess (a "something is wrong" threshold, never measured against a
+       stationary phone's real quiet period); that unknown left with the code.
+
+   BOUNDARY — what is NOT in this register and why (the #65 discipline of stating
+   the edge so nothing drifts in): OPERATION timeouts answer "how long to wait
+   for a response," a different question — OVERPASS_TIMEOUT_MS, WIPE_WRITE_TIMEOUT_MS,
+   FIRST_BLEND_MAX_HOLD_MS, SUGGEST_DEBOUNCE_MS. CACHE / RETENTION TTLs answer
+   "how long is stored data good / kept" — PLACES_CACHE_TTL_MS, CAP_TELEMETRY_TTL_MS,
+   CAPTURE_ANCHOR_TTL_MS. LAST_VIEW_TTL_MS is the closest miss (a saved MAP FRAME's
+   recency, not the user's live position) and is excluded on that seam. If you add
+   a duration that judges "is this fact about where-the-user-is-now still current,"
+   it belongs HERE — derive it from the entry answering the same question, at the
+   moment you create it, which is the only moment it is free (#65's transferable rule).
+   ========================================================= */
+const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this doesn't count as continuous travel (#161 register)
 // Real GPS is rarely accurate to 3m on its own — this widens the effective range to at
 // least match the phone's own reported accuracy, so normal GPS wobble doesn't make an
 // otherwise-correct capture impossible. A capped ceiling keeps it from becoming trivial
@@ -7498,7 +7545,8 @@ const WALK_IDLE_TIMEOUT_MS = 45 * 60 * 1000; // 45min — gap bigger than this d
    long ago is still now". ~15 GPS ticks on a phone that is reporting once a
    second: long enough to outlast the jitter that produced #146, short enough
    that walking away still revokes the window promptly (distance grows on the
-   very next tick; only the RANGE is held). */
+   very next tick; only the RANGE is held).
+   #161 register entry — the flagged GUESS (untuned, one-walk-validated). */
 const CAPTURE_RANGE_HOLD_MS = 15000;
 /* #146 — THE DEFECT AND WHY THE FIX LIVES HERE RATHER THAN AT THE HUD.
    effectiveCaptureRange() tracked state.meAccuracy LIVE, and onLocation()
@@ -7633,6 +7681,22 @@ function onLocation(lat,lng,sim,accuracy){
      Setting meAccuracy above is unchanged on purpose: effectiveCaptureRange()'s
      `acc<=0` guard is load-bearing (#51) and sim must keep reading as "no data",
      never as a perfect fix. */
+  /* ---- #160: INCONSISTENT-POSITION WINDOW OPENS HERE ----
+     `state.meAccuracy` was just written (new), but `state.me` is NOT updated
+     until the bottom of this function (search "#160: WINDOW CLOSES"). Everything
+     synchronous between here and there sees the NEW accuracy against the OLD
+     position. Nothing reads that pair today (the walk accumulator below uses the
+     local `lat`/`lng` PARAMS, not `state.me`; renderPassport reads neither), so
+     this is inert — but this is the hottest function in the app (every GPS tick),
+     and a call added inside this window inherits the mismatch with no signal,
+     surfacing as a distance/range computed against a position the user already
+     left (#51's "standing out front and it wouldn't take"), not as an ordering
+     bug. RULE: do not add anything that reads BOTH position and accuracy in this
+     window. If you must read position here, read the local `lat`/`lng` params,
+     never `state.me`. #159 already routed its walk-badge check to the END of the
+     function for exactly this reason. Closing the window (option (b): compute a
+     local `{lat,lng,acc}` at entry and promote once at the end) is the real fix;
+     this marker is option (c), the honest minimum until then. */
   state.meIsSim = !!sim;
   if(sim){
     state.simEverUsed = true;
@@ -7666,6 +7730,9 @@ function onLocation(lat,lng,sim,accuracy){
   state.lastWalkPos = {lat,lng};
   state.lastWalkTime = now;
 
+  /* ---- #160: INCONSISTENT-POSITION WINDOW CLOSES HERE ----
+     `state.me` catches up to the accuracy written at the top. From this line on,
+     `state.meAccuracy` and `state.me` are consistent again. */
   state.me = {lat,lng};
   if(state.meMarker){
     state.meMarker.setLatLng([lat,lng]);

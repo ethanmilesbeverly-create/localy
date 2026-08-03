@@ -595,8 +595,22 @@ function renderMap(points){
   /* No geolocation, no player marker, no recentre-on-me. The map is
      framed on the HUNT, which is also the shape item 7 wants. */
   const map = L.map('map', { zoomControl:true, scrollWheelZoom:false });
+  /* #206 — the continuous-pan grey-band fix #205 shipped for index.html's three
+     maps. This file builds its OWN CARTO layer inline (it does NOT route through
+     index.html's addBaseLayer), so it never inherited the fix and still showed
+     the un-tiled band on a drag. updateWhenIdle:false loads tiles DURING the pan
+     (mobile default is true → nothing loads until moveend); keepBuffer:6 keeps a
+     wider retained ring; updateInterval:80 requests the leading edge ~2.5× sooner
+     than Leaflet's 200ms default. Safe here with no ceiling caveat — landing.html
+     has no perspective/AR/3D (#86/#49a), so #205's bleed-gravestone concerns don't
+     apply. ONE-FACT-TWO-PLACES: these options are now set in two files with no
+     shared source — addBaseLayer (index.html) and here. Change one, change both
+     (the #182/#155 duplicated-fact shape). */
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom:19,
+    updateWhenIdle:false,
+    keepBuffer:6,
+    updateInterval:80,
     attribution:'&copy; OpenStreetMap contributors &copy; CARTO'
   }).addTo(map);
 
