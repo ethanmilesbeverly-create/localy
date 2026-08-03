@@ -958,6 +958,12 @@
   }
   .target-row .t-name{font-size:14.5px;font-weight:600;}
   .target-row .t-dist{font-size:12px;color:var(--text-dim);}
+  /* The category label that now leads the sub-line, so the row shows name (title),
+     then TYPE + distance at a glance (#215 asked for the headline; this answers the
+     "hard to tell what is what" follow-up). Colour is set inline to the pin's
+     category colour so the type is scannable; weight lifts it above the dim
+     distance it sits next to. Inherits the 12px size from .t-dist. */
+  .target-row .t-cat{font-weight:600;}
   .target-row .t-meta{flex:1;min-width:0;}
   .target-row-detail{margin-top:10px;}
   .target-row-detail .t-desc{font-size:13px;color:var(--text-dim);line-height:1.5;margin:8px 0 0;}
@@ -2100,7 +2106,7 @@
          whose first element ("Explore Nearby") carries margin:14px on top of the
          shared .screen 52px top padding. Scoped inline so the global h1.page-title
          margin (used by other screens) is untouched. -->
-    <h1 class="page-title" style="margin-top:14px;">Submit a hidden gem</h1>
+    <h1 class="page-title" style="margin-top:14px;">Submit a Hidden Gem</h1>
     <p class="page-sub">Search the address, or tap the map to drop a pin right where it is. Then tell us why it's worth finding.</p>
     <!-- #17 — same shared component as the map header pill and the hunt builder
          (#88's attachPlaceSuggest). .location-search-row is reused ONLY for its
@@ -2196,7 +2202,12 @@
 
   <!-- CREATE HUNT -->
   <div class="screen" id="screen-create">
-    <h1 class="page-title" id="create-screen-title">Create a guide</h1>
+    <!-- Title-cased "Create a Guide" and top margin 4px -> 14px (inline) to mirror
+         the Explore page, matching the submit + passport headlines. The text is also
+         set dynamically in openCreateScreen ("Edit Guide" / "Add Stops"); those two
+         are Title-cased there too. Scoped inline so the global h1.page-title margin
+         (other screens) is untouched. -->
+    <h1 class="page-title" id="create-screen-title" style="margin-top:14px;">Create a Guide</h1>
     <p class="page-sub">Name your guide, drop your pins, and share with friends.</p>
     <div class="field">
       <label class="field-label">1. Name your guide</label>
@@ -2350,7 +2361,10 @@
   <!-- PASSPORT -->
   <div class="screen" id="screen-passport">
     <!-- #81 — the gear is the ONLY route to settings. It is not a nav tab. -->
-    <div class="title-row">
+    <!-- Top margin bumped 4px -> 14px (inline) to mirror the Explore page, matching
+         the submit page. .title-row is shared by 6 screens, so this is scoped here
+         and NOT put on the global .title-row rule. The h1 inside stays margin:0. -->
+    <div class="title-row" style="margin-top:14px;">
       <h1 class="page-title">Passport</h1>
       <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -6593,7 +6607,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03h';
+const APP_VERSION = '2026.08.03j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9814,7 +9828,7 @@ function openCreateScreen(existingHunt, seedPoint){
   state.createIsHolderEdit = holderEdit;
   state.createBaselineIds = existingHunt ? new Set((existingHunt.points||[]).map(p=>p.id)) : new Set();
   document.getElementById('create-screen-title').textContent =
-    existingHunt ? (holderEdit ? 'Add stops' : 'Edit guide') : 'Create a guide';
+    existingHunt ? (holderEdit ? 'Add Stops' : 'Edit Guide') : 'Create a Guide';
   document.getElementById('delete-hunt-btn').style.display = (existingHunt && !holderEdit) ? 'block' : 'none';  // #202 — a holder removes their copy from the 3-dot menu, not here
   const nameEl = document.getElementById('create-hunt-name');
   nameEl.value = existingHunt ? existingHunt.name : '';
@@ -11660,13 +11674,19 @@ function renderNearbyList(){
 
   list.innerHTML = note + targets.map(t=>{
     const color = colorFor(t);
+    /* Same category vocabulary as the pin sheet's meta row (fillPinSheet ->
+       PIN_CAT_LABEL[t.category] || 'Spot'), so the drawer and the opened sheet
+       agree. Falls back to 'Spot' for a target with no/unknown category (a guide
+       stop, a data anomaly) rather than rendering blank. */
+    const cat = PIN_CAT_LABEL[t.category] || 'Spot';
+    const distTxt = t.found ? `✓ Found · ${fmtDist(t.dist)}` : fmtDist(t.dist)+' away';
     return `
     <div class="target-row">
       <div class="target-row-main" onclick="openPinSheetById('${t.id}')">
         <div class="blaze-mini">${pinSVGsized(t.found?color:'#EDE9DD', t.found, 18,26)}</div>
         <div class="t-meta">
           <div class="t-name">${escapeHtml(t.name)}${t.found?' ✓':''}</div>
-          <div class="t-dist">${t.found ? `✓ Found · ${fmtDist(t.dist)}` : fmtDist(t.dist)+' away'}</div>
+          <div class="t-dist"><span class="t-cat" style="color:${color}">${escapeHtml(cat)}</span> · ${escapeHtml(distTxt)}</div>
         </div>
       </div>
     </div>`;
