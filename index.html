@@ -2309,6 +2309,7 @@
       <h4 id="hunt-empty-title">Nothing here yet</h4>
       <p id="hunt-empty-body"></p>
       <div class="he-actions">
+        <button id="hunt-empty-widen" type="button" onclick="widenSearchRadius()">Search wider</button>
         <button class="he-primary" onclick="openSuggestGemScreen()">Add the first one</button>
         <button onclick="goToModeSelect()">Browse something else</button>
       </div>
@@ -4018,7 +4019,10 @@ function nearbyApprovedGems(base, excludeIds, limit, bucket){
     .filter(g=>g.status==='approved' && !excludeIds.includes(g.id) &&
                (!bucket || g.bucket===bucket || (bucket==='history' && g.bucket==='lore')))
     .map(g=>({...g, dist:haversine(base.lat, base.lng, g.lat, g.lng)}))
-    .filter(g=>g.dist<=GEM_INCLUDE_RADIUS_M)
+    // #28b — state.radiusExpand (default 1) widens the inclusion radius when the
+    // user taps "Search wider" on the empty card. Moves in lockstep with the real
+    // filter below so gems and real places keep one radius (#65 equalise).
+    .filter(g=>g.dist<=GEM_INCLUDE_RADIUS_M*(state.radiusExpand||1))
     .sort((a,b)=>a.dist-b.dist)
     .slice(0,limit);
 }
@@ -4258,6 +4262,37 @@ function searchThisArea(){
     state._preserveViewOnNextHunt = false;
   }
   document.getElementById('search-here-btn').classList.remove('show');
+}
+/* #28b — WIDEN THE RADIUS. Goal is exactly that: show places farther out.
+   The tile is already queried to OVERPASS_RADIUS_M (4.2km) but the blend only
+   INCLUDES to REAL_INCLUDE_RADIUS_M (2km), so widening is revealing the
+   already-fetched 2-4.2km ring — no new fetch, no cold-load wait.
+
+   THE ONE TRAP, AND WHY THIS REUSES searchThisArea()'s GUARD. The widened radius
+   (up to 4.2km) is past DISCOVER_FALLOFF_M (2.5km), and on a live discoverlocal
+   hunt refreshDiscoverLocalIfNeeded() culls-and-replaces any pin past the falloff
+   on the next GPS tick — the 2026-07-30 "pins get removed and replaced with
+   closer ones" regression (#65). That cull is suppressed whenever
+   state.searchedArea is set, so anchoring the content here as a searched area
+   BEFORE regenerating keeps the revealed far pins from being swapped back out.
+   radiusExpand is reset by any fresh hunt via setCurrentHunt (see there). */
+function widenSearchRadius(){
+  if((state.radiusExpand||1) > 1) return; // already widened; nothing more to reveal without a wider fetch
+  let base = state.browsingLocation || state.searchedArea || state.me;
+  if(!base && state.leafletMap){ const c = state.leafletMap.getCenter(); base = {lat:c.lat, lng:c.lng}; }
+  if(!base || base.lat == null) return;
+  base = {lat: base.lat, lng: base.lng};
+  state.radiusExpand = OVERPASS_RADIUS_M / REAL_INCLUDE_RADIUS_M; // reveal to the fetched bound, no further
+  if(!state.browsingLocation){
+    state.searchedArea = base;   // suppress the DISCOVER_FALLOFF_M cull (#8/#65)
+    state.followMe = false;      // or the next GPS tick pans off the area you just widened
+    const lb = document.getElementById('locate-btn'); if(lb) lb.classList.remove('following');
+  }
+  state.localHuntOrigin = base;
+  state._preserveViewOnNextHunt = true; // keep the view AND keep radiusExpand through setCurrentHunt
+  try{ regenerateCurrentHuntAt(base); }
+  finally{ state._preserveViewOnNextHunt = false; }
+  const ee = document.getElementById('hunt-empty'); if(ee) ee.classList.remove('show'); // the re-render decides if it comes back
 }
 function refreshDiscoverLocalIfNeeded(lat, lng){
   if(state.browsingLocation || state.searchedArea) return; // browsing or searching elsewhere on purpose — real-position drift must not rewrite that content (#8)
@@ -4983,7 +5018,11 @@ function nearbyRealPlaces(base, category, limit, excludeIds){
   return list
     .filter(p=>!ex.includes(p.id))
     .map(p=>({...p, dist:haversine(base.lat, base.lng, p.lat, p.lng)}))
-    .filter(p=>p.dist<=REAL_INCLUDE_RADIUS_M)
+    // #28b — widen on demand. The tile is already FETCHED to OVERPASS_RADIUS_M
+    // (4.2km) and only SHOWN to REAL_INCLUDE_RADIUS_M (2km); state.radiusExpand
+    // reveals the already-fetched ring with no re-fetch. Capped at the query
+    // bound by widenSearchRadius() so this never asks for un-fetched distance.
+    .filter(p=>p.dist<=REAL_INCLUDE_RADIUS_M*(state.radiusExpand||1))
     .sort((a,b)=>a.dist-b.dist)
     .slice(0, limit);
 }
@@ -6578,7 +6617,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03e';
+const APP_VERSION = '2026.08.03f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8739,6 +8778,10 @@ function setCurrentHunt(hunt, deferCaptured){
   refreshTargetsUI();
   refreshTrackUI();
   saveProgress();
+  // #28b — a FRESH hunt (category switch, recenter, guide open) drops any widen;
+  // a preserve-view rebuild (widen itself, or "Search this area") keeps it. Read
+  // the flag before the block below clears it.
+  if(!state._preserveViewOnNextHunt) state.radiusExpand = 1;
   // #8 — skip the snap-home when the hunt was rebuilt for an area the user
   // deliberately panned to. Every other path still recenters as before.
   if(state._preserveViewOnNextHunt){
@@ -11747,6 +11790,11 @@ function updateHuntEmptyState(count){
   const copy = EMPTY_COPY[mode] || EMPTY_DEFAULT;
   document.getElementById('hunt-empty-title').textContent = copy.title;
   document.getElementById('hunt-empty-body').textContent = copy.body;
+  // #28b — offer "Search wider" only where it can do something: a real-place
+  // backed mode that has not already been widened. Once widened (radiusExpand>1)
+  // an empty result means the wider ring is empty too, so hide the no-op.
+  const widenBtn = document.getElementById('hunt-empty-widen');
+  if(widenBtn) widenBtn.style.display = (REALPLACE_BACKED(mode) && (state.radiusExpand||1) <= 1) ? '' : 'none';
   el.classList.add('show');
   assertViewportCentred(el, '#95', '#hunt-empty');
 }
