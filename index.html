@@ -6494,7 +6494,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02ze';
+const APP_VERSION = '2026.08.02zf';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11939,13 +11939,16 @@ function pointNameLookup(key, id){
   return id;
 }
 const ACH_ICONS = {
-  /* #63 — the Stamps-family achievement now renders THIS glyph (icon-forward, no
-     circle) instead of the cancellation stamp (#180, retired here). It must be a
-     recognisable RUBBER-STAMP silhouette, NOT a ring — a ring would look like the
-     round per-place stamps we're differentiating from. Single filled body: a round
-     grip, shoulders flaring to a wide base pad. Fills tier colour when earned,
-     outlines when locked; also the popup icon and the unknown-icon fallback. */
-  stamp: {vb:'0 0 24 24', body:'M9 4.5a1.5 1.5 0 0 1 1.5-1.5h3a1.5 1.5 0 0 1 1.5 1.5V8l3 7a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1l3-7z'},
+  /* #63 — the STAMPS achievement family renders a PASSPORT (the book that holds
+     the stamps) — the same mark as the Passport nav tab — per the user's request,
+     icon-forward with no circle. Cover is the filled `body`; the emblem circle +
+     spine line are the `accent`, and knockout:true draws them in the surface
+     behind when earned (so they read as cut into the tier-coloured cover instead
+     of vanishing — the gem's rule, #180/#214). The surface differs by screen, so
+     renderAchievementIcon is passed #10231C on the full grid and #173229 on the
+     passport card. Key renamed 'stamp' → 'passport'; the six Stamps badges repoint
+     here and the rubber-stamp glyph is removed (removed-not-stranded, #24). */
+  passport: {vb:'0 0 24 24', body:'M6 3H18a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z', accent:'M9 11a3 3 0 1 0 6 0a3 3 0 1 0-6 0M9 17h6', knockout:true},
   tree: {vb:'0 0 24 24', body:'M12 2 L18 12 H15 L19 18 H5 L9 12 H6 Z M10.5 18 H13.5 V22 H10.5 Z'},
   bag: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   glass: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
@@ -11959,7 +11962,14 @@ const ACH_ICONS = {
      no other consumer, so it is renamed rather than left orphaned (#24's
      removed-not-stranded rule). */
   walk: {vb:'0 0 24 24', body:'M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C15 12 16.6 13 18.5 13V11c-1.6 0-3-.8-3.8-2l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z'},
-  plus: {vb:'0 0 24 24', body:'M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z'},
+  /* #63 — the GUIDES achievement family renders the GUIDE FLAG — the exact mark on
+     the My Guides cards in Explore (flagSVG: pole + pennant) — per the user's
+     request. Single filled body (pole rect + pennant triangle): solid when earned,
+     outline when locked. Key renamed 'plus' → 'flag'; the six Guides badges repoint
+     here and the plus glyph is removed (removed-not-stranded, #24). Kept in sync
+     with flagSVG() by hand — they are two copies of one pennant path (the card uses
+     the function; achievements need a path in the ACH_ICONS body/accent shape). */
+  flag: {vb:'0 0 24 24', body:'M6 3h1.2v18h-1.2z M7.2 4l10 3-10 3z'},
   trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'},
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
@@ -12013,12 +12023,12 @@ const TIER_NAMES  = {1:'Bronze', 2:'Silver', 3:'Gold', 4:'Platinum', 5:'Diamond'
    every category, incl. Lore) fire on the unscoped capture check. */
 const ACHIEVEMENTS = [
   // STAMPS — total captures, any category. Fires on capture (unscoped).
-  {id:'first_stamp', family:'Stamps Collected', tier:1, label:'First Stamp', icon:'stamp', check:s=>s.totalFound>=1},
-  {id:'stamps_5',    family:'Stamps Collected', tier:2, label:'5 Stamps',    icon:'stamp', check:s=>s.totalFound>=5},
-  {id:'stamps_10',   family:'Stamps Collected', tier:3, label:'10 Stamps',   icon:'stamp', check:s=>s.totalFound>=10},
-  {id:'stamps_25',   family:'Stamps Collected', tier:4, label:'25 Stamps',   icon:'stamp', check:s=>s.totalFound>=25},
-  {id:'stamps_50',   family:'Stamps Collected', tier:5, label:'50 Stamps',   icon:'stamp', check:s=>s.totalFound>=50},
-  {id:'stamps_100',  family:'Stamps Collected', tier:6, label:'100 Stamps',  icon:'stamp', check:s=>s.totalFound>=100},
+  {id:'first_stamp', family:'Stamps Collected', tier:1, label:'First Stamp', icon:'passport', check:s=>s.totalFound>=1},
+  {id:'stamps_5',    family:'Stamps Collected', tier:2, label:'5 Stamps',    icon:'passport', check:s=>s.totalFound>=5},
+  {id:'stamps_10',   family:'Stamps Collected', tier:3, label:'10 Stamps',   icon:'passport', check:s=>s.totalFound>=10},
+  {id:'stamps_25',   family:'Stamps Collected', tier:4, label:'25 Stamps',   icon:'passport', check:s=>s.totalFound>=25},
+  {id:'stamps_50',   family:'Stamps Collected', tier:5, label:'50 Stamps',   icon:'passport', check:s=>s.totalFound>=50},
+  {id:'stamps_100',  family:'Stamps Collected', tier:6, label:'100 Stamps',  icon:'passport', check:s=>s.totalFound>=100},
 
   /* GEMS — the ACT of submitting, not approval (see #24). gemsSubmittedCount is
      state.gemSubmissions.length, counted at every status. */
@@ -12031,12 +12041,12 @@ const ACHIEVEMENTS = [
 
   /* GUIDES — MAKING only (authoredHuntsCount, #145's !external count). 'hunt_maker'
      keeps its load-bearing id (#56). Top tiers (50/100) are aspirational. */
-  {id:'hunt_maker', family:'Guides Created', tier:1, label:'First Guide', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
-  {id:'guides_5',   family:'Guides Created', tier:2, label:'5 Guides',    icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=5},
-  {id:'guides_10',  family:'Guides Created', tier:3, label:'10 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=10},
-  {id:'guides_25',  family:'Guides Created', tier:4, label:'25 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=25},
-  {id:'guides_50',  family:'Guides Created', tier:5, label:'50 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=50},
-  {id:'guides_100', family:'Guides Created', tier:6, label:'100 Guides',  icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=100},
+  {id:'hunt_maker', family:'Guides Created', tier:1, label:'First Guide', icon:'flag', reads:'guides', check:s=>s.authoredHuntsCount>=1},
+  {id:'guides_5',   family:'Guides Created', tier:2, label:'5 Guides',    icon:'flag', reads:'guides', check:s=>s.authoredHuntsCount>=5},
+  {id:'guides_10',  family:'Guides Created', tier:3, label:'10 Guides',   icon:'flag', reads:'guides', check:s=>s.authoredHuntsCount>=10},
+  {id:'guides_25',  family:'Guides Created', tier:4, label:'25 Guides',   icon:'flag', reads:'guides', check:s=>s.authoredHuntsCount>=25},
+  {id:'guides_50',  family:'Guides Created', tier:5, label:'50 Guides',   icon:'flag', reads:'guides', check:s=>s.authoredHuntsCount>=50},
+  {id:'guides_100', family:'Guides Created', tier:6, label:'100 Guides',  icon:'flag', reads:'guides', check:s=>s.authoredHuntsCount>=100},
 
   // PARKS & TRAILS — 5/10/25 existing (ids preserved); 3/50/100 new. catCounts.parks.
   {id:'park_3',   family:'Parks & Trails Visited', tier:1, label:'3 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=3},
@@ -12449,7 +12459,7 @@ function renderStampBadge(id, unlocked, dateStr, bottomText){
 }
 function renderAchievementIcon(iconKey, unlocked, size, knockoutColor){
   size = size || 28;
-  const def = ACH_ICONS[iconKey] || ACH_ICONS.stamp;
+  const def = ACH_ICONS[iconKey] || ACH_ICONS.passport;
   const fill = unlocked ? 'currentColor' : 'none';
   /* #180/#214 — a filled body hides any accent drawn in the same colour. For a
      `knockout` def (the gem's facets sit inside its fill), draw the accent in the
@@ -12679,7 +12689,11 @@ function recentEarnedAchievements(limit){
   let stampTs = null;
   const withTs = ACHIEVEMENTS.filter(a=>earned.has(a.id)).map(a=>{
     let ts = (state.achievedAt || {})[a.id];
-    if(!ts && a.icon === 'stamp'){
+    /* #63 — the Stamps family (now icon:'passport') earned before achievedAt
+       existed has no recorded earn time; estimate it from the Nth capture stamp so
+       the recent-order is right. Keyed on the icon (Stamps is the only 'passport'
+       family), same pattern as the old 'stamp' key it replaced. */
+    if(!ts && a.icon === 'passport'){
       if(stampTs === null) stampTs = sortedStampTimestamps();
       const n = parseInt((a.label.match(/^\d+/) || ['1'])[0], 10) || 1;
       if(stampTs.length >= n) ts = stampTs[n - 1];
