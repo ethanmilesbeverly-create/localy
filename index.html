@@ -1716,6 +1716,22 @@
   }
   .save-hunt-option:hover{background:var(--surface-3);}
 
+  /* #84 — DELETE/UNSHARE CONFIRM. Same overlay + card as the two modals above;
+     the only new thing on screen is the forward-only warning and a .confirm-row
+     (the app's existing destructive-action control, reused from the delete-
+     account flow). */
+  #delete-guide-modal{
+    position:absolute;inset:0;z-index:1150;
+    background:rgba(6,16,12,0.55);
+    backdrop-filter:blur(5px);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  #delete-guide-modal.show{display:flex;}
+  #delete-guide-modal .modal-card{position:relative;padding-top:24px;text-align:left;}
+  #delete-guide-modal p{font-size:13px;color:var(--text);line-height:1.55;margin:0 0 14px;}
+  #delete-guide-modal p b{color:var(--text);font-weight:700;}
+
   /* #25 — REPORT A PIN.
      Clones #save-to-hunt-modal's geometry deliberately rather than inventing a
      third modal language: same overlay, same card, same close button, so the
@@ -1953,6 +1969,21 @@
       <div id="report-pin-options" style="max-height:238px;overflow-y:auto;margin-bottom:10px;"></div>
       <textarea id="report-pin-note" rows="2" maxlength="500" placeholder="Anything else? (optional)"></textarea>
       <button class="btn" id="report-pin-send" onclick="submitPinReport()" disabled>Send report</button>
+    </div>
+  </div>
+
+  <!-- #84 — delete/unshare confirm. Shown ONLY for a guide you MADE and SHARED
+       (has a code); a redeemed guide or an unshared draft deletes without it,
+       because nobody else holds it. Clones the save-to-hunt / report-pin modal
+       geometry rather than inventing a third overlay language. -->
+  <div id="delete-guide-modal">
+    <div class="modal-card" style="max-width:330px;">
+      <h2 style="font-size:17px;margin-bottom:10px;">Delete this guide?</h2>
+      <p id="delete-guide-msg"></p>
+      <div class="confirm-row">
+        <button onclick="closeDeleteGuideModal()">Keep it</button>
+        <button class="go" onclick="confirmDeleteGuide()">Delete guide</button>
+      </div>
     </div>
   </div>
 
@@ -6547,7 +6578,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03d';
+const APP_VERSION = '2026.08.03e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9944,8 +9975,69 @@ function createNewHuntWithPoint(){
   closeSaveToHuntModal();
   openCreateScreen(null, point);
 }
-async function deleteMyHuntDirect(id){
-  state.myHunts = state.myHunts.filter(h=>h.id!==id);
+/* #84 — UNSHARE (guide delete, forward-only, tombstone). Deleting a guide you
+   MADE and SHARED writes a tombstone {withdrawn:true} into its hunt-code: blob,
+   so a NOT-YET-OPENED code stops redeeming (redeemCodeValue + landing.html show
+   "no longer shared"), while anyone who ALREADY opened it keeps their copy — the
+   tombstone deliberately carries NO points array, so guideContentChanged()'s
+   Array.isArray(points) guard leaves every redeemed snapshot untouched.
+   Forward-only is thus by CONSTRUCTION, not a second code path. It is an UPDATE,
+   not a row delete: #135's owner-scoped UPDATE policy already permits an owner
+   (and, deliberately, a legacy owner-NULL row — the ≈12 pre-owner guides, which
+   we chose to let their maker withdraw) to write it, so there is NO backend
+   deploy. The caller gates on !external && code: a REDEEMED guide (external) or
+   an unshared draft (no code) never reaches here, so a holder can never tombstone
+   the maker's blob and #202's editable guides (a holder's copy is external) are
+   safe. Fails soft — a blocked/offline shared write still removes the LOCAL
+   guide, because forward-only already tolerates a stale blob and the local delete
+   is the part the user asked for and sees. */
+async function unshareGuide(hunt){
+  if(!hunt || hunt.external || !hunt.code) return;
+  try{
+    await window.storage.set('hunt-code:'+hunt.code, JSON.stringify({withdrawn:true, name:hunt.name||''}), true);
+  }catch(e){ /* shared write blocked/offline — the local delete below still runs */ }
+}
+/* #84 — a guide you MADE and SHARED confirms before delete, because the warning
+   only makes sense there: deleting stops NEW redemptions but cannot un-send to
+   anyone who already opened it. A redeemed guide or an unshared draft deletes
+   instantly as before — nobody else holds it, so there is nothing to warn about
+   and no shared blob to touch. Both delete entry points (the ⋮ menu and the edit
+   screen's "Delete this guide") route through here. */
+let pendingDeleteGuide = null;
+function requestDeleteGuide(id, returnToMode){
+  const h = state.myHunts.find(x=>x.id===id);
+  if(!h) return;
+  if(!h.external && h.code){
+    pendingDeleteGuide = {id, returnToMode:!!returnToMode};
+    const msg = document.getElementById('delete-guide-msg');
+    if(msg){
+      msg.innerHTML = 'Delete <b>'+escapeHtml(h.name)+'</b>? It leaves your guides and its code stops opening for anyone new. '
+        + 'People you already shared it with who have opened it keep their copy — deleting can\u2019t un-send it to them.';
+    }
+    document.getElementById('delete-guide-modal').classList.add('show');
+  } else {
+    performGuideDelete(id, returnToMode);
+  }
+}
+function closeDeleteGuideModal(){
+  document.getElementById('delete-guide-modal').classList.remove('show');
+  pendingDeleteGuide = null;
+}
+async function confirmDeleteGuide(){
+  const pd = pendingDeleteGuide;
+  document.getElementById('delete-guide-modal').classList.remove('show');
+  pendingDeleteGuide = null;
+  if(!pd) return;
+  await performGuideDelete(pd.id, pd.returnToMode);
+}
+/* The shared deletion core. unshareGuide() is a no-op unless the guide is
+   owned+shared, so it is safe to call unconditionally. Count-goes-down (#83) is
+   preserved by the renderPassport() call, exactly as the two old delete
+   functions did it. */
+async function performGuideDelete(id, returnToMode){
+  const h = state.myHunts.find(x=>x.id===id);
+  if(h) await unshareGuide(h);
+  state.myHunts = state.myHunts.filter(x=>x.id!==id);
   await saveMyHunts();
   const progKey = 'custom_'+id;
   if(state.progress[progKey]){
@@ -9955,6 +10047,10 @@ async function deleteMyHuntDirect(id){
   renderMyHunts();
   renderPassport();
   showToast('Guide deleted');
+  if(returnToMode){ state.editingHuntId = null; goToModeSelect(); }
+}
+function deleteMyHuntDirect(id){
+  requestDeleteGuide(id, false);
 }
 async function copyHuntCode(id){
   const h = state.myHunts.find(x=>x.id===id);
@@ -9992,19 +10088,7 @@ document.addEventListener('click', (e)=>{
 });
 function deleteCurrentHunt(){
   if(!state.editingHuntId) return;
-  const id = state.editingHuntId;
-  state.myHunts = state.myHunts.filter(h=>h.id!==id);
-  saveMyHunts();
-  const progKey = 'custom_'+id;
-  if(state.progress[progKey]){
-    delete state.progress[progKey];
-    saveProgress();
-  }
-  state.editingHuntId = null;
-  renderMyHunts();
-  renderPassport();
-  showToast('Guide deleted');
-  goToModeSelect();
+  requestDeleteGuide(state.editingHuntId, true);   // #84 — confirm-then-unshare if owned+shared; returns to mode select
 }
 /* #202 — per-stop builder permissions, by role. Two flags:
      removable   — a Remove button is shown and removeCreatePin will act
@@ -10228,8 +10312,9 @@ async function saveCustomHunt(){
      the other four are excluded on purpose, not by omission:
        saveDiscoveredPointToHunt  — adds a stop, which can only make a guide LESS
                                     complete; checking could un-earn (#83).
-       deleteMyHuntDirect         — count goes down (#83).
-       deleteCurrentHunt          — count goes down (#83).
+       performGuideDelete         — the delete core both deleteMyHuntDirect and
+                                    deleteCurrentHunt now route through (#84);
+                                    count goes down (#83).
        redeemGuideCode            — pushes {external:true}, which is exactly what
                                     #145(1) stopped counting. Awarding here would
                                     reintroduce the defect through the back door.
@@ -10319,6 +10404,7 @@ async function startMyHunt(id, skipRefresh){
    null leaves the existing snapshot untouched, never wiped, which matters because
    cross-device shared reads are known-flaky (see redeemCodeValue's catch copy). */
 function guideContentChanged(hunt, data){
+  if(data && data.withdrawn) return false;   // #84 — a withdrawn guide never overwrites a holder's saved copy (forward-only, belt-and-braces alongside the no-points guard below)
   if(!data || !Array.isArray(data.points)) return false;
   if(hunt.name !== data.name) return true;
   if(!!hunt.editable !== (data.editable === true)) return true;   // #202 — maker flipping the toggle propagates
@@ -10381,6 +10467,15 @@ async function redeemCodeValue(code){
   if(!res) return "No guide found for that code. Double-check it and try again.";
   try{
     const data = JSON.parse(res.value);
+    if(data && data.withdrawn){
+      /* #84 — the maker withdrew this guide. This is NOT "no guide found": the
+         code WAS a guide and its author unshared it, so the message names that
+         rather than sending the recipient hunting for a typo (the absent-vs-
+         withdrawn distinction #28/#58 make load-bearing). A holder who already
+         saved this guide keeps their copy — we only refuse a NEW open and never
+         touch state.myHunts here. */
+      return "This guide is no longer shared by its creator.";
+    }
     let hunt = state.myHunts.find(h=>h.external && h.code===code);
     if(!hunt){
       hunt = {id:'ext'+Date.now(), name:data.name, points:data.points, code, external:true, editable:data.editable===true};

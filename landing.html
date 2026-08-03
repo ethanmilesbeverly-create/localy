@@ -85,7 +85,7 @@
    copied: the main script below calls these same two globals.
    One definition, moved earlier — not a second copy that drifts.
    ============================================================ */
-const LANDING_VERSION = '2026.07.27b';
+const LANDING_VERSION = '2026.08.03a';
 console.log('%c[landing] ' + LANDING_VERSION, 'font-weight:700');
 
 /* Coarse pointer OR narrow viewport. Deliberately generous: a false
@@ -502,6 +502,11 @@ async function lookupHunt(code){
   catch(e){ throw new LookupError('corrupt'); }
 
   if(!data || typeof data !== 'object') throw new LookupError('corrupt');
+  /* #84 — a tombstone: the maker withdrew this guide. Distinct from 'notfound'
+     (the code was real) and from 'corrupt' (the data is intact, it just says
+     "withdrawn"). Only the desktop preview reaches this — a phone bounced to the
+     app before lookup, and index.html shows its own withdrawn message. */
+  if(data.withdrawn) throw new LookupError('withdrawn');
   const points = Array.isArray(data.points) ? data.points.filter(
     p => p && typeof p.lat === 'number' && typeof p.lng === 'number'
   ) : [];
@@ -679,6 +684,11 @@ function showLookupError(err, code){
       setEntryError('That code exists, but its guide data is unreadable. Ask '
         + 'whoever shared it to open the guide and save it once, which writes '
         + 'a fresh copy.');
+      break;
+    case 'withdrawn':
+      setEntryError('This guide is no longer shared. Its creator removed it, so '
+        + 'the code no longer opens a guide. If someone shared it with you, ask '
+        + 'them for a current one.');
       break;
     case 'notfound':
     default:
