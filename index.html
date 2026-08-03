@@ -1430,6 +1430,67 @@
   .stat-box .num{font-size:21px;font-weight:700;}
   .stat-box .lbl{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;}
 
+  /* #63 — passport section header: a title on the left, a "View all" text link on
+     the right, sharing a baseline. Used by both the Stamps and Achievements
+     sections on the passport. The link is hidden by JS when there is nothing more
+     to see than what the preview already shows. */
+  .passport-section{margin-top:22px;}
+  .passport-section-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;margin-bottom:12px;
+  }
+  .passport-section-head .section-title{
+    margin:0;font-size:17px;font-weight:700;color:var(--text);
+  }
+  .view-all-link{
+    background:none;border:none;padding:4px 2px;margin:0;cursor:pointer;
+    color:var(--orange);font-size:13px;font-weight:600;font-family:inherit;
+    white-space:nowrap;flex-shrink:0;
+  }
+  .view-all-link:active{opacity:0.6;}
+  /* #63 — a small, quiet empty line for a section with nothing in it yet, so the
+     passport reads as "start collecting" rather than broken. */
+  .passport-empty{
+    color:var(--text-dim);font-size:13px;line-height:1.5;
+    padding:6px 2px 2px;
+  }
+
+  /* #63 — the per-place STAMP grid. Same 3-up centred layout as the achievement
+     grid, but each tile carries a caption (the spot name) under the cancellation
+     stamp, because unlike a badge the stamp's identity is the place, not a tier. */
+  .place-stamp-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:18px 10px;justify-items:center;
+  }
+  .place-stamp{
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;
+    min-width:0;width:100%;
+  }
+  /* The stamp itself reuses .stamp-circle (rim + rotate), always "minted" (a
+     captured place is always earned) and coloured by its category via inline
+     color. */
+  .place-stamp .stamp-circle{
+    width:72px;height:72px;margin:0;border-style:solid;
+    background:color-mix(in srgb, currentColor 14%, transparent);
+  }
+  .place-stamp .place-stamp-name{
+    font-size:11.5px;font-weight:600;color:var(--text);line-height:1.25;
+    max-width:100%;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .place-stamp .place-stamp-cat{
+    font-size:10px;color:var(--text-dim);line-height:1.2;
+  }
+  /* #63 — a recent-achievement preview tile: the same minted .stamp-circle as the
+     full grid, but captioned with the badge label (mixed families in one row, so
+     the family sub-header that names them on the full grid isn't present here). */
+  .ach-recent-label{
+    font-size:11px;font-weight:600;color:var(--text);line-height:1.25;text-align:center;
+    max-width:100%;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+
   /* ---------- Create hunt screen ---------- */
   #create-map{height:220px;border-radius:12px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line);}
   #suggest-gem-map{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
@@ -2259,6 +2320,45 @@
     <div class="stat-row">
       <div class="stat-box"><div class="num" id="stat-found">0</div><div class="lbl">Stamps</div></div>
       <div class="stat-box"><div class="num" id="stat-walked">0 m</div><div class="lbl">Traveled</div></div>
+    </div>
+    <!-- #63 — the passport is split into two collections, each showing its most
+         recent few with a "View all" into a full-list screen. renderPassport()
+         fills both mounts. STAMPS is the per-place collection this row was open
+         for (one stamp per captured spot, on #40's stored capture meta);
+         ACHIEVEMENTS is the tiered badge grid (#24/#180), of which the passport
+         now shows only the most-recently-earned, the full grid living on its own
+         screen. -->
+    <div id="passport-stamps-section"></div>
+    <div id="passport-achievements-section"></div>
+  </div>
+
+  <!-- #63 — VIEW-ALL: every captured stamp. A no-nav sub-screen on the settings
+       pattern (#81/#177): shown via showScreen(), Back returns to the passport,
+       the Passport nav tab stays lit. renderAllStamps() fills the grid on open. -->
+  <div class="screen" id="screen-stamps-all">
+    <div class="title-row">
+      <h1 class="page-title">Your Stamps</h1>
+      <button class="icon-btn" onclick="closeAllStamps()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div id="stamps-all-grid"></div>
+  </div>
+
+  <!-- #63 — VIEW-ALL: the full tiered achievements grid (earned + locked), moved
+       off the passport onto its own screen. renderAchievements() still fills
+       #achievements-section (id unchanged, so #83's assertAchievementRecord()
+       reads the same element — it just lives here now and draws on open). -->
+  <div class="screen" id="screen-achievements-all">
+    <div class="title-row">
+      <h1 class="page-title">Achievements</h1>
+      <button class="icon-btn" onclick="closeAllAchievements()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
     </div>
     <div id="achievements-section"></div>
   </div>
@@ -6381,7 +6481,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02zb';
+const APP_VERSION = '2026.08.02zc';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -6991,6 +7091,30 @@ function closeSettings(){
      on the passport, two screens from where you started. */
   setTab(state.settingsReturn || 'screen-passport');
   state.settingsReturn = null;
+}
+/* #63 — VIEW-ALL screens for the two passport collections. Same no-nav sub-screen
+   pattern as settings/about (#81/#91/#177): showScreen() in, Back returns to the
+   passport, the Passport nav tab stays lit. Each renders fresh on open so the
+   list is current; on close the passport previews are re-rendered so a stamp
+   captured elsewhere in the session shows up immediately. Reached only from the
+   passport, so Back is always the passport — no return-target state needed. */
+function openAllStamps(){
+  renderAllStamps();
+  showScreen('screen-stamps-all');
+  setNavActive('screen-passport');
+}
+function closeAllStamps(){
+  setTab('screen-passport');
+  renderPassport();
+}
+function openAllAchievements(){
+  renderAchievements();   // fills #achievements-section, which lives on this screen
+  showScreen('screen-achievements-all');
+  setNavActive('screen-passport');
+}
+function closeAllAchievements(){
+  setTab('screen-passport');
+  renderPassport();
 }
 /* #82 / #177 — the delete screen sits UNDER settings: reached from the tertiary
    link, its Back arrow returns to settings, and settings' own Back still returns
@@ -12325,7 +12449,11 @@ function renderAchievements(){
      bronze → master ramp shows the rung; the icon + header show the family. All
      tiles stay under #achievements-section, so #83's assertAchievementRecord()
      DOM count is unaffected by the extra grid wrappers. */
-  let html = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>`;
+  /* #63 — the "Achievements" heading that used to lead this grid is gone: the
+     grid now lives on its own #screen-achievements-all, which carries the title.
+     renderAchievements() is otherwise unchanged and still fills #achievements-section,
+     so #83's assertAchievementRecord() reads the same element. */
+  let html = '';
   let lastFamily = null;
   let _stampTs = null;   // #180 — lazily-built sorted capture timestamps, for date backfill
   ACHIEVEMENTS.forEach(a=>{
@@ -12393,6 +12521,197 @@ function loadFailBannerHTML(){
     + '</div>';
 }
 
+/* =========================================================
+   #63 — THE PER-PLACE STAMP COLLECTION
+   ---------------------------------------------------------
+   The passport's long-open Med gap: it counted stamps and drew badge TIERS, but
+   never listed the stamps themselves — one keepsake per place you captured. This
+   builds that list off #40's stored capture meta (name, category colour) and
+   #211's foundAt timestamps.
+
+   capturedStampEntries() MIRRORS reconciledCaptures() EXACTLY so the number of
+   stamps equals the "Stamps" stat and the badge total (#148's invariant — the
+   three must agree by construction). Auto buckets are unioned to one record per
+   id (a place double-banked under two explore cards is ONE stamp); custom_/code_/
+   guide buckets are counted per bucket (a stop captured on a guide AND on the
+   open map is two legitimate events, so it earns two stamps — the counter's own
+   rule). Returns entries newest-first, each {id, name, cat, color, ts}. ts is
+   #211's earliest-across-buckets stamp (the moment it entered the passport); a
+   legacy capture with no foundAt sorts last and shows a blank date, never a bad
+   one (#211's null-guard). */
+function capturedStampEntries(){
+  const out = [];
+  const push = (id, meta, ts) => {
+    if(!meta) return;
+    out.push({
+      id: id,
+      name: (meta.name || 'A spot'),
+      cat: (PIN_CAT_LABEL[meta.mode] || 'Spot'),
+      color: (meta.color || MODE_COLOR[meta.mode] || '#E8622C'),
+      ts: (typeof ts === 'number' ? ts : null)
+    });
+  };
+  /* AUTO buckets: union across every shared key, first record per id wins —
+     identical construction to reconciledCaptures()'s auto pass. */
+  const autoSeen = {};
+  Object.keys(state.progress || {}).forEach(k=>{
+    if(!isSharedProgressKey(k)) return;
+    const meta = (state.progress[k] || {}).foundMeta || {};
+    Object.keys(meta).forEach(id=>{ if(autoSeen[id] === undefined) autoSeen[id] = meta[id]; });
+  });
+  Object.keys(autoSeen).forEach(id=>{ push(id, autoSeen[id], capturedAtFor(id)); });
+  /* custom_/code_/guide buckets: counted per bucket, NOT deduped — the same as
+     the counter. The stamp's date is this bucket's own foundAt when present. */
+  Object.keys(state.progress || {}).forEach(k=>{
+    if(isSharedProgressKey(k)) return;
+    const bucket = state.progress[k] || {};
+    const meta = bucket.foundMeta || {};
+    const fa = bucket.foundAt || {};
+    Object.keys(meta).forEach(id=>{
+      const ts = (typeof fa[id] === 'number') ? fa[id] : capturedAtFor(id);
+      push(id, meta[id], ts);
+    });
+  });
+  /* Newest first; undated (legacy) captures sort to the END rather than jumping
+     to the top as if ts were 0. */
+  out.sort((a,b)=>{
+    if(a.ts === null && b.ts === null) return 0;
+    if(a.ts === null) return 1;
+    if(b.ts === null) return -1;
+    return b.ts - a.ts;
+  });
+  return out;
+}
+/* #63 — one place stamp, a cancellation stamp like the Stamps-family badge
+   (#180): top arc is the SPOT NAME, bottom arc its CATEGORY (a stand-in for the
+   city, which the capture record doesn't store — see the pass note), centre the
+   capture DATE, currentColor its category colour (set inline on the tile). Long
+   names are trimmed on the arc with an ellipsis; the full name is the caption
+   under the tile, so nothing is lost. */
+function renderPlaceStamp(entry){
+  const uid = 'ps-' + String(entry.id).replace(/[^A-Za-z0-9_-]/g,'');
+  const at = 'plstamp-t-' + uid, ab = 'plstamp-b-' + uid;
+  const clip = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n-1) + '…' : s; };
+  const topText = clip((entry.name || '').toUpperCase(), 15);
+  const botText = clip((entry.cat || '').toUpperCase(), 16);
+  const dateStr = fmtStampDate(entry.ts);
+  const date = dateStr
+    ? '<text x="50" y="55" font-size="11" font-weight="700" letter-spacing="0.3" fill="currentColor" stroke="none" text-anchor="middle">' + escapeHtml(dateStr) + '</text>'
+    : '';
+  const bottom = botText
+    ? '<text font-size="9" font-weight="700" letter-spacing="0.5" fill="currentColor" stroke="none" text-anchor="middle"><textPath xlink:href="#' + ab + '" startOffset="50%">' + escapeHtml(botText) + '</textPath></text>'
+    : '';
+  return '<svg width="62" height="62" viewBox="0 0 100 100" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" stroke="currentColor" style="display:block;">'
+    + '<defs>'
+    + '<path id="' + at + '" d="M 12 50 A 38 38 0 0 1 88 50" fill="none" stroke="none"/>'
+    + '<path id="' + ab + '" d="M 12 50 A 38 38 0 0 0 88 50" fill="none" stroke="none"/>'
+    + '</defs>'
+    + '<text font-size="9" font-weight="700" letter-spacing="0.3" fill="currentColor" stroke="none" text-anchor="middle"><textPath xlink:href="#' + at + '" startOffset="50%">' + escapeHtml(topText) + '</textPath></text>'
+    + bottom
+    + date
+    + '</svg>';
+}
+/* #63 — one stamp tile: the cancellation stamp, the full spot name, its category. */
+function placeStampTileHTML(entry){
+  const dstr = fmtStampDate(entry.ts);
+  return '<div class="place-stamp" title="' + escapeHtml(entry.name + (dstr ? ' — ' + dstr : '')) + '">'
+    + '<div class="stamp-circle" style="color:' + entry.color + '">' + renderPlaceStamp(entry) + '</div>'
+    + '<div class="place-stamp-name">' + escapeHtml(entry.name) + '</div>'
+    + '<div class="place-stamp-cat">' + escapeHtml(entry.cat) + '</div>'
+    + '</div>';
+}
+/* #63 — the passport's Stamps section: the 6 most-recent place stamps + a "View
+   all" into #screen-stamps-all (shown only when there are more than 6). Re-run by
+   renderPassport() on every capture / passport entry, so the preview always shows
+   your latest six. */
+function renderStampsSection(){
+  const el = document.getElementById('passport-stamps-section');
+  if(!el) return;
+  const entries = capturedStampEntries();
+  const PREVIEW = 6;
+  const viewAll = entries.length > PREVIEW
+    ? '<button class="view-all-link" onclick="openAllStamps()">View all ' + entries.length + ' →</button>'
+    : '';
+  let body;
+  if(!entries.length){
+    body = '<p class="passport-empty">No stamps yet — walk to a spot and capture it to start your collection.</p>';
+  } else {
+    body = '<div class="place-stamp-grid">' + entries.slice(0, PREVIEW).map(placeStampTileHTML).join('') + '</div>';
+  }
+  el.className = 'passport-section';
+  el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Stamps</h2>' + viewAll + '</div>' + body;
+}
+/* #63 — every place stamp, on its own screen (rendered on open). */
+function renderAllStamps(){
+  const el = document.getElementById('stamps-all-grid');
+  if(!el) return;
+  const entries = capturedStampEntries();
+  if(!entries.length){
+    el.innerHTML = '<p class="passport-empty">No stamps yet — walk to a spot and capture it to start your collection.</p>';
+    return;
+  }
+  el.innerHTML = '<div class="place-stamp-grid">' + entries.map(placeStampTileHTML).join('') + '</div>';
+}
+/* #63 — the earned achievements, newest-first, for the passport preview. Earned =
+   earnedAchievementIds() (the #83 record ∪ live-true). Earned time is
+   state.achievedAt when recorded, else — for a Stamps-family tier earned before
+   achievedAt existed — backfilled from the Nth capture timestamp exactly as the
+   grid does (#180). Undated earns sort last. */
+function recentEarnedAchievements(limit){
+  const stats = computeAchievementStats();
+  const earned = earnedAchievementIds(stats);
+  let stampTs = null;
+  const withTs = ACHIEVEMENTS.filter(a=>earned.has(a.id)).map(a=>{
+    let ts = (state.achievedAt || {})[a.id];
+    if(!ts && a.icon === 'stamp'){
+      if(stampTs === null) stampTs = sortedStampTimestamps();
+      const n = parseInt((a.label.match(/^\d+/) || ['1'])[0], 10) || 1;
+      if(stampTs.length >= n) ts = stampTs[n - 1];
+    }
+    return {a: a, ts: (typeof ts === 'number' ? ts : null)};
+  });
+  withTs.sort((x,y)=>{
+    if(x.ts === null && y.ts === null) return 0;
+    if(x.ts === null) return 1;
+    if(y.ts === null) return -1;
+    return y.ts - x.ts;
+  });
+  return (typeof limit === 'number') ? withTs.slice(0, limit) : withTs;
+}
+/* #63 — the passport's Achievements section: the 6 most-recently-earned badges +
+   a "View all" into the full grid. Deliberately NOT under #achievements-section,
+   so #83's grid check ignores this subset (the full grid there still holds every
+   earned + locked tile). Each preview tile is a minted .stamp-circle captioned
+   with the badge label, since a recent row mixes families and has no sub-header. */
+function renderRecentAchievements(){
+  const el = document.getElementById('passport-achievements-section');
+  if(!el) return;
+  const PREVIEW = 6;
+  const recent = recentEarnedAchievements(PREVIEW);
+  const viewAll = '<button class="view-all-link" onclick="openAllAchievements()">View all →</button>';
+  let body;
+  if(!recent.length){
+    body = '<p class="passport-empty">No achievements yet — capture spots, submit gems and build guides to earn them.</p>';
+  } else {
+    body = '<div class="achievement-grid">' + recent.map(r=>{
+      const a = r.a;
+      const color = TIER_COLORS[a.tier] || '#E8622C';
+      let inner;
+      if(a.icon === 'stamp'){
+        inner = renderStampBadge(a.id, true, fmtStampDate(r.ts), (TIER_NAMES[a.tier] || '').toUpperCase());
+      } else {
+        inner = '<div class="blaze-mini">' + renderAchievementIcon(a.icon, true) + '</div>';
+      }
+      return '<div class="achievement-item" title="' + escapeHtml(a.label) + '">'
+        + '<div class="stamp-circle" style="color:' + color + '">' + inner + '</div>'
+        + '<div class="ach-recent-label">' + escapeHtml(a.label) + '</div>'
+        + '</div>';
+    }).join('') + '</div>';
+  }
+  el.className = 'passport-section';
+  el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Achievements</h2>' + viewAll + '</div>' + body;
+}
+
 function renderPassport(){
   /* #58 — fill or clear the banner first, so it's correct even if a later line
      in this function throws. Guarded on the element in case the mount is ever
@@ -12400,12 +12719,19 @@ function renderPassport(){
   const lf = document.getElementById('passport-loadfail');
   if(lf) lf.innerHTML = loadFailBannerHTML();
   document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
+  /* #63 — the passport now shows two PREVIEWS (recent stamps, recent achievements);
+     the full grids live on their own screens. renderAchievements() still runs here
+     so #achievements-section stays current for #83's invariant and the view-all
+     screen is already correct the instant it's opened. */
   renderAchievements();
+  renderStampsSection();
+  renderRecentAchievements();
 
   /* #148 — Stamps total now reads reconciledCaptures().count, the SAME set the
      badge grid counts, instead of summing foundIds across every bucket. Two
      effects: a place double-banked under two auto cards counts once, and this
-     number can no longer disagree with computeAchievementStats(). */
+     number can no longer disagree with computeAchievementStats(). #63's stamp
+     LIST reuses the same construction, so the list length equals this number. */
   document.getElementById('stat-found').textContent = reconciledCaptures().count;
 }
 </script>
