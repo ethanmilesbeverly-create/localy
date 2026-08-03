@@ -6381,7 +6381,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02x';
+const APP_VERSION = '2026.08.02y';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12251,6 +12251,20 @@ function fmtStampDate(ts){
   const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   return M[d.getMonth()] + ' ' + String(d.getDate()).padStart(2,'0') + ' ' + d.getFullYear();
 }
+/* #180 — BACKFILL for stamps earned before achievedAt existed: the moment you
+   reached "N Stamps" ≈ the timestamp of your Nth unique capture. Reads foundAt (the
+   per-capture stamp #211 already keeps), earliest ts per unique id across buckets,
+   sorted ascending — so the tier date is the (N-1) index. Captures with no foundAt
+   (legacy) are simply absent, so a tier we can't place stays blank rather than
+   guessing. achievedAt (the real recorded moment) still wins when present. */
+function sortedStampTimestamps(){
+  const seen = {};
+  Object.values(state.progress || {}).forEach(b=>{
+    const fa = b && b.foundAt; if(!fa) return;
+    Object.keys(fa).forEach(id=>{ const t = fa[id]; if(typeof t === 'number' && (seen[id] === undefined || t < seen[id])) seen[id] = t; });
+  });
+  return Object.values(seen).sort((a,b)=>a-b);
+}
 /* #180 — Stamps render as a park CANCELLATION STAMP rather than the shared icon.
    The tile's own .stamp-circle border is the OUTER RIM (so this SVG must not draw
    one — the user's "use the outer circle as the rim" note); this adds curved
@@ -12293,6 +12307,7 @@ function renderAchievements(){
      DOM count is unaffected by the extra grid wrappers. */
   let html = `<p class="page-sub" style="margin:0 0 12px;font-weight:700;color:var(--text);">Achievements</p>`;
   let lastFamily = null;
+  let _stampTs = null;   // #180 — lazily-built sorted capture timestamps, for date backfill
   ACHIEVEMENTS.forEach(a=>{
     const fam = a.family || 'Achievements';
     if(fam !== lastFamily){
@@ -12312,9 +12327,21 @@ function renderAchievements(){
     const achPill = (a.reads === 'walk') ? (achN === '1' ? '1 mile' : achN + ' miles') : achN;
     /* #180 — the Stamps family draws a cancellation stamp (rim=tile, curved text,
        centre date) directly in the .stamp-circle; every other family keeps the
-       shared .blaze-mini icon. */
+       shared .blaze-mini icon. Date = the recorded earned moment (achievedAt) when
+       present, else backfilled from the Nth capture's timestamp (sortedStampTimestamps);
+       blank if neither is available. Only for unlocked tiles. */
+    let stampDate = '';
+    if(a.icon === 'stamp' && unlocked){
+      let ts = (state.achievedAt || {})[a.id];
+      if(!ts){
+        if(_stampTs === null) _stampTs = sortedStampTimestamps();
+        const th = parseInt(achN, 10) || 1;
+        if(_stampTs.length >= th) ts = _stampTs[th - 1];
+      }
+      stampDate = fmtStampDate(ts);
+    }
     const inner = (a.icon === 'stamp')
-      ? renderStampBadge(a.id, unlocked, unlocked ? fmtStampDate((state.achievedAt||{})[a.id]) : '')
+      ? renderStampBadge(a.id, unlocked, stampDate)
       : ('<div class="blaze-mini">' + renderAchievementIcon(a.icon, unlocked) + '</div>');
     html += `<div class="achievement-item ${unlocked?'':'locked'}" title="${escapeHtml(tierName ? tierName + ' — ' + a.label : a.label)}">
         <div class="stamp-circle"${unlocked ? ` style="color:${color}"` : ''}>
