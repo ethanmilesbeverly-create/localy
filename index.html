@@ -6547,7 +6547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03c';
+const APP_VERSION = '2026.08.03d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12495,12 +12495,13 @@ function checkNewAchievements(onlyIds){
 function showNextAchievementPopup(){
   const next = state.pendingAchievementPopups.shift();
   if(!next) return;
-  /* #24 revamp v2 — colour and tier name come from the tier, the single source of
-     truth (badges carry no colour). Eyebrow reads e.g. "Gold Achievement". */
+  /* #24 revamp v2 — colour still comes from the tier, the single source of truth
+     (badges carry no colour). Eyebrow is ALWAYS "Achievement Unlocked": the tier
+     name (Bronze/Silver/Gold/…) is deliberately NOT shown, so every unlock reads
+     the same regardless of rung. The tier only tints the badge colour below. */
   const color = TIER_COLORS[next.tier] || '#E8622C';
-  const tierName = TIER_NAMES[next.tier] || '';
   const eyebrow = document.querySelector('#achievement-popup .achievement-popup-eyebrow');
-  if(eyebrow) eyebrow.textContent = (tierName ? tierName + ' Achievement' : 'Achievement Unlocked');
+  if(eyebrow) eyebrow.textContent = 'Achievement Unlocked';
   document.getElementById('achievement-popup-label').textContent = next.label;
   document.getElementById('achievement-popup-icon').innerHTML = renderAchievementIcon(next.icon, true, 40);
   document.getElementById('achievement-popup-badge').style.color = color;
