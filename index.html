@@ -6365,7 +6365,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02s';
+const APP_VERSION = '2026.08.02t';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11801,7 +11801,13 @@ const ACH_ICONS = {
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
      body/accent split bag/bust already use. */
-  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'}
+  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'},
+  /* #180 — ART: a framed landscape (the universal "picture" glyph) for the Art
+     family (#193's public-art category). The scene — mountains + sun — is the
+     FILLED body so it reads when earned; the frame is the stroke-only accent, so
+     the interior detail never floods to a solid block the way #214's Explore art
+     icon did (detail-inside-fill is the trap that fix records). */
+  art: {vb:'0 0 24 24', body:'M5 18 L9 12 L12 15 L15 10 L19 18 Z M8.6 7.6 a1.5 1.5 0 1 0 0 3 a1.5 1.5 0 1 0 0 -3 z', accent:'M4 5 H20 V19 H4 Z'}
 };
 /* #24 REVAMP v2 — TIER RAMP. The six rungs of every family map to these six tiers
    by POSITION (tier 1 = the family's easiest rung, tier 6 = its hardest). The tier
@@ -11910,13 +11916,25 @@ const ACHIEVEMENTS = [
      old ledger is pruned at load (see loadKey('unlocked-achievements')) so the #83
      record count stays exact — retiring a rung, not un-earning a live badge. */
 
-  // WANDERER — miles walked. mile_1/mile_5 preserved (#159); 10/25/50/100 new. reads:'walk'.
-  {id:'mile_1',   family:'Wanderer', tier:1, label:'First Mile', icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
-  {id:'mile_5',   family:'Wanderer', tier:2, label:'5 Miles',    icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
-  {id:'mile_10',  family:'Wanderer', tier:3, label:'10 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=16093},
-  {id:'mile_25',  family:'Wanderer', tier:4, label:'25 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=40234},
-  {id:'mile_50',  family:'Wanderer', tier:5, label:'50 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=80467},
-  {id:'mile_100', family:'Wanderer', tier:6, label:'100 Miles',  icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=160934}
+  // ART — #193's public-art category (murals, sculptures, statues), stored mode
+  //  'art', counted in reconciledCaptures above. New family, fresh ids (art_*).
+  {id:'art_3',   family:'Art', tier:1, label:'3 Art',   icon:'art', check:s=>(s.catCounts.art||0)>=3},
+  {id:'art_5',   family:'Art', tier:2, label:'5 Art',   icon:'art', check:s=>(s.catCounts.art||0)>=5},
+  {id:'art_10',  family:'Art', tier:3, label:'10 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=10},
+  {id:'art_25',  family:'Art', tier:4, label:'25 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=25},
+  {id:'art_50',  family:'Art', tier:5, label:'50 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=50},
+  {id:'art_100', family:'Art', tier:6, label:'100 Art', icon:'art', check:s=>(s.catCounts.art||0)>=100},
+
+  /* DISTANCE TRAVELED — miles walked (was "Wanderer"; renamed #180 so the header
+     says what it measures). mile_1/mile_5 preserved (#159); ids UNCHANGED — only
+     the display family moved. reads:'walk' is the writer-side tag AND what the pill
+     keys its "N miles" unit off, so this rename can't silence the units. */
+  {id:'mile_1',   family:'Distance Traveled', tier:1, label:'First Mile', icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
+  {id:'mile_5',   family:'Distance Traveled', tier:2, label:'5 Miles',    icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
+  {id:'mile_10',  family:'Distance Traveled', tier:3, label:'10 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=16093},
+  {id:'mile_25',  family:'Distance Traveled', tier:4, label:'25 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=40234},
+  {id:'mile_50',  family:'Distance Traveled', tier:5, label:'50 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=80467},
+  {id:'mile_100', family:'Distance Traveled', tier:6, label:'100 Miles',  icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=160934}
 ];
 /* #145(2) — DERIVED, NOT A SECOND LIST. `reads:'guides'` tags every badge whose
    inputs come out of state.myHunts, and this set is computed from the tag rather
@@ -11970,7 +11988,7 @@ function hasUnearnedWalkBadge(){
    build, not by luck — a foundIds entry with no foundMeta was never counted by
    the badge grid and is not resurrected here. Returns {count, catCounts}. */
 function reconciledCaptures(){
-  const catCounts = {parks:0, shops:0, barsrest:0, history:0, lore:0};
+  const catCounts = {parks:0, shops:0, barsrest:0, history:0, lore:0, art:0};
   const bump = m => {
     if(!m) return;
     if(m.mode==='park' || m.mode==='trail') catCounts.parks++;
@@ -11978,6 +11996,7 @@ function reconciledCaptures(){
     else if(m.mode==='bars' || m.mode==='restaurants') catCounts.barsrest++;
     else if(m.mode==='history') catCounts.history++;
     else if(m.mode==='lore') catCounts.lore++;
+    else if(m.mode==='art') catCounts.art++;   // #180/#193 — feeds the Art badge family
   };
   let count = 0;
   /* AUTO buckets: union across every shared key, first record per id wins.
@@ -12228,10 +12247,12 @@ function renderAchievements(){
     const color = TIER_COLORS[a.tier] || '#E8622C';
     const tierName = TIER_NAMES[a.tier] || '';
     const achN = (a.label.match(/^\d+/) || ['1'])[0];
-    /* #180 — Wanderer pills carry units ("1 mile" / "5 miles") because a bare "5"
-       under a walking figure could read as anything; every other family's number is
-       self-evident from its sub-header + icon, so those stay bare. Singular only at 1. */
-    const achPill = (a.family === 'Wanderer') ? (achN === '1' ? '1 mile' : achN + ' miles') : achN;
+    /* #180 — the distance family's pills carry units ("1 mile" / "5 miles") because
+       a bare "5" under a walking figure could read as anything; every other family's
+       number is self-evident from its sub-header + icon, so those stay bare. Keyed on
+       reads:'walk' (the mileage tag), NOT the display family name, so renaming the
+       family header never silences the units. Singular only at 1. */
+    const achPill = (a.reads === 'walk') ? (achN === '1' ? '1 mile' : achN + ' miles') : achN;
     html += `<div class="achievement-item ${unlocked?'':'locked'}" title="${escapeHtml(tierName ? tierName + ' — ' + a.label : a.label)}">
         <div class="stamp-circle"${unlocked ? ` style="color:${color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
