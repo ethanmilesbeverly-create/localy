@@ -958,12 +958,18 @@
   }
   .target-row .t-name{font-size:14.5px;font-weight:600;}
   .target-row .t-dist{font-size:12px;color:var(--text-dim);}
-  /* The category label that now leads the sub-line, so the row shows name (title),
+  /* The category label that leads the sub-line, so the row shows name (title),
      then TYPE + distance at a glance (#215 asked for the headline; this answers the
-     "hard to tell what is what" follow-up). Colour is set inline to the pin's
-     category colour so the type is scannable; weight lifts it above the dim
-     distance it sits next to. Inherits the 12px size from .t-dist. */
+     "hard to tell what is what" follow-up). Colour is INHERITED from .t-dist
+     (--text-dim) so it reads the same as the "· N mi away" it sits next to, by
+     directive; the semibold weight is the only thing lifting the type above the
+     distance. One source of truth for that dim colour: .t-dist. */
   .target-row .t-cat{font-weight:600;}
+  /* Right-edge drill-in affordance so the row reads as tappable (it opens the pin
+     sheet). Same chevron as the Explore "Have a code?" row (.code-entry-chevron),
+     but its OWN class so the two surfaces stay independent. .t-meta is flex:1, so
+     this sits hard right; dim so it hints rather than shouts. */
+  .target-row .t-chevron{width:18px;height:18px;color:var(--text-dim);flex-shrink:0;}
   .target-row .t-meta{flex:1;min-width:0;}
   .target-row-detail{margin-top:10px;}
   .target-row-detail .t-desc{font-size:13px;color:var(--text-dim);line-height:1.5;margin:8px 0 0;}
@@ -6607,7 +6613,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03j';
+const APP_VERSION = '2026.08.03l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11686,8 +11692,9 @@ function renderNearbyList(){
         <div class="blaze-mini">${pinSVGsized(t.found?color:'#EDE9DD', t.found, 18,26)}</div>
         <div class="t-meta">
           <div class="t-name">${escapeHtml(t.name)}${t.found?' ✓':''}</div>
-          <div class="t-dist"><span class="t-cat" style="color:${color}">${escapeHtml(cat)}</span> · ${escapeHtml(distTxt)}</div>
+          <div class="t-dist"><span class="t-cat">${escapeHtml(cat)}</span> · ${escapeHtml(distTxt)}</div>
         </div>
+        <svg class="t-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>`;
   }).join('');
