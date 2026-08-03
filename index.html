@@ -3950,13 +3950,15 @@ function generateDiscoverLocal(base){
      default is that they do not.
 
    FRAMING — "what the camera does"
-     FRAME_RADIUS_M          2500  (~1.55 mi)  ~#6257
+     FRAME_RADIUS_M          1500  (~0.9 mi)  ~#6257
        The default map view around you (#47). Deliberately smaller than the blend
        radius: it frames what is walkable, not what is loaded. History: 3000m
-       (~zoom 12) -> 1500m (~zoom 13, so the pin cluster filled the width) ->
-       2500m (~zoom 12) on 2026-08-03 when the content radius doubled to 4000, so
-       the newly-reachable pins are visible on open rather than off-screen until a
-       pinch. Now ~5/8 of REAL_INCLUDE_RADIUS_M; that ratio has never been examined.
+       (~zoom 12) -> 1500m (~zoom 13, so the pin cluster filled the width). HELD at
+       1500 on 2026-08-03 when the content radius doubled to 4000: a 2500m frame
+       was tried and reverted by directive — opening tight reads as "where I am",
+       and that is wanted over showing the new far pins on open (they are reached
+       by pinching out). Now ~3/8 of REAL_INCLUDE_RADIUS_M; that ratio has never
+       been examined.
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
        "Is this pin walkable from here?" (#7). Two uses, both the same question:
        (1) fitMapToHunt() frames YOU together with the pins only when the nearest
@@ -6587,7 +6589,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03f';
+const APP_VERSION = '2026.08.03g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7753,16 +7755,18 @@ const ZOOM_OVERVIEW = 16;
    left the pin cluster occupying only the center third of the width. Lowered
    to 1500m (~0.9mi, ~zoom 13) so the walkable pin spread reaches most of the
    viewport width on open — the framing users expected from the pins they see.
-   RAISED 1500->2500 (~1.55mi, ~zoom 12) on 2026-08-03 when the content radius
-   doubled to 4000m: with the old 1500m frame the newly-reachable pins loaded
-   off-screen until you pinched out, so "further radius" wasn't visible on open.
-   Still deliberately far smaller than the 4000m blend radius — it frames a
-   walkable slice, not the whole loaded set.
+   HELD AT 1500m on 2026-08-03 even though the content radius doubled to 4000m:
+   the wider frame (2500m) was tried and REVERTED by directive — opening tight
+   reads as "where I am" rather than "here is the whole area", and that framing
+   is wanted more than seeing the new far pins on open. The 4000m of content is
+   still there; it is reached by pinching out, not shown at rest. This is now
+   ~3/8 of REAL_INCLUDE_RADIUS_M (was ~3/4 at the 2km content setting); the frame
+   is deliberately a walkable slice, not the loaded set.
    Want it wider? Raise this. Tighter? Lower it. Nothing else needs to
    change. */
 // #65 register — FRAMING, not content. Deliberately smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
-const FRAME_RADIUS_M = 2500;
+const FRAME_RADIUS_M = 1500;
 const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). One number for fitMapToHunt / remote-hunt routing / the guide line.
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
