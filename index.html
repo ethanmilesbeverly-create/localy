@@ -1434,7 +1434,21 @@
      the right, sharing a baseline. Used by both the Stamps and Achievements
      sections on the passport. The link is hidden by JS when there is nothing more
      to see than what the preview already shows. */
-  .passport-section{margin-top:22px;}
+  /* #63 — each passport section is its OWN CARD (--surface + --line + radius, the
+     app's standard card language, same as the stat boxes above), so Stamps and
+     Achievements read as two distinct collections rather than one continuous wall
+     of stamp-circle tiles. NOTE (handoff §5 knockout rule): the earned Gem badge's
+     facet cut is keyed to the surface BEHIND it — on this card that is --surface
+     (#173229), NOT the page --bg — so renderRecentAchievements() passes --surface
+     as the knockout colour; the full grid on #screen-achievements-all stays on
+     --bg and keeps the default #10231C. */
+  .passport-section{
+    margin-top:14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 14px;
+  }
   .passport-section-head{
     display:flex;align-items:baseline;justify-content:space-between;
     gap:12px;margin-bottom:12px;
@@ -6481,7 +6495,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02zc';
+const APP_VERSION = '2026.08.02zd';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12424,15 +12438,19 @@ function renderStampBadge(id, unlocked, dateStr, bottomText){
     + date
     + '</svg>';
 }
-function renderAchievementIcon(iconKey, unlocked, size){
+function renderAchievementIcon(iconKey, unlocked, size, knockoutColor){
   size = size || 28;
   const def = ACH_ICONS[iconKey] || ACH_ICONS.stamp;
   const fill = unlocked ? 'currentColor' : 'none';
   /* #180/#214 — a filled body hides any accent drawn in the same colour. For a
      `knockout` def (the gem's facets sit inside its fill), draw the accent in the
-     tile background (#10231C, --bg) when filled so the interior detail reads as a
-     cut; unfilled and every non-knockout def keep currentColor. */
-  const accentStroke = (unlocked && def.knockout) ? '#10231C' : 'currentColor';
+     surface BEHIND the glyph when filled so the interior detail reads as a cut.
+     That surface differs by screen (handoff §5): the full grid + popup sit on the
+     page --bg (#10231C, the default); the passport preview tiles sit on a
+     --surface card (#63), which passes #173229 here. Unfilled and every
+     non-knockout def keep currentColor. */
+  const knockout = knockoutColor || '#10231C';
+  const accentStroke = (unlocked && def.knockout) ? knockout : 'currentColor';
   const accent = def.accent ? `<path d="${def.accent}" fill="none" stroke="${accentStroke}" stroke-width="1.6" stroke-linecap="round"/>` : '';
   return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;" fill="${fill}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="${def.body}"/>${accent}</svg>`;
 }
@@ -12700,7 +12718,7 @@ function renderRecentAchievements(){
       if(a.icon === 'stamp'){
         inner = renderStampBadge(a.id, true, fmtStampDate(r.ts), (TIER_NAMES[a.tier] || '').toUpperCase());
       } else {
-        inner = '<div class="blaze-mini">' + renderAchievementIcon(a.icon, true) + '</div>';
+        inner = '<div class="blaze-mini">' + renderAchievementIcon(a.icon, true, 28, '#173229') + '</div>';
       }
       return '<div class="achievement-item" title="' + escapeHtml(a.label) + '">'
         + '<div class="stamp-circle" style="color:' + color + '">' + inner + '</div>'
