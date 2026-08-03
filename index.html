@@ -2309,7 +2309,6 @@
       <h4 id="hunt-empty-title">Nothing here yet</h4>
       <p id="hunt-empty-body"></p>
       <div class="he-actions">
-        <button id="hunt-empty-widen" type="button" onclick="widenSearchRadius()">Search wider</button>
         <button class="he-primary" onclick="openSuggestGemScreen()">Add the first one</button>
         <button onclick="goToModeSelect()">Browse something else</button>
       </div>
@@ -3918,22 +3917,27 @@ function generateDiscoverLocal(base){
      GEM_INCLUDE_RADIUS_M   = REAL_INCLUDE_RADIUS_M  ~#4090
        Approved user gems pulled into a blend around the anchor. DERIVED from
        real-place inclusion so a gem reaches no farther than any other pin.
-     REAL_INCLUDE_RADIUS_M   2000  (~1.2 mi)  ~#3564
+     REAL_INCLUDE_RADIUS_M   4000  (~2.5 mi)  ~#3564
        OSM/Wikipedia places pulled into the same blend. The one source both this
-       group's other radii derive from. MUST STAY BELOW DISCOVER_FALLOFF_M (2500),
-       and that ceiling — not "how far is interesting" — is what sets it. Any pin
-       the blend places farther from you than the falloff is culled and replaced
-       with a nearer one by refreshDiscoverLocalIfNeeded() on the very next GPS
-       tick, so an include radius ABOVE the falloff guarantees a visible
-       remove-and-replace swap on the first fix (the bug behind 9000/16000/5000 —
-       all of which sat above the 2500 falloff). 2000 leaves ~500 m of headroom
-       for GPS drift so blend pins are not culled at rest. Supply is not the limit
-       (a single tile returned 113 real places); ATL_TARGET concentrates the cap
-       inside this radius.
+       group's other radii derive from. Coupling rule: MUST STAY <= DISCOVER_FALLOFF_M,
+       because any pin the blend places farther from you than the falloff is culled
+       by refreshDiscoverLocalIfNeeded() on the very next GPS tick (replacement is
+       null while SHOW_PROCEDURAL_FILLER is false, so the pin just DROPS) — an
+       include radius ABOVE the falloff guarantees a visible remove-and-drop on the
+       first fix (the bug behind 9000/16000/5000, all of which sat above the old
+       2500 falloff). RAISED 2000->4000 on 2026-08-03 to widen "near me" for
+       everyone, and DISCOVER_FALLOFF_M was raised 2500->4500 in the same pass to
+       keep the coupling; 4000 sits just under the 4200 fetched bound, so it reveals
+       nearly the whole tile with no server change, and 4500 leaves ~500 m of GPS-
+       drift headroom above it. Supply is not the limit (a single tile returned 113
+       real places); ATL_TARGET concentrates the cap inside this radius.
      OVERPASS_RADIUS_M       4200  (~2.6 mi)  ~#3565
        Query radius asked of Overpass. NOT a display filter — it is the outer
-       bound of what the server could ever have, so REAL_INCLUDE_RADIUS_M can
-       only ever filter DOWN from tiles built at this size.
+       bound of what a tile can contain, so REAL_INCLUDE_RADIUS_M can only ever
+       filter DOWN from tiles built at this size. With the include radius now at
+       4000 there is only ~200 m of headroom left here: reaching PAST ~4.2 km needs
+       THIS raised too, which is a `nearby-places` (index.js) change — a second
+       deploy target and heavier/slower cold queries — not a one-file edit.
 
      >>> THE GEM-VS-REAL GAP IS DECIDED: EQUALIZED. <<<
      Formerly gems reached 15 km while real places stopped at 9 km, so between
@@ -3946,13 +3950,13 @@ function generateDiscoverLocal(base){
      default is that they do not.
 
    FRAMING — "what the camera does"
-     FRAME_RADIUS_M          1500  (~0.9 mi)  ~#6257
-       The default map view around you (#47). Deliberately much smaller than the
-       blend radius: it frames what is walkable, not what is loaded. Was 3000m
-       (~zoom 12); lowered to 1500m (~zoom 13) so the pin cluster fills the
-       viewport width on open instead of sitting in the center third. Now
-       roughly three-quarters of REAL_INCLUDE_RADIUS_M (at the 2 km setting), and
-       that ratio has never been examined.
+     FRAME_RADIUS_M          2500  (~1.55 mi)  ~#6257
+       The default map view around you (#47). Deliberately smaller than the blend
+       radius: it frames what is walkable, not what is loaded. History: 3000m
+       (~zoom 12) -> 1500m (~zoom 13, so the pin cluster filled the width) ->
+       2500m (~zoom 12) on 2026-08-03 when the content radius doubled to 4000, so
+       the newly-reachable pins are visible on open rather than off-screen until a
+       pinch. Now ~5/8 of REAL_INCLUDE_RADIUS_M; that ratio has never been examined.
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
        "Is this pin walkable from here?" (#7). Two uses, both the same question:
        (1) fitMapToHunt() frames YOU together with the pins only when the nearest
@@ -3988,9 +3992,13 @@ function generateDiscoverLocal(base){
        seventh independent number. The worked example of the standing rule.
 
    PROCEDURAL / UI NUDGES
-     DISCOVER_FALLOFF_M      2500   ~#3332
-       A Discover Local spot this far from you is swapped for a fresh one.
-       Largely inert while SHOW_PROCEDURAL_FILLER is false (#37).
+     DISCOVER_FALLOFF_M      4500   ~#3332
+       A Discover Local spot this far from you is swapped for a fresh one (or, with
+       SHOW_PROCEDURAL_FILLER false since #37, simply dropped). RAISED 2500->4500
+       on 2026-08-03 in lockstep with REAL_INCLUDE_RADIUS_M (include<=falloff). At
+       4500 it sits above the 4200 fetched bound, so no real pin can reach it and
+       it now culls nothing — it exists only to hold ~500m of headroom above the
+       4000 content radius. Keep it >= REAL_INCLUDE_RADIUS_M + ~500.
      SEARCH_HERE_DIST_M       600   ~#3333
        Map drift before the "Search this area" pill appears (#8, #59). A UI
        trigger, not a content radius. Correctly independent.
@@ -4019,10 +4027,7 @@ function nearbyApprovedGems(base, excludeIds, limit, bucket){
     .filter(g=>g.status==='approved' && !excludeIds.includes(g.id) &&
                (!bucket || g.bucket===bucket || (bucket==='history' && g.bucket==='lore')))
     .map(g=>({...g, dist:haversine(base.lat, base.lng, g.lat, g.lng)}))
-    // #28b — state.radiusExpand (default 1) widens the inclusion radius when the
-    // user taps "Search wider" on the empty card. Moves in lockstep with the real
-    // filter below so gems and real places keep one radius (#65 equalise).
-    .filter(g=>g.dist<=GEM_INCLUDE_RADIUS_M*(state.radiusExpand||1))
+    .filter(g=>g.dist<=GEM_INCLUDE_RADIUS_M)
     .sort((a,b)=>a.dist-b.dist)
     .slice(0,limit);
 }
@@ -4159,7 +4164,7 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds, exclude
   return {id:'dlr'+uid, name:shuffled(RESTAURANT_NAMES)[0], lat:p.lat, lng:p.lng, desc:'A local restaurant nearby.', category:'restaurants'};
 }
 
-const DISCOVER_FALLOFF_M = 2500; // #65 register: procedural nudge, not a content radius. Swaps a stale Discover Local spot for a fresh nearby one. CEILING for REAL_INCLUDE_RADIUS_M: the blend must not place a pin farther than this, or it is culled and replaced on the next GPS tick (the remove-and-replace swap). If this drops, REAL_INCLUDE_RADIUS_M must drop with it.
+const DISCOVER_FALLOFF_M = 4500; // #65 register: procedural nudge, not a content radius. Swaps a stale Discover Local spot for a fresh nearby one. CEILING for REAL_INCLUDE_RADIUS_M: the blend must not place a pin farther than this, or it is culled (replacement is null while SHOW_PROCEDURAL_FILLER is false, so the pin just DROPS) on the next GPS tick. RAISED 2500->4500 on 2026-08-03 IN LOCKSTEP with REAL_INCLUDE_RADIUS_M 2000->4000 — the coupling is include<=falloff, so widening the content radius past the old 2500 required moving this too. At 4500 (>OVERPASS_RADIUS_M 4200, the fetched bound) no real pin can ever sit past it, so the falloff no longer culls content at all; it keeps ~500m of GPS-drift headroom above the 4000 include radius. If REAL_INCLUDE_RADIUS_M drops, this may drop with it (keep it >= include + ~500).
 const SEARCH_HERE_DIST_M = 600;  // #65 register: UI trigger for the "Search this area" pill (#8/#59). Lower = more eager, higher = calmer.
 function huntAnchor(){
   /* #59 (correction) — the centroid is the right anchor ONLY when content is
@@ -4221,7 +4226,7 @@ function maybeShowSearchHere(){
      (1) setCurrentHunt() ends with an unconditional centerOnPlayer(), so the
          regenerated hunt snapped the viewport back to you immediately;
      (2) on the next GPS tick refreshDiscoverLocalIfNeeded() swaps out any
-         Discover-Local point more than DISCOVER_FALLOFF_M (2.5km) from your REAL
+         Discover-Local point more than DISCOVER_FALLOFF_M (4.5km) from your REAL
          position — every point you just searched for — and since procedural
          filler is off (#37) the replacements come back null and the slots simply
          drop, i.e. the searched area quietly empties out;
@@ -4262,37 +4267,6 @@ function searchThisArea(){
     state._preserveViewOnNextHunt = false;
   }
   document.getElementById('search-here-btn').classList.remove('show');
-}
-/* #28b — WIDEN THE RADIUS. Goal is exactly that: show places farther out.
-   The tile is already queried to OVERPASS_RADIUS_M (4.2km) but the blend only
-   INCLUDES to REAL_INCLUDE_RADIUS_M (2km), so widening is revealing the
-   already-fetched 2-4.2km ring — no new fetch, no cold-load wait.
-
-   THE ONE TRAP, AND WHY THIS REUSES searchThisArea()'s GUARD. The widened radius
-   (up to 4.2km) is past DISCOVER_FALLOFF_M (2.5km), and on a live discoverlocal
-   hunt refreshDiscoverLocalIfNeeded() culls-and-replaces any pin past the falloff
-   on the next GPS tick — the 2026-07-30 "pins get removed and replaced with
-   closer ones" regression (#65). That cull is suppressed whenever
-   state.searchedArea is set, so anchoring the content here as a searched area
-   BEFORE regenerating keeps the revealed far pins from being swapped back out.
-   radiusExpand is reset by any fresh hunt via setCurrentHunt (see there). */
-function widenSearchRadius(){
-  if((state.radiusExpand||1) > 1) return; // already widened; nothing more to reveal without a wider fetch
-  let base = state.browsingLocation || state.searchedArea || state.me;
-  if(!base && state.leafletMap){ const c = state.leafletMap.getCenter(); base = {lat:c.lat, lng:c.lng}; }
-  if(!base || base.lat == null) return;
-  base = {lat: base.lat, lng: base.lng};
-  state.radiusExpand = OVERPASS_RADIUS_M / REAL_INCLUDE_RADIUS_M; // reveal to the fetched bound, no further
-  if(!state.browsingLocation){
-    state.searchedArea = base;   // suppress the DISCOVER_FALLOFF_M cull (#8/#65)
-    state.followMe = false;      // or the next GPS tick pans off the area you just widened
-    const lb = document.getElementById('locate-btn'); if(lb) lb.classList.remove('following');
-  }
-  state.localHuntOrigin = base;
-  state._preserveViewOnNextHunt = true; // keep the view AND keep radiusExpand through setCurrentHunt
-  try{ regenerateCurrentHuntAt(base); }
-  finally{ state._preserveViewOnNextHunt = false; }
-  const ee = document.getElementById('hunt-empty'); if(ee) ee.classList.remove('show'); // the re-render decides if it comes back
 }
 function refreshDiscoverLocalIfNeeded(lat, lng){
   if(state.browsingLocation || state.searchedArea) return; // browsing or searching elsewhere on purpose — real-position drift must not rewrite that content (#8)
@@ -4432,14 +4406,14 @@ function dismissStaleHunt(){
    inside the sandboxed in-app preview pane, same as Supabase.
    ========================================================= */
 const REAL_TILE_DEG = 0.05;          // ~5.5km tiles — nearby positions reuse one fetch
-/* #65 register — CONTENT SELECTION. Surfaces real places within ~1.2 mi of the
+/* #65 register — CONTENT SELECTION. Surfaces real places within ~2.5 mi of the
    anchor, and is the source two other constants DERIVE from rather than
    restate: CAPTURED_INJECT_RADIUS_M and LIST_RANGE_M. Anything that is the same
    question joins them here instead of becoming a new number.
    The gem-vs-real gap is now CLOSED: GEM_INCLUDE_RADIUS_M derives from this
    constant just below, so both radii move together — see the register block
    above nearbyApprovedGems(). */
-const REAL_INCLUDE_RADIUS_M = 2000;
+const REAL_INCLUDE_RADIUS_M = 4000;
 /* #65 register — CONTENT SELECTION. DERIVED, not a second number: user gems and
    real OSM/Wikipedia places now share ONE inclusion radius, so no pin type
    reaches farther than another and the 9-15 km gems-only band is gone. Declared
@@ -5018,11 +4992,7 @@ function nearbyRealPlaces(base, category, limit, excludeIds){
   return list
     .filter(p=>!ex.includes(p.id))
     .map(p=>({...p, dist:haversine(base.lat, base.lng, p.lat, p.lng)}))
-    // #28b — widen on demand. The tile is already FETCHED to OVERPASS_RADIUS_M
-    // (4.2km) and only SHOWN to REAL_INCLUDE_RADIUS_M (2km); state.radiusExpand
-    // reveals the already-fetched ring with no re-fetch. Capped at the query
-    // bound by widenSearchRadius() so this never asks for un-fetched distance.
-    .filter(p=>p.dist<=REAL_INCLUDE_RADIUS_M*(state.radiusExpand||1))
+    .filter(p=>p.dist<=REAL_INCLUDE_RADIUS_M)
     .sort((a,b)=>a.dist-b.dist)
     .slice(0, limit);
 }
@@ -5074,7 +5044,7 @@ function buildAllThingsLocal(base){
 
      ROUND-ROBIN, AND WHY IT WASN'T ENOUGH ALONE. Round-robin shares the target
      across categories that have stock. But "stock" was measured over the whole
-     REAL_INCLUDE_RADIUS_M (2km) blend radius, so anchored AT a cemetery the
+     REAL_INCLUDE_RADIUS_M (4km) blend radius, so anchored AT a cemetery the
      surrounding city fills every non-history bucket within 2km, round-robin
      splits the 15 slots six ways, history gets ~2-3, and ~1 lands inside a tight
      cemetery frame. Correct diversification of the wrong scope. (First shipped
@@ -7783,11 +7753,16 @@ const ZOOM_OVERVIEW = 16;
    left the pin cluster occupying only the center third of the width. Lowered
    to 1500m (~0.9mi, ~zoom 13) so the walkable pin spread reaches most of the
    viewport width on open — the framing users expected from the pins they see.
+   RAISED 1500->2500 (~1.55mi, ~zoom 12) on 2026-08-03 when the content radius
+   doubled to 4000m: with the old 1500m frame the newly-reachable pins loaded
+   off-screen until you pinched out, so "further radius" wasn't visible on open.
+   Still deliberately far smaller than the 4000m blend radius — it frames a
+   walkable slice, not the whole loaded set.
    Want it wider? Raise this. Tighter? Lower it. Nothing else needs to
    change. */
-// #65 register — FRAMING, not content. Deliberately far smaller than the blend
+// #65 register — FRAMING, not content. Deliberately smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
-const FRAME_RADIUS_M = 1500;
+const FRAME_RADIUS_M = 2500;
 const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). One number for fitMapToHunt / remote-hunt routing / the guide line.
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
@@ -8778,10 +8753,6 @@ function setCurrentHunt(hunt, deferCaptured){
   refreshTargetsUI();
   refreshTrackUI();
   saveProgress();
-  // #28b — a FRESH hunt (category switch, recenter, guide open) drops any widen;
-  // a preserve-view rebuild (widen itself, or "Search this area") keeps it. Read
-  // the flag before the block below clears it.
-  if(!state._preserveViewOnNextHunt) state.radiusExpand = 1;
   // #8 — skip the snap-home when the hunt was rebuilt for an area the user
   // deliberately panned to. Every other path still recenters as before.
   if(state._preserveViewOnNextHunt){
@@ -11790,11 +11761,6 @@ function updateHuntEmptyState(count){
   const copy = EMPTY_COPY[mode] || EMPTY_DEFAULT;
   document.getElementById('hunt-empty-title').textContent = copy.title;
   document.getElementById('hunt-empty-body').textContent = copy.body;
-  // #28b — offer "Search wider" only where it can do something: a real-place
-  // backed mode that has not already been widened. Once widened (radiusExpand>1)
-  // an empty result means the wider ring is empty too, so hide the no-op.
-  const widenBtn = document.getElementById('hunt-empty-widen');
-  if(widenBtn) widenBtn.style.display = (REALPLACE_BACKED(mode) && (state.radiusExpand||1) <= 1) ? '' : 'none';
   el.classList.add('show');
   assertViewportCentred(el, '#95', '#hunt-empty');
 }
