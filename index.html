@@ -4672,6 +4672,29 @@ function isLowValueWikiArticle(title, extract){
   return WIKI_STOP_RE.test(opener);
 }
 
+/* --- #102: classify a wiki article from its opener (MIRROR of index.js — keep
+   identical). The Wikipedia path stamped category:'history' on every article, so
+   a metropark was filed as history (Pearson Metropark: 'is a regional park in
+   ...'). This reads the already-fetched opener and maps park-family nouns to
+   'park', reusing WIKI_STOP_RE's three guards (copula-anchored, ≤3 non-function
+   adjectives, noun followed by a preposition or punctuation) so 'regional' sits
+   in the adjective run while 'parkway'/'parking'/'park ranger' fail the trailing
+   lookahead. CLASSIFIES, NEVER DROPS — dropping lakes/bridges is a relevance call
+   deferred to its own row. Park family only for now; returns null (→ 'history'
+   default) otherwise. Bare 'garden' is excluded (beer garden = bars); only
+   'botanical garden'. WHERE THIS BITES ON THE CLIENT: the live copy runs in
+   applyRealPlaces() (below), re-classifying a wiki 'history' pin that arrives from
+   a tile cached before the Edge Function was redeployed — the same second-net
+   role the #96 filter plays there. The mirror in fetchWikipedia() is dead, kept in
+   lockstep so a resurrected mirror does not reship the defect. */
+const WIKI_PARK_RE = /\b(?:is|was)\s+(?:one\s+of\s+the|a|an|the)\s+(?:(?!(?:in|of|on|to|at|for|by|with|from|near|within|the|a|an|and)\b)[^\s.]+\s+){0,3}?(?:metroparks?|metropolitan\s+parks?|regional\s+parks?|state\s+parks?|national\s+parks?|county\s+parks?|city\s+parks?|municipal\s+parks?|public\s+parks?|linear\s+parks?|urban\s+parks?|nature\s+(?:reserves?|preserves?)|nature\s+cent(?:er|re)s?|wildlife\s+(?:refuges?|preserves?)|botanical\s+gardens?|arboreta|arboretums?|parks?)(?=\s*(?:[,.;:()\[\]{}"\u201c\u201d\u2014]|$)|\s+(?:in|of|on|and|within|near|located|situated|serving|which|that|for|between)\b)/i;
+
+function classifyWikiOpener(title, extract){
+  const opener = wikiOpener(extract);
+  if(opener && WIKI_PARK_RE.test(opener)) return 'park';
+  return null; /* fall through to the caller's 'history' default */
+}
+
 /* --- Wikipedia GeoSearch: nearby articles → real landmark/history points,
    with genuine intro-sentence descriptions, all in one request.
    DEAD PATH since #37 — kept in lockstep with index.js so the two never drift.
@@ -4708,7 +4731,10 @@ async function fetchWikipedia(base){
          index.js copy does not — that divergence is #113's to reconcile, not
          this change's. */
       desc: desc || null,
-      category:'history', source:'wiki', real:true
+      /* #102 — classify from the opener (park-family → 'park'); mirrors index.js
+         in lockstep so a resurrected mirror does not reship the hardcoded
+         category. The live client reclassify is in applyRealPlaces(). */
+      category: classifyWikiOpener(pg.title, raw) || 'history', source:'wiki', real:true
     });
   });
   return out;
@@ -4784,6 +4810,24 @@ function applyRealPlaces(key, base, list){
   });
   if(wikiDropped) console.log('[localy] #96 dropped '+wikiDropped+' settlement/school wiki pin(s) from tile '+key);
   _realDebug.lastWikiDropped = wikiDropped;
+  /* #102 — THE LIVE CLIENT RECLASSIFY, same second-net role as the #96 drop filter
+     one block up. A tile cached before the Edge Function was redeployed carries its
+     wiki pins as category:'history' by construction, so a metropark reads (and
+     colours, #16) as history until CACHE_VERSION v18 orphans the tile. This fixes it
+     on the way IN: a wiki 'history' pin whose opener classifies as a park is recoloured
+     here, immediately, for the cached case. A freshly-fetched tile arrives already
+     classified by the server, so category!=='history' and this is a no-op — no double
+     work, no override of a server decision. OSM pins are untouched (source guard).
+     Counted, not silent (#94). */
+  let wikiReclassed = 0;
+  filtered.forEach(p => {
+    if(p && p.source === 'wiki' && p.category === 'history'){
+      const c = classifyWikiOpener(p.name, p.desc);
+      if(c && c !== 'history'){ p.category = c; wikiReclassed++; }
+    }
+  });
+  if(wikiReclassed) console.log('[localy] #102 reclassified '+wikiReclassed+' wiki pin(s) off history on tile '+key);
+  _realDebug.lastWikiReclassed = wikiReclassed;
   /* #78c — AN AREA THAT IS ALL CHAINS IS EMPTY *TO THIS APP*, and it must say
      so. This early return used to be the quietest path in the file: a strip mall
      with twelve franchises came back as a full list, got filtered to nothing,
@@ -6503,7 +6547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03b';
+const APP_VERSION = '2026.08.03c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
