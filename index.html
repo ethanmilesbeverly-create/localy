@@ -5723,7 +5723,15 @@ async function loadPersonal(quiet){
     v=>{ state.totalWalkedMeters = v ? (JSON.parse(v).totalWalkedMeters||0) : 0; },
     ()=>{ state.totalWalkedMeters = 0; });
   await loadKey('unlocked-achievements',
-    v=>{ state.unlockedAchievements = v ? new Set(JSON.parse(v)) : new Set(); },
+    /* #180 — prune ledger ids that no longer name a rung in ACHIEVEMENTS. This is
+       RETIREMENT, not un-earning: the lore_* ids were removed when Lore merged into
+       History & Lore, and a persisted lore_* would otherwise sit in the record with
+       no tile to light and trip assertAchievementRecord()'s lit < record check. The
+       merged history_* rung re-lights from the same captures (its check reads
+       catCounts.lore), so no earned achievement is actually lost. #83 forbids
+       un-earning a badge that still EXISTS; a retired rung does not. */
+    v=>{ const raw = v ? JSON.parse(v) : []; const ids = new Set(ACHIEVEMENTS.map(a=>a.id));
+         state.unlockedAchievements = new Set(raw.filter(id=>ids.has(id))); },
     ()=>{ state.unlockedAchievements = new Set(); });
   await loadKey('has-captured-once',
     v=>{ state.hasCapturedOnce = v ? JSON.parse(v) === true : false; },
@@ -6357,7 +6365,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02r';
+const APP_VERSION = '2026.08.02s';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11793,10 +11801,7 @@ const ACH_ICONS = {
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
      body/accent split bag/bust already use. */
-  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'},
-  /* #24 revamp — an open book for Lore & Legends (the one map category that had
-     no badge). accent is the centre spine. */
-  book: {vb:'0 0 24 24', body:'M12 6 C10 4 6 4 4 5 V19 C6 18 10 18 12 20 C14 18 18 18 20 19 V5 C18 4 14 4 12 6 Z', accent:'M12 6 V20'}
+  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21'}
 };
 /* #24 REVAMP v2 — TIER RAMP. The six rungs of every family map to these six tiers
    by POSITION (tier 1 = the family's easiest rung, tier 6 = its hardest). The tier
@@ -11881,21 +11886,29 @@ const ACHIEVEMENTS = [
   {id:'barrest_100', family:'Bars & Restaurants', tier:6, label:'100 Bars & Restaurants', icon:'glass', check:s=>s.catCounts.barsrest>=100},
 
   // HISTORY
-  {id:'history_3',   family:'History', tier:1, label:'3 History Spots',   icon:'bust', check:s=>s.catCounts.history>=3},
-  {id:'history_5',   family:'History', tier:2, label:'5 History Spots',   icon:'bust', check:s=>s.catCounts.history>=5},
-  {id:'history_10',  family:'History', tier:3, label:'10 History Spots',  icon:'bust', check:s=>s.catCounts.history>=10},
-  {id:'history_25',  family:'History', tier:4, label:'25 History Spots',  icon:'bust', check:s=>s.catCounts.history>=25},
-  {id:'history_50',  family:'History', tier:5, label:'50 History Spots',  icon:'bust', check:s=>s.catCounts.history>=50},
-  {id:'history_100', family:'History', tier:6, label:'100 History Spots', icon:'bust', check:s=>s.catCounts.history>=100},
+  /* HISTORY & LORE — #192 merged the History and Lore Explore cards into one
+     "History & Lore" category (stored mode 'history'; legacy 'lore' captures still
+     resolve). #180 mirrors that merge HERE: this is now ONE family on the COMBINED
+     count history + lore, so the two ladders read as one section like the Explore
+     card. The history_* ids are PRESERVED and carry the merged ladder; the lore_*
+     ids are RETIRED (removed below, reserved not reused — #24's retired-Guides
+     precedent). A pre-merge lore capture still counts: it lands in catCounts.lore
+     and the combined check below lights the same rung it would have. Icon stays
+     'bust' to match the Explore card's 'history' glyph; 'book' is deleted above. */
+  {id:'history_3',   family:'History & Lore', tier:1, label:'3 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=3},
+  {id:'history_5',   family:'History & Lore', tier:2, label:'5 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=5},
+  {id:'history_10',  family:'History & Lore', tier:3, label:'10 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=10},
+  {id:'history_25',  family:'History & Lore', tier:4, label:'25 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=25},
+  {id:'history_50',  family:'History & Lore', tier:5, label:'50 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=50},
+  {id:'history_100', family:'History & Lore', tier:6, label:'100 History & Lore', icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=100},
 
-  /* LORE & LEGENDS — the map category that had no badge until the revamp; the
-     'lore' mode is now counted in computeAchievementStats(). */
-  {id:'lore_3',   family:'Lore & Legends', tier:1, label:'3 Lore & Legends',   icon:'book', check:s=>s.catCounts.lore>=3},
-  {id:'lore_5',   family:'Lore & Legends', tier:2, label:'5 Lore & Legends',   icon:'book', check:s=>s.catCounts.lore>=5},
-  {id:'lore_10',  family:'Lore & Legends', tier:3, label:'10 Lore & Legends',  icon:'book', check:s=>s.catCounts.lore>=10},
-  {id:'lore_25',  family:'Lore & Legends', tier:4, label:'25 Lore & Legends',  icon:'book', check:s=>s.catCounts.lore>=25},
-  {id:'lore_50',  family:'Lore & Legends', tier:5, label:'50 Lore & Legends',  icon:'book', check:s=>s.catCounts.lore>=50},
-  {id:'lore_100', family:'Lore & Legends', tier:6, label:'100 Lore & Legends', icon:'book', check:s=>s.catCounts.lore>=100},
+  /* LORE & LEGENDS — RETIRED into History & Lore above (#180/#192). The six lore_*
+     ids are reserved, not reused; a lore capture now counts toward the merged
+     history_* ladder via its combined check. `catCounts.lore` is still produced by
+     computeAchievementStats() (legacy captures) and is READ by that combined check,
+     so nothing counted before this pass stops counting. Any lore_* id left in an
+     old ledger is pruned at load (see loadKey('unlocked-achievements')) so the #83
+     record count stays exact — retiring a rung, not un-earning a live badge. */
 
   // WANDERER — miles walked. mile_1/mile_5 preserved (#159); 10/25/50/100 new. reads:'walk'.
   {id:'mile_1',   family:'Wanderer', tier:1, label:'First Mile', icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
