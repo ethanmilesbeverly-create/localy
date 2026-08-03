@@ -6365,7 +6365,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02t';
+const APP_VERSION = '2026.08.02u';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11842,54 +11842,54 @@ const TIER_NAMES  = {1:'Bronze', 2:'Silver', 3:'Gold', 4:'Platinum', 5:'Diamond'
    every category, incl. Lore) fire on the unscoped capture check. */
 const ACHIEVEMENTS = [
   // STAMPS — total captures, any category. Fires on capture (unscoped).
-  {id:'first_stamp', family:'Stamps', tier:1, label:'First Stamp', icon:'stamp', check:s=>s.totalFound>=1},
-  {id:'stamps_5',    family:'Stamps', tier:2, label:'5 Stamps',    icon:'stamp', check:s=>s.totalFound>=5},
-  {id:'stamps_10',   family:'Stamps', tier:3, label:'10 Stamps',   icon:'stamp', check:s=>s.totalFound>=10},
-  {id:'stamps_25',   family:'Stamps', tier:4, label:'25 Stamps',   icon:'stamp', check:s=>s.totalFound>=25},
-  {id:'stamps_50',   family:'Stamps', tier:5, label:'50 Stamps',   icon:'stamp', check:s=>s.totalFound>=50},
-  {id:'stamps_100',  family:'Stamps', tier:6, label:'100 Stamps',  icon:'stamp', check:s=>s.totalFound>=100},
+  {id:'first_stamp', family:'Stamps Collected', tier:1, label:'First Stamp', icon:'stamp', check:s=>s.totalFound>=1},
+  {id:'stamps_5',    family:'Stamps Collected', tier:2, label:'5 Stamps',    icon:'stamp', check:s=>s.totalFound>=5},
+  {id:'stamps_10',   family:'Stamps Collected', tier:3, label:'10 Stamps',   icon:'stamp', check:s=>s.totalFound>=10},
+  {id:'stamps_25',   family:'Stamps Collected', tier:4, label:'25 Stamps',   icon:'stamp', check:s=>s.totalFound>=25},
+  {id:'stamps_50',   family:'Stamps Collected', tier:5, label:'50 Stamps',   icon:'stamp', check:s=>s.totalFound>=50},
+  {id:'stamps_100',  family:'Stamps Collected', tier:6, label:'100 Stamps',  icon:'stamp', check:s=>s.totalFound>=100},
 
   /* GEMS — the ACT of submitting, not approval (see #24). gemsSubmittedCount is
      state.gemSubmissions.length, counted at every status. */
-  {id:'gem_submitted', family:'Gems', tier:1, label:'First Gem', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1},
-  {id:'gems_5',        family:'Gems', tier:2, label:'5 Gems',    icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=5},
-  {id:'gems_10',       family:'Gems', tier:3, label:'10 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=10},
-  {id:'gems_25',       family:'Gems', tier:4, label:'25 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=25},
-  {id:'gems_50',       family:'Gems', tier:5, label:'50 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=50},
-  {id:'gems_100',      family:'Gems', tier:6, label:'100 Gems',  icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=100},
+  {id:'gem_submitted', family:'Gems Submitted', tier:1, label:'First Gem', icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=1},
+  {id:'gems_5',        family:'Gems Submitted', tier:2, label:'5 Gems',    icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=5},
+  {id:'gems_10',       family:'Gems Submitted', tier:3, label:'10 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=10},
+  {id:'gems_25',       family:'Gems Submitted', tier:4, label:'25 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=25},
+  {id:'gems_50',       family:'Gems Submitted', tier:5, label:'50 Gems',   icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=50},
+  {id:'gems_100',      family:'Gems Submitted', tier:6, label:'100 Gems',  icon:'gem', reads:'submissions', check:s=>s.gemsSubmittedCount>=100},
 
   /* GUIDES — MAKING only (authoredHuntsCount, #145's !external count). 'hunt_maker'
      keeps its load-bearing id (#56). Top tiers (50/100) are aspirational. */
-  {id:'hunt_maker', family:'Guides', tier:1, label:'First Guide', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
-  {id:'guides_5',   family:'Guides', tier:2, label:'5 Guides',    icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=5},
-  {id:'guides_10',  family:'Guides', tier:3, label:'10 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=10},
-  {id:'guides_25',  family:'Guides', tier:4, label:'25 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=25},
-  {id:'guides_50',  family:'Guides', tier:5, label:'50 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=50},
-  {id:'guides_100', family:'Guides', tier:6, label:'100 Guides',  icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=100},
+  {id:'hunt_maker', family:'Guides Created', tier:1, label:'First Guide', icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=1},
+  {id:'guides_5',   family:'Guides Created', tier:2, label:'5 Guides',    icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=5},
+  {id:'guides_10',  family:'Guides Created', tier:3, label:'10 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=10},
+  {id:'guides_25',  family:'Guides Created', tier:4, label:'25 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=25},
+  {id:'guides_50',  family:'Guides Created', tier:5, label:'50 Guides',   icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=50},
+  {id:'guides_100', family:'Guides Created', tier:6, label:'100 Guides',  icon:'plus', reads:'guides', check:s=>s.authoredHuntsCount>=100},
 
   // PARKS & TRAILS — 5/10/25 existing (ids preserved); 3/50/100 new. catCounts.parks.
-  {id:'park_3',   family:'Parks & Trails', tier:1, label:'3 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=3},
-  {id:'park_5',   family:'Parks & Trails', tier:2, label:'5 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=5},
-  {id:'park_10',  family:'Parks & Trails', tier:3, label:'10 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=10},
-  {id:'park_25',  family:'Parks & Trails', tier:4, label:'25 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=25},
-  {id:'park_50',  family:'Parks & Trails', tier:5, label:'50 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=50},
-  {id:'park_100', family:'Parks & Trails', tier:6, label:'100 Parks & Trails', icon:'tree', check:s=>s.catCounts.parks>=100},
+  {id:'park_3',   family:'Parks & Trails Visited', tier:1, label:'3 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=3},
+  {id:'park_5',   family:'Parks & Trails Visited', tier:2, label:'5 Parks & Trails',   icon:'tree', check:s=>s.catCounts.parks>=5},
+  {id:'park_10',  family:'Parks & Trails Visited', tier:3, label:'10 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=10},
+  {id:'park_25',  family:'Parks & Trails Visited', tier:4, label:'25 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=25},
+  {id:'park_50',  family:'Parks & Trails Visited', tier:5, label:'50 Parks & Trails',  icon:'tree', check:s=>s.catCounts.parks>=50},
+  {id:'park_100', family:'Parks & Trails Visited', tier:6, label:'100 Parks & Trails', icon:'tree', check:s=>s.catCounts.parks>=100},
 
   // SHOPS
-  {id:'shop_3',   family:'Shops', tier:1, label:'3 Shops',   icon:'bag', check:s=>s.catCounts.shops>=3},
-  {id:'shop_5',   family:'Shops', tier:2, label:'5 Shops',   icon:'bag', check:s=>s.catCounts.shops>=5},
-  {id:'shop_10',  family:'Shops', tier:3, label:'10 Shops',  icon:'bag', check:s=>s.catCounts.shops>=10},
-  {id:'shop_25',  family:'Shops', tier:4, label:'25 Shops',  icon:'bag', check:s=>s.catCounts.shops>=25},
-  {id:'shop_50',  family:'Shops', tier:5, label:'50 Shops',  icon:'bag', check:s=>s.catCounts.shops>=50},
-  {id:'shop_100', family:'Shops', tier:6, label:'100 Shops', icon:'bag', check:s=>s.catCounts.shops>=100},
+  {id:'shop_3',   family:'Shops Visited', tier:1, label:'3 Shops',   icon:'bag', check:s=>s.catCounts.shops>=3},
+  {id:'shop_5',   family:'Shops Visited', tier:2, label:'5 Shops',   icon:'bag', check:s=>s.catCounts.shops>=5},
+  {id:'shop_10',  family:'Shops Visited', tier:3, label:'10 Shops',  icon:'bag', check:s=>s.catCounts.shops>=10},
+  {id:'shop_25',  family:'Shops Visited', tier:4, label:'25 Shops',  icon:'bag', check:s=>s.catCounts.shops>=25},
+  {id:'shop_50',  family:'Shops Visited', tier:5, label:'50 Shops',  icon:'bag', check:s=>s.catCounts.shops>=50},
+  {id:'shop_100', family:'Shops Visited', tier:6, label:'100 Shops', icon:'bag', check:s=>s.catCounts.shops>=100},
 
   // BARS & RESTAURANTS
-  {id:'barrest_3',   family:'Bars & Restaurants', tier:1, label:'3 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=3},
-  {id:'barrest_5',   family:'Bars & Restaurants', tier:2, label:'5 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=5},
-  {id:'barrest_10',  family:'Bars & Restaurants', tier:3, label:'10 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=10},
-  {id:'barrest_25',  family:'Bars & Restaurants', tier:4, label:'25 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=25},
-  {id:'barrest_50',  family:'Bars & Restaurants', tier:5, label:'50 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=50},
-  {id:'barrest_100', family:'Bars & Restaurants', tier:6, label:'100 Bars & Restaurants', icon:'glass', check:s=>s.catCounts.barsrest>=100},
+  {id:'barrest_3',   family:'Bars & Restaurants Visited', tier:1, label:'3 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=3},
+  {id:'barrest_5',   family:'Bars & Restaurants Visited', tier:2, label:'5 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=5},
+  {id:'barrest_10',  family:'Bars & Restaurants Visited', tier:3, label:'10 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=10},
+  {id:'barrest_25',  family:'Bars & Restaurants Visited', tier:4, label:'25 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=25},
+  {id:'barrest_50',  family:'Bars & Restaurants Visited', tier:5, label:'50 Bars & Restaurants',  icon:'glass', check:s=>s.catCounts.barsrest>=50},
+  {id:'barrest_100', family:'Bars & Restaurants Visited', tier:6, label:'100 Bars & Restaurants', icon:'glass', check:s=>s.catCounts.barsrest>=100},
 
   // HISTORY
   /* HISTORY & LORE — #192 merged the History and Lore Explore cards into one
@@ -11901,12 +11901,12 @@ const ACHIEVEMENTS = [
      precedent). A pre-merge lore capture still counts: it lands in catCounts.lore
      and the combined check below lights the same rung it would have. Icon stays
      'bust' to match the Explore card's 'history' glyph; 'book' is deleted above. */
-  {id:'history_3',   family:'History & Lore', tier:1, label:'3 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=3},
-  {id:'history_5',   family:'History & Lore', tier:2, label:'5 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=5},
-  {id:'history_10',  family:'History & Lore', tier:3, label:'10 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=10},
-  {id:'history_25',  family:'History & Lore', tier:4, label:'25 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=25},
-  {id:'history_50',  family:'History & Lore', tier:5, label:'50 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=50},
-  {id:'history_100', family:'History & Lore', tier:6, label:'100 History & Lore', icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=100},
+  {id:'history_3',   family:'History & Lore Visited', tier:1, label:'3 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=3},
+  {id:'history_5',   family:'History & Lore Visited', tier:2, label:'5 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=5},
+  {id:'history_10',  family:'History & Lore Visited', tier:3, label:'10 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=10},
+  {id:'history_25',  family:'History & Lore Visited', tier:4, label:'25 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=25},
+  {id:'history_50',  family:'History & Lore Visited', tier:5, label:'50 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=50},
+  {id:'history_100', family:'History & Lore Visited', tier:6, label:'100 History & Lore', icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=100},
 
   /* LORE & LEGENDS — RETIRED into History & Lore above (#180/#192). The six lore_*
      ids are reserved, not reused; a lore capture now counts toward the merged
@@ -11918,12 +11918,12 @@ const ACHIEVEMENTS = [
 
   // ART — #193's public-art category (murals, sculptures, statues), stored mode
   //  'art', counted in reconciledCaptures above. New family, fresh ids (art_*).
-  {id:'art_3',   family:'Art', tier:1, label:'3 Art',   icon:'art', check:s=>(s.catCounts.art||0)>=3},
-  {id:'art_5',   family:'Art', tier:2, label:'5 Art',   icon:'art', check:s=>(s.catCounts.art||0)>=5},
-  {id:'art_10',  family:'Art', tier:3, label:'10 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=10},
-  {id:'art_25',  family:'Art', tier:4, label:'25 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=25},
-  {id:'art_50',  family:'Art', tier:5, label:'50 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=50},
-  {id:'art_100', family:'Art', tier:6, label:'100 Art', icon:'art', check:s=>(s.catCounts.art||0)>=100},
+  {id:'art_3',   family:'Art Visited', tier:1, label:'3 Art',   icon:'art', check:s=>(s.catCounts.art||0)>=3},
+  {id:'art_5',   family:'Art Visited', tier:2, label:'5 Art',   icon:'art', check:s=>(s.catCounts.art||0)>=5},
+  {id:'art_10',  family:'Art Visited', tier:3, label:'10 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=10},
+  {id:'art_25',  family:'Art Visited', tier:4, label:'25 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=25},
+  {id:'art_50',  family:'Art Visited', tier:5, label:'50 Art',  icon:'art', check:s=>(s.catCounts.art||0)>=50},
+  {id:'art_100', family:'Art Visited', tier:6, label:'100 Art', icon:'art', check:s=>(s.catCounts.art||0)>=100},
 
   /* DISTANCE TRAVELED — miles walked (was "Wanderer"; renamed #180 so the header
      says what it measures). mile_1/mile_5 preserved (#159); ids UNCHANGED — only
