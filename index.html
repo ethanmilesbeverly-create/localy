@@ -924,6 +924,10 @@
   #target-drawer:not(.collapsed) #drawer-body{
     flex:1;min-height:0;overflow-y:auto;
     margin-top:14px;
+    /* Right gutter so the overlay scrollbar doesn't paint over the row's
+       right-edge .t-chevron. The scrollbar sits at the padding-box right edge;
+       10px keeps the chevron clear of it (overlay on phones, classic on desktop). */
+    padding-right:10px;
   }
 
   #screen-map.drawer-open #locate-btn,
@@ -6613,7 +6617,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03l';
+const APP_VERSION = '2026.08.03m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11685,7 +11689,11 @@ function renderNearbyList(){
        agree. Falls back to 'Spot' for a target with no/unknown category (a guide
        stop, a data anomaly) rather than rendering blank. */
     const cat = PIN_CAT_LABEL[t.category] || 'Spot';
-    const distTxt = t.found ? `✓ Found · ${fmtDist(t.dist)}` : fmtDist(t.dist)+' away';
+    /* Found sub-line: no second ✓ (the name line already carries one) and the
+       word is "Visited", not "Found" — moving toward "visited" language. The
+       broader "Captured"/"Capture" surfaces (pin sheet status + button, capture
+       prompt, passport) are a separate migration, not swept here. */
+    const distTxt = t.found ? `Visited · ${fmtDist(t.dist)}` : fmtDist(t.dist)+' away';
     return `
     <div class="target-row">
       <div class="target-row-main" onclick="openPinSheetById('${t.id}')">
