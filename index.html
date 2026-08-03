@@ -1366,18 +1366,24 @@
     position:relative;
   }
   .stamp-circle .blaze-mini{transform:rotate(8deg);}
+  /* #180 — three 1fr columns still fill the container and each item is centred in
+     its cell, so the columns read as centred; what changed here is SIZE. With the
+     labels gone (the pill is tiny) the 56px circles floated in empty space, so the
+     ring grows to 72px and the icon to 36px to use the reclaimed room, with a wider
+     row gap so the bigger rings breathe. Column count and the fill/centre model are
+     unchanged. */
   .achievement-grid{
     display:grid;grid-template-columns:repeat(3,1fr);
-    gap:16px 10px;margin-bottom:22px;
+    gap:20px 10px;margin-bottom:22px;justify-items:center;
   }
   .achievement-item{
-    display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;
   }
   .achievement-item .stamp-circle{
-    width:56px;height:56px;margin:0;
+    width:72px;height:72px;margin:0;
   }
   .achievement-item .blaze-mini{
-    width:28px;height:28px;
+    width:36px;height:36px;
     display:flex;align-items:center;justify-content:center;
   }
   .achievement-item.locked .stamp-circle{
@@ -1393,9 +1399,9 @@
      popup (showNextAchievementPopup reads a.label) and the tile `title` tooltip, so
      celebration/hover context is preserved — only the grid tile got quieter. */
   .achievement-item .ach-pill{
-    font-size:12px;font-weight:600;color:var(--text-dim);line-height:1.4;
+    font-size:13px;font-weight:600;color:var(--text-dim);line-height:1.4;
     background:var(--surface);border:1px solid var(--line);
-    border-radius:11px;padding:1px 9px;min-width:16px;text-align:center;
+    border-radius:12px;padding:2px 10px;min-width:18px;text-align:center;
   }
   .achievement-item.locked .ach-pill{opacity:0.7;}
   /* #24 revamp v2 — family sub-headers (Stamps / Gems / … / Wanderer). Each family
@@ -6351,7 +6357,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02p';
+const APP_VERSION = '2026.08.02q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
