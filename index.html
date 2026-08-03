@@ -6381,7 +6381,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02za';
+const APP_VERSION = '2026.08.02zb';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11828,8 +11828,11 @@ const ACH_ICONS = {
      and its facet lines (accent), drawn in that same colour, vanished — the earned
      gem read as a solid diamond. renderAchievementIcon now draws a knockout def's
      accent in the tile background (#10231C) when filled, so the facets read as cuts
-     and the gem keeps its definition. Locked/unfilled is unchanged. */
-  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M6 3 L12 9 L18 3 M12 9 V21', knockout:true},
+     and the gem keeps its definition. Locked/unfilled is unchanged.
+     #180 — the facet pattern now MATCHES the footer Submit (Suggest a Gem) diamond
+     logo (`#screen-suggest-gem` nav button): same outer diamond + crown line, and
+     the two brilliant-cut facets flanking the centre, so the two read as one mark. */
+  gem: {vb:'0 0 24 24', body:'M6 3 H18 L22 9 L12 21 L2 9 Z', accent:'M2 9 H22 M10 3 L8 9 L12 21 L16 9 L14 3', knockout:true},
   /* #180 — ART: a framed landscape (the universal "picture" glyph) for the Art
      family (#193's public-art category). The scene — mountains + sun — is the
      FILLED body so it reads when earned; the frame is the stroke-only accent, so
