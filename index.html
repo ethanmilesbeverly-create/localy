@@ -1401,7 +1401,7 @@
   .achievement-item .ach-pill{
     font-size:13px;font-weight:600;color:var(--text-dim);line-height:1.4;
     background:var(--surface);border:1px solid var(--line);
-    border-radius:12px;padding:2px 10px;min-width:18px;text-align:center;
+    border-radius:12px;padding:2px 10px;min-width:18px;text-align:center;white-space:nowrap;
   }
   .achievement-item.locked .ach-pill{opacity:0.7;}
   /* #24 revamp v2 — family sub-headers (Stamps / Gems / … / Wanderer). Each family
@@ -6357,7 +6357,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.02q';
+const APP_VERSION = '2026.08.02r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11779,10 +11779,15 @@ const ACH_ICONS = {
   bag: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   glass: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
   bust: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
-  /* #24 revamp v2 — MILES icon is now a receding ROAD (trapezoid narrowing toward
-     the top) with a dashed centre line as the accent — reads as distance/journey.
-     Renamed from 'footprints'; the Wanderer badges point at 'road' now. */
-  road: {vb:'0 0 24 24', body:'M9 3 h6 l4 18 h-14 z', accent:'M12 5 v3 M12 11 v3 M12 17 v3'},
+  /* #180 — MILES icon is now a WALKING PERSON, which reads the intent of the
+     Wanderer family (distance covered on foot) more directly than the receding-road
+     trapezoid it replaces. Standard pedestrian silhouette on the shared 24x24 vb: a
+     single filled `body` (head subpath + torso/legs/arms), so it fills solid when
+     earned and reads as an outline when locked, like bust/tree/glass. No accent.
+     Key RENAMED 'road' → 'walk' and the six Wanderer badges repointed — 'road' had
+     no other consumer, so it is renamed rather than left orphaned (#24's
+     removed-not-stranded rule). */
+  walk: {vb:'0 0 24 24', body:'M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C15 12 16.6 13 18.5 13V11c-1.6 0-3-.8-3.8-2l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z'},
   plus: {vb:'0 0 24 24', body:'M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z'},
   trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'},
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
@@ -11893,12 +11898,12 @@ const ACHIEVEMENTS = [
   {id:'lore_100', family:'Lore & Legends', tier:6, label:'100 Lore & Legends', icon:'book', check:s=>s.catCounts.lore>=100},
 
   // WANDERER — miles walked. mile_1/mile_5 preserved (#159); 10/25/50/100 new. reads:'walk'.
-  {id:'mile_1',   family:'Wanderer', tier:1, label:'First Mile', icon:'road', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
-  {id:'mile_5',   family:'Wanderer', tier:2, label:'5 Miles',    icon:'road', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
-  {id:'mile_10',  family:'Wanderer', tier:3, label:'10 Miles',   icon:'road', reads:'walk', check:s=>s.totalWalkedMeters>=16093},
-  {id:'mile_25',  family:'Wanderer', tier:4, label:'25 Miles',   icon:'road', reads:'walk', check:s=>s.totalWalkedMeters>=40234},
-  {id:'mile_50',  family:'Wanderer', tier:5, label:'50 Miles',   icon:'road', reads:'walk', check:s=>s.totalWalkedMeters>=80467},
-  {id:'mile_100', family:'Wanderer', tier:6, label:'100 Miles',  icon:'road', reads:'walk', check:s=>s.totalWalkedMeters>=160934}
+  {id:'mile_1',   family:'Wanderer', tier:1, label:'First Mile', icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=1609},
+  {id:'mile_5',   family:'Wanderer', tier:2, label:'5 Miles',    icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=8047},
+  {id:'mile_10',  family:'Wanderer', tier:3, label:'10 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=16093},
+  {id:'mile_25',  family:'Wanderer', tier:4, label:'25 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=40234},
+  {id:'mile_50',  family:'Wanderer', tier:5, label:'50 Miles',   icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=80467},
+  {id:'mile_100', family:'Wanderer', tier:6, label:'100 Miles',  icon:'walk', reads:'walk', check:s=>s.totalWalkedMeters>=160934}
 ];
 /* #145(2) — DERIVED, NOT A SECOND LIST. `reads:'guides'` tags every badge whose
    inputs come out of state.myHunts, and this set is computed from the tag rather
@@ -12209,11 +12214,16 @@ function renderAchievements(){
     const unlocked = earned.has(a.id);
     const color = TIER_COLORS[a.tier] || '#E8622C';
     const tierName = TIER_NAMES[a.tier] || '';
+    const achN = (a.label.match(/^\d+/) || ['1'])[0];
+    /* #180 — Wanderer pills carry units ("1 mile" / "5 miles") because a bare "5"
+       under a walking figure could read as anything; every other family's number is
+       self-evident from its sub-header + icon, so those stay bare. Singular only at 1. */
+    const achPill = (a.family === 'Wanderer') ? (achN === '1' ? '1 mile' : achN + ' miles') : achN;
     html += `<div class="achievement-item ${unlocked?'':'locked'}" title="${escapeHtml(tierName ? tierName + ' — ' + a.label : a.label)}">
         <div class="stamp-circle"${unlocked ? ` style="color:${color}"` : ''}>
           <div class="blaze-mini">${renderAchievementIcon(a.icon, unlocked)}</div>
         </div>
-        <div class="ach-pill">${(a.label.match(/^\d+/) || ['1'])[0]}</div>
+        <div class="ach-pill">${achPill}</div>
       </div>`;
   });
   if(lastFamily !== null) html += `</div>`;
