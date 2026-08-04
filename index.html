@@ -6627,7 +6627,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04c';
+const APP_VERSION = '2026.08.04d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11113,13 +11113,8 @@ function whatItisFor(t){
    (deleted), so it retries next open — the #78c rule that a failed fetch is not
    evidence of an empty area. Guarded to credited gems with no local twin. */
 function maybeEnrichWhatItis(t){
-  const dbg = state._wdbg || (state._wdbg = {});
-  if(!t) return;
-  if(t.whatItis){ return; }
-  if(!t.by){ dbg[t.id] = {bail:'no by'}; return; }
-  if(!t.gemId){ dbg[t.id] = {bail:'no gemId (search-result point, not a gem)'}; return; }
-  if(!t.name){ dbg[t.id] = {bail:'no name'}; return; }
-  if(whatItisFor(t)){ dbg[t.id] = {bail:'local twin found'}; return; } // will render
+  if(!t || t.whatItis || !t.by || !t.gemId || !t.name) return;
+  if(whatItisFor(t)) return; // local tile already has the twin — it will render
   const key = t.id;
   const cache = state._whatItisCache || (state._whatItisCache = {});
   if(key in cache){
@@ -11130,57 +11125,34 @@ function maybeEnrichWhatItis(t){
   cache[key] = null; // pending — blocks a duplicate fetch while in flight
   (async () => {
     try{
+      // 1) The pin's own tile — catches an OSM twin that just wasn't loaded
+      //    around the user (a park the user hadn't walked to yet).
       const { data, error } = await sb.functions.invoke('nearby-places', { body:{ lat:t.lat, lng:t.lng } });
       if(error) throw error;
       const places = (data && data.places) || [];
       let best = null, bestD = Infinity;
-      const matched = [];
       for(const r of places){
-        if(!r || !r.name) continue;
-        if(_placeNameMatch(t.name, r.name)){
-          const dd = haversine(t.lat, t.lng, r.lat, r.lng);
-          matched.push(r.name + '(' + Math.round(dd) + 'm,desc:' + (r.desc?'Y':'n') + ')');
-          if(r.desc && dd <= 90 && dd < bestD){ best = r; bestD = dd; }
-        }
+        if(!r || !r.desc || !_placeNameMatch(t.name, r.name)) continue;
+        const d = haversine(t.lat, t.lng, r.lat, r.lng);
+        if(d <= 90 && d < bestD){ best = r; bestD = d; }
       }
-      const wt = best ? String(best.desc).trim() : '';
+      let wt = best ? String(best.desc).trim() : '';
+      // 2) #54 — no OSM twin: resolve the wiki "what it is" BY NAME server-side
+      //    (Mr. Beef is famous, Wikipedia-documented, and simply not in OSM). The
+      //    function verifies name + coordinate and returns text or null.
+      if(!wt){
+        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+        const place = r2 && r2.data && r2.data.place;
+        if(place && place.desc) wt = String(place.desc).trim();
+      }
       const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
       cache[key] = val;
-      dbg[key] = { fetched: places.length, matched, twin: best ? best.name : null, val: val ? 'set' : 'empty(no twin/dup)' };
-      if(state.selectedPinId === key){ if(val) t.whatItis = val; fillPinSheet(t); } // re-render either way so the diag panel updates
+      if(val && state.selectedPinId === key){ t.whatItis = val; fillPinSheet(t); }
     }catch(e){
       delete cache[key]; // retry next open — a failed fetch is not "no twin"
-      dbg[key] = { bail: 'fetch failed: ' + ((e && e.message) || e) };
-      if(state.selectedPinId === key) fillPinSheet(t);
       console.warn('[#54] on-demand what-it-is lookup failed', (e && e.message) || e);
     }
   })();
-}
-/* #54 DIAGNOSTIC — TEMPORARY. Renders what the hybrid resolver actually sees,
-   inline in the sheet, because this is being debugged on a phone with no
-   console (#92/#65 "instrument the surface"). REMOVE the panel + this function +
-   its call in fillPinSheet once the cause is found. */
-function buildHybridDebug(t){
-  const all = (state.realPlaces && state.realPlaces.all) || [];
-  const near = [];
-  for(const r of all){
-    if(!r || !r.name || r.lat == null) continue;
-    const d = haversine(t.lat, t.lng, r.lat, r.lng);
-    if(d <= 150) near.push('· ' + escapeHtml(r.name) + ' ' + Math.round(d) + 'm match:' + (_placeNameMatch(t.name, r.name) ? 'Y' : 'n') + ' desc:' + (r.desc ? 'Y' : 'n'));
-  }
-  const od = (state._wdbg && state._wdbg[t.id]) || null;
-  const odTxt = od
-    ? (od.bail ? ('bail: ' + od.bail)
-       : ('fetched ' + od.fetched + ', matched [' + (od.matched.join(', ') || 'none') + '], => ' + od.val))
-    : 'pending…';
-  return '<div class="ps-slot" style="border:1px solid #a55;border-radius:8px;padding:8px;font-family:monospace;font-size:10px;line-height:1.45;color:var(--text-dim);white-space:pre-wrap;word-break:break-word;">'
-    + '[#54 diag ' + APP_VERSION + ']\n'
-    + 'gemId:' + (t.gemId ? 'Y' : 'n') + '  isGem:' + (t.isGem ? 'Y' : 'n') + '  by:' + escapeHtml(t.by || '(none)') + '\n'
-    + 'tile places:' + all.length + '  within150m:' + near.length + '\n'
-    + (near.slice(0, 10).join('\n') || '(none within 150m)') + '\n'
-    + 'local whatItisFor: ' + (whatItisFor(t) ? 'FOUND' : 'empty') + '\n'
-    + 'on-demand: ' + odTxt
-    + '</div>';
 }
 function fillPinSheet(t){
   const color = pinSheetColor(t);
@@ -11269,8 +11241,7 @@ function fillPinSheet(t){
        layer reachable everywhere, not by making the other layer scarce.
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
        #23 decision (2) and #82's null submitted_by. */
-    `${t.by ? buildHybridDebug(t) : ''}
-     ${whatItis ? `<div class="ps-slot"><span class="ps-slot-label">What it is</span><p class="ps-desc">${escapeHtml(whatItis)}</p></div>` : ''}
+    `${whatItis ? `<div class="ps-slot"><span class="ps-slot-label">What it is</span><p class="ps-desc">${escapeHtml(whatItis)}</p></div>` : ''}
      ${t.desc ? (whatItis
        ? `<div class="ps-slot"><span class="ps-slot-label">A local's take</span><p class="ps-desc">${escapeHtml(t.desc)}</p></div>`
        : `<p class="ps-desc">${escapeHtml(t.desc)}</p>`) : ''}
