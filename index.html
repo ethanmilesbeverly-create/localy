@@ -1104,6 +1104,17 @@
   }
   .ps-by-name{color:var(--text);font-weight:600;}
   .ps-by-icon{width:13px;height:13px;flex:0 0 13px;opacity:.75;}
+  /* #31/#225 — "+N others also submitted", the vouch count. Reads as a
+     continuation of the credit line: aligned under the credit TEXT (past the
+     13px icon + 7px gap = 20px), pulled up under it with a negative top margin
+     (the .ps-by 13px bottom gap would otherwise double-space it), and it restores
+     that 13px below itself. Renders ONLY when t.by AND t.seconds>0, so a pin with
+     no vouch is byte-identical to today — the #16 seam stays on the one credit
+     surface #23 already bought, never on the pin/peek row. */
+  .ps-seconds{
+    font-size:12px; line-height:1.4; color:var(--text-dim);
+    margin:-9px 0 13px; padding-left:20px;
+  }
   /* #61(b) — padding-bottom lives HERE as well as on #pin-sheet, and the reason
      is not redundancy. #pin-sheet.expanded #pin-sheet-expand is
      max-height:44vh; overflow-y:auto, so on a short screen with a long
@@ -4150,7 +4161,9 @@ function gemPoint(g, idPrefix, ctxCategory, extra){
        knowingly overridden for; see fillPinSheet() for the argument and the
        cost. Undefined on every scaffolded pin, and on any gem without a
        renderable name. */
-    by:g.by
+    by:g.by,
+    // #31/#225 — the vouch count carried onto the point for the pin sheet.
+    seconds:g.seconds || 0
   }, extra||{});
 }
 
@@ -6201,6 +6214,42 @@ async function fetchGemCredits(uids){
     return {};
   }
 }
+/* #31/#225 — THE VOUCH COUNT, READ FOR DISPLAY. gem_seconds holds one row per
+   (canonical submission_id, a DIFFERENT submitter's user_id) — #31 writes it at
+   merge time and skips a self-second, so every row is ANOTHER person who
+   submitted the same place. This tallies rows per canonical id so the pin sheet
+   can show "+N others also submitted" beside the credit. Mirrors fetchGemCredits
+   exactly: ONE round trip for the whole map, fail-soft to {} (a blocked read or a
+   missing SELECT policy renders NO count, which is identical on screen to "no
+   vouches" — silent, never "recommended by none", #23/#16). state.gemSeconds is
+   the #154/#70 instrument that SEPARATES the two cases: status:'ok' resolved:0
+   means the read worked and nobody has a vouch yet; status:'failed' means the
+   read threw and every count is missing for a reason the console names (most
+   likely a gem_seconds SELECT policy — the one thing that lives outside this
+   file). No toast: the reader who can act on it is whoever is in the console. */
+async function fetchGemSeconds(ids){
+  const list = [...new Set((ids||[]).filter(Boolean))];
+  if(!list.length){
+    state.gemSeconds = { status:'skipped', asked:0, resolved:0, at:Date.now() };
+    return {};
+  }
+  try{
+    const { data, error } = await sb
+      .from('gem_seconds')
+      .select('submission_id')
+      .in('submission_id', list);
+    if(error) throw error;
+    const counts = {};
+    (data||[]).forEach(r=>{ if(r.submission_id) counts[r.submission_id] = (counts[r.submission_id]||0) + 1; });
+    state.gemSeconds = { status:'ok', asked:list.length, resolved:Object.keys(counts).length, at:Date.now() };
+    return counts;
+  }catch(e){
+    state.gemSeconds = { status:'failed', asked:list.length, resolved:0, at:Date.now(), error:String(e && e.message || e) };
+    console.warn('[#31/#225] fetchGemSeconds FAILED — no vouch counts will render on any pin.' +
+      ' Most likely gem_seconds has no client SELECT policy (the one thing outside index.html).', e);
+    return {};
+  }
+}
 async function loadApprovedGems(){
   try{
     const { data, error } = await sb
@@ -6233,6 +6282,10 @@ async function loadApprovedGems(){
     const rows = data || [];
     // #23 — one extra round trip for the whole map, not one per pin.
     const credits = await fetchGemCredits(rows.map(r=>r.submitted_by));
+    // #31/#225 — a second round trip for the whole map: the vouch count per
+    // canonical id, for the "+N others also submitted" line. Fail-soft to {} →
+    // count 0 → no line, so a failed read is silent, never a wrong number.
+    const seconds = await fetchGemSeconds(rows.map(r=>r.id));
     state.approvedGems = rows.map(r=>({
       id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
       lat:r.lat, lng:r.lng, status:'approved',
@@ -6240,7 +6293,10 @@ async function loadApprovedGems(){
       // produce a name (null submitted_by from #82's anonymisation, a blocked
       // profile, a user who never set one, a failed lookup) lands here as
       // undefined and the sheet renders nothing at all.
-      by: credits[r.submitted_by] || undefined
+      by: credits[r.submitted_by] || undefined,
+      // #31/#225 — vouch count: how many OTHER people submitted this same place
+      // (0 when none). Rendered only in the expanded sheet, only when >0 (#16).
+      seconds: seconds[r.id] || 0
     }));
   }catch(e){ state.approvedGems = []; }
 }
@@ -6639,7 +6695,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04f';
+const APP_VERSION = '2026.08.04g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11261,6 +11317,7 @@ function fillPinSheet(t){
        <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
        <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
      </div>` : ''}
+     ${(t.by && t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
   if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
