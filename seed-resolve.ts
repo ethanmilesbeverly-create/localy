@@ -61,7 +61,15 @@ const NEARBY_PLACES_KEY = Deno.env.get("NEARBY_PLACES_KEY") ?? "";
 const CITY = { name: "Chicago", lat: 41.8781, lng: -87.6298 };
 const CITY_MAX_KM = 60; // reject a geocode that lands outside metro Chicago
 
-const MATCH_RADIUS_M = 90;      // same constant as index.html dedupeReal()
+const MATCH_RADIUS_M = 90;      // same constant as index.html dedupeReal() — DEDUP only
+// Enrichment reaches wider than dedup ON PURPOSE. A big park's Wikipedia
+// coordinate can sit 200-400 m from where Photon dropped the pin, so a 90 m
+// geosearch misses the article that is genuinely there. This radius is used
+// ONLY to find the "what it is" description text, NEVER to merge pins, and a
+// hit is attached ONLY if its title matches the place name (WIKI_TITLE_MIN) —
+// so widening the search cannot pull in a neighbouring building's article.
+const WIKI_ENRICH_RADIUS_M = 300;
+const WIKI_TITLE_MIN = 0.5;    // min name/title token overlap to accept an article
 const CONF_MIN = 0.75;          // below this, a decision goes to the human, not the machine
 const VALID_CATEGORIES = new Set(["park", "shops", "barsrest", "history", "art"]);
 
@@ -173,6 +181,66 @@ async function wikiAt(
     const first: any = Object.values(pages)[0] ?? {};
     const intro = String(first.extract ?? "").trim();
     return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 2b) WIDER wiki lookup for the DESCRIPTION slot only. Searches WIKI_ENRICH_
+//     RADIUS_M (300 m), but attaches an article ONLY when its title actually
+//     matches the place name — so a big park whose article coordinate is 250 m
+//     away gets enriched, while a random neighbouring article inside the circle
+//     is rejected. Never used for dedup; never invents text (#101/#178): a name
+//     with no matching article stays blank.
+// ---------------------------------------------------------------------------
+function tokens(s: string): Set<string> {
+  const STOP = new Set(["the", "of", "a", "an", "and", "at", "in", "on", "chicago", "il", "illinois"]);
+  return new Set(
+    (s || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w && !STOP.has(w)),
+  );
+}
+function titleMatch(name: string, title: string): number {
+  const a = tokens(name), b = tokens(title);
+  if (!a.size || !b.size) return 0;
+  let hit = 0;
+  for (const w of a) if (b.has(w)) hit++;
+  return hit / a.size; // fraction of the place-name's words the article title covers
+}
+async function wikiEnrich(
+  name: string,
+  lat: number,
+  lng: number,
+): Promise<{ title: string; intro: string } | null> {
+  try {
+    const geo =
+      "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
+      WIKI_ENRICH_RADIUS_M +
+      "&gscoord=" + lat + "%7C" + lng;
+    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!gr.ok) return null;
+    const gd = await gr.json();
+    const hits: any[] = gd?.query?.geosearch ?? [];
+    if (!hits.length) return null;
+
+    // Rank candidates by title match to the place name, not by distance.
+    let best: any = null, bestScore = 0;
+    for (const h of hits) {
+      const s = titleMatch(name, h.title || "");
+      if (s > bestScore) { bestScore = s; best = h; }
+    }
+    if (!best || bestScore < WIKI_TITLE_MIN) return null; // nothing here really IS this place
+
+    const ex =
+      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+      encodeURIComponent(best.title);
+    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!er.ok) return null;
+    const ed = await er.json();
+    const pages = ed?.query?.pages ?? {};
+    const first: any = Object.values(pages)[0] ?? {};
+    const intro = String(first.extract ?? "").trim();
+    return intro ? { title: best.title, intro } : null;
   } catch {
     return null;
   }
@@ -352,14 +420,27 @@ async function run() {
       continue;
     }
 
+    // Tight 90 m lookup: the dedup/resolve signal (is there an article right here?).
     const wiki = await wikiAt(geo.lat, geo.lng);
     const existing = await existingNear(geo.lat, geo.lng);
     const verdict = await resolve(candidate, wiki?.title ?? null, existing);
 
+    // Description slot: prefer the tight hit's intro; if blank, widen to 300 m
+    // with a title-match gate. This only fills TEXT — it never changes the
+    // dedup verdict above.
+    let wikiTitle = wiki?.title ?? null;
+    let wikiIntro = wiki?.intro ?? "";
+    let wikiWidened = false;
+    if (!wikiIntro && verdict.decision === "new") {
+      const enrich = await wikiEnrich(verdict.canonicalName || candidate, geo.lat, geo.lng);
+      if (enrich) { wikiTitle = enrich.title; wikiIntro = enrich.intro; wikiWidened = true; }
+    }
+
     const base = {
       candidate,
       geo,
-      wikiTitle: wiki?.title ?? null,
+      wikiTitle,
+      wikiWidened,
       existing: existing.map((e) => e.name),
       verdict,
     };
@@ -370,26 +451,26 @@ async function run() {
     } else if (verdict.decision === "new") {
       const row: SeedRow = {
         name: verdict.canonicalName,
-        description: wiki?.intro ?? "",
+        description: wikiIntro,
         category: verdict.category,
         lat: geo.lat,
         lng: geo.lng,
         status: "approved",
         submitted_by: null,
         source: "seed:reddit",
-        seed_meta: { candidate, geocodeLabel: geo.label, wikiTitle: wiki?.title ?? null, confidence: verdict.confidence },
+        seed_meta: { candidate, geocodeLabel: geo.label, wikiTitle, confidence: verdict.confidence },
       };
       rows.push(row);
       report.push({ ...base, outcome: "new-seed" });
       const cat = verdict.category ?? "UNCLASSIFIED";
-      const desc = row.description ? "wiki✓" : "wiki∅";
+      const desc = row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
       console.log(`  + ${verdict.canonicalName} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})`);
     } else {
       report.push({ ...base, outcome: "review" });
       console.log(`  ? ${candidate} → REVIEW: ${verdict.why} (conf ${verdict.confidence.toFixed(2)})`);
     }
 
-    await sleep(250); // be polite to Photon / Wikipedia / Gemini
+    await sleep(7000); // ~8-9 calls/min — stays under Gemini free-tier 10 RPM (429s otherwise)
   }
 
   await Deno.writeTextFile("seed_records.json", JSON.stringify(rows, null, 2));
