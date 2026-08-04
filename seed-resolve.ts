@@ -70,6 +70,13 @@ const MATCH_RADIUS_M = 90;      // same constant as index.html dedupeReal() — 
 // so widening the search cannot pull in a neighbouring building's article.
 const WIKI_ENRICH_RADIUS_M = 300;
 const WIKI_TITLE_MIN = 0.5;    // min name/title token overlap to accept an article
+// When the coordinate geosearch finds nothing (Photon dropped the pin too far
+// from a wide feature's article coordinate — e.g. Palmisano, Promontory), fall
+// back to searching Wikipedia BY NAME, then accept the article only if its OWN
+// coordinate lands within this radius of the pin. Generous enough to absorb
+// geocode drift across a park, tight enough to reject a same-named place in
+// another city.
+const WIKI_NAME_SANITY_M = 1000;
 const CONF_MIN = 0.75;          // below this, a decision goes to the human, not the machine
 const VALID_CATEGORIES = new Set(["park", "shops", "barsrest", "history", "art"]);
 
@@ -207,40 +214,97 @@ function titleMatch(name: string, title: string): number {
   for (const w of a) if (b.has(w)) hit++;
   return hit / a.size; // fraction of the place-name's words the article title covers
 }
+async function wikiIntroFor(title: string): Promise<string> {
+  try {
+    const ex =
+      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+      encodeURIComponent(title);
+    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!er.ok) return "";
+    const ed = await er.json();
+    const pages = ed?.query?.pages ?? {};
+    const first: any = Object.values(pages)[0] ?? {};
+    return String(first.extract ?? "").trim();
+  } catch {
+    return "";
+  }
+}
+
 async function wikiEnrich(
   name: string,
   lat: number,
   lng: number,
 ): Promise<{ title: string; intro: string } | null> {
+  // Path A — coordinate geosearch (300 m) + title gate. Best when Photon
+  // dropped the pin near the article's own coordinate.
   try {
     const geo =
       "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
       WIKI_ENRICH_RADIUS_M +
       "&gscoord=" + lat + "%7C" + lng;
     const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!gr.ok) return null;
-    const gd = await gr.json();
-    const hits: any[] = gd?.query?.geosearch ?? [];
-    if (!hits.length) return null;
-
-    // Rank candidates by title match to the place name, not by distance.
-    let best: any = null, bestScore = 0;
-    for (const h of hits) {
-      const s = titleMatch(name, h.title || "");
-      if (s > bestScore) { bestScore = s; best = h; }
+    if (gr.ok) {
+      const gd = await gr.json();
+      const hits: any[] = gd?.query?.geosearch ?? [];
+      let best: any = null, bestScore = 0;
+      for (const h of hits) {
+        const s = titleMatch(name, h.title || "");
+        if (s > bestScore) { bestScore = s; best = h; }
+      }
+      if (best && bestScore >= WIKI_TITLE_MIN) {
+        const intro = await wikiIntroFor(best.title);
+        if (intro) return { title: best.title, intro };
+      }
     }
-    if (!best || bestScore < WIKI_TITLE_MIN) return null; // nothing here really IS this place
+  } catch { /* fall through to Path B */ }
 
-    const ex =
-      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
-      encodeURIComponent(best.title);
-    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!er.ok) return null;
-    const ed = await er.json();
-    const pages = ed?.query?.pages ?? {};
-    const first: any = Object.values(pages)[0] ?? {};
-    const intro = String(first.extract ?? "").trim();
-    return intro ? { title: best.title, intro } : null;
+  // Path B — name search, then verify the found article's OWN coordinate is
+  // within WIKI_NAME_SANITY_M of the pin. Recovers wide features whose article
+  // coordinate sits beyond the 300 m circle (Palmisano, Promontory). The
+  // coordinate check is what stops a same-named place elsewhere from attaching.
+  try {
+    const srch =
+      "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=5&srsearch=" +
+      encodeURIComponent(name);
+    const sr = await fetch(srch, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!sr.ok) return null;
+    const sd = await sr.json();
+    const results: any[] = sd?.query?.search ?? [];
+    // Keep only results whose title plausibly IS this place, best first.
+    const ranked = results
+      .map((r) => ({ title: r.title as string, score: titleMatch(name, r.title || "") }))
+      .filter((r) => r.score >= WIKI_TITLE_MIN)
+      .sort((a, b) => b.score - a.score);
+    if (!ranked.length) return null;
+
+    for (const cand of ranked) {
+      // One call for BOTH the coordinate (to sanity-check distance) and the
+      // intro. Parsed defensively — the coordinates array is read by shape, not
+      // by a fixed path, because the earlier two-call version misread it and
+      // silently dropped valid hits (Palmisano returned a real coord and was
+      // skipped anyway).
+      const q =
+        "https://en.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cextracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+        encodeURIComponent(cand.title);
+      const cr = await fetch(q, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+      if (!cr.ok) continue;
+      const cdj = await cr.json();
+      const pages = cdj?.query?.pages ?? {};
+      const p: any = Object.values(pages)[0] ?? {};
+      const coord = Array.isArray(p?.coordinates) ? p.coordinates[0] : null;
+      const cLat = Number(coord?.lat), cLon = Number(coord?.lon ?? coord?.lng);
+      // If the article carries a coordinate, it must be within the sanity
+      // radius. If it carries NONE, accept on the exact-title match alone
+      // (a perfect name hit with no coord is still almost certainly the place).
+      if (Number.isFinite(cLat) && Number.isFinite(cLon)) {
+        if (haversineM(lat, lng, cLat, cLon) > WIKI_NAME_SANITY_M) continue; // same name, wrong place
+      } else if (cand.score < 1) {
+        continue; // no coord AND an imperfect title — too risky, skip
+      }
+      const intro = String(p?.extract ?? "").trim();
+      if (intro) return { title: cand.title, intro };
+    }
+    return null;
   } catch {
     return null;
   }
