@@ -2127,7 +2127,7 @@
          shared .screen 52px top padding. Scoped inline so the global h1.page-title
          margin (used by other screens) is untouched. -->
     <h1 class="page-title" style="margin-top:14px;">Submit a Hidden Gem</h1>
-    <p class="page-sub">Search the address, or tap the map to drop a pin right where it is. Then tell us why you love it.</p>
+    <p class="page-sub">Search the address, or tap the map to drop a pin right where it is. Then tell us why someone should go.</p>
     <!-- #17 — same shared component as the map header pill and the hunt builder
          (#88's attachPlaceSuggest). .location-search-row is reused ONLY for its
          position:relative host + flex sizing; there is no Go button here on
@@ -2148,21 +2148,21 @@
       <label class="field-label">What is it?</label>
       <input type="text" id="gem-name" placeholder="e.g. The mural behind the laundromat">
     </div>
-    <!-- #225 — ASK FOR A TAKE, NOT A DESCRIPTION. The field id/required-ness are
-         unchanged (submitGem still requires gem-desc; the #12 gate still copy-edits
-         it). Only the framing moved: users were pasting the encyclopaedia (the
-         Jerry-P "Mr. Beef" gem ≈ the wiki line), which made #54's two-slot pin
-         ("What it is" / "A local's take") echo itself. The label now asks for the
-         HUMAN half, and the hint below tells the submitter the FACTS get filled
-         from the internet IF we can find them — CONDITIONAL, never flat, because a
-         pure-lore spot ("John Dillinger Fate Alley") has no article and
-         resolveWiki returns nothing (the #5/#82 honesty lens: don't promise what
-         the pin can't always keep). The hint is sentence-case (not a .field-label,
-         so #217's capitalize doesn't apply) and dimmed via --text-dim. -->
+    <!-- #225 — ASK FOR THE REASON TO GO, NOT A DESCRIPTION. The field id and
+         required-ness are unchanged (submitGem still requires gem-desc; the #12
+         gate still copy-edits it). Only the framing moved: users were pasting the
+         encyclopaedia (the Jerry-P "Mr. Beef" gem ≈ the wiki line), which made
+         #54's two-slot pin ("What it is" / "A local's take") echo itself. The
+         label now asks for the HUMAN half, and the placeholder is an EXAMPLE take
+         mirroring the "What is it?" field above (both point at the same imaginary
+         laundromat mural) so the submitter sees the register we want, not a second
+         prompt. We deliberately do NOT tell the submitter "we'll add the facts" —
+         a flat promise would break on a pure-lore spot with no article (#5/#82),
+         and #54 surfaces the sourced facts on the pin regardless of what the form
+         says. -->
     <div class="field">
-      <label class="field-label">What's your take?</label>
-      <textarea id="gem-desc" rows="3" placeholder="Why should someone go? What do you love about it?"></textarea>
-      <p style="font-size:12px;color:var(--text-dim);line-height:1.45;margin:6px 0 0;">If this place is known online, we'll add the facts for you — so just tell us why you love it.</p>
+      <label class="field-label">Why should someone go here?</label>
+      <textarea id="gem-desc" rows="3" placeholder="e.g. The colors are unreal up close and hardly anyone knows it's there"></textarea>
     </div>
     <!-- #114 — the "What category is it?" <select id="gem-category"> was REMOVED.
          review-submission now classifies the place server-side from its name and
@@ -6639,7 +6639,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04e';
+const APP_VERSION = '2026.08.04f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9702,7 +9702,7 @@ async function submitGem(){
   const name = document.getElementById('gem-name').value.trim();
   const desc = document.getElementById('gem-desc').value.trim();
   if(!name){ showToast('Give it a name first'); return; }
-  if(!desc){ showToast('Add your take — why should someone go?'); return; }
+  if(!desc){ showToast('Add a reason someone should go'); return; }
   if(!state.gemDraftPin){ showToast('Search the address above, or tap the map to drop a pin'); return; }
   const uid = state.user && state.user.id;
   if(!uid){ showToast('Please log in again to submit'); return; }
