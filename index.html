@@ -6627,7 +6627,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04a';
+const APP_VERSION = '2026.08.04b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11050,6 +11050,27 @@ function fmtPassportDate(ts){
   const p = n => String(n).padStart(2,'0');
   return p(d.getMonth()+1) + '/' + p(d.getDate()) + '/' + String(d.getFullYear()).slice(-2);
 }
+/* Twin-name match for the hybrid slot. Deliberately more forgiving than an
+   exact normName equality but still tight: EVERY significant word of the
+   shorter name must appear in the longer (so "Mr. Beef" pairs with OSM's
+   "Mr. Beef on Orleans", but "Beef Shack" does not), always paired with the
+   <90 m proximity guard at the call site. It does NOT try to equate different
+   words for the same place ("Lily Pool" vs "Lily Pond") — that semantic call
+   belongs to the AI-resolve step, not this conservative client match, because
+   here a wrong pairing would mis-describe a real person's pin. */
+function _hybridTokens(s){
+  const STOP = new Set(['the','of','a','an','and','at','in','on','chicago','il','illinois']);
+  return (s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w && !STOP.has(w));
+}
+function _placeNameMatch(a, b){
+  const A = _hybridTokens(a), B = new Set(_hybridTokens(b));
+  const As = new Set(A);
+  if(!As.size || !B.size) return false;
+  const shorter = As.size <= B.size ? As : B;
+  const longer  = As.size <= B.size ? B : As;
+  for(const w of shorter) if(!longer.has(w)) return false; // shorter ⊆ longer
+  return true;
+}
 /* #54 — the HYBRID "what it is" slot. When a pin carries a person's note (a
    credited gem), pair it with the neutral Wikipedia/OSM description for the SAME
    place, so the formal "what it is" and the human take sit side by side instead
@@ -11058,27 +11079,70 @@ function fmtPassportDate(ts){
    with its desc intact, so the text is recoverable here.
    READ-TIME, never denormalised onto the gem row — the #23 rule: editing a name
    or re-fetching a tile re-resolves this for free, and #82's anonymisation
-   removes nothing extra. Matched by name AND <90 m, the SAME contract as
-   dedupeReal(), so it can only ever attach the twin's own text, never a
-   neighbour's. Fires only for a pin with a human credit (t.by): a bare
-   scaffold/seed pin already shows its wiki text AS its description (#101), so
-   there is nothing to pair, and a seed's null submitted_by means no t.by. An
-   explicit t.whatItis (e.g. set upstream) wins outright. Returns '' when there
-   is no distinct twin text — the sheet then renders exactly as before. */
+   removes nothing extra. Matched by name (token-subset) AND <90 m, the SAME
+   proximity contract as dedupeReal(), so it can only ever attach the twin's own
+   text, never a neighbour's. Fires only for a pin with a human credit (t.by): a
+   bare scaffold/seed pin already shows its wiki text AS its description (#101),
+   so there is nothing to pair, and a seed's null submitted_by means no t.by. An
+   explicit t.whatItis (set by the on-demand lookup below, or upstream) wins
+   outright. Returns '' when there is no distinct twin in the LOADED tile — the
+   on-demand path (maybeEnrichWhatItis) then covers a searched-to pin whose tile
+   was never fetched. */
 function whatItisFor(t){
   if(t && t.whatItis) return String(t.whatItis).trim();
-  if(!t || !t.by) return '';
-  const k = normName(t.name); if(!k) return '';
+  if(!t || !t.by || !t.name) return '';
   const all = (state.realPlaces && state.realPlaces.all) || [];
   let best = null, bestD = Infinity;
   for(const r of all){
-    if(!r || !r.desc || normName(r.name) !== k) continue;
+    if(!r || !r.desc || !_placeNameMatch(t.name, r.name)) continue;
     const d = haversine(t.lat, t.lng, r.lat, r.lng);
     if(d <= 90 && d < bestD){ best = r; bestD = d; }
   }
   if(!best) return '';
   const wt = String(best.desc).trim();
   return (wt && wt !== String(t.desc || '').trim()) ? wt : '';
+}
+/* #54 — ON-DEMAND twin lookup for a searched-to pin. whatItisFor() only sees
+   the tile loaded around the USER; open Mr. Beef from 3 mi away and its OSM/
+   Wikipedia twin was never fetched, so the sheet shows one slot. This fetches
+   the PIN's own area through the same `nearby-places` function the map uses,
+   finds the twin, and re-renders the sheet with the "what it is" filled — the
+   async-swap pattern the address row already uses. Cached per pin id so a pin
+   is looked up once per session; a resolved-empty ('') is remembered so we
+   don't refetch a pin with genuinely no twin. A transport failure is NOT cached
+   (deleted), so it retries next open — the #78c rule that a failed fetch is not
+   evidence of an empty area. Guarded to credited gems with no local twin. */
+function maybeEnrichWhatItis(t){
+  if(!t || t.whatItis || !t.by || !t.gemId || !t.name) return;
+  if(whatItisFor(t)) return; // local tile already has it — it will render
+  const key = t.id;
+  const cache = state._whatItisCache || (state._whatItisCache = {});
+  if(key in cache){
+    const v = cache[key];
+    if(v && state.selectedPinId === key){ t.whatItis = v; fillPinSheet(t); }
+    return;
+  }
+  cache[key] = null; // pending — blocks a duplicate fetch while in flight
+  (async () => {
+    try{
+      const { data, error } = await sb.functions.invoke('nearby-places', { body:{ lat:t.lat, lng:t.lng } });
+      if(error) throw error;
+      const places = (data && data.places) || [];
+      let best = null, bestD = Infinity;
+      for(const r of places){
+        if(!r || !r.desc || !_placeNameMatch(t.name, r.name)) continue;
+        const d = haversine(t.lat, t.lng, r.lat, r.lng);
+        if(d <= 90 && d < bestD){ best = r; bestD = d; }
+      }
+      const wt = best ? String(best.desc).trim() : '';
+      const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
+      cache[key] = val;
+      if(val && state.selectedPinId === key){ t.whatItis = val; fillPinSheet(t); }
+    }catch(e){
+      delete cache[key]; // retry next open — a failed fetch is not "no twin"
+      console.warn('[#54] on-demand what-it-is lookup failed', (e && e.message) || e);
+    }
+  })();
 }
 function fillPinSheet(t){
   const color = pinSheetColor(t);
@@ -11178,6 +11242,10 @@ function fillPinSheet(t){
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
   if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
+
+  // #54 — if this credited gem had no twin in the loaded tile, look it up on
+  // demand from its own area and swap the "what it is" slot in when it lands.
+  maybeEnrichWhatItis(t);
 
   // Coords render instantly; the address swaps in if/when the lookup lands.
   // The copy payload has to swap with it, or a slow lookup leaves the row
