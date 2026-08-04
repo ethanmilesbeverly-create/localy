@@ -1081,6 +1081,16 @@
     border-top:1px solid var(--line);
   }
   .ps-desc{font-size:13.5px;line-height:1.55;color:var(--text-dim);margin:0 0 14px;}
+  /* #54 — hybrid pin: the neutral "what it is" (wiki/OSM) and a person's take
+     rendered as two labelled slots instead of one clobbering the other. Reuses
+     .ps-desc for the body text; the slot only adds a quiet uppercase label and
+     zeroes the paragraph's own margin so the slot's margin governs spacing. */
+  .ps-slot{margin:0 0 14px;}
+  .ps-slot .ps-desc{margin:0;}
+  .ps-slot-label{
+    display:block; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    font-weight:600; color:var(--text-dim); opacity:.7; margin:0 0 3px;
+  }
   /* #23 — the credit line. Sits under the description, above the location row:
      it is about the words you just read, not about the address.
      QUIET BY SIZE AND WEIGHT, NEVER BY CONTRAST — #91 established that floor
@@ -6617,7 +6627,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.03m';
+const APP_VERSION = '2026.08.04a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11040,6 +11050,36 @@ function fmtPassportDate(ts){
   const p = n => String(n).padStart(2,'0');
   return p(d.getMonth()+1) + '/' + p(d.getDate()) + '/' + String(d.getFullYear()).slice(-2);
 }
+/* #54 — the HYBRID "what it is" slot. When a pin carries a person's note (a
+   credited gem), pair it with the neutral Wikipedia/OSM description for the SAME
+   place, so the formal "what it is" and the human take sit side by side instead
+   of one clobbering the other. The client blend drops the real twin from the
+   pin LIST when a gem shares its name, but state.realPlaces.all still holds it
+   with its desc intact, so the text is recoverable here.
+   READ-TIME, never denormalised onto the gem row — the #23 rule: editing a name
+   or re-fetching a tile re-resolves this for free, and #82's anonymisation
+   removes nothing extra. Matched by name AND <90 m, the SAME contract as
+   dedupeReal(), so it can only ever attach the twin's own text, never a
+   neighbour's. Fires only for a pin with a human credit (t.by): a bare
+   scaffold/seed pin already shows its wiki text AS its description (#101), so
+   there is nothing to pair, and a seed's null submitted_by means no t.by. An
+   explicit t.whatItis (e.g. set upstream) wins outright. Returns '' when there
+   is no distinct twin text — the sheet then renders exactly as before. */
+function whatItisFor(t){
+  if(t && t.whatItis) return String(t.whatItis).trim();
+  if(!t || !t.by) return '';
+  const k = normName(t.name); if(!k) return '';
+  const all = (state.realPlaces && state.realPlaces.all) || [];
+  let best = null, bestD = Infinity;
+  for(const r of all){
+    if(!r || !r.desc || normName(r.name) !== k) continue;
+    const d = haversine(t.lat, t.lng, r.lat, r.lng);
+    if(d <= 90 && d < bestD){ best = r; bestD = d; }
+  }
+  if(!best) return '';
+  const wt = String(best.desc).trim();
+  return (wt && wt !== String(t.desc || '').trim()) ? wt : '';
+}
 function fillPinSheet(t){
   const color = pinSheetColor(t);
   /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
@@ -11098,6 +11138,7 @@ function fillPinSheet(t){
       : `<button class="ps-btn ps-btn-report" onclick="openReportPin('${t.id}')">Report a problem</button>`;
   }
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
+  const whatItis = whatItisFor(t);
   document.getElementById('pin-sheet-expand').innerHTML =
     /* #101 — render NO description block when there is no real description,
        rather than the invented "A notable local landmark." (now null upstream)
@@ -11126,7 +11167,10 @@ function fillPinSheet(t){
        layer reachable everywhere, not by making the other layer scarce.
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
        #23 decision (2) and #82's null submitted_by. */
-    `${t.desc ? `<p class="ps-desc">${escapeHtml(t.desc)}</p>` : ''}
+    `${whatItis ? `<div class="ps-slot"><span class="ps-slot-label">What it is</span><p class="ps-desc">${escapeHtml(whatItis)}</p></div>` : ''}
+     ${t.desc ? (whatItis
+       ? `<div class="ps-slot"><span class="ps-slot-label">A local's take</span><p class="ps-desc">${escapeHtml(t.desc)}</p></div>`
+       : `<p class="ps-desc">${escapeHtml(t.desc)}</p>`) : ''}
      ${t.by ? `<div class="ps-by">
        <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
        <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
