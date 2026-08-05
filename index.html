@@ -1122,6 +1122,10 @@
   }
   .ps-sub{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13.5px;color:var(--text);}
   .ps-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  /* #236 — dot + category as a single token inside the .ps-meta flex row, so the
+     ps-div dividers fall BETWEEN category/distance/status, never between the dot
+     and its label. */
+  .ps-cat{display:inline-flex;align-items:center;gap:6px;}
   .ps-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:9px;font-size:12.5px;color:var(--text-dim);}
   /* #211/#222 — the captured status in the meta row reads "Visited on MM/DD/YY"
      and carries the green the old body line used, so the one consolidated line
@@ -6780,7 +6784,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05h';
+const APP_VERSION = '2026.08.05i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11315,18 +11319,23 @@ function fillPinSheet(t){
   const statusTxt = t.found
     ? (capDate ? 'Visited on ' + capDate : 'Visited')
     : (inRange ? 'In range' : 'Not visited yet');
-  /* #236 — the category is NOT in this meta row. It already renders one line up
-     in the sub row (#pin-sheet-sub: colour dot + PIN_CAT_LABEL[t.category]), so
-     repeating it here as a second token was redundant. Meta is now distance ·
-     status only. `cat` is still computed above because the sub row below uses it. */
+  /* #236 — cat, distance and status share ONE line. The colour dot + category
+     lead the meta row, then distance, then status, separated by ps-div dividers
+     (.ps-cat keeps the dot beside its label as one token). GRAVESTONE — the first
+     cut kept the dot+category on its own sub row and left only distance · status
+     here; the directive folded all three onto a single line, so #pin-sheet-sub is
+     now unused and hidden below. */
   const meta = [
+    `<span class="ps-cat"><span class="ps-cat-dot" style="background:${color}"></span>${escapeHtml(cat)}</span>`,
     distTxt ? `<span>${escapeHtml(distTxt)}</span>` : '',
     statusTxt ? `<span class="${t.found ? 'ps-visited' : ''}">${escapeHtml(statusTxt)}</span>` : ''
   ].filter(Boolean).join('<i class="ps-div"></i>');
 
   document.getElementById('pin-sheet-title').textContent = t.name || 'Unnamed spot';
-  document.getElementById('pin-sheet-sub').innerHTML =
-    `<span class="ps-cat-dot" style="background:${color}"></span>${escapeHtml(cat)}`;
+  // #236 — category folded into the single meta line; sub row is now vestigial.
+  const subEl = document.getElementById('pin-sheet-sub');
+  subEl.innerHTML = '';
+  subEl.style.display = 'none';
   document.getElementById('pin-sheet-meta').innerHTML = meta;
 
   let actions = '';
