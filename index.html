@@ -6799,7 +6799,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05q-debug1';
+const APP_VERSION = '2026.08.05r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10264,7 +10264,7 @@ function openSpotSheet(){
   /* Before the first fix, currentTargetsSorted() is empty, so openPinSheet()'s
      trailing refreshTargetsUI() would immediately close the sheet (open/close
      flash). Wait for state.me — onLocation() re-calls this on the first fix. */
-  if(!state.me){ _spotLog('openSpotSheet: no me yet, wait'); return; }
+  if(!state.me) return;
   const sp = pend.sp, carried = pend.carried;
   const h = state.currentHunt;
   let twin = null;
@@ -10277,7 +10277,6 @@ function openSpotSheet(){
   const target = twin || carried;
   if(!twin && h && h.points && !h.points.some(p=>p.id===target.id)) h.points.unshift(target);
   state._spotSheetId = target.id; // #26 — protect this sheet from the rebuild-close in refreshTargetsUI
-  _spotLog('openSpotSheet OPEN target='+target.id+' twin='+(twin?'Y':'N')+' huntKey='+(h&&h.key)+' pts='+(h&&h.points?h.points.length:0));
   openPinSheet(target);
   expandPinSheet();            // land on the FULL sheet (details + actions), not the peek row
   /* Clear the pending flag ONLY when a stable twin already in the hunt is what
@@ -11822,7 +11821,6 @@ async function submitPinReport(){
   }
 }
 function openPinSheet(t){
-  _spotLog('openPinSheet '+t.id+(t.id===state._spotSheetId?' (=spot)':''));
   state.selectedPinId = t.id;
   // don't stack on top of the nearby-list drawer
   const drawer = document.getElementById('target-drawer');
@@ -11842,30 +11840,9 @@ function openPinSheet(t){
   closeAllPlaceSuggest();   // #88 — sheet takes over the screen; stale list must go
   refreshTargetsUI();
 }
-/* #26-DEBUG — TEMPORARY on-screen logger so a phone can show what closes the
-   shared-spot sheet. Remove with the other #26-DEBUG blocks once diagnosed. */
-function _spotLog(msg){
-  try{
-    var el = document.getElementById('spot-debug');
-    if(!el){
-      el = document.createElement('div');
-      el.id = 'spot-debug';
-      el.style.cssText = 'position:fixed;top:56px;left:6px;right:6px;z-index:99999;background:rgba(0,0,0,.85);color:#3f6;font:10.5px/1.35 ui-monospace,monospace;padding:6px 8px;border-radius:8px;max-height:46vh;overflow:auto;white-space:pre-wrap;pointer-events:none;';
-      (document.body||document.documentElement).appendChild(el);
-    }
-    var t = (Date.now()%100000)/1000;
-    el.textContent = (t.toFixed(2)+'  '+msg+'\n'+el.textContent).slice(0,3000);
-  }catch(e){}
-}
 function closePinSheet(){
   const sheet = document.getElementById('pin-sheet');
   if(!sheet) return;
-  // #26-DEBUG — TEMPORARY: log who is closing the sheet and the id state at close.
-  try{
-    var _st = (new Error().stack||'').split('\n').slice(1,5)
-      .map(function(s){return s.trim().replace(/^at\s+/,'').replace(/\s*\(.*$/,'');}).join(' <- ');
-    _spotLog('CLOSE sel='+state.selectedPinId+' spotId='+state._spotSheetId+' | '+_st);
-  }catch(e){}
   sheet.classList.remove('open','expanded');
   sheet.setAttribute('aria-hidden','true');
   document.getElementById('screen-map').classList.remove('sheet-open');
@@ -12058,8 +12035,7 @@ function refreshTargetsUI(){
        the shared spot, leave it open showing the carried data; openSpotSheet()
        (via onLocation / onRealPlacesReady) re-selects the live twin to resume
        live distance. Cleared on any deliberate close or on browse exit. */
-    else if(state.selectedPinId !== state._spotSheetId){ _spotLog('rTU guard->CLOSE sel='+state.selectedPinId+' spotId='+state._spotSheetId+' targets='+targets.length); closePinSheet(); }
-    else { _spotLog('rTU guard->KEEP (spot) sel='+state.selectedPinId+' targets='+targets.length); }
+    else if(state.selectedPinId !== state._spotSheetId) closePinSheet();
   }
 
   refreshGuideLine();
