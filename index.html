@@ -6790,7 +6790,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05k';
+const APP_VERSION = '2026.08.05l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8859,16 +8859,6 @@ function exitLocationBrowseMode(){
 }
 function recenterMap(){
   maybeRequestCompassPermission();
-  /* #26 — a shared-spot arrival puts you on a single-pin fixed `spot_` hunt.
-     Tapping locate is the way back to normal discovery near you, so restart
-     local browse rather than just recentering on a one-pin view. */
-  if(state.currentHunt && state.currentHunt.mode === 'spot'){
-    state.followMe = true;
-    document.getElementById('locate-btn').classList.add('following');
-    const shb = document.getElementById('search-here-btn'); if(shb) shb.classList.remove('show');
-    startLocalHunt(state.me || state.localHuntOrigin || FALLBACK_LOCATION);
-    return;
-  }
   state.followMe = true;
   document.getElementById('locate-btn').classList.add('following');
   /* #59 — recenter is the deliberate way home, so the pill must go with it.
@@ -10205,28 +10195,46 @@ function shareSpot(id){
   const text = 'Check out ' + (t.name || 'this spot') + ' on Nahgoo!\n' + link;
   window.location.href = 'sms:&body=' + encodeURIComponent(text);
 }
-/* Arrival: decode the carried payload into a single-pin FIXED-content hunt and
-   open its sheet. `spot_` key + `spot` mode is deliberately NOT a guide
-   (isGuideHunt matches only custom_/code_), NOT reblendable (REAL_UPGRADABLE_KEY
-   does not match) and NOT discoverlocal — so the injected pin survives every GPS
-   tick WITHOUT needing a searchedArea anchor, and onLocation()'s local_ rebuild
-   leaves it alone. deferCaptured=true keeps the view to exactly the one shared
-   pin. Opened via openPinSheet(pt) (NOT ...ById): fillPinSheet is null-safe on
-   t.dist, so the sheet opens cleanly before the first GPS fix and the live
-   distance / capture button fill in when onLocation lands. Capture stays
-   GPS-gated (#4) — a shared link lets you SEE and navigate to the spot, never
-   capture it remotely. */
+/* Arrival: land the recipient IN THE AREA around the shared pin — its
+   neighbours visible, the pin itself selected — not on an isolated dot.
+   enterLocationBrowseMode() is the exact reuse (it is what picking a place from
+   search does): it anchors local discovery at `base`, drops the "you are here"
+   marker (you're not really there), regenerates the surrounding pins, and — key
+   — its EXIT is already the locate button (recenterMap -> exitLocationBrowseMode),
+   so no bespoke "back to me" path is needed.
+   Then select the shared pin itself. A GEM is already in the freshly built hunt
+   (approved gems load synchronously in init, before this runs); a real
+   OSM/Wikipedia place may still be mid-fetch, so match by name + proximity
+   (CAPTURED_TWIN_M, the file's settled "same place" distance) and, only if it is
+   not there yet, inject the carried point so there is ALWAYS a selectable marker
+   and sheet. The injected fallback can be replaced by the real pin when the
+   async fetch lands and reblendHuntInPlace() runs; the sheet, opened from the
+   carried data, stays put either way. Opened at the PEEK/half detent
+   (collapsePinSheet clears .expanded). Capture stays GPS-gated (#4) — a shared
+   link lets you SEE and navigate to the spot, never capture it remotely. */
 function consumeSharedSpot(param){
   const sp = param && decodeSpotPayload(param);
   if(!sp) return;
-  const id = sp.gemId ? ('catgem'+sp.gemId)
-    : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5)));
-  const pt = { id, name:sp.name, lat:sp.lat, lng:sp.lng,
-               category:sp.category || null, desc:sp.desc || '' };
-  if(sp.gemId) pt.gemId = sp.gemId;
-  setCurrentHunt({ key:'spot_'+id, name:sp.name, mode:'spot', points:[pt] }, true);
-  openPinSheet(pt);
-  flyToStop(pt.lat, pt.lng);
+  const base = { lat:sp.lat, lng:sp.lng };
+  enterLocationBrowseMode(base, sp.name);
+  const h = state.currentHunt;
+  let target = null;
+  if(h && h.points && h.points.length){
+    if(sp.gemId) target = h.points.find(p => p.gemId === sp.gemId);
+    if(!target)  target = h.points.find(p =>
+      normName(p.name) === normName(sp.name) &&
+      haversine(p.lat, p.lng, sp.lat, sp.lng) <= CAPTURED_TWIN_M);
+  }
+  if(!target){
+    target = { id: sp.gemId ? ('catgem'+sp.gemId)
+      : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5))),
+      name:sp.name, lat:sp.lat, lng:sp.lng, category:sp.category || null, desc:sp.desc || '' };
+    if(sp.gemId) target.gemId = sp.gemId;
+    if(h && h.points){ h.points.unshift(target); refreshTargetsUI(); }
+  }
+  openPinSheet(target);
+  collapsePinSheet();          // half/peek detent, not the fully expanded body
+  flyToStop(target.lat, target.lng);
 }
 function openSaveToHuntPicker(pointId){
   if(!state.currentHunt) return;
