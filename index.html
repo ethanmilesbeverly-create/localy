@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04k';
+const APP_VERSION = '2026.08.04l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11326,7 +11326,7 @@ function fillPinSheet(t){
      ${(t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
-  if(t.found && state.currentHunt){ hydrateCapturePhoto(photoBucketFor(state.currentHunt.key, t.id), t.id, t.name); }
+  if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
 
   // #54 — if this credited gem had no twin in the loaded tile, look it up on
   // demand from its own area and swap the "what it is" slot in when it lands.
@@ -12310,25 +12310,48 @@ async function handleCapturePhotoFile(event){
     showToast("Couldn't save that photo — try again.");
   }
 }
-/* #230 — the capture PHOTO (#209) is a per-pin capture fact keyed huntKey::id,
-   so like found-state (#147), count (#148) and date (#211) it must be resolved
-   ACROSS shared buckets. A photo taken while browsing All Things Local is filed
-   under local_v1::id; viewing that same pin under the Art (or any) card must find
-   it, not read art_v1::id and miss — the gap #229's cross-card found-state fix
-   exposed (before it, the pin wasn't `found` on the Art card, so the loader never
-   ran). Guides keep their own private ledger (#147 scope), so the cross-bucket
-   resolve runs ONLY for shared keys. Uses the `photo:true` flag that already rides
-   with progress (set on the SAME bucket the blob was saved under), so it is an
-   in-memory scan of foundMeta, not an IndexedDB probe. */
-function photoBucketFor(currentKey, id){
-  if(!isSharedProgressKey(currentKey)) return currentKey;
-  const prog = state.progress || {};
-  for(const k of Object.keys(prog)){
-    if(!isSharedProgressKey(k)) continue;
-    const m = (prog[k].foundMeta || {})[id];
-    if(m && m.photo) return k;
-  }
-  return currentKey; // no photo recorded under any shared bucket → read here, render empty
+/* #230 — find this pin's photo wherever it is stored, keyed <huntKey>::id, by
+   scanning the store's keys for the ::id suffix. Bucket- AND flag-independent:
+   the bucket you VIEW under (art_v1) is often not the one you CAPTURED under
+   (local_v1 in All Things Local), and the progress photo flag is not a reliable
+   pointer (foundMeta[id] can be absent while foundAt/foundIds are not — which is
+   why the earlier flag-scan resolve missed). First matching key wins. Returns
+   {blob,key} or null. */
+function loadPhotoBlobForId(id){
+  return photoDB().then(db=>new Promise((resolve, reject)=>{
+    const tx = db.transaction('photos','readonly');
+    const store = tx.objectStore('photos');
+    const kr = store.getAllKeys();
+    kr.onsuccess = ()=>{
+      const suffix = '::' + id;
+      const hit = (kr.result||[]).find(k => typeof k === 'string' && k.length > suffix.length && k.slice(-suffix.length) === suffix);
+      if(!hit){ resolve(null); return; }
+      const gr = store.get(hit);
+      gr.onsuccess = ()=>resolve(gr.result ? {blob:gr.result, key:hit} : null);
+      gr.onerror = ()=>reject(gr.error);
+    };
+    kr.onerror = ()=>reject(kr.error);
+  }));
+}
+/* #230 — THROWAWAY diagnostic (strip on the clean-up build). Gated on
+   ?photodebug=1. Renders what the store actually holds for this id, so we can
+   tell a resolution bug (bytes present under some key) from local-only eviction
+   / a different device (bytes absent — #209, unrecoverable) instead of guessing. */
+async function renderPhotoDebug(block, key, id){
+  try{
+    const db = await photoDB();
+    const keys = await new Promise((res,rej)=>{ const tx=db.transaction('photos','readonly'); const r=tx.objectStore('photos').getAllKeys(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); });
+    if(state.selectedPinId !== id) return;
+    block = document.getElementById('ps-capture-photo-block'); if(!block) return;
+    const match = (keys||[]).filter(k=>typeof k==='string' && k.indexOf('::'+id) !== -1);
+    const dump = '#230 photodebug'
+      + '\nid: ' + id
+      + '\nviewing key: ' + key
+      + '\nstored photo keys: ' + (keys?keys.length:0)
+      + '\nkeys ending ::id: ' + (match.length ? match.join(', ') : '(none)')
+      + '\nfirst keys: ' + (keys||[]).slice(0,12).join(' | ');
+    block.innerHTML = '<pre style="white-space:pre-wrap;font-size:11px;line-height:1.4;opacity:.85;margin:6px 0;padding:8px;border:1px solid var(--line);border-radius:8px;overflow-x:auto">' + escapeHtml(dump) + '</pre>';
+  }catch(e){ if(block) block.innerHTML = '<pre style="font-size:11px">#230 photodebug error: ' + escapeHtml(String((e&&e.message)||e)) + '</pre>'; }
 }
 /* Fill #ps-capture-photo-block for a captured pin — DISPLAY ONLY. A stored photo
    renders read-only; a pin without one (skipped at capture, or bytes evicted / new
@@ -12339,8 +12362,14 @@ function photoBucketFor(currentKey, id){
 async function hydrateCapturePhoto(key, id, name){
   let block = document.getElementById('ps-capture-photo-block');
   if(!block) return;
+  /* #230 — a shared card VIEWS one place list; the photo may sit under any shared
+     bucket's key, so resolve it by id. A guide keeps its own private ledger
+     (#147 scope), so read its photo under the exact guide key. */
   let blob = null;
-  try{ blob = await loadPhotoBlob(capturePhotoKey(key, id)); }catch(e){ blob = null; }
+  try{
+    if(isSharedProgressKey(key)){ const r = await loadPhotoBlobForId(id); blob = r ? r.blob : null; }
+    else { blob = await loadPhotoBlob(capturePhotoKey(key, id)); }
+  }catch(e){ blob = null; }
   if(state.selectedPinId !== id) return;
   block = document.getElementById('ps-capture-photo-block');
   if(!block) return;
@@ -12350,6 +12379,7 @@ async function hydrateCapturePhoto(key, id, name){
     block.innerHTML = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">';
   } else {
     block.innerHTML = '';
+    if(/[?&]photodebug/.test(location.search)){ await renderPhotoDebug(block, key, id); }
   }
 }
 
