@@ -239,6 +239,15 @@
     row-level security, and <strong>nothing in the app shows one person's captures to
     another person</strong>. That is a design rule, not just a current fact.</p>
 
+  <h3>Your capture photos</h3>
+  <p>If you choose to take a photo at the moment you capture a place, that photo is
+    stored <strong>privately in your account</strong> (in Supabase Storage), so it
+    survives across your devices and a cleared browser cache. It is readable only by
+    you, protected by row-level security the same way your captures are —
+    <strong>never public, never shown to anyone else, and never part of a submitted
+    gem</strong>. Taking a photo is always optional, and you can skip it on any
+    capture.</p>
+
   <h3>A short-lived integrity record</h3>
   <p>To tell a real capture from a faked one, each capture also records how accurate
     your GPS reading was at that moment, how far from the pin you were, whether the

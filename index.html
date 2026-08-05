@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04m';
+const APP_VERSION = '2026.08.04n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12190,10 +12190,12 @@ async function attemptMarkFound(){
 let _pendingPhoto = null;
 let _capturePhotoURL = null;
 let _photoDBPromise = null;
-/* #230 — THROWAWAY diagnostic switch (remove with renderPhotoDebug on the
-   clean-up build). Not a URL param: clearResetParam() replaceStates the query off
-   at boot (#85), so ?photodebug never survives to sheet-open — hence a constant. */
-const PHOTO_DEBUG = true;
+/* #209 Build 2 — capture photos are mirrored to a PRIVATE, owner-scoped Supabase
+   Storage bucket so they survive a cache clear / new device; IndexedDB stays the
+   instant local buffer. The bucket + RLS are created in Supabase BEFORE this ships
+   (see 230_capture_photos_storage.sql) — otherwise uploads fail soft to local-only. */
+const PHOTO_BUCKET = 'capture-photos';
+const _remotePhotoMiss = new Set(); // session negative-cache: ids with no remote copy, so a photoless captured pin isn't re-fetched every sheet-open
 function capturePhotoKey(key, id){ return key + '::' + id; }
 function photoDB(){
   if(_photoDBPromise) return _photoDBPromise;
@@ -12305,7 +12307,9 @@ async function handleCapturePhotoFile(event){
   try{
     const blob = await compressImageFile(file, 1600, 0.82);
     await savePhotoBlob(capturePhotoKey(pending.key, pending.id), blob);
-    // Flag the record so the "has a photo" bit rides with progress (bytes stay local).
+    // #209 Build 2 — mirror to durable owner-scoped Storage (best-effort; the local buffer above is the immediate copy for this session/device).
+    uploadPhotoRemote(pending.id, blob);
+    // Flag the record so the "has a photo" bit rides with progress; the bytes now also live server-side (#209 Build 2).
     const meta = prog.foundMeta && prog.foundMeta[pending.id];
     if(meta && !meta.photo){ meta.photo = true; try{ await saveProgress(); }catch(e){ notePersistenceIssue(e); } }
     showToast('Photo added.');
@@ -12313,6 +12317,33 @@ async function handleCapturePhotoFile(event){
   }catch(e){
     showToast("Couldn't save that photo — try again.");
   }
+}
+/* #209 Build 2 — durable photo storage. Path is <uid>/<pinId>: RLS scopes to the
+   owner by the first path segment, and one photo per pin per user is found directly
+   by id (no bucket in the path, so cross-card display is trivial). Best-effort — a
+   failed upload leaves the local IndexedDB buffer as the copy; a signed-out or demo
+   user skips remote entirely. */
+function photoRemotePath(id){
+  const uid = state.user && state.user.id;
+  if(!uid || !id || uid === 'demo-user') return null;
+  return uid + '/' + String(id).replace(/[^A-Za-z0-9_.-]/g, '_');
+}
+async function uploadPhotoRemote(id, blob){
+  const path = photoRemotePath(id); if(!path) return false;
+  try{
+    const { error } = await sb.storage.from(PHOTO_BUCKET).upload(path, blob, { upsert:true, contentType:'image/jpeg' });
+    if(!error) _remotePhotoMiss.delete(id);
+    return !error;
+  }catch(e){ return false; }
+}
+async function downloadPhotoRemote(id){
+  const path = photoRemotePath(id); if(!path) return null;
+  if(_remotePhotoMiss.has(id)) return null;
+  try{
+    const { data, error } = await sb.storage.from(PHOTO_BUCKET).download(path);
+    if(error || !data){ _remotePhotoMiss.add(id); return null; }
+    return data; // a Blob
+  }catch(e){ return null; }
 }
 /* #230 — find this pin's photo wherever it is stored, keyed <huntKey>::id, by
    scanning the store's keys for the ::id suffix. Bucket- AND flag-independent:
@@ -12337,26 +12368,6 @@ function loadPhotoBlobForId(id){
     kr.onerror = ()=>reject(kr.error);
   }));
 }
-/* #230 — THROWAWAY diagnostic (strip on the clean-up build). Gated on
-   ?photodebug=1. Renders what the store actually holds for this id, so we can
-   tell a resolution bug (bytes present under some key) from local-only eviction
-   / a different device (bytes absent — #209, unrecoverable) instead of guessing. */
-async function renderPhotoDebug(block, key, id){
-  try{
-    const db = await photoDB();
-    const keys = await new Promise((res,rej)=>{ const tx=db.transaction('photos','readonly'); const r=tx.objectStore('photos').getAllKeys(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); });
-    if(state.selectedPinId !== id) return;
-    block = document.getElementById('ps-capture-photo-block'); if(!block) return;
-    const match = (keys||[]).filter(k=>typeof k==='string' && k.indexOf('::'+id) !== -1);
-    const dump = '#230 photodebug'
-      + '\nid: ' + id
-      + '\nviewing key: ' + key
-      + '\nstored photo keys: ' + (keys?keys.length:0)
-      + '\nkeys ending ::id: ' + (match.length ? match.join(', ') : '(none)')
-      + '\nfirst keys: ' + (keys||[]).slice(0,12).join(' | ');
-    block.innerHTML = '<pre style="white-space:pre-wrap;font-size:11px;line-height:1.4;opacity:.85;margin:6px 0;padding:8px;border:1px solid var(--line);border-radius:8px;overflow-x:auto">' + escapeHtml(dump) + '</pre>';
-  }catch(e){ if(block) block.innerHTML = '<pre style="font-size:11px">#230 photodebug error: ' + escapeHtml(String((e&&e.message)||e)) + '</pre>'; }
-}
 /* Fill #ps-capture-photo-block for a captured pin — DISPLAY ONLY. A stored photo
    renders read-only; a pin without one (skipped at capture, or bytes evicted / new
    device) renders empty. No button here by design: the only way to attach a photo
@@ -12374,6 +12385,13 @@ async function hydrateCapturePhoto(key, id, name){
     if(isSharedProgressKey(key)){ const r = await loadPhotoBlobForId(id); blob = r ? r.blob : null; }
     else { blob = await loadPhotoBlob(capturePhotoKey(key, id)); }
   }catch(e){ blob = null; }
+  /* #209 Build 2 — local buffer empty (cache cleared / new device)? Pull the durable
+     copy from owner-scoped Storage and repopulate the buffer so the next open is
+     instant. A pin with no photo returns null and is negative-cached for the session. */
+  if(!blob){
+    const remote = await downloadPhotoRemote(id);
+    if(remote){ blob = remote; try{ await savePhotoBlob(capturePhotoKey(key, id), remote); }catch(e){} }
+  }
   if(state.selectedPinId !== id) return;
   block = document.getElementById('ps-capture-photo-block');
   if(!block) return;
@@ -12383,7 +12401,6 @@ async function hydrateCapturePhoto(key, id, name){
     block.innerHTML = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">';
   } else {
     block.innerHTML = '';
-    if(PHOTO_DEBUG){ await renderPhotoDebug(block, key, id); }
   }
 }
 
