@@ -6758,7 +6758,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05e';
+const APP_VERSION = '2026.08.05f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11292,7 +11292,7 @@ function fillPinSheet(t){
   const capDate = t.found ? fmtPassportDate(capturedAtFor(t.id)) : '';
   const statusTxt = t.found
     ? (capDate ? 'Visited on ' + capDate : 'Visited')
-    : (inRange ? 'In range' : 'Not captured');
+    : (inRange ? 'In range' : 'Not visited yet');
   const meta = [
     distTxt ? `<span>${escapeHtml(distTxt)}</span>` : '',
     cat ? `<span>${escapeHtml(cat)}</span>` : '',
