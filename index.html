@@ -51,6 +51,19 @@
        gap and the standalone "Have a code?" card's top offset are the SAME
        fact; stated once here so they cannot disagree (see --sheet-offset). */
     --card-gap:12px;
+    /* #98 — THE CEILING SHARED BY THE TWO CONTENT-SIZED BOTTOM SHEETS, stated
+       once so the individual-pin sheet and the nearby-list can't drift apart.
+       ~150px is always left above a sheet: it clears the #topbar overlay (~52px)
+       and leaves ~100px of live map on any screen height. A MAX, not a fixed
+       height — both sheets still shrink to their content. Want them taller or
+       shorter? Change only the 150px here.
+         - #target-drawer (the nearby-list / "pin group" menu, bottom-left button)
+           caps its WHOLE box at this.
+         - #pin-sheet.expanded #pin-sheet-expand caps its SCROLL REGION at this,
+           so a maximally-tall pin sheet is its own chrome (grabber + peek row)
+           taller than a maximally-tall drawer — accepted; the common case is a
+           short pin that never reaches the ceiling. */
+    --sheet-max:calc(100vh - 150px - env(safe-area-inset-top));
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -773,13 +786,12 @@
     margin-top:-20px;
     /* Ceiling raised when the compass panel was removed (more rows fit), then
        pulled back so the drawer still reads as a slide-up sheet rather than a
-       full-screen takeover. Expressed as a reserved strip instead of a raw vh
-       number: ~150px is always left above the drawer, which clears the
-       #topbar overlay (~52px) and leaves ~100px of live map visible beneath it
-       on any screen height. This is a MAX, not a fixed height — the drawer
-       still shrinks to content, so one or two items stay short. Want it taller
-       or shorter? Change only the 150px. */
-    max-height:calc(100vh - 150px - env(safe-area-inset-top));
+       full-screen takeover. It is now --sheet-max (see :root) — the SAME fact
+       #pin-sheet's expandable body uses, so the two content-sized sheets can't
+       drift. This is a MAX, not a fixed height — the drawer still shrinks to
+       content, so one or two items stay short. Want it taller or shorter?
+       Change the 150px at --sheet-max, not here. */
+    max-height:var(--sheet-max);
   }
   #drawer-header{
     position:relative;
@@ -1077,7 +1089,12 @@
     transition:max-height .3s ease, opacity .25s ease, margin .3s ease, padding .3s ease;
   }
   #pin-sheet.expanded #pin-sheet-expand{
-    max-height:44vh;overflow-y:auto;opacity:1;margin-top:14px;padding-top:14px;
+    /* 44vh -> --sheet-max: the same ceiling the nearby-list/"pin group" drawer
+       (#target-drawer) uses, so a long pin's detail scrolls less before it hits
+       the cap. Still a MAX on a scroll region that shrinks to content, and it
+       stays a concrete length so the max-height:0 -> ceiling open animation
+       (the transition above) keeps working. See --sheet-max in :root. */
+    max-height:var(--sheet-max);overflow-y:auto;opacity:1;margin-top:14px;padding-top:14px;
     border-top:1px solid var(--line);
   }
   .ps-desc{font-size:13.5px;line-height:1.55;color:var(--text-dim);margin:0 0 14px;}
@@ -1119,7 +1136,7 @@
   }
   /* #61(b) — padding-bottom lives HERE as well as on #pin-sheet, and the reason
      is not redundancy. #pin-sheet.expanded #pin-sheet-expand is
-     max-height:44vh; overflow-y:auto, so on a short screen with a long
+     max-height:var(--sheet-max); overflow-y:auto, so on a short screen with a long
      description "+ Save to a hunt" is the last row INSIDE a scroll container —
      and #pin-sheet's padding sits OUTSIDE it, creating no room at the scroll end.
      Raising the sheet's padding alone fixes the short case and misses this one. */
@@ -6713,7 +6730,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04r';
+const APP_VERSION = '2026.08.05a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
