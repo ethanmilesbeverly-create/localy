@@ -6799,7 +6799,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05p';
+const APP_VERSION = '2026.08.05q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8858,6 +8858,7 @@ function enterLocationBrowseMode(base, placeName){
 function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
   state._pendingSpot = null; // #26 — leaving the shared-spot area; stop re-opening its sheet
+  state._spotSheetId = null; // #26 — drop protection so the natural rebuild below closes the spot sheet
   state.browsingLocation = null;
   state.searchedArea = null;
   state.followMe = true;
@@ -10275,6 +10276,7 @@ function openSpotSheet(){
   }
   const target = twin || carried;
   if(!twin && h && h.points && !h.points.some(p=>p.id===target.id)) h.points.unshift(target);
+  state._spotSheetId = target.id; // #26 — protect this sheet from the rebuild-close in refreshTargetsUI
   openPinSheet(target);
   expandPinSheet();            // land on the FULL sheet (details + actions), not the peek row
   /* Clear the pending flag ONLY when a stable twin already in the hunt is what
@@ -11846,6 +11848,8 @@ function closePinSheet(){
   document.getElementById('screen-map').classList.remove('sheet-open');
   if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} _capturePhotoURL = null; }
   state.selectedPinId = null;
+  state._spotSheetId = null;  // #26 — a deliberate close ends the shared-spot session
+  state._pendingSpot = null;  // #26 — stop any pending re-open too
   /* #51 follow-on, fixed alongside #73 because they produce the same symptom.
      refreshTrackUI() checks expandedTargets FIRST, so a pin left in this set
      after its sheet closed kept the capture button locked to that pin instead
@@ -12023,7 +12027,15 @@ function refreshTargetsUI(){
   if(state.selectedPinId){
     const sel = targets.find(x=>x.id===state.selectedPinId);
     if(sel) fillPinSheet(sel);
-    else closePinSheet();
+    /* #26 — the shared-spot sheet must NEVER be torn down here. A hunt rebuild
+       (first-fix player recenter, real-places reblend, a re-mint under a new id)
+       transiently drops the selected pin from `targets`; for a normal pin that
+       correctly closes the sheet, but for a shared-spot arrival it produced the
+       "opens then closes" flash no matter which rebuild fired. When the sheet is
+       the shared spot, leave it open showing the carried data; openSpotSheet()
+       (via onLocation / onRealPlacesReady) re-selects the live twin to resume
+       live distance. Cleared on any deliberate close or on browse exit. */
+    else if(state.selectedPinId !== state._spotSheetId) closePinSheet();
   }
 
   refreshGuideLine();
