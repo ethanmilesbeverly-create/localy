@@ -58,11 +58,12 @@
        height — both sheets still shrink to their content. Want them taller or
        shorter? Change only the 150px here.
          - #target-drawer (the nearby-list / "pin group" menu, bottom-left button)
-           caps its WHOLE box at this.
-         - #pin-sheet.expanded #pin-sheet-expand caps its SCROLL REGION at this,
-           so a maximally-tall pin sheet is its own chrome (grabber + peek row)
-           taller than a maximally-tall drawer — accepted; the common case is a
-           short pin that never reaches the ceiling. */
+           caps its WHOLE box at this; its fixed header + scrolling body do the
+           rest.
+         - #pin-sheet caps its WHOLE box at this too (NOT just the scroll region —
+           the grabber + peek row live above the body, so capping the body alone
+           made the sheet peek-height taller than the drawer). Same fixed-peek +
+           scrolling-body structure, so both sheets top out at the same line. */
     --sheet-max:calc(100vh - 150px - env(safe-area-inset-top));
   }
   *{box-sizing:border-box;}
@@ -1056,6 +1057,17 @@
     border-top:1px solid rgba(237,233,221,0.16);
     border-radius:20px 20px 0 0;
     box-shadow:0 -12px 34px rgba(0,0,0,0.42);
+    /* Cap the WHOLE sheet at --sheet-max (the nearby-list/"pin group" drawer's
+       ceiling), NOT just the scroll region — otherwise the grabber + title/meta
+       peek row, which sit ABOVE the scroll region, push the sheet's top edge
+       past the drawer's and eat the strip of map the drawer leaves visible.
+       flex column so the peek stays fixed (flex-shrink:0 on #pin-sheet-drag)
+       and only #pin-sheet-expand scrolls — the exact structure #target-drawer
+       uses (fixed #drawer-header + scrolling #drawer-body). overflow:hidden so
+       nothing paints past the cap or the rounded top corners. */
+    display:flex;flex-direction:column;
+    max-height:var(--sheet-max);
+    overflow:hidden;
     /* #61(b) — 14px -> 22px. This edge is pinned above the nav at
        --sheet-offset, so there is no safe-area slack quietly absorbing it and
        the last button sat right on the edge. Left unresolved on purpose:
@@ -1068,7 +1080,7 @@
     will-change:transform;
   }
   #pin-sheet.open{transform:translateY(0);}
-  #pin-sheet-drag{cursor:grab;touch-action:none;}
+  #pin-sheet-drag{cursor:grab;touch-action:none;flex-shrink:0;}
   #pin-sheet-grabber{
     width:42px;height:5px;border-radius:3px;
     background:rgba(237,233,221,0.34);
@@ -1089,11 +1101,14 @@
     transition:max-height .3s ease, opacity .25s ease, margin .3s ease, padding .3s ease;
   }
   #pin-sheet.expanded #pin-sheet-expand{
-    /* 44vh -> --sheet-max: the same ceiling the nearby-list/"pin group" drawer
-       (#target-drawer) uses, so a long pin's detail scrolls less before it hits
-       the cap. Still a MAX on a scroll region that shrinks to content, and it
-       stays a concrete length so the max-height:0 -> ceiling open animation
-       (the transition above) keeps working. See --sheet-max in :root. */
+    /* The sheet total is now capped by #pin-sheet (max-height:--sheet-max); this
+       body is the flex child that takes the room left under the fixed peek and
+       scrolls when a long pin overflows it. flex:0 1 auto — no grow, so a SHORT
+       pin still hugs its content instead of stretching to fill the cap; shrink +
+       min-height:0 let a TALL pin's body shrink so overflow-y:auto scrolls
+       inside it. max-height stays a concrete length purely so the max-height:0 ->
+       ceiling open animation (the transition above) keeps working. */
+    flex:0 1 auto;min-height:0;
     max-height:var(--sheet-max);overflow-y:auto;opacity:1;margin-top:14px;padding-top:14px;
     border-top:1px solid var(--line);
   }
@@ -6730,7 +6745,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05a';
+const APP_VERSION = '2026.08.05b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
