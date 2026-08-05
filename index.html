@@ -6784,7 +6784,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05i';
+const APP_VERSION = '2026.08.05j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12002,18 +12002,33 @@ function renderNearbyList(){
        agree. Falls back to 'Spot' for a target with no/unknown category (a guide
        stop, a data anomaly) rather than rendering blank. */
     const cat = PIN_CAT_LABEL[t.category] || 'Spot';
-    /* Found sub-line: no second ✓ (the name line already carries one) and the
-       word is "Visited", not "Found" — moving toward "visited" language. The
-       broader "Captured"/"Capture" surfaces (pin sheet status + button, capture
-       prompt, passport) are a separate migration, not swept here. */
-    const distTxt = t.found ? `Visited · ${fmtDist(t.dist)}` : fmtDist(t.dist)+' away';
+    /* #236 — THE DRAWER META LINE IS THE CONSOLIDATED MIRROR OF THE PIN SHEET'S.
+       Same order the opened sheet uses (fillPinSheet): category, then distance,
+       then status — never status-before-distance. This is the LIGHT version of
+       that line, and the two ways it diverges are deliberate, by directive:
+         1. NO colour dot beside the category. The sheet leads its .ps-cat with a
+            .ps-cat-dot; the drawer already carries the colour on the row's
+            blaze-mini pin at left, so a second dot next to the label would be
+            the same fact twice. Category stays plain .t-cat text here.
+         2. Status is the bare word "Visited" and ONLY when found — never the
+            dated "Visited on MM/DD/YY" (that lives on the full sheet) and never
+            the unfound "In range"/"Not visited yet" states. An unvisited row
+            shows category · distance and stops.
+       Distance carries "away" in both states, matching the sheet's distTxt. */
+    const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
+    const statusTxt = t.found ? 'Visited' : '';
+    const metaLine = [
+      `<span class="t-cat">${escapeHtml(cat)}</span>`,
+      distTxt ? escapeHtml(distTxt) : '',
+      statusTxt ? escapeHtml(statusTxt) : ''
+    ].filter(Boolean).join(' · ');
     return `
     <div class="target-row">
       <div class="target-row-main" onclick="openPinSheetById('${t.id}')">
         <div class="blaze-mini">${pinSVGsized(t.found?color:'#EDE9DD', t.found, 18,26)}</div>
         <div class="t-meta">
           <div class="t-name">${escapeHtml(t.name)}${t.found?' ✓':''}</div>
-          <div class="t-dist"><span class="t-cat">${escapeHtml(cat)}</span> · ${escapeHtml(distTxt)}</div>
+          <div class="t-dist">${metaLine}</div>
         </div>
         <svg class="t-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
