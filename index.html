@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04n';
+const APP_VERSION = '2026.08.04o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12313,7 +12313,14 @@ async function handleCapturePhotoFile(event){
     const meta = prog.foundMeta && prog.foundMeta[pending.id];
     if(meta && !meta.photo){ meta.photo = true; try{ await saveProgress(); }catch(e){ notePersistenceIssue(e); } }
     showToast('Photo added.');
+    /* #231 — capturing from the sheet runs closePinSheet() before the photo prompt
+       (captureFromSheet, load-bearing order), so selectedPinId is null by the time
+       the photo saves and the old guarded hydrate never painted — the photo saved
+       fine but only appeared on a manual reopen. If the sheet is still open (map
+       camera-button path) hydrate in place; otherwise reopen the captured pin, which
+       re-renders the captured card and hydrates the photo in context. */
     if(state.selectedPinId === pending.id){ hydrateCapturePhoto(pending.key, pending.id, pending.name); }
+    else { openPinSheetById(pending.id); }
   }catch(e){
     showToast("Couldn't save that photo — try again.");
   }
