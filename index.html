@@ -6819,7 +6819,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05u';
+const APP_VERSION = '2026.08.05v';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10300,7 +10300,7 @@ function openSpotSheet(){
   if(!twin && h && h.points && !h.points.some(p=>p.id===target.id)) h.points.unshift(target);
   state._spotSheetId = target.id; // #26 — protect this sheet from the rebuild-close in refreshTargetsUI
   openPinSheet(target);
-  expandPinSheet();            // land on the FULL sheet (details + actions), not the peek row
+  collapsePinSheet();          // land at the semi-collapsed peek detent so the pin stays visible; swipe up to expand
   /* Clear the pending flag ONLY when a stable twin already in the hunt is what
      got selected. While only the injected placeholder is in play (a real place
      whose tile is still mid-fetch), keep retrying — onRealPlacesReady() calls
