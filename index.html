@@ -1303,18 +1303,6 @@
     0%{box-shadow:0 0 0 0 rgba(232,98,44,0.55);}
     100%{box-shadow:0 0 0 26px rgba(232,98,44,0);}
   }
-  /* #26 — the SELECTED pin gets a bolder, unmistakable halo: a solid white +
-     accent ring that is always visible (so you can tell at a glance which pin is
-     open) plus a stronger expanding pulse on top of it. */
-  .fm-halo.fm-halo-sel{
-    width:28px;height:28px;box-sizing:border-box;
-    border:3px solid #fff;
-    animation:fmHaloSel 1.5s ease-out infinite;
-  }
-  @keyframes fmHaloSel{
-    0%{box-shadow:0 0 0 2px rgba(232,98,44,0.95), 0 0 14px 3px rgba(232,98,44,0.6), 0 0 0 0 rgba(232,98,44,0.5);}
-    100%{box-shadow:0 0 0 2px rgba(232,98,44,0.95), 0 0 14px 3px rgba(232,98,44,0.6), 0 0 0 20px rgba(232,98,44,0);}
-  }
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
   .player-wrap{position:relative;width:64px;height:64px;}
@@ -6811,7 +6799,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05s';
+const APP_VERSION = '2026.08.05t';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12019,11 +12007,10 @@ function refreshTargetsUI(){
   targets.forEach(t=>{
     const color = colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
-    const isSelected = selectedTarget && t.id===selectedTarget.id;
     const icon = L.divIcon({
       className:'',
       html:`<div class="fm-wrap">
-        ${isNearest ? '<div class="fm-halo'+(isSelected?' fm-halo-sel':'')+'"></div>' : ''}
+        ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-shadow"></div>
         <div class="fm-icon ${t.found?'fm-found':''}">
           ${dropPinSVG(t.found ? color : dimColor(color), t.found, 26, 37)}
@@ -12032,7 +12019,7 @@ function refreshTargetsUI(){
       iconSize:[38,56],
       iconAnchor:[19,52]
     });
-    const m = L.marker([t.lat,t.lng], {icon, zIndexOffset: isSelected?900:0}).addTo(state.markersLayer);
+    const m = L.marker([t.lat,t.lng], {icon}).addTo(state.markersLayer);
     m.on('click', ()=> openPinSheet(t));
   });
 
