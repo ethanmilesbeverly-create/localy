@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04o';
+const APP_VERSION = '2026.08.04p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12196,6 +12196,25 @@ let _photoDBPromise = null;
    (see 230_capture_photos_storage.sql) — otherwise uploads fail soft to local-only. */
 const PHOTO_BUCKET = 'capture-photos';
 const _remotePhotoMiss = new Set(); // session negative-cache: ids with no remote copy, so a photoless captured pin isn't re-fetched every sheet-open
+/* #231 — THROWAWAY on-screen photo trace (strip with _pdbg on the clean-up build).
+   A fixed overlay, not a URL param (clearResetParam strips the query at boot) and
+   not the pin sheet (which capture closes), so the trace survives regardless. */
+const PHOTO_DEBUG = true;
+function _pdbg(msg){
+  if(!PHOTO_DEBUG) return;
+  try{
+    let el = document.getElementById('_photo_dbg');
+    if(!el){
+      el = document.createElement('div');
+      el.id = '_photo_dbg';
+      el.style.cssText = 'position:fixed;left:6px;right:6px;bottom:6px;z-index:99999;max-height:44vh;overflow:auto;background:rgba(0,0,0,.86);color:#5f5;font:11px/1.35 monospace;padding:8px;border-radius:8px;white-space:pre-wrap;word-break:break-all';
+      el.addEventListener('click', ()=>{ el.textContent = ''; }); // tap to clear
+      document.body.appendChild(el);
+    }
+    el.textContent += msg + '\n';
+    el.scrollTop = el.scrollHeight;
+  }catch(e){}
+}
 function capturePhotoKey(key, id){ return key + '::' + id; }
 function photoDB(){
   if(_photoDBPromise) return _photoDBPromise;
@@ -12297,31 +12316,37 @@ async function handleCapturePhotoFile(event){
   const file = input && input.files && input.files[0];
   const pending = _pendingPhoto;
   _pendingPhoto = null;
-  if(!file || !pending) return;
-  /* Safety net: only keep the photo if the pin is actually captured. The prompt
-     only appears after a committed find, so this is normally always true — it just
-     guards against a stray onchange binding a shot to an uncaptured pin. */
+  _pdbg('--- photo capture ---');
+  _pdbg('file: ' + (file ? ((file.name||'(noname)')+' '+file.type+' '+file.size+'b') : 'NONE'));
+  _pdbg('pending: ' + (pending ? (pending.key+'::'+pending.id) : 'NONE'));
+  if(!file || !pending) { _pdbg('BAIL: no file / no pending'); return; }
   const prog = state.progress[pending.key];
   const committed = prog && prog.foundIds && prog.foundIds.indexOf(pending.id) !== -1;
-  if(!committed){ return; }
+  _pdbg('committed under ' + pending.key + ': ' + committed);
+  if(!committed){ _pdbg('BAIL: not committed'); return; }
   try{
     const blob = await compressImageFile(file, 1600, 0.82);
-    await savePhotoBlob(capturePhotoKey(pending.key, pending.id), blob);
-    // #209 Build 2 — mirror to durable owner-scoped Storage (best-effort; the local buffer above is the immediate copy for this session/device).
+    _pdbg('compressed: ' + (blob ? (blob.size+'b '+blob.type) : 'NULL BLOB'));
+    const saveKey = capturePhotoKey(pending.key, pending.id);
+    await savePhotoBlob(saveKey, blob);
+    _pdbg('saved under: ' + saveKey);
+    try{ const rb = await loadPhotoBlob(saveKey); _pdbg('readback exact: ' + (rb ? rb.size+'b' : 'NULL')); }catch(e){ _pdbg('readback exact ERR: '+((e&&e.message)||e)); }
+    try{ const r2 = await loadPhotoBlobForId(pending.id); _pdbg('readback byId: ' + (r2 ? (r2.key+' '+(r2.blob&&r2.blob.size)+'b') : 'NULL')); }catch(e){ _pdbg('byId ERR: '+((e&&e.message)||e)); }
+    try{ const db=await photoDB(); const keys=await new Promise((res,rej)=>{const tx=db.transaction('photos','readonly');const rr=tx.objectStore('photos').getAllKeys();rr.onsuccess=()=>res(rr.result||[]);rr.onerror=()=>rej(rr.error);}); _pdbg('store keys ('+keys.length+'): '+keys.slice(0,8).join(' | ')); }catch(e){ _pdbg('getAllKeys ERR: '+((e&&e.message)||e)); }
     uploadPhotoRemote(pending.id, blob);
-    // Flag the record so the "has a photo" bit rides with progress; the bytes now also live server-side (#209 Build 2).
     const meta = prog.foundMeta && prog.foundMeta[pending.id];
     if(meta && !meta.photo){ meta.photo = true; try{ await saveProgress(); }catch(e){ notePersistenceIssue(e); } }
     showToast('Photo added.');
-    /* #231 — capturing from the sheet runs closePinSheet() before the photo prompt
-       (captureFromSheet, load-bearing order), so selectedPinId is null by the time
-       the photo saves and the old guarded hydrate never painted — the photo saved
-       fine but only appeared on a manual reopen. If the sheet is still open (map
-       camera-button path) hydrate in place; otherwise reopen the captured pin, which
-       re-renders the captured card and hydrates the photo in context. */
-    if(state.selectedPinId === pending.id){ hydrateCapturePhoto(pending.key, pending.id, pending.name); }
-    else { openPinSheetById(pending.id); }
+    if(state.selectedPinId === pending.id){
+      _pdbg('display: hydrate-in-place, sel=' + state.selectedPinId);
+      hydrateCapturePhoto(pending.key, pending.id, pending.name);
+    } else {
+      const found = currentTargetsSorted().find(x=>x.id===pending.id);
+      _pdbg('display: reopen, sel=' + state.selectedPinId + ', inList=' + (found?'yes':'NO'));
+      openPinSheetById(pending.id);
+    }
   }catch(e){
+    _pdbg('CATCH: ' + ((e&&e.message)||e));
     showToast("Couldn't save that photo — try again.");
   }
 }
@@ -12399,6 +12424,7 @@ async function hydrateCapturePhoto(key, id, name){
     const remote = await downloadPhotoRemote(id);
     if(remote){ blob = remote; try{ await savePhotoBlob(capturePhotoKey(key, id), remote); }catch(e){} }
   }
+  _pdbg('hydrate(' + key + ',' + id + '): blob=' + (blob ? blob.size+'b' : 'NULL') + ' sel=' + state.selectedPinId + (state.selectedPinId!==id?' -> GUARD RETURN':''));
   if(state.selectedPinId !== id) return;
   block = document.getElementById('ps-capture-photo-block');
   if(!block) return;
