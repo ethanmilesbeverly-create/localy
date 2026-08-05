@@ -60,10 +60,12 @@
          - #target-drawer (the nearby-list / "pin group" menu, bottom-left button)
            caps its WHOLE box at this; its fixed header + scrolling body do the
            rest.
-         - #pin-sheet caps its WHOLE box at this too (NOT just the scroll region —
-           the grabber + peek row live above the body, so capping the body alone
-           made the sheet peek-height taller than the drawer). Same fixed-peek +
-           scrolling-body structure, so both sheets top out at the same line. */
+         - #pin-sheet caps its WHOLE box too (NOT just the scroll region — the
+           grabber + peek row live above the body). It floats --sheet-offset up
+           from the app bottom, so it caps at (--sheet-max - --sheet-offset): the
+           same fact minus the gap it is anchored by, which lands its top on the
+           SAME line as the drawer's. Both sheets top out together and track this
+           one number. */
     --sheet-max:calc(100vh - 150px - env(safe-area-inset-top));
   }
   *{box-sizing:border-box;}
@@ -1057,16 +1059,24 @@
     border-top:1px solid rgba(237,233,221,0.16);
     border-radius:20px 20px 0 0;
     box-shadow:0 -12px 34px rgba(0,0,0,0.42);
-    /* Cap the WHOLE sheet at --sheet-max (the nearby-list/"pin group" drawer's
-       ceiling), NOT just the scroll region — otherwise the grabber + title/meta
-       peek row, which sit ABOVE the scroll region, push the sheet's top edge
-       past the drawer's and eat the strip of map the drawer leaves visible.
-       flex column so the peek stays fixed (flex-shrink:0 on #pin-sheet-drag)
-       and only #pin-sheet-expand scrolls — the exact structure #target-drawer
-       uses (fixed #drawer-header + scrolling #drawer-body). overflow:hidden so
-       nothing paints past the cap or the rounded top corners. */
+    /* Cap the WHOLE sheet, NOT just the scroll region — otherwise the grabber +
+       title/meta peek row, which sit ABOVE the scroll region, push the sheet's
+       top past the drawer's and eat the strip of map the drawer leaves visible.
+       flex column so the peek stays fixed (flex-shrink:0 on #pin-sheet-drag) and
+       only #pin-sheet-expand scrolls — the exact structure #target-drawer uses
+       (fixed #drawer-header + scrolling #drawer-body). overflow:hidden so nothing
+       paints past the cap or the rounded top corners.
+
+       WHY --sheet-max MINUS --sheet-offset, not --sheet-max alone: the drawer's
+       box bottom sits at the viewport bottom (#bottomnav is position:absolute, so
+       #screen-map is full-height), so its top lands at the 150px reserve. This
+       sheet floats --sheet-offset (56px + safe-area) UP from the app bottom, so
+       with the SAME height its top would sit --sheet-offset HIGHER than the
+       drawer's. Subtracting the offset it is anchored by lands its top on the
+       SAME line as the drawer — both derived from the two shared tokens, so they
+       track together (#98). */
     display:flex;flex-direction:column;
-    max-height:var(--sheet-max);
+    max-height:calc(var(--sheet-max) - var(--sheet-offset));
     overflow:hidden;
     /* #61(b) — 14px -> 22px. This edge is pinned above the nav at
        --sheet-offset, so there is no safe-area slack quietly absorbing it and
@@ -6745,7 +6755,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05b';
+const APP_VERSION = '2026.08.05c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
