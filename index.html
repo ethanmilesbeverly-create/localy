@@ -1098,6 +1098,24 @@
   }
   #pin-sheet-peek{display:flex;gap:14px;align-items:flex-start;}
   #pin-sheet-info{flex:1;min-width:0;}
+  /* #235 — DETERMINISTIC FULL CLOSE. The swipe steps detents (expanded -> half,
+     half -> closed) the standard multi-detent way (Apple/Google Maps place
+     cards); this X is the escape hatch those sheets pair with the swipe, so a
+     user at full who wants OUT does it in one tap instead of two swipes. Lives
+     as the 2nd child of #pin-sheet-peek: #pin-sheet-info is flex:1 so the title
+     block shrinks to make room and the X sits top-right, Apple-style (filled
+     circle + stroked glyph). flex-shrink:0 so it never squishes. It sits INSIDE
+     #pin-sheet-drag, which carries the pointerdown/pointerup drag handlers, so
+     wirePinSheet() stops the button's pointerdown from registering as a tap
+     (which would toggle expand) — the guard is in the JS, not here. */
+  #pin-sheet-close{
+    flex-shrink:0;width:30px;height:30px;border-radius:50%;border:0;padding:0;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    background:rgba(237,233,221,0.12);color:var(--text-dim);
+    -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  }
+  #pin-sheet-close:active{background:rgba(237,233,221,0.22);}
+  #pin-sheet-close svg{width:15px;height:15px;display:block;}
   .ps-title{
     color:var(--yellow);font-weight:700;font-size:19px;line-height:1.15;letter-spacing:0.01em;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
@@ -2759,6 +2777,10 @@
           <div id="pin-sheet-sub" class="ps-sub"></div>
           <div id="pin-sheet-meta" class="ps-meta"></div>
         </div>
+        <!-- #235 — full-close X (see #pin-sheet-close CSS + wirePinSheet guard). -->
+        <button id="pin-sheet-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
       </div>
     </div>
     <div id="pin-sheet-expand"></div>
@@ -6758,7 +6780,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05f';
+const APP_VERSION = '2026.08.05g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11716,7 +11738,18 @@ function flyToStop(lat, lng){
 function wirePinSheet(){
   const sheet = document.getElementById('pin-sheet');
   const zone = document.getElementById('pin-sheet-drag');
+  const closeBtn = document.getElementById('pin-sheet-close');
   let startY = null;
+  // #235 — the X is a child of `zone`, which carries the drag handlers. Without
+  // this guard a tap on it bubbles to zone.pointerdown (sets startY), then the
+  // window pointerup below reads ~0 movement and fires togglePinSheetExpand() —
+  // so tapping close would toggle expand instead of closing. Stopping the
+  // button's pointerdown means zone never sets startY, so pointerup no-ops
+  // (startY === null) and only the click handler runs → a clean full close.
+  if(closeBtn){
+    closeBtn.addEventListener('pointerdown', e=>{ e.stopPropagation(); });
+    closeBtn.addEventListener('click', e=>{ e.stopPropagation(); closePinSheet(); });
+  }
   zone.addEventListener('pointerdown', e=>{ startY = e.clientY; });
   window.addEventListener('pointerup', e=>{
     if(startY === null) return;
@@ -11724,7 +11757,7 @@ function wirePinSheet(){
     startY = null;
     const expanded = sheet.classList.contains('expanded');
     if(dy < -28)      expandPinSheet();          // swipe up → expand
-    else if(dy > 28)  expanded ? collapsePinSheet() : closePinSheet(); // swipe down
+    else if(dy > 28)  expanded ? collapsePinSheet() : closePinSheet(); // swipe down steps one detent
     else              togglePinSheetExpand();     // tap
   });
 }
