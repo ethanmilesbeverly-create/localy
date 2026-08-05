@@ -6505,6 +6505,7 @@ function finishOnboarding(){
 }
 
 async function init(){
+  const _pendingSpot = pendingSpotParam(); // #26 — read BEFORE consumePendingGuideInvite() calls clearResetParam() and strips the URL
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   migrateLoreGemIds();          // #149 — same constraint: re-key lore<id>→catgem<id> before isFound() runs
@@ -6573,6 +6574,11 @@ async function init(){
      metadata carrier (set in submitAuth's signup branch) survives that
      cross-tab round trip; see the #128 note by pendingGuideCode(). */
   await consumePendingGuideInvite();
+
+  /* #26 — if a ?spot= link brought us here, open it LAST: the map (setupBaseMap),
+     first hunt (startLocalHunt) and sizing (fixMapSize) are all in place, and the
+     URL was already read into _pendingSpot above before it got stripped. */
+  consumeSharedSpot(_pendingSpot);
 
 }
 
@@ -6784,7 +6790,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05j';
+const APP_VERSION = '2026.08.05k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8853,6 +8859,16 @@ function exitLocationBrowseMode(){
 }
 function recenterMap(){
   maybeRequestCompassPermission();
+  /* #26 — a shared-spot arrival puts you on a single-pin fixed `spot_` hunt.
+     Tapping locate is the way back to normal discovery near you, so restart
+     local browse rather than just recentering on a one-pin view. */
+  if(state.currentHunt && state.currentHunt.mode === 'spot'){
+    state.followMe = true;
+    document.getElementById('locate-btn').classList.add('following');
+    const shb = document.getElementById('search-here-btn'); if(shb) shb.classList.remove('show');
+    startLocalHunt(state.me || state.localHuntOrigin || FALLBACK_LOCATION);
+    return;
+  }
   state.followMe = true;
   document.getElementById('locate-btn').classList.add('following');
   /* #59 — recenter is the deliberate way home, so the pill must go with it.
@@ -10140,6 +10156,78 @@ function shareHunt(id){
   const text = `Check out my guide "${h.name}" on Nahgoo!\n${link}\n(Or enter code ${h.code} in the app.)`;
   window.location.href = 'sms:&body=' + encodeURIComponent(text);
 }
+/* ============================================================
+   #26 — SHAREABLE SPOT DEEP-LINKS
+   ============================================================
+   Share ANY pin (a gem OR a real OSM/Wikipedia place) as a link. The pin's own
+   data is base64url-encoded INTO the URL, so the recipient reconstructs it with
+   NO database read — which is exactly what lets a real place (no id to fetch,
+   unlike a gem) be shared, and dodges #133 (anon SELECT on shared_kv is limited
+   to `hunt-code:%`, so any new-key fetch would read empty for a signed-out
+   visitor). The param is `spot`: NOT `code` (PKCE claims it — #2/#85) and NOT
+   `guide` (#85). It targets index.html directly (AUTH_REDIRECT_BASE) — a spot
+   needs no landing.html guide-lookup preview, and on a web app "open the app" is
+   "open the page". #50 METER: every spot link is another Pages URL a repo
+   rename / custom-domain move 404s, and unlike a guide there is no 6-char code
+   fallback — the link is the only recovery path. Stated, inherent, accepted. */
+function encodeSpotPayload(t){
+  const o = { n:String(t.name||'').slice(0,120), la:+(+t.lat).toFixed(6), lg:+(+t.lng).toFixed(6) };
+  if(t.category) o.c = t.category;
+  if(t.gemId)    o.g = t.gemId;
+  if(t.desc)     o.d = String(t.desc).slice(0,400);
+  // base64url of UTF-8 bytes so names with punctuation / non-ASCII survive.
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeSpotPayload(s){
+  try{
+    let b64 = String(s).replace(/-/g,'+').replace(/_/g,'/');
+    while(b64.length % 4) b64 += '=';
+    const o = JSON.parse(decodeURIComponent(escape(atob(b64))));
+    const lat = +o.la, lng = +o.lg;
+    if(!isFinite(lat) || !isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180) return null;
+    return { name:o.n || 'Shared spot', lat, lng, category:o.c || null, gemId:o.g || null, desc:o.d || '' };
+  }catch(e){ return null; }
+}
+/* Read the inbound ?spot= param. Captured EARLY in init() (see the call there)
+   because consumePendingGuideInvite() calls clearResetParam() unconditionally
+   and would strip the URL before we could read it. */
+function pendingSpotParam(){
+  try{ return new URLSearchParams(location.search).get('spot') || null; }
+  catch(e){ return null; }
+}
+/* The pin-sheet "Share this spot" button. Mirrors shareHunt(): build the link,
+   hand it to the SMS composer. Looks the target up by id like openReportPin(). */
+function shareSpot(id){
+  const t = currentTargetsSorted().find(x=>x.id===id);
+  if(!t){ return; }
+  const link = AUTH_REDIRECT_BASE + '?spot=' + encodeSpotPayload(t);
+  const text = 'Check out ' + (t.name || 'this spot') + ' on Nahgoo!\n' + link;
+  window.location.href = 'sms:&body=' + encodeURIComponent(text);
+}
+/* Arrival: decode the carried payload into a single-pin FIXED-content hunt and
+   open its sheet. `spot_` key + `spot` mode is deliberately NOT a guide
+   (isGuideHunt matches only custom_/code_), NOT reblendable (REAL_UPGRADABLE_KEY
+   does not match) and NOT discoverlocal — so the injected pin survives every GPS
+   tick WITHOUT needing a searchedArea anchor, and onLocation()'s local_ rebuild
+   leaves it alone. deferCaptured=true keeps the view to exactly the one shared
+   pin. Opened via openPinSheet(pt) (NOT ...ById): fillPinSheet is null-safe on
+   t.dist, so the sheet opens cleanly before the first GPS fix and the live
+   distance / capture button fill in when onLocation lands. Capture stays
+   GPS-gated (#4) — a shared link lets you SEE and navigate to the spot, never
+   capture it remotely. */
+function consumeSharedSpot(param){
+  const sp = param && decodeSpotPayload(param);
+  if(!sp) return;
+  const id = sp.gemId ? ('catgem'+sp.gemId)
+    : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5)));
+  const pt = { id, name:sp.name, lat:sp.lat, lng:sp.lng,
+               category:sp.category || null, desc:sp.desc || '' };
+  if(sp.gemId) pt.gemId = sp.gemId;
+  setCurrentHunt({ key:'spot_'+id, name:sp.name, mode:'spot', points:[pt] }, true);
+  openPinSheet(pt);
+  flyToStop(pt.lat, pt.lng);
+}
 function openSaveToHuntPicker(pointId){
   if(!state.currentHunt) return;
   const point = state.currentHunt.points.find(p=>p.id===pointId);
@@ -11360,6 +11448,8 @@ function fillPinSheet(t){
      path where nothing else on screen explains the failure, and it is the case
      #51 was really about. Deleting both would reintroduce the silence. */
   actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a guide</button>`;
+  // #26 — share this pin as a self-contained ?spot= deep-link (see shareSpot).
+  actions += `<button class="ps-btn" onclick="shareSpot('${t.id}')">Share this spot</button>`;
   /* #25 — last, quietest, and only on pins that have somewhere for a report to
      go (see reportTargetFor). Once reported in this session it becomes inert
      text rather than disappearing: a button that vanishes reads as a failed tap,
