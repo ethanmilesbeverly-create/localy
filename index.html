@@ -6538,8 +6538,12 @@ async function init(){
   /* #52 — first-run onboarding, when present, owns the first location prompt
      (step 1) so it arrives with a reason instead of cold. Otherwise locate now.
      ensureLocating() is idempotent, so finishOnboarding()'s safety-net call and
-     this one cannot double-register or double-prompt. */
-  if(shouldRunOnboarding()){ startOnboarding(); }
+     this one cannot double-register or double-prompt.
+     #26 — a shared-spot link (_pendingSpot) skips onboarding entirely: the
+     visitor came for a specific pin, not the cold first-run tour, and the tour
+     would overlay the shared-pin landing. Normal first-run onboarding is
+     unchanged when no spot link is present. */
+  if(shouldRunOnboarding() && !_pendingSpot){ startOnboarding(); }
   else { ensureLocating(); }
   // #1a — retry the blocked read when the connection returns, so a bad boot is a
   // temporary condition rather than a dead session.
@@ -6790,7 +6794,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05l';
+const APP_VERSION = '2026.08.05m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10209,9 +10213,10 @@ function shareSpot(id){
    not there yet, inject the carried point so there is ALWAYS a selectable marker
    and sheet. The injected fallback can be replaced by the real pin when the
    async fetch lands and reblendHuntInPlace() runs; the sheet, opened from the
-   carried data, stays put either way. Opened at the PEEK/half detent
-   (collapsePinSheet clears .expanded). Capture stays GPS-gated (#4) — a shared
-   link lets you SEE and navigate to the spot, never capture it remotely. */
+   carried data, stays put either way. Opened EXPANDED (expandPinSheet sets
+   .expanded) so the visitor sees the pin's details and actions on landing.
+   Capture stays GPS-gated (#4) — a shared link lets you SEE and navigate to the
+   spot, never capture it remotely. */
 function consumeSharedSpot(param){
   const sp = param && decodeSpotPayload(param);
   if(!sp) return;
@@ -10233,7 +10238,7 @@ function consumeSharedSpot(param){
     if(h && h.points){ h.points.unshift(target); refreshTargetsUI(); }
   }
   openPinSheet(target);
-  collapsePinSheet();          // half/peek detent, not the fully expanded body
+  expandPinSheet();            // land on the FULL sheet (details + actions), not the peek row
   flyToStop(target.lat, target.lng);
 }
 function openSaveToHuntPicker(pointId){
