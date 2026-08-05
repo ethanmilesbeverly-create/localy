@@ -6794,7 +6794,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05m';
+const APP_VERSION = '2026.08.05n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8067,6 +8067,10 @@ function onLocation(lat,lng,sim,accuracy){
   checkCuratedStaleness(lat, lng);
   refreshTargetsUI();
   refreshTrackUI();
+  // #26 — a shared-spot link opens its sheet before the first fix, when the
+  // empty target list forces it closed. state.me is set now, so the pin sticks:
+  // (re)open it EXPANDED. openSpotSheet() clears the pending flag, so this is one-shot.
+  if(state._pendingSpot) openSpotSheet();
 
   /* #159 — THE WALKING HALF OF #145, AND THE SCOPING IS THE WHOLE FIX.
      Before this, checkNewAchievements() had exactly one call site — after a
@@ -10220,8 +10224,30 @@ function shareSpot(id){
 function consumeSharedSpot(param){
   const sp = param && decodeSpotPayload(param);
   if(!sp) return;
-  const base = { lat:sp.lat, lng:sp.lng };
-  enterLocationBrowseMode(base, sp.name);
+  enterLocationBrowseMode({ lat:sp.lat, lng:sp.lng }, sp.name);
+  // Carry the decoded pin; openSpotSheet() resolves it to the live twin in the
+  // hunt (a gem, or a real place the browse fetch produced) or injects this one.
+  const carried = { id: sp.gemId ? ('catgem'+sp.gemId)
+      : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5))),
+      name:sp.name, lat:sp.lat, lng:sp.lng, category:sp.category || null, desc:sp.desc || '' };
+  if(sp.gemId) carried.gemId = sp.gemId;
+  state._pendingSpot = { sp, carried };
+  openSpotSheet();
+  flyToStop(sp.lat, sp.lng);
+}
+/* Open (and keep open) the shared-spot sheet, EXPANDED. Called first from
+   consumeSharedSpot() and AGAIN from onLocation()'s first fix. The re-attempt is
+   the fix for "lands at peek / won't expand": before state.me exists,
+   currentTargetsSorted() is empty, so the refreshTargetsUI() at the tail of
+   openPinSheet() takes its `else closePinSheet()` branch and tears down the sheet
+   we just opened — expandPinSheet() then lands on a dead sheet. Once the first
+   fix sets state.me the pin is in the sorted set, the sheet survives, and this
+   re-run makes it stick EXPANDED. Prefers the live twin already in the hunt so
+   the map marker and sheet share an id; otherwise injects the carried point. */
+function openSpotSheet(){
+  const pend = state._pendingSpot;
+  if(!pend) return;
+  const sp = pend.sp, carried = pend.carried;
   const h = state.currentHunt;
   let target = null;
   if(h && h.points && h.points.length){
@@ -10231,15 +10257,12 @@ function consumeSharedSpot(param){
       haversine(p.lat, p.lng, sp.lat, sp.lng) <= CAPTURED_TWIN_M);
   }
   if(!target){
-    target = { id: sp.gemId ? ('catgem'+sp.gemId)
-      : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5))),
-      name:sp.name, lat:sp.lat, lng:sp.lng, category:sp.category || null, desc:sp.desc || '' };
-    if(sp.gemId) target.gemId = sp.gemId;
-    if(h && h.points){ h.points.unshift(target); refreshTargetsUI(); }
+    target = carried;
+    if(h && h.points && !h.points.some(p=>p.id===target.id)) h.points.unshift(target);
   }
   openPinSheet(target);
   expandPinSheet();            // land on the FULL sheet (details + actions), not the peek row
-  flyToStop(target.lat, target.lng);
+  if(state.me) state._pendingSpot = null; // pin now sticks; this open is final
 }
 function openSaveToHuntPicker(pointId){
   if(!state.currentHunt) return;
