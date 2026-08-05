@@ -3783,6 +3783,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins */
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
+/* #103 — startBuiltinHunt() (the tourist-route STARTER) was deleted 2026-08-04;
+   this TABLE survives as a name/point lookup for historical progress keys
+   (huntDisplayName + the point-name lookup further down). Dead as a feature,
+   load-bearing as history — do not delete. */
 const BUILTIN = {
   tourist_chicago: {
     name: 'Tourist Mode — Chicago',
@@ -6698,7 +6702,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04h';
+const APP_VERSION = '2026.08.04i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9098,17 +9102,16 @@ function centerOnPlayer(opts){
   });
 }
 
-/* #67 — ORPHANED, FLAGGED, NOT DELETED. startBuiltinHunt() and startRandomHunt()
-   below both have zero callers anywhere in this file — the same condition that
-   retired the eight starters this pass removed. They are left in place because
-   they were not part of the reviewed list, and deleting a feature the reviewer
-   has not been told exists is how a decision gets made by omission. Random
-   Nearby in particular is a real product idea with working code, not a
-   leftover. Decide both explicitly. */
-function startBuiltinHunt(id){
-  const src = BUILTIN[id];
-  setCurrentHunt({ key:id, name:src.name, mode:src.mode, points:src.points });
-}
+/* #103 — RESOLVED BY DELETION (2026-08-04). startBuiltinHunt() lived here: it
+   loaded BUILTIN.tourist_chicago, a hardcoded six-stop Chicago route that
+   contradicts the "works anywhere from OSM" premise, and had zero callers.
+   Deleted as a feature. The BUILTIN TABLE ITSELF IS KEPT (see its definition) —
+   it is still read for name lookup of historical progress keys, so removing the
+   data would turn old passport entries into raw ids: dead as a feature,
+   load-bearing as history. startRandomHunt() was deleted in the same pass (its
+   gravestone is below). The `tourist`/`random` MODE_COLOR keys and the
+   `random_v1` migration entry are kept deliberately for the same
+   history-render/legacy-capture reason — not swept with the functions. */
 
 /* Backstop for the first-paint hold below: if the real-place fetch never settles
    (a hung invoke — a normal success/empty/failure resolves the hold through
@@ -9576,25 +9579,14 @@ function selectExplore(cat){
   }
 }
 
-function startRandomHunt(){
-  const base = state.me || FALLBACK_LOCATION;
-  ensureRealPlaces(base); // warm the real-place cache for this area
-  const cats = ['park','trail','shops','bars','restaurants','history'];
-  let pool = [];
-  cats.forEach(c=>{ pool = pool.concat(nearbyRealPlaces(base, c, 4)); });
-  pool = pool.concat(nearbyApprovedGems(base, [], 8).map(gemToPoint));
-  const seen = new Set();
-  pool = pool.filter(p=>{ const k=normName(p.name); if(!k||seen.has(k)) return false; seen.add(k); return true; });
-  pool.sort(()=>Math.random()-0.5);
-  const points = pool.slice(0,5).map((p,i)=>({...p, id:p.id||('r'+i)}));
-  if(!points.length){
-    showToast('No real spots loaded here yet — give it a moment or pan the map, then try again');
-    return;
-  }
-  const key = 'random_v1';
-  setCurrentHunt({key, name:'Random Nearby', mode:'random', points});
-  showToast('Random guide from real spots near you');
-}
+/* #103 — RESOLVED BY DELETION (2026-08-04). startRandomHunt() lived here: it
+   built "Random Nearby" (mode:'random', key:'random_v1') by mixing the six real
+   categories plus approved gems, deduping by name, shuffling and taking five.
+   Real, working code for a genuine product idea — but zero callers and no
+   Explore card, so decided as a tidy sweep rather than shipped. If Random Nearby
+   is ever wanted, this is the shape to revive; the `random`/`random_v1`
+   MODE_COLOR + migration entries were left in place so a revived version and any
+   historical random_v1 captures still resolve. */
 
 /* #194 — `searchCreateLocation()` is DELETED, not unwired. Its only caller was
    the create-screen Go button, removed this pass to match the gem screen now
