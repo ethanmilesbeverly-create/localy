@@ -6780,7 +6780,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05g';
+const APP_VERSION = '2026.08.05h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11315,9 +11315,12 @@ function fillPinSheet(t){
   const statusTxt = t.found
     ? (capDate ? 'Visited on ' + capDate : 'Visited')
     : (inRange ? 'In range' : 'Not visited yet');
+  /* #236 — the category is NOT in this meta row. It already renders one line up
+     in the sub row (#pin-sheet-sub: colour dot + PIN_CAT_LABEL[t.category]), so
+     repeating it here as a second token was redundant. Meta is now distance ·
+     status only. `cat` is still computed above because the sub row below uses it. */
   const meta = [
     distTxt ? `<span>${escapeHtml(distTxt)}</span>` : '',
-    cat ? `<span>${escapeHtml(cat)}</span>` : '',
     statusTxt ? `<span class="${t.found ? 'ps-visited' : ''}">${escapeHtml(statusTxt)}</span>` : ''
   ].filter(Boolean).join('<i class="ps-div"></i>');
 
