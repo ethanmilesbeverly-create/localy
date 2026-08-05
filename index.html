@@ -6755,7 +6755,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05c';
+const APP_VERSION = '2026.08.05d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11329,7 +11329,8 @@ function fillPinSheet(t){
   }
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   const whatItis = whatItisFor(t);
-  document.getElementById('pin-sheet-expand').innerHTML =
+  const expandEl = document.getElementById('pin-sheet-expand');
+  const expandHTML =
     /* #101 — render NO description block when there is no real description,
        rather than the invented "A notable local landmark." (now null upstream)
        OR the "No description yet." filler that used to sit here. Both are
@@ -11368,26 +11369,40 @@ function fillPinSheet(t){
      ${(t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
-  if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
-
-  // #54 — if this credited gem had no twin in the loaded tile, look it up on
-  // demand from its own area and swap the "what it is" slot in when it lands.
-  maybeEnrichWhatItis(t);
-
-  // Coords render instantly; the address swaps in if/when the lookup lands.
-  // The copy payload has to swap with it, or a slow lookup leaves the row
-  // showing a street address while copying raw coordinates.
-  if(!cachedAddr){
-    const pinId = t.id;
-    lookupAddress(t).then(addr=>{
-      if(!addr || state.selectedPinId !== pinId) return;
-      const row = document.querySelector('#pin-sheet-expand .ps-loc-text');
-      if(!row) return;
-      row.classList.remove('is-coords');
-      row.firstChild.textContent = addr;
-      const btn = document.querySelector('#pin-sheet-expand .ps-loc-copy');
-      if(btn) btn.setAttribute('data-copy', addr);
-    });
+  /* fillPinSheet re-runs on EVERY GPS tick (refreshTargetsUI, to keep the live
+     distance fresh). Blindly re-assigning this scrolling body's innerHTML each
+     time reset the user's scroll to the top and re-hydrated the capture photo
+     every tick — a flash + a scroll jump, now visible because the sheet is tall
+     enough to scroll. The live distance is in the PEEK meta row above (updated
+     every tick, OUTSIDE this scroll container), so the body only needs rebuilding
+     when its OWN content changes: found-state, description, "what it is", address,
+     the in-range Capture button, or report state. Sign it (keyed on the pin id so
+     a different pin always rebuilds) and skip the rewrite — and the hydrate /
+     enrich / address lookup it kicks off — when nothing changed. */
+  const expandSig = (state.selectedPinId || t.id) + '\u0001' + expandHTML;
+  if(expandEl._pinFillSig !== expandSig){
+    expandEl._pinFillSig = expandSig;
+    expandEl.innerHTML = expandHTML;
+    if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
+    // #54 — if this credited gem had no twin in the loaded tile, look it up on
+    // demand from its own area and swap the "what it is" slot in when it lands.
+    // Its result re-enters fillPinSheet with a changed body, re-rendering here.
+    maybeEnrichWhatItis(t);
+    // Coords render instantly; the address swaps in if/when the lookup lands.
+    // The copy payload has to swap with it, or a slow lookup leaves the row
+    // showing a street address while copying raw coordinates.
+    if(!cachedAddr){
+      const pinId = t.id;
+      lookupAddress(t).then(addr=>{
+        if(!addr || state.selectedPinId !== pinId) return;
+        const row = document.querySelector('#pin-sheet-expand .ps-loc-text');
+        if(!row) return;
+        row.classList.remove('is-coords');
+        row.firstChild.textContent = addr;
+        const btn = document.querySelector('#pin-sheet-expand .ps-loc-copy');
+        if(btn) btn.setAttribute('data-copy', addr);
+      });
+    }
   }
 }
 /* =========================================================
@@ -11619,6 +11634,11 @@ function openPinSheet(t){
   const drawer = document.getElementById('target-drawer');
   if(drawer && !drawer.classList.contains('collapsed')) toggleDrawer();
   fillPinSheet(t);
+  // The body-rebuild guard in fillPinSheet skips re-rendering when reopening the
+  // same pin with unchanged content, so scroll can survive a close/reopen. A
+  // fresh open should always start at the top.
+  const expandEl = document.getElementById('pin-sheet-expand');
+  if(expandEl) expandEl.scrollTop = 0;
   const sheet = document.getElementById('pin-sheet');
   sheet.classList.add('open');
   sheet.setAttribute('aria-hidden','false');
