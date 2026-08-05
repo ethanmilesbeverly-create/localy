@@ -5680,7 +5680,13 @@ async function loadKey(key, apply, fallback){
    few bytes. The alternative costs somebody's passport. */
 const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
   'restaurants','barsrest','history','gems','lore','stateparks','nationalparks',
-  'trails','discover','random'];
+  'trails','discover','random',
+  'art' /* #229 — Art (#193) was missed here. Without it art_v1 is not a shared
+           key, so isFound() takes the single-bucket branch on the Art card and a
+           place captured under All Things Local reads as un-captured there; it
+           also let reconciledCaptures double-count an art place banked on both
+           surfaces. Adding it puts art_v1 in the #147 shared union. MUST ship with
+           the CAPTURED_MODE_ACCEPT['art'] entry below. */];
 
 /* =========================================================
    #147 — ONE PLACE, ONE CAPTURE, ACROSS EVERY EXPLORE CARD
@@ -5761,7 +5767,12 @@ const CAPTURED_MODE_ACCEPT = {
   restaurants:   ['restaurants'],
   barsrest:      ['bars','restaurants','barsrest'],
   history:       ['history'],
-  lore:          ['lore']
+  lore:          ['lore'],
+  art:           ['art']  /* #229 — restore ONLY art captures onto the Art card
+                             (the #147 category-promise rule). Load-bearing now that
+                             'art' is a shared prefix: capturedModeFilterFor defaults
+                             to accept-all when a key is absent, so without this the
+                             Art card would paint foreign (shops/park/…) captures. */
 };
 function capturedModeFilterFor(key){
   const allow = CAPTURED_MODE_ACCEPT[String(key).split('_')[0]];
@@ -6702,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04i';
+const APP_VERSION = '2026.08.04j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
