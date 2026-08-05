@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04j';
+const APP_VERSION = '2026.08.04k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11326,7 +11326,7 @@ function fillPinSheet(t){
      ${(t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
-  if(t.found && state.currentHunt){ hydrateCapturePhoto(state.currentHunt.key, t.id, t.name); }
+  if(t.found && state.currentHunt){ hydrateCapturePhoto(photoBucketFor(state.currentHunt.key, t.id), t.id, t.name); }
 
   // #54 — if this credited gem had no twin in the loaded tile, look it up on
   // demand from its own area and swap the "what it is" slot in when it lands.
@@ -12309,6 +12309,26 @@ async function handleCapturePhotoFile(event){
   }catch(e){
     showToast("Couldn't save that photo — try again.");
   }
+}
+/* #230 — the capture PHOTO (#209) is a per-pin capture fact keyed huntKey::id,
+   so like found-state (#147), count (#148) and date (#211) it must be resolved
+   ACROSS shared buckets. A photo taken while browsing All Things Local is filed
+   under local_v1::id; viewing that same pin under the Art (or any) card must find
+   it, not read art_v1::id and miss — the gap #229's cross-card found-state fix
+   exposed (before it, the pin wasn't `found` on the Art card, so the loader never
+   ran). Guides keep their own private ledger (#147 scope), so the cross-bucket
+   resolve runs ONLY for shared keys. Uses the `photo:true` flag that already rides
+   with progress (set on the SAME bucket the blob was saved under), so it is an
+   in-memory scan of foundMeta, not an IndexedDB probe. */
+function photoBucketFor(currentKey, id){
+  if(!isSharedProgressKey(currentKey)) return currentKey;
+  const prog = state.progress || {};
+  for(const k of Object.keys(prog)){
+    if(!isSharedProgressKey(k)) continue;
+    const m = (prog[k].foundMeta || {})[id];
+    if(m && m.photo) return k;
+  }
+  return currentKey; // no photo recorded under any shared bucket → read here, render empty
 }
 /* Fill #ps-capture-photo-block for a captured pin — DISPLAY ONLY. A stored photo
    renders read-only; a pin without one (skipped at capture, or bytes evicted / new
