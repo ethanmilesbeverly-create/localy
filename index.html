@@ -5542,6 +5542,26 @@ function reblendHuntInPlace(h){
   // twin of a capture that had to be injected standalone on a cold start, and
   // this is the pass that merges the two instead of leaving a duplicate.
   injectCapturedPins(h, base);
+  /* #26 — keep the shared-spot pin in the hunt across every rebuild. Without
+     this it is neither "found" nor in the fresh blend, so it is dropped here;
+     then selectedTarget can't resolve and the halo falls back to the nearest
+     pin instead of the pin you were dropped on. Adopt a real/gem twin if the
+     rebuild produced one (no duplicate, and live/found data attaches); else
+     re-add the carried point. Update the tracked id so selection + halo follow. */
+  if(state._spotPin){
+    let rep = h.points.find(p=>p.id===state._spotSheetId);
+    if(!rep) rep = h.points.find(p=>
+      normName(p.name)===normName(state._spotPin.name) &&
+      haversine(p.lat,p.lng,state._spotPin.lat,state._spotPin.lng) <= CAPTURED_TWIN_M);
+    if(rep){
+      if(rep.id !== state._spotSheetId){
+        if(state.selectedPinId === state._spotSheetId) state.selectedPinId = rep.id;
+        state._spotSheetId = rep.id;
+      }
+    } else {
+      h.points.unshift(state._spotPin);
+    }
+  }
   // #111 — second mutation path; the boot-time check never saw this either.
   if(typeof assertNoDuplicatePoints === 'function') assertNoDuplicatePoints();
 }
@@ -6799,7 +6819,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05t';
+const APP_VERSION = '2026.08.05u';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8859,6 +8879,7 @@ function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
   state._pendingSpot = null; // #26 — leaving the shared-spot area; stop re-opening its sheet
   state._spotSheetId = null; // #26 — drop protection so the natural rebuild below closes the spot sheet
+  state._spotPin = null;     // #26 — stop reblend re-adding the shared pin
   state.browsingLocation = null;
   state.searchedArea = null;
   state.followMe = true;
@@ -10245,6 +10266,7 @@ function consumeSharedSpot(param){
       : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5))),
       name:sp.name, lat:sp.lat, lng:sp.lng, category:sp.category || null, desc:sp.desc || '' };
   if(sp.gemId) carried.gemId = sp.gemId;
+  state._spotPin = carried;   // #26 — canonical shared pin; reblend keeps it in the hunt
   state._pendingSpot = { sp, carried };
   openSpotSheet();
   flyToStop(sp.lat, sp.lng);
@@ -11849,6 +11871,7 @@ function closePinSheet(){
   if(_capturePhotoURL){ try{ URL.revokeObjectURL(_capturePhotoURL); }catch(e){} _capturePhotoURL = null; }
   state.selectedPinId = null;
   state._spotSheetId = null;  // #26 — a deliberate close ends the shared-spot session
+  state._spotPin = null;      // #26 — stop reblend re-adding it
   state._pendingSpot = null;  // #26 — stop any pending re-open too
   /* #51 follow-on, fixed alongside #73 because they produce the same symptom.
      refreshTrackUI() checks expandedTargets FIRST, so a pin left in this set
