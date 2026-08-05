@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04l';
+const APP_VERSION = '2026.08.04m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12190,6 +12190,10 @@ async function attemptMarkFound(){
 let _pendingPhoto = null;
 let _capturePhotoURL = null;
 let _photoDBPromise = null;
+/* #230 — THROWAWAY diagnostic switch (remove with renderPhotoDebug on the
+   clean-up build). Not a URL param: clearResetParam() replaceStates the query off
+   at boot (#85), so ?photodebug never survives to sheet-open — hence a constant. */
+const PHOTO_DEBUG = true;
 function capturePhotoKey(key, id){ return key + '::' + id; }
 function photoDB(){
   if(_photoDBPromise) return _photoDBPromise;
@@ -12379,7 +12383,7 @@ async function hydrateCapturePhoto(key, id, name){
     block.innerHTML = '<img class="ps-photo" alt="Your photo of ' + escapeHtml(name || 'this spot') + '" src="' + _capturePhotoURL + '">';
   } else {
     block.innerHTML = '';
-    if(/[?&]photodebug/.test(location.search)){ await renderPhotoDebug(block, key, id); }
+    if(PHOTO_DEBUG){ await renderPhotoDebug(block, key, id); }
   }
 }
 
