@@ -6799,7 +6799,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05o';
+const APP_VERSION = '2026.08.05p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10231,8 +10231,15 @@ function consumeSharedSpot(param){
   const sp = param && decodeSpotPayload(param);
   if(!sp) return;
   enterLocationBrowseMode({ lat:sp.lat, lng:sp.lng }, sp.name);
-  // Carry the decoded pin; openSpotSheet() resolves it to the live twin in the
-  // hunt (a gem, or a real place the browse fetch produced) or injects this one.
+  /* #26 — the browse hunt runs under key 'local_v1', so onLocation()'s first-fix
+     block (`key.startsWith('local_') -> startLocalHunt({player})`) would rebuild
+     the hunt around the PLAYER on the first fix, drop the 2-mi-away shared pin,
+     and refreshTargetsUI() would then close its sheet — the "opens then closes"
+     flash. We have already framed the spot via flyToStop (followMe is off), so
+     mark centering done: the first fix updates state.me but does NOT re-anchor
+     content off the spot. exitLocationBrowseMode (locate button) restores the
+     player view normally. */
+  state._centeredOnce = true;
   const carried = { id: sp.gemId ? ('catgem'+sp.gemId)
       : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5))),
       name:sp.name, lat:sp.lat, lng:sp.lng, category:sp.category || null, desc:sp.desc || '' };
@@ -10253,6 +10260,10 @@ function consumeSharedSpot(param){
 function openSpotSheet(){
   const pend = state._pendingSpot;
   if(!pend) return;
+  /* Before the first fix, currentTargetsSorted() is empty, so openPinSheet()'s
+     trailing refreshTargetsUI() would immediately close the sheet (open/close
+     flash). Wait for state.me — onLocation() re-calls this on the first fix. */
+  if(!state.me) return;
   const sp = pend.sp, carried = pend.carried;
   const h = state.currentHunt;
   let twin = null;
