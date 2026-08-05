@@ -6713,7 +6713,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.04p';
+const APP_VERSION = '2026.08.04q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12229,19 +12229,36 @@ function photoDB(){
   });
   return _photoDBPromise;
 }
-function savePhotoBlob(key, blob){
-  return photoDB().then(db=>new Promise((resolve, reject)=>{
+/* #232 — iOS/WebKit frequently fails to persist a Blob directly in IndexedDB: the
+   write transaction aborts, often with a null error — exactly what the 04p trace
+   showed (compress OK, then savePhotoBlob throws with CATCH:null and the store stays
+   empty, so every downstream "fix" was chasing a write that never happened). Storing
+   the bytes as an ArrayBuffer persists reliably; the Blob is rebuilt on read. Legacy
+   entries that stored a raw Blob (older devices) are still read via _blobFromStored. */
+function _blobFromStored(v){
+  if(!v) return null;
+  if(v instanceof Blob) return v;                                   // legacy Build-1 entry
+  if(v.ab){ try{ return new Blob([v.ab], { type: v.type || 'image/jpeg' }); }catch(e){ return null; } }
+  if(v instanceof ArrayBuffer){ return new Blob([v], { type:'image/jpeg' }); }
+  return null;
+}
+async function savePhotoBlob(key, blob){
+  const ab = (blob && blob.arrayBuffer) ? await blob.arrayBuffer() : blob;
+  const type = (blob && blob.type) || 'image/jpeg';
+  const db = await photoDB();
+  return new Promise((resolve, reject)=>{
     const tx = db.transaction('photos','readwrite');
-    tx.objectStore('photos').put(blob, key);
+    tx.objectStore('photos').put({ ab: ab, type: type }, key);
     tx.oncomplete = ()=>resolve(true);
-    tx.onerror = ()=>reject(tx.error);
-  }));
+    tx.onabort = ()=>reject(tx.error || new Error('idb write aborted'));
+    tx.onerror = ()=>reject(tx.error || new Error('idb write error'));
+  });
 }
 function loadPhotoBlob(key){
   return photoDB().then(db=>new Promise((resolve, reject)=>{
     const tx = db.transaction('photos','readonly');
     const r = tx.objectStore('photos').get(key);
-    r.onsuccess = ()=>resolve(r.result || null);
+    r.onsuccess = ()=>resolve(_blobFromStored(r.result));
     r.onerror = ()=>reject(r.error);
   }));
 }
@@ -12394,7 +12411,7 @@ function loadPhotoBlobForId(id){
       const hit = (kr.result||[]).find(k => typeof k === 'string' && k.length > suffix.length && k.slice(-suffix.length) === suffix);
       if(!hit){ resolve(null); return; }
       const gr = store.get(hit);
-      gr.onsuccess = ()=>resolve(gr.result ? {blob:gr.result, key:hit} : null);
+      gr.onsuccess = ()=>{ const b = _blobFromStored(gr.result); resolve(b ? {blob:b, key:hit} : null); };
       gr.onerror = ()=>reject(gr.error);
     };
     kr.onerror = ()=>reject(kr.error);
