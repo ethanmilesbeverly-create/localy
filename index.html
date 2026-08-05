@@ -5556,6 +5556,11 @@ function onRealPlacesReady(){
   reblendHuntInPlace(h);
   if(typeof refreshTargetsUI==='function') refreshTargetsUI();
   if(typeof refreshTrackUI==='function') refreshTrackUI();
+  // #26 — reblend just rebuilt the hunt (a shared real place now carries its own
+  // OSM/gem id, and the injected placeholder was dropped). Re-select the shared
+  // spot by name/gemId so its sheet survives the rebuild instead of being closed
+  // for a missing id — the "flashed open then removed" case.
+  if(state._pendingSpot) openSpotSheet();
   /* Loaded case of the first-paint hold: this just painted the balanced set with
      real supply, so retire the pending flag and its backstop timer. The empty and
      transport-failure cases are resolved instead by paintFirstBlend() in
@@ -6794,7 +6799,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05n';
+const APP_VERSION = '2026.08.05o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8852,6 +8857,7 @@ function enterLocationBrowseMode(base, placeName){
 }
 function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
+  state._pendingSpot = null; // #26 — leaving the shared-spot area; stop re-opening its sheet
   state.browsingLocation = null;
   state.searchedArea = null;
   state.followMe = true;
@@ -10249,20 +10255,24 @@ function openSpotSheet(){
   if(!pend) return;
   const sp = pend.sp, carried = pend.carried;
   const h = state.currentHunt;
-  let target = null;
+  let twin = null;
   if(h && h.points && h.points.length){
-    if(sp.gemId) target = h.points.find(p => p.gemId === sp.gemId);
-    if(!target)  target = h.points.find(p =>
+    if(sp.gemId) twin = h.points.find(p => p.gemId === sp.gemId);
+    if(!twin)    twin = h.points.find(p =>
       normName(p.name) === normName(sp.name) &&
       haversine(p.lat, p.lng, sp.lat, sp.lng) <= CAPTURED_TWIN_M);
   }
-  if(!target){
-    target = carried;
-    if(h && h.points && !h.points.some(p=>p.id===target.id)) h.points.unshift(target);
-  }
+  const target = twin || carried;
+  if(!twin && h && h.points && !h.points.some(p=>p.id===target.id)) h.points.unshift(target);
   openPinSheet(target);
   expandPinSheet();            // land on the FULL sheet (details + actions), not the peek row
-  if(state.me) state._pendingSpot = null; // pin now sticks; this open is final
+  /* Clear the pending flag ONLY when a stable twin already in the hunt is what
+     got selected. While only the injected placeholder is in play (a real place
+     whose tile is still mid-fetch), keep retrying — onRealPlacesReady() calls
+     back here after reblendHuntInPlace() rebuilds the hunt under the real pin's
+     id, and this re-selects it by name/gemId instead of the sheet being torn
+     down for a now-missing id (the "flashed open then removed" case). */
+  if(state.me && twin) state._pendingSpot = null;
 }
 function openSaveToHuntPicker(pointId){
   if(!state.currentHunt) return;
