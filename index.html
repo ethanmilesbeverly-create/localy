@@ -1105,6 +1105,10 @@
   .ps-sub{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13.5px;color:var(--text);}
   .ps-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
   .ps-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:9px;font-size:12.5px;color:var(--text-dim);}
+  /* #211/#222 — the captured status in the meta row reads "Visited on MM/DD/YY"
+     and carries the green the old body line used, so the one consolidated line
+     still reads as a positive/earned state rather than dim metadata. */
+  .ps-meta .ps-visited{color:var(--moss);font-weight:600;}
   .ps-meta .ps-div{width:1px;height:11px;background:rgba(237,233,221,0.22);display:inline-block;}
   #pin-sheet-expand{
     max-height:0;overflow:hidden;opacity:0;margin-top:0;
@@ -1172,7 +1176,6 @@
   }
   .ps-btn:active{transform:scale(0.99);}
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
-  .ps-found{font-size:13px;color:var(--moss);font-weight:600;}
   /* #18 — location row: address when we have one, coords when we don't. Plain
      text plus a copy icon — no background or border, because the filled surface
      read as a tappable button and competed with the real actions below it.
@@ -6755,7 +6758,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05d';
+const APP_VERSION = '2026.08.05e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11143,14 +11146,14 @@ function pinSheetColor(t){
   const def = (state.currentHunt && MODE_COLOR[state.currentHunt.mode]) || '#E8622C';
   return (t && t.category && MODE_COLOR[t.category]) || def;
 }
-/* #211 — the date a captured pin entered the passport, shown on its sheet as
-   "Added to your passport on MM/DD/YY". foundAt[id] is the capture timestamp,
+/* #211/#222 — the date a captured pin entered the passport, shown in its sheet's
+   meta row as "Visited on MM/DD/YY". foundAt[id] is the capture timestamp,
    but it is keyed PER BUCKET (a pin can be banked under a shared/auto bucket or
    a guide bucket), so scan every bucket the way sharedCapturedIds() does and
    take the EARLIEST stamp — the moment it first entered the passport. foundAt is
    old but not universal (see the #4-phase-2 note that it "predates this work"),
    so a legacy capture with no stamp returns null and the caller drops the
-   "on <date>" tail rather than rendering "on Invalid Date". */
+   "on <date>" tail, rendering just "Visited" rather than "Visited on Invalid Date". */
 function capturedAtFor(id){
   let earliest = null;
   Object.values(state.progress || {}).forEach(b=>{
@@ -11280,9 +11283,21 @@ function fillPinSheet(t){
   const cat = PIN_CAT_LABEL[t.category] || 'Spot';
   const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
   const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
-  const statusTxt = t.found ? 'Captured' : (inRange ? 'In range' : 'Not captured');
-  const meta = [distTxt, cat, statusTxt].filter(Boolean)
-    .map(p=>`<span>${escapeHtml(p)}</span>`).join('<i class="ps-div"></i>');
+  /* #211/#222 — captured state is ONE line now. The meta-row status word carries
+     the passport date and reads "Visited on MM/DD/YY" (green), replacing BOTH the
+     old bare "Captured" chip AND the separate "✓ Added to your passport" line that
+     used to sit in the body below — consolidated to a single line by directive.
+     Date drops off cleanly for a legacy capture with no foundAt stamp
+     (capturedAtFor -> null) -> just "Visited". */
+  const capDate = t.found ? fmtPassportDate(capturedAtFor(t.id)) : '';
+  const statusTxt = t.found
+    ? (capDate ? 'Visited on ' + capDate : 'Visited')
+    : (inRange ? 'In range' : 'Not captured');
+  const meta = [
+    distTxt ? `<span>${escapeHtml(distTxt)}</span>` : '',
+    cat ? `<span>${escapeHtml(cat)}</span>` : '',
+    statusTxt ? `<span class="${t.found ? 'ps-visited' : ''}">${escapeHtml(statusTxt)}</span>` : ''
+  ].filter(Boolean).join('<i class="ps-div"></i>');
 
   document.getElementById('pin-sheet-title').textContent = t.name || 'Unnamed spot';
   document.getElementById('pin-sheet-sub').innerHTML =
@@ -11291,14 +11306,8 @@ function fillPinSheet(t){
 
   let actions = '';
   if(t.found){
-    /* #211 — beside the checkmark, name the day it entered the passport instead
-       of the generic "Captured — added to your passport". Date drops off cleanly
-       for a legacy capture with no foundAt stamp (capturedAtFor -> null). */
-    const capDate = fmtPassportDate(capturedAtFor(t.id));
-    const passportLine = capDate
-      ? `✓ Added to your passport on ${capDate}`
-      : `✓ Added to your passport`;
-    actions += `<div class="ps-found">${passportLine}</div>`;
+    // Just the captured photo now — the "✓ Added to your passport" line moved
+    // up into the meta row above as "Visited on MM/DD/YY" (#211/#222).
     actions += `<div id="ps-capture-photo-block" class="ps-photo-block"></div>`;
   } else if(inRange){
     actions += `<button class="ps-btn ps-btn-primary" onclick="captureFromSheet()">Capture this spot</button>`;
