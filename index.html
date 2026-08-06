@@ -6819,7 +6819,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05v';
+const APP_VERSION = '2026.08.05w';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11468,6 +11468,69 @@ function maybeEnrichWhatItis(t){
     }
   })();
 }
+/* #237 — a SHARED real place (?spot=) carries only a generic snapshot description
+   in its link: name/coords/category fit the URL, the live OSM/Wikipedia "what it
+   is" does not, so on arrival the recipient reads e.g. "A walking trail nearby."
+   instead of the richer line the same pin shows when browsed. #26 already adopts
+   a real TWIN — carrying its live desc — when the shared place is in the
+   recipient's fetched tile (reblendHuntInPlace / openSpotSheet), and that path is
+   UNCHANGED. This fills the two gaps that leaves: the COLD-TILE window before the
+   twin loads, and a shared place NOT in the tile at all (too far, or simply
+   absent from OSM like Mr. Beef). It resolves the live description on demand
+   through the SAME nearby-places / resolveWiki chain maybeEnrichWhatItis uses,
+   then OVERWRITES the carried generic desc and re-renders.
+   WHY OVERWRITE t.desc rather than set t.whatItis (as the gem path does): a real
+   place has no t.by, so there is no "A local's take" to layer a "What it is" slot
+   above — it shows ONE plain description, exactly as a browsed real place does.
+   Setting whatItis here would render the good line above the carried generic one
+   as a bogus "local's take". GATED to the carried shared-spot pin itself
+   (t.id === state._spotPin.id, no by/gemId): once a twin is adopted t.id changes
+   to the twin's and this stops firing, and a gem is handled by maybeEnrichWhatItis
+   above, never here. Cached per pin id (a resolved-empty is remembered so we don't
+   refetch a place with genuinely no better text); a transport failure is NOT
+   cached, so it retries next open — the #78c "a failed fetch is not an empty area"
+   rule the gem path already follows. */
+function maybeResolveSpotDesc(t){
+  if(!t || !t.name || t.by || t.gemId) return;
+  const sp = state._spotPin;
+  if(!sp || t.id !== sp.id) return; // only the carried real-place shared pin
+  const cache = state._spotDescCache || (state._spotDescCache = {});
+  const key = t.id;
+  if(key in cache){
+    const v = cache[key];
+    if(v && state.selectedPinId === key && t.desc !== v){ t.desc = v; sp.desc = v; fillPinSheet(t); }
+    return;
+  }
+  cache[key] = null; // pending — blocks a duplicate fetch while in flight
+  (async () => {
+    try{
+      let wt = '';
+      // 1) The pin's own tile — an OSM twin that just isn't in the loaded frame.
+      const { data, error } = await sb.functions.invoke('nearby-places', { body:{ lat:t.lat, lng:t.lng } });
+      if(error) throw error;
+      const places = (data && data.places) || [];
+      let best = null, bestD = Infinity;
+      for(const r of places){
+        if(!r || !r.desc || !_placeNameMatch(t.name, r.name)) continue;
+        const d = haversine(t.lat, t.lng, r.lat, r.lng);
+        if(d <= 90 && d < bestD){ best = r; bestD = d; }
+      }
+      wt = best ? String(best.desc).trim() : '';
+      // 2) No OSM twin — resolve the wiki "what it is" BY NAME server-side.
+      if(!wt){
+        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+        const place = r2 && r2.data && r2.data.place;
+        if(place && place.desc) wt = String(place.desc).trim();
+      }
+      const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
+      cache[key] = val;
+      if(val && state.selectedPinId === key){ t.desc = val; sp.desc = val; fillPinSheet(t); }
+    }catch(e){
+      delete cache[key]; // retry next open — a failed fetch is not "no desc"
+      console.warn('[#237] shared-spot desc resolve failed', (e && e.message) || e);
+    }
+  })();
+}
 function fillPinSheet(t){
   const color = pinSheetColor(t);
   /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
@@ -11602,6 +11665,11 @@ function fillPinSheet(t){
     // demand from its own area and swap the "what it is" slot in when it lands.
     // Its result re-enters fillPinSheet with a changed body, re-rendering here.
     maybeEnrichWhatItis(t);
+    // #237 — a SHARED real place carries a generic snapshot desc; resolve the live
+    // OSM/Wiki description on demand and overwrite it (fills the cold-tile window
+    // and the not-in-tile case #26's twin-adoption doesn't cover). No-op unless t
+    // is the carried shared-spot pin (real place, pre-twin-adoption).
+    maybeResolveSpotDesc(t);
     // Coords render instantly; the address swaps in if/when the lookup lands.
     // The copy payload has to swap with it, or a slow lookup leaves the row
     // showing a street address while copying raw coordinates.
