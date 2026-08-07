@@ -3066,6 +3066,14 @@
      pass (OAuth + password reset + password login), never a silent upgrade. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0"></script>
 <script>
+/* REFRESH-PERSISTENCE — snapshot the URL hash on the FIRST executable line of the
+   script, before supabase.createClient() below runs. supabase-js has
+   detectSessionInUrl ON (see #2) and inspects — and can replaceState away — the
+   URL as it initialises, which happens EARLIER than init(), so reading the hash
+   inside init() (the way #26's _pendingSpot is captured before clearResetParam)
+   is already too late. bootTabParam() reads THIS snapshot, so the persisted tab
+   survives whatever the SDK, or anything else at boot, does to the live hash. */
+const _BOOT_HASH = (function(){ try{ return location.hash || ''; }catch(e){ return ''; } })();
 /* =========================================================
    SUPABASE CONFIG  ← your project's connection details
    (the publishable key is safe to ship in the browser)
@@ -6784,15 +6792,16 @@ function persistActiveTab(id){
     history.replaceState(null, '', '#' + id);
   }catch(e){}
 }
-/* Read the persisted tab from the URL hash. MUST be called at the top of init()
-   before clearResetParam() (invoked inside consumePendingGuideInvite) replaces
-   the URL with AUTH_REDIRECT_BASE and wipes the hash — the same capture-early
-   discipline #26's pendingSpotParam() uses. Returns a valid tab id or null; a
-   Supabase implicit-flow token hash (#access_token=…, #type=recovery) matches no
-   tab id and returns null, so it is never mistaken for a tab. */
+/* Resolve the persisted tab from _BOOT_HASH — the hash snapshotted on the first
+   line of the script, before the Supabase client or clearResetParam() (invoked
+   inside consumePendingGuideInvite, which replaces the URL with AUTH_REDIRECT_BASE
+   and wipes the live hash) can touch it. Reading the LIVE location.hash here would
+   be too late on both counts. Returns a valid tab id or null; a Supabase
+   implicit-flow token hash (#access_token=…, #type=recovery) matches no tab id and
+   returns null, so it is never mistaken for a tab. */
 function bootTabParam(){
   try{
-    const h = (location.hash || '').replace(/^#/, '');
+    const h = (_BOOT_HASH || '').replace(/^#/, '');
     return HASH_TAB_IDS.indexOf(h) !== -1 ? h : null;
   }catch(e){ return null; }
 }
@@ -6941,7 +6950,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06r';
+const APP_VERSION = '2026.08.06s';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
