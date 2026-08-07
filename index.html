@@ -6819,7 +6819,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.05w';
+const APP_VERSION = '2026.08.06a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12888,15 +12888,19 @@ const ACH_ICONS = {
   bag: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   glass: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
   bust: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
-  /* #180 — MILES icon is now a WALKING PERSON, which reads the intent of the
+  /* #180 — MILES icon is a WALKING PERSON, which reads the intent of the
      Wanderer family (distance covered on foot) more directly than the receding-road
-     trapezoid it replaces. Standard pedestrian silhouette on the shared 24x24 vb: a
-     single filled `body` (head subpath + torso/legs/arms), so it fills solid when
-     earned and reads as an outline when locked, like bust/tree/glass. No accent.
+     trapezoid it replaces. Now the Font Awesome Free 6.5.2 `person-walking` glyph
+     (CC BY 4.0), scaled ×1.5 from its native 16×16 source onto the shared 24×24 vb
+     so the locked-outline stroke weight matches its badge siblings (a 16 vb would
+     make renderAchievementIcon's fixed 1.8 stroke render ~1.5× heavier here). A
+     single filled `body` (head + torso/legs/arms + trailing foot subpaths), so it
+     fills solid when earned and reads as an outline when locked, like
+     bust/tree/glass. No accent.
      Key RENAMED 'road' → 'walk' and the six Wanderer badges repointed — 'road' had
      no other consumer, so it is renamed rather than left orphaned (#24's
      removed-not-stranded rule). */
-  walk: {vb:'0 0 24 24', body:'M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C15 12 16.6 13 18.5 13V11c-1.6 0-3-.8-3.8-2l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z'},
+  walk: {vb:'0 0 24 24', body:'M12 2.445c-0.001 -1.697 1.836 -2.759 3.307 -1.912 0.683 0.394 1.104 1.123 1.104 1.912 0.001 1.697 -1.836 2.759 -3.307 1.912 -0.683 -0.394 -1.104 -1.123 -1.104 -1.912Zm-1.539 6.951c-0.046 0.018 -0.087 0.037 -0.133 0.055l-0.368 0.161c-0.753 0.335 -1.332 0.974 -1.594 1.755l-0.119 0.358c-0.257 0.772 -1.089 1.185 -1.861 0.928s-1.185 -1.089 -0.928 -1.861l0.119 -0.358c0.524 -1.567 1.681 -2.844 3.188 -3.514l0.368 -0.161c0.956 -0.423 1.989 -0.643 3.037 -0.643 2.049 0 3.896 1.231 4.681 3.119l0.707 1.695 0.983 0.492c0.726 0.363 1.02 1.245 0.657 1.971s-1.245 1.02 -1.971 0.657l-1.231 -0.611c-0.473 -0.239 -0.845 -0.634 -1.047 -1.126l-0.441 -1.057 -0.887 3.009 2.274 2.481c0.248 0.271 0.423 0.597 0.515 0.956l1.057 4.231c0.198 0.786 -0.28 1.585 -1.07 1.782s-1.585 -0.28 -1.782 -1.07l-1.011 -4.047 -3.248 -3.542c-0.68 -0.74 -0.933 -1.773 -0.675 -2.743l0.776 -2.917Zm-2.655 9.128 1.148 -2.867c0.096 0.138 0.207 0.266 0.322 0.395l1.87 2.04 -0.666 1.663c-0.11 0.276 -0.276 0.528 -0.487 0.74l-2.834 2.834c-0.574 0.574 -1.507 0.574 -2.081 0s-0.574 -1.507 0 -2.081l2.729 -2.724Z'},
   /* #63 — the GUIDES achievement family renders the GUIDE FLAG — the exact mark on
      the My Guides cards in Explore (flagSVG: pole + pennant) — per the user's
      request. Single filled body (pole rect + pennant triangle): solid when earned,
