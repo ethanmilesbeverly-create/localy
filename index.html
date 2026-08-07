@@ -1326,6 +1326,7 @@
   .fm-label{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;}
   .fm-name{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;display:none;}
   .fm-name.fm-name-show{display:block;}
+  .fm-label.fm-hide{display:none;}
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
   .player-wrap{position:relative;width:64px;height:64px;}
@@ -6849,7 +6850,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06i';
+const APP_VERSION = '2026.08.06j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12135,12 +12136,17 @@ function updatePinLabels(){
   if(!map || !state.markersLayer) return;
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
-  // Zoom floor: hide every quiet label when zoomed out past the threshold.
+  // Zoom floor: hide every label — quiet AND the selected pin's chip — when
+  // zoomed out past the threshold, so a selected pin only labels itself once
+  // you're zoomed in far enough for labels at all.
   if(map.getZoom() < MIN_LABEL_ZOOM){
     state.markersLayer.eachLayer(m=>{
       const el = m.getElement && m.getElement();
-      const label = el && el.querySelector('.fm-name');
-      if(label) label.classList.remove('fm-name-show');
+      if(!el) return;
+      const quiet = el.querySelector('.fm-name');
+      if(quiet) quiet.classList.remove('fm-name-show');
+      const chip = el.querySelector('.fm-label');
+      if(chip) chip.classList.add('fm-hide');
     });
     return;
   }
@@ -12151,6 +12157,10 @@ function updatePinLabels(){
     if(!info || !info.name) return;
     const el = m.getElement();
     if(!el) return;
+    if(info.selected){                          // above the floor: the selected chip shows
+      const chip = el.querySelector('.fm-label');
+      if(chip) chip.classList.remove('fm-hide');
+    }
     const label = el.querySelector('.fm-name');   // null for the selected pin (it uses .fm-label, always shown)
     const pt = map.latLngToContainerPoint(m.getLatLng());
     if(pt.x < -margin || pt.x > size.x+margin || pt.y < -margin || pt.y > size.y+margin){
