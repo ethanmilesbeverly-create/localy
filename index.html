@@ -6596,7 +6596,6 @@ async function init(){
      LAST, after consumeSharedSpot. */
   const _bootTab = bootTabParam();
   const _bootDeepLink = !!(_pendingSpot || pendingGuideCode() || readStashedGuide() || resetLinkActive());
-  tabTrace({ ver: APP_VERSION, phase: 'init-start', bootHash: JSON.stringify(_BOOT_HASH), liveHash: JSON.stringify(location.hash), resolvedTab: String(_bootTab), deepLink: String(_bootDeepLink) }); // TAB-RESTORE DIAGNOSTIC — remove with the tabTrace block
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   migrateLoreGemIds();          // #149 — same constraint: re-key lore<id>→catgem<id> before isFound() runs
@@ -6752,6 +6751,7 @@ function showScreen(id){
   if(id!=='screen-map') closePinSheet();
 }
 function goToModeSelect(){
+  state._holdTabOffMap = false; // REFRESH-PERSISTENCE — deliberate nav ends the boot-restore hold (see enterHuntMode)
   document.getElementById('bottomnav').classList.remove('hidden');
   setTab('screen-modes');
 }
@@ -6818,54 +6818,18 @@ function bootTabParam(){
    clearResetParam just cleared this boot. navTo's dirty-form confirm cannot fire
    here — nothing has been typed on a fresh boot. */
 function restoreBootTab(tab, hadDeepLink){
-  const onb = shouldRunOnboarding();
-  let action;
-  if(!tab || tab === 'screen-map') action = 'skip:no-tab/map';
-  else if(hadDeepLink) action = 'skip:deep-link';
-  else if(onb) action = 'skip:onboarding';
-  else action = 'RESTORE ' + tab;
-  const info = {
-    ver: APP_VERSION,
-    phase: 'restore',
-    bootHash: JSON.stringify(_BOOT_HASH),
-    liveHash: JSON.stringify(location.hash),
-    resolvedTab: String(tab),
-    deepLink: String(hadDeepLink),
-    onboarding: String(onb),
-    action: action
-  };
-  tabTrace(info);
-  if(action.indexOf('RESTORE') === 0){
-    navTo(tab);
-    // #92 — did anything override the restore a beat later? Read the active
-    // screen back after the first GPS tick has had time to fire.
-    setTimeout(()=>{
-      info.activeAfter = (document.querySelector('.screen.active') || {id:'(none)'}).id;
-      tabTrace(info);
-    }, 2500);
-  }
-}
-/* TAB-RESTORE DIAGNOSTIC (temporary — remove once the restore is confirmed).
-   Gated on this in-file constant, NOT a URL param: clearResetParam() strips
-   ?params at boot before they can be read (#232's lesson), so a ?tabdebug=1
-   would never survive. Flip TAB_DEBUG to false (or delete this block) to remove
-   the on-screen overlay. It renders a fixed, tap-to-dismiss panel so the boot
-   decision can be screenshotted from a phone with no console. */
-const TAB_DEBUG = true;
-function tabTrace(info){
-  if(!TAB_DEBUG) return;
-  try{
-    let el = document.getElementById('tab-debug');
-    if(!el){
-      el = document.createElement('div');
-      el.id = 'tab-debug';
-      el.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#10231C;color:#EDE9DD;border:1px solid #E8622C;border-radius:10px;padding:10px 12px;font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap;word-break:break-all;box-shadow:0 6px 20px rgba(0,0,0,.55)';
-      el.addEventListener('click', ()=>el.remove());
-      (document.body || document.documentElement).appendChild(el);
-    }
-    const lines = Object.keys(info).map(k=>k + ': ' + String(info[k]));
-    el.textContent = 'TAB DEBUG (tap to dismiss)\n' + lines.join('\n');
-  }catch(e){}
+  if(!tab || tab === 'screen-map') return;
+  if(hadDeepLink) return;
+  if(shouldRunOnboarding()) return;
+  /* The boot hunt is a local_ hunt, and the first GPS fix regenerates it
+     (onLocation -> startLocalHunt -> setCurrentHunt -> enterHuntMode), which
+     would setTab('screen-map') OVER the tab we just restored ~1s in — the "starts
+     correct then flips to map" report. Mark that we are intentionally off the map
+     so enterHuntMode() HOLDS the current tab until the user actively navigates;
+     navTo()/goToModeSelect() clear the flag the moment the user taps a tab, so a
+     genuine hunt-open still shows the map. */
+  state._holdTabOffMap = true;
+  navTo(tab);
 }
 function setTab(id){
   showScreen(id);
@@ -6940,6 +6904,7 @@ function isCreateFormDirty(){
   return !!(pins !== seeded || (named && !state.editingHuntId));
 }
 function navTo(id){
+  state._holdTabOffMap = false; // REFRESH-PERSISTENCE — a deliberate nav tap ends the boot-restore hold (see enterHuntMode)
   if(id !== 'screen-suggest-gem' && isGemFormDirty()){
     if(!confirm('Discard this gem? What you have typed here will not be saved.')) return;
   }
@@ -6995,7 +6960,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06t';
+const APP_VERSION = '2026.08.06u';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7948,6 +7913,12 @@ window.addEventListener('resize', ()=>{ if(document.getElementById('screen-map')
 window.addEventListener('orientationchange', ()=>{ setTimeout(fixMapSize, 200); });
 function enterHuntMode(){
   document.getElementById('bottomnav').classList.remove('hidden');
+  /* REFRESH-PERSISTENCE — do not steal the tab from a user who booted onto a
+     non-map tab (restoreBootTab set _holdTabOffMap). The first-fix local-hunt
+     regeneration reaches here and would otherwise setTab('screen-map') over the
+     restored screen. The nav is still un-hidden above; only the tab switch is
+     held, and only until the user's first deliberate nav clears the flag. */
+  if(state._holdTabOffMap){ return; }
   setTab('screen-map');
 }
 
