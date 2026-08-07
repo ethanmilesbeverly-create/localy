@@ -1285,18 +1285,17 @@
   }
   .fm-icon.fm-found{bottom:6px;opacity:0.92;}
   @keyframes fmBob{0%,100%{margin-top:0;}50%{margin-top:-7px;}}
-  /* Visited badge — a moss circle with a white ring and white check, sitting in
-     the CENTRE of the pin head (where the old inline check was), the same on every
-     category so status never depends on the pin's hue. The category colour still
-     reads on the rim and tail; green + white = the one universal "you've been". */
+  /* Visited badge — a moss circle with a white ring and white check, on the
+     top-right CORNER of the pin, the same on every category so status never
+     depends on the pin's hue. The corner keeps the pin's colour fully visible. */
   .fm-check{
-    position:absolute;top:15px;left:11px;
-    width:16px;height:16px;border-radius:50%;
+    position:absolute;top:9px;left:21px;
+    width:18px;height:18px;border-radius:50%;
     background:var(--moss);border:2px solid #fff;
     display:flex;align-items:center;justify-content:center;
-    z-index:3;
+    z-index:3;box-shadow:0 1px 3px rgba(0,0,0,0.45);
   }
-  .fm-check svg{width:10px;height:10px;display:block;}
+  .fm-check svg{width:11px;height:11px;display:block;}
   .fm-halo{
     position:absolute;left:50%;bottom:6px;transform:translate(-50%,0);
     width:20px;height:20px;border-radius:50%;
@@ -1330,6 +1329,15 @@
   .fm-label{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;}
   .fm-name{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;display:none;}
   .fm-name.fm-name-show{display:block;}
+  /* .fm-name-in is added only to a label that is NEWLY appearing (tracked in JS,
+     not on every marker rebuild) so it eases in once when you cross the zoom
+     threshold and stays calm afterwards. */
+  .fm-name.fm-name-in{animation:fmLabelIn 0.2s ease-out;}
+  @keyframes fmLabelIn{
+    from{opacity:0;transform:translateX(-50%) translateY(4px) scale(0.9);}
+    to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){ .fm-name.fm-name-in{animation:none;} }
   .fm-label.fm-hide{display:none;}
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
@@ -6854,7 +6862,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06m';
+const APP_VERSION = '2026.08.06n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12135,11 +12143,13 @@ function scheduleLabelUpdate(){
    is roughly "a few blocks in" — raise it to reveal names later, lower it to
    reveal them sooner. Above the floor, the collision pass decides which fit. */
 const MIN_LABEL_ZOOM = 16;
+let _shownLabels = new Set();   // pin ids showing a quiet label last pass — so a rebuild doesn't re-animate persisting labels
 function updatePinLabels(){
   const map = state.leafletMap;
   if(!map || !state.markersLayer) return;
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
+  const hide = label=>{ if(label) label.classList.remove('fm-name-show','fm-name-in'); };
   // Zoom floor: hide every label — quiet AND the selected pin's chip — when
   // zoomed out past the threshold, so a selected pin only labels itself once
   // you're zoomed in far enough for labels at all.
@@ -12147,11 +12157,11 @@ function updatePinLabels(){
     state.markersLayer.eachLayer(m=>{
       const el = m.getElement && m.getElement();
       if(!el) return;
-      const quiet = el.querySelector('.fm-name');
-      if(quiet) quiet.classList.remove('fm-name-show');
+      hide(el.querySelector('.fm-name'));
       const chip = el.querySelector('.fm-label');
       if(chip) chip.classList.add('fm-hide');
     });
+    _shownLabels = new Set();
     return;
   }
   const margin = 48;
@@ -12168,7 +12178,7 @@ function updatePinLabels(){
     const label = el.querySelector('.fm-name');   // null for the selected pin (it uses .fm-label, always shown)
     const pt = map.latLngToContainerPoint(m.getLatLng());
     if(pt.x < -margin || pt.x > size.x+margin || pt.y < -margin || pt.y > size.y+margin){
-      if(label) label.classList.remove('fm-name-show');
+      hide(label);
       return;                                 // off-screen: can't collide, stays hidden
     }
     // estimated label box, centred above the pin head (~52px above the tip)
@@ -12176,20 +12186,26 @@ function updatePinLabels(){
     const cx = pt.x, cy = pt.y - 52;
     const box = { l:cx - w/2, r:cx + w/2, t:cy - 10, b:cy + 10 };
     const tier = info.selected ? 0 : info.halo ? 1 : info.found ? 3 : 2;
-    entries.push({ label, box, key: tier*100000 + info.rank, selected:info.selected });
+    entries.push({ label, box, key: tier*100000 + info.rank, selected:info.selected, id:info.id });
   });
   entries.sort((a,b)=> a.key - b.key);
   const placed = [];
+  const nowShown = new Set();
   const hit = (x,y)=> x.l < y.r && x.r > y.l && x.t < y.b && x.b > y.t;
   for(const e of entries){
     if(e.selected){ placed.push(e.box); continue; }   // prominent chip always shows; claim its box
     if(placed.some(p=> hit(e.box, p))){
-      if(e.label) e.label.classList.remove('fm-name-show');
+      hide(e.label);
     } else {
-      if(e.label) e.label.classList.add('fm-name-show');
       placed.push(e.box);
+      if(e.label){
+        if(!_shownLabels.has(e.id)) e.label.classList.add('fm-name-in');   // only NEW labels ease in
+        e.label.classList.add('fm-name-show');
+      }
+      nowShown.add(e.id);
     }
   }
+  _shownLabels = nowShown;
 }
 function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
@@ -12257,7 +12273,7 @@ function refreshTargetsUI(){
        already body-anchored/distance-sorted (#66) — so the label priority is stable
        during a pan (it never recomputes distance on move), which is what stops the
        labels flickering on and off while you drag. */
-    m._pinLabel = { name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx };
+    m._pinLabel = { id:t.id, name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx };
     m.on('click', ()=> openPinSheet(t));
   });
   updatePinLabels();
