@@ -438,6 +438,10 @@
     -webkit-overflow-scrolling:touch;
   }
   .screen.active{display:block;}
+  /* #253 — Settings pins Log out to the bottom: flex column + margin-top:auto on
+     the footer section pushes it down when content is short, scrolls when tall. */
+  #screen-settings.active{ display:flex; flex-direction:column; }
+  .settings-footer{ margin-top:auto; margin-bottom:0; }
   #screen-map.active{display:flex;flex-direction:column;padding:0;min-height:0;perspective:800px;perspective-origin:50% 25%;}
 
   h1.page-title{
@@ -2716,6 +2720,12 @@
         <p id="settings-resend-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
     </div>
+    <!-- #253/#177 — Delete account moved here from the Settings hub; it's an
+         account action. Mechanism (openDeleteAccount + the delete-account edge
+         function) unchanged; gated by SHOW_CLEAR_MY_DATA in openAccount(). -->
+    <div class="settings-section">
+      <button class="link-btn" id="delete-account-entry" onclick="openDeleteAccount()" style="display:none;">Delete account</button>
+    </div>
   </div>
 
   <!-- #253 — PRIVACY screen: reached from the Privacy nav row in Settings, Back
@@ -2794,9 +2804,8 @@
          opens #screen-delete-account (not a red button + inline confirm), gated
          by SHOW_CLEAR_MY_DATA — the mechanism (deleteMyAccount + the
          delete-account edge function) is unchanged. -->
-    <div class="settings-section">
+    <div class="settings-section settings-footer">
       <button class="settings-btn" onclick="logout()">Log out</button>
-      <button class="link-btn" id="delete-account-entry" onclick="openDeleteAccount()" style="display:none;margin-top:12px;">Delete account</button>
     </div>
   </div>
 
@@ -7095,7 +7104,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07f';
+const APP_VERSION = '2026.08.07g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7567,10 +7576,6 @@ async function updateSettingsEmail(){
 }
 function openSettings(returnTo){
   cancelClearProgress(); // never open with a destructive confirm already armed
-  /* #177 — the delete ENTRY POINT is a tertiary link in the Log-out section that
-     opens #screen-delete-account. Same SHOW_CLEAR_MY_DATA gate as before. */
-  const delEntry = document.getElementById('delete-account-entry');
-  if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
   /* #91 — where Back goes; the map credit passes 'screen-map' for a round trip. */
   state.settingsReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-passport';
   showScreen('screen-settings');
@@ -7611,6 +7616,10 @@ function openAccount(returnTo){
       }
     });
   }
+  /* #253/#177 — delete-account entry moved here from Settings. Gated by
+     SHOW_CLEAR_MY_DATA, the single edit that hides the whole capability. */
+  const delEntry = document.getElementById('delete-account-entry');
+  if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
   state.accountReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-settings';
   showScreen('screen-account');
   setNavActive('screen-passport');
@@ -7920,7 +7929,7 @@ function openDeleteAccount(){
 }
 function closeDeleteAccount(){
   cancelClearProgress();
-  showScreen('screen-settings');
+  showScreen('screen-account');
   setNavActive('screen-passport');
 }
 function askClearProgress(){
