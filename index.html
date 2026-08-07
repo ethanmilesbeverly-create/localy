@@ -6868,7 +6868,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06o';
+const APP_VERSION = '2026.08.06p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8486,7 +8486,21 @@ function setupBaseMap(){
       return;
     }
     if(state.followMe && !state.browsingLocation && state.me){
-      state.leafletMap.panTo([state.me.lat, state.me.lng], {animate:false});
+      /* #59 REVISED — zoom used to ALWAYS snap back to you while following, so a
+         pinch toward another block yanked you home. Now zoom behaves like a pan:
+         if it drifts the centre past SEARCH_HERE_DIST_M from you, stop following
+         (drop the 'following' state) so you're left where you zoomed, and let the
+         "Search this area" pill offer to load it. A zoom that stays roughly on you
+         still re-centres, so zooming in place keeps you centred as before. */
+      const c = state.leafletMap.getCenter();
+      const drift = haversine(c.lat, c.lng, state.me.lat, state.me.lng);
+      if(drift > SEARCH_HERE_DIST_M){
+        state.followMe = false;
+        document.getElementById('locate-btn').classList.remove('following');
+        maybeShowSearchHere();
+      } else {
+        state.leafletMap.panTo([state.me.lat, state.me.lng], {animate:false});
+      }
     }
   });
   document.getElementById('locate-btn').classList.add('following');
