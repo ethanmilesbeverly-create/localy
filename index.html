@@ -1285,14 +1285,17 @@
   }
   .fm-icon.fm-found{bottom:6px;opacity:0.92;}
   @keyframes fmBob{0%,100%{margin-top:0;}50%{margin-top:-7px;}}
+  /* Visited badge — the ONE universal "you've been here" marker, identical on
+     every category so status never depends on the pin's hue. Moss fill with a
+     cream ring so it reads on any pin colour, park green included. */
   .fm-check{
-    position:absolute;top:2px;right:-4px;
-    width:16px;height:16px;border-radius:50%;
-    background:var(--moss);border:2px solid var(--bg);
+    position:absolute;top:9px;left:21px;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--moss);border:2px solid var(--text);
     display:flex;align-items:center;justify-content:center;
-    z-index:2;
+    z-index:3;box-shadow:0 1px 3px rgba(0,0,0,0.45);
   }
-  .fm-check svg{width:9px;height:9px;}
+  .fm-check svg{width:11px;height:11px;display:block;}
   .fm-halo{
     position:absolute;left:50%;bottom:6px;transform:translate(-50%,0);
     width:20px;height:20px;border-radius:50%;
@@ -6850,7 +6853,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06k';
+const APP_VERSION = '2026.08.06l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12222,10 +12225,12 @@ function refreshTargetsUI(){
        updatePinLabels() clears it to show. Both are the same size — the selected
        one just doesn't get culled. Both are filled with the pin's category colour
        so the label reads its type at a glance; text colour is picked for contrast. */
-    /* Match the label fill to the pin body EXACTLY — full colour for a captured
-       pin, dimmed for an uncaptured one — so the chip reads as the same object as
-       its pin. pinColor is the single source both the label and the teardrop use. */
-    const pinColor = t.found ? color : dimColor(color);
+    /* ONE hue per category, same for visited and unvisited — status is carried by
+       a corner check BADGE (below), not by brightness. This keeps category colour
+       reliable (6 hues, not 12 shades that blur into each other) and separates the
+       two signals: hue = what it is, badge = whether you've been. The label fills
+       with the same colour, so chip and pin always match. */
+    const pinColor = color;
     const labelStyle = `background:${pinColor};color:${labelTextColor(pinColor)}`;
     const nameHtml = t.name
       ? (isSelected
@@ -12238,9 +12243,10 @@ function refreshTargetsUI(){
         ${nameHtml}
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-shadow"></div>
-        <div class="fm-icon ${t.found?'fm-found':''}">
-          ${dropPinSVG(pinColor, t.found, 26, 37)}
+        <div class="fm-icon">
+          ${dropPinSVG(pinColor, false, 26, 37)}
         </div>
+        ${t.found ? `<div class="fm-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4 4L19 7" fill="none" stroke="#EDE9DD" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>` : ''}
       </div>`,
       iconSize:[38,56],
       iconAnchor:[19,52]
