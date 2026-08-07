@@ -1303,6 +1303,20 @@
     0%{box-shadow:0 0 0 0 rgba(232,98,44,0.55);}
     100%{box-shadow:0 0 0 26px rgba(232,98,44,0);}
   }
+  /* Option B — a name chip floats ABOVE the head of the SELECTED pin only, so
+     it names the dot you just tapped and never collides with a neighbour (one
+     label max on screen). It sits above the icon, clearing the bottom sheet;
+     pointer-events:none so it can't swallow the tap that should hit the marker.
+     Rendered only when selectedPinId matches AND the pin has a name; the
+     selected marker also gets a zIndexOffset so this draws over nearby pins. */
+  .fm-label{
+    position:absolute;bottom:47px;left:50%;transform:translateX(-50%);
+    max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    background:var(--surface);color:var(--text);
+    border:0.5px solid var(--line);border-radius:8px;
+    padding:3px 9px;font-size:12.5px;font-weight:600;line-height:1.25;
+    pointer-events:none;box-shadow:0 3px 10px rgba(0,0,0,0.4);
+  }
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
   .player-wrap{position:relative;width:64px;height:64px;}
@@ -6819,7 +6833,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06c';
+const APP_VERSION = '2026.08.06e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12098,9 +12112,11 @@ function refreshTargetsUI(){
   targets.forEach(t=>{
     const color = colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
+    const isSelected = selectedTarget && t.id===selectedTarget.id;
     const icon = L.divIcon({
       className:'',
       html:`<div class="fm-wrap">
+        ${isSelected && t.name ? `<div class="fm-label">${escapeHtml(t.name)}</div>` : ''}
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-shadow"></div>
         <div class="fm-icon ${t.found?'fm-found':''}">
@@ -12110,7 +12126,7 @@ function refreshTargetsUI(){
       iconSize:[38,56],
       iconAnchor:[19,52]
     });
-    const m = L.marker([t.lat,t.lng], {icon}).addTo(state.markersLayer);
+    const m = L.marker([t.lat,t.lng], {icon, zIndexOffset: isSelected ? 500 : 0}).addTo(state.markersLayer);
     m.on('click', ()=> openPinSheet(t));
   });
 
@@ -12894,7 +12910,7 @@ const ACH_ICONS = {
      (CC BY 4.0), fitted onto the shared 24×24 vb centred with margin (bbox ≈ x7.2–16.8,
      y4.3–19.8) so the head clears the top edge under the 1.8 stroke — the earlier
      flush-to-edge fit cropped it.
-     #223 — negativeFill (walk only, user request): EARNED reads as a colour-INVERSE
+     #244 — negativeFill (walk only, user request): EARNED reads as a colour-INVERSE
      of the locked figure — a tier-coloured chip with the figure knocked OUT in the
      surface colour behind. LOCKED is a SOLID figure filled in the faint locked colour
      (var(--line) @0.6), not an outline. See renderAchievementIcon; the earned knockout
@@ -13413,7 +13429,7 @@ function renderAchievementIcon(iconKey, unlocked, size, knockoutColor){
      --surface card (#63), which passes #173229 here. Unfilled and every
      non-knockout def keep currentColor. */
   const knockout = knockoutColor || '#10231C';
-  /* #223 — negativeFill (walk). EARNED: a tier-coloured chip with the glyph painted
+  /* #244 — negativeFill (walk). EARNED: a tier-coloured chip with the glyph painted
      ON TOP in the surface colour, so the figure reads as knocked OUT of the chip — a
      colour-inverse of the locked figure. Painted, not an even-odd hole, so the FA
      glyph's touching subpaths can't punch stray slivers; `knockout` is the same
