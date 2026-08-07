@@ -6819,7 +6819,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06b';
+const APP_VERSION = '2026.08.06c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12895,12 +12895,12 @@ const ACH_ICONS = {
      y4.3–19.8) so the head clears the top edge under the 1.8 stroke — the earlier
      flush-to-edge fit cropped it.
      #223 — negativeFill (walk only, user request): EARNED reads as a colour-INVERSE
-     of the locked outline — a tier-coloured chip with the figure knocked OUT in the
-     surface colour behind — instead of a solid tier figure. LOCKED is unchanged: the
-     figure still draws as a faint outline with no chip. See renderAchievementIcon;
-     the knockout is painted (not an even-odd hole) so the FA glyph's overlapping
-     subpaths can't punch stray slivers, and it tracks the same per-screen surface
-     colour the gem uses (grid/popup #10231C, passport card #173229).
+     of the locked figure — a tier-coloured chip with the figure knocked OUT in the
+     surface colour behind. LOCKED is a SOLID figure filled in the faint locked colour
+     (var(--line) @0.6), not an outline. See renderAchievementIcon; the earned knockout
+     is painted (not an even-odd hole) so the FA glyph's overlapping subpaths can't
+     punch stray slivers, and it tracks the same per-screen surface colour the gem uses
+     (grid/popup #10231C, passport card #173229).
      Key RENAMED 'road' → 'walk' and the six Wanderer badges repointed — 'road' had
      no other consumer, so it is renamed rather than left orphaned (#24's
      removed-not-stranded rule). */
@@ -13413,16 +13413,24 @@ function renderAchievementIcon(iconKey, unlocked, size, knockoutColor){
      --surface card (#63), which passes #173229 here. Unfilled and every
      non-knockout def keep currentColor. */
   const knockout = knockoutColor || '#10231C';
-  /* #223 — negativeFill (walk): EARNED is a colour-inverse of the locked outline.
-     Draw a tier-coloured chip (fill = currentColor) and paint the glyph ON TOP in
-     the surface colour so it reads as a figure knocked OUT of the chip. Painted, not
-     an even-odd hole, so the FA glyph's touching subpaths can't punch stray slivers;
-     `knockout` is the same per-screen surface the gem uses. LOCKED falls through to
-     the default outline below (no chip), so only the earned look changes. */
-  if(def.negativeFill && unlocked){
-    return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;" stroke-linejoin="round">`
-      + `<rect x="1.5" y="1.5" width="21" height="21" rx="5.5" fill="currentColor" stroke="none"/>`
-      + `<path d="${def.body}" fill="${knockout}" stroke="none"/>`
+  /* #223 — negativeFill (walk). EARNED: a tier-coloured chip with the glyph painted
+     ON TOP in the surface colour, so the figure reads as knocked OUT of the chip — a
+     colour-inverse of the locked figure. Painted, not an even-odd hole, so the FA
+     glyph's touching subpaths can't punch stray slivers; `knockout` is the same
+     per-screen surface the gem uses (grid/popup #10231C, passport #173229). LOCKED:
+     the figure is FILLED SOLID in the faint locked colour (currentColor = var(--line)
+     @0.6 via .achievement-item.locked .ach-badge), NOT an outline — per the user, a
+     light solid silhouette rather than line-art. Both states are solid figures; only
+     the colour + chip differ. */
+  if(def.negativeFill){
+    if(unlocked){
+      return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;" stroke-linejoin="round">`
+        + `<rect x="1.5" y="1.5" width="21" height="21" rx="5.5" fill="currentColor" stroke="none"/>`
+        + `<path d="${def.body}" fill="${knockout}" stroke="none"/>`
+        + `</svg>`;
+    }
+    return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;">`
+      + `<path d="${def.body}" fill="currentColor" stroke="none"/>`
       + `</svg>`;
   }
   const accentStroke = (unlocked && def.knockout) ? knockout : 'currentColor';
