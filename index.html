@@ -6961,7 +6961,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06v';
+const APP_VERSION = '2026.08.06w';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8529,7 +8529,24 @@ function setupBaseMap(){
   // that has genuinely never had a real fix (true first launch), which the
   // reload complaint never was.
   const start = rememberedMapView() || {lat:41.8827, lng:-87.6233, zoom:16};
-  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false}).setView([start.lat, start.lng], start.zoom);
+  /* SMOOTH / CONTINUOUS ZOOM. Leaflet's default zoomSnap:1 quantises the map to
+     integer zoom levels: a pinch or scroll is continuous DURING the gesture but
+     snaps to the nearest whole level the instant you lift off — the "it snaps to
+     the closest milestone, I can't stop anywhere" report. zoomSnap:0 removes that
+     snap so the zoom settles wherever you leave it (fractional levels allowed),
+     matching the continuous feel of a vector map like maps.deflock.org. Note the
+     honest limit: this is a RASTER tile map (CARTO Voyager), so between integer
+     tile levels Leaflet CSS-scales the tiles — motion is smooth, but a fractional
+     zoom looks a touch softer than a true vector renderer until it settles; that
+     is inherent to raster tiles, not a bug we left unset. wheelPxPerZoomLevel:120
+     (up from 60) slows desktop scroll-zoom so it glides rather than jumps (no
+     effect on mobile pinch). This is NOT the #59/#246 zoom-snap-BACK behaviour
+     (that re-centres the map on you during a zoom while following) — this is the
+     zoom LEVEL quantisation, a different Leaflet default. Everything that reads
+     getZoom()/getBoundsZoom() (defaultFrameZoom #174, the label floor #245's
+     MIN_LABEL_ZOOM, the remembered-frame replay #120) already handles fractional
+     values — setView/setMinZoom accept them and the comparisons are all </>=. */
+  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false, zoomSnap:0, wheelPxPerZoomLevel:120}).setView([start.lat, start.lng], start.zoom);
   addBaseLayer(state.leafletMap);
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
   // Option C — update which pin names fit live during the gesture (continuous
@@ -9999,7 +10016,9 @@ function openSuggestGemScreen(){
     if(!state.suggestMap){
       assertContainerMeasured('suggest-gem-map', '#87', '#suggest-gem-map');
       const start = state.me || FALLBACK_LOCATION;
-      state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false}).setView([start.lat,start.lng], 16);
+      // Continuous zoom (zoomSnap:0), same as the main map — the two picker maps
+      // build separately, not through one function, so the option is set at each site.
+      state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false, zoomSnap:0, wheelPxPerZoomLevel:120}).setView([start.lat,start.lng], 16);
       addBaseLayer(state.suggestMap);
       state.suggestMap.on('click', e=>{
         /* #17 — routed through setGemDraftPin so tap and geocode share one
@@ -10233,7 +10252,8 @@ function openCreateScreen(existingHunt, seedPoint){
     if(!state.createMap){
       assertContainerMeasured('create-map', '#87', '#create-map');
       const start = state.me || {lat:41.8827,lng:-87.6233};
-      state.createMap = L.map('create-map', {zoomControl:false, attributionControl:false}).setView([start.lat,start.lng], 14);
+      // Continuous zoom (zoomSnap:0), same as the main map.
+      state.createMap = L.map('create-map', {zoomControl:false, attributionControl:false, zoomSnap:0, wheelPxPerZoomLevel:120}).setView([start.lat,start.lng], 14);
       addBaseLayer(state.createMap);
       state.createMarkersLayer = L.layerGroup().addTo(state.createMap);
       state.createMap.on('click', e=>{
