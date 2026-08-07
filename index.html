@@ -6748,7 +6748,7 @@ function showScreen(id){
      state un-sticky: one navigation heals it. */
   const app = document.getElementById('app');
   if(app) app.scrollTop = 0;
-  if(id!=='screen-map') closePinSheet();
+  if(id!=='screen-map'){ closePinSheet(); collapseDrawer(); }
 }
 function goToModeSelect(){
   state._holdTabOffMap = false; // REFRESH-PERSISTENCE — deliberate nav ends the boot-restore hold (see enterHuntMode)
@@ -6961,7 +6961,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06x';
+const APP_VERSION = '2026.08.06y';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9572,6 +9572,22 @@ function toggleDrawer(){
   // with it visually but leaves it "open" in state: reopening the drawer would
   // then show a stale list against a query the user has forgotten typing.
   if(!nowCollapsed) closeAllPlaceSuggest();
+}
+/* Idempotent drawer close, used when LEAVING the map (showScreen). The drawer
+   lives INSIDE #screen-map, so a tab switch merely HIDES it with the map rather
+   than closing it — without this it re-appears still-open when you come back,
+   which is exactly the pin-menu-stuck-open report. Mirrors the collapse side of
+   toggleDrawer() (drop #screen-map.drawer-open, which un-hides #map-search-row
+   per #88); safe to call when already collapsed (no-op). closeAllPlaceSuggest()
+   is not needed here — showScreen() already calls it at its top. Companion to
+   the closePinSheet() call on the same showScreen line; the pin sheet is a
+   top-level fixed element so it needs its own teardown, the drawer is a screen
+   child so it only needs its open-state cleared. */
+function collapseDrawer(){
+  const drawer = document.getElementById('target-drawer');
+  if(!drawer || drawer.classList.contains('collapsed')) return;
+  drawer.classList.add('collapsed');
+  document.getElementById('screen-map').classList.remove('drawer-open');
 }
 /* #67 — ONE BRANCH PER CARD, AND THAT IS NOW AN ENFORCED INVARIANT.
    This function used to dispatch twelve categories against a grid of six
