@@ -1285,17 +1285,18 @@
   }
   .fm-icon.fm-found{bottom:6px;opacity:0.92;}
   @keyframes fmBob{0%,100%{margin-top:0;}50%{margin-top:-7px;}}
-  /* Visited badge — the ONE universal "you've been here" marker, identical on
-     every category so status never depends on the pin's hue. Moss fill with a
-     cream ring so it reads on any pin colour, park green included. */
+  /* Visited badge — a moss circle with a white ring and white check, sitting in
+     the CENTRE of the pin head (where the old inline check was), the same on every
+     category so status never depends on the pin's hue. The category colour still
+     reads on the rim and tail; green + white = the one universal "you've been". */
   .fm-check{
-    position:absolute;top:9px;left:21px;
-    width:18px;height:18px;border-radius:50%;
-    background:var(--moss);border:2px solid var(--text);
+    position:absolute;top:15px;left:11px;
+    width:16px;height:16px;border-radius:50%;
+    background:var(--moss);border:2px solid #fff;
     display:flex;align-items:center;justify-content:center;
-    z-index:3;box-shadow:0 1px 3px rgba(0,0,0,0.45);
+    z-index:3;
   }
-  .fm-check svg{width:11px;height:11px;display:block;}
+  .fm-check svg{width:10px;height:10px;display:block;}
   .fm-halo{
     position:absolute;left:50%;bottom:6px;transform:translate(-50%,0);
     width:20px;height:20px;border-radius:50%;
@@ -6853,7 +6854,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06l';
+const APP_VERSION = '2026.08.06m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12246,7 +12247,7 @@ function refreshTargetsUI(){
         <div class="fm-icon">
           ${dropPinSVG(pinColor, false, 26, 37)}
         </div>
-        ${t.found ? `<div class="fm-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4 4L19 7" fill="none" stroke="#EDE9DD" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>` : ''}
+        ${t.found ? `<div class="fm-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4 4L19 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>` : ''}
       </div>`,
       iconSize:[38,56],
       iconAnchor:[19,52]
