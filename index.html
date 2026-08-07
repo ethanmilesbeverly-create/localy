@@ -6850,7 +6850,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06j';
+const APP_VERSION = '2026.08.06k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12222,7 +12222,11 @@ function refreshTargetsUI(){
        updatePinLabels() clears it to show. Both are the same size — the selected
        one just doesn't get culled. Both are filled with the pin's category colour
        so the label reads its type at a glance; text colour is picked for contrast. */
-    const labelStyle = `background:${color};color:${labelTextColor(color)}`;
+    /* Match the label fill to the pin body EXACTLY — full colour for a captured
+       pin, dimmed for an uncaptured one — so the chip reads as the same object as
+       its pin. pinColor is the single source both the label and the teardrop use. */
+    const pinColor = t.found ? color : dimColor(color);
+    const labelStyle = `background:${pinColor};color:${labelTextColor(pinColor)}`;
     const nameHtml = t.name
       ? (isSelected
           ? `<div class="fm-label" style="${labelStyle}">${escapeHtml(t.name)}</div>`
@@ -12235,7 +12239,7 @@ function refreshTargetsUI(){
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-shadow"></div>
         <div class="fm-icon ${t.found?'fm-found':''}">
-          ${dropPinSVG(t.found ? color : dimColor(color), t.found, 26, 37)}
+          ${dropPinSVG(pinColor, t.found, 26, 37)}
         </div>
       </div>`,
       iconSize:[38,56],
