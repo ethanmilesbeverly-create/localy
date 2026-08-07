@@ -1653,8 +1653,6 @@
   .lb-count span{font-size:11px;font-weight:600;color:var(--text-dim);margin-left:3px;}
   .lb-optout{
     display:flex;align-items:center;justify-content:space-between;gap:14px;
-    margin-top:0;padding:14px;background:var(--surface);border:1px solid var(--line);
-    border-radius:12px;
   }
   .lb-optout-label{font-size:14px;color:var(--text);}
   .lb-optout-sub{font-size:12px;color:var(--text-dim);margin-top:4px;line-height:1.45;}
@@ -2653,10 +2651,30 @@
     </div>
     <p class="page-sub">The most places captured. Get out there and climb.</p>
     <div class="lb-toggle">
-      <button id="lb-tab-global" class="active" onclick="setLeaderboardScope('global')">Global</button>
-      <button id="lb-tab-local" onclick="setLeaderboardScope('local')">Nearby</button>
+      <button id="lb-tab-local" class="active" onclick="setLeaderboardScope('local')">Nearby</button>
+      <button id="lb-tab-global" onclick="setLeaderboardScope('global')">Global</button>
     </div>
     <div id="lb-list-mount"></div>
+  </div>
+
+  <!-- #253 — PRIVACY screen: reached from the Privacy nav row in Settings, Back
+       returns there (or the map). Holds the leaderboard opt-out inside a standard
+       settings-card; more privacy controls can join it later. -->
+  <div class="screen" id="screen-privacy">
+    <div class="title-row">
+      <h1 class="page-title">Privacy</h1>
+      <button class="icon-btn" onclick="closePrivacy()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">What others can see.</p>
+    <div class="settings-section">
+      <div class="settings-card">
+        <div id="lb-optout-mount"></div>
+      </div>
+    </div>
   </div>
 
   <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
@@ -2724,13 +2742,14 @@
       </div>
     </div>
 
-    <!-- #253 — PRIVACY. The leaderboard opt-out moved here (out of the leaderboard
-         screen, by directive) so it sits with the account/privacy controls.
-         Visible-by-default; this switch opts OUT. Filled by renderLeaderboardOptout()
-         via #lb-optout-mount, rendered on openSettings(). -->
+    <!-- #253 — PRIVACY. A nav row like "About this app" (opens #screen-privacy),
+         holding the leaderboard opt-out. Same chevron-row pattern so it scales if
+         more privacy controls land later. -->
     <div class="settings-section">
-      <h2>Privacy</h2>
-      <div id="lb-optout-mount"></div>
+      <button class="settings-nav" onclick="openPrivacy('screen-settings')">
+        <span>Privacy</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
     </div>
 
     <!-- #177 — ABOUT PAGE ENTRY. Reference material (Your data, credits,
@@ -7050,7 +7069,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07c';
+const APP_VERSION = '2026.08.07e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7569,10 +7588,6 @@ function openSettings(returnTo){
      is still the only edit that hides the whole capability. */
   const delEntry = document.getElementById('delete-account-entry');
   if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
-  /* #253 — leaderboard opt-out now lives in Privacy. Render from cache (defaults
-     to visible), then refresh from the server so a prior opt-out shows correctly. */
-  renderLeaderboardOptout();
-  fetchLeaderboardMe().then(function(){ renderLeaderboardOptout(); });
   /* #91 — where Back goes. Defaults to the passport because the gear is still
      the primary entrance; the map credit passes 'screen-map' so the pill is a
      round trip rather than a one-way door onto a screen you weren't on. */
@@ -7640,6 +7655,24 @@ function openCredits(){
    the map credit (openCredits → 'screen-map'). Back returns to whichever, via
    state.aboutReturn — the same pattern settings uses with settingsReturn. The
    version is stamped here because #settings-version now lives on this screen. */
+function openPrivacy(returnTo){
+  state.privacyReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-settings';
+  showScreen('screen-privacy');
+  setNavActive('screen-passport');
+  renderLeaderboardOptout();
+  fetchLeaderboardMe().then(function(){ renderLeaderboardOptout(); });
+}
+function closePrivacy(){
+  const back = state.privacyReturn || 'screen-settings';
+  state.privacyReturn = null;
+  if(back === 'screen-map'){
+    setTab('screen-map');
+  }else{
+    showScreen('screen-settings');
+    setNavActive('screen-passport');
+  }
+}
+
 function openAbout(returnTo){
   const vEl = document.getElementById('settings-version');
   if(vEl) vEl.textContent = APP_VERSION;
@@ -7729,7 +7762,7 @@ function renderLeaderboardEntry(){
   const me = state._lbMe;
   let inner;
   if(me && me.opted_out){
-    inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on in <b>Settings</b>.</div>';
+    inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on in <b>Settings \u2192 Privacy</b>.</div>';
   } else if(me && me.distinct_pins > 0){
     inner = '<div class="lb-entry-rank">' + (me.rank ? ('#' + me.rank) : '\u2014') + '</div>'
           + '<div class="lb-entry-sub">' + me.distinct_pins + ' verified '
@@ -7753,7 +7786,12 @@ function renderLeaderboardEntry(){
 }
 
 function openLeaderboard(){
-  if(state._lbScope !== 'local') state._lbScope = 'global';
+  /* First open defaults to Nearby when we have a location (this is a local-
+     discovery app); with no GPS fix it defaults to Global so the board never
+     opens on the "turn on location" prompt. A prior in-session pick is kept. */
+  if(state._lbScope !== 'global' && state._lbScope !== 'local'){
+    state._lbScope = (state.me && typeof state.me.lat === 'number') ? 'local' : 'global';
+  }
   showScreen('screen-leaderboard');
   setNavActive('screen-passport');
   syncLeaderboardTabs();
@@ -14293,7 +14331,7 @@ function recentEarnedAchievements(limit){
 function renderRecentAchievements(){
   const el = document.getElementById('passport-achievements-section');
   if(!el) return;
-  const PREVIEW = 6;
+  const PREVIEW = 3;
   const recent = recentEarnedAchievements(PREVIEW);
   const viewAll = '<button class="view-all-link" onclick="openAllAchievements()">View all →</button>';
   let body;
