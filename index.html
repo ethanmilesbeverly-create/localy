@@ -1329,15 +1329,21 @@
   .fm-label{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;}
   .fm-name{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;display:none;}
   .fm-name.fm-name-show{display:block;}
-  /* .fm-name-in is added only to a label that is NEWLY appearing (tracked in JS,
-     not on every marker rebuild) so it eases in once when you cross the zoom
-     threshold and stays calm afterwards. */
+  /* Labels ease IN when they newly appear and ease OUT when they leave — a mirror
+     pair. Only NEW appearances get .fm-name-in (tracked in JS, so a marker rebuild
+     doesn't re-animate persisting labels); a still-visible label that gets dropped
+     gets .fm-name-out and hides on animationend. */
   .fm-name.fm-name-in{animation:fmLabelIn 0.2s ease-out;}
+  .fm-name.fm-name-out{animation:fmLabelOut 0.2s ease-in forwards;}
   @keyframes fmLabelIn{
     from{opacity:0;transform:translateX(-50%) translateY(4px) scale(0.9);}
     to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
   }
-  @media (prefers-reduced-motion: reduce){ .fm-name.fm-name-in{animation:none;} }
+  @keyframes fmLabelOut{
+    from{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+    to{opacity:0;transform:translateX(-50%) translateY(4px) scale(0.9);}
+  }
+  @media (prefers-reduced-motion: reduce){ .fm-name.fm-name-in,.fm-name.fm-name-out{animation:none;} }
   .fm-label.fm-hide{display:none;}
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
@@ -6862,7 +6868,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06n';
+const APP_VERSION = '2026.08.06o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12144,12 +12150,32 @@ function scheduleLabelUpdate(){
    reveal them sooner. Above the floor, the collision pass decides which fit. */
 const MIN_LABEL_ZOOM = 16;
 let _shownLabels = new Set();   // pin ids showing a quiet label last pass — so a rebuild doesn't re-animate persisting labels
+const _reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function hideLabel(label){
+  if(!label || label.classList.contains('fm-name-out')) return;   // absent or already leaving
+  if(_reduceMotion || !label.classList.contains('fm-name-show')){
+    label.classList.remove('fm-name-show','fm-name-in');          // instant: already hidden, or reduced motion
+    return;
+  }
+  label.classList.remove('fm-name-in');
+  label.classList.add('fm-name-out');                             // play exit, then hide on animationend
+  label.addEventListener('animationend', function onEnd(e){
+    if(e.animationName !== 'fmLabelOut') return;
+    label.removeEventListener('animationend', onEnd);
+    if(label.classList.contains('fm-name-out')) label.classList.remove('fm-name-show','fm-name-out');
+  });
+}
+function showLabel(label, id){
+  if(!label) return;
+  label.classList.remove('fm-name-out');                          // cancel an in-progress exit if it reappears
+  if(!_shownLabels.has(id) && !_reduceMotion) label.classList.add('fm-name-in');   // only NEW labels ease in
+  label.classList.add('fm-name-show');
+}
 function updatePinLabels(){
   const map = state.leafletMap;
   if(!map || !state.markersLayer) return;
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
-  const hide = label=>{ if(label) label.classList.remove('fm-name-show','fm-name-in'); };
   // Zoom floor: hide every label — quiet AND the selected pin's chip — when
   // zoomed out past the threshold, so a selected pin only labels itself once
   // you're zoomed in far enough for labels at all.
@@ -12157,7 +12183,7 @@ function updatePinLabels(){
     state.markersLayer.eachLayer(m=>{
       const el = m.getElement && m.getElement();
       if(!el) return;
-      hide(el.querySelector('.fm-name'));
+      hideLabel(el.querySelector('.fm-name'));
       const chip = el.querySelector('.fm-label');
       if(chip) chip.classList.add('fm-hide');
     });
@@ -12178,7 +12204,7 @@ function updatePinLabels(){
     const label = el.querySelector('.fm-name');   // null for the selected pin (it uses .fm-label, always shown)
     const pt = map.latLngToContainerPoint(m.getLatLng());
     if(pt.x < -margin || pt.x > size.x+margin || pt.y < -margin || pt.y > size.y+margin){
-      hide(label);
+      hideLabel(label);
       return;                                 // off-screen: can't collide, stays hidden
     }
     // estimated label box, centred above the pin head (~52px above the tip)
@@ -12195,13 +12221,10 @@ function updatePinLabels(){
   for(const e of entries){
     if(e.selected){ placed.push(e.box); continue; }   // prominent chip always shows; claim its box
     if(placed.some(p=> hit(e.box, p))){
-      hide(e.label);
+      hideLabel(e.label);
     } else {
       placed.push(e.box);
-      if(e.label){
-        if(!_shownLabels.has(e.id)) e.label.classList.add('fm-name-in');   // only NEW labels ease in
-        e.label.classList.add('fm-name-show');
-      }
+      showLabel(e.label, e.id);
       nowShown.add(e.id);
     }
   }
