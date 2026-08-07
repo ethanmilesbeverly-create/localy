@@ -1323,7 +1323,7 @@
   }
   /* background + text colour are set inline per pin (its category colour, with a
      dark or cream text pick chosen for contrast) — see the render in refreshTargetsUI. */
-  .fm-label{max-width:160px;padding:3px 9px;font-size:12.5px;font-weight:600;}
+  .fm-label{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;}
   .fm-name{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;display:none;}
   .fm-name.fm-name-show{display:block;}
 
@@ -6849,7 +6849,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06h';
+const APP_VERSION = '2026.08.06i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8414,10 +8414,11 @@ function setupBaseMap(){
   state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false}).setView([start.lat, start.lng], start.zoom);
   addBaseLayer(state.leafletMap);
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
-  // Option C — recompute which pin names fit whenever the view settles. moveend
-  // covers pan, zoomend covers zoom; both fire at rest so labels snap without
-  // thrashing mid-gesture. This only toggles classes, it never rebuilds markers.
-  state.leafletMap.on('moveend zoomend', updatePinLabels);
+  // Option C — update which pin names fit live during the gesture (continuous
+  // 'zoom'/'move') and once more when it settles ('zoomend'/'moveend'), so names
+  // reveal as you cross the zoom threshold without needing to lift your fingers.
+  // rAF-throttled, and only toggles classes — it never rebuilds markers.
+  state.leafletMap.on('zoom move zoomend moveend', scheduleLabelUpdate);
   state.guideLayer = L.layerGroup().addTo(state.leafletMap);
   state.meMarker = L.marker([start.lat, start.lng], {icon:playerIcon(), zIndexOffset:1000}).addTo(state.leafletMap);
   state.rangeCircle = L.circle([start.lat, start.lng], {
@@ -12114,6 +12115,15 @@ function refreshGuideLine(){
    pin's prominent chip is always shown and claims its box first so nothing quiet
    overlaps it. Cheap: a few dozen pins is a sub-ms pass, and it toggles a class
    rather than rebuilding markers, so it stays off the GPS-tick render path. */
+/* Live label updates during a pinch/pan without waiting for release: the map's
+   continuous 'zoom'/'move' events fire this, throttled to one collision pass per
+   animation frame so it stays cheap. Labels then cross the zoom floor and reveal
+   as you're still moving, snapping to a final accurate pass on moveend/zoomend. */
+let _labelRaf = 0;
+function scheduleLabelUpdate(){
+  if(_labelRaf) return;
+  _labelRaf = requestAnimationFrame(()=>{ _labelRaf = 0; updatePinLabels(); });
+}
 /* Names only begin to appear once you're zoomed in past this level; below it the
    map stays clean. A zoom LEVEL (not a distance), so it lives here rather than in
    the #65 distance register. The map's default frame sits around zoom 13, so 16
@@ -12148,7 +12158,7 @@ function updatePinLabels(){
       return;                                 // off-screen: can't collide, stays hidden
     }
     // estimated label box, centred above the pin head (~52px above the tip)
-    const w = Math.min(info.selected ? 168 : 150, 18 + info.name.length * 6.6);
+    const w = Math.min(150, 18 + info.name.length * 6.6);
     const cx = pt.x, cy = pt.y - 52;
     const box = { l:cx - w/2, r:cx + w/2, t:cy - 10, b:cy + 10 };
     const tier = info.selected ? 0 : info.halo ? 1 : info.found ? 3 : 2;
@@ -12197,10 +12207,11 @@ function refreshTargetsUI(){
     const color = colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
     const isSelected = selectedTarget && t.id===selectedTarget.id;
-    /* Selected pin gets the prominent .fm-label chip; every other named pin gets
-       the quiet .fm-name (hidden until updatePinLabels() clears it to show).
-       Both chips are filled with the pin's category colour so the label reads its
-       type at a glance; text colour is picked for contrast against that fill. */
+    /* Selected pin's chip is always shown (and lifted above neighbours via
+       zIndexOffset); every other named pin gets the quiet .fm-name, hidden until
+       updatePinLabels() clears it to show. Both are the same size — the selected
+       one just doesn't get culled. Both are filled with the pin's category colour
+       so the label reads its type at a glance; text colour is picked for contrast. */
     const labelStyle = `background:${color};color:${labelTextColor(color)}`;
     const nameHtml = t.name
       ? (isSelected
