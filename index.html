@@ -6819,7 +6819,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06a';
+const APP_VERSION = '2026.08.06b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12888,19 +12888,23 @@ const ACH_ICONS = {
   bag: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   glass: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
   bust: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
-  /* #180 — MILES icon is a WALKING PERSON, which reads the intent of the
-     Wanderer family (distance covered on foot) more directly than the receding-road
-     trapezoid it replaces. Now the Font Awesome Free 6.5.2 `person-walking` glyph
-     (CC BY 4.0), scaled ×1.5 from its native 16×16 source onto the shared 24×24 vb
-     so the locked-outline stroke weight matches its badge siblings (a 16 vb would
-     make renderAchievementIcon's fixed 1.8 stroke render ~1.5× heavier here). A
-     single filled `body` (head + torso/legs/arms + trailing foot subpaths), so it
-     fills solid when earned and reads as an outline when locked, like
-     bust/tree/glass. No accent.
+  /* #180 — MILES icon is a WALKING PERSON, which reads the intent of the Wanderer
+     family (distance covered on foot) more directly than the receding-road trapezoid
+     it replaces. The glyph is the Font Awesome Free 6.5.2 `person-walking` mark
+     (CC BY 4.0), fitted onto the shared 24×24 vb centred with margin (bbox ≈ x7.2–16.8,
+     y4.3–19.8) so the head clears the top edge under the 1.8 stroke — the earlier
+     flush-to-edge fit cropped it.
+     #223 — negativeFill (walk only, user request): EARNED reads as a colour-INVERSE
+     of the locked outline — a tier-coloured chip with the figure knocked OUT in the
+     surface colour behind — instead of a solid tier figure. LOCKED is unchanged: the
+     figure still draws as a faint outline with no chip. See renderAchievementIcon;
+     the knockout is painted (not an even-odd hole) so the FA glyph's overlapping
+     subpaths can't punch stray slivers, and it tracks the same per-screen surface
+     colour the gem uses (grid/popup #10231C, passport card #173229).
      Key RENAMED 'road' → 'walk' and the six Wanderer badges repointed — 'road' had
      no other consumer, so it is renamed rather than left orphaned (#24's
      removed-not-stranded rule). */
-  walk: {vb:'0 0 24 24', body:'M12 2.445c-0.001 -1.697 1.836 -2.759 3.307 -1.912 0.683 0.394 1.104 1.123 1.104 1.912 0.001 1.697 -1.836 2.759 -3.307 1.912 -0.683 -0.394 -1.104 -1.123 -1.104 -1.912Zm-1.539 6.951c-0.046 0.018 -0.087 0.037 -0.133 0.055l-0.368 0.161c-0.753 0.335 -1.332 0.974 -1.594 1.755l-0.119 0.358c-0.257 0.772 -1.089 1.185 -1.861 0.928s-1.185 -1.089 -0.928 -1.861l0.119 -0.358c0.524 -1.567 1.681 -2.844 3.188 -3.514l0.368 -0.161c0.956 -0.423 1.989 -0.643 3.037 -0.643 2.049 0 3.896 1.231 4.681 3.119l0.707 1.695 0.983 0.492c0.726 0.363 1.02 1.245 0.657 1.971s-1.245 1.02 -1.971 0.657l-1.231 -0.611c-0.473 -0.239 -0.845 -0.634 -1.047 -1.126l-0.441 -1.057 -0.887 3.009 2.274 2.481c0.248 0.271 0.423 0.597 0.515 0.956l1.057 4.231c0.198 0.786 -0.28 1.585 -1.07 1.782s-1.585 -0.28 -1.782 -1.07l-1.011 -4.047 -3.248 -3.542c-0.68 -0.74 -0.933 -1.773 -0.675 -2.743l0.776 -2.917Zm-2.655 9.128 1.148 -2.867c0.096 0.138 0.207 0.266 0.322 0.395l1.87 2.04 -0.666 1.663c-0.11 0.276 -0.276 0.528 -0.487 0.74l-2.834 2.834c-0.574 0.574 -1.507 0.574 -2.081 0s-0.574 -1.507 0 -2.081l2.729 -2.724Z'},
+  walk: {vb:'0 0 24 24', negativeFill:true, body:'M12 5.706c-0.001 -1.118 1.21 -1.818 2.179 -1.26 0.45 0.26 0.728 0.74 0.727 1.26 0.001 1.118 -1.21 1.818 -2.179 1.26 -0.45 -0.26 -0.728 -0.74 -0.727 -1.26Zm-1.014 4.58c-0.03 0.012 -0.058 0.024 -0.088 0.036l-0.242 0.106c-0.496 0.221 -0.878 0.642 -1.05 1.156l-0.079 0.236c-0.17 0.509 -0.717 0.781 -1.226 0.611s-0.781 -0.717 -0.611 -1.226l0.079 -0.236c0.345 -1.032 1.108 -1.874 2.101 -2.316l0.242 -0.106c0.63 -0.278 1.311 -0.424 2.001 -0.424 1.35 0 2.567 0.811 3.084 2.055l0.466 1.117 0.648 0.324c0.478 0.239 0.672 0.82 0.433 1.299s-0.82 0.672 -1.299 0.433l-0.811 -0.403c-0.312 -0.157 -0.557 -0.418 -0.69 -0.742l-0.291 -0.696 -0.584 1.983 1.498 1.635c0.163 0.179 0.278 0.394 0.339 0.63l0.696 2.788c0.13 0.518 -0.185 1.044 -0.705 1.174s-1.044 -0.185 -1.174 -0.705l-0.666 -2.667 -2.14 -2.334c-0.448 -0.487 -0.614 -1.168 -0.445 -1.807l0.512 -1.922Zm-1.75 6.015 0.757 -1.889c0.064 0.091 0.136 0.176 0.212 0.26l1.232 1.344 -0.439 1.096c-0.073 0.182 -0.182 0.348 -0.321 0.487l-1.868 1.868c-0.378 0.378 -0.993 0.378 -1.371 0s-0.378 -0.993 0 -1.371l1.798 -1.795Z'},
   /* #63 — the GUIDES achievement family renders the GUIDE FLAG — the exact mark on
      the My Guides cards in Explore (flagSVG: pole + pennant) — per the user's
      request. Single filled body (pole rect + pennant triangle): solid when earned,
@@ -13409,6 +13413,18 @@ function renderAchievementIcon(iconKey, unlocked, size, knockoutColor){
      --surface card (#63), which passes #173229 here. Unfilled and every
      non-knockout def keep currentColor. */
   const knockout = knockoutColor || '#10231C';
+  /* #223 — negativeFill (walk): EARNED is a colour-inverse of the locked outline.
+     Draw a tier-coloured chip (fill = currentColor) and paint the glyph ON TOP in
+     the surface colour so it reads as a figure knocked OUT of the chip. Painted, not
+     an even-odd hole, so the FA glyph's touching subpaths can't punch stray slivers;
+     `knockout` is the same per-screen surface the gem uses. LOCKED falls through to
+     the default outline below (no chip), so only the earned look changes. */
+  if(def.negativeFill && unlocked){
+    return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;" stroke-linejoin="round">`
+      + `<rect x="1.5" y="1.5" width="21" height="21" rx="5.5" fill="currentColor" stroke="none"/>`
+      + `<path d="${def.body}" fill="${knockout}" stroke="none"/>`
+      + `</svg>`;
+  }
   const accentStroke = (unlocked && def.knockout) ? knockout : 'currentColor';
   const accent = def.accent ? `<path d="${def.accent}" fill="none" stroke="${accentStroke}" stroke-width="1.6" stroke-linecap="round"/>` : '';
   return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;" fill="${fill}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="${def.body}"/>${accent}</svg>`;
