@@ -1616,6 +1616,60 @@
     padding:6px 2px 2px;
   }
 
+  /* #253 — LEADERBOARD. An entry card on the passport + its own sub-screen. Uses
+     the app's card language (--surface/--line/--radius); the single accent is the
+     viewer's OWN row, highlighted so you can find yourself at a glance. Scoped to
+     .lb-* so it can't restyle any shared surface (§5). */
+  .lb-entry-rank{font-size:26px;font-weight:800;color:var(--text);line-height:1;}
+  .lb-entry-sub{font-size:12.5px;color:var(--text-dim);margin-top:5px;}
+  .lb-entry-hidden{font-size:13px;color:var(--text-dim);line-height:1.5;}
+  .lb-toggle{
+    display:flex;background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:3px;margin:0 0 14px;
+  }
+  .lb-toggle button{
+    flex:1;background:none;border:none;color:var(--text-dim);font-family:inherit;
+    font-size:13.5px;font-weight:700;padding:8px 0;border-radius:999px;cursor:pointer;
+    transition:background .15s,color .15s;
+  }
+  .lb-toggle button.active{background:var(--orange);color:#fff;}
+  .lb-list{display:flex;flex-direction:column;gap:8px;}
+  .lb-row{
+    display:flex;align-items:center;gap:12px;background:var(--surface);
+    border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+  }
+  .lb-row.me{border-color:var(--orange);background:var(--surface-2);}
+  .lb-rank{
+    font-size:15px;font-weight:800;color:var(--text-dim);min-width:34px;
+    font-variant-numeric:tabular-nums;
+  }
+  .lb-row.me .lb-rank{color:var(--orange);}
+  .lb-name{
+    flex:1;font-size:15px;font-weight:600;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .lb-you{font-size:11px;font-weight:800;color:var(--orange);margin-left:7px;letter-spacing:.04em;}
+  .lb-count{font-size:14px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+  .lb-count span{font-size:11px;font-weight:600;color:var(--text-dim);margin-left:3px;}
+  .lb-optout{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    margin-top:18px;padding:14px;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;
+  }
+  .lb-optout-label{font-size:14px;color:var(--text);}
+  .lb-optout-sub{font-size:12px;color:var(--text-dim);margin-top:4px;line-height:1.45;}
+  .lb-switch{
+    position:relative;width:46px;height:28px;flex-shrink:0;border:none;padding:0;
+    border-radius:999px;background:var(--line);cursor:pointer;transition:background .18s;
+  }
+  .lb-switch.on{background:var(--orange);}
+  .lb-switch::after{
+    content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;
+    border-radius:50%;background:#fff;transition:transform .18s;
+  }
+  .lb-switch.on::after{transform:translateX(18px);}
+  .lb-note{font-size:12.5px;color:var(--text-dim);line-height:1.5;padding:8px 2px;}
+
   /* #63 — the per-place STAMP grid. Same 3-up centred layout as the achievement
      grid, but each tile carries a caption (the spot name) under the cancellation
      stamp, because unlike a badge the stamp's identity is the place, not a tier. */
@@ -2546,6 +2600,11 @@
          screen. -->
     <div id="passport-stamps-section"></div>
     <div id="passport-achievements-section"></div>
+    <!-- #253 — leaderboard entry card: your rank + verified count, opening the
+         full board. Filled by renderLeaderboardEntry(). The "verified" count is
+         the SERVER score, deliberately distinct from the local "Stamps" stat
+         above — a capture counts here only once the server confirms it (#249/#148). -->
+    <div id="passport-leaderboard-section"></div>
   </div>
 
   <!-- #63 — VIEW-ALL: every captured stamp. A no-nav sub-screen on the settings
@@ -2577,6 +2636,28 @@
       </button>
     </div>
     <div id="achievements-section"></div>
+  </div>
+
+  <!-- #253 — LEADERBOARD sub-screen. Same no-nav sub-screen pattern as the #63
+       view-all screens: shown via showScreen(), Back returns to the passport, the
+       Passport nav tab stays lit. Global / Nearby toggle, the ranked list (your
+       own row highlighted), and an opt-out switch. Filled by renderLeaderboard*(). -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="title-row">
+      <h1 class="page-title">Leaderboard</h1>
+      <button class="icon-btn" onclick="closeLeaderboard()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">The most places captured. Get out there and climb.</p>
+    <div class="lb-toggle">
+      <button id="lb-tab-global" class="active" onclick="setLeaderboardScope('global')">Global</button>
+      <button id="lb-tab-local" onclick="setLeaderboardScope('local')">Nearby</button>
+    </div>
+    <div id="lb-list-mount"></div>
+    <div id="lb-optout-mount"></div>
   </div>
 
   <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
@@ -6961,7 +7042,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07a';
+const APP_VERSION = '2026.08.07b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7595,6 +7676,165 @@ function openAllAchievements(){
 function closeAllAchievements(){
   setTab('screen-passport');
   renderPassport();
+}
+
+/* =========================================================
+   #253 — LEADERBOARD (visible ranking; server-verified score)
+   ---------------------------------------------------------
+   The passport shows a private, GENEROUS stamp count (reconciledCaptures());
+   the leaderboard shows a SEPARATE, server-VERIFIED count banked by the
+   capture-verify function only after it confirms you were there (#249). The two
+   differ by design (#148), so the UI labels the board's number "verified" and
+   never lets that read as a bug. Reads go through three SECURITY DEFINER RPCs
+   that return NO uids/coords (leaderboard_top / leaderboard_me /
+   set_leaderboard_visibility, #74/#156). Sub-screen nav mirrors the #63 view-all
+   screens: showScreen + keep Passport lit; Back returns to the passport.
+   ========================================================= */
+
+function lbEsc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+
+async function fetchLeaderboardMe(){
+  try{
+    const { data, error } = await sb.rpc('leaderboard_me');
+    if(error) return null;
+    const row = Array.isArray(data) ? data[0] : data;
+    state._lbMe = row || { rank:null, distinct_pins:0, opted_out:false };
+    state._lbMeAt = Date.now();
+    return state._lbMe;
+  }catch(e){ return null; }
+}
+
+/* The passport entry card. Renders from cache immediately and refreshes in the
+   background if stale — renderPassport() runs on many events, so we don't fire an
+   RPC every time. */
+function renderLeaderboardEntry(){
+  const mount = document.getElementById('passport-leaderboard-section');
+  if(!mount) return;
+  const me = state._lbMe;
+  let inner;
+  if(me && me.opted_out){
+    inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on under <b>View all</b>.</div>';
+  } else if(me && me.distinct_pins > 0){
+    inner = '<div class="lb-entry-rank">' + (me.rank ? ('#' + me.rank) : '\u2014') + '</div>'
+          + '<div class="lb-entry-sub">' + me.distinct_pins + ' verified '
+          + (me.distinct_pins === 1 ? 'stamp' : 'stamps') + '</div>';
+  } else if(me){
+    inner = '<div class="lb-entry-hidden">Capture a place to join the leaderboard.</div>';
+  } else {
+    inner = '<div class="lb-entry-hidden">Loading\u2026</div>';
+  }
+  mount.innerHTML =
+    '<div class="passport-section">'
+    + '<div class="passport-section-head">'
+    +   '<h2 class="section-title">Leaderboard</h2>'
+    +   '<button class="view-all-link" onclick="openLeaderboard()">View all \u2192</button>'
+    + '</div>'
+    + inner
+    + '</div>';
+  if(!me || (Date.now() - (state._lbMeAt||0) > 20000)){
+    fetchLeaderboardMe().then(function(m){ if(m) renderLeaderboardEntry(); });
+  }
+}
+
+function openLeaderboard(){
+  if(state._lbScope !== 'local') state._lbScope = 'global';
+  showScreen('screen-leaderboard');
+  setNavActive('screen-passport');
+  syncLeaderboardTabs();
+  renderLeaderboardList();
+  renderLeaderboardOptout();
+  fetchLeaderboardMe().then(function(m){ if(m) renderLeaderboardOptout(); });
+}
+function closeLeaderboard(){
+  setTab('screen-passport');
+  renderPassport();
+}
+function setLeaderboardScope(scope){
+  state._lbScope = (scope === 'local') ? 'local' : 'global';
+  syncLeaderboardTabs();
+  renderLeaderboardList();
+}
+function syncLeaderboardTabs(){
+  const g = document.getElementById('lb-tab-global');
+  const l = document.getElementById('lb-tab-local');
+  if(g) g.classList.toggle('active', state._lbScope !== 'local');
+  if(l) l.classList.toggle('active', state._lbScope === 'local');
+}
+
+async function renderLeaderboardList(){
+  const mount = document.getElementById('lb-list-mount');
+  if(!mount) return;
+  const scope = (state._lbScope === 'local') ? 'local' : 'global';
+  if(scope === 'local' && (!state.me || typeof state.me.lat !== 'number')){
+    mount.innerHTML = '<div class="lb-note">Turn on location to see who\u2019s climbing near you.</div>';
+    return;
+  }
+  mount.innerHTML = '<div class="lb-note">Loading\u2026</div>';
+  let rows = null;
+  try{
+    const args = (scope === 'local')
+      ? { p_scope:'local', p_lat:state.me.lat, p_lng:state.me.lng, p_radius_m:50000, p_limit:100 }
+      : { p_scope:'global', p_limit:100 };
+    const { data, error } = await sb.rpc('leaderboard_top', args);
+    if(error) throw error;
+    rows = data || [];
+  }catch(e){
+    mount.innerHTML = '<div class="lb-note">Couldn\u2019t load the leaderboard. Go back and try again.</div>';
+    return;
+  }
+  /* a scope tap while awaiting could land this stale — bail if the scope moved */
+  if(((state._lbScope === 'local') ? 'local' : 'global') !== scope) return;
+  if(!rows.length){
+    mount.innerHTML = '<div class="lb-note">'
+      + (scope === 'local'
+          ? 'No one\u2019s climbing near you yet. Capture a place to be first.'
+          : 'No one\u2019s on the leaderboard yet. Capture a place to be first.')
+      + '</div>';
+    return;
+  }
+  mount.innerHTML = '<div class="lb-list">' + rows.map(function(r){
+    const me = !!r.is_me;
+    const n = r.distinct_pins;
+    return '<div class="lb-row' + (me?' me':'') + '">'
+      + '<div class="lb-rank">#' + r.rank + '</div>'
+      + '<div class="lb-name">' + lbEsc(r.display_name) + (me?'<span class="lb-you">YOU</span>':'') + '</div>'
+      + '<div class="lb-count">' + n + '<span>' + (n===1?'stamp':'stamps') + '</span></div>'
+      + '</div>';
+  }).join('') + '</div>';
+}
+
+function renderLeaderboardOptout(){
+  const mount = document.getElementById('lb-optout-mount');
+  if(!mount) return;
+  const hidden = !!(state._lbMe && state._lbMe.opted_out);
+  mount.innerHTML =
+    '<div class="lb-optout">'
+    + '<div><div class="lb-optout-label">Show me on the leaderboard</div>'
+    +   '<div class="lb-optout-sub">Others see your display name and stamp count. Your captured places stay private.</div></div>'
+    + '<button class="lb-switch' + (hidden?'':' on') + '" role="switch" aria-checked="' + (hidden?'false':'true') + '" aria-label="Show me on the leaderboard" onclick="toggleLeaderboardOptout()"></button>'
+    + '</div>';
+}
+
+async function toggleLeaderboardOptout(){
+  const wasHidden = !!(state._lbMe && state._lbMe.opted_out);
+  const nextOptOut = !wasHidden;
+  state._lbMe = Object.assign({ rank:null, distinct_pins:0 }, state._lbMe||{}, { opted_out: nextOptOut });
+  renderLeaderboardOptout();           // optimistic
+  try{
+    const { error } = await sb.rpc('set_leaderboard_visibility', { p_opt_out: nextOptOut });
+    if(error) throw error;
+  }catch(e){
+    state._lbMe = Object.assign({}, state._lbMe||{}, { opted_out: wasHidden });  // revert
+    renderLeaderboardOptout();
+    showToast('Couldn\u2019t update that. Try again.');
+    return;
+  }
+  fetchLeaderboardMe().then(function(){ renderLeaderboardOptout(); });
+  renderLeaderboardList();
 }
 /* #82 / #177 — the delete screen sits UNDER settings: reached from the tertiary
    link, its Back arrow returns to settings, and settings' own Back still returns
@@ -14080,6 +14320,7 @@ function renderPassport(){
   renderAchievements();
   renderStampsSection();
   renderRecentAchievements();
+  renderLeaderboardEntry();
 
   /* #148 — Stamps total now reads reconciledCaptures().count, the SAME set the
      badge grid counts, instead of summing foundIds across every bucket. Two
