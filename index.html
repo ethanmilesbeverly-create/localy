@@ -6961,7 +6961,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06y';
+const APP_VERSION = '2026.08.07a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12872,6 +12872,30 @@ async function attemptMarkFound(){
       } else { blockedSave(); }
     }
     showToast('Captured! Marked as found.');
+    /* #252 — fire-and-forget the capture to the server verification engine
+       (capture-verify, #249). This does NOT gate the local capture: it is
+       UNAWAITED and swallows every error, so a failed or offline POST never
+       blocks or reverts the passport, which stays generous + offline-first.
+       The server re-resolves the pin's authoritative coords ITSELF and trusts
+       only our device GPS, so we send the pin id/name, our position, the client
+       clock and the #4 `cap` blob; a gem (`catgem<subId>`) also sends its
+       submissions id so the server takes the DB-lookup branch. Fires only on a
+       genuinely NEW local capture (we are inside the !includes(id) block). The
+       private passport count and this server-verified score are SEPARATE by
+       design (#148/#249) — this write feeds ONLY the leaderboard score. */
+    try{
+      const _pinId  = target.id;
+      const _gemSub = (typeof _pinId === 'string' && _pinId.startsWith('catgem')) ? _pinId.slice(6) : undefined;
+      sb.functions.invoke('capture-verify', { body:{
+        pinId:          _pinId,
+        name:           target.name || '',
+        deviceLat:      state.me.lat,
+        deviceLng:      state.me.lng,
+        capturedAt:     capturedAt,
+        gemSubmissionId: _gemSub,
+        cap:            state.progress[key].foundMeta[id].cap
+      }}).catch(function(){ /* score is best-effort; the local capture already stands */ });
+    }catch(e){ /* never let scoring interfere with a committed capture */ }
     refreshTargetsUI();
     refreshTrackUI();
     renderPassport();
