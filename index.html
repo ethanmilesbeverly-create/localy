@@ -1653,7 +1653,7 @@
   .lb-count span{font-size:11px;font-weight:600;color:var(--text-dim);margin-left:3px;}
   .lb-optout{
     display:flex;align-items:center;justify-content:space-between;gap:14px;
-    margin-top:18px;padding:14px;background:var(--surface);border:1px solid var(--line);
+    margin-top:0;padding:14px;background:var(--surface);border:1px solid var(--line);
     border-radius:12px;
   }
   .lb-optout-label{font-size:14px;color:var(--text);}
@@ -2657,7 +2657,6 @@
       <button id="lb-tab-local" onclick="setLeaderboardScope('local')">Nearby</button>
     </div>
     <div id="lb-list-mount"></div>
-    <div id="lb-optout-mount"></div>
   </div>
 
   <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
@@ -2723,6 +2722,15 @@
         <button class="settings-btn" id="settings-resend-btn" onclick="resendConfirmationForAccount()">Resend confirmation email</button>
         <p id="settings-resend-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
+    </div>
+
+    <!-- #253 — PRIVACY. The leaderboard opt-out moved here (out of the leaderboard
+         screen, by directive) so it sits with the account/privacy controls.
+         Visible-by-default; this switch opts OUT. Filled by renderLeaderboardOptout()
+         via #lb-optout-mount, rendered on openSettings(). -->
+    <div class="settings-section">
+      <h2>Privacy</h2>
+      <div id="lb-optout-mount"></div>
     </div>
 
     <!-- #177 — ABOUT PAGE ENTRY. Reference material (Your data, credits,
@@ -7042,7 +7050,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07b';
+const APP_VERSION = '2026.08.07c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7561,6 +7569,10 @@ function openSettings(returnTo){
      is still the only edit that hides the whole capability. */
   const delEntry = document.getElementById('delete-account-entry');
   if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
+  /* #253 — leaderboard opt-out now lives in Privacy. Render from cache (defaults
+     to visible), then refresh from the server so a prior opt-out shows correctly. */
+  renderLeaderboardOptout();
+  fetchLeaderboardMe().then(function(){ renderLeaderboardOptout(); });
   /* #91 — where Back goes. Defaults to the passport because the gear is still
      the primary entrance; the map credit passes 'screen-map' so the pill is a
      round trip rather than a one-way door onto a screen you weren't on. */
@@ -7717,7 +7729,7 @@ function renderLeaderboardEntry(){
   const me = state._lbMe;
   let inner;
   if(me && me.opted_out){
-    inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on under <b>View all</b>.</div>';
+    inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on in <b>Settings</b>.</div>';
   } else if(me && me.distinct_pins > 0){
     inner = '<div class="lb-entry-rank">' + (me.rank ? ('#' + me.rank) : '\u2014') + '</div>'
           + '<div class="lb-entry-sub">' + me.distinct_pins + ' verified '
@@ -7746,8 +7758,6 @@ function openLeaderboard(){
   setNavActive('screen-passport');
   syncLeaderboardTabs();
   renderLeaderboardList();
-  renderLeaderboardOptout();
-  fetchLeaderboardMe().then(function(m){ if(m) renderLeaderboardOptout(); });
 }
 function closeLeaderboard(){
   setTab('screen-passport');
@@ -7834,7 +7844,8 @@ async function toggleLeaderboardOptout(){
     return;
   }
   fetchLeaderboardMe().then(function(){ renderLeaderboardOptout(); });
-  renderLeaderboardList();
+  const lb = document.getElementById('screen-leaderboard');
+  if(lb && lb.classList.contains('active')) renderLeaderboardList();
 }
 /* #82 / #177 — the delete screen sits UNDER settings: reached from the tertiary
    link, its Back arrow returns to settings, and settings' own Back still returns
