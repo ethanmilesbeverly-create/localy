@@ -6580,6 +6580,14 @@ function finishOnboarding(){
 
 async function init(){
   const _pendingSpot = pendingSpotParam(); // #26 — read BEFORE consumePendingGuideInvite() calls clearResetParam() and strips the URL
+  /* REFRESH-PERSISTENCE — capture the persisted tab and whether this boot is a
+     deep-link arrival, BOTH before clearResetParam() (via consumePendingGuideInvite)
+     wipes the hash and clears the guide carriers. _bootDeepLink reads only the
+     synchronous URL/stash carriers (metadata-only guide invites are brand-new
+     users with no persisted tab, so they can't collide); the restore itself runs
+     LAST, after consumeSharedSpot. */
+  const _bootTab = bootTabParam();
+  const _bootDeepLink = !!(_pendingSpot || pendingGuideCode() || readStashedGuide() || resetLinkActive());
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   migrateLoreGemIds();          // #149 — same constraint: re-key lore<id>→catgem<id> before isFound() runs
@@ -6657,6 +6665,10 @@ async function init(){
      first hunt (startLocalHunt) and sizing (fixMapSize) are all in place, and the
      URL was already read into _pendingSpot above before it got stripped. */
   consumeSharedSpot(_pendingSpot);
+
+  /* REFRESH-PERSISTENCE — LAST, so the deep-link consumers above always win the
+     landing; guarded so it only fires on a plain reload. See restoreBootTab. */
+  restoreBootTab(_bootTab, _bootDeepLink);
 
 }
 
@@ -6739,6 +6751,67 @@ function goToModeSelect(){
    while being its own screen. */
 function setNavActive(id){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
+  persistActiveTab(id); // REFRESH-PERSISTENCE — write the lit tab into the URL hash so a hard reload restores it
+}
+
+/* =========================================================
+   REFRESH-PERSISTENCE — SURVIVE A HARD RELOAD ON THE TAB YOU WERE ON
+   ---------------------------------------------------------
+   The "screens" are .active-toggled divs, not real routes, so a hard reload
+   always reboots init() to the default map and loses the tab you were on. The
+   lit tab is the only view state that survives losing, so it is the only thing
+   written into the URL — as a HASH, deliberately, because the query string is
+   already load-bearing for ?spot= / ?guide= / ?code= / the auth params and a
+   hash sits in a separate part of the URL that clearResetParam()'s param-strip
+   and the deep-link consumers cannot collide with.
+
+   setNavActive() is the single authority on which tab is lit — every tab tap
+   funnels through it, and every deep sub-screen (settings, all-stamps, about
+   light Passport per #91) calls it too — so this is the one-fact-one-home spot
+   to persist, and a sub-screen correctly persists as its PARENT tab.
+
+   replaceState, NOT `location.hash =`, and NOT pushState. Assigning location.hash
+   would make the browser scroll to the same-id .screen element AND push a history
+   entry; replaceState('#id') updates the URL bar with neither. Keeping it out of
+   the history stack is a decision, not an accident: Back stays exactly what it is
+   today (no per-tab back-stepping, no reopening the landing-bounce back-button
+   work). Only the four real tab ids are ever written; a stray id is ignored
+   rather than persisted as a target init() can't route to. */
+const HASH_TAB_IDS = ['screen-map','screen-modes','screen-suggest-gem','screen-passport'];
+function persistActiveTab(id){
+  try{
+    if(HASH_TAB_IDS.indexOf(id) === -1) return;
+    history.replaceState(null, '', '#' + id);
+  }catch(e){}
+}
+/* Read the persisted tab from the URL hash. MUST be called at the top of init()
+   before clearResetParam() (invoked inside consumePendingGuideInvite) replaces
+   the URL with AUTH_REDIRECT_BASE and wipes the hash — the same capture-early
+   discipline #26's pendingSpotParam() uses. Returns a valid tab id or null; a
+   Supabase implicit-flow token hash (#access_token=…, #type=recovery) matches no
+   tab id and returns null, so it is never mistaken for a tab. */
+function bootTabParam(){
+  try{
+    const h = (location.hash || '').replace(/^#/, '');
+    return HASH_TAB_IDS.indexOf(h) !== -1 ? h : null;
+  }catch(e){ return null; }
+}
+/* Restore the persisted tab, LAST in init() and guarded — the deep-link
+   consumers run last precisely so a shared-spot or guide-invite arrival OWNS the
+   landing, and a stale persisted tab must never win over it. So restore fires
+   only on a plain reload: no inbound deep link (captured at the top of init() as
+   _bootDeepLink, before consume clears the carriers), and not while first-run
+   onboarding is taking over the first screen. The map is the default, so a
+   #screen-map hash needs nothing. Routed through navTo()/openSuggestGemScreen()
+   so each tab's real side effects run (Submit's lazy map seed, Explore's guide
+   refresh, the map's fixMapSize) AND setNavActive re-writes the hash that
+   clearResetParam just cleared this boot. navTo's dirty-form confirm cannot fire
+   here — nothing has been typed on a fresh boot. */
+function restoreBootTab(tab, hadDeepLink){
+  if(!tab || tab === 'screen-map') return;
+  if(hadDeepLink) return;
+  if(shouldRunOnboarding()) return;
+  navTo(tab);
 }
 function setTab(id){
   showScreen(id);
@@ -6868,7 +6941,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06q';
+const APP_VERSION = '2026.08.06r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
