@@ -6847,7 +6847,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06f';
+const APP_VERSION = '2026.08.06g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12112,11 +12112,26 @@ function refreshGuideLine(){
    pin's prominent chip is always shown and claims its box first so nothing quiet
    overlaps it. Cheap: a few dozen pins is a sub-ms pass, and it toggles a class
    rather than rebuilding markers, so it stays off the GPS-tick render path. */
+/* Names only begin to appear once you're zoomed in past this level; below it the
+   map stays clean. A zoom LEVEL (not a distance), so it lives here rather than in
+   the #65 distance register. The map's default frame sits around zoom 13, so 16
+   is roughly "a few blocks in" — raise it to reveal names later, lower it to
+   reveal them sooner. Above the floor, the collision pass decides which fit. */
+const MIN_LABEL_ZOOM = 16;
 function updatePinLabels(){
   const map = state.leafletMap;
   if(!map || !state.markersLayer) return;
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
+  // Zoom floor: hide every quiet label when zoomed out past the threshold.
+  if(map.getZoom() < MIN_LABEL_ZOOM){
+    state.markersLayer.eachLayer(m=>{
+      const el = m.getElement && m.getElement();
+      const label = el && el.querySelector('.fm-name');
+      if(label) label.classList.remove('fm-name-show');
+    });
+    return;
+  }
   const margin = 48;
   const entries = [];
   state.markersLayer.eachLayer(m=>{
