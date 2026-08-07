@@ -477,6 +477,7 @@
   .settings-section{
     margin:0 0 26px;
   }
+  .settings-nav-group{ margin-bottom:10px; }
   .settings-section > h2{
     font-size:12px;letter-spacing:0.08em;text-transform:capitalize;
     color:var(--text-dim);margin:0 0 10px;font-weight:700;
@@ -1524,6 +1525,10 @@
     display:grid;grid-template-columns:repeat(3,1fr);
     gap:20px 10px;margin-bottom:22px;justify-items:center;
   }
+  /* #253 — the passport PREVIEW grid (one row) mirrors the card's top padding at
+     the bottom; the 22px margin stays on the full-grid screen where it spaces
+     badge families. */
+  #passport-achievements-section .achievement-grid{ margin-bottom:0; }
   .achievement-item{
     display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;
   }
@@ -2657,49 +2662,19 @@
     <div id="lb-list-mount"></div>
   </div>
 
-  <!-- #253 — PRIVACY screen: reached from the Privacy nav row in Settings, Back
-       returns there (or the map). Holds the leaderboard opt-out inside a standard
-       settings-card; more privacy controls can join it later. -->
-  <div class="screen" id="screen-privacy">
+  <!-- #253/#177 — MANAGE ACCOUNT screen: the account fields (email, name, resend)
+       moved off the Settings hub onto their own screen, reached from the Manage
+       account nav row. Back returns to Settings. Seeding lives in openAccount(). -->
+  <div class="screen" id="screen-account">
     <div class="title-row">
-      <h1 class="page-title">Privacy</h1>
-      <button class="icon-btn" onclick="closePrivacy()" aria-label="Back">
+      <h1 class="page-title">Manage account</h1>
+      <button class="icon-btn" onclick="closeAccount()" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
     </div>
-    <p class="page-sub">What others can see.</p>
     <div class="settings-section">
-      <div class="settings-card">
-        <div id="lb-optout-mount"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
-       passport gear, left by the back arrow. See openSettings() for why this
-       does not go through setTab(). -->
-  <div class="screen" id="screen-settings">
-    <div class="title-row">
-      <h1 class="page-title">Settings</h1>
-      <button class="icon-btn" onclick="closeSettings()" aria-label="Back to passport">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-    </div>
-    <p class="page-sub">Your account and what this app keeps.</p>
-
-    <!-- #177 — Account consolidated into ONE card: email and name as adjacent
-         editable rows with prose trimmed to a single line each, instead of the
-         four stacked cards this screen grew by accretion. Order is email → name
-         → Log out → Delete-as-tertiary-link, per the revamp brief. The load-
-         bearing privacy copy that used to live in the name block (#156's public-
-         name disclosure) is kept, because moving disclosure copy is the one-fact-
-         two-files hazard #77/#5 warn about — it is trimmed, not dropped. -->
-    <div class="settings-section">
-      <h2>Account</h2>
       <div class="settings-card">
         <!-- #181 — EMAIL CHANGE. Editable only for password accounts. A Google
              (#76) identity's email is owned by Google; updateUser({email}) on it
@@ -2741,11 +2716,62 @@
         <p id="settings-resend-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
     </div>
+  </div>
+
+  <!-- #253 — PRIVACY screen: reached from the Privacy nav row in Settings, Back
+       returns there (or the map). Holds the leaderboard opt-out inside a standard
+       settings-card; more privacy controls can join it later. -->
+  <div class="screen" id="screen-privacy">
+    <div class="title-row">
+      <h1 class="page-title">Privacy</h1>
+      <button class="icon-btn" onclick="closePrivacy()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">What others can see.</p>
+    <div class="settings-section">
+      <div class="settings-card">
+        <div id="lb-optout-mount"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
+       passport gear, left by the back arrow. See openSettings() for why this
+       does not go through setTab(). -->
+  <div class="screen" id="screen-settings">
+    <div class="title-row">
+      <h1 class="page-title">Settings</h1>
+      <button class="icon-btn" onclick="closeSettings()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">Your account and what this app keeps.</p>
+
+    <!-- #177 — Account consolidated into ONE card: email and name as adjacent
+         editable rows with prose trimmed to a single line each, instead of the
+         four stacked cards this screen grew by accretion. Order is email → name
+         → Log out → Delete-as-tertiary-link, per the revamp brief. The load-
+         bearing privacy copy that used to live in the name block (#156's public-
+         name disclosure) is kept, because moving disclosure copy is the one-fact-
+         two-files hazard #77/#5 warn about — it is trimmed, not dropped. -->
+    <!-- #253/#177 — MANAGE ACCOUNT nav row (email/name/resend moved to
+         #screen-account). Grouped tight with Privacy + About below. -->
+    <div class="settings-section settings-nav-group">
+      <button class="settings-nav" onclick="openAccount('screen-settings')">
+        <span>Manage account</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
 
     <!-- #253 — PRIVACY. A nav row like "About this app" (opens #screen-privacy),
          holding the leaderboard opt-out. Same chevron-row pattern so it scales if
          more privacy controls land later. -->
-    <div class="settings-section">
+    <div class="settings-section settings-nav-group">
       <button class="settings-nav" onclick="openPrivacy('screen-settings')">
         <span>Privacy</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -7069,7 +7095,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07e';
+const APP_VERSION = '2026.08.07f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7540,15 +7566,24 @@ async function updateSettingsEmail(){
   }
 }
 function openSettings(returnTo){
-  const u = state.user || {};
+  cancelClearProgress(); // never open with a destructive confirm already armed
+  /* #177 — the delete ENTRY POINT is a tertiary link in the Log-out section that
+     opens #screen-delete-account. Same SHOW_CLEAR_MY_DATA gate as before. */
+  const delEntry = document.getElementById('delete-account-entry');
+  if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
+  /* #91 — where Back goes; the map credit passes 'screen-map' for a round trip. */
+  state.settingsReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-passport';
+  showScreen('screen-settings');
+  setNavActive('screen-passport');
+}
 
-  /* #181 — email field. Seed it from the current account email and reset any
-     stale status line from a previous visit. Editability is decided by IDENTITY
-     PROVIDER: a Google-only (#76) account's email is owned by Google, so editing
-     it here would fork the login from the identity — render it read-only and
-     point the user at Google instead. A password account (providers includes
-     'email') gets the editable field and the Update button. app_metadata carries
-     the provider list; fall back to the singular `provider` for older sessions. */
+/* #253/#177 — MANAGE ACCOUNT is its own screen now (mirrors About/Privacy). The
+   email + name + resend fields moved here off the Settings hub, and their seeding
+   moved with them so it runs when THIS screen opens, not the Settings list. */
+function openAccount(returnTo){
+  const u = state.user || {};
+  /* #181 — email field: editable only for password accounts (a Google identity's
+     email is owned by Google; verify the effect, not the report). */
   const emailEl = document.getElementById('settings-email-input');
   if(emailEl){
     emailEl.value = u.email || '';
@@ -7563,42 +7598,30 @@ function openSettings(returnTo){
     const emMsg = document.getElementById('settings-email-msg');
     if(emMsg){ emMsg.textContent = ''; emMsg.style.display = 'none'; }
   }
-
-  /* #177 — resend-confirmation card: inert while Confirm Email is off, gated
-     rather than deleted (see SHOW_RESEND_CONFIRMATION). */
   const resendCard = document.getElementById('resend-confirm-card');
   if(resendCard) resendCard.style.display = SHOW_RESEND_CONFIRMATION ? '' : 'none';
-
   const nameEl = document.getElementById('settings-name');
   if(nameEl){
     nameEl.value = (state.profile && state.profile.display_name) || '';
     const msg = document.getElementById('settings-name-msg');
     if(msg){ msg.textContent = ''; msg.style.display = 'none'; }
     loadMyProfile().then(()=>{
-      // Only overwrite if the user hasn't started typing in the meantime.
       if(document.activeElement !== nameEl){
         nameEl.value = (state.profile && state.profile.display_name) || '';
       }
     });
   }
-  cancelClearProgress(); // never open with a destructive confirm already armed
-  /* #177 — the delete ENTRY POINT is now a tertiary link in Account that opens
-     #screen-delete-account; the old inline #clear-data-section is gone. Same
-     SHOW_CLEAR_MY_DATA gate as before, now on the link, so flipping the constant
-     is still the only edit that hides the whole capability. */
-  const delEntry = document.getElementById('delete-account-entry');
-  if(delEntry) delEntry.style.display = SHOW_CLEAR_MY_DATA ? '' : 'none';
-  /* #91 — where Back goes. Defaults to the passport because the gear is still
-     the primary entrance; the map credit passes 'screen-map' so the pill is a
-     round trip rather than a one-way door onto a screen you weren't on. */
-  state.settingsReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-passport';
-  showScreen('screen-settings');
-  /* #91 — SET, don't inherit. This used to rely on the nav already showing
-     Passport, which was only ever true because the gear was the sole entrance.
-     Stating it here makes the footer correct from any entrance, including ones
-     that don't exist yet. */
+  state.accountReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-settings';
+  showScreen('screen-account');
   setNavActive('screen-passport');
 }
+function closeAccount(){
+  const back = state.accountReturn || 'screen-settings';
+  state.accountReturn = null;
+  if(back === 'screen-map'){ setTab('screen-map'); }
+  else{ showScreen('screen-settings'); setNavActive('screen-passport'); }
+}
+
 /* =========================================================
    #91 — CREDITS ENTRY POINT
    =========================================================
