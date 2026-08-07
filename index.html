@@ -6824,12 +6824,13 @@ function restoreBootTab(tab, hadDeepLink){
   /* The boot hunt is a local_ hunt, and the first GPS fix regenerates it
      (onLocation -> startLocalHunt -> setCurrentHunt -> enterHuntMode), which
      would setTab('screen-map') OVER the tab we just restored ~1s in — the "starts
-     correct then flips to map" report. Mark that we are intentionally off the map
-     so enterHuntMode() HOLDS the current tab until the user actively navigates;
-     navTo()/goToModeSelect() clear the flag the moment the user taps a tab, so a
-     genuine hunt-open still shows the map. */
-  state._holdTabOffMap = true;
+     correct then flips to map" report. Arm _holdTabOffMap so enterHuntMode() HOLDS
+     the current tab until the user actively navigates.
+     ORDER IS LOAD-BEARING: navTo() clears _holdTabOffMap on its first line (a
+     deliberate nav ends the hold), so the flag MUST be set AFTER navTo, or the
+     restore call wipes its own flag before the first-fix regen can read it. */
   navTo(tab);
+  state._holdTabOffMap = true;
 }
 function setTab(id){
   showScreen(id);
@@ -6960,7 +6961,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06u';
+const APP_VERSION = '2026.08.06v';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
