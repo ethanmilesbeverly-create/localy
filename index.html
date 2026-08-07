@@ -1303,12 +1303,18 @@
     0%{box-shadow:0 0 0 0 rgba(232,98,44,0.55);}
     100%{box-shadow:0 0 0 26px rgba(232,98,44,0);}
   }
-  /* Option B — a name chip floats ABOVE the head of the SELECTED pin only, so
-     it names the dot you just tapped and never collides with a neighbour (one
-     label max on screen). It sits above the icon, clearing the bottom sheet;
-     pointer-events:none so it can't swallow the tap that should hit the marker.
-     Rendered only when selectedPinId matches AND the pin has a name; the
-     selected marker also gets a zIndexOffset so this draws over nearby pins. */
+  /* Pin name labels (Option B + C).
+     .fm-label — the SELECTED pin's prominent chip: bold, on a surface chip so
+     it reads as "this is the one the sheet is about." Always visible while its
+     pin is selected; its screen box is claimed FIRST in updatePinLabels() so
+     quiet labels never overlap it.
+     .fm-name — every other pin's quiet haloed name (no chip, so a screenful
+     reads as texture, not a wall of boxes). Hidden by default; updatePinLabels()
+     runs a greedy overlap pass on moveend/zoomend and adds .fm-name-show only to
+     the ones that fit without colliding — so few show zoomed out, more reveal as
+     pins spread on zoom-in, no magic threshold. Both sit above the pin head so
+     the bottom sheet can't cover them, and both are pointer-events:none so they
+     never steal the tap meant for the marker. */
   .fm-label{
     position:absolute;bottom:47px;left:50%;transform:translateX(-50%);
     max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -1317,6 +1323,14 @@
     padding:3px 9px;font-size:12.5px;font-weight:600;line-height:1.25;
     pointer-events:none;box-shadow:0 3px 10px rgba(0,0,0,0.4);
   }
+  .fm-name{
+    position:absolute;bottom:47px;left:50%;transform:translateX(-50%);
+    max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    color:var(--text);font-size:11.5px;font-weight:600;line-height:1.2;
+    text-shadow:0 0 3px var(--bg),0 1px 3px var(--bg),0 0 2px var(--bg);
+    pointer-events:none;display:none;
+  }
+  .fm-name.fm-name-show{display:block;}
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
   .player-wrap{position:relative;width:64px;height:64px;}
@@ -6833,7 +6847,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.06e';
+const APP_VERSION = '2026.08.06f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8398,6 +8412,10 @@ function setupBaseMap(){
   state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false}).setView([start.lat, start.lng], start.zoom);
   addBaseLayer(state.leafletMap);
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
+  // Option C — recompute which pin names fit whenever the view settles. moveend
+  // covers pan, zoomend covers zoom; both fire at rest so labels snap without
+  // thrashing mid-gesture. This only toggles classes, it never rebuilds markers.
+  state.leafletMap.on('moveend zoomend', updatePinLabels);
   state.guideLayer = L.layerGroup().addTo(state.leafletMap);
   state.meMarker = L.marker([start.lat, start.lng], {icon:playerIcon(), zIndexOffset:1000}).addTo(state.leafletMap);
   state.rangeCircle = L.circle([start.lat, start.lng], {
@@ -12083,6 +12101,55 @@ function refreshGuideLine(){
   }).addTo(state.guideLayer);
 }
 
+/* Option C — reveal pin names as they stop overlapping, Apple-style.
+   Runs on moveend/zoomend and after every marker rebuild. For each named pin in
+   view it estimates the screen box its label would occupy just above the pin,
+   walks them in PRIORITY order (selected -> nearest-unfound halo -> uncaptured by
+   distance from you -> captured by distance), and greedily shows a quiet .fm-name
+   only if its box doesn't hit one already placed. Zoomed out, pins are jammed in
+   pixels so most collide and only the top few names show; zoom in and the boxes
+   separate so more light up — no threshold, the geometry decides. The selected
+   pin's prominent chip is always shown and claims its box first so nothing quiet
+   overlaps it. Cheap: a few dozen pins is a sub-ms pass, and it toggles a class
+   rather than rebuilding markers, so it stays off the GPS-tick render path. */
+function updatePinLabels(){
+  const map = state.leafletMap;
+  if(!map || !state.markersLayer) return;
+  const size = map.getSize();
+  if(!size || !size.x) return;               // map not laid out yet (screen hidden)
+  const margin = 48;
+  const entries = [];
+  state.markersLayer.eachLayer(m=>{
+    const info = m._pinLabel;
+    if(!info || !info.name) return;
+    const el = m.getElement();
+    if(!el) return;
+    const label = el.querySelector('.fm-name');   // null for the selected pin (it uses .fm-label, always shown)
+    const pt = map.latLngToContainerPoint(m.getLatLng());
+    if(pt.x < -margin || pt.x > size.x+margin || pt.y < -margin || pt.y > size.y+margin){
+      if(label) label.classList.remove('fm-name-show');
+      return;                                 // off-screen: can't collide, stays hidden
+    }
+    // estimated label box, centred above the pin head (~52px above the tip)
+    const w = Math.min(info.selected ? 168 : 150, 18 + info.name.length * 6.6);
+    const cx = pt.x, cy = pt.y - 52;
+    const box = { l:cx - w/2, r:cx + w/2, t:cy - 10, b:cy + 10 };
+    const tier = info.selected ? 0 : info.halo ? 1 : info.found ? 3 : 2;
+    entries.push({ label, box, key: tier*100000 + info.rank, selected:info.selected });
+  });
+  entries.sort((a,b)=> a.key - b.key);
+  const placed = [];
+  const hit = (x,y)=> x.l < y.r && x.r > y.l && x.t < y.b && x.b > y.t;
+  for(const e of entries){
+    if(e.selected){ placed.push(e.box); continue; }   // prominent chip always shows; claim its box
+    if(placed.some(p=> hit(e.box, p))){
+      if(e.label) e.label.classList.remove('fm-name-show');
+    } else {
+      if(e.label) e.label.classList.add('fm-name-show');
+      placed.push(e.box);
+    }
+  }
+}
 function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
   if(!state.currentHunt){
@@ -12109,14 +12176,21 @@ function refreshTargetsUI(){
   state.markersLayer.clearLayers();
   state.guideLayer.clearLayers();
 
-  targets.forEach(t=>{
+  targets.forEach((t, idx)=>{
     const color = colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
     const isSelected = selectedTarget && t.id===selectedTarget.id;
+    /* Selected pin gets the prominent .fm-label chip; every other named pin gets
+       the quiet .fm-name (hidden until updatePinLabels() clears it to show). */
+    const nameHtml = t.name
+      ? (isSelected
+          ? `<div class="fm-label">${escapeHtml(t.name)}</div>`
+          : `<div class="fm-name">${escapeHtml(t.name)}</div>`)
+      : '';
     const icon = L.divIcon({
       className:'',
       html:`<div class="fm-wrap">
-        ${isSelected && t.name ? `<div class="fm-label">${escapeHtml(t.name)}</div>` : ''}
+        ${nameHtml}
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-shadow"></div>
         <div class="fm-icon ${t.found?'fm-found':''}">
@@ -12127,8 +12201,14 @@ function refreshTargetsUI(){
       iconAnchor:[19,52]
     });
     const m = L.marker([t.lat,t.lng], {icon, zIndexOffset: isSelected ? 500 : 0}).addTo(state.markersLayer);
+    /* idx is this pin's distance rank from you — targets is currentTargetsSorted(),
+       already body-anchored/distance-sorted (#66) — so the label priority is stable
+       during a pan (it never recomputes distance on move), which is what stops the
+       labels flickering on and off while you drag. */
+    m._pinLabel = { name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx };
     m.on('click', ()=> openPinSheet(t));
   });
+  updatePinLabels();
 
   // Keep an open pin sheet in sync with fresh data (live distance / capture state).
   if(state.selectedPinId){
