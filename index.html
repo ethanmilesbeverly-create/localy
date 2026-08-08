@@ -4318,13 +4318,14 @@ function generateDiscoverLocal(base){
        by pinching out). Now ~3/8 of REAL_INCLUDE_RADIUS_M; that ratio has never
        been examined.
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
-       "Is this pin walkable from here?" (#7). Two uses, both the same question:
-       (1) fitMapToHunt() frames YOU together with the pins only when the nearest
-       one is inside it, otherwise just the pins; (2) refreshGuideLine() draws the
-       dotted line to the target only inside it, since a line to a pin in another
-       state spans off-screen and reads as noise. NOTE: which hunts frame-the-pins
-       vs center-on-you is decided by TYPE (guide vs explore card, see
-       isGuideHunt), not by this distance — an early cut keyed the routing on
+       "Is this pin walkable from here?" (#7). One use now: refreshGuideLine()
+       draws the dotted line to the target only inside it, since a line to a pin
+       in another state spans off-screen and reads as noise. (#257 dropped its
+       second use — fitMapToHunt used to frame YOU together with the pins when
+       the nearest was inside it; it now frames the pins only, centered, so the
+       frame button never un-centers the pins or drops you in.) NOTE: which hunts
+       frame-the-pins vs center-on-you is decided by TYPE (guide vs explore card,
+       see isGuideHunt), not by this distance — an early cut keyed the routing on
        this number and failed, because every guide in a one-city dataset is near.
        Was a bare 5000 literal in fitMapToHunt (flagged by #65 as an undeclared
        tenth distance); declared here at the moment #7 made it load-bearing in a
@@ -7124,7 +7125,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07o';
+const APP_VERSION = '2026.08.07p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8523,7 +8524,7 @@ const ZOOM_OVERVIEW = 16;
 // #65 register — FRAMING, not content. Deliberately smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
 const FRAME_RADIUS_M = 1500;
-const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). One number for fitMapToHunt / remote-hunt routing / the guide line.
+const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). Used for remote-hunt routing and the guide line (#257 dropped fitMapToHunt's use — it now frames pins only).
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
   /* #73 — a real fix takes over the input mode; #4's flag does not come back.
@@ -9657,11 +9658,16 @@ function updateExploreSelectionIcons(){
 }
 function fitMapToHunt(hunt){
   if(!state.leafletMap || !hunt.points || hunt.points.length===0) return;
+  // #257 — frame the PINS ONLY, centered. #7 used to stretch the frame to include
+  // your position whenever the nearest pin was within HUNT_NEAR_M ("show you
+  // together with the spots"). That extended the bounds off the pins and dropped
+  // you into the view, so near a private guide the frame / re-find button didn't
+  // center the pins and put you in there too ("maybe because I'm close to the
+  // pins?"). The two buttons are now cleanly split by directive: frame-guide =
+  // all pins centered (this), locate = you centered (centerOnPlayer). state.me is
+  // deliberately not read here; HUNT_NEAR_M still gates the guide LINE elsewhere.
+  // GRAVESTONE: #7's near-inclusion clause, reversed on user directive.
   const bounds = L.latLngBounds(hunt.points.map(p=>[p.lat,p.lng]));
-  if(state.me){
-    const nearestDist = Math.min(...hunt.points.map(p=>haversine(state.me.lat, state.me.lng, p.lat, p.lng)));
-    if(nearestDist < HUNT_NEAR_M) bounds.extend([state.me.lat, state.me.lng]); // #7/#65 — walkable-range (HUNT_NEAR_M): frame you together with the spots
-  }
   state._programmaticViewChange = true;
   // #7 — this can run on the same tick the map screen became visible (opening a
   // guide from My Guides calls setTab('screen-map') then fits immediately).
@@ -9686,8 +9692,8 @@ function fitMapToHunt(hunt){
    cut keyed on "are the pins >5km away", which failed the common case — every
    guide in a single-city dataset is nearby, so it always centered on the user.
    Whether a guide is near or far, "show me the guide" is the right response;
-   fitMapToHunt already frames you together with the pins when they are within
-   HUNT_NEAR_M and just the pins when they are not. */
+   fitMapToHunt frames the pins only, centered (#257 dropped the near-inclusion
+   that used to put you in the frame — locate is the "show me" button). */
 function isGuideHunt(hunt){
   return !!(hunt && hunt.key && (hunt.key.startsWith('custom_') || hunt.key.startsWith('code_')));
 }
