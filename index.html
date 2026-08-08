@@ -7145,7 +7145,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07t';
+const APP_VERSION = '2026.08.07u';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9033,10 +9033,13 @@ function setupBaseMap(){
      fighting the drag. `move` is deliberately NOT used: re-rendering mid-drag
      rebuilds the drawer's innerHTML under the user's thumb. */
   state.leafletMap.on('moveend', renderNearbyList);
-  // pinch/scroll zoom can shift the center point away from the player — snap back
-  // to center immediately after, so zooming never drifts you off-center. Skipped when
-  // the zoom came from a deliberate programmatic view change (like the overview fit),
-  // so this doesn't fight that intentional framing.
+  // #260 — a manual zoom NEVER re-centres you (user directive: "don't center me if
+  // I zoom away from my location"). Old code panned you back to your dot on any zoom
+  // that stayed within 600 m — that hard snap WAS the reported "slides then corrects"
+  // shift. Now: if the zoom leaves your dot away from the centre (you zoomed away),
+  // following is dropped so nothing snaps you back; if your dot stays near centre (you
+  // zoomed roughly in place) following continues but the zoom does NOT pan you.
+  // Skipped for a programmatic view change (the overview fit), so it doesn't fight that.
   state.leafletMap.on('zoomend', ()=>{
     /* #66 — BEFORE the _programmaticViewChange early return, deliberately. A
        programmatic fit still changes what is on screen, and returning early
@@ -9048,21 +9051,29 @@ function setupBaseMap(){
       return;
     }
     if(state.followMe && !state.browsingLocation && state.me){
-      /* #59 REVISED — zoom used to ALWAYS snap back to you while following, so a
-         pinch toward another block yanked you home. Now zoom behaves like a pan:
-         if it drifts the centre past SEARCH_HERE_DIST_M from you, stop following
-         (drop the 'following' state) so you're left where you zoomed, and let the
-         "Search this area" pill offer to load it. A zoom that stays roughly on you
-         still re-centres, so zooming in place keeps you centred as before. */
+      /* #260 REVISES #59/#246 on user directive. The old branch RE-CENTRED you
+         (panTo → a hard sideways slide) whenever a zoom stayed within
+         SEARCH_HERE_DIST_M of you — that snap IS the reported "map slides then
+         corrects" and it is exactly the "don't center me if I zoom away" the user
+         rejected. Now a manual zoom never pans you. Decide follow by SCREEN
+         position, not metres: if your dot is no longer in the central half of the
+         viewport you have zoomed AWAY — drop following so no later GPS tick snaps
+         you back, and offer the "Search this area" pill; otherwise (dot still near
+         centre — zoomed roughly in place) keep following but leave the view exactly
+         where the zoom left it. Pixel box is zoom-adaptive (a fixed metre threshold
+         is generous at high zoom and stingy at low). GRAVESTONE: the
+         panTo(state.me,{animate:false}) re-centre, removed. */
+      const p = state.leafletMap.latLngToContainerPoint([state.me.lat, state.me.lng]);
+      const size = state.leafletMap.getSize();
+      const stillCentred = p.x > size.x*0.25 && p.x < size.x*0.75 && p.y > size.y*0.25 && p.y < size.y*0.75;
       const c = state.leafletMap.getCenter();
       const drift = haversine(c.lat, c.lng, state.me.lat, state.me.lng);
-      if(drift > SEARCH_HERE_DIST_M){
+      if(!stillCentred || drift > SEARCH_HERE_DIST_M){
         state.followMe = false;
         document.getElementById('locate-btn').classList.remove('following');
         maybeShowSearchHere();
-      } else {
-        state.leafletMap.panTo([state.me.lat, state.me.lng], {animate:false});
       }
+      /* else: dot still near centre (zoomed in place) — keep following, no re-centre. */
     }
   });
   document.getElementById('locate-btn').classList.add('following');
