@@ -27,6 +27,14 @@
      and it will still mean what it meant when it was written.
      ============================================================ -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<!-- #258 — MapLibre GL CSS. The basemap is now a GPU vector layer drawn INSIDE
+     the existing Leaflet map (via maplibre-gl-leaflet, script tags below), which
+     is what gives deflock-style continuous crisp zoom instead of CARTO raster
+     tiles that CSS-scale soft between integer levels (#250's stated honest limit).
+     Everything else — markers, the #245 label engine, capture, hunt logic —
+     stays Leaflet. This stylesheet is REQUIRED for the GL canvas to size/paint
+     correctly; without it the vector tiles render but mis-position. -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
 <style>
   :root{
     /* #98 — THE OFFSET #pin-sheet IS ANCHORED BY AND THE DISTANCE IT MUST TRAVEL
@@ -2522,7 +2530,7 @@
          shapes tried and why this one is the safest of them. onclick is the
          guideline's required route to the licence text, so it must keep
          leading to Settings → Credits. -->
-    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · CARTO</button>
+    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · OpenFreeMap</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -2919,7 +2927,7 @@
         </p>
         <p class="credit-row">
           <strong>Map tiles</strong>
-          © <a class="credit-link" href="https://carto.com/" target="_blank" rel="noopener noreferrer">CARTO</a>, built from OpenStreetMap data.
+          Vector tiles by <a class="credit-link" href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>, built from OpenStreetMap data.
         </p>
         <p class="credit-row">
           <strong>Place search</strong>
@@ -3218,6 +3226,18 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- #258 — VECTOR BASEMAP. Order is load-bearing: Leaflet, THEN maplibre-gl,
+     THEN the maplibre-gl-leaflet binding (it registers L.maplibreGL and needs
+     both L and maplibregl to already exist). If either of these two fails to
+     load (CDN blocked, offline, ancient WebGL-less browser), addBaseLayer()
+     detects the missing L.maplibreGL / WebGL and SILENTLY falls back to the
+     old CARTO raster layer, which itself falls back to StylizedGrid — so a
+     failed vector load degrades to exactly today's behaviour, never a blank map.
+     maplibre-gl pinned to major 5 (OpenFreeMap's own recommended pairing);
+     the binding pinned to an exact version. Tighten maplibre-gl@5 to its exact
+     resolved patch on the next pass if drift is a concern (the #173 discipline). -->
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
 <!-- #173 — PINNED, do not revert to the bare `@2` alias. `@2` resolves to
      whatever the latest 2.x is on each page load, and supabase-js has shifted
      PKCE / `detectSessionInUrl` behaviour WITHIN the 2.x line (see #2, #85).
@@ -4320,7 +4340,7 @@ function generateDiscoverLocal(base){
      HUNT_NEAR_M             5000  (~3.1 mi)  ~#6874
        "Is this pin walkable from here?" (#7). One use now: refreshGuideLine()
        draws the dotted line to the target only inside it, since a line to a pin
-       in another state spans off-screen and reads as noise. (#257 dropped its
+       in another state spans off-screen and reads as noise. (#242 fix; this dropped its
        second use — fitMapToHunt used to frame YOU together with the pins when
        the nearest was inside it; it now frames the pins only, centered, so the
        frame button never un-centers the pins or drops you in.) NOTE: which hunts
@@ -7125,7 +7145,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07p';
+const APP_VERSION = '2026.08.07r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8524,7 +8544,7 @@ const ZOOM_OVERVIEW = 16;
 // #65 register — FRAMING, not content. Deliberately smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
 const FRAME_RADIUS_M = 1500;
-const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). Used for remote-hunt routing and the guide line (#257 dropped fitMapToHunt's use — it now frames pins only).
+const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). Used for remote-hunt routing and the guide line (#242 dropped fitMapToHunt's use — it now frames pins only).
 function onLocation(lat,lng,sim,accuracy){
   state.meAccuracy = sim ? 0 : (typeof accuracy === 'number' ? accuracy : null);
   /* #73 — a real fix takes over the input mode; #4's flag does not come back.
@@ -8686,61 +8706,87 @@ const StylizedGrid = L.GridLayer.extend({
    silently failing to load — if enough of them error out, this falls back to
    the procedural stylized map instead of leaving a blank gray screen. */
 function addBaseLayer(map){
-  /* #205 — CONTINUOUS-PAN GREY BAND. A single uninterrupted swipe outran the
-     tile layer and revealed the bare container down one side as a hard-edged
-     grey half-screen (reported on all three app maps). This is NOT #87's
-     hidden-container-measures-zero bug — that renders a permanent left-edge
-     strip; this map is full-width at rest and only greys WHILE a finger drags.
-     TWO Leaflet defaults caused it, both left implicit until now:
-       (1) updateWhenIdle defaults to TRUE on mobile (L.Browser.mobile), so new
-           tiles are requested only at moveend — nothing loads DURING the drag,
-           so a long continuous swipe shows un-tiled container until you lift off.
-       (2) keepBuffer defaults to 2 (~2 tile rows, ~512px of off-screen margin),
-           which a fast swipe exhausts before the drag ends.
-     FIX: load tiles during the pan (updateWhenIdle:false), widen the retained
-     margin (keepBuffer:6, ~1.5k px each side — mostly kills the flash when you
-     REVERSE a swipe, since keepBuffer governs RETENTION, not lead-in), and
-     request tiles more often mid-drag (updateInterval:80, down from Leaflet's
-     200 default — so the LEADING edge is asked for ~2.5x sooner). Applied HERE
-     because all THREE app maps build through this one function — #leaflet-map,
-     #suggest-gem-map and #create-map — so one change covers all three.
-     RESIDUAL FLASH IS NETWORK-BOUND, NOT AN OPTION WE LEFT UNSET. Leaflet only
-     REQUESTS a tile once it is entering the viewport (keepBuffer retains what was
-     already loaded; it does not pre-fetch a ring AHEAD of the pan). So on a very
-     fast continuous swipe the extreme leading edge is still downloading as it
-     scrolls in, and no TileLayer option removes that. updateInterval:80 shrinks
-     the window; it cannot close it. The only GUARANTEED zero-flash approach is to
-     make Leaflet's viewport physically LARGER than the screen (a bleed container:
-     #leaflet-map inset negative beyond #screen-map, clipped) so an off-screen
-     tile ring is painted before it scrolls in. That is deliberately NOT done here:
-     #screen-map carries perspective:800px for the compass/AR/3D tilt (#95's
-     containing-block, #86/#73's AR framing), and resizing the perspective'd map
-     container is a real regression surface that is untestable in simulate mode
-     (#73) — it belongs in its own dedicated, AR-QA'd pass, not bundled into a
-     tile-options change. Filed as the open half of this row.
-     COST: more CARTO tile requests while panning. Already disclosed under #112,
-     which describes CARTO as seeing "which square, continuously while the map is
-     open" — this makes the already-continuous fetch actually continuous mid-drag,
-     so it is NOT a new disclosure category and privacy.html needs no change.
-     landing.html builds its own CARTO layer inline and does NOT route through
-     here, so it carries the same latent band and is a SEPARATE fix (flagged, not
-     bundled) — see the delivery note. */
-  const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
-  const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
-  let errorCount = 0, fellBack = false;
-  real.on('tileerror', () => {
-    errorCount++;
-    if(errorCount >= 4 && !fellBack){
-      fellBack = true;
-      map.removeLayer(real);
-      /* Same options on the fallback grid so the stylized map matches the buffer
-         behaviour; it draws synchronously on canvas so it never showed the band,
-         but keeping the options identical avoids a future divergence. */
-      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
-      showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
-    }
-  });
-  real.addTo(map);
+  /* #258 — VECTOR-FIRST BASEMAP with a raster fallback ladder.
+     PRIMARY: a GPU MapLibre GL vector layer (OpenFreeMap 'liberty' style) drawn
+     INSIDE this Leaflet map via L.maplibreGL. Vector + WebGL is what gives the
+     continuous, crisp fractional zoom deflock has and CARTO raster could not
+     (#250's stated honest limit): raster PNGs CSS-scale soft between integer
+     levels, a GL renderer redraws crisply at every fractional level — so the
+     zoomSnap:0 already on the L.map finally pairs with a renderer that can honour
+     it. All three app maps (#leaflet-map, #suggest-gem-map, #create-map) build
+     through here, so one change covers all three.
+     LADDER, so a failed vector load is NEVER a blank map: vector -> (binding
+     missing / WebGL unavailable / repeated GL error) -> CARTO raster -> (tileerror)
+     -> StylizedGrid. The bottom two rungs are the exact pre-#258 behaviour.
+     ATTRIBUTION: maplibre's own control is suppressed (attributionControl:false)
+     so the single #map-attrib pill + Credits modal stay the one home for it
+     (#91/#112); both now read OpenStreetMap / OpenFreeMap, and privacy.html's
+     recipient list swaps CARTO -> OpenFreeMap in the same pass (coupled deploy).
+     STYLE is a one-word swap: 'liberty' (real, colourful, deflock-like) ->
+     'positron' (quiet grey, best if category pins get lost against the map) ->
+     'bright'. */
+
+  /* RASTER FALLBACK — the pre-#258 path, byte-for-byte, reused only when vector
+     can't run. #205 lives here: a single uninterrupted swipe outran the tile
+     layer and greyed the container; updateWhenIdle:false loads tiles DURING the
+     drag, keepBuffer:6 widens the retained margin, updateInterval:80 asks for the
+     leading edge ~2.5x sooner. Residual fast-flick flash is network-bound (Leaflet
+     requests a tile only as it enters the viewport; it does not pre-fetch a ring
+     ahead of the pan) and no TileLayer option removes it. The VECTOR path has no
+     such band at all — MapLibre paints the whole GL viewport — so whenever vector
+     is running, #205 is moot. landing.html builds its own CARTO layer inline and
+     does NOT route through here, so it keeps the raster band and is a separate fix. */
+  function addRasterFallback(){
+    const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
+    const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
+    let errorCount = 0, fellBack = false;
+    real.on('tileerror', () => {
+      errorCount++;
+      if(errorCount >= 4 && !fellBack){
+        fellBack = true;
+        map.removeLayer(real);
+        /* Same options on the fallback grid so the stylized map matches the buffer
+           behaviour; it draws synchronously on canvas so it never showed the band,
+           but keeping the options identical avoids a future divergence. */
+        new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
+        showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
+      }
+    });
+    real.addTo(map);
+  }
+
+  /* WebGL + binding availability. maplibregl.supported was REMOVED in maplibre-gl
+     v3+, so its ABSENCE means "assume supported" (v5 requires WebGL2, broadly
+     present); only fail when it exists and returns false. A missing L.maplibreGL
+     means the binding script didn't load (CDN blocked / offline) — raster covers it. */
+  const glReady = (typeof L.maplibreGL === 'function')
+    && (typeof maplibregl !== 'undefined')
+    && (typeof maplibregl.supported !== 'function' || maplibregl.supported());
+  if(!glReady){ addRasterFallback(); return; }
+
+  let gl, wentRaster = false, glErrors = 0;
+  function toRaster(){
+    if(wentRaster) return;
+    wentRaster = true;
+    try { if(gl) map.removeLayer(gl); } catch(_){}
+    addRasterFallback();
+  }
+  try {
+    gl = L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/liberty', attributionControl: false });
+    gl.addTo(map);
+  } catch(_){
+    toRaster();
+    return;
+  }
+  /* If the GL map errors repeatedly (style host unreachable, tiles blocked in a
+     preview iframe), fall back rather than sit on an empty canvas. A few transient
+     errors are normal on a slow network, so require a small burst before switching.
+     getMaplibreMap() not being ready yet is harmless — the layer still renders; we
+     just don't wire the error-fallback in that (rare) case. */
+  try {
+    const ml = gl.getMaplibreMap && gl.getMaplibreMap();
+    if(ml && ml.on){ ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); }); }
+  } catch(_){}
 }
 
 /* Zoomed way out: no streets/buildings, just muted "region" fills with bold
@@ -8913,11 +8959,12 @@ function setupBaseMap(){
      snaps to the nearest whole level the instant you lift off — the "it snaps to
      the closest milestone, I can't stop anywhere" report. zoomSnap:0 removes that
      snap so the zoom settles wherever you leave it (fractional levels allowed),
-     matching the continuous feel of a vector map like maps.deflock.org. Note the
-     honest limit: this is a RASTER tile map (CARTO Voyager), so between integer
-     tile levels Leaflet CSS-scales the tiles — motion is smooth, but a fractional
-     zoom looks a touch softer than a true vector renderer until it settles; that
-     is inherent to raster tiles, not a bug we left unset. wheelPxPerZoomLevel:120
+     matching the continuous feel of a vector map like maps.deflock.org. As of
+     #258 the basemap IS a vector renderer (MapLibre GL via addBaseLayer), so this
+     zoomSnap:0 now pairs with a renderer that redraws crisply at every fractional
+     level — the soft-between-levels raster limit this note used to record only
+     applies on the CARTO raster FALLBACK (binding/WebGL unavailable), not the
+     happy path. wheelPxPerZoomLevel:120
      (up from 60) slows desktop scroll-zoom so it glides rather than jumps (no
      effect on mobile pinch). This is NOT the #59/#246 zoom-snap-BACK behaviour
      (that re-centres the map on you during a zoom while following) — this is the
@@ -9658,7 +9705,7 @@ function updateExploreSelectionIcons(){
 }
 function fitMapToHunt(hunt){
   if(!state.leafletMap || !hunt.points || hunt.points.length===0) return;
-  // #257 — frame the PINS ONLY, centered. #7 used to stretch the frame to include
+  // #242 — frame the PINS ONLY, centered. #7 used to stretch the frame to include
   // your position whenever the nearest pin was within HUNT_NEAR_M ("show you
   // together with the spots"). That extended the bounds off the pins and dropped
   // you into the view, so near a private guide the frame / re-find button didn't
@@ -9676,7 +9723,7 @@ function fitMapToHunt(hunt){
   state.leafletMap.invalidateSize();
   state.leafletMap.setMinZoom(2); // clear any previous floor before recomputing, so fitBounds isn't constrained by the last hunt's limit
   state.leafletMap.fitBounds(bounds, {padding:[48,48], maxZoom:15});
-  // #256 — leave 2 levels of pinch-out headroom below the fit, mirroring
+  // #255 — leave 2 levels of pinch-out headroom below the fit, mirroring
   // centerOnPlayer's `targetZoom - 2`. Pinning the floor at exactly getZoom()
   // FROZE the map: a tightly-clustered guide fits at the maxZoom:15 cap, so
   // getZoom() came back 15 and minZoom became 15 — you couldn't zoom out at all
@@ -9692,7 +9739,7 @@ function fitMapToHunt(hunt){
    cut keyed on "are the pins >5km away", which failed the common case — every
    guide in a single-city dataset is nearby, so it always centered on the user.
    Whether a guide is near or far, "show me the guide" is the right response;
-   fitMapToHunt frames the pins only, centered (#257 dropped the near-inclusion
+   fitMapToHunt frames the pins only, centered (#242 dropped the near-inclusion
    that used to put you in the frame — locate is the "show me" button). */
 function isGuideHunt(hunt){
   return !!(hunt && hunt.key && (hunt.key.startsWith('custom_') || hunt.key.startsWith('code_')));
