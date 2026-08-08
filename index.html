@@ -27,7 +27,7 @@
      and it will still mean what it meant when it was written.
      ============================================================ -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<!-- #258 — MapLibre GL CSS. The basemap is now a GPU vector layer drawn INSIDE
+<!-- #256 — MapLibre GL CSS. The basemap is now a GPU vector layer drawn INSIDE
      the existing Leaflet map (via maplibre-gl-leaflet, script tags below), which
      is what gives deflock-style continuous crisp zoom instead of CARTO raster
      tiles that CSS-scale soft between integer levels (#250's stated honest limit).
@@ -3226,7 +3226,7 @@
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<!-- #258 — VECTOR BASEMAP. Order is load-bearing: Leaflet, THEN maplibre-gl,
+<!-- #256 — VECTOR BASEMAP. Order is load-bearing: Leaflet, THEN maplibre-gl,
      THEN the maplibre-gl-leaflet binding (it registers L.maplibreGL and needs
      both L and maplibregl to already exist). If either of these two fails to
      load (CDN blocked, offline, ancient WebGL-less browser), addBaseLayer()
@@ -5280,25 +5280,20 @@ function applyRealPlaces(key, base, list){
   onRealPlacesReady();
 }
 
-/* Supabase shared_kv cache: one row per tile (public, same table as shared
-   hunt codes). First visitor to a tile populates it; everyone after — and
-   every reload — gets real data in a single fast DB read instead of hitting
-   Overpass. Gems stay live (queried separately), so trickle-out is unaffected. */
-const PLACES_CACHE_TTL_MS = 21 * 24 * 3600 * 1000; // 21 days
-async function readTileCache(key){
-  try{
-    const row = await window.storage.get('places:'+key, true);
-    if(!row || !row.value) return null;
-    const obj = JSON.parse(row.value);
-    if(!obj || !obj.ts || !Array.isArray(obj.places) || !obj.places.length) return null;
-    if(Date.now() - obj.ts > PLACES_CACHE_TTL_MS) return null; // stale — refetch
-    return obj.places;
-  }catch(e){ return null; }
-}
-async function writeTileCache(key, places){
-  try{ await window.storage.set('places:'+key, JSON.stringify({ ts:Date.now(), places }), true); }
-  catch(e){ /* caching is best-effort */ }
-}
+/* #113 (fossil-source half, 2026-08-08) — the CLIENT tile cache is GONE.
+   `readTileCache`/`writeTileCache` + `PLACES_CACHE_TTL_MS` were removed here:
+   zero-caller since #37 moved all fetching + caching server-side, and
+   `writeTileCache`'s `window.storage.set('places:'+key, …)` — string-concatenated
+   with NO CACHE_VERSION segment — was the SOURCE of the #136 unversioned `places:`
+   fossils that the #126 sweep cleaned up. This was the ONLY client writer/reader of
+   a `places:` key, so with it gone no client path can ever mint an unevictable
+   fossil again (belt to the weekly `tilecache-sweep` job's suspenders).
+   DO NOT re-add a client-side tile cache — caching lives server-side in
+   `nearby-places` under versioned `places:<CACHE_VERSION>:` keys, read below via
+   `sb.functions.invoke('nearby-places')`. The REST of the dead Overpass mirror
+   (parseOverpass / categorizeOsm / osmDesc / dedupeReal / fetch* / OVERPASS_*)
+   is the still-open document-vs-debt half of #113 and is NOT touched here —
+   note `OVERPASS_TIMEOUT_MS` is still LIVE-referenced by `FIRST_BLEND_MAX_HOLD_MS`. */
 
 let _realFetchInFlight = {};
 async function ensureRealPlaces(base){
@@ -7145,7 +7140,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07v';
+const APP_VERSION = '2026.08.08a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8390,7 +8385,7 @@ const FOUND_THRESHOLD_M = 25;
    the edge so nothing drifts in): OPERATION timeouts answer "how long to wait
    for a response," a different question — OVERPASS_TIMEOUT_MS, WIPE_WRITE_TIMEOUT_MS,
    FIRST_BLEND_MAX_HOLD_MS, SUGGEST_DEBOUNCE_MS. CACHE / RETENTION TTLs answer
-   "how long is stored data good / kept" — PLACES_CACHE_TTL_MS, CAP_TELEMETRY_TTL_MS,
+   "how long is stored data good / kept" — CAP_TELEMETRY_TTL_MS,
    CAPTURE_ANCHOR_TTL_MS. LAST_VIEW_TTL_MS is the closest miss (a saved MAP FRAME's
    recency, not the user's live position) and is excluded on that seam. If you add
    a duration that judges "is this fact about where-the-user-is-now still current,"
@@ -8706,7 +8701,7 @@ const StylizedGrid = L.GridLayer.extend({
    silently failing to load — if enough of them error out, this falls back to
    the procedural stylized map instead of leaving a blank gray screen. */
 function addBaseLayer(map){
-  /* #258 — VECTOR-FIRST BASEMAP with a raster fallback ladder.
+  /* #256 — VECTOR-FIRST BASEMAP with a raster fallback ladder.
      PRIMARY: a GPU MapLibre GL vector layer drawn INSIDE this Leaflet map via
      L.maplibreGL, using CARTO's VOYAGER vector style
      (basemaps.cartocdn.com/gl/voyager-gl-style/style.json) — the SAME warm Voyager
@@ -8716,14 +8711,14 @@ function addBaseLayer(map){
      between integer levels, a GL renderer redraws crisply at every fractional
      level — so the zoomSnap:0 already on the L.map finally pairs with a renderer
      that can honour it. Keeping Voyager (not a busier style like OpenFreeMap
-     'liberty', which #258's first build shipped and was reverted) is deliberate:
+     'liberty', which #256's first build shipped and was reverted) is deliberate:
      Voyager is muted, so the category pins keep the contrast the #326 credit-scrim
      math was tuned against — a colourful basemap washed the pins out. All three
      app maps (#leaflet-map, #suggest-gem-map, #create-map) build through here, so
      one change covers all three.
      LADDER, so a failed vector load is NEVER a blank map: vector -> (binding
      missing / WebGL unavailable / repeated GL error) -> CARTO raster -> (tileerror)
-     -> StylizedGrid. The bottom two rungs are the exact pre-#258 behaviour, and the
+     -> StylizedGrid. The bottom two rungs are the exact pre-#256 behaviour, and the
      raster fallback is Voyager too, so vector and fallback look identical.
      ATTRIBUTION / RECIPIENT UNCHANGED FROM THE APP'S WHOLE HISTORY: the tile
      provider is still CARTO (raster then, vector now), so the #map-attrib pill +
@@ -8732,7 +8727,7 @@ function addBaseLayer(map){
      STYLE is a one-word URL swap if ever wanted: voyager-gl-style ->
      positron-gl-style (light grey, even more pin contrast) -> dark-matter-gl-style. */
 
-  /* RASTER FALLBACK — the pre-#258 path, byte-for-byte, reused only when vector
+  /* RASTER FALLBACK — the pre-#256 path, byte-for-byte, reused only when vector
      can't run. #205 lives here: a single uninterrupted swipe outran the tile
      layer and greyed the container; updateWhenIdle:false loads tiles DURING the
      drag, keepBuffer:6 widens the retained margin, updateInterval:80 asks for the
@@ -8965,15 +8960,15 @@ function setupBaseMap(){
      snaps to the nearest whole level the instant you lift off — the "it snaps to
      the closest milestone, I can't stop anywhere" report. zoomSnap:0.25 keeps the
      zoom near-continuous (settles to quarter-levels, still smooth during the pinch)
-     while giving the #258 vector layer ALIGNED zoom targets to match. #261 — it was
+     while giving the #256 vector layer ALIGNED zoom targets to match. #259 — it was
      zoomSnap:0 (fully free); that stresses the MapLibre-in-Leaflet transform sync
      hardest (the two engines must agree on an arbitrary fractional zoom frame by
      frame, and sub-pixel rounding mismatches show as the basemap SLIDING sideways
-     then snapping — reported after #258/#259/#260 ruled out the app-side causes).
+     then snapping — reported after #256/#257/#258 ruled out the app-side causes).
      Quarter-level snapping cuts the arbitrary fractionals the plugin has to chase.
      If this doesn't calm the slide, the cause is the nesting itself and the fix is
      native MapLibre or a raster revert, not another zoom option. As of
-     #258 the basemap IS a vector renderer (MapLibre GL via addBaseLayer), so this
+     #256 the basemap IS a vector renderer (MapLibre GL via addBaseLayer), so this
      zoomSnap now pairs with a renderer that redraws crisply at every quarter
      level — the soft-between-levels raster limit this note used to record only
      applies on the CARTO raster FALLBACK (binding/WebGL unavailable), not the
@@ -8985,7 +8980,7 @@ function setupBaseMap(){
      getZoom()/getBoundsZoom() (defaultFrameZoom #174, the label floor #245's
      MIN_LABEL_ZOOM, the remembered-frame replay #120) already handles fractional
      values — setView/setMinZoom accept them and the comparisons are all </>=.
-     #259 — zoomAnimation:false. With the #258 vector basemap, Leaflet's CSS zoom
+     #257 — zoomAnimation:false. With the #256 vector basemap, Leaflet's CSS zoom
      ANIMATION and the MapLibre GL canvas transform must track each other frame by
      frame; when they briefly disagree the basemap SLIDES sideways during the zoom
      and snaps back at the end (reported: "map shifts when zooming in", NOT the
@@ -8996,7 +8991,7 @@ function setupBaseMap(){
      (double-tap) settle instantly rather than tweened; PINCH stays smooth (the GL
      layer re-renders continuously as touchZoom reports live) and wheel stays
      smooth (zoomSnap:0 + wheelPxPerZoomLevel make it quasi-continuous), so the
-     thing that motivated #258 is unaffected. Set at ALL THREE L.map sites
+     thing that motivated #256 is unaffected. Set at ALL THREE L.map sites
      (leaflet-map / suggest-gem-map / create-map — the #250 three-sites rule) since
      all three now carry the GL layer. Raster fallback is unaffected either way. */
   state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat, start.lng], start.zoom);
@@ -9040,7 +9035,7 @@ function setupBaseMap(){
      fighting the drag. `move` is deliberately NOT used: re-rendering mid-drag
      rebuilds the drawer's innerHTML under the user's thumb. */
   state.leafletMap.on('moveend', renderNearbyList);
-  // #260 — a manual zoom NEVER re-centres you (user directive: "don't center me if
+  // #258 — a manual zoom NEVER re-centres you (user directive: "don't center me if
   // I zoom away from my location"). Old code panned you back to your dot on any zoom
   // that stayed within 600 m — that hard snap WAS the reported "slides then corrects"
   // shift. Now: if the zoom leaves your dot away from the centre (you zoomed away),
@@ -9058,7 +9053,7 @@ function setupBaseMap(){
       return;
     }
     if(state.followMe && !state.browsingLocation && state.me){
-      /* #260 REVISES #59/#246 on user directive. The old branch RE-CENTRED you
+      /* #258 REVISES #59/#246 on user directive. The old branch RE-CENTRED you
          (panTo → a hard sideways slide) whenever a zoom stayed within
          SEARCH_HERE_DIST_M of you — that snap IS the reported "map slides then
          corrects" and it is exactly the "don't center me if I zoom away" the user
@@ -10507,7 +10502,7 @@ function openSuggestGemScreen(){
     if(!state.suggestMap){
       assertContainerMeasured('suggest-gem-map', '#87', '#suggest-gem-map');
       const start = state.me || FALLBACK_LOCATION;
-      // Continuous zoom (zoomSnap:0.25 since #261), same as the main map — the two picker maps
+      // Continuous zoom (zoomSnap:0.25 since #259), same as the main map — the two picker maps
       // build separately, not through one function, so the option is set at each site.
       state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 16);
       addBaseLayer(state.suggestMap);
@@ -10743,7 +10738,7 @@ function openCreateScreen(existingHunt, seedPoint){
     if(!state.createMap){
       assertContainerMeasured('create-map', '#87', '#create-map');
       const start = state.me || {lat:41.8827,lng:-87.6233};
-      // Continuous zoom (zoomSnap:0.25 since #261), same as the main map.
+      // Continuous zoom (zoomSnap:0.25 since #259), same as the main map.
       state.createMap = L.map('create-map', {zoomControl:false, attributionControl:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 14);
       addBaseLayer(state.createMap);
       state.createMarkersLayer = L.layerGroup().addTo(state.createMap);
