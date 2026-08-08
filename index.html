@@ -438,10 +438,15 @@
     -webkit-overflow-scrolling:touch;
   }
   .screen.active{display:block;}
-  /* #253 — Settings pins Log out to the bottom: flex column + margin-top:auto on
-     the footer section pushes it down when content is short, scrolls when tall. */
-  #screen-settings.active{ display:flex; flex-direction:column; }
-  .settings-footer{ margin-top:auto; margin-bottom:0; }
+  /* #253 — Settings pins Log out to the bottom via a WRAPPER, not margin:auto.
+     The screen is a flex column; scrollable content lives in .settings-scroll
+     (flex:1) and Log out is a plain flex footer below it. Deliberate: margin-top:auto
+     on a child of an overflow:auto flex container does NOT pin on iOS Safari (a
+     known WebKit bug), which is why the first attempt looked pinned on desktop but
+     not on a phone. Moving the scroll onto an inner wrapper sidesteps it entirely. */
+  #screen-settings.active{ display:flex; flex-direction:column; overflow:hidden; }
+  #screen-settings .settings-scroll{ flex:1 1 auto; overflow-y:auto; min-height:0; -webkit-overflow-scrolling:touch; }
+  .settings-footer{ margin:0; }
   #screen-map.active{display:flex;flex-direction:column;padding:0;min-height:0;perspective:800px;perspective-origin:50% 25%;}
 
   h1.page-title{
@@ -1676,6 +1681,14 @@
   }
   .lb-switch.on::after{transform:translateX(18px);}
   .lb-note{font-size:12.5px;color:var(--text-dim);line-height:1.5;padding:8px 2px;}
+  .lb-metric-toggle{ margin-bottom:8px; }
+  .lb-standing{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .lb-stand-cell{ text-align:center; }
+  .lb-stand-rank{ font-size:15px; font-weight:800; color:var(--orange); font-variant-numeric:tabular-nums; }
+  .lb-stand-rank.none{ color:var(--text-dim); }
+  .lb-stand-val{ font-size:18px; font-weight:800; color:var(--text); margin-top:3px; font-variant-numeric:tabular-nums; }
+  .lb-stand-val span{ font-size:11px; font-weight:600; color:var(--text-dim); }
+  .lb-stand-label{ font-size:11px; color:var(--text-dim); margin-top:1px; letter-spacing:.02em; }
 
   /* #63 — the per-place STAMP grid. Same 3-up centred layout as the achievement
      grid, but each tile carries a caption (the spot name) under the cancellation
@@ -2658,7 +2671,12 @@
         </svg>
       </button>
     </div>
-    <p class="page-sub">The most places captured. Get out there and climb.</p>
+    <p class="page-sub">Who’s exploring, covering ground, and finding gems.</p>
+    <div class="lb-toggle lb-metric-toggle">
+      <button id="lb-metric-stamps" class="active" onclick="setLeaderboardMetric('stamps')">Stamps</button>
+      <button id="lb-metric-distance" onclick="setLeaderboardMetric('distance')">Distance</button>
+      <button id="lb-metric-gems" onclick="setLeaderboardMetric('gems')">Gems</button>
+    </div>
     <div class="lb-toggle">
       <button id="lb-tab-local" class="active" onclick="setLeaderboardScope('local')">Nearby</button>
       <button id="lb-tab-global" onclick="setLeaderboardScope('global')">Global</button>
@@ -2752,6 +2770,7 @@
        passport gear, left by the back arrow. See openSettings() for why this
        does not go through setTab(). -->
   <div class="screen" id="screen-settings">
+    <div class="settings-scroll">
     <div class="title-row">
       <h1 class="page-title">Settings</h1>
       <button class="icon-btn" onclick="closeSettings()" aria-label="Back to passport">
@@ -2804,6 +2823,7 @@
          opens #screen-delete-account (not a red button + inline confirm), gated
          by SHOW_CLEAR_MY_DATA — the mechanism (deleteMyAccount + the
          delete-account edge function) is unchanged. -->
+    </div><!-- /.settings-scroll -->
     <div class="settings-section settings-footer">
       <button class="settings-btn" onclick="logout()">Log out</button>
     </div>
@@ -7104,7 +7124,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07g';
+const APP_VERSION = '2026.08.07i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7774,20 +7794,35 @@ function lbEsc(s){
   });
 }
 
+/* #254 — the board now ranks THREE server-verified metrics; the user filters
+   which one. The metric list + value formatting live here. */
+var LB_METRICS = ['stamps','distance','gems'];
+function lbFormatValue(metric, v){
+  v = Number(v) || 0;
+  if(metric === 'distance'){
+    var km = v / 1000;
+    if(km >= 10)  return { n: String(Math.round(km)), unit:'km' };
+    if(km >= 0.1) return { n: km.toFixed(1), unit:'km' };
+    return { n: String(Math.round(v)), unit:'m' };
+  }
+  if(metric === 'gems')  return { n: String(v), unit: (v === 1 ? 'gem' : 'gems') };
+  return { n: String(v), unit: (v === 1 ? 'stamp' : 'stamps') };
+}
+
 async function fetchLeaderboardMe(){
   try{
     const { data, error } = await sb.rpc('leaderboard_me');
     if(error) return null;
     const row = Array.isArray(data) ? data[0] : data;
-    state._lbMe = row || { rank:null, distinct_pins:0, opted_out:false };
+    state._lbMe = row || { stamps:0, distance_m:0, gems:0, rank_stamps:null, rank_distance:null, rank_gems:null, opted_out:false };
     state._lbMeAt = Date.now();
     return state._lbMe;
   }catch(e){ return null; }
 }
 
-/* The passport entry card. Renders from cache immediately and refreshes in the
-   background if stale — renderPassport() runs on many events, so we don't fire an
-   RPC every time. */
+/* The passport "Your standing" card — your rank + value in all three metrics.
+   Renders from cache immediately and refreshes in the background if stale
+   (renderPassport runs on many events, so we don't fire an RPC every time). */
 function renderLeaderboardEntry(){
   const mount = document.getElementById('passport-leaderboard-section');
   if(!mount) return;
@@ -7795,19 +7830,29 @@ function renderLeaderboardEntry(){
   let inner;
   if(me && me.opted_out){
     inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on in <b>Settings \u2192 Privacy</b>.</div>';
-  } else if(me && me.distinct_pins > 0){
-    inner = '<div class="lb-entry-rank">' + (me.rank ? ('#' + me.rank) : '\u2014') + '</div>'
-          + '<div class="lb-entry-sub">' + me.distinct_pins + ' verified '
-          + (me.distinct_pins === 1 ? 'stamp' : 'stamps') + '</div>';
+  } else if(me && ((me.stamps||0) > 0 || (me.distance_m||0) > 0 || (me.gems||0) > 0)){
+    const cell = function(rank, valHtml, label){
+      return '<div class="lb-stand-cell">'
+        + '<div class="lb-stand-rank' + (rank ? '' : ' none') + '">' + (rank ? ('#' + rank) : '\u2014') + '</div>'
+        + '<div class="lb-stand-val">' + valHtml + '</div>'
+        + '<div class="lb-stand-label">' + label + '</div>'
+        + '</div>';
+    };
+    const d = lbFormatValue('distance', me.distance_m);
+    inner = '<div class="lb-standing">'
+      + cell(me.rank_stamps, (me.stamps||0), 'Stamps')
+      + cell(me.rank_distance, d.n + '<span> ' + d.unit + '</span>', 'Distance')
+      + cell(me.rank_gems, (me.gems||0), 'Gems')
+      + '</div>';
   } else if(me){
-    inner = '<div class="lb-entry-hidden">Capture a place to join the leaderboard.</div>';
+    inner = '<div class="lb-entry-hidden">Capture a place or get a gem approved to join the leaderboard.</div>';
   } else {
     inner = '<div class="lb-entry-hidden">Loading\u2026</div>';
   }
   mount.innerHTML =
     '<div class="passport-section">'
     + '<div class="passport-section-head">'
-    +   '<h2 class="section-title">Leaderboard</h2>'
+    +   '<h2 class="section-title">Your standing</h2>'
     +   '<button class="view-all-link" onclick="openLeaderboard()">View all \u2192</button>'
     + '</div>'
     + inner
@@ -7824,6 +7869,7 @@ function openLeaderboard(){
   if(state._lbScope !== 'global' && state._lbScope !== 'local'){
     state._lbScope = (state.me && typeof state.me.lat === 'number') ? 'local' : 'global';
   }
+  if(LB_METRICS.indexOf(state._lbMetric) === -1) state._lbMetric = 'stamps';
   showScreen('screen-leaderboard');
   setNavActive('screen-passport');
   syncLeaderboardTabs();
@@ -7838,17 +7884,28 @@ function setLeaderboardScope(scope){
   syncLeaderboardTabs();
   renderLeaderboardList();
 }
+function setLeaderboardMetric(metric){
+  state._lbMetric = (LB_METRICS.indexOf(metric) !== -1) ? metric : 'stamps';
+  syncLeaderboardTabs();
+  renderLeaderboardList();
+}
 function syncLeaderboardTabs(){
   const g = document.getElementById('lb-tab-global');
   const l = document.getElementById('lb-tab-local');
   if(g) g.classList.toggle('active', state._lbScope !== 'local');
   if(l) l.classList.toggle('active', state._lbScope === 'local');
+  const m = LB_METRICS.indexOf(state._lbMetric) !== -1 ? state._lbMetric : 'stamps';
+  LB_METRICS.forEach(function(k){
+    const b = document.getElementById('lb-metric-' + k);
+    if(b) b.classList.toggle('active', m === k);
+  });
 }
 
 async function renderLeaderboardList(){
   const mount = document.getElementById('lb-list-mount');
   if(!mount) return;
   const scope = (state._lbScope === 'local') ? 'local' : 'global';
+  const metric = LB_METRICS.indexOf(state._lbMetric) !== -1 ? state._lbMetric : 'stamps';
   if(scope === 'local' && (!state.me || typeof state.me.lat !== 'number')){
     mount.innerHTML = '<div class="lb-note">Turn on location to see who\u2019s climbing near you.</div>';
     return;
@@ -7857,8 +7914,8 @@ async function renderLeaderboardList(){
   let rows = null;
   try{
     const args = (scope === 'local')
-      ? { p_scope:'local', p_lat:state.me.lat, p_lng:state.me.lng, p_radius_m:50000, p_limit:100 }
-      : { p_scope:'global', p_limit:100 };
+      ? { p_scope:'local', p_lat:state.me.lat, p_lng:state.me.lng, p_radius_m:50000, p_limit:100, p_metric:metric }
+      : { p_scope:'global', p_limit:100, p_metric:metric };
     const { data, error } = await sb.rpc('leaderboard_top', args);
     if(error) throw error;
     rows = data || [];
@@ -7866,23 +7923,24 @@ async function renderLeaderboardList(){
     mount.innerHTML = '<div class="lb-note">Couldn\u2019t load the leaderboard. Go back and try again.</div>';
     return;
   }
-  /* a scope tap while awaiting could land this stale — bail if the scope moved */
-  if(((state._lbScope === 'local') ? 'local' : 'global') !== scope) return;
+  /* a scope/metric tap while awaiting could land this stale — bail if either moved */
+  const curScope = (state._lbScope === 'local') ? 'local' : 'global';
+  const curMetric = LB_METRICS.indexOf(state._lbMetric) !== -1 ? state._lbMetric : 'stamps';
+  if(curScope !== scope || curMetric !== metric) return;
   if(!rows.length){
     mount.innerHTML = '<div class="lb-note">'
-      + (scope === 'local'
-          ? 'No one\u2019s climbing near you yet. Capture a place to be first.'
-          : 'No one\u2019s on the leaderboard yet. Capture a place to be first.')
+      + (scope === 'local' ? 'No one\u2019s on this board near you yet. Be first.'
+                           : 'No one\u2019s on this board yet. Be first.')
       + '</div>';
     return;
   }
   mount.innerHTML = '<div class="lb-list">' + rows.map(function(r){
     const me = !!r.is_me;
-    const n = r.distinct_pins;
-    return '<div class="lb-row' + (me?' me':'') + '">'
+    const f = lbFormatValue(metric, r.value);
+    return '<div class="lb-row' + (me ? ' me' : '') + '">'
       + '<div class="lb-rank">#' + r.rank + '</div>'
-      + '<div class="lb-name">' + lbEsc(r.display_name) + (me?'<span class="lb-you">YOU</span>':'') + '</div>'
-      + '<div class="lb-count">' + n + '<span>' + (n===1?'stamp':'stamps') + '</span></div>'
+      + '<div class="lb-name">' + lbEsc(r.display_name) + (me ? '<span class="lb-you">YOU</span>' : '') + '</div>'
+      + '<div class="lb-count">' + f.n + '<span>' + f.unit + '</span></div>'
       + '</div>';
   }).join('') + '</div>';
 }
