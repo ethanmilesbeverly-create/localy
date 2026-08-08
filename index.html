@@ -2607,10 +2607,10 @@
          account. renderPassport() fills or clears this. -->
     <div id="passport-loadfail"></div>
     <p class="page-sub">Every spot you find earns a stamp here — start collecting.</p>
-    <div class="stat-row">
-      <div class="stat-box"><div class="num" id="stat-found">0</div><div class="lbl">Stamps</div></div>
-      <div class="stat-box"><div class="num" id="stat-walked">0 m</div><div class="lbl">Traveled</div></div>
-    </div>
+    <!-- #253/#254 — leaderboard card, moved to the TOP of the passport. The legacy
+         Stamps/Traveled stat-row was removed; this section now carries those numbers
+         as verified, ranked values. Filled by renderLeaderboardEntry(). -->
+    <div id="passport-leaderboard-section"></div>
     <!-- #63 — the passport is split into two collections, each showing its most
          recent few with a "View all" into a full-list screen. renderPassport()
          fills both mounts. STAMPS is the per-place collection this row was open
@@ -2620,11 +2620,6 @@
          screen. -->
     <div id="passport-stamps-section"></div>
     <div id="passport-achievements-section"></div>
-    <!-- #253 — leaderboard entry card: your rank + verified count, opening the
-         full board. Filled by renderLeaderboardEntry(). The "verified" count is
-         the SERVER score, deliberately distinct from the local "Stamps" stat
-         above — a capture counts here only once the server confirms it (#249/#148). -->
-    <div id="passport-leaderboard-section"></div>
   </div>
 
   <!-- #63 — VIEW-ALL: every captured stamp. A no-nav sub-screen on the settings
@@ -7124,7 +7119,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07i';
+const APP_VERSION = '2026.08.07j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7800,10 +7795,10 @@ var LB_METRICS = ['stamps','distance','gems'];
 function lbFormatValue(metric, v){
   v = Number(v) || 0;
   if(metric === 'distance'){
-    var km = v / 1000;
-    if(km >= 10)  return { n: String(Math.round(km)), unit:'km' };
-    if(km >= 0.1) return { n: km.toFixed(1), unit:'km' };
-    return { n: String(Math.round(v)), unit:'m' };
+    var mi = v / 1609.344;
+    if(mi >= 10)  return { n: String(Math.round(mi)), unit:'mi' };
+    if(mi >= 0.1) return { n: mi.toFixed(1), unit:'mi' };
+    return { n: String(Math.round(v * 3.28084)), unit:'ft' };
   }
   if(metric === 'gems')  return { n: String(v), unit: (v === 1 ? 'gem' : 'gems') };
   return { n: String(v), unit: (v === 1 ? 'stamp' : 'stamps') };
@@ -7852,8 +7847,8 @@ function renderLeaderboardEntry(){
   mount.innerHTML =
     '<div class="passport-section">'
     + '<div class="passport-section-head">'
-    +   '<h2 class="section-title">Your standing</h2>'
-    +   '<button class="view-all-link" onclick="openLeaderboard()">View all \u2192</button>'
+    +   '<h2 class="section-title">Leaderboard</h2>'
+    +   '<button class="view-all-link" onclick="openLeaderboard()">View rankings \u2192</button>'
     + '</div>'
     + inner
     + '</div>';
@@ -14451,7 +14446,7 @@ function renderPassport(){
      removed from the passport markup. */
   const lf = document.getElementById('passport-loadfail');
   if(lf) lf.innerHTML = loadFailBannerHTML();
-  document.getElementById('stat-walked').textContent = fmtDist(state.totalWalkedMeters);
+  const sw = document.getElementById('stat-walked'); if(sw) sw.textContent = fmtDist(state.totalWalkedMeters);
   /* #63 — the passport now shows two PREVIEWS (recent stamps, recent achievements);
      the full grids live on their own screens. renderAchievements() still runs here
      so #achievements-section stays current for #83's invariant and the view-all
@@ -14466,7 +14461,7 @@ function renderPassport(){
      effects: a place double-banked under two auto cards counts once, and this
      number can no longer disagree with computeAchievementStats(). #63's stamp
      LIST reuses the same construction, so the list length equals this number. */
-  document.getElementById('stat-found').textContent = reconciledCaptures().count;
+  const sf = document.getElementById('stat-found'); if(sf) sf.textContent = reconciledCaptures().count;
 }
 </script>
 </body>
