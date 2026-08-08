@@ -7119,7 +7119,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07j';
+const APP_VERSION = '2026.08.07k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -7826,18 +7826,17 @@ function renderLeaderboardEntry(){
   if(me && me.opted_out){
     inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on in <b>Settings \u2192 Privacy</b>.</div>';
   } else if(me && ((me.stamps||0) > 0 || (me.distance_m||0) > 0 || (me.gems||0) > 0)){
-    const cell = function(rank, valHtml, label){
+    const cell = function(valHtml, label){
       return '<div class="lb-stand-cell">'
-        + '<div class="lb-stand-rank' + (rank ? '' : ' none') + '">' + (rank ? ('#' + rank) : '\u2014') + '</div>'
         + '<div class="lb-stand-val">' + valHtml + '</div>'
         + '<div class="lb-stand-label">' + label + '</div>'
         + '</div>';
     };
     const d = lbFormatValue('distance', me.distance_m);
     inner = '<div class="lb-standing">'
-      + cell(me.rank_stamps, (me.stamps||0), 'Stamps')
-      + cell(me.rank_distance, d.n + '<span> ' + d.unit + '</span>', 'Distance')
-      + cell(me.rank_gems, (me.gems||0), 'Gems')
+      + cell((me.stamps||0), 'Stamps')
+      + cell(d.n + '<span> ' + d.unit + '</span>', 'Distance')
+      + cell((me.gems||0), 'Gems')
       + '</div>';
   } else if(me){
     inner = '<div class="lb-entry-hidden">Capture a place or get a gem approved to join the leaderboard.</div>';
