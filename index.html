@@ -1682,6 +1682,10 @@
   .lb-switch.on::after{transform:translateX(18px);}
   .lb-note{font-size:12.5px;color:var(--text-dim);line-height:1.5;padding:8px 2px;}
   .lb-metric-toggle{ margin-bottom:8px; }
+  .lb-scope{ display:flex; align-items:center; justify-content:center; gap:8px; margin:0 0 14px; }
+  .lb-scope-opt{ background:none; border:none; font-family:inherit; font-size:13px; font-weight:700; color:var(--text-dim); padding:6px 6px; cursor:pointer; transition:color .15s; }
+  .lb-scope-opt.active{ color:var(--text); }
+  .lb-scope-dot{ color:var(--text-dim); font-weight:700; }
   .lb-standing{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .lb-stand-cell{ text-align:center; }
   .lb-stand-rank{ font-size:15px; font-weight:800; color:var(--orange); font-variant-numeric:tabular-nums; }
@@ -2672,9 +2676,10 @@
       <button id="lb-metric-distance" onclick="setLeaderboardMetric('distance')">Distance</button>
       <button id="lb-metric-gems" onclick="setLeaderboardMetric('gems')">Gems</button>
     </div>
-    <div class="lb-toggle">
-      <button id="lb-tab-local" class="active" onclick="setLeaderboardScope('local')">Nearby</button>
-      <button id="lb-tab-global" onclick="setLeaderboardScope('global')">Global</button>
+    <div class="lb-scope">
+      <button id="lb-tab-local" class="lb-scope-opt active" onclick="setLeaderboardScope('local')">Nearby</button>
+      <span class="lb-scope-dot" aria-hidden="true">·</span>
+      <button id="lb-tab-global" class="lb-scope-opt" onclick="setLeaderboardScope('global')">Global</button>
     </div>
     <div id="lb-list-mount"></div>
   </div>
@@ -7119,7 +7124,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07l';
+const APP_VERSION = '2026.08.07m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
