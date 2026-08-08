@@ -7174,7 +7174,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.08b';
+const APP_VERSION = '2026.08.08c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13576,7 +13576,15 @@ async function handleCapturePhotoFile(event){
     // Flag the record so the "has a photo" bit rides with progress; the bytes now also live server-side (#209 Build 2).
     const meta = prog.foundMeta && prog.foundMeta[pending.id];
     if(meta && !meta.photo){ meta.photo = true; try{ await saveProgress(); }catch(e){ notePersistenceIssue(e); } }
-    showToast('Photo added.');
+    /* #260 — NO "Photo added." toast here. On camera return this handler ALSO opens
+       or hydrates the pin sheet (the block just below), and the sheet renders the
+       captured photo in context — so the toast is redundant confirmation. Worse, the
+       toast lives at bottom:100px / z-index:1000 while the pin sheet floats up to
+       bottom:var(--sheet-offset) / z-index:590, so a toast fired at the same instant
+       the sheet opens lands INSIDE the sheet's band and paints ON TOP of it (higher
+       z) — the "toast + pin menu overlap weirdly on camera close" report. The sheet
+       appearing with the photo IS the success feedback; the error path below keeps
+       its toast because no sheet opens on a failed save. */
     /* #231 — capturing from the sheet runs closePinSheet() before the photo prompt
        (captureFromSheet, load-bearing order), so selectedPinId is null by the time the
        photo saves and the old guarded hydrate never painted. Hydrate in place if the
