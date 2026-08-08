@@ -7145,7 +7145,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07u';
+const APP_VERSION = '2026.08.07v';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8963,11 +8963,18 @@ function setupBaseMap(){
   /* SMOOTH / CONTINUOUS ZOOM. Leaflet's default zoomSnap:1 quantises the map to
      integer zoom levels: a pinch or scroll is continuous DURING the gesture but
      snaps to the nearest whole level the instant you lift off — the "it snaps to
-     the closest milestone, I can't stop anywhere" report. zoomSnap:0 removes that
-     snap so the zoom settles wherever you leave it (fractional levels allowed),
-     matching the continuous feel of a vector map like maps.deflock.org. As of
+     the closest milestone, I can't stop anywhere" report. zoomSnap:0.25 keeps the
+     zoom near-continuous (settles to quarter-levels, still smooth during the pinch)
+     while giving the #258 vector layer ALIGNED zoom targets to match. #261 — it was
+     zoomSnap:0 (fully free); that stresses the MapLibre-in-Leaflet transform sync
+     hardest (the two engines must agree on an arbitrary fractional zoom frame by
+     frame, and sub-pixel rounding mismatches show as the basemap SLIDING sideways
+     then snapping — reported after #258/#259/#260 ruled out the app-side causes).
+     Quarter-level snapping cuts the arbitrary fractionals the plugin has to chase.
+     If this doesn't calm the slide, the cause is the nesting itself and the fix is
+     native MapLibre or a raster revert, not another zoom option. As of
      #258 the basemap IS a vector renderer (MapLibre GL via addBaseLayer), so this
-     zoomSnap:0 now pairs with a renderer that redraws crisply at every fractional
+     zoomSnap now pairs with a renderer that redraws crisply at every quarter
      level — the soft-between-levels raster limit this note used to record only
      applies on the CARTO raster FALLBACK (binding/WebGL unavailable), not the
      happy path. wheelPxPerZoomLevel:120
@@ -8992,7 +8999,7 @@ function setupBaseMap(){
      thing that motivated #258 is unaffected. Set at ALL THREE L.map sites
      (leaflet-map / suggest-gem-map / create-map — the #250 three-sites rule) since
      all three now carry the GL layer. Raster fallback is unaffected either way. */
-  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false, zoomSnap:0, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat, start.lng], start.zoom);
+  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat, start.lng], start.zoom);
   addBaseLayer(state.leafletMap);
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
   // Option C — update which pin names fit live during the gesture (continuous
@@ -10500,9 +10507,9 @@ function openSuggestGemScreen(){
     if(!state.suggestMap){
       assertContainerMeasured('suggest-gem-map', '#87', '#suggest-gem-map');
       const start = state.me || FALLBACK_LOCATION;
-      // Continuous zoom (zoomSnap:0), same as the main map — the two picker maps
+      // Continuous zoom (zoomSnap:0.25 since #261), same as the main map — the two picker maps
       // build separately, not through one function, so the option is set at each site.
-      state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false, zoomSnap:0, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 16);
+      state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 16);
       addBaseLayer(state.suggestMap);
       state.suggestMap.on('click', e=>{
         /* #17 — routed through setGemDraftPin so tap and geocode share one
@@ -10736,8 +10743,8 @@ function openCreateScreen(existingHunt, seedPoint){
     if(!state.createMap){
       assertContainerMeasured('create-map', '#87', '#create-map');
       const start = state.me || {lat:41.8827,lng:-87.6233};
-      // Continuous zoom (zoomSnap:0), same as the main map.
-      state.createMap = L.map('create-map', {zoomControl:false, attributionControl:false, zoomSnap:0, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 14);
+      // Continuous zoom (zoomSnap:0.25 since #261), same as the main map.
+      state.createMap = L.map('create-map', {zoomControl:false, attributionControl:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 14);
       addBaseLayer(state.createMap);
       state.createMarkersLayer = L.layerGroup().addTo(state.createMap);
       state.createMap.on('click', e=>{
