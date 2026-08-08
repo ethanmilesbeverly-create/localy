@@ -2530,7 +2530,7 @@
          shapes tried and why this one is the safest of them. onclick is the
          guideline's required route to the licence text, so it must keep
          leading to Settings → Credits. -->
-    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · OpenFreeMap</button>
+    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · CARTO</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -2927,7 +2927,7 @@
         </p>
         <p class="credit-row">
           <strong>Map tiles</strong>
-          Vector tiles by <a class="credit-link" href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>, built from OpenStreetMap data.
+          © <a class="credit-link" href="https://carto.com/" target="_blank" rel="noopener noreferrer">CARTO</a>, built from OpenStreetMap data.
         </p>
         <p class="credit-row">
           <strong>Place search</strong>
@@ -3233,9 +3233,9 @@
      detects the missing L.maplibreGL / WebGL and SILENTLY falls back to the
      old CARTO raster layer, which itself falls back to StylizedGrid — so a
      failed vector load degrades to exactly today's behaviour, never a blank map.
-     maplibre-gl pinned to major 5 (OpenFreeMap's own recommended pairing);
-     the binding pinned to an exact version. Tighten maplibre-gl@5 to its exact
-     resolved patch on the next pass if drift is a concern (the #173 discipline). -->
+     maplibre-gl pinned to major 5; the binding pinned to an exact version.
+     Tighten maplibre-gl@5 to its exact resolved patch on the next pass if drift
+     is a concern (the #173 discipline). -->
 <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
 <!-- #173 — PINNED, do not revert to the bare `@2` alias. `@2` resolves to
@@ -7145,7 +7145,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07r';
+const APP_VERSION = '2026.08.07s';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8707,24 +8707,30 @@ const StylizedGrid = L.GridLayer.extend({
    the procedural stylized map instead of leaving a blank gray screen. */
 function addBaseLayer(map){
   /* #258 — VECTOR-FIRST BASEMAP with a raster fallback ladder.
-     PRIMARY: a GPU MapLibre GL vector layer (OpenFreeMap 'liberty' style) drawn
-     INSIDE this Leaflet map via L.maplibreGL. Vector + WebGL is what gives the
-     continuous, crisp fractional zoom deflock has and CARTO raster could not
-     (#250's stated honest limit): raster PNGs CSS-scale soft between integer
-     levels, a GL renderer redraws crisply at every fractional level — so the
-     zoomSnap:0 already on the L.map finally pairs with a renderer that can honour
-     it. All three app maps (#leaflet-map, #suggest-gem-map, #create-map) build
-     through here, so one change covers all three.
+     PRIMARY: a GPU MapLibre GL vector layer drawn INSIDE this Leaflet map via
+     L.maplibreGL, using CARTO's VOYAGER vector style
+     (basemaps.cartocdn.com/gl/voyager-gl-style/style.json) — the SAME warm Voyager
+     palette the app used as CARTO raster from day one, now rendered as GPU vector.
+     Vector + WebGL is what gives the continuous, crisp fractional zoom deflock has
+     and raster could not (#250's stated honest limit): raster PNGs CSS-scale soft
+     between integer levels, a GL renderer redraws crisply at every fractional
+     level — so the zoomSnap:0 already on the L.map finally pairs with a renderer
+     that can honour it. Keeping Voyager (not a busier style like OpenFreeMap
+     'liberty', which #258's first build shipped and was reverted) is deliberate:
+     Voyager is muted, so the category pins keep the contrast the #326 credit-scrim
+     math was tuned against — a colourful basemap washed the pins out. All three
+     app maps (#leaflet-map, #suggest-gem-map, #create-map) build through here, so
+     one change covers all three.
      LADDER, so a failed vector load is NEVER a blank map: vector -> (binding
      missing / WebGL unavailable / repeated GL error) -> CARTO raster -> (tileerror)
-     -> StylizedGrid. The bottom two rungs are the exact pre-#258 behaviour.
-     ATTRIBUTION: maplibre's own control is suppressed (attributionControl:false)
-     so the single #map-attrib pill + Credits modal stay the one home for it
-     (#91/#112); both now read OpenStreetMap / OpenFreeMap, and privacy.html's
-     recipient list swaps CARTO -> OpenFreeMap in the same pass (coupled deploy).
-     STYLE is a one-word swap: 'liberty' (real, colourful, deflock-like) ->
-     'positron' (quiet grey, best if category pins get lost against the map) ->
-     'bright'. */
+     -> StylizedGrid. The bottom two rungs are the exact pre-#258 behaviour, and the
+     raster fallback is Voyager too, so vector and fallback look identical.
+     ATTRIBUTION / RECIPIENT UNCHANGED FROM THE APP'S WHOLE HISTORY: the tile
+     provider is still CARTO (raster then, vector now), so the #map-attrib pill +
+     Credits modal keep OpenStreetMap / CARTO and privacy.html's recipient list is
+     unchanged — no new disclosure category, same terms the app always ran under.
+     STYLE is a one-word URL swap if ever wanted: voyager-gl-style ->
+     positron-gl-style (light grey, even more pin contrast) -> dark-matter-gl-style. */
 
   /* RASTER FALLBACK — the pre-#258 path, byte-for-byte, reused only when vector
      can't run. #205 lives here: a single uninterrupted swipe outran the tile
@@ -8772,7 +8778,7 @@ function addBaseLayer(map){
     addRasterFallback();
   }
   try {
-    gl = L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/liberty', attributionControl: false });
+    gl = L.maplibreGL({ style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', attributionControl: false });
     gl.addTo(map);
   } catch(_){
     toRaster();
