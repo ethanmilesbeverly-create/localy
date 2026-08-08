@@ -7124,7 +7124,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07n';
+const APP_VERSION = '2026.08.07o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9670,7 +9670,13 @@ function fitMapToHunt(hunt){
   state.leafletMap.invalidateSize();
   state.leafletMap.setMinZoom(2); // clear any previous floor before recomputing, so fitBounds isn't constrained by the last hunt's limit
   state.leafletMap.fitBounds(bounds, {padding:[48,48], maxZoom:15});
-  state.leafletMap.setMinZoom(state.leafletMap.getZoom());
+  // #256 — leave 2 levels of pinch-out headroom below the fit, mirroring
+  // centerOnPlayer's `targetZoom - 2`. Pinning the floor at exactly getZoom()
+  // FROZE the map: a tightly-clustered guide fits at the maxZoom:15 cap, so
+  // getZoom() came back 15 and minZoom became 15 — you couldn't zoom out at all
+  // ("sometimes I go to a shared guide and cannot zoom out"). Floored at 2 so a
+  // wide guide's frame still can't zoom out to the whole world and lose itself.
+  state.leafletMap.setMinZoom(Math.max(2, state.leafletMap.getZoom() - 2));
 }
 /* #7 — is this a curated GUIDE (one you built, `custom_`, or redeemed by code,
    `code_`) rather than an auto-generated explore card (`local_`, `parkstrails_`,
