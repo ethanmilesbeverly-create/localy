@@ -4804,6 +4804,37 @@ const REAL_INCLUDE_RADIUS_M = 4000;
    first. Widen the reach of gems again only by making this its own value with a
    stated reason — do not silently restate the number. */
 const GEM_INCLUDE_RADIUS_M = REAL_INCLUDE_RADIUS_M;
+/* ============================================================================
+   #113 — DEAD CLIENT OVERPASS / WIKIPEDIA MIRROR. DECIDED 2026-08-08: KEEP,
+   DOCUMENTED (not excised). This whole cluster is UNREACHABLE — nothing has
+   called it since #37 moved all place-fetching + caching into the `nearby-places`
+   Edge Function. It is a deliberate MIRROR of index.js, kept as a READABLE
+   REFERENCE for the server logic — the #67 `STABLE_HUNT_PREFIXES` precedent:
+   inert code that is load-bearing as a RECORD. Live comments below (#96/#105/#102)
+   explain the LIVE filters BY POINTING AT these functions, and excising cleanly
+   would mean rehoming a live constant + rewriting ~8 of those comments for zero
+   user-facing gain; the full caller graph + the entanglement are in #113's row.
+
+   THE DEAD SET (INTERLEAVED with live code — never region-delete this span):
+     consts  OVERPASS_RADIUS_M, OVERPASS_ENDPOINTS — and OVERPASS_TIMEOUT_MS,
+             which is the ONE LIVE-REFERENCED exception (`FIRST_BLEND_MAX_HOLD_MS`
+             reads it; do not delete it without rehoming that).
+     fns     isTransitStop, categorizeOsm, osmDesc, buildOverpassQuery,
+             parseOverpass, fetchOverpassOne, fetchOverpass, fetchWikipedia,
+             dedupeReal.
+   STILL LIVE and interleaved here — MUST survive any future edit:
+     normName, realTileKey, _realDebug, setTileState, currentTileState,
+     EXCLUDE_CHAINS/CHAIN_NAME_RE/isChainPlace, WIKI_RELEVANCE_FILTER/WIKI_STOP_RE/
+     wikiOpener/isLowValueWikiArticle/WIKI_PARK_RE/classifyWikiOpener,
+     groupRealByCat, applyRealPlaces (the live client second-net guards).
+
+   DO NOT RESURRECT — the mirror has DRIFTED and is now WRONG in places:
+   categorizeOsm's `tourism=attraction` (live #13/v20 gates it on a wiki link),
+   fetchWikipedia still truncates (live #77 removed the cap), osmDesc's commercial
+   arm lags (live #178). Re-enabling any of it reships retired bugs (#99→#98).
+   The logic that actually runs is server-side in `nearby-places` + applyRealPlaces().
+   (#113's readTileCache/writeTileCache fossil half was already removed 2026.08.08a.)
+   ============================================================================ */
 // #65 register — the OUTER BOUND of what a tile can contain, not a display
 // filter. REAL_INCLUDE_RADIUS_M can only ever filter down from this.
 const OVERPASS_RADIUS_M = 4200;
@@ -5292,8 +5323,11 @@ function applyRealPlaces(key, base, list){
    `nearby-places` under versioned `places:<CACHE_VERSION>:` keys, read below via
    `sb.functions.invoke('nearby-places')`. The REST of the dead Overpass mirror
    (parseOverpass / categorizeOsm / osmDesc / dedupeReal / fetch* / OVERPASS_*)
-   is the still-open document-vs-debt half of #113 and is NOT touched here —
-   note `OVERPASS_TIMEOUT_MS` is still LIVE-referenced by `FIRST_BLEND_MAX_HOLD_MS`. */
+   was DECIDED 2026-08-08 (#113): KEPT + DOCUMENTED, not excised — see the
+   authoritative dead-mirror header above the OVERPASS_* consts for the full dead
+   set, the live-interleaved survivors, and why (it mirrors index.js and live
+   #96/#105/#102 comments point at it). `OVERPASS_TIMEOUT_MS` is the one
+   live-referenced exception (`FIRST_BLEND_MAX_HOLD_MS` reads it). */
 
 let _realFetchInFlight = {};
 async function ensureRealPlaces(base){
@@ -7140,7 +7174,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.08a';
+const APP_VERSION = '2026.08.08b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
