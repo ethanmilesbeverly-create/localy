@@ -470,7 +470,7 @@
      text-size setting. */
   .title-row{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
-    margin:4px 0 6px;
+    margin:14px 0 6px;
   }
   .title-row h1.page-title{margin:0;}
   .icon-btn{
@@ -2596,7 +2596,7 @@
     <!-- Top margin bumped 4px -> 14px (inline) to mirror the Explore page, matching
          the submit page. .title-row is shared by 6 screens, so this is scoped here
          and NOT put on the global .title-row rule. The h1 inside stays margin:0. -->
-    <div class="title-row" style="margin-top:14px;">
+    <div class="title-row">
       <h1 class="page-title">Passport</h1>
       <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -2662,7 +2662,7 @@
        Passport nav tab stays lit. Global / Nearby toggle, the ranked list (your
        own row highlighted), and an opt-out switch. Filled by renderLeaderboard*(). -->
   <div class="screen" id="screen-leaderboard">
-    <div class="title-row" style="margin-top:14px;">
+    <div class="title-row">
       <h1 class="page-title">Leaderboard</h1>
       <button class="icon-btn" onclick="closeLeaderboard()" aria-label="Back to passport">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -7124,7 +7124,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.07m';
+const APP_VERSION = '2026.08.07n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
