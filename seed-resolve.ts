@@ -163,6 +163,68 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+// ---------------------------------------------------------------------------
+// Resilient Wikipedia GET -> parsed JSON, or null after real exhaustion.
+//
+// WHY THIS EXISTS. Every row fires several Wikipedia calls (geosearch for the
+// description, the same lookup again for "what's already here", plus the widen
+// / name-search). Wikipedia rate-limits, and the old raw fetches read a throttle
+// as "nothing found" — so a landmark whose article is metres away would RANDOMLY
+// either dedupe against it or get written as a new blank seed, depending on which
+// calls got throttled that run (QA: two identical Chicago-25 runs disagreed on
+// 14/25 rows). A throttle must be a WAIT, not a wrong answer.
+//
+// The distinction that keeps this honest: a *throttle* (HTTP 429/503, or a
+// non-JSON "too many requests" body) is retried with backoff; a *valid empty
+// result* (200 with real JSON and an empty geosearch) is returned as-is, so a
+// genuine "no article here" still reads as blank. Only a persistent throttle
+// past all retries degrades to null — now rare instead of routine.
+// Self-pacing gate: keep our OWN Wikipedia requests at least WIKI_MIN_GAP_MS
+// apart, globally. The tool fires 2–4 Wikipedia calls per row back-to-back
+// (geosearch + extract + widen), and it was that BURST that tripped Wikipedia's
+// throttle — retries then papered over it unevenly, leaving ~1/10 rows still
+// flipping. Spacing the calls PREVENTS the throttle instead of reacting to it;
+// the cost is ~1s/row on top of the 7s inter-row sleep. Calls are already
+// sequential, so a timestamp gate is enough to serialise them politely.
+const WIKI_MIN_GAP_MS = 350;
+let _wikiNextAt = 0;
+async function wikiPace() {
+  const now = Date.now();
+  const wait = Math.max(0, _wikiNextAt - now);
+  _wikiNextAt = Math.max(now, _wikiNextAt) + WIKI_MIN_GAP_MS;
+  if (wait > 0) await sleep(wait);
+}
+
+async function wikiJSON(url: string, tries = 6): Promise<any | null> {
+  // Backoff caps at 8s (waits: 1,2,4,8,8,8 — up to ~31s for a fully throttled
+  // row) with jitter so parallel-ish calls don't retry in lockstep. A row that
+  // needs no retry pays nothing; only a genuinely throttled one waits. QA showed
+  // 4 tries left ~1/10 rows still flipping under sustained load (National Museum
+  // of Mexican Art, article 6m away, geocode stable — a pure throttle exhaustion,
+  // not a boundary case); the extra headroom is to close that gap.
+  for (let attempt = 1; attempt <= tries; attempt++) {
+    const backoff = Math.min(8000, 1000 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 400);
+    await wikiPace(); // space our own calls to avoid tripping the throttle
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0 (map seed dedup; contact via repo)" } });
+      if (r.status === 429 || r.status === 503) { await sleep(backoff); continue; }
+      if (!r.ok) return null; // a non-throttle error (400/404/…) is a real miss
+      const text = await r.text();
+      try {
+        return JSON.parse(text); // valid JSON (incl. a legitimately empty result)
+      } catch {
+        // 200-ish but the body isn't JSON — Wikipedia's throttle/error HTML.
+        // Treat as a throttle and back off; do NOT read it as an empty result.
+        await sleep(backoff);
+        continue;
+      }
+    } catch {
+      await sleep(backoff); // network blip — retry
+    }
+  }
+  return null;
+}
+
 type Existing = { name: string; lat: number; lng: number; category?: string; source?: string };
 
 // ---------------------------------------------------------------------------
@@ -199,33 +261,25 @@ async function wikiAt(
   lat: number,
   lng: number,
 ): Promise<{ title: string; intro: string; lat: number; lng: number } | null> {
-  try {
-    const geo =
-      "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=5&gsradius=" +
-      MATCH_RADIUS_M +
-      "&gscoord=" +
-      lat +
-      "%7C" +
-      lng;
-    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!gr.ok) return null;
-    const gd = await gr.json();
-    const hit = gd?.query?.geosearch?.[0];
-    if (!hit?.title) return null;
+  const geo =
+    "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=5&gsradius=" +
+    MATCH_RADIUS_M +
+    "&gscoord=" +
+    lat +
+    "%7C" +
+    lng;
+  const gd = await wikiJSON(geo);
+  const hit = gd?.query?.geosearch?.[0];
+  if (!hit?.title) return null;
 
-    const ex =
-      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
-      encodeURIComponent(hit.title);
-    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!er.ok) return { title: hit.title, intro: "", lat: hit.lat, lng: hit.lon };
-    const ed = await er.json();
-    const pages = ed?.query?.pages ?? {};
-    const first: any = Object.values(pages)[0] ?? {};
-    const intro = String(first.extract ?? "").trim();
-    return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
-  } catch {
-    return null;
-  }
+  const ex =
+    "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+    encodeURIComponent(hit.title);
+  const ed = await wikiJSON(ex);
+  const pages = ed?.query?.pages ?? {};
+  const first: any = Object.values(pages)[0] ?? {};
+  const intro = String(first.extract ?? "").trim();
+  return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
 }
 
 // ---------------------------------------------------------------------------
@@ -254,19 +308,13 @@ function titleMatch(name: string, title: string): number {
   return hit / a.size; // fraction of the place-name's words the article title covers
 }
 async function wikiIntroFor(title: string): Promise<string> {
-  try {
-    const ex =
-      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
-      encodeURIComponent(title);
-    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!er.ok) return "";
-    const ed = await er.json();
-    const pages = ed?.query?.pages ?? {};
-    const first: any = Object.values(pages)[0] ?? {};
-    return String(first.extract ?? "").trim();
-  } catch {
-    return "";
-  }
+  const ex =
+    "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+    encodeURIComponent(title);
+  const ed = await wikiJSON(ex);
+  const pages = ed?.query?.pages ?? {};
+  const first: any = Object.values(pages)[0] ?? {};
+  return String(first.extract ?? "").trim();
 }
 
 async function wikiEnrich(
@@ -276,38 +324,34 @@ async function wikiEnrich(
 ): Promise<{ title: string; intro: string } | null> {
   // Path A — coordinate geosearch (300 m) + title gate. Best when Photon
   // dropped the pin near the article's own coordinate.
-  try {
+  {
     const geo =
       "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
       WIKI_ENRICH_RADIUS_M +
       "&gscoord=" + lat + "%7C" + lng;
-    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (gr.ok) {
-      const gd = await gr.json();
-      const hits: any[] = gd?.query?.geosearch ?? [];
-      let best: any = null, bestScore = 0;
-      for (const h of hits) {
-        const s = titleMatch(name, h.title || "");
-        if (s > bestScore) { bestScore = s; best = h; }
-      }
-      if (best && bestScore >= WIKI_TITLE_MIN) {
-        const intro = await wikiIntroFor(best.title);
-        if (intro) return { title: best.title, intro };
-      }
+    const gd = await wikiJSON(geo);
+    const hits: any[] = gd?.query?.geosearch ?? [];
+    let best: any = null, bestScore = 0;
+    for (const h of hits) {
+      const s = titleMatch(name, h.title || "");
+      if (s > bestScore) { bestScore = s; best = h; }
     }
-  } catch { /* fall through to Path B */ }
+    if (best && bestScore >= WIKI_TITLE_MIN) {
+      const intro = await wikiIntroFor(best.title);
+      if (intro) return { title: best.title, intro };
+    }
+    // fall through to Path B
+  }
 
   // Path B — name search, then verify the found article's OWN coordinate is
   // within WIKI_NAME_SANITY_M of the pin. Recovers wide features whose article
   // coordinate sits beyond the 300 m circle (Palmisano, Promontory). The
   // coordinate check is what stops a same-named place elsewhere from attaching.
-  try {
+  {
     const srch =
       "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=5&srsearch=" +
       encodeURIComponent(name);
-    const sr = await fetch(srch, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!sr.ok) return null;
-    const sd = await sr.json();
+    const sd = await wikiJSON(srch);
     const results: any[] = sd?.query?.search ?? [];
     // Keep only results whose title plausibly IS this place, best first.
     const ranked = results
@@ -325,9 +369,8 @@ async function wikiEnrich(
       const q =
         "https://en.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cextracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
         encodeURIComponent(cand.title);
-      const cr = await fetch(q, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-      if (!cr.ok) continue;
-      const cdj = await cr.json();
+      const cdj = await wikiJSON(q);
+      if (!cdj) continue;
       const pages = cdj?.query?.pages ?? {};
       const p: any = Object.values(pages)[0] ?? {};
       const coord = Array.isArray(p?.coordinates) ? p.coordinates[0] : null;
@@ -350,8 +393,6 @@ async function wikiEnrich(
       if (intro) return { title: cand.title, intro };
     }
     return null;
-  } catch {
-    return null;
   }
 }
 
@@ -360,7 +401,13 @@ async function wikiEnrich(
 //    Prefer the deployed nearby-places function (exact app parity); fall back
 //    to Wikipedia geosearch (covers the wiki-collision class).
 // ---------------------------------------------------------------------------
-async function existingNear(lat: number, lng: number): Promise<Existing[]> {
+// wikiHint is the wikiAt() result run() already computed for this exact spot.
+// Reusing it removes a second identical Wikipedia geosearch per row — the old
+// code called wikiAt() here again, doubling the Wikipedia load AND adding a
+// second independent throttle-failure point, so the direct call and this one
+// could disagree within a single row (one found the article, the other got
+// throttled -> the row saw an empty "existing" and became a spurious new seed).
+async function existingNear(lat: number, lng: number, wikiHint?: { title: string; lat: number; lng: number } | null): Promise<Existing[]> {
   if (NEARBY_PLACES_URL) {
     try {
       const r = await fetch(NEARBY_PLACES_URL, {
@@ -383,7 +430,7 @@ async function existingNear(lat: number, lng: number): Promise<Existing[]> {
       // fall through to Wikipedia
     }
   }
-  const w = await wikiAt(lat, lng);
+  const w = wikiHint !== undefined ? wikiHint : await wikiAt(lat, lng);
   return w && w.title ? [{ name: w.title, lat: w.lat, lng: w.lng, source: "wiki" }] : [];
 }
 
@@ -606,7 +653,7 @@ async function run() {
     }
 
     const wiki = await wikiAt(geo.lat, geo.lng);
-    const existing = await existingNear(geo.lat, geo.lng);
+    const existing = await existingNear(geo.lat, geo.lng, wiki);
     const verdict = await resolve(name, wiki?.title ?? null, existing);
 
     let wikiTitle = wiki?.title ?? null;
