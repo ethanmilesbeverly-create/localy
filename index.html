@@ -1289,33 +1289,70 @@
     border:2px solid var(--bg);
   }
 
-  /* floating target markers */
-  .fm-wrap{position:relative;width:38px;height:56px;}
+  /* ---------- floating target markers: tailed expanding pill (#270) ----------
+     Replaces the dropPinSVG teardrop + stacked .fm-name/.fm-label chip. The marker
+     is ONE object at every zoom — a category-glyph pill with a downward arrow that
+     always points at the location — and the ONLY thing that animates is the label
+     unfurling to the RIGHT (updatePinLabels()/setPillReveal()). The arrow (base 12,
+     length 7) is constant. RECENTRE ANCHOR: the whole html box is fixed 200×40 with
+     the arrow tip at bottom-centre = iconAnchor [100,40], so the arrow tip stays on
+     the geo point while the pill grows symmetrically around it (icon drifts left,
+     name fills right). Overflow past the 200px box is fine — Leaflet doesn't clip a
+     divIcon. Only the target markers use this; the player/guide/draft pins are
+     untouched (they still call dropPinSVG). */
+  /* Belt-and-suspenders reset: two-class specificity beats Leaflet's own
+     .leaflet-div-icon{background:#fff;border:1px solid #666}, so the 200px pill
+     wrapper (and every other divIcon) can never flash a default white box. */
+  .leaflet-marker-icon.leaflet-div-icon{background:transparent;border:0;}
+  .fm-wrap{position:relative;width:200px;height:40px;pointer-events:none;}
   .fm-shadow{
+    position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);
+    width:14px;height:5px;border-radius:50%;
+    background:rgba(0,0,0,0.42);filter:blur(1px);
+  }
+  /* The arrow: a downward CSS triangle, tip at the wrapper's bottom-centre = the
+     geo point. border-top-color is set inline to the pin's category hue. */
+  .fm-arrow{
     position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-    width:22px;height:8px;border-radius:50%;
-    background:rgba(0,0,0,0.45);filter:blur(1px);
+    width:0;height:0;
+    border-left:6px solid transparent;border-right:6px solid transparent;
+    border-top:7px solid #888;
   }
-  .fm-icon{
-    position:absolute;bottom:8px;left:50%;
-    width:26px;height:37px;
-    transform:translateX(-50%);
+  /* The pill: icon + expanding name, centred on the point, sitting just above the
+     arrow. pointer-events:auto so the whole pill is the tap target. overflow is
+     VISIBLE (the .fm-txt span clips itself) so the corner check isn't clipped. */
+  .fm-pill{
+    position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+    display:inline-flex;align-items:center;height:24px;
+    padding:0 5px;border-radius:999px;white-space:nowrap;
+    pointer-events:auto;box-shadow:0 2px 7px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.25);
   }
-  .fm-icon.fm-found{bottom:6px;opacity:0.92;}
-  @keyframes fmBob{0%,100%{margin-top:0;}50%{margin-top:-7px;}}
-  /* Visited badge — a moss circle with a white ring and white check, on the
-     top-right CORNER of the pin, the same on every category so status never
-     depends on the pin's hue. The corner keeps the pin's colour fully visible. */
+  .fm-pill.sel{box-shadow:0 0 0 2px rgba(237,233,221,0.55),0 3px 10px rgba(0,0,0,0.5);}
+  .fm-gly{flex:0 0 auto;display:flex;}
+  .fm-gly svg{display:block;}
+  /* The name unfurls: max-width 0 -> open, opacity + a small left gap, all eased.
+     white-space:nowrap + overflow:hidden means a partway max-width clips it, which
+     reads as the label sliding open. Driven by setPillReveal(). */
+  .fm-txt{
+    overflow:hidden;max-width:0;opacity:0;margin-left:0;
+    font-size:12px;font-weight:700;line-height:1.2;
+    transition:max-width .16s ease,opacity .16s ease,margin-left .16s ease;
+  }
+  @media (prefers-reduced-motion: reduce){ .fm-txt{transition:none;} }
+  /* Visited badge — moss circle + white check on the glyph's top-right corner, the
+     same on every category so status never depends on hue. Rides the glyph (pill's
+     first child), so it stays put as the pill expands. */
   .fm-check{
-    position:absolute;top:9px;left:21px;
-    width:18px;height:18px;border-radius:50%;
+    position:absolute;top:-4px;left:13px;
+    width:14px;height:14px;border-radius:50%;
     background:var(--moss);border:2px solid #fff;
     display:flex;align-items:center;justify-content:center;
     z-index:3;box-shadow:0 1px 3px rgba(0,0,0,0.45);
   }
-  .fm-check svg{width:11px;height:11px;display:block;}
+  .fm-check svg{width:8px;height:8px;display:block;}
+  /* Nearest-unfound / selected halo — a pulse centred on the point, behind the pill. */
   .fm-halo{
-    position:absolute;left:50%;bottom:6px;transform:translate(-50%,0);
+    position:absolute;left:50%;bottom:5px;transform:translate(-50%,0);
     width:20px;height:20px;border-radius:50%;
     box-shadow:0 0 0 0 rgba(232,98,44,0.6);
     animation:fmHalo 1.8s ease-out infinite;
@@ -1324,45 +1361,6 @@
     0%{box-shadow:0 0 0 0 rgba(232,98,44,0.55);}
     100%{box-shadow:0 0 0 26px rgba(232,98,44,0);}
   }
-  /* Pin name labels (Option B + C).
-     .fm-label — the SELECTED pin's prominent chip: bold, on a surface chip so
-     it reads as "this is the one the sheet is about." Always visible while its
-     pin is selected; its screen box is claimed FIRST in updatePinLabels() so
-     quiet labels never overlap it.
-     .fm-name — every other pin's quiet haloed name (no chip, so a screenful
-     reads as texture, not a wall of boxes). Hidden by default; updatePinLabels()
-     runs a greedy overlap pass on moveend/zoomend and adds .fm-name-show only to
-     the ones that fit without colliding — so few show zoomed out, more reveal as
-     pins spread on zoom-in, no magic threshold. Both sit above the pin head so
-     the bottom sheet can't cover them, and both are pointer-events:none so they
-     never steal the tap meant for the marker. */
-  .fm-label, .fm-name{
-    position:absolute;bottom:47px;left:50%;transform:translateX(-50%);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    border:0.5px solid rgba(0,0,0,0.25);border-radius:8px;
-    line-height:1.2;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.4);
-  }
-  /* background + text colour are set inline per pin (its category colour, with a
-     dark or cream text pick chosen for contrast) — see the render in refreshTargetsUI. */
-  .fm-label{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;}
-  .fm-name{max-width:150px;padding:2px 8px;font-size:11.5px;font-weight:600;display:none;}
-  .fm-name.fm-name-show{display:block;}
-  /* Labels ease IN when they newly appear and ease OUT when they leave — a mirror
-     pair. Only NEW appearances get .fm-name-in (tracked in JS, so a marker rebuild
-     doesn't re-animate persisting labels); a still-visible label that gets dropped
-     gets .fm-name-out and hides on animationend. */
-  .fm-name.fm-name-in{animation:fmLabelIn 0.2s ease-out;}
-  .fm-name.fm-name-out{animation:fmLabelOut 0.2s ease-in forwards;}
-  @keyframes fmLabelIn{
-    from{opacity:0;transform:translateX(-50%) translateY(4px) scale(0.9);}
-    to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
-  }
-  @keyframes fmLabelOut{
-    from{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
-    to{opacity:0;transform:translateX(-50%) translateY(4px) scale(0.9);}
-  }
-  @media (prefers-reduced-motion: reduce){ .fm-name.fm-name-in,.fm-name.fm-name-out{animation:none;} }
-  .fm-label.fm-hide{display:none;}
 
   /* player avatar — ground point is at the feet (bottom), figure stands up from there */
   .player-wrap{position:relative;width:64px;height:64px;}
@@ -4026,6 +4024,24 @@ function dimColor(hex){ return mixHex(hex, '#10231C', 0.45); }
 function labelTextColor(hex){
   const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
   return ((0.299*r + 0.587*g + 0.114*b)/255) > 0.6 ? '#10231C' : '#EDE9DD';
+}
+/* #270 — per-category line glyphs that ride inside the pill marker. One 24×24 path
+   set per live point category (park/trail/bars/restaurants/shops/history/art — the
+   MODE_COLOR live-point keys). stroke="currentColor" so the pill sets the ink colour
+   (labelTextColor of the category hue). Anything without a glyph — a lore/custom/gem
+   pin with a non-category mode — falls back to a filled dot, so it still renders. */
+const CATEGORY_GLYPH = {
+  restaurants:'<path d="M8 3v6a2 2 0 0 1-4 0V3M6 3v18M17 3c-1.6 0-2.5 1.6-2.5 4.5S16 12 17 12v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  bars:'<path d="M4 4h16l-8 8zM12 12v7M8 20h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  shops:'<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  park:'<path d="M12 3 6 11h3l-4 6h14l-4-6h3zM12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  trail:'<path d="M3 19 10 7l4 6 2-3 5 9zM15 7l2.5-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  history:'<path d="M4 6h16M6 6v12M12 6v12M18 6v12M4 20h16M4 4l8-1 8 1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  art:'<path d="M12 3a9 9 0 0 0 0 18c1.4 0 1.8-1 1.3-1.9-.6-1.1.2-2.1 1.4-2.1H17a4 4 0 0 0 4-4c0-5-4-8-9-8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="8.5" cy="9" r="1.1" fill="currentColor"/><circle cx="12" cy="7" r="1.1" fill="currentColor"/><circle cx="15.5" cy="9" r="1.1" fill="currentColor"/>'
+};
+function categoryGlyphSVG(cat, ink){
+  const g = CATEGORY_GLYPH[cat] || '<circle cx="12" cy="12" r="3.4" fill="currentColor"/>';
+  return `<svg viewBox="0 0 24 24" width="14" height="14" style="color:${ink}">${g}</svg>`;
 }
 /* Solid rounded-drop map pin. captured -> full color + check; default -> dimmed + dot. */
 function dropPinSVG(fillColor, captured, w, h){
@@ -7174,7 +7190,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.08c';
+const APP_VERSION = '2026.08.10a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12776,17 +12792,18 @@ function refreshGuideLine(){
   }).addTo(state.guideLayer);
 }
 
-/* Option C — reveal pin names as they stop overlapping, Apple-style.
-   Runs on moveend/zoomend and after every marker rebuild. For each named pin in
-   view it estimates the screen box its label would occupy just above the pin,
-   walks them in PRIORITY order (selected -> nearest-unfound halo -> uncaptured by
-   distance from you -> captured by distance), and greedily shows a quiet .fm-name
-   only if its box doesn't hit one already placed. Zoomed out, pins are jammed in
-   pixels so most collide and only the top few names show; zoom in and the boxes
-   separate so more light up — no threshold, the geometry decides. The selected
-   pin's prominent chip is always shown and claims its box first so nothing quiet
-   overlaps it. Cheap: a few dozen pins is a sub-ms pass, and it toggles a class
-   rather than rebuilding markers, so it stays off the GPS-tick render path. */
+/* Expansion engine (#270 — was the Option-C name show/hide) — reveal pin names as
+   they stop overlapping, Apple-style, now by UNFURLING the pill's inline label to
+   the right instead of showing a stacked chip. Runs on moveend/zoomend and after
+   every marker rebuild. For each in-view pill it estimates the recentred screen box
+   the EXPANDED pill would occupy, walks them in PRIORITY order (selected -> nearest-
+   unfound halo -> uncaptured by distance from you -> captured by distance), and only
+   expands one whose box doesn't hit a pill that already claimed its space; the rest
+   stay collapsed pins with the arrow still on their spot. Zoomed out (below the floor)
+   nothing expands; zoom in and boxes separate so more unfurl — the geometry decides.
+   The selected pill always expands and claims first. Cheap: a few dozen pills is a
+   sub-ms pass, and it sets inline styles rather than rebuilding markers, so it stays
+   off the GPS-tick render path. */
 /* Live label updates during a pinch/pan without waiting for release: the map's
    continuous 'zoom'/'move' events fire this, throttled to one collision pass per
    animation frame so it stays cheap. Labels then cross the zoom floor and reveal
@@ -12804,86 +12821,62 @@ function scheduleLabelUpdate(){
    continuous-zoom change) so labels appear a little sooner when zoomed out. Above
    the floor, the collision pass decides which fit. */
 const MIN_LABEL_ZOOM = 15.5;
-let _shownLabels = new Set();   // pin ids showing a quiet label last pass — so a rebuild doesn't re-animate persisting labels
-const _reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-function hideLabel(label){
-  if(!label || label.classList.contains('fm-name-out')) return;   // absent or already leaving
-  if(_reduceMotion || !label.classList.contains('fm-name-show')){
-    label.classList.remove('fm-name-show','fm-name-in');          // instant: already hidden, or reduced motion
-    return;
-  }
-  label.classList.remove('fm-name-in');
-  label.classList.add('fm-name-out');                             // play exit, then hide on animationend
-  label.addEventListener('animationend', function onEnd(e){
-    if(e.animationName !== 'fmLabelOut') return;
-    label.removeEventListener('animationend', onEnd);
-    if(label.classList.contains('fm-name-out')) label.classList.remove('fm-name-show','fm-name-out');
-  });
+/* #270 — set a pill's label reveal r in [0,1]: 0 = collapsed to the glyph (a
+   round pin), 1 = fully unfurled. A partway r clips the name, which reads as the
+   label sliding open. The arrow and glyph never move; only the name span animates. */
+function setPillReveal(pill, txt, r){
+  if(!txt) return;
+  txt.style.maxWidth = (r * 170) + 'px';        // 170 = generous cap; the pill hugs the text, so extra is invisible
+  txt.style.opacity = r;
+  txt.style.marginLeft = (r > 0.02 ? 6 * r : 0) + 'px';
+  pill.style.paddingRight = (5 + r * 8) + 'px';
 }
-function showLabel(label, id){
-  if(!label) return;
-  label.classList.remove('fm-name-out');                          // cancel an in-progress exit if it reappears
-  if(!_shownLabels.has(id) && !_reduceMotion) label.classList.add('fm-name-in');   // only NEW labels ease in
-  label.classList.add('fm-name-show');
-}
+/* #270 — the expansion engine (was the .fm-name show/hide collision pass). Runs on
+   zoom/move/zoomend/moveend and after every marker rebuild. Below MIN_LABEL_ZOOM
+   every pill stays a collapsed pin. Above it, the name wants to unfurl (reveal ramps
+   0->1 across ~1.2 levels); a pill only actually expands if its recentred width fits
+   without hitting a pill that already claimed its space — selected first, then by the
+   stable distance-rank from you (info.rank, not a live centre-distance, so expansion
+   doesn't flicker while you pan). The rest stay collapsed pins with the arrow still
+   marking their spot. */
 function updatePinLabels(){
   const map = state.leafletMap;
   if(!map || !state.markersLayer) return;
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
-  // Zoom floor: hide every label — quiet AND the selected pin's chip — when
-  // zoomed out past the threshold, so a selected pin only labels itself once
-  // you're zoomed in far enough for labels at all.
-  if(map.getZoom() < MIN_LABEL_ZOOM){
-    state.markersLayer.eachLayer(m=>{
-      const el = m.getElement && m.getElement();
-      if(!el) return;
-      hideLabel(el.querySelector('.fm-name'));
-      const chip = el.querySelector('.fm-label');
-      if(chip) chip.classList.add('fm-hide');
-    });
-    _shownLabels = new Set();
-    return;
-  }
-  const margin = 48;
+  const zoom = map.getZoom();
+  const reveal = Math.max(0, Math.min(1, (zoom - MIN_LABEL_ZOOM) / 1.2));
+  const margin = 60;
   const entries = [];
   state.markersLayer.eachLayer(m=>{
     const info = m._pinLabel;
-    if(!info || !info.name) return;
+    if(!info) return;
     const el = m.getElement();
     if(!el) return;
-    if(info.selected){                          // above the floor: the selected chip shows
-      const chip = el.querySelector('.fm-label');
-      if(chip) chip.classList.remove('fm-hide');
-    }
-    const label = el.querySelector('.fm-name');   // null for the selected pin (it uses .fm-label, always shown)
+    const pill = el.querySelector('.fm-pill');
+    if(!pill) return;
+    const txt = pill.querySelector('.fm-txt');
+    if(!info.name || reveal <= 0){ setPillReveal(pill, txt, 0); return; }   // no name, or below the floor -> collapsed
     const pt = map.latLngToContainerPoint(m.getLatLng());
     if(pt.x < -margin || pt.x > size.x+margin || pt.y < -margin || pt.y > size.y+margin){
-      hideLabel(label);
-      return;                                 // off-screen: can't collide, stays hidden
+      setPillReveal(pill, txt, 0);            // off-screen: can't collide, stays a collapsed pin
+      return;
     }
-    // estimated label box, centred above the pin head (~52px above the tip)
-    const w = Math.min(150, 18 + info.name.length * 6.6);
-    const cx = pt.x, cy = pt.y - 52;
-    const box = { l:cx - w/2, r:cx + w/2, t:cy - 10, b:cy + 10 };
+    // estimated expanded pill box, RECENTRED on the point (padL + glyph + gap + text + padR)
+    const nameW = Math.min(150, 8 + info.name.length * 6.6);
+    const half = (5 + 14 + 6 + nameW + 13) / 2;
+    const box = { l:pt.x - half, r:pt.x + half, t:pt.y - 34, b:pt.y - 2 };
     const tier = info.selected ? 0 : info.halo ? 1 : info.found ? 3 : 2;
-    entries.push({ label, box, key: tier*100000 + info.rank, selected:info.selected, id:info.id });
+    entries.push({ pill, txt, box, key: tier*100000 + info.rank, selected:info.selected });
   });
-  entries.sort((a,b)=> a.key - b.key);
+  entries.sort((a,b)=> a.key - b.key);          // selected, then nearest-rank first — stable during a pan
   const placed = [];
-  const nowShown = new Set();
   const hit = (x,y)=> x.l < y.r && x.r > y.l && x.t < y.b && x.b > y.t;
   for(const e of entries){
-    if(e.selected){ placed.push(e.box); continue; }   // prominent chip always shows; claim its box
-    if(placed.some(p=> hit(e.box, p))){
-      hideLabel(e.label);
-    } else {
-      placed.push(e.box);
-      showLabel(e.label, e.id);
-      nowShown.add(e.id);
-    }
+    if(e.selected){ placed.push(e.box); setPillReveal(e.pill, e.txt, 1); continue; }  // selected always expands, claims first
+    if(placed.some(p=> hit(e.box, p))){ setPillReveal(e.pill, e.txt, 0); }             // would collide -> stay a collapsed pin
+    else { placed.push(e.box); setPillReveal(e.pill, e.txt, reveal); }
   }
-  _shownLabels = nowShown;
 }
 function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
@@ -12915,36 +12908,39 @@ function refreshTargetsUI(){
     const color = colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
     const isSelected = selectedTarget && t.id===selectedTarget.id;
-    /* Selected pin's chip is always shown (and lifted above neighbours via
-       zIndexOffset); every other named pin gets the quiet .fm-name, hidden until
-       updatePinLabels() clears it to show. Both are the same size — the selected
-       one just doesn't get culled. Both are filled with the pin's category colour
-       so the label reads its type at a glance; text colour is picked for contrast. */
+    /* #270 — selected pill always unfurls its name (and is lifted above neighbours
+       via zIndexOffset); every other pill starts collapsed and updatePinLabels()
+       expands the ones that fit. The pill is filled with the pin's category colour
+       and carries that category's glyph, so it reads its type at a glance whether or
+       not the name is open; the glyph + text ink colour is picked for contrast. */
     /* ONE hue per category, same for visited and unvisited — status is carried by
        a corner check BADGE (below), not by brightness. This keeps category colour
        reliable (6 hues, not 12 shades that blur into each other) and separates the
        two signals: hue = what it is, badge = whether you've been. The label fills
        with the same colour, so chip and pin always match. */
     const pinColor = color;
-    const labelStyle = `background:${pinColor};color:${labelTextColor(pinColor)}`;
-    const nameHtml = t.name
-      ? (isSelected
-          ? `<div class="fm-label" style="${labelStyle}">${escapeHtml(t.name)}</div>`
-          : `<div class="fm-name" style="${labelStyle}">${escapeHtml(t.name)}</div>`)
+    const ink = labelTextColor(pinColor);
+    /* #270 — the pill is built COLLAPSED (label max-width 0). updatePinLabels()
+       expands the ones that fit once you're zoomed past MIN_LABEL_ZOOM. The arrow
+       is constant and always present; only the name animates. iconAnchor is the
+       arrow tip (bottom-centre of the 200×40 box), so it stays on the geo point. */
+    const checkHtml = t.found
+      ? '<span class="fm-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4 4L19 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
       : '';
     const icon = L.divIcon({
       className:'',
       html:`<div class="fm-wrap">
-        ${nameHtml}
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
-        <div class="fm-shadow"></div>
-        <div class="fm-icon">
-          ${dropPinSVG(pinColor, false, 26, 37)}
+        <div class="fm-pill${isSelected ? ' sel' : ''}" style="background:${pinColor};color:${ink}">
+          <span class="fm-gly">${categoryGlyphSVG(t.category, ink)}</span>
+          <span class="fm-txt">${t.name ? escapeHtml(t.name) : ''}</span>
+          ${checkHtml}
         </div>
-        ${t.found ? `<div class="fm-check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4 4L19 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>` : ''}
+        <div class="fm-arrow" style="border-top-color:${pinColor}"></div>
+        <div class="fm-shadow"></div>
       </div>`,
-      iconSize:[38,56],
-      iconAnchor:[19,52]
+      iconSize:[200,40],
+      iconAnchor:[100,40]
     });
     const m = L.marker([t.lat,t.lng], {icon, zIndexOffset: isSelected ? 500 : 0}).addTo(state.markersLayer);
     /* idx is this pin's distance rank from you — targets is currentTargetsSorted(),
