@@ -1317,6 +1317,7 @@
     width:0;height:0;
     border-left:6px solid transparent;border-right:6px solid transparent;
     border-top:7px solid #888;
+    transition:border-width .16s ease,opacity .16s ease;
   }
   /* The pill: icon + expanding name, centred on the point, sitting just above the
      arrow. pointer-events:auto so the whole pill is the tap target. overflow is
@@ -1326,6 +1327,7 @@
     display:inline-flex;align-items:center;height:24px;
     padding:0 5px;border-radius:999px;white-space:nowrap;
     pointer-events:auto;box-shadow:0 2px 7px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.25);
+    transition:bottom .16s ease,height .16s ease,padding .16s ease;
   }
   .fm-pill.sel{box-shadow:0 0 0 2px rgba(237,233,221,0.55),0 3px 10px rgba(0,0,0,0.5);}
   .fm-gly{flex:0 0 auto;display:flex;}
@@ -7191,7 +7193,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.10b';
+const APP_VERSION = '2026.08.10c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12824,6 +12826,34 @@ function scheduleLabelUpdate(){
    map area shown before any name appears, which crowds). Above the floor, the
    collision pass still decides which fit. */
 const MIN_LABEL_ZOOM = 15.0;
+/* #270 — the far-zoom collapse tier. At/below MIN_DOT_ZOOM a non-selected pin is a
+   small glyph DOT (no arrow, no name), read as texture; by DOT_SETTLE_TOP it has
+   settled up into a full pin (arrow + glyph); between the two it interpolates. The
+   default map frame sits ~zoom 13, so opening wide shows dots. The SELECTED pin never
+   collapses (see updatePinLabels), so your current pick stays a findable pin when you
+   zoom out among the dots. Raise MIN_DOT_ZOOM to keep pins visible when zoomed further
+   out; widen the gap to DOT_SETTLE_TOP for a slower settle. */
+const MIN_DOT_ZOOM = 13.5;
+const DOT_SETTLE_TOP = 14.5;
+/* #270 — apply the collapse factor c in [0,1] (0 = full pin, 1 = fully collapsed dot)
+   to one pill: shrink the glyph 14->13, shrink the pill 24->20, shrink the arrow to
+   nothing, and SETTLE the pill down so its centre drops from 18px above the point to
+   3px above it (a small floating dot over its shadow — the shadow marks the exact
+   spot). Selected pins are passed c=0 so they never collapse. */
+function setPillCollapse(pill, arrow, gly, c){
+  const pillH = 24 - 4*c;                 // 24 -> 20
+  const centreAbove = 18 - 15*c;          // pill-centre height above the point: 18 (pin) -> 3 (dot), ~15px settle
+  pill.style.height = pillH + 'px';
+  pill.style.bottom = (centreAbove - pillH/2) + 'px';   // 6 (pin) -> -7 (dot)
+  if(gly){ const g = Math.round(14 - c); gly.setAttribute('width', g); gly.setAttribute('height', g); }
+  if(arrow){
+    const h = 7*(1-c), w = 6*(1-c);
+    arrow.style.borderLeftWidth = w + 'px';
+    arrow.style.borderRightWidth = w + 'px';
+    arrow.style.borderTopWidth = h + 'px';
+    arrow.style.opacity = (1-c);
+  }
+}
 /* #270 — set a pill's label reveal r in [0,1]: 0 = collapsed to the glyph (a
    round pin), 1 = fully unfurled. A partway r clips the name, which reads as the
    label sliding open. The arrow and glyph never move; only the name span animates. */
@@ -12848,6 +12878,7 @@ function updatePinLabels(){
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
   const zoom = map.getZoom();
+  const collapseAll = Math.max(0, Math.min(1, (DOT_SETTLE_TOP - zoom) / (DOT_SETTLE_TOP - MIN_DOT_ZOOM)));
   const reveal = Math.max(0, Math.min(1, (zoom - MIN_LABEL_ZOOM) / 1.2));
   const margin = 60;
   const entries = [];
@@ -12858,8 +12889,12 @@ function updatePinLabels(){
     if(!el) return;
     const pill = el.querySelector('.fm-pill');
     if(!pill) return;
+    const arrow = el.querySelector('.fm-arrow');
+    const gly = pill.querySelector('.fm-gly svg');
     const txt = pill.querySelector('.fm-txt');
-    if(!info.name || reveal <= 0){ setPillReveal(pill, txt, 0); return; }   // no name, or below the floor -> collapsed
+    const c = info.selected ? 0 : collapseAll;   // the SELECTED pin never collapses — it stays a findable pin among the dots
+    setPillCollapse(pill, arrow, gly, c);
+    if(!info.name || reveal <= 0 || c > 0){ setPillReveal(pill, txt, 0); return; }   // no name, below the floor, or collapsing -> no name
     const pt = map.latLngToContainerPoint(m.getLatLng());
     if(pt.x < -margin || pt.x > size.x+margin || pt.y < -margin || pt.y > size.y+margin){
       setPillReveal(pill, txt, 0);            // off-screen: can't collide, stays a collapsed pin
