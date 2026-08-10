@@ -1339,11 +1339,12 @@
     transition:max-width .16s ease,opacity .16s ease,margin-left .16s ease;
   }
   @media (prefers-reduced-motion: reduce){ .fm-txt{transition:none;} }
-  /* Visited badge — moss circle + white check on the glyph's top-right corner, the
-     same on every category so status never depends on hue. Rides the glyph (pill's
-     first child), so it stays put as the pill expands. */
+  /* Visited badge — moss circle + white check on the pill's top-RIGHT corner, the
+     same on every category so status never depends on hue. Pinned to the right edge
+     (right:-4px), so it rides the end of the name as the pill expands and sits at the
+     glyph circle's corner when collapsed. */
   .fm-check{
-    position:absolute;top:-4px;left:13px;
+    position:absolute;top:-4px;right:-4px;
     width:14px;height:14px;border-radius:50%;
     background:var(--moss);border:2px solid #fff;
     display:flex;align-items:center;justify-content:center;
@@ -7190,7 +7191,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.10a';
+const APP_VERSION = '2026.08.10b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12817,10 +12818,12 @@ function scheduleLabelUpdate(){
    map stays clean. A zoom LEVEL (not a distance), so it lives here rather than in
    the #65 distance register. The map's default frame sits around zoom 13, so 15.5
    is roughly "a few blocks in" — raise it to reveal names later, lower it to
-   reveal them sooner. Was 16; dropped to 15.5 (half a level, made possible by the
-   continuous-zoom change) so labels appear a little sooner when zoomed out. Above
-   the floor, the collision pass decides which fit. */
-const MIN_LABEL_ZOOM = 15.5;
+   reveal them sooner. Was 16, then 15.5; dropped again to 15.0 (#270) because the
+   expanded pill reads as valuable enough to show a touch sooner when zoomed out —
+   half a level more, deliberately not a full one (a full level roughly doubles the
+   map area shown before any name appears, which crowds). Above the floor, the
+   collision pass still decides which fit. */
+const MIN_LABEL_ZOOM = 15.0;
 /* #270 — set a pill's label reveal r in [0,1]: 0 = collapsed to the glyph (a
    round pin), 1 = fully unfurled. A partway r clips the name, which reads as the
    label sliding open. The arrow and glyph never move; only the name span animates. */
