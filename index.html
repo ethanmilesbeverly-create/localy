@@ -1524,8 +1524,14 @@
      Display-only: the photo is shown read-only; there are no photo buttons in the
      sheet (the camera opens at capture, never from here). */
   .ps-photo-block{ margin-top:10px; }
+  /* #262 — was object-fit:cover, which centre-cropped a photo whose aspect ratio
+     didn't match the box. object-fit:contain shows the WHOLE photo at its true
+     ratio, scaled down to fit the bounded box (never grows the sheet, so the #233
+     --sheet-max cap can't be breached); the leftover letterbox area shows the
+     --surface-2 mat so the bars read as an intentional frame, not a gap. */
   .ps-photo{
-    display:block; width:100%; max-height:280px; object-fit:cover;
+    display:block; width:100%; max-height:280px; object-fit:contain;
+    background:var(--surface-2);
     border-radius:12px; border:1px solid var(--line);
   }
   /* #209 — post-capture photo prompt: full-page semi-transparent overlay, kept
@@ -7307,7 +7313,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11q';
+const APP_VERSION = '2026.08.11r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
