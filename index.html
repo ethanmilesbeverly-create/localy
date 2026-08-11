@@ -4046,6 +4046,10 @@ function labelTextColor(hex){
 const CATEGORY_GLYPH = {
   restaurants:'<path d="M8 3v6a2 2 0 0 1-4 0V3M6 3v18M17 3c-1.6 0-2.5 1.6-2.5 4.5S16 12 17 12v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   bars:'<path d="M4 4h16l-8 8zM12 12v7M8 20h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  /* #272 — the combined bucket needs its own glyph now that a barsrest gem no
+     longer borrows the 'bars' cocktail or 'restaurants' fork. Fork (left) +
+     cocktail glass (right) = "Bar & Restaurant", legible at 14px. */
+  barsrest:'<path d="M7 3v5a2 2 0 0 1-4 0V3M5 3v18M13 6h8l-4 5zM17 11v7M14 18h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   shops:'<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   park:'<path d="M12 3 6 11h3l-4 6h14l-4-6h3zM12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   trail:'<path d="M3 19 10 7l4 6 2-3 5 9zM15 7l2.5-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -4493,11 +4497,27 @@ const GEM_BUCKET_CATEGORY = {
   lore:'history'
 };
 function gemDisplayCategory(g, ctxCategory){
-  /* Falls back to 'local' (the neutral cream pin), never to 'gems' — a row with
-     no stored category is a data anomaly, and dropping it into the gold "Hidden
-     Gem" bucket would reintroduce exactly the marker we just removed. With this,
-     no pin anywhere renders as the gems category. */
-  return ctxCategory || GEM_BUCKET_CATEGORY[g && g.bucket] || 'local';
+  /* #272 — the gem's STORED bucket now wins over the blend-slot ctxCategory.
+     The single `barsrest` bucket has no bars-vs-restaurants distinction in the
+     data — every food/drink/nightlife gem is `barsrest` (the submit form + AI
+     gate only ever write park/shops/barsrest/history/art). blendCategory used to
+     narrow it to whichever slot the gem was blended into (blendCategory →
+     gemToPoint(g,'restaurants')), so a bar/blues club (Kingston Mines) rendered
+     "Restaurant" with a fork glyph purely by which arm won the dedup — a coin
+     flip on a distinction the data does not carry. Returning the bucket's own
+     category makes a barsrest gem read the honest combined "Bar & Restaurant"
+     (PIN_CAT_LABEL.barsrest) every time. For park/shops/history/art the bucket
+     category already EQUALS the ctx, so this is a no-op there. This is gem-only
+     (gemDisplayCategory is reached solely via gemPoint) — OSM/Wikipedia places
+     keep the specific 'bars'/'restaurants' categorizeOsm gives them, so a real
+     restaurant still reads "Restaurant". The id is `catgem<gemId>` regardless of
+     category (gemPoint), so #147 found-state and #148 counts are untouched, and
+     CAPTURED_MODE_ACCEPT['barsrest'] already accepts ['bars','restaurants',
+     'barsrest'] so old and new captures both restore onto the card.
+     Falls back to `ctxCategory` for a gem with no/unknown bucket, then to 'local'
+     (the neutral cream pin) — never to 'gems', which would reintroduce the marker
+     #67 removed. */
+  return GEM_BUCKET_CATEGORY[g && g.bucket] || ctxCategory || 'local';
 }
 function gemPoint(g, idPrefix, ctxCategory, extra){
   return Object.assign({
@@ -7203,7 +7223,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.10f';
+const APP_VERSION = '2026.08.11a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
