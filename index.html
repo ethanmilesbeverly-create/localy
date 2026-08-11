@@ -415,12 +415,18 @@
      account) and NOT an error screen; both are already solved and must never be
      confused with this one. It is the cheap half of #58: ONE persistent banner
      reused on every personal-data surface while loadFailedKeys().size > 0, in
-     place of a distinct couldn't-load treatment per surface (that is #58's Med
-     half and is deferred, incl. the pin checkmarks). Styled after #19's
+     place of a distinct couldn't-load treatment per surface (that distinct
+     per-surface treatment — an "unknown" pin glyph, a couldn't-check gem-map
+     state — is #58's Med half and stays deferred). Styled after #19's
      browsing-indicator — the established "the screen is not showing you what you
      think" pattern — but in --danger, not --yellow, so it reads as a fault
      rather than as browsing. Rendered inline at the top of the surface, so it
-     flows with the content rather than floating over the map like #19. */
+     flows with the content rather than floating over the map like #19.
+     SURFACES CARRYING IT: the passport (#passport-loadfail), My Guides
+     (renderMyHunts), the My-submissions list (renderGemSubmissions, gated on
+     loadMyGems's own failure flag — a Supabase query, not a loadFailedKeys row),
+     and the MAP (#map-loadfail below, gated on the 'progress' key specifically,
+     because that is the read whose failure silently un-checks captured pins). */
   .loadfail-banner{
     display:flex;align-items:center;gap:10px;
     background:var(--surface);border:1px solid var(--danger);color:var(--text);
@@ -436,6 +442,27 @@
     padding:6px 12px;cursor:pointer;border-radius:8px;
   }
   .loadfail-retry:active{background:rgba(192,82,76,0.15);}
+  /* #58 — the MAP instance of the couldn't-load banner. The map has no inline
+     content column to flow into, so unlike the .loadfail-banner surfaces this one
+     FLOATS like #browsing-indicator (the #19 pattern it is styled after), same
+     slot, same shadow — but in --danger. It exists because a failed 'progress'
+     read leaves state.progress {} and isFound() returns false for every pin, so
+     every already-captured spot silently loses its check badge: without this the
+     map claims, wrongly and without a word, that you have captured nothing. When
+     browsing is ALSO active both want top:108px, so the sibling rule drops this
+     one below the browsing bar (browsing-indicator precedes it in the markup). */
+  #map-loadfail{
+    position:absolute;top:108px;left:16px;right:16px;z-index:501;
+    display:none;align-items:center;gap:10px;
+    background:var(--surface);border:1px solid var(--danger);color:var(--text);
+    border-radius:10px;padding:9px 8px 9px 12px;font-size:12.5px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.4);
+  }
+  #map-loadfail.show{display:flex;}
+  #map-loadfail .lf-icon{width:16px;height:16px;flex-shrink:0;color:var(--danger);}
+  #map-loadfail .lf-text{flex:1;min-width:0;line-height:1.3;}
+  #map-loadfail .lf-text b{color:var(--danger);font-weight:700;}
+  #browsing-indicator.show ~ #map-loadfail.show{top:160px;}
 
   /* ---------- Screens ---------- */
   .screen{
@@ -990,6 +1017,7 @@
   #screen-map.drawer-open #stale-hunt-banner,
   #screen-map.drawer-open #map-search-row,
   #screen-map.drawer-open #browsing-indicator,
+  #screen-map.drawer-open #map-loadfail,
   #screen-map.drawer-open #search-here-btn,
   #screen-map.sheet-open #search-here-btn,
   #screen-map.drawer-open #map-attrib,
@@ -2554,6 +2582,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         Exit
       </button>
+    </div>
+    <!-- #58 — the map's couldn't-load banner: shown while the 'progress' read
+         has failed, so captured pins that are silently showing unchecked don't
+         read as "you've captured nothing". Retry re-reads progress and clears it
+         on success (retryLoadPersonal → refreshTargetsUI). Copy is static;
+         updateMapLoadFail() only toggles .show. -->
+    <div id="map-loadfail" role="status" aria-live="polite">
+      <svg class="lf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span class="lf-text"><b>Can't reach your progress.</b> Captured spots may show unchecked until this reconnects.</span>
+      <button class="loadfail-retry" type="button" onclick="retryLoadPersonal()">Retry</button>
     </div>
     <button id="tilt-toggle-btn" class="is-2d" onclick="toggleTilt()" aria-label="Toggle 3D view">2D</button>
     <!-- #91 — always visible, centred, text only. The (i) icon and the
@@ -6560,16 +6598,23 @@ async function loadMyGems(){
       id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
       lat:r.lat, lng:r.lng, status:r.status
     }));
+    state._myGemsLoadFailed = false;   // #58 — a clean read clears the couldn't-load flag
   }catch(e){
     /* #62 — WAS A SILENT [] AND STILL DEGRADES TO ONE, but it now says so.
-       #1 records that this function swallows failures into an empty array,
+       #1/#58 records that this function swallows failures into an empty array,
        which renders as "you have submitted nothing" rather than "couldn't
        check". Adding ai_reason to the select above is exactly the kind of
        change that can start failing here (missing column, RLS), and a
        regression that presents as an empty list with a clean console is the
-       worst version of it. Not the full #1 treatment — that is still owed. */
-    console.warn('[#62] loadMyGems failed — submissions list will render empty', e);
+       worst version of it.
+       #58 — the flag turns that silent [] into an honest state: renderGemSubmissions
+       reads _myGemsLoadFailed and, when the list is empty BECAUSE the read failed,
+       shows the couldn't-load banner + a Retry instead of a blank/absent section.
+       This is a Supabase query, not a persisted key, so it is NOT in loadFailedKeys
+       and gets its own flag + its own retry (retryLoadMyGems). */
+    console.warn('[#62/#58] loadMyGems failed — submissions list will show couldn\'t-load', e);
     state.gemSubmissions = [];
+    state._myGemsLoadFailed = true;
   }
 }
 
@@ -7257,7 +7302,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11o';
+const APP_VERSION = '2026.08.11p';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8290,6 +8335,7 @@ async function clearMyProgress(){
     state.lastWalkTime = null;
     state.myHunts = [];
     state.gemSubmissions = [];
+    state._myGemsLoadFailed = false;   // #58 — a wipe is a genuine empty, not a failed read
     state.editingHuntId = null;
     /* If the guide you were partway through is one we just deleted, its points
        are still in state.currentHunt and the map would keep drawing a route
@@ -10870,7 +10916,23 @@ function renderGemSubmissions(){
   const el = document.getElementById('gem-submissions-section');
   if(!el) return;
   const subs = state.gemSubmissions || [];
-  if(subs.length === 0){ el.innerHTML=''; return; }
+  if(subs.length === 0){
+    /* #58 — empty is now TWO states, and they must not read the same. A genuine
+       "you haven't submitted anything" stays silent (renders nothing, as before);
+       a read that FAILED shows the couldn't-load banner so it doesn't lie that you
+       submitted nothing. The Retry re-runs loadMyGems (a Supabase query, so its own
+       retry — retryLoadPersonal only re-reads the persisted keys, not this). */
+    if(state._myGemsLoadFailed){
+      el.innerHTML = '<div class="loadfail-banner" role="status">'
+        + '<svg class="lf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+        + '<div class="lf-text"><b>Couldn\'t load your submissions.</b> This isn\'t "you haven\'t submitted anything" — we couldn\'t check. Anything you\'ve submitted is safe.</div>'
+        + '<button class="loadfail-retry" type="button" onclick="retryLoadMyGems()">Retry</button>'
+        + '</div>';
+    }else{
+      el.innerHTML='';
+    }
+    return;
+  }
 
   const pending  = subs.filter(g=>g.status!=='approved' && g.status!=='rejected').length;
   const approved = subs.filter(g=>g.status==='approved').length;
@@ -10905,6 +10967,20 @@ function renderGemSubmissions(){
     </summary>
     <div class="gs-body"><div class="mode-grid">${rows}</div></div>
   </details>`;
+}
+/* #58 — the couldn't-load retry for the My-submissions list. loadMyGems re-runs
+   the Supabase query and sets/clears _myGemsLoadFailed itself, so this just
+   re-renders after: a clean read shows the list (or a true empty), a still-failed
+   read shows the banner again. Guarded against a double-tap. */
+async function retryLoadMyGems(){
+  if(state._retryingMyGems) return;
+  state._retryingMyGems = true;
+  try{
+    await loadMyGems();
+    renderGemSubmissions();
+  }finally{
+    state._retryingMyGems = false;
+  }
 }
 /* Gem moderation is deliberately NOT in the client. Approvals happen admin-side
    in Supabase (see moderation.sql): the `pending_review` view is the queue, and
@@ -13050,6 +13126,7 @@ function updatePinLabels(){
 }
 function refreshTargetsUI(){
   const badge = document.getElementById('list-toggle-badge');
+  updateMapLoadFail();   // #58 — keep the map's couldn't-load banner in step; runs both branches below
   if(!state.currentHunt){
     updateHuntEmptyState(null);
     document.getElementById('target-list').innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:10px 0;">No guide active — choose one from the guide menu up top.</p>';
@@ -14584,6 +14661,22 @@ function loadFailBannerHTML(){
     + '<div class="lf-text"><b>Can\'t reach your progress right now.</b> These aren\'t lost — we just couldn\'t load them. New finds won\'t save until this reconnects.</div>'
     + '<button class="loadfail-retry" type="button" onclick="retryLoadPersonal()">Retry</button>'
     + '</div>';
+}
+
+/* #58 — the MAP surface's half of the same honesty. The other loadfail surfaces
+   render zeros (a count, a list); the map instead silently DROPS the check badge
+   off every captured pin, because isFound() reads state.progress which is {} on a
+   failed read. This does NOT try to paint an "unknown" pin state per marker — that
+   is the deferred Med half — it just shows/hides the floating #map-loadfail banner
+   so the map stops asserting, wordlessly, that nothing is captured. Gated on the
+   'progress' key specifically (not loadFailedKeys().size): a failed read of stats
+   or achievements does not un-check a pin, so those must not raise the map banner.
+   Called from refreshTargetsUI (every tick + after a successful retry, which is
+   also where the markers rebuild), so it tracks the live state for free. */
+function updateMapLoadFail(){
+  const el = document.getElementById('map-loadfail');
+  if(!el) return;
+  el.classList.toggle('show', loadFailedKeys().has('progress'));
 }
 
 /* =========================================================
