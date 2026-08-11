@@ -7231,7 +7231,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11c';
+const APP_VERSION = '2026.08.11d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8877,7 +8877,29 @@ function addBaseLayer(map){
      just don't wire the error-fallback in that (rare) case. */
   try {
     const ml = gl.getMaplibreMap && gl.getMaplibreMap();
-    if(ml && ml.on){ ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); }); }
+    if(ml && ml.on){
+      ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); });
+      /* COVERAGE-GAP FIX (2026.08.11d). Reported + reproduced from a device
+         screenshot: zoom all the way out, then pan, and the map paints only part
+         of the viewport — a blank vertical band on one side, WITHIN the world (the
+         painted side was contiguous Chicago suburbs, so it is not a pan-past-edge).
+         The nested MapLibre GL canvas fell out of size-sync with the Leaflet
+         container: the app calls state.leafletMap.invalidateSize() on framing
+         (centerOnPlayer / fitMapToHunt) and the container can also change on a
+         rotate / toolbar show-hide, but nothing resized the GL canvas in lockstep,
+         so it kept covering an old, smaller rectangle. Forcing a MapLibre resize()
+         when the view settles recomputes the canvas from the live container size
+         and repaints the whole viewport, closing the band. moveend/zoomend (settle
+         only, not every drag frame) is enough because the gap persists into the
+         settled state; 'resize' catches orientation / chrome changes. An initial
+         resize on load covers the first-paint case. All wrapped so a not-yet-ready
+         GL map or a transient throw can't break the basemap. Scope: main map only
+         via addBaseLayer's caller set — the pickers route through here too and a
+         resize is harmless there, so this needs no per-site duplication. */
+      const glResize = () => { try { ml.resize(); } catch(_){} };
+      if(ml.loaded && ml.loaded()) glResize(); else ml.on('load', glResize);
+      map.on('moveend zoomend resize', glResize);
+    }
   } catch(_){}
 }
 
@@ -9085,29 +9107,16 @@ function setupBaseMap(){
      thing that motivated #256 is unaffected. Set at ALL THREE L.map sites
      (leaflet-map / suggest-gem-map / create-map — the #250 three-sites rule) since
      all three now carry the GL layer. Raster fallback is unaffected either way. */
-  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false, maxBoundsViscosity:1.0}).setView([start.lat, start.lng], start.zoom);
-  /* WORLD PAN-CLAMP. Reported: zoom all the way out, then pan, and the map goes
-     empty on the sides. There is no maxBounds/worldCopyJump anywhere and the
-     min-zoom floor is only set dynamically (base construction min zoom is
-     Leaflet's default 0), so at a low zoom nothing stops a drag from carrying the
-     single world copy out of the viewport and leaving the container's empty
-     ground on the exposed edges. This clamps the pannable area to the web-mercator
-     world (±180 lng, ±85.0511 lat = the mercator limit, so the poles are capped
-     too) with viscosity 1.0 = a hard wall, so a pan can no longer reveal the void
-     beyond the world's edge. It never bites normal use — every real frame
-     (centerOnPlayer/fitMapToHunt, searchedArea, guides) sits deep inside these
-     bounds — it only stops the drag-off-the-edge at far zoom-out.
-     Shipped as HARDENING, not a proven render diagnosis (#92): I can't reproduce
-     on a phone, so this removes the ABILITY to reach the empty state rather than
-     claiming to have found the exact renderer gap. RE-OPEN BREADCRUMB: if the void
-     still shows AFTER this — i.e. it appears WITHIN the world bounds, not past the
-     edge — then it's a within-bounds paint gap in the MapLibre-GL-in-Leaflet layer
-     (renderWorldCopies) / the CARTO raster wrap, not a pan-past-edge, and this
-     clamp won't have touched it. SCOPE: main map only. The two picker maps
-     (#suggest-gem-map z16, #create-map z14) never lower their floor toward 0 and
-     can't reach the void, so the #250/#256 three-sites rule is considered and
-     deliberately not applied to a corrective that only the main map needs. */
-  state.leafletMap.setMaxBounds([[-85.0511, -180], [85.0511, 180]]);
+  state.leafletMap = L.map('leaflet-map', {zoomControl:false, attributionControl:false, bounceAtZoomLimits:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat, start.lng], start.zoom);
+  /* GRAVESTONE (2026.08.11c, superseded by d): the "empty on the sides when zoomed
+     out and panned" report was first fixed with a world maxBounds pan-clamp
+     (±180 lng / ±85.0511 lat, viscosity 1.0), on the theory that a drag was
+     carrying the world out of the viewport past its edge. A device screenshot
+     DISPROVED that: the blank band sits WITHIN the world (contiguous Chicago
+     suburbs on the painted side), so it is a GL-layer COVERAGE gap, not a
+     pan-past-edge — the clamp was inert here and was reverted. The real fix lives
+     in addBaseLayer (re-sync the nested MapLibre canvas to the container on settle).
+     Do not re-add a maxBounds clamp for this symptom; it addresses a different one. */
   addBaseLayer(state.leafletMap);
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
   // Option C — update which pin names fit live during the gesture (continuous
