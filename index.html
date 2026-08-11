@@ -7231,7 +7231,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11d';
+const APP_VERSION = '2026.08.11e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8877,29 +8877,37 @@ function addBaseLayer(map){
      just don't wire the error-fallback in that (rare) case. */
   try {
     const ml = gl.getMaplibreMap && gl.getMaplibreMap();
-    if(ml && ml.on){
-      ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); });
-      /* COVERAGE-GAP FIX (2026.08.11d). Reported + reproduced from a device
-         screenshot: zoom all the way out, then pan, and the map paints only part
-         of the viewport — a blank vertical band on one side, WITHIN the world (the
-         painted side was contiguous Chicago suburbs, so it is not a pan-past-edge).
-         The nested MapLibre GL canvas fell out of size-sync with the Leaflet
-         container: the app calls state.leafletMap.invalidateSize() on framing
-         (centerOnPlayer / fitMapToHunt) and the container can also change on a
-         rotate / toolbar show-hide, but nothing resized the GL canvas in lockstep,
-         so it kept covering an old, smaller rectangle. Forcing a MapLibre resize()
-         when the view settles recomputes the canvas from the live container size
-         and repaints the whole viewport, closing the band. moveend/zoomend (settle
-         only, not every drag frame) is enough because the gap persists into the
-         settled state; 'resize' catches orientation / chrome changes. An initial
-         resize on load covers the first-paint case. All wrapped so a not-yet-ready
-         GL map or a transient throw can't break the basemap. Scope: main map only
-         via addBaseLayer's caller set — the pickers route through here too and a
-         resize is harmless there, so this needs no per-site duplication. */
-      const glResize = () => { try { ml.resize(); } catch(_){} };
-      if(ml.loaded && ml.loaded()) glResize(); else ml.on('load', glResize);
-      map.on('moveend zoomend resize', glResize);
-    }
+    if(ml && ml.on){ ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); }); }
+    /* PAN-SYNC CATCH-UP (2026.08.11e). Reported + reproduced from a device
+       screenshot: zoom all the way out, then pan, and the map paints only PART of
+       the viewport — a blank vertical band on one side, WITHIN the world (the
+       painted side was contiguous Chicago suburbs, so it is NOT a pan-past-edge).
+       ROOT, read straight out of maplibre-gl-leaflet@0.1.3's source: the plugin
+       syncs its GL layer to Leaflet on the 'move' event THROTTLED to 32ms, and it
+       does NOT listen to 'moveend'. A fast pan outruns the throttle, the final
+       frame is dropped, and there is no catch-up — so the GL container is left at a
+       STALE POSITION (setPosition never runs for that last frame), which reads as a
+       blank band on the trailing side and the map shifted the other way. It persists
+       because nothing re-syncs until the next move/zoom. FIX: on Leaflet 'moveend'
+       (and 'zoomend', belt-and-braces), call the plugin's own _update() — the exact
+       method its throttled 'move' handler uses, which recomputes topLeft from the
+       SETTLED Leaflet position, setPosition()s the container correctly and
+       re-centres the GL transform. Private method, but pinned to @0.1.3 so it's
+       stable; wrapped so a throw can't break the basemap. Scope: main map only via
+       addBaseLayer's callers (the pickers route through here too; a _update on
+       their moveend is harmless), so no per-site duplication.
+       GRAVESTONE — 2026.08.11c and d, both wrong, both superseded:
+         c: a world maxBounds pan-clamp (theory: world dragged past its edge). The
+            screenshot showed the void sits WITHIN the world, so the clamp was inert.
+            Reverted (gravestone at the L.map construction site).
+         d: MapLibre ml.resize() on settle (theory: canvas SIZE fell out of sync).
+            resize() repaints at the right SIZE but never repositions the container,
+            and the gap is a POSITION lag, not a size mismatch — so it did nothing.
+            Container SIZE changes (invalidateSize/rotate) are already handled by the
+            plugin's own 'resize'→_transitionEnd handler; position after a pan was the
+            real gap. Do not re-reach for resize() for this symptom. */
+    const glSync = () => { try { if(gl && gl._update) gl._update(); } catch(_){} };
+    map.on('moveend zoomend', glSync);
   } catch(_){}
 }
 
