@@ -7247,7 +7247,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11i';
+const APP_VERSION = '2026.08.11j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9243,6 +9243,35 @@ function setupBaseMap(){
           } catch(_){}
           lines.push('GLtransform: ' + trW + 'x' + trH);
           lines.push('GLzoom: ' + mlZoom + ' (L-1=' + (Math.round((m.getZoom()-1)*100)/100) + ')');
+          /* i's perspective gate did NOT fix it — buffer still healthy, still blank.
+             So either a compositing prop is applied at RUNTIME on some ancestor, or an
+             element is COVERING the map. Read both truths directly: (a) actual laid-out
+             canvas rect, (b) every ancestor carrying transform/filter/backdrop/
+             perspective/will-change/contain right now, (c) what element is actually on
+             top at a point in the blank region. */
+          try {
+            if(canv){
+              const cr = canv.getBoundingClientRect();
+              lines.push('canvasRect: ' + fmt(cr.left) + ',' + fmt(cr.top) + ' ' + fmt(cr.width) + 'x' + fmt(cr.height));
+              const props = ['transform','filter','backdropFilter','webkitBackdropFilter','perspective','willChange','contain','isolation','mixBlendMode','opacity'];
+              let chain = [], node = canv;
+              for(let i=0; i<10 && node && node !== document.body; i++){
+                const cs = getComputedStyle(node);
+                let hit = [];
+                props.forEach(p => { const v = cs[p]; if(v && v!=='none' && v!=='normal' && v!=='auto' && v!=='visible' && !(p==='opacity'&&v==='1')) hit.push(p+'='+String(v).slice(0,18)); });
+                const tag = node.tagName.toLowerCase() + (node.id?('#'+node.id):'') + (node.className && node.className.toString? ('.'+node.className.toString().trim().split(/\s+/).join('.')).slice(0,24):'');
+                if(hit.length) chain.push(tag+' {'+hit.join(' ')+'}');
+                node = node.parentElement;
+              }
+              lines.push('ANCESTORS w/ ctx:');
+              lines.push(chain.length ? chain.join('\n') : '  (none — clean chain)');
+              // hit-test a point in the blank upper-left region (well above the debug box)
+              const px = Math.round(cr.left + cr.width*0.35), py = Math.round(cr.top + cr.height*0.18);
+              const topEl = document.elementFromPoint(px, py);
+              const topDesc = topEl ? (topEl.tagName.toLowerCase() + (topEl.id?('#'+topEl.id):'') + (topEl.className&&topEl.className.toString?('.'+topEl.className.toString().trim().split(/\s+/)[0]):'')) : 'null';
+              lines.push('topEl@'+px+','+py+': ' + topDesc);
+            }
+          } catch(e){ lines.push('probe err: ' + (e&&e.message)); }
         } else {
           lines.push('(no GL layer — raster path)');
         }
