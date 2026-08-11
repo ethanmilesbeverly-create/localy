@@ -7231,7 +7231,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11e';
+const APP_VERSION = '2026.08.11f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8829,6 +8829,7 @@ function addBaseLayer(map){
      is running, #205 is moot. landing.html builds its own CARTO layer inline and
      does NOT route through here, so it keeps the raster band and is a separate fix. */
   function addRasterFallback(){
+    state._basemapEngine = 'raster'; state._glLayer = null; // MAP_DEBUG readout
     const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
     const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
     let errorCount = 0, fellBack = false;
@@ -8866,6 +8867,7 @@ function addBaseLayer(map){
   try {
     gl = L.maplibreGL({ style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', attributionControl: false });
     gl.addTo(map);
+    state._basemapEngine = 'gl'; state._glLayer = gl; // MAP_DEBUG readout
   } catch(_){
     toRaster();
     return;
@@ -9126,6 +9128,75 @@ function setupBaseMap(){
      in addBaseLayer (re-sync the nested MapLibre canvas to the container on settle).
      Do not re-add a maxBounds clamp for this symptom; it addresses a different one. */
   addBaseLayer(state.leafletMap);
+  /* ================= MAP_DEBUG — DIAGNOSTIC OVERLAY (2026.08.11f) =================
+     THREE fixes for "zoom all the way out, pan → gray blank" have missed (c world
+     maxBounds, d MapLibre resize, e plugin _update on moveend), so this build STOPS
+     GUESSING and instruments the surface instead — the handoff's TAB_DEBUG/atldebug
+     rule after plausible-but-unproven fixes. It is gated on an IN-FILE constant, NOT
+     a ?query param, because clearResetParam() replaceState-strips query params at
+     boot (documented gotcha), so a URL flag never survives to here. Set MAP_DEBUG
+     false and re-ship to remove it (this whole block goes when the cause is known).
+     It reads, live: which basemap engine is active (GL vs the raster fallback —
+     first thing to rule out), the Leaflet container size + zoom + min-zoom floor,
+     the GL layer CONTAINER element's CSS size and translate, and the GL CANVAS
+     backing + css size + the GL map's own zoom. If the blank is a raster fallback,
+     a GL container sized/placed wrong, or a GL zoom clamped below its min, one
+     screenshot of this at the blank state names it. */
+  const MAP_DEBUG = true;
+  if(MAP_DEBUG){
+    const dbg = document.createElement('div');
+    dbg.id = 'map-debug';
+    dbg.style.cssText = 'position:fixed;left:6px;bottom:120px;z-index:99999;'
+      + 'background:rgba(0,0,0,0.82);color:#0f0;font:11px/1.35 monospace;'
+      + 'padding:6px 8px;border-radius:6px;max-width:78vw;white-space:pre;'
+      + 'pointer-events:none;letter-spacing:0.2px;';
+    document.body.appendChild(dbg);
+    const fmt = n => (n==null ? '?' : Math.round(n));
+    const readTranslate = el => {
+      if(!el) return '?';
+      const t = (el.style && el.style.transform) || '';
+      const m = t.match(/translate3d\(([^,]+),\s*([^,]+)/) || t.match(/translate\(([^,]+),\s*([^,]+)/);
+      return m ? (Math.round(parseFloat(m[1]))+','+Math.round(parseFloat(m[2]))) : (t || 'none');
+    };
+    const updateMapDebug = () => {
+      try {
+        const m = state.leafletMap; if(!m) return;
+        const sz = m.getSize();
+        const eng = state._basemapEngine || '?';
+        let lines = [
+          'MAP_DBG ' + APP_VERSION,
+          'engine: ' + eng,
+          'Lzoom: ' + (Math.round(m.getZoom()*100)/100) + '  min:' + m.getMinZoom() + ' max:' + m.getMaxZoom(),
+          'Lsize: ' + fmt(sz.x) + 'x' + fmt(sz.y) + '  dpr:' + (Math.round((window.devicePixelRatio||1)*100)/100)
+        ];
+        const gl = state._glLayer;
+        if(gl){
+          let cont=null, canv=null, mlZoom='?';
+          try { cont = gl.getContainer && gl.getContainer(); } catch(_){}
+          try { canv = gl.getCanvas && gl.getCanvas(); } catch(_){}
+          try { const ml = gl.getMaplibreMap && gl.getMaplibreMap(); if(ml) mlZoom = Math.round(ml.getZoom()*100)/100; } catch(_){}
+          if(cont){
+            lines.push('GLbox css: ' + fmt(parseFloat(cont.style.width)) + 'x' + fmt(parseFloat(cont.style.height))
+              + '  off:' + cont.offsetWidth + 'x' + cont.offsetHeight);
+            lines.push('GLbox xy: ' + readTranslate(cont));
+          } else { lines.push('GLbox: <no container>'); }
+          if(canv){
+            lines.push('GLcanvas back: ' + canv.width + 'x' + canv.height);
+            lines.push('GLcanvas css: ' + fmt(parseFloat(canv.style.width)) + 'x' + fmt(parseFloat(canv.style.height))
+              + '  xy:' + readTranslate(canv));
+          } else { lines.push('GLcanvas: <none>'); }
+          lines.push('GLzoom: ' + mlZoom + ' (L-1=' + (Math.round((m.getZoom()-1)*100)/100) + ')');
+        } else {
+          lines.push('(no GL layer — raster path)');
+        }
+        dbg.textContent = lines.join('\n');
+      } catch(err){ dbg.textContent = 'MAP_DBG err: ' + (err && err.message); }
+    };
+    state.leafletMap.on('move zoom moveend zoomend resize', updateMapDebug);
+    setInterval(updateMapDebug, 500);
+    updateMapDebug();
+  }
+  /* =============== END MAP_DEBUG =============== */
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
   // Option C — update which pin names fit live during the gesture (continuous
   // 'zoom'/'move') and once more when it settles ('zoomend'/'moveend'), so names
