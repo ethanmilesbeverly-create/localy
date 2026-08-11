@@ -7247,7 +7247,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11k';
+const APP_VERSION = '2026.08.11l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8845,7 +8845,6 @@ function addBaseLayer(map){
      is running, #205 is moot. landing.html builds its own CARTO layer inline and
      does NOT route through here, so it keeps the raster band and is a separate fix. */
   function addRasterFallback(){
-    state._basemapEngine = 'raster'; state._glLayer = null; // MAP_DEBUG readout
     const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
     const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
     let errorCount = 0, fellBack = false;
@@ -8873,6 +8872,32 @@ function addBaseLayer(map){
     && (typeof maplibregl.supported !== 'function' || maplibregl.supported());
   if(!glReady){ addRasterFallback(); return; }
 
+  /* iOS → NATIVE RASTER BASEMAP (2026.08.11l). End of the c–k arc. The
+     "zoom all the way out, pan → blank map" bug is the maplibre-gl-leaflet@0.1.3
+     plugin failing to keep its nested GL canvas synced to Leaflet's map-pane through
+     this app's pan + invalidateSize churn on iOS/WebKit. MAP_DEBUG proved it
+     conclusively: in the blank state the canvas is HEALTHY (buffer allocated,
+     context alive, tiles+style loaded, centre valid) but its real screen rect rides
+     off the viewport (canvasRect x≈492 on a 390-wide screen) because the pane's pan
+     translation is never cancelled. Eleven fixes narrowed it precisely but every
+     timing-level patch (c maxBounds, d resize, e/k moveend re-sync, i perspective
+     gate) got close and drifted again on a slightly different interaction — the
+     plugin is structurally fragile here and pinned old. Leaflet's OWN raster tile
+     layer has no nested pane to drift: it positions tiles inside the pane the way
+     the markers already do, so this whole bug class cannot occur. We already trust
+     that path — it's the existing fallback — so iOS routes to it directly. Desktop
+     keeps the #256 vector basemap (the bug never reproduced there; vector crispness
+     and smooth continuous zoom stay). Gravestone for the vector-on-iOS approach: not
+     deleted, just not taken on iOS; if the plugin is ever updated/replaced this gate
+     is the one line to revisit. iPadOS 13+ reports as MacIntel, so the touch check
+     catches it. */
+  const isIOS = (function(){
+    const ua = navigator.userAgent || '';
+    return /iP(hone|od|ad)/.test(ua)
+      || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1);
+  })();
+  if(isIOS){ addRasterFallback(); return; }
+
   let gl, wentRaster = false, glErrors = 0;
   function toRaster(){
     if(wentRaster) return;
@@ -8883,7 +8908,6 @@ function addBaseLayer(map){
   try {
     gl = L.maplibreGL({ style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', attributionControl: false });
     gl.addTo(map);
-    state._basemapEngine = 'gl'; state._glLayer = gl; // MAP_DEBUG readout
   } catch(_){
     toRaster();
     return;
@@ -9159,145 +9183,6 @@ function setupBaseMap(){
      in addBaseLayer (re-sync the nested MapLibre canvas to the container on settle).
      Do not re-add a maxBounds clamp for this symptom; it addresses a different one. */
   addBaseLayer(state.leafletMap);
-  /* ================= MAP_DEBUG — DIAGNOSTIC OVERLAY (2026.08.11f) =================
-     THREE fixes for "zoom all the way out, pan → gray blank" have missed (c world
-     maxBounds, d MapLibre resize, e plugin _update on moveend), so this build STOPS
-     GUESSING and instruments the surface instead — the handoff's TAB_DEBUG/atldebug
-     rule after plausible-but-unproven fixes. It is gated on an IN-FILE constant, NOT
-     a ?query param, because clearResetParam() replaceState-strips query params at
-     boot (documented gotcha), so a URL flag never survives to here. Set MAP_DEBUG
-     false and re-ship to remove it (this whole block goes when the cause is known).
-     It reads, live: which basemap engine is active (GL vs the raster fallback —
-     first thing to rule out), the Leaflet container size + zoom + min-zoom floor,
-     the GL layer CONTAINER element's CSS size and translate, and the GL CANVAS
-     backing + css size + the GL map's own zoom. If the blank is a raster fallback,
-     a GL container sized/placed wrong, or a GL zoom clamped below its min, one
-     screenshot of this at the blank state names it. */
-  const MAP_DEBUG = true;
-  if(MAP_DEBUG){
-    const dbg = document.createElement('div');
-    dbg.id = 'map-debug';
-    dbg.style.cssText = 'position:fixed;left:6px;bottom:120px;z-index:99999;'
-      + 'background:rgba(0,0,0,0.82);color:#0f0;font:11px/1.35 monospace;'
-      + 'padding:6px 8px;border-radius:6px;max-width:78vw;white-space:pre;'
-      + 'pointer-events:none;letter-spacing:0.2px;';
-    document.body.appendChild(dbg);
-    const fmt = n => (n==null ? '?' : Math.round(n));
-    const readTranslate = el => {
-      if(!el) return '?';
-      const t = (el.style && el.style.transform) || '';
-      const m = t.match(/translate3d\(([^,]+),\s*([^,]+)/) || t.match(/translate\(([^,]+),\s*([^,]+)/);
-      return m ? (Math.round(parseFloat(m[1]))+','+Math.round(parseFloat(m[2]))) : (t || 'none');
-    };
-    const updateMapDebug = () => {
-      try {
-        const m = state.leafletMap; if(!m) return;
-        const sz = m.getSize();
-        const eng = state._basemapEngine || '?';
-        let lines = [
-          'MAP_DBG ' + APP_VERSION,
-          'engine: ' + eng,
-          'Lzoom: ' + (Math.round(m.getZoom()*100)/100) + '  min:' + m.getMinZoom() + ' max:' + m.getMaxZoom(),
-          'Lsize: ' + fmt(sz.x) + 'x' + fmt(sz.y) + '  dpr:' + (Math.round((window.devicePixelRatio||1)*100)/100)
-        ];
-        const gl = state._glLayer;
-        if(gl){
-          let cont=null, canv=null, mlZoom='?';
-          try { cont = gl.getContainer && gl.getContainer(); } catch(_){}
-          try { canv = gl.getCanvas && gl.getCanvas(); } catch(_){}
-          try { const ml = gl.getMaplibreMap && gl.getMaplibreMap(); if(ml) mlZoom = Math.round(ml.getZoom()*100)/100; } catch(_){}
-          if(cont){
-            lines.push('GLbox css: ' + fmt(parseFloat(cont.style.width)) + 'x' + fmt(parseFloat(cont.style.height))
-              + '  off:' + cont.offsetWidth + 'x' + cont.offsetHeight);
-            lines.push('GLbox xy: ' + readTranslate(cont));
-          } else { lines.push('GLbox: <no container>'); }
-          if(canv){
-            lines.push('GLcanvas back: ' + canv.width + 'x' + canv.height);
-            lines.push('GLcanvas css: ' + fmt(parseFloat(canv.style.width)) + 'x' + fmt(parseFloat(canv.style.height))
-              + '  xy:' + readTranslate(canv));
-            /* THE DECIDING READ (2026.08.11g): the c/d/e/f metrics were all healthy
-               and identical between the working and blank frames, so the gap is
-               INSIDE the WebGL context — MapLibre draws into its full canvas but iOS
-               Safari can silently CLAMP the drawing buffer below the requested size
-               at high dpr, leaving a rendered sub-rectangle. Read the ACTUAL buffer
-               vs the requested backing + the device max, which no earlier line saw. */
-            let ctx = null;
-            try { ctx = canv.getContext('webgl2') || canv.getContext('webgl') || canv.getContext('experimental-webgl'); } catch(_){}
-            if(ctx){
-              lines.push('GLbuffer real: ' + ctx.drawingBufferWidth + 'x' + ctx.drawingBufferHeight
-                + (ctx.drawingBufferWidth < canv.width || ctx.drawingBufferHeight < canv.height ? '  <-- CLAMPED' : '  (ok)'));
-              try { lines.push('ctxLost: ' + ctx.isContextLost()); } catch(_){}
-              try {
-                const mv = ctx.getParameter(ctx.MAX_VIEWPORT_DIMS);
-                lines.push('MAXviewport: ' + (mv ? (mv[0]+'x'+mv[1]) : '?') + '  MAXtex:' + ctx.getParameter(ctx.MAX_TEXTURE_SIZE));
-              } catch(_){}
-            } else { lines.push('GLbuffer: <no ctx>'); }
-          } else { lines.push('GLcanvas: <none>'); }
-          let trW='?', trH='?';
-          try {
-            const ml2 = gl.getMaplibreMap();
-            if(ml2){
-              if(ml2.transform){ trW = Math.round(ml2.transform.width); trH = Math.round(ml2.transform.height); }
-              /* g ruled out sizing/clamp: canvas, buffer and transform are all
-                 healthy while the map is blank. These four reads split the only
-                 remaining causes — a stalled style/tile load, an off-world/NaN
-                 centre after the pan, or a painted-but-not-composited buffer (all
-                 "loaded / valid centre" would point at the iOS compositing bug). */
-              let ld='?', sl='?', tl='?';
-              try { ld = ml2.loaded && ml2.loaded(); } catch(_){}
-              try { sl = ml2.isStyleLoaded && ml2.isStyleLoaded(); } catch(_){}
-              try { tl = ml2.areTilesLoaded && ml2.areTilesLoaded(); } catch(_){}
-              lines.push('loaded:' + ld + ' style:' + sl + ' tiles:' + tl);
-              try {
-                const c = ml2.getCenter();
-                lines.push('GLcenter: ' + (c ? (Math.round(c.lat*1000)/1000 + ',' + Math.round(c.lng*1000)/1000) : '?')
-                  + '  brg:' + (Math.round((ml2.getBearing?ml2.getBearing():0)*10)/10)
-                  + ' pit:' + (Math.round((ml2.getPitch?ml2.getPitch():0)*10)/10));
-              } catch(_){}
-            }
-          } catch(_){}
-          lines.push('GLtransform: ' + trW + 'x' + trH);
-          lines.push('GLzoom: ' + mlZoom + ' (L-1=' + (Math.round((m.getZoom()-1)*100)/100) + ')');
-          /* i's perspective gate did NOT fix it — buffer still healthy, still blank.
-             So either a compositing prop is applied at RUNTIME on some ancestor, or an
-             element is COVERING the map. Read both truths directly: (a) actual laid-out
-             canvas rect, (b) every ancestor carrying transform/filter/backdrop/
-             perspective/will-change/contain right now, (c) what element is actually on
-             top at a point in the blank region. */
-          try {
-            if(canv){
-              const cr = canv.getBoundingClientRect();
-              lines.push('canvasRect: ' + fmt(cr.left) + ',' + fmt(cr.top) + ' ' + fmt(cr.width) + 'x' + fmt(cr.height));
-              const props = ['transform','filter','backdropFilter','webkitBackdropFilter','perspective','willChange','contain','isolation','mixBlendMode','opacity'];
-              let chain = [], node = canv;
-              for(let i=0; i<10 && node && node !== document.body; i++){
-                const cs = getComputedStyle(node);
-                let hit = [];
-                props.forEach(p => { const v = cs[p]; if(v && v!=='none' && v!=='normal' && v!=='auto' && v!=='visible' && !(p==='opacity'&&v==='1')) hit.push(p+'='+String(v).slice(0,18)); });
-                const tag = node.tagName.toLowerCase() + (node.id?('#'+node.id):'') + (node.className && node.className.toString? ('.'+node.className.toString().trim().split(/\s+/).join('.')).slice(0,24):'');
-                if(hit.length) chain.push(tag+' {'+hit.join(' ')+'}');
-                node = node.parentElement;
-              }
-              lines.push('ANCESTORS w/ ctx:');
-              lines.push(chain.length ? chain.join('\n') : '  (none — clean chain)');
-              // hit-test a point in the blank upper-left region (well above the debug box)
-              const px = Math.round(cr.left + cr.width*0.35), py = Math.round(cr.top + cr.height*0.18);
-              const topEl = document.elementFromPoint(px, py);
-              const topDesc = topEl ? (topEl.tagName.toLowerCase() + (topEl.id?('#'+topEl.id):'') + (topEl.className&&topEl.className.toString?('.'+topEl.className.toString().trim().split(/\s+/)[0]):'')) : 'null';
-              lines.push('topEl@'+px+','+py+': ' + topDesc);
-            }
-          } catch(e){ lines.push('probe err: ' + (e&&e.message)); }
-        } else {
-          lines.push('(no GL layer — raster path)');
-        }
-        dbg.textContent = lines.join('\n');
-      } catch(err){ dbg.textContent = 'MAP_DBG err: ' + (err && err.message); }
-    };
-    state.leafletMap.on('move zoom moveend zoomend resize', updateMapDebug);
-    setInterval(updateMapDebug, 500);
-    updateMapDebug();
-  }
-  /* =============== END MAP_DEBUG =============== */
   state.markersLayer = L.layerGroup().addTo(state.leafletMap);
   // Option C — update which pin names fit live during the gesture (continuous
   // 'zoom'/'move') and once more when it settles ('zoomend'/'moveend'), so names
