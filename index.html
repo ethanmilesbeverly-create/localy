@@ -7247,7 +7247,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11j';
+const APP_VERSION = '2026.08.11k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8925,7 +8925,22 @@ function addBaseLayer(map){
             plugin's own 'resize'→_transitionEnd handler; position after a pan was the
             real gap. Do not re-reach for resize() for this symptom. */
     const glSync = () => { try { if(gl && gl._update) gl._update(); } catch(_){} };
-    map.on('moveend zoomend', glSync);
+    /* OFF-SCREEN DRIFT FIX (2026.08.11k). Confirmed by MAP_DEBUG canvasRect: after a
+       pan the GL canvas' real screen rect jumps to x=492 (off the right edge) while
+       its own transform still reads the pane=0 value (-39) — the Leaflet map-pane
+       accumulates a +531 pan translation and the plugin's container never re-syncs to
+       cancel it. WHY the inline moveend _update (added in e) wasn't enough: the app
+       wires MORE 'moveend' handlers AFTER this one (maybeShowSearchHere, renderNearbyList)
+       and fixMapSize fires deferred invalidateSize() at rAF and +120ms — any of which
+       shifts the map-pane in the SAME tick AFTER our sync ran, re-stranding the canvas.
+       So re-run the sync after the synchronous handlers (rAF) and after the deferred
+       invalidateSize (timeout > 120ms), on moveend / zoomend / dragend. _update itself
+       just re-applies containerPointToLayerPoint([0,0]) - offset, which lands the canvas
+       back at screen -offset regardless of the pane offset; calling it late is safe and
+       idempotent. GRAVESTONE: e ("_update on moveend, inline only") was correct in
+       method but fired too early in the tick — kept, with these later re-syncs added. */
+    const glResync = () => { glSync(); requestAnimationFrame(glSync); setTimeout(glSync, 160); };
+    map.on('moveend zoomend dragend', glResync);
   } catch(_){}
 }
 
