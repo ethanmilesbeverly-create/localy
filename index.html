@@ -5356,10 +5356,16 @@ function applyRealPlaces(key, base, list){
      with twelve franchises came back as a full list, got filtered to nothing,
      and returned without touching state or logging — indistinguishable from a
      fetch that never happened. It is a real #90 trigger independent of search
-     precision, and it is the one case where "nothing mapped here" is arguably
-     the wrong words for a place with plenty mapped. Left as generic empty copy
-     for now rather than inventing a third message; noted so it is a decision
-     and not an oversight. #96 ADDS A SECOND WAY TO REACH THIS LINE: a thin
+     precision, and it is the one case where "nothing mapped here" was the wrong
+     words for a place with plenty mapped. RESOLVED 2026-08-11 by directive
+     ("never show chains, if it is empty it is empty") = option (c): the area
+     reads empty, and EMPTY_DEFAULT's copy was made cause-NEUTRAL so it no longer
+     asserts "thin coverage" for a dense-but-all-chain tile. GRAVESTONE: #94's
+     proposed logged counter (to measure frequency "before anyone pays for (a)
+     or (b)") is NOT built — the product call is MADE, not deferred, so there is
+     nothing to measure toward; app-report's per-cell coverage already shows
+     where pins are thin. This return stays silent (no user surface), correct now
+     that the copy is honest either way. #96 ADDS A SECOND WAY TO REACH THIS LINE: a thin
      rural tile whose only "history" pin was the town it sits in now filters to
      zero and correctly says so, where before it showed one pin pointing at the
      user. That is the intended outcome, not a regression — but it is the
@@ -7247,7 +7253,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11l';
+const APP_VERSION = '2026.08.11m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13307,9 +13313,21 @@ const LOADING_COPY = {
   title: 'Looking around…',
   body: "Finding what's mapped in this area. It can take a few seconds the first time anyone looks here."
 };
+/* #94 — CAUSE-NEUTRAL BY DIRECTIVE ("never show chains, empty is empty"). The
+   prior body asserted "that usually means thin coverage rather than an empty
+   neighborhood" — a FALSE cause in the one case #94 exists for: a densely
+   mapped strip-mall district whose every place is a franchise chain, filtered
+   to nothing at applyRealPlaces()'s all-chain early return. It IS mapped; there
+   is just nothing this app will show. The old copy told a stranger standing in
+   a dense suburb the wrong reason, and this card cannot tell that case from a
+   genuinely thin tile or a failed fetch (all three land here as tile 'empty').
+   So the fix is to stop naming a cause at all: the message below is true in
+   EVERY empty case and, per EMPTY_COPY's own rule, still does not describe the
+   machinery (no "no independent spots", nothing that reveals the chain filter).
+   The invite to contribute stays — an empty tile is the supply funnel. */
 const EMPTY_DEFAULT = {
-  title: 'Nothing mapped here yet',
-  body: "We couldn't find anything for this category nearby. That usually means thin coverage rather than an empty neighborhood — try another category, or add a spot you know."
+  title: 'Nothing here yet',
+  body: "We don't have anything to show for this category around here right now. Try another category, or add a spot you know."
 };
 /* The empty card is informative, not an error, so it must be dismissable —
    otherwise "this town has nothing, let me pan one town over and try again"
@@ -13360,9 +13378,12 @@ function updateHuntEmptyState(count){
      a settled tile is an ANSWER.
 
      A failed fetch leaves the status absent, which lands here as 'empty'. That
-     is deliberate: we still cannot show pins, so the user still needs the card,
-     and the generic copy ("that usually means thin coverage") is true either
-     way. What we do NOT do is add anything to that card claiming we looked. */
+     is deliberate: we still cannot show pins, so the user still needs the card.
+     The copy is now cause-NEUTRAL (#94) precisely so it stays honest across all
+     three ways to reach this line — genuinely thin, all-chain-filtered, and
+     failed fetch — none of which this card can distinguish. What we do NOT do is
+     add anything to that card claiming we looked, or naming a reason we can't
+     verify. */
   const tile = currentTileState();
   if(tile === 'loading' && REALPLACE_BACKED(mode)){
     el.classList.remove('show');
