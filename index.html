@@ -7231,7 +7231,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11f';
+const APP_VERSION = '2026.08.11g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9184,7 +9184,26 @@ function setupBaseMap(){
             lines.push('GLcanvas back: ' + canv.width + 'x' + canv.height);
             lines.push('GLcanvas css: ' + fmt(parseFloat(canv.style.width)) + 'x' + fmt(parseFloat(canv.style.height))
               + '  xy:' + readTranslate(canv));
+            /* THE DECIDING READ (2026.08.11g): the c/d/e/f metrics were all healthy
+               and identical between the working and blank frames, so the gap is
+               INSIDE the WebGL context — MapLibre draws into its full canvas but iOS
+               Safari can silently CLAMP the drawing buffer below the requested size
+               at high dpr, leaving a rendered sub-rectangle. Read the ACTUAL buffer
+               vs the requested backing + the device max, which no earlier line saw. */
+            let ctx = null;
+            try { ctx = canv.getContext('webgl2') || canv.getContext('webgl') || canv.getContext('experimental-webgl'); } catch(_){}
+            if(ctx){
+              lines.push('GLbuffer real: ' + ctx.drawingBufferWidth + 'x' + ctx.drawingBufferHeight
+                + (ctx.drawingBufferWidth < canv.width || ctx.drawingBufferHeight < canv.height ? '  <-- CLAMPED' : '  (ok)'));
+              try {
+                const mv = ctx.getParameter(ctx.MAX_VIEWPORT_DIMS);
+                lines.push('MAXviewport: ' + (mv ? (mv[0]+'x'+mv[1]) : '?') + '  MAXtex:' + ctx.getParameter(ctx.MAX_TEXTURE_SIZE));
+              } catch(_){}
+            } else { lines.push('GLbuffer: <no ctx>'); }
           } else { lines.push('GLcanvas: <none>'); }
+          let trW='?', trH='?';
+          try { const ml2 = gl.getMaplibreMap(); if(ml2 && ml2.transform){ trW = Math.round(ml2.transform.width); trH = Math.round(ml2.transform.height); } } catch(_){}
+          lines.push('GLtransform: ' + trW + 'x' + trH);
           lines.push('GLzoom: ' + mlZoom + ' (L-1=' + (Math.round((m.getZoom()-1)*100)/100) + ')');
         } else {
           lines.push('(no GL layer — raster path)');
