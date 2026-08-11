@@ -1278,11 +1278,16 @@
   }
   /* Selectable so long-press-to-select still works if the clipboard API is
      unavailable (insecure context, older webview). */
-  .ps-loc-text{flex:1;min-width:0;user-select:text;-webkit-user-select:text;}
+  /* #241 — was flex:1, which stretched the address block to the full row width
+     and stranded the copy icon at the far sheet edge with a wide gap on short
+     addresses. flex:0 1 auto sizes the text to its content so the icon sits
+     immediately after the address end; min-width:0 still lets a long address
+     shrink/wrap to fill the width. */
+  .ps-loc-text{flex:0 1 auto;min-width:0;user-select:text;-webkit-user-select:text;}
   .ps-loc-text.is-coords{font-variant-numeric:tabular-nums;}
   .ps-loc-copy{
     flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    width:28px;height:28px;margin:-4px -4px 0 0;padding:0;
+    width:28px;height:28px;margin:-4px 0 0 0;padding:0;
     background:none;border:none;border-radius:8px;
     color:var(--text-dim);cursor:pointer;font-family:inherit;
   }
@@ -2318,7 +2323,7 @@
       </div>
       <div class="mode-card" data-cat="shops" onclick="selectExplore('shops')">
         <div class="icon-wrap"></div>
-        <div><h3>Shops</h3><p>Shops and boutiques.</p></div>
+        <div><h3>Stores</h3><p>Shops and boutiques.</p></div>
       </div>
       <div class="mode-card" data-cat="bars_restaurants" onclick="selectExplore('bars_restaurants')">
         <div class="icon-wrap"></div>
@@ -7302,7 +7307,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11p';
+const APP_VERSION = '2026.08.11q';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10217,7 +10222,7 @@ function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'shops_v1';
-  setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
+  setCurrentHunt({key, name:'Stores', mode:'shops', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
@@ -12180,14 +12185,17 @@ const PIN_CAT_LABEL = {
   /* #67 — 'Hidden Gem' label retired with the tab. No pin can carry the gems
      category any more (#16), so this only ever mislabelled a data anomaly. */
   park:'Park', parks_trails:'Park & Trail', trail:'Trail',
-  shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
+  shops:'Store', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
   /* #152 — 'Lore & Story' → 'Lore & Legend'. #151 renamed the Explore card, the
      submit-form option, the explainer and the hunt header to "Lore & Legends"
      and swept for the PLURAL ('Stories'), which is every form the label takes on
-     those surfaces. This map is singular by construction — Park & Trail, Shop,
+     those surfaces. This map is singular by construction — Park & Trail, Store,
      Bar & Restaurant, History — so no grep written from the expected form of the
      label could have found it. Singular here, plural on the card: that is the
-     map's rule, not an inconsistency. Do not pluralise this to match. */
+     map's rule, not an inconsistency. Do not pluralise this to match.
+     #238(a) — 'Shop' relabelled to 'Store' (LABEL only; the category key/value
+     'shops' is unchanged everywhere, so no data migration and no orphaned
+     captures — the #192 'history'-relabel precedent). */
   barsrest:'Bar & Restaurant', lore:'Lore & Legend',
   history:'History', art:'Art', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
 };
@@ -13977,7 +13985,7 @@ function huntDisplayName(key){
   if(key.startsWith('trails_')) return 'Trails Nearby';
   if(key.startsWith('parkstrails_')) return 'Parks & Trails Nearby';
   if(key.startsWith('discover_')) return 'Discover — First Visit';
-  if(key.startsWith('shops_')) return 'Shops';
+  if(key.startsWith('shops_')) return 'Stores';
   if(key.startsWith('bars_')) return 'Bars';
   if(key.startsWith('restaurants_')) return 'Restaurants';
   if(key.startsWith('barsrest_')) return 'Bars & Restaurants';
@@ -14142,12 +14150,12 @@ const ACHIEVEMENTS = [
   {id:'park_100', family:'Parks & Trails Visited', tier:6, label:'100 Parks & Trails', icon:'tree', check:s=>s.catCounts.parks>=100},
 
   // SHOPS
-  {id:'shop_3',   family:'Shops Visited', tier:1, label:'3 Shops',   icon:'bag', check:s=>s.catCounts.shops>=3},
-  {id:'shop_5',   family:'Shops Visited', tier:2, label:'5 Shops',   icon:'bag', check:s=>s.catCounts.shops>=5},
-  {id:'shop_10',  family:'Shops Visited', tier:3, label:'10 Shops',  icon:'bag', check:s=>s.catCounts.shops>=10},
-  {id:'shop_25',  family:'Shops Visited', tier:4, label:'25 Shops',  icon:'bag', check:s=>s.catCounts.shops>=25},
-  {id:'shop_50',  family:'Shops Visited', tier:5, label:'50 Shops',  icon:'bag', check:s=>s.catCounts.shops>=50},
-  {id:'shop_100', family:'Shops Visited', tier:6, label:'100 Shops', icon:'bag', check:s=>s.catCounts.shops>=100},
+  {id:'shop_3',   family:'Stores Visited', tier:1, label:'3 Stores',   icon:'bag', check:s=>s.catCounts.shops>=3},
+  {id:'shop_5',   family:'Stores Visited', tier:2, label:'5 Stores',   icon:'bag', check:s=>s.catCounts.shops>=5},
+  {id:'shop_10',  family:'Stores Visited', tier:3, label:'10 Stores',  icon:'bag', check:s=>s.catCounts.shops>=10},
+  {id:'shop_25',  family:'Stores Visited', tier:4, label:'25 Stores',  icon:'bag', check:s=>s.catCounts.shops>=25},
+  {id:'shop_50',  family:'Stores Visited', tier:5, label:'50 Stores',  icon:'bag', check:s=>s.catCounts.shops>=50},
+  {id:'shop_100', family:'Stores Visited', tier:6, label:'100 Stores', icon:'bag', check:s=>s.catCounts.shops>=100},
 
   // BARS & RESTAURANTS
   {id:'barrest_3',   family:'Bars & Restaurants Visited', tier:1, label:'3 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=3},
