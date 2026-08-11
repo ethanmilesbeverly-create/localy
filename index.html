@@ -455,7 +455,23 @@
   #screen-settings.active{ display:flex; flex-direction:column; overflow:hidden; }
   #screen-settings .settings-scroll{ flex:1 1 auto; overflow-y:auto; min-height:0; -webkit-overflow-scrolling:touch; }
   .settings-footer{ margin:0; }
-  #screen-map.active{display:flex;flex-direction:column;padding:0;min-height:0;perspective:800px;perspective-origin:50% 25%;}
+  #screen-map.active{display:flex;flex-direction:column;padding:0;min-height:0;}
+  /* PERSPECTIVE GATED TO TILT (2026.08.11i) — root cause of "zoom all the way out,
+     pan → blank/partial map on iOS", confirmed by the MAP_DEBUG reads: in the blank
+     state the GL canvas, buffer, transform, context, tiles and centre are ALL
+     healthy (buffer painted, ctxLost:false, tiles:true, centre valid) yet nothing
+     shows — a compositing failure, not a render failure. A WebGL canvas inside a CSS
+     `perspective` ancestor intermittently stops compositing on iOS Safari after a
+     re-layer (a pan resets Leaflet's panes). This perspective:800px was ALWAYS on
+     #screen-map.active but is only needed for tilt-3d's rotateX (off by default), so
+     it was keeping the basemap in a 3D context for no visible benefit in 2D. Now it
+     is applied only while tilted (toggleTilt adds .tilt-on in the same call that adds
+     .tilt-3d), so normal 2D map use has no 3D context and the canvas composites. This
+     also happens to make #hunt-empty/#hunt-loading fixed-anchoring correct in 2D (see
+     the #95 gravestone) — they anchor to the window instead of #screen-map. Raster
+     tiles were never affected (img layers composite fine in 3D), which is why only
+     the GL basemap showed it. */
+  #screen-map.active.tilt-on{perspective:800px;perspective-origin:50% 25%;}
 
   h1.page-title{
     font-size:26px;
@@ -7231,7 +7247,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11h';
+const APP_VERSION = '2026.08.11i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9830,6 +9846,10 @@ function toggleTilt(){
   const wrap = document.getElementById('map-3d-wrap');
   const btn = document.getElementById('tilt-toggle-btn');
   wrap.classList.toggle('tilt-3d', state.is3D);
+  // Perspective lives on #screen-map and is needed ONLY while tilted; adding it in
+  // the same call keeps the 3D context off the GL canvas in 2D (see the CSS note at
+  // #screen-map.active.tilt-on — the iOS compositing fix).
+  document.getElementById('screen-map').classList.toggle('tilt-on', state.is3D);
   btn.classList.toggle('is-2d', !state.is3D);
   btn.textContent = state.is3D ? '3D' : '2D';
 }
