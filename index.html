@@ -7191,7 +7191,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.10d';
+const APP_VERSION = '2026.08.10e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9736,7 +9736,16 @@ const EXPLORE_ICON_DEFS = {
   parks_trails: {vb:'0 0 24 24', body:'M12 2 L18 12 H15 L19 18 H5 L9 12 H6 Z M10.5 18 H13.5 V22 H10.5 Z'},
   shops: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   bars_restaurants: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
-  history: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
+  /* #238(b) — the Explore History & Lore card now reuses the MAP's museum/history
+     glyph (CATEGORY_GLYPH.history — the columned building) so the map pin, this
+     card and the History achievement badge all read as one mark. It is a
+     stroke-only line drawing, not a fillable silhouette like the other defs, so
+     it carries `strokeGlyph` (the shared path) instead of a `body` and
+     exploreCategoryIconSVG renders it stroked in the category colour in BOTH
+     states — the .selected card border/background carries selection, not an icon
+     fill (a filled columned building floods to junk triangles). The former bust
+     silhouette is retired. */
+  history: {vb:'0 0 24 24', strokeGlyph:CATEGORY_GLYPH.history},
   // #193 — framed picture (frame + sun), for public art. The lore book def was
   // retired with the History & Lore merge (#192); there is no lore card to key it.
   // #214 — body is the FRAME only; the sun moved to `dot` and the mountains are
@@ -9747,6 +9756,14 @@ const EXPLORE_ICON_DEFS = {
 function exploreCategoryIconSVG(cat, color, filled){
   const def = EXPLORE_ICON_DEFS[cat];
   if(!def) return `<div class="blaze">${blazeSVG(color, filled)}</div>`;
+  /* #238(b) — a stroke-only glyph (the shared map museum path) can't fill into a
+     silhouette the way the other defs do, so it renders as strokes in the
+     category colour regardless of `filled`; the glyph's own paths use
+     stroke="currentColor", so setting the SVG's color drives the ink. Selection
+     is carried by the .selected card border/background, not by an icon fill. */
+  if(def.strokeGlyph){
+    return `<svg viewBox="${def.vb}" width="24" height="24" style="color:${color}" xmlns="http://www.w3.org/2000/svg">${def.strokeGlyph}</svg>`;
+  }
   const fill = filled ? color : 'none';
   /* #214 — a selected icon fills its body with `color`; interior detail drawn
      in that same colour then vanishes. The art def is the only one whose detail
@@ -13760,7 +13777,17 @@ const ACH_ICONS = {
   tree: {vb:'0 0 24 24', body:'M12 2 L18 12 H15 L19 18 H5 L9 12 H6 Z M10.5 18 H13.5 V22 H10.5 Z'},
   bag: {vb:'0 0 24 24', body:'M5 8h14l-1.3 12.5a1 1 0 0 1-1 .9H7.3a1 1 0 0 1-1-.9z', accent:'M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8'},
   glass: {vb:'0 0 24 24', body:'M5 4h14l-6 8v6h3v2H8v-2h3v-6z'},
-  bust: {vb:'0 0 24 24', body:'M9 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0z M8 9.5C5.5 10.3 5 12.5 5 18L19 18C19 12.5 18.5 10.3 16 9.5L12 12Z M5.5 19h13v2h-13z M7.5 21.5h9v1.8h-9z'},
+  /* #238(b) — the History & Lore badge family reuses the MAP's museum/history
+     glyph (CATEGORY_GLYPH.history — the columned building) so the map pin, the
+     Explore card and this badge are one mark. Key renamed 'bust' → 'history' and
+     the six history_* rows repointed (removed-not-stranded, #24 — 'bust' had no
+     other consumer). It is a stroke-only line drawing, not a fillable silhouette,
+     so it carries `strokeGlyph` and renderAchievementIcon draws it stroked in
+     currentColor: EARNED = the tier colour, LOCKED = the faint --line @0.6 the
+     .ach-badge already sets — state carried by colour/opacity rather than the
+     family's usual solid-fill-vs-outline (a filled columned building floods to
+     junk). The former bust silhouette is retired. */
+  history: {vb:'0 0 24 24', strokeGlyph:CATEGORY_GLYPH.history},
   /* #180 — MILES icon is a WALKING PERSON, which reads the intent of the Wanderer
      family (distance covered on foot) more directly than the receding-road trapezoid
      it replaces. The glyph is the Font Awesome Free 6.5.2 `person-walking` mark
@@ -13789,7 +13816,7 @@ const ACH_ICONS = {
   trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'},
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
-     body/accent split bag/bust already use. */
+     body/accent split bag already uses. */
   /* #180/#214 — knockout:true. When EARNED the gem body fills with the tier colour
      and its facet lines (accent), drawn in that same colour, vanished — the earned
      gem read as a solid diamond. renderAchievementIcon now draws a knockout def's
@@ -13897,13 +13924,14 @@ const ACHIEVEMENTS = [
      ids are RETIRED (removed below, reserved not reused — #24's retired-Guides
      precedent). A pre-merge lore capture still counts: it lands in catCounts.lore
      and the combined check below lights the same rung it would have. Icon stays
-     'bust' to match the Explore card's 'history' glyph; 'book' is deleted above. */
-  {id:'history_3',   family:'History & Lore Visited', tier:1, label:'3 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=3},
-  {id:'history_5',   family:'History & Lore Visited', tier:2, label:'5 History & Lore',   icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=5},
-  {id:'history_10',  family:'History & Lore Visited', tier:3, label:'10 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=10},
-  {id:'history_25',  family:'History & Lore Visited', tier:4, label:'25 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=25},
-  {id:'history_50',  family:'History & Lore Visited', tier:5, label:'50 History & Lore',  icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=50},
-  {id:'history_100', family:'History & Lore Visited', tier:6, label:'100 History & Lore', icon:'bust', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=100},
+     'history' (#238(b) — the shared map/Explore museum glyph, repointed from the
+     retired 'bust'); 'book' is deleted above. */
+  {id:'history_3',   family:'History & Lore Visited', tier:1, label:'3 History & Lore',   icon:'history', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=3},
+  {id:'history_5',   family:'History & Lore Visited', tier:2, label:'5 History & Lore',   icon:'history', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=5},
+  {id:'history_10',  family:'History & Lore Visited', tier:3, label:'10 History & Lore',  icon:'history', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=10},
+  {id:'history_25',  family:'History & Lore Visited', tier:4, label:'25 History & Lore',  icon:'history', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=25},
+  {id:'history_50',  family:'History & Lore Visited', tier:5, label:'50 History & Lore',  icon:'history', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=50},
+  {id:'history_100', family:'History & Lore Visited', tier:6, label:'100 History & Lore', icon:'history', check:s=>(s.catCounts.history||0)+(s.catCounts.lore||0)>=100},
 
   /* LORE & LEGENDS — RETIRED into History & Lore above (#180/#192). The six lore_*
      ids are reserved, not reused; a lore capture now counts toward the merged
@@ -14277,6 +14305,15 @@ function renderStampBadge(id, unlocked, dateStr, bottomText){
 function renderAchievementIcon(iconKey, unlocked, size, knockoutColor){
   size = size || 28;
   const def = ACH_ICONS[iconKey] || ACH_ICONS.pin;
+  /* #238(b) — a stroke-only glyph (the shared map museum path) can't fill into a
+     solid silhouette, so it renders stroked in currentColor and lets the wrapping
+     .ach-badge colour it: EARNED = the tier colour (set inline on the badge),
+     LOCKED = the faint --line @0.6 the .achievement-item.locked rule applies. The
+     glyph's own paths carry stroke="currentColor", so no per-path colour is set
+     here; state is carried by colour/opacity, not fill-vs-outline. */
+  if(def.strokeGlyph){
+    return `<svg viewBox="${def.vb}" width="${size}" height="${size}" style="display:block;">${def.strokeGlyph}</svg>`;
+  }
   const fill = unlocked ? 'currentColor' : 'none';
   /* #180/#214 — a filled body hides any accent drawn in the same colour. For a
      `knockout` def (the gem's facets sit inside its fill), draw the accent in the
