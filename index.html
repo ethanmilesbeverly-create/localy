@@ -4039,17 +4039,21 @@ function labelTextColor(hex){
   return ((0.299*r + 0.587*g + 0.114*b)/255) > 0.6 ? '#10231C' : '#EDE9DD';
 }
 /* #270 — per-category line glyphs that ride inside the pill marker. One 24×24 path
-   set per live point category (park/trail/bars/restaurants/shops/history/art — the
-   MODE_COLOR live-point keys). stroke="currentColor" so the pill sets the ink colour
+   set per live point category (park/trail/food/shops/history/art — the MODE_COLOR
+   live-point keys). stroke="currentColor" so the pill sets the ink colour
    (labelTextColor of the category hue). Anything without a glyph — a lore/custom/gem
    pin with a non-category mode — falls back to a filled dot, so it still renders. */
+/* #273 — the whole food-and-drink family (OSM bars, OSM restaurants, and gems in
+   the combined `barsrest` bucket) is ONE map identity now: one glyph and one colour
+   (MODE_COLOR unifies restaurants onto the family pink below). The separate 'bars'
+   cocktail and 'restaurants' fork were dropped by directive — the earlier fork+
+   cocktail combined mark (#272) is the single family glyph, shared by all three
+   category keys through this const so there is nothing to drift. */
+const FOOD_GLYPH = '<path d="M7 3v5a2 2 0 0 1-4 0V3M5 3v18M13 6h8l-4 5zM17 11v7M14 18h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 const CATEGORY_GLYPH = {
-  restaurants:'<path d="M8 3v6a2 2 0 0 1-4 0V3M6 3v18M17 3c-1.6 0-2.5 1.6-2.5 4.5S16 12 17 12v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
-  bars:'<path d="M4 4h16l-8 8zM12 12v7M8 20h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
-  /* #272 — the combined bucket needs its own glyph now that a barsrest gem no
-     longer borrows the 'bars' cocktail or 'restaurants' fork. Fork (left) +
-     cocktail glass (right) = "Bar & Restaurant", legible at 14px. */
-  barsrest:'<path d="M7 3v5a2 2 0 0 1-4 0V3M5 3v18M13 6h8l-4 5zM17 11v7M14 18h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  restaurants:FOOD_GLYPH,
+  bars:FOOD_GLYPH,
+  barsrest:FOOD_GLYPH,
   shops:'<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   park:'<path d="M12 3 6 11h3l-4 6h14l-4-6h3zM12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   trail:'<path d="M3 19 10 7l4 6 2-3 5 9zM15 7l2.5-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -4124,7 +4128,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
    longer be either — gemDisplayCategory has never returned it since #16, and
    startHiddenGemsHunt was the last thing that set mode:'gems'. 'discover' went
    with startDiscoverHunt. 'discoverlocal' is All Things Local and stays. */
-const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#E8622C', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins */
+const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. */
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 /* #103 — startBuiltinHunt() (the tourist-route STARTER) was deleted 2026-08-04;
@@ -5606,9 +5610,13 @@ function buildAllThingsLocal(base){
        ID. isFound() matches on id, so capturing one flips both rows to Found,
        and openPinSheetById() returns whichever .find() reaches first. A
        duplicate id is never legitimate, whatever produced it.
-   (2) MODE_COLOR.bars is #C1587A and MODE_COLOR.restaurants is #E8622C, so the
-       two copies render as two DIFFERENT-COLOURED pins at identical
-       coordinates — #16's "colour IS the category" broken on the map.
+   (2) Historically the two copies rendered as DIFFERENT-COLOURED pins at
+       identical coordinates (MODE_COLOR.bars #C1587A vs restaurants #E8622C) —
+       #16's "colour IS the category" broken on the map. That symptom is doubly
+       moot now: #272 stamps every gem 'barsrest' (never 'bars'/'restaurants'),
+       and #273 recoloured restaurants onto the family pink, so the food family
+       is one colour regardless. The id-collision half of this defect (below)
+       stands on its own and is why the dedupe still matters.
 
    Real places cannot do this: groupRealByCat gives each place exactly one
    p.category, so a place is in `bars` or `restaurants`, never both. This is a
@@ -7223,7 +7231,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11a';
+const APP_VERSION = '2026.08.11b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
