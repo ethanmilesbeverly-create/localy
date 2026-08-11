@@ -2323,7 +2323,7 @@
       </div>
       <div class="mode-card" data-cat="shops" onclick="selectExplore('shops')">
         <div class="icon-wrap"></div>
-        <div><h3>Stores</h3><p>Shops and boutiques.</p></div>
+        <div><h3>Shops</h3><p>Shops and boutiques.</p></div>
       </div>
       <div class="mode-card" data-cat="bars_restaurants" onclick="selectExplore('bars_restaurants')">
         <div class="icon-wrap"></div>
@@ -10222,7 +10222,7 @@ function startShopsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'shops_v1';
-  setCurrentHunt({key, name:'Stores', mode:'shops', points:buildPointsForKey(key, base)});
+  setCurrentHunt({key, name:'Shops', mode:'shops', points:buildPointsForKey(key, base)});
 }
 function startBarsAndRestaurantsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
@@ -12185,17 +12185,14 @@ const PIN_CAT_LABEL = {
   /* #67 — 'Hidden Gem' label retired with the tab. No pin can carry the gems
      category any more (#16), so this only ever mislabelled a data anomaly. */
   park:'Park', parks_trails:'Park & Trail', trail:'Trail',
-  shops:'Store', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
+  shops:'Shop', bars:'Bar', restaurants:'Restaurant', bars_restaurants:'Bar & Restaurant',
   /* #152 — 'Lore & Story' → 'Lore & Legend'. #151 renamed the Explore card, the
      submit-form option, the explainer and the hunt header to "Lore & Legends"
      and swept for the PLURAL ('Stories'), which is every form the label takes on
-     those surfaces. This map is singular by construction — Park & Trail, Store,
+     those surfaces. This map is singular by construction — Park & Trail, Shop,
      Bar & Restaurant, History — so no grep written from the expected form of the
      label could have found it. Singular here, plural on the card: that is the
-     map's rule, not an inconsistency. Do not pluralise this to match.
-     #238(a) — 'Shop' relabelled to 'Store' (LABEL only; the category key/value
-     'shops' is unchanged everywhere, so no data migration and no orphaned
-     captures — the #192 'history'-relabel precedent). */
+     map's rule, not an inconsistency. Do not pluralise this to match. */
   barsrest:'Bar & Restaurant', lore:'Lore & Legend',
   history:'History', art:'Art', local:'Local Spot', custom:'Custom Spot', code:'Custom Spot'
 };
@@ -13985,7 +13982,7 @@ function huntDisplayName(key){
   if(key.startsWith('trails_')) return 'Trails Nearby';
   if(key.startsWith('parkstrails_')) return 'Parks & Trails Nearby';
   if(key.startsWith('discover_')) return 'Discover — First Visit';
-  if(key.startsWith('shops_')) return 'Stores';
+  if(key.startsWith('shops_')) return 'Shops';
   if(key.startsWith('bars_')) return 'Bars';
   if(key.startsWith('restaurants_')) return 'Restaurants';
   if(key.startsWith('barsrest_')) return 'Bars & Restaurants';
@@ -14150,12 +14147,12 @@ const ACHIEVEMENTS = [
   {id:'park_100', family:'Parks & Trails Visited', tier:6, label:'100 Parks & Trails', icon:'tree', check:s=>s.catCounts.parks>=100},
 
   // SHOPS
-  {id:'shop_3',   family:'Stores Visited', tier:1, label:'3 Stores',   icon:'bag', check:s=>s.catCounts.shops>=3},
-  {id:'shop_5',   family:'Stores Visited', tier:2, label:'5 Stores',   icon:'bag', check:s=>s.catCounts.shops>=5},
-  {id:'shop_10',  family:'Stores Visited', tier:3, label:'10 Stores',  icon:'bag', check:s=>s.catCounts.shops>=10},
-  {id:'shop_25',  family:'Stores Visited', tier:4, label:'25 Stores',  icon:'bag', check:s=>s.catCounts.shops>=25},
-  {id:'shop_50',  family:'Stores Visited', tier:5, label:'50 Stores',  icon:'bag', check:s=>s.catCounts.shops>=50},
-  {id:'shop_100', family:'Stores Visited', tier:6, label:'100 Stores', icon:'bag', check:s=>s.catCounts.shops>=100},
+  {id:'shop_3',   family:'Shops Visited', tier:1, label:'3 Shops',   icon:'bag', check:s=>s.catCounts.shops>=3},
+  {id:'shop_5',   family:'Shops Visited', tier:2, label:'5 Shops',   icon:'bag', check:s=>s.catCounts.shops>=5},
+  {id:'shop_10',  family:'Shops Visited', tier:3, label:'10 Shops',  icon:'bag', check:s=>s.catCounts.shops>=10},
+  {id:'shop_25',  family:'Shops Visited', tier:4, label:'25 Shops',  icon:'bag', check:s=>s.catCounts.shops>=25},
+  {id:'shop_50',  family:'Shops Visited', tier:5, label:'50 Shops',  icon:'bag', check:s=>s.catCounts.shops>=50},
+  {id:'shop_100', family:'Shops Visited', tier:6, label:'100 Shops', icon:'bag', check:s=>s.catCounts.shops>=100},
 
   // BARS & RESTAURANTS
   {id:'barrest_3',   family:'Bars & Restaurants Visited', tier:1, label:'3 Bars & Restaurants',   icon:'glass', check:s=>s.catCounts.barsrest>=3},
