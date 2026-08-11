@@ -922,16 +922,16 @@
   #hunt-empty .he-icon{margin:0 auto 10px; width:34px; height:34px; color:var(--lore, #3E9C8F);}
   #hunt-empty h4{margin:0 0 6px; font-size:15px; color:var(--text); font-weight:700;}
   #hunt-empty p{margin:0 0 14px; font-size:13px; line-height:1.5; color:var(--text-dim);}
-  #hunt-empty .he-actions{display:flex; gap:10px; justify-content:center;}
+  #hunt-empty .he-actions{display:flex; flex-direction:column; gap:10px;}
   /* Scoped to .he-actions — this was always meant for the two action buttons,
      and only reached the close button because it matched every descendant.
-     flex:1 + min-width:0 forces the two buttons side-by-side at equal width and
-     lets a longer label ("Submit a hidden gem") wrap inside its own button
-     rather than wrapping the whole row to a stack (the old flex-wrap behaviour). */
+     Stacked full-width: column layout makes each button span the card, and
+     white-space:nowrap keeps each label on ONE line (no in-button wrap, no
+     row-stack). Reverted from the side-by-side flex:1 cut by directive. */
   #hunt-empty .he-actions button{
-    flex:1 1 0; min-width:0;
+    width:100%; white-space:nowrap;
     font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
-    padding:10px 12px; border-radius:11px; border:1px solid var(--line);
+    padding:10px 16px; border-radius:11px; border:1px solid var(--line);
     background:var(--surface-2); color:var(--text);
   }
   #hunt-empty .he-actions button.he-primary{background:var(--orange); border-color:var(--orange); color:#fff;}
@@ -2595,8 +2595,8 @@
       <h4 id="hunt-empty-title">Nothing here yet</h4>
       <p id="hunt-empty-body"></p>
       <div class="he-actions">
-        <button onclick="goToModeSelect()">Browse something else</button>
         <button class="he-primary" onclick="openSuggestGemScreen()">Submit a hidden gem</button>
+        <button onclick="goToModeSelect()">Browse something else</button>
       </div>
     </div>
     <!-- #78c — SEPARATE ELEMENT, NOT A PHASE OF #hunt-empty. The first cut made
@@ -7257,7 +7257,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11n';
+const APP_VERSION = '2026.08.11o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
