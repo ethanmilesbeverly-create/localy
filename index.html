@@ -7231,7 +7231,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11g';
+const APP_VERSION = '2026.08.11h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9195,6 +9195,7 @@ function setupBaseMap(){
             if(ctx){
               lines.push('GLbuffer real: ' + ctx.drawingBufferWidth + 'x' + ctx.drawingBufferHeight
                 + (ctx.drawingBufferWidth < canv.width || ctx.drawingBufferHeight < canv.height ? '  <-- CLAMPED' : '  (ok)'));
+              try { lines.push('ctxLost: ' + ctx.isContextLost()); } catch(_){}
               try {
                 const mv = ctx.getParameter(ctx.MAX_VIEWPORT_DIMS);
                 lines.push('MAXviewport: ' + (mv ? (mv[0]+'x'+mv[1]) : '?') + '  MAXtex:' + ctx.getParameter(ctx.MAX_TEXTURE_SIZE));
@@ -9202,7 +9203,28 @@ function setupBaseMap(){
             } else { lines.push('GLbuffer: <no ctx>'); }
           } else { lines.push('GLcanvas: <none>'); }
           let trW='?', trH='?';
-          try { const ml2 = gl.getMaplibreMap(); if(ml2 && ml2.transform){ trW = Math.round(ml2.transform.width); trH = Math.round(ml2.transform.height); } } catch(_){}
+          try {
+            const ml2 = gl.getMaplibreMap();
+            if(ml2){
+              if(ml2.transform){ trW = Math.round(ml2.transform.width); trH = Math.round(ml2.transform.height); }
+              /* g ruled out sizing/clamp: canvas, buffer and transform are all
+                 healthy while the map is blank. These four reads split the only
+                 remaining causes — a stalled style/tile load, an off-world/NaN
+                 centre after the pan, or a painted-but-not-composited buffer (all
+                 "loaded / valid centre" would point at the iOS compositing bug). */
+              let ld='?', sl='?', tl='?';
+              try { ld = ml2.loaded && ml2.loaded(); } catch(_){}
+              try { sl = ml2.isStyleLoaded && ml2.isStyleLoaded(); } catch(_){}
+              try { tl = ml2.areTilesLoaded && ml2.areTilesLoaded(); } catch(_){}
+              lines.push('loaded:' + ld + ' style:' + sl + ' tiles:' + tl);
+              try {
+                const c = ml2.getCenter();
+                lines.push('GLcenter: ' + (c ? (Math.round(c.lat*1000)/1000 + ',' + Math.round(c.lng*1000)/1000) : '?')
+                  + '  brg:' + (Math.round((ml2.getBearing?ml2.getBearing():0)*10)/10)
+                  + ' pit:' + (Math.round((ml2.getPitch?ml2.getPitch():0)*10)/10));
+              } catch(_){}
+            }
+          } catch(_){}
           lines.push('GLtransform: ' + trW + 'x' + trH);
           lines.push('GLzoom: ' + mlZoom + ' (L-1=' + (Math.round((m.getZoom()-1)*100)/100) + ')');
         } else {
