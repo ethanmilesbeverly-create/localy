@@ -7313,7 +7313,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.12a';
+const APP_VERSION = '2026.08.12b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12546,10 +12546,31 @@ function maybeResolveSpotDesc(t){
    refetch a pin with genuinely no better text; a transport failure is NOT cached,
    so it retries next open (#78c — a failed fetch is not "no desc"). t._descEnriched
    latches on the first successful upgrade so a re-render tick can't re-scan or
-   re-fetch. */
+   re-fetch.
+   ALSO fires for an EMPTY-DESCRIPTION, UNCREDITED SEED (#57/#162 scaffold). A
+   seed:reddit row lands with submitted_by NULL (so no t.by) and — for the ~130
+   park/history/art names Wikipedia documents but seed-resolve.ts left un-enriched
+   (its own by-name coordinate sanity dropped a long linear feature the same way
+   the pin resolver did, #54) — description NULL, so the sheet renders blank (the
+   reported "The 606 (Bloomingdale Trail)" seed, id 99d83eee…, desc NULL). Such a
+   seed carries a gemId but no take and no facts, so NEITHER the credited-gem path
+   (maybeEnrichWhatItis, gated to t.by) nor the OSM path (source==='osm') touched
+   it. Resolving its "what it is" at read time is the SAME #23 read-time/never-
+   denormalise pattern the credited-gem twin already uses — the DB description stays
+   NULL, the client fills facts on open. COMMERCIAL seeds (bars/restaurants/shops)
+   are excluded by the facts-category gate below: they have no Wikipedia article, so
+   firing resolveWiki on the ~890 of them would be cost with no payoff (#275 — a
+   commercial seed's value is the recommendation, not a wiki fact). A seed that
+   later GRADUATES (a human adds a take → gains t.by + a real desc) leaves this
+   branch and is handled by maybeEnrichWhatItis, which layers facts ABOVE the take. */
 const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1 };
 function maybeEnrichRealDesc(t){
-  if(!t || t._descEnriched || !t.name || t.source !== 'osm' || t.by || t.gemId) return;
+  if(!t || t._descEnriched || !t.name || t.by) return;
+  // Plain browsed OSM pin, OR an uncredited seed with no take and no description
+  // yet (a facts-category scaffold whose seed-resolve enrichment missed it).
+  const isPlainOsm  = t.source === 'osm' && !t.gemId;
+  const isEmptySeed = !!t.gemId && !String(t.desc || '').trim();
+  if(!isPlainOsm && !isEmptySeed) return;
   if(!REAL_DESC_FACTS_CATS[t.category]) return;
   if(state._spotPin && t.id === state._spotPin.id) return; // maybeResolveSpotDesc owns the shared-spot pin
   const cur = String(t.desc || '').trim();
@@ -12732,11 +12753,12 @@ function fillPinSheet(t){
     // and the not-in-tile case #26's twin-adoption doesn't cover). No-op unless t
     // is the carried shared-spot pin (real place, pre-twin-adoption).
     maybeResolveSpotDesc(t);
-    // #54 — a PLAIN browsed OSM pin (no take, no gemId, not the shared-spot pin)
-    // shows only osmDesc()'s generic filler; resolve its real Wikipedia/OSM "what
-    // it is" and overwrite the desc so facts appear on every pin, not just gems.
-    // No-op unless t is a facts-category (history/park/trail) OSM pin. Its result
-    // re-enters fillPinSheet with a changed body, re-rendering here.
+    // #54 — a PLAIN browsed OSM pin, OR an uncredited seed with no take and an
+    // empty description (a facts-category scaffold seed-resolve missed, e.g. The
+    // 606), shows only filler / nothing; resolve its real Wikipedia/OSM "what it
+    // is" and fill the desc so facts appear everywhere, not just on gems. No-op
+    // unless t is a facts-category (history/park/trail) OSM pin or empty seed. Its
+    // result re-enters fillPinSheet with a changed body, re-rendering here.
     maybeEnrichRealDesc(t);
     // Coords render instantly; the address swaps in if/when the lookup lands.
     // The copy payload has to swap with it, or a slow lookup leaves the row
