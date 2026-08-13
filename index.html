@@ -1961,18 +1961,11 @@
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  /* location permission modal */
-  #location-modal{
-    position:absolute;inset:0;z-index:1100;
-    background:rgba(6,16,12,0.9);
-    backdrop-filter:blur(4px);
-    display:none;align-items:center;justify-content:center;
-    padding:24px;
-  }
-  #location-modal.show{display:flex;}
-  /* #52 — first-run onboarding: a full-screen 3-step flow (location, camera,
-     add-to-home) shown once per device after sign-in. Reuses .modal-card, .btn
-     and .modal-icon; adds only the overlay, step-switching and the dots. */
+  /* #52/#176 — first-run onboarding: a 4-step flow (location, camera, explore,
+     share a guide) shown once per device after sign-in. Reuses .modal-card, .btn
+     and .modal-icon; adds only the overlay, step-switching and the dots. The dead
+     #location-modal (never shown; its grant/decline handlers were never defined)
+     was removed here in #176. */
   #onboard-overlay{
     position:absolute;inset:0;z-index:2000;
     /* #52 — a light scrim + soft blur over the LIVE map behind, not an opaque
@@ -2185,24 +2178,14 @@
 <body>
 <div id="app">
 
-  <div id="location-modal">
-    <div class="modal-card">
-      <div class="modal-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-      </div>
-      <h2>Nahgoo needs your location</h2>
-      <p>This app is built around real places near you — finding them, walking to them, and checking in only once you're actually there. Without location access, that core loop can't work.</p>
-      <button class="btn" onclick="grantLocationAccess()">Share My Location</button>
-      <button class="btn ghost" onclick="declineLocationAccess()">Not now — demo mode only</button>
-    </div>
-  </div>
-
-  <!-- #52 — first-run onboarding. Shown once per account per device by
+  <!-- #52/#176 — first-run onboarding. Shown once per account per device by
        startOnboarding() after auth, gated on onboardedKey() + demoBypassActive().
-       Step 1 (location) is required and has no skip; step 2 (camera) is optional
-       because capture still works on compass+distance without it. Each fires the
-       real OS prompt with a reason shown first; the OS only shows a prompt if the
-       permission is not already granted for the origin. -->
+       Steps 1 (location) and 2 (camera) are permission steps, both required
+       in-flow. Steps 3 (explore/capture/passport) and 4 (make-a-guide/share) are
+       no-permission value cards. Each permission step fires the real OS prompt
+       with a reason shown first; the OS only shows a prompt if the permission is
+       not already granted for the origin. #176 reworded steps 1–3 in the
+       ask-a-local voice and added step 4 (the guide/share loop). -->
   <div id="onboard-overlay">
     <div class="modal-card">
 
@@ -2210,8 +2193,8 @@
         <div class="modal-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
         </div>
-        <h2>Find what's near you</h2>
-        <p>Nahgoo is built around real places around you — finding them, walking to them, and checking in once you're actually there. It needs your location for that core loop to work.</p>
+        <h2>Find the good spots near you</h2>
+        <p>Nahgoo is a map of real places worth a stop — the ones people who live here actually recommend. Turn on location so it can surface the ones around you.</p>
         <button class="btn" onclick="onboardEnableLocation()">Enable location</button>
       </div>
 
@@ -2219,8 +2202,8 @@
         <div class="modal-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
-        <h2>Capture places you reach</h2>
-        <p>When you arrive at a place, you capture it through the camera — and every capture is logged as a stamp in your passport. Enable the camera so you're ready the moment you get there.</p>
+        <h2>Check in when you get there</h2>
+        <p>Reach a place and check in to earn a passport stamp — and snap a photo to remember it. Turn on the camera so you're ready the moment you arrive.</p>
         <button class="btn" onclick="onboardEnableCamera()">Enable camera</button>
       </div>
 
@@ -2228,8 +2211,17 @@
         <div class="modal-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/></svg>
         </div>
-        <h2>Collect the places near you</h2>
-        <p>Walk to real spots around you and capture them to earn passport stamps. Find somewhere worth sharing? Submit it as a gem so others can discover it too.</p>
+        <h2>Fill your passport</h2>
+        <p>Wander to real spots nearby and check in to collect their stamps. Stumble on somewhere special? Add it as a gem so the next person finds it too.</p>
+        <button class="btn" onclick="showOnboardStep(4)">Next</button>
+      </div>
+
+      <div class="onboard-step" id="onboard-step-4">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>
+        </div>
+        <h2>Make a guide, share it with friends</h2>
+        <p>String your favorite spots into a guide — a little trail worth doing — and send it with one link. Whoever taps it follows every stop right here in Nahgoo.</p>
         <button class="btn" onclick="finishOnboarding()">Start exploring</button>
       </div>
 
@@ -2237,6 +2229,7 @@
         <span id="onboard-dot-1" class="on"></span>
         <span id="onboard-dot-2"></span>
         <span id="onboard-dot-3"></span>
+        <span id="onboard-dot-4"></span>
       </div>
 
     </div>
@@ -6891,12 +6884,13 @@ function notePersistenceIssue(e){
    sees it; the same account sees it again on a genuinely new device (where the
    permissions actually need granting); and it never re-shows for a settled
    account+device pair. Skipped entirely in demo mode.
-   Three cards: step 1 (location) and step 2 (camera) are permission steps, both
+   Four cards: step 1 (location) and step 2 (camera) are permission steps, both
    required in-flow — neither has an in-app skip, so the only way forward is to tap
-   the enable button on each. Step 3 is a no-permission explore/capture/passport
-   card whose "Start exploring" button finishes onboarding. (A user can still
-   hard-deny a permission at the OS level; we don't trap them — the flow continues
-   and the optional capture-photo step is simply skipped later.) Each permission step fires
+   the enable button on each. Step 3 (explore/capture/passport) and step 4
+   (make-a-guide/share) are no-permission value cards; step 3 advances to step 4
+   and step 4's "Start exploring" button finishes onboarding (#176). (A user can
+   still hard-deny a permission at the OS level; we don't trap them — the flow
+   continues and the optional capture-photo step is simply skipped later.) Each permission step fires
    the real OS prompt, but the OS only shows a prompt when the permission is NOT
    already granted for the origin; an already-granted permission resolves silently
    and the flow advances, which is correct, not a dead button.
@@ -6927,7 +6921,7 @@ function startOnboarding(){
 }
 function showOnboardStep(n){
   state._onboardStep = n;
-  for(let i=1;i<=3;i++){
+  for(let i=1;i<=4;i++){
     document.getElementById('onboard-step-'+i).classList.toggle('active', i===n);
     document.getElementById('onboard-dot-'+i).classList.toggle('on', i<=n);
   }
@@ -7328,7 +7322,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.13d';
+const APP_VERSION = '2026.08.13e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
