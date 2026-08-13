@@ -811,6 +811,14 @@
     color:var(--text-dim);
     margin:0 0 6px;
   }
+  /* #282 — a quieter "(optional)" hint riding the field label; lower contrast
+     and no caps so it reads as a note, not a second prompt. */
+  label.field-label .field-optional{
+    text-transform:none;
+    letter-spacing:0;
+    opacity:0.6;
+    font-weight:400;
+  }
   .field{margin-bottom:16px;}
 
   /* ---------- Map screen ---------- */
@@ -2426,9 +2434,16 @@
       <label class="field-label">What is it?</label>
       <input type="text" id="gem-name" placeholder="e.g. The mural behind the laundromat">
     </div>
-    <!-- #225 — ASK FOR THE REASON TO GO, NOT A DESCRIPTION. The field id and
-         required-ness are unchanged (submitGem still requires gem-desc; the #12
-         gate still copy-edits it). Only the framing moved: users were pasting the
+    <!-- #225 — ASK FOR THE REASON TO GO, NOT A DESCRIPTION. The field id is
+         unchanged and the #12 gate still copy-edits it. #282 (2026-08-13) made it
+         OPTIONAL: since #54's OSM-only universal-facts half + #237 resolve a real
+         Wikipedia/OSM "what it is" at read time, a bare name+location still gets a
+         factual pin, so the human TAKE is exactly the thing that is fine to leave
+         blank (the #54 "graduates to two slots" model — a take-less gem carries
+         only the facts until someone adds one, like a seed). submitGem no longer
+         gates on an empty gem-desc; review-submission's #12 copy-edit already
+         tolerates a null description (description_clean stays null on blank) and
+         the insert column is nullable. Only the framing moved: users were pasting the
          encyclopaedia (the Jerry-P "Mr. Beef" gem ≈ the wiki line), which made
          #54's two-slot pin ("What it is" / "A local's take") echo itself. The
          label now asks for the HUMAN half, and the placeholder is an EXAMPLE take
@@ -2439,7 +2454,7 @@
          and #54 surfaces the sourced facts on the pin regardless of what the form
          says. -->
     <div class="field">
-      <label class="field-label">Why should someone go here?</label>
+      <label class="field-label">Why should someone go here? <span class="field-optional">(optional)</span></label>
       <textarea id="gem-desc" rows="3" placeholder="e.g. The colors are unreal up close and hardly anyone knows it's there"></textarea>
     </div>
     <!-- #114 — the "What category is it?" <select id="gem-category"> was REMOVED.
@@ -7313,7 +7328,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.12b';
+const APP_VERSION = '2026.08.13a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10824,7 +10839,12 @@ async function submitGem(){
   const name = document.getElementById('gem-name').value.trim();
   const desc = document.getElementById('gem-desc').value.trim();
   if(!name){ showToast('Give it a name first'); return; }
-  if(!desc){ showToast('Add a reason someone should go'); return; }
+  /* #282 — the description is OPTIONAL. A bare name+location still gets a
+     factual pin (#54/#237 resolve "what it is" from Wikipedia/OSM at read time),
+     and the human field is the TAKE, which is fine to leave blank. No empty-desc
+     gate here; the insert below sends `description:desc` which is '' when blank
+     (the column is nullable and #12's copy-edit leaves description_clean null on
+     an empty string). Name and a dropped pin stay required. */
   if(!state.gemDraftPin){ showToast('Search the address above, or tap the map to drop a pin'); return; }
   const uid = state.user && state.user.id;
   if(!uid){ showToast('Please log in again to submit'); return; }
@@ -10875,13 +10895,14 @@ async function submitGem(){
   goToModeSelect();
 
   // Send it through the AI review gate (server-side edge function).
-  let decision = null;
+  let decision = null, review = null;
   try{
     const { data, error } = await sb.functions.invoke('review-submission', { body:{ id:newId } });
     if(error) throw error;
-    decision = data && data.decision;
+    review = data || null;
+    decision = review && review.decision;
   }catch(e){
-    decision = null; // review failed → row stays 'pending', a human can look later
+    decision = null; review = null; // review failed → row stays 'pending', a human can look later
   }
 
   await loadMyGems();
@@ -10900,7 +10921,34 @@ async function submitGem(){
   renderPassport();
   checkNewAchievements(SUBMISSION_ACHIEVEMENT_IDS);
 
-  if(decision==='approve')      showToast("Approved!");
+  /* #281 — SAY WHAT ACTUALLY HAPPENED, not just the moderation verdict.
+     "Approved!" was true but heard as "on your map now", and it misled two ways:
+       (a) APPROVED ≠ VISIBLE — an approved gem only draws within ~2.5 mi of the
+           browse anchor (REAL_INCLUDE_RADIUS_M / #219), opening framed tighter,
+           so a pin a few miles off (or mis-geocoded, #88/#15) is correctly
+           off-screen and the submitter goes hunting for a pin that isn't near
+           them. The approve copy now SETS that proximity expectation.
+       (b) APPROVED-THEN-MERGED — a duplicate reports back approve/review but is
+           then folded (merged_into set → filtered off every map read), so the
+           submitter was told "approved" and never got "their" pin nor knew it
+           joined an existing one. We branch on the merge fields review-submission
+           already returns (duplicate / merged_into / match_via /
+           recommended_by_count, #74/#228) — no new backend — and say the vouch
+           landed on the existing pin. The merge branch is checked FIRST because a
+           fold can carry decision 'approve' OR 'review'; either way it merged.
+     This is the #56/#58/#150 honesty category — a true word that misled — not a
+     new capability. */
+  if(review && review.duplicate){
+    const n = Number(review.recommended_by_count) || 0;
+    showToast(n > 1
+      ? `Already on the map — your vouch joins ${n} others. Thanks!`
+      : "Already on the map — we added your vouch to it. Thanks!");
+  }
+  else if(decision==='approve'){
+    showToast(name
+      ? `“${name}” is live — you'll see it on the map when you're nearby.`
+      : "It's live — you'll see it on the map when you're nearby.");
+  }
   else if(decision==='reject')  showToast("That one couldn't be approved.");
   else                          showToast('Submitted — pending review.');
 }
