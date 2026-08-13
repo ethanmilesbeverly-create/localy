@@ -7328,7 +7328,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.13c';
+const APP_VERSION = '2026.08.13d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10921,6 +10921,29 @@ async function submitGem(){
 
   await loadMyGems();
   await loadApprovedGems();
+
+  /* MAP-VISIBILITY FIX (2026-08-13d) — DROP THE JUST-APPROVED GEM ONTO THE BROWSE
+     MAP WITHOUT A RELOAD. loadApprovedGems() above refreshed the DATA, but the
+     browse hunt's pins are built once and held STABLE while you move (#66), so a
+     newly-approved gem never appeared until an app reload / "Search here" / a big
+     move — the "submitted, approved, not on the map" report. Mirror
+     onRealPlacesReady() exactly (the late-real-places path): reblend the current
+     hunt in place — it preserves captured/found pins and the shared-spot pin and
+     dedupes by name — but ONLY for a browse/category hunt (REAL_UPGRADABLE_KEY),
+     never a guide/shared hunt, where injecting a fresh pin would be wrong. A
+     MERGED duplicate correctly adds NO pin (it's filtered by merged_into); its
+     effect is the canonical gaining your credit, which this reblend also surfaces.
+     Safe to run while on mode-select: it updates state.currentHunt.points so the
+     map is already correct when you return to it. */
+  {
+    const h = state.currentHunt;
+    if(h && REAL_UPGRADABLE_KEY.test(h.key)){
+      reblendHuntInPlace(h);
+      if(typeof refreshTargetsUI==='function') refreshTargetsUI();
+      if(typeof refreshTrackUI==='function') refreshTrackUI();
+    }
+  }
+
   renderGemSubmissions();
 
   /* #24 — WRITER-SIDE, SCOPED, AND AFTER loadMyGems() ON PURPOSE. The freshly
