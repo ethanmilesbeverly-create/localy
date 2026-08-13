@@ -7313,7 +7313,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.11r';
+const APP_VERSION = '2026.08.12a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12509,6 +12509,90 @@ function maybeResolveSpotDesc(t){
     }
   })();
 }
+/* #54 — the OSM-only UNIVERSAL-FACTS half. A PLAIN browsed OSM pin (no human
+   take, no gemId, not the carried ?spot= pin) shows only osmDesc()'s generic
+   filler ("A notable local spot.", "A local green space to wander.") even when
+   Wikipedia has a real "what it is" line for that exact place. The credited-gem
+   path (whatItisFor / maybeEnrichWhatItis) and the shared-spot path
+   (maybeResolveSpotDesc, #237) both skip it — it has neither a t.by to layer a
+   slot under nor a _spotPin identity. This closes that gap: resolve the live
+   "what it is" for a plain OSM pin and OVERWRITE its generic desc, so facts
+   appear on EVERY pin and not only on gems (the "facts-on-top must be universal"
+   direction — a facts line only on gems would re-open #16's seam from the facts
+   side, the mirror of the credit seam).
+   WHY OVERWRITE t.desc, NOT set t.whatItis (as the gem path does): a plain pin
+   has no take, so there is nothing to layer a "What it is" slot ABOVE — it shows
+   ONE plain description, exactly as a browsed real place does. Setting whatItis
+   would render the good line above a bogus "A local's take" built from the
+   generic osmDesc filler — the same reason #237 overwrites for shared spots.
+   Facts stay Wikipedia/OSM-sourced, NEVER Gemini-written (#37/#101/#178) — the
+   AI-writes-facts option was ruled out on this row.
+   SIGNAL, not a string list: source:'osm' pins ALWAYS carry osmDesc() filler
+   (index.js ~line 5101); source:'wiki' pins ALWAYS carry the real extract. So
+   gating on t.source==='osm' is exact and needs no fragile match against the
+   osmDesc() lines (which would be a #155 two-copy of that function). An overwrite
+   is therefore always an upgrade or a guarded no-op, never a downgrade of real
+   text.
+   SCOPED to the facts categories (history/park/trail): a bar/restaurant/shop is
+   #275's user-gen/backstop territory and effectively never has a Wikipedia
+   article, so firing resolveWiki on every commercial pin the user opens is cost
+   with no payoff. Documented, not silent — widen REAL_DESC_FACTS_CATS if a real
+   case shows a commercial OSM pin carrying a genuine wiki "what it is".
+   Step 1 is FREE: a Wikipedia twin already loaded in the tile (source:'wiki',
+   name-subset AND <90 m — the dedupeReal() contract, so it can only ever attach
+   the twin's own text, never a neighbour's) — no network. Step 2 is the Mr-Beef
+   case: resolve BY NAME server-side (the SAME resolveWiki chain the gem/spot
+   paths use), once, cached. A resolved-empty ('') is remembered so we don't
+   refetch a pin with genuinely no better text; a transport failure is NOT cached,
+   so it retries next open (#78c — a failed fetch is not "no desc"). t._descEnriched
+   latches on the first successful upgrade so a re-render tick can't re-scan or
+   re-fetch. */
+const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1 };
+function maybeEnrichRealDesc(t){
+  if(!t || t._descEnriched || !t.name || t.source !== 'osm' || t.by || t.gemId) return;
+  if(!REAL_DESC_FACTS_CATS[t.category]) return;
+  if(state._spotPin && t.id === state._spotPin.id) return; // maybeResolveSpotDesc owns the shared-spot pin
+  const cur = String(t.desc || '').trim();
+  // 1) FREE — a wiki twin already loaded in the tile carries the real line.
+  const all = (state.realPlaces && state.realPlaces.all) || [];
+  let best = null, bestD = Infinity;
+  for(const r of all){
+    if(!r || r.source !== 'wiki' || !r.desc || r.id === t.id) continue;
+    if(!_placeNameMatch(t.name, r.name)) continue;
+    const d = haversine(t.lat, t.lng, r.lat, r.lng);
+    if(d <= 90 && d < bestD){ best = r; bestD = d; }
+  }
+  if(best){
+    const wt = String(best.desc).trim();
+    if(wt && wt !== cur){
+      t._descEnriched = true;
+      if(state.selectedPinId === t.id){ t.desc = wt; fillPinSheet(t); }
+      return; // upgraded from the loaded tile — no network needed
+    }
+  }
+  // 2) NETWORK — no wiki twin loaded: resolve the "what it is" BY NAME, once.
+  const cache = state._realDescCache || (state._realDescCache = {});
+  const key = t.id;
+  if(key in cache){
+    const v = cache[key];
+    if(v && state.selectedPinId === key && cur !== v){ t._descEnriched = true; t.desc = v; fillPinSheet(t); }
+    return;
+  }
+  cache[key] = null; // pending — blocks a duplicate fetch while in flight
+  (async () => {
+    try{
+      const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+      const place = r2 && r2.data && r2.data.place;
+      const wt = (place && place.desc) ? String(place.desc).trim() : '';
+      const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
+      cache[key] = val;
+      if(val && state.selectedPinId === key){ t._descEnriched = true; t.desc = val; fillPinSheet(t); }
+    }catch(e){
+      delete cache[key]; // retry next open — a failed fetch is not "no desc"
+      console.warn('[#54] plain-pin what-it-is resolve failed', (e && e.message) || e);
+    }
+  })();
+}
 function fillPinSheet(t){
   const color = pinSheetColor(t);
   /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
@@ -12648,6 +12732,12 @@ function fillPinSheet(t){
     // and the not-in-tile case #26's twin-adoption doesn't cover). No-op unless t
     // is the carried shared-spot pin (real place, pre-twin-adoption).
     maybeResolveSpotDesc(t);
+    // #54 — a PLAIN browsed OSM pin (no take, no gemId, not the shared-spot pin)
+    // shows only osmDesc()'s generic filler; resolve its real Wikipedia/OSM "what
+    // it is" and overwrite the desc so facts appear on every pin, not just gems.
+    // No-op unless t is a facts-category (history/park/trail) OSM pin. Its result
+    // re-enters fillPinSheet with a changed body, re-rendering here.
+    maybeEnrichRealDesc(t);
     // Coords render instantly; the address swaps in if/when the lookup lands.
     // The copy payload has to swap with it, or a slow lookup leaves the row
     // showing a street address while copying raw coordinates.
