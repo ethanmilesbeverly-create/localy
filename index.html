@@ -7328,7 +7328,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.13b';
+const APP_VERSION = '2026.08.13c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10904,8 +10904,10 @@ async function submitGem(){
      the #56/#58/#150 honesty-by-saying-less move: a claim we could not word without
      misleading is not made. The submitter learns the real status (live / pending /
      joined-an-existing-pin) from My Submissions, not a toast. This toast fires
-     BEFORE goToModeSelect(), so it is the message shown as the screen returns. */
-  showToast('Submitted — thanks! We\u2019ll review it.');
+     BEFORE goToModeSelect(), so it is the message shown as the screen returns.
+     COPY IS LITERALLY "Submitted!" BY DIRECTIVE (2026-08-13c) — the shortest
+     true statement, no outcome claim of any kind. */
+  showToast('Submitted!');
   goToModeSelect();
 
   /* The gate still RUNS — it classifies (#114), copy-edits (#12) and folds true
