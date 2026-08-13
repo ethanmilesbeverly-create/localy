@@ -7328,7 +7328,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.13a';
+const APP_VERSION = '2026.08.13b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10891,19 +10891,31 @@ async function submitGem(){
     return;
   }
 
-  showToast('Submitted — reviewing…');
+  /* #281 — ONE OUTCOME-FREE CONFIRMATION, BY DIRECTIVE (2026-08-13b).
+     The submit confirmation states only what is certain — the row was written and
+     is queued — and makes NO claim about the outcome. "Approved!"/"live" misled
+     two ways the earlier fix tried to word around: (a) an approved gem only draws
+     within ~2.5 mi of the browse anchor (REAL_INCLUDE_RADIUS_M / #219), so "live"
+     read as "on your map now" when the pin was correctly off-screen; (b) a folded
+     duplicate (merged_into set → filtered off every map read) still reported back
+     approve/review, so "approved" promised a pin that never appears. Rather than
+     branch the copy to word each case safely — which also leaned on the #228
+     semantic-merge match fields — we stop making the outcome claim at all. This is
+     the #56/#58/#150 honesty-by-saying-less move: a claim we could not word without
+     misleading is not made. The submitter learns the real status (live / pending /
+     joined-an-existing-pin) from My Submissions, not a toast. This toast fires
+     BEFORE goToModeSelect(), so it is the message shown as the screen returns. */
+  showToast('Submitted — thanks! We\u2019ll review it.');
   goToModeSelect();
 
-  // Send it through the AI review gate (server-side edge function).
-  let decision = null, review = null;
+  /* The gate still RUNS — it classifies (#114), copy-edits (#12) and folds true
+     duplicates (#31/#228) server-side — we just no longer read its verdict for a
+     toast. Fired and awaited so loadMyGems() below reflects whatever it did; a
+     gate error leaves the row 'pending' for a human, unchanged. */
   try{
-    const { data, error } = await sb.functions.invoke('review-submission', { body:{ id:newId } });
+    const { error } = await sb.functions.invoke('review-submission', { body:{ id:newId } });
     if(error) throw error;
-    review = data || null;
-    decision = review && review.decision;
-  }catch(e){
-    decision = null; review = null; // review failed → row stays 'pending', a human can look later
-  }
+  }catch(e){ /* review failed → row stays 'pending', a human can look later */ }
 
   await loadMyGems();
   await loadApprovedGems();
@@ -10920,37 +10932,6 @@ async function submitGem(){
      what earns it. */
   renderPassport();
   checkNewAchievements(SUBMISSION_ACHIEVEMENT_IDS);
-
-  /* #281 — SAY WHAT ACTUALLY HAPPENED, not just the moderation verdict.
-     "Approved!" was true but heard as "on your map now", and it misled two ways:
-       (a) APPROVED ≠ VISIBLE — an approved gem only draws within ~2.5 mi of the
-           browse anchor (REAL_INCLUDE_RADIUS_M / #219), opening framed tighter,
-           so a pin a few miles off (or mis-geocoded, #88/#15) is correctly
-           off-screen and the submitter goes hunting for a pin that isn't near
-           them. The approve copy now SETS that proximity expectation.
-       (b) APPROVED-THEN-MERGED — a duplicate reports back approve/review but is
-           then folded (merged_into set → filtered off every map read), so the
-           submitter was told "approved" and never got "their" pin nor knew it
-           joined an existing one. We branch on the merge fields review-submission
-           already returns (duplicate / merged_into / match_via /
-           recommended_by_count, #74/#228) — no new backend — and say the vouch
-           landed on the existing pin. The merge branch is checked FIRST because a
-           fold can carry decision 'approve' OR 'review'; either way it merged.
-     This is the #56/#58/#150 honesty category — a true word that misled — not a
-     new capability. */
-  if(review && review.duplicate){
-    const n = Number(review.recommended_by_count) || 0;
-    showToast(n > 1
-      ? `Already on the map — your vouch joins ${n} others. Thanks!`
-      : "Already on the map — we added your vouch to it. Thanks!");
-  }
-  else if(decision==='approve'){
-    showToast(name
-      ? `“${name}” is live — you'll see it on the map when you're nearby.`
-      : "It's live — you'll see it on the map when you're nearby.");
-  }
-  else if(decision==='reject')  showToast("That one couldn't be approved.");
-  else                          showToast('Submitted — pending review.');
 }
 /* #62 — COLLAPSED BY DEFAULT, AND THE COLLAPSE IS THE POINT.
    Expanded, this list is a running tally of your rejections sitting directly
