@@ -3461,20 +3461,34 @@ const supabaseStorage = {
    second device, and the flush is last-write-wins, so a capture made elsewhere
    mid-outage loses. Real multi-device merge needs the relational schema (#6).
    ========================================================= */
-/* THE OLD BRAND NAME IN THIS STRING IS DELIBERATE AND MUST NOT BE "FIXED".
-   This is a PERSISTED localStorage key prefix, not copy. Renaming it to
-   `nahgoo:v1:` on the #50 rename would orphan every mirror already written
-   on every device — a walk captured offline before the rename would flush
-   into nowhere, and the pre-rename mirror would sit unreadable until Safari
-   evicted it. Same ruling #56 made for `'my-hunts'`, `'hunt-code:'` and the
-   `hunt_maker` achievement id: persisted keys survive a rename, because
-   moving one is a migration with a backfill, not a copy edit. If it ever has
-   to move, that is the work, and this comment is the reason it hasn't. */
-const MIRROR_PREFIX = 'localy:v1:';
+/* #172 — THE PREFIX MOVED to the current brand via a READ-BOTH-WRITE-NEW shim,
+   NOT a rename. A bare rename of a PERSISTED localStorage key would orphan
+   every mirror already written on every device — a walk captured offline
+   before the move would flush into nowhere, and the pre-move mirror would sit
+   unreadable until Safari evicted it. That is why #56's rule (same as
+   `'my-hunts'`, `'hunt-code:'`, the `hunt_maker` id) forbids renaming a
+   persisted key in place: moving one is a migration, not a copy edit.
+   The migration here needs no bulk backfill: writes go ONLY to the new
+   namespace, reads try the new namespace then fall back to the LEGACY one, so
+   an offline capture queued under the old prefix still flushes and every
+   active key promotes itself forward the next time it is written (mirrorSet in
+   the get/set flows, and the pending-queue self-migrates on the first drain).
+   `purgeMirror` clears BOTH namespaces so a logout/#82-delete leaves neither
+   behind. Do NOT collapse this back to one prefix until the legacy namespace
+   is provably drained on all devices — a fresh install writes new-only, but a
+   long-dormant returning device may still hold `localy:v1:` mirrors. */
+const MIRROR_PREFIX = 'nahgoo:v1:';
+const LEGACY_MIRROR_PREFIX = 'localy:v1:'; // #172 read-fallback only; never written
 
 function mirrorNS(){
   const uid = state.user && state.user.id;
   return uid ? MIRROR_PREFIX + uid + ':' : null;
+}
+/* #172 — the pre-move namespace, read-only. Reads fall back here when the new
+   namespace has no entry; nothing is ever written under it. */
+function legacyMirrorNS(){
+  const uid = state.user && state.user.id;
+  return uid ? LEGACY_MIRROR_PREFIX + uid + ':' : null;
 }
 /* Every localStorage call is wrapped: it throws in Safari private mode and on
    quota, and the correct response to that is to degrade silently to exactly the
@@ -3482,7 +3496,11 @@ function mirrorNS(){
 function mirrorGet(key){
   const ns = mirrorNS(); if(!ns) return null;
   try{
-    const raw = localStorage.getItem(ns + key);
+    let raw = localStorage.getItem(ns + key);
+    if(raw == null){ // #172 — fall back to the pre-move namespace (read-only)
+      const lns = legacyMirrorNS();
+      if(lns) raw = localStorage.getItem(lns + key);
+    }
     return raw == null ? null : JSON.parse(raw); // {value, ts}
   }catch(e){ return null; }
 }
@@ -3495,8 +3513,20 @@ function mirrorSet(key, value){
 }
 function pendingKeys(){
   const ns = mirrorNS(); if(!ns) return [];
-  try{ return JSON.parse(localStorage.getItem(ns + '__pending') || '[]'); }
-  catch(e){ return []; }
+  try{
+    const raw = localStorage.getItem(ns + '__pending');
+    if(raw != null) return JSON.parse(raw); // new queue is authoritative once it exists
+    // #172 — new queue never written yet: inherit any queue left under the
+    // pre-move namespace so an offline capture from before the move still
+    // flushes. The first setPendingKeys() writes the new queue and from then
+    // on the branch above wins, so this self-migrates and never loops.
+    const lns = legacyMirrorNS();
+    if(lns){
+      const legacy = localStorage.getItem(lns + '__pending');
+      if(legacy != null) return JSON.parse(legacy);
+    }
+    return [];
+  }catch(e){ return []; }
 }
 function setPendingKeys(list){
   const ns = mirrorNS(); if(!ns) return;
@@ -3504,8 +3534,11 @@ function setPendingKeys(list){
 }
 function purgeMirror(){
   const ns = mirrorNS(); if(!ns) return;
+  const lns = legacyMirrorNS(); // #172 — wipe the pre-move namespace too
   try{
-    Object.keys(localStorage).filter(k=>k.indexOf(ns)===0).forEach(k=>localStorage.removeItem(k));
+    Object.keys(localStorage)
+      .filter(k => k.indexOf(ns)===0 || (lns && k.indexOf(lns)===0))
+      .forEach(k=>localStorage.removeItem(k));
   }catch(e){}
 }
 
@@ -7322,7 +7355,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.13e';
+const APP_VERSION = '2026.08.14a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
