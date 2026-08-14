@@ -7109,6 +7109,23 @@ function showToast(msg){
    nav routes through showScreen, not through a tap on the map), so without
    this the dropdown survives underneath the next screen. */
 const placeSuggest = {map:null, create:null, gem:null};
+/* #287 — a tap on an open address-suggestion row falls through to the draft-pin
+   map behind it on iOS (the .place-suggest z-index:20-vs-Leaflet-panes surface
+   #88a/#97 flag), so the map's own click handler drops a stray pin at the finger
+   instead of the picked address winning. `_placeSuggestPickAt` is stamped by the
+   single commit() funnel on every pick; a draft-pin map ignores a click while its
+   list is open OR within a short window after a pick — covering both event
+   orderings (the map click can fire just before OR just after the row commits).
+   700ms mirrors attachPlaceSuggest's own commit-dedup window. Applied to the two
+   DRAFT-PIN maps that share the defect (#suggest-gem-map #287, #create-map #194);
+   the main #leaflet-map is unaffected — its click dismisses sheets / simulates a
+   move, it never drops a pin from a suggestion, and map-search-input's pick runs
+   enterLocationBrowseMode, not a draft pin. */
+let _placeSuggestPickAt = 0;
+function placeSuggestGuardsMapClick(which){
+  const ps = placeSuggest[which];
+  return !!(ps && ps.isOpen()) || (Date.now() - _placeSuggestPickAt < 700);
+}
 function wirePlaceSuggest(){
   placeSuggest.map = attachPlaceSuggest('map-search-input', place=>{
     document.getElementById('map-search-input').value = '';
@@ -7355,7 +7372,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.14a';
+const APP_VERSION = '2026.08.14b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9626,6 +9643,7 @@ function attachPlaceSuggest(inputId, onPick){
 
   function commit(place){
     if(!place) return;
+    _placeSuggestPickAt = Date.now();   // #287 — the draft-pin maps read this to ignore the fall-through click
     close();
     input.blur();
     onPick(place);
@@ -9768,7 +9786,7 @@ function attachPlaceSuggest(inputId, onPick){
     close();
   }, true);
 
-  return {close, el:list};
+  return {close, el:list, isOpen: ()=>st.open};   // #287 — isOpen() lets a draft-pin map suppress the fall-through click while the list is up
 }
 
 /* #88 — `searchMapLocation()` is DELETED, not unwired. Its only caller was the
@@ -10824,6 +10842,11 @@ function openSuggestGemScreen(){
       state.suggestMap = L.map('suggest-gem-map', {zoomControl:false, attributionControl:false, zoomSnap:0.25, wheelPxPerZoomLevel:120, zoomAnimation:false}).setView([start.lat,start.lng], 16);
       addBaseLayer(state.suggestMap);
       state.suggestMap.on('click', e=>{
+        /* #287 — a tap on an open address-suggestion row falls through to the map
+           on iOS; ignore the map click while the gem suggest is open or just
+           committed, so the picked address (jumpSuggestMapTo) drops the pin
+           instead of a stray one landing at the finger. */
+        if(placeSuggestGuardsMapClick('gem')) return;
         /* #17 — routed through setGemDraftPin so tap and geocode share one
            marker path. Also closes the dropdown: a list left open over the map
            swallows the next tap. */
@@ -11129,6 +11152,10 @@ function openCreateScreen(existingHunt, seedPoint){
       addBaseLayer(state.createMap);
       state.createMarkersLayer = L.layerGroup().addTo(state.createMap);
       state.createMap.on('click', e=>{
+        /* #287 — same fall-through as #suggest-gem-map: a tap on an open
+           create-location-search suggestion must not drop a stray "Pin N" on the
+           map behind it. jumpCreateMapTo handles the real pick. */
+        if(placeSuggestGuardsMapClick('create')) return;
         // #195 — no "Next pin's name" field any more; a raw map tap has no place
         //   name to borrow, so it defaults to "Pin N" and is renamed in its list row.
         const name = 'Pin '+(state.createPins.length+1);
