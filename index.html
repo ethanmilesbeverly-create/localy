@@ -1921,11 +1921,30 @@
   }
 
   /* ---------- Bottom nav ---------- */
+  /* #103 — GLASS NAV, WITH A GRADIENT FLOOR. Was rgba(16,35,28,0.96) — near
+     opaque, a grounded "floor" under the map. Now semi-transparent to match
+     #topbar (rgba(16,35,28,0.5) + blur) so the map reads as one continuous
+     surface top-to-bottom and owns the whole screen. This is the #34/#88 tint
+     tradeoff walked into ON PURPOSE, not the mistake repeated: #34/#88 were
+     about opaque-vs-tint on TEXT-DENSE lists (search dropdown, 5 rows) over
+     bright tiles. This is a 4-item nav with ONE line of small text per item,
+     and the risk is contained by the gradient. The bar is NOT a flat 0.5: the
+     icons sit in the light top half (0.5, matches the header), the labels sit
+     in the deeper bottom half (0.72) so the sub-16px dim (--text-dim) labels
+     keep a floor under them over bright map states (streets/satellite at the
+     screen bottom edge). The active orange label reads over anything; the
+     three inactive dim labels over the BRIGHTEST tiles are the pass/fail —
+     that is the QA guard, not a reason to go back to opaque. If you flatten
+     this to a single 0.5 stop you reintroduce #34 for the dim labels. */
   #bottomnav{
     position:absolute;bottom:0;left:0;right:0;
     display:flex;
-    background:rgba(16,35,28,0.96);
+    background:linear-gradient(180deg,
+      rgba(16,35,28,0.5) 0%,
+      rgba(16,35,28,0.62) 45%,
+      rgba(16,35,28,0.72) 100%);
     backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     border-top:1px solid var(--line);
     padding:8px 6px calc(8px + env(safe-area-inset-bottom));
     z-index:600;
@@ -1945,7 +1964,19 @@
     padding:6px 2px;cursor:pointer;
   }
   .nav-btn.active{color:var(--orange);}
-  .nav-btn svg{width:22px;height:22px;}
+  /* #103 — the active tab's icon sits in a tinted circle. EVERY tab's icon
+     gets the same 34px round slot (22px glyph + 6px ring via content-box), so
+     the slot is transparent when inactive and only fills on .active — the icon
+     never shifts or resizes between states, only the background appears. Tint
+     is the orange at 0.18 to sit under the orange glyph without fighting it. */
+  .nav-btn svg{
+    width:22px;height:22px;
+    box-sizing:content-box;
+    padding:6px;border-radius:50%;
+    background:transparent;
+    transition:background 0.15s ease;
+  }
+  .nav-btn.active svg{background:rgba(232,98,44,0.18);}
 
   /* toast */
   #toast{
@@ -7372,7 +7403,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.14b';
+const APP_VERSION = '2026.08.18a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
