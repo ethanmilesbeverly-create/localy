@@ -39,8 +39,17 @@
   :root{
     /* #98 — THE OFFSET #pin-sheet IS ANCHORED BY AND THE DISTANCE IT MUST TRAVEL
        TO CLEAR ARE THE SAME FACT, AND THEY USED TO BE TWO NUMBERS IN DIFFERENT
-       UNITS. Stated once here so they cannot disagree again. See #pin-sheet. */
-    --sheet-offset:calc(56px + env(safe-area-inset-bottom));
+       UNITS. Stated once here so they cannot disagree again. See #pin-sheet.
+
+       #103 — WAS 56px (docked nav footprint). The nav now FLOATS: it is inset
+       14px off the app bottom and stands ~68px tall, so its TOP edge is at
+       ~82px from the app bottom, not 56px. This offset is where the pin-sheet's
+       bottom edge lands, so it must sit ABOVE the floating nav's top or the nav
+       (z600) covers the sheet's lower buttons and eats their taps — the exact
+       #98/#61 tap-eating defect. 90px = ~82px nav top + ~8px clearance so the
+       sheet floats a hair above the pill. If you ever un-float the nav, this
+       goes back to 56px in lockstep with the #bottomnav rule. */
+    --sheet-offset:calc(90px + env(safe-area-inset-bottom));
     --bg:#10231C;
     --surface:#173229;
     --surface-2:#1F3F32;
@@ -341,7 +350,12 @@
   #map-attrib{
     position:absolute;
     left:50%;transform:translateX(-50%);
-    bottom:calc(71px + env(safe-area-inset-bottom));
+    /* #103 — 71px -> 90px. At 71px this centered pill sat inside the FLOATING
+       nav's band (nav now spans ~14px..82px off the bottom) and disappeared
+       behind it (nav z600 > this z500). 90px lands it on the nav's top line,
+       centred in the gap between the two corner map buttons (both at 96px).
+       Tracks --sheet-offset intentionally: both mark the floating nav's top. */
+    bottom:calc(90px + env(safe-area-inset-bottom));
     z-index:500;
     display:flex;align-items:center;
     height:20px;
@@ -1936,17 +1950,47 @@
      three inactive dim labels over the BRIGHTEST tiles are the pass/fail —
      that is the QA guard, not a reason to go back to opaque. If you flatten
      this to a single 0.5 stop you reintroduce #34 for the dim labels. */
+  /* #103 — GLASS NAV, FLOATING PILL. Was rgba(16,35,28,0.96) full-bleed, a
+     grounded opaque "floor". Now a semi-transparent rounded pill inset off all
+     edges and floating over the map, so the map reads as one continuous surface
+     the pill hovers on — the whole screen is the map.
+
+     Two things ride on this rule and must move WITH it, both marked #103:
+       - --sheet-offset (56px -> 90px): the pin-sheet anchors above the nav's TOP
+         edge. Floating raised that edge from 56px to ~82px; if the offset had
+         stayed 56 the pill would float over the sheet's bottom buttons and eat
+         taps (#98/#61). 
+       - #map-attrib (71px -> 90px): the centred credits pill was inside the
+         floating band and hid behind the pill; raised onto the nav-top line.
+     If you ever un-float this, revert all three together.
+
+     GLASS/LEGIBILITY (unchanged reasoning from the docked version): the map
+     shows through, which is the #34/#88 tint tradeoff walked into ON PURPOSE,
+     not the mistake repeated. #34/#88 were opaque-vs-tint on TEXT-DENSE lists
+     over bright tiles; this is a 4-item nav, one short label each, risk
+     contained by the gradient. NOT a flat stop: icons sit in the lighter top
+     (0.55, near the header's 0.5), labels sit in the deeper bottom (0.76) so
+     the sub-16px --text-dim labels keep a floor over bright map (streets/
+     satellite). Floating means bright map can sit BELOW the pill too, which is
+     why the bottom stop is 0.76 here vs 0.72 docked. Active orange label reads
+     over anything; the three inactive dim labels over the BRIGHTEST tiles are
+     the pass/fail QA guard, not a reason to go opaque. Flatten to one stop and
+     you reintroduce #34 for the dim labels. */
   #bottomnav{
-    position:absolute;bottom:0;left:0;right:0;
+    position:absolute;
+    bottom:calc(14px + env(safe-area-inset-bottom));
+    left:14px;right:14px;
     display:flex;
     background:linear-gradient(180deg,
-      rgba(16,35,28,0.5) 0%,
-      rgba(16,35,28,0.62) 45%,
-      rgba(16,35,28,0.72) 100%);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    border-top:1px solid var(--line);
-    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+      rgba(16,35,28,0.55) 0%,
+      rgba(16,35,28,0.66) 45%,
+      rgba(16,35,28,0.76) 100%);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.42);
+    padding:8px 6px;
     z-index:600;
   }
   /* #98b — AS OF 2026.07.20r NOTHING ADDS THIS CLASS. The two callers that did
@@ -7403,7 +7447,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.18a';
+const APP_VERSION = '2026.08.18b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
