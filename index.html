@@ -2326,12 +2326,10 @@
          the topbar, so no compensating margin is needed here. -->
     <p class="page-sub" style="margin:14px 0 10px;font-weight:700;color:var(--text);">Explore Nearby</p>
     <!-- #294 — SOURCE FILTER. "Word of mouth" shows only human-sourced picks
-         (approved gems + the seed layer); "All places" is gems + auto-generated
-         OSM/Wikipedia (today's behaviour). It affects the COMMERCIAL
-         cards (Bars & Restaurants, Shops); the scaffold cards (Parks & Trails,
-         History & Lore, Art) render the same in both modes, so the wording is
-         neutral rather than implying it governs all six. Static markup defaults to
-         "Word of mouth"; applyBrowseSourceUI() corrects it from the saved value on hydrate. -->
+         (approved gems + the seed layer) across ALL six cards; "All places" adds
+         auto-generated OSM/Wikipedia (today's behaviour). Static markup defaults
+         to "Word of mouth"; applyBrowseSourceUI() corrects it from the saved value
+         on hydrate. -->
     <div id="source-toggle" role="tablist" aria-label="Place source">
       <button type="button" role="tab" data-src="wordofmouth" aria-selected="true" onclick="setBrowseSource('wordofmouth')">Word of mouth</button>
       <button type="button" role="tab" data-src="all" aria-selected="false" onclick="setBrowseSource('all')">All places</button>
@@ -5584,15 +5582,15 @@ async function ensureRealPlaces(base){
 
 /* Nearest real internet places of a category (mirrors nearbyApprovedGems). */
 function nearbyRealPlaces(base, category, limit, excludeIds){
-  /* #294 — in "Word of mouth" mode the COMMERCIAL categories (bars/restaurants/
-     shops) surface only human-sourced picks, so their auto-generated OSM/Wikipedia
-     places are withheld here. This is the SINGLE read point for real internet
-     places (blendCategory's step 2 AND generateOneCategoryPoint both call it), so
-     one guard covers every consumer — the Explore commercial cards and All Things
-     Local alike. Scaffold categories (park/trail/history/art) are never gated;
-     already-captured pins are kept elsewhere (reblendHuntInPlace's foundSet), so
-     this never un-shows a place you visited. Default 'all' = no change. */
-  if(state.browseSource === 'wordofmouth' && isCommercialCategory(category)) return [];
+  /* #294 — in "Word of mouth" mode the app surfaces only human-sourced picks
+     (approved gems + the seed layer, both via nearbyApprovedGems), so ALL
+     auto-generated OSM/Wikipedia places are withheld here — every category,
+     History and Parks included, not just commercial. This is the SINGLE read
+     point for real internet places (blendCategory's step 2 AND
+     generateOneCategoryPoint both call it), so one guard covers every consumer
+     and every card. Already-captured pins are kept elsewhere (reblendHuntInPlace's
+     foundSet), so this never un-shows a place you visited. */
+  if(state.browseSource === 'wordofmouth') return [];
   const cache = state.realPlaces;
   const list = (cache && cache.byCat && cache.byCat[category]) || [];
   const ex = excludeIds || [];
@@ -6068,7 +6066,7 @@ let state = {
   profile: null,       // #23 — {display_name, status} for THIS user, or null if never loaded
   simulating: false,
   currentHunt: null,    // {key, name, mode, points:[{id,name,lat,lng,desc}]}
-  browseSource: 'wordofmouth',  // #294 — Explore source filter DEFAULT: 'wordofmouth' (human-sourced only for commercial cards) | 'all' (gems + auto OSM/Wiki). Hydrated from localStorage in init(); read by nearbyRealPlaces().
+  browseSource: 'wordofmouth',  // #294 — Explore source filter DEFAULT: 'wordofmouth' (human-sourced only — gems + seed, no auto OSM/Wiki, ANY category) | 'all' (adds auto OSM/Wiki, today). Hydrated from localStorage in init(); read by nearbyRealPlaces().
   lastSeenAt: null,     // #27 — ms epoch of the previous app-open, from user_state 'freshness:lastSeen'. Stored now, consumed later by push (#175). Cannot be backfilled, which is why it is written from day one.
   progress: {},         // { huntKey: { foundIds:[...], foundAt:{id:ts} } }
   myHunts: [],          // custom hunts saved personally
@@ -7400,7 +7398,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19c';
+const APP_VERSION = '2026.08.19d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10702,18 +10700,18 @@ function assertGemBucketsAgree(){
   }catch(e){ console.warn('[#68] bucket check failed', e); }
 }
 /* #294 — Explore source filter ("Word of mouth" vs "All places").
-   The segmented control under the Explore heading flips whether the COMMERCIAL
-   categories blend in auto-generated OSM/Wikipedia places or show ONLY
-   human-sourced picks (approved gems + the seed layer). The scaffold categories
-   are never gated (see nearbyRealPlaces). One localStorage flag + that one guard
-   is the whole feature; it flips back with a tap, and the default is now
-   'wordofmouth' (commercial cards are human-first out of the box; a saved 'all'
-   is honoured). The first reversible slice of
-   #275 (OSM-commercial-as-backstop). isCommercialCategory / readBrowseSource are
-   function declarations so hoisting lets nearbyRealPlaces (defined above) call
-   them. */
+   The segmented control under the Explore heading flips whether the map blends
+   in auto-generated OSM/Wikipedia places (All places = today) or shows ONLY
+   human-sourced picks (approved gems + the seed layer) across EVERY category —
+   History and Parks included. One localStorage flag + one guard in
+   nearbyRealPlaces is the whole feature; it flips back with a tap, and the
+   default is 'wordofmouth' (the map is human-first out of the box; a saved 'all'
+   is honoured). The scaffold categories (History/Art/Parks) can read sparse or
+   empty in "Word of mouth" where few gems/seeds exist — that is the accepted cost
+   of a human-only map (#94's "empty is empty"), not a bug. The first reversible
+   slice of #275. readBrowseSource is a function declaration so hoisting lets
+   nearbyRealPlaces (defined above) reach it. */
 const BROWSE_SOURCE_KEY = 'nahgoo-browse-source';
-function isCommercialCategory(cat){ return cat==='bars' || cat==='restaurants' || cat==='shops'; }
 function readBrowseSource(){ try{ return localStorage.getItem(BROWSE_SOURCE_KEY)==='all' ? 'all' : 'wordofmouth'; }catch(e){ return 'wordofmouth'; } }
 function hydrateBrowseSource(){ state.browseSource = readBrowseSource(); applyBrowseSourceUI(); }
 function applyBrowseSourceUI(){
@@ -10732,25 +10730,19 @@ function setBrowseSource(mode){
   state.browseSource = next;
   try{ localStorage.setItem(BROWSE_SOURCE_KEY, next); }catch(e){}
   applyBrowseSourceUI();
-  /* Rebuild the live hunt so a commercial category already on the map re-filters
-     immediately (opening a card fresh already rebuilds via selectExplore). Route
-     through regenerateCurrentHuntAt — the SAME rebuild "Search here" uses, which
-     re-runs the hunt's own starter and repaints reliably. reblendHuntInPlace was
-     the wrong primitive: an in-place merge that left the map unchanged.
-     ONLY the source-affected hunts are rebuilt — All Things Local (mixed),
-     Shops, and Bars & Restaurants — so scaffold hunts (parks/history/art/lore)
-     aren't needlessly rebuilt and a fixed GUIDE never hits regenerate's
-     "spots are fixed" toast. Anchor + preserve-view mirror selectExplore so the
-     camera doesn't snap when browsing an area you're not standing in (#116/#8). */
+  /* Re-filter the live hunt QUIETLY so if the map is already showing a category
+     it updates without a jump — reblendHuntInPlace rebuilds the hunt's points in
+     place (through the now-gated buildPointsForKey) and NEVER switches tabs or
+     reframes the camera (that "jump back to the map" came from routing through
+     the hunt starters, which force the map tab). refreshTargetsUI repaints the
+     markers from the rebuilt points. A fixed GUIDE is a safe no-op
+     (buildPointsForKey returns null → points unchanged, no toast). Opening a card
+     fresh also rebuilds via the gate, so this only matters for an already-live
+     hunt. Not swallowed — a throw is logged, not hidden. */
   if(state.currentHunt){
-    const k = state.currentHunt.key || '';
-    const affected = k.startsWith('local_') || k.startsWith('shops_') || k.startsWith('barsrest_');
-    if(affected){
-      const base = state.browsingLocation || state.searchedArea || state.me || FALLBACK_LOCATION;
-      if(state.browsingLocation || state.searchedArea) state._preserveViewOnNextHunt = true;
-      try{ regenerateCurrentHuntAt(base); }
-      finally{ state._preserveViewOnNextHunt = false; }
-    }
+    try{ reblendHuntInPlace(state.currentHunt); }
+    catch(e){ console.warn('[#294] live re-filter failed', e); }
+    refreshTargetsUI();
   }
 }
 
