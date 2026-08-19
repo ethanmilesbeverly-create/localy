@@ -647,6 +647,12 @@
      scale it to sit like the explore cards' 24px category icons. Only My Guides
      cards render a `.blaze`, so this never touches an explore card. */
   .explore-grid .mode-card .blaze{ width:20px; height:28px; }
+  /* #294 — Explore source filter segmented control ("Word of mouth" vs "All
+     places"). Track = --surface, active pill = --orange with --bg text for
+     contrast; inactive is dim. Sits directly under the "Explore Nearby" heading. */
+  #source-toggle{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:3px; gap:3px; margin:0 0 14px; }
+  #source-toggle button{ flex:1; border:0; cursor:pointer; background:transparent; color:var(--text-dim); border-radius:8px; padding:9px 6px; font-size:13px; font-weight:400; font-family:inherit; line-height:1.2; transition:background .12s, color .12s; }
+  #source-toggle button.active{ background:var(--orange); color:var(--bg); font-weight:700; }
   .icon-wrap.plus-icon{
     width:40px;height:40px;border-radius:50%;
     background:rgba(154,127,191,0.15);
@@ -2319,6 +2325,17 @@
          colour so it reads as one). The screen's 52px top padding is the spacing to
          the topbar, so no compensating margin is needed here. -->
     <p class="page-sub" style="margin:14px 0 10px;font-weight:700;color:var(--text);">Explore Nearby</p>
+    <!-- #294 — SOURCE FILTER. "Word of mouth" shows only human-sourced picks
+         (approved gems + the seed layer); "All places" is gems + auto-generated
+         OSM/Wikipedia (today's behaviour). It affects the COMMERCIAL
+         cards (Bars & Restaurants, Shops); the scaffold cards (Parks & Trails,
+         History & Lore, Art) render the same in both modes, so the wording is
+         neutral rather than implying it governs all six. Static markup defaults to
+         "Word of mouth"; applyBrowseSourceUI() corrects it from the saved value on hydrate. -->
+    <div id="source-toggle" role="tablist" aria-label="Place source">
+      <button type="button" role="tab" data-src="wordofmouth" aria-selected="true" onclick="setBrowseSource('wordofmouth')">Word of mouth</button>
+      <button type="button" role="tab" data-src="all" aria-selected="false" onclick="setBrowseSource('all')">All places</button>
+    </div>
     <div class="mode-grid explore-grid">
       <div class="mode-card" data-cat="local" onclick="selectExplore('local')">
         <div class="icon-wrap"></div>
@@ -5567,6 +5584,15 @@ async function ensureRealPlaces(base){
 
 /* Nearest real internet places of a category (mirrors nearbyApprovedGems). */
 function nearbyRealPlaces(base, category, limit, excludeIds){
+  /* #294 — in "Word of mouth" mode the COMMERCIAL categories (bars/restaurants/
+     shops) surface only human-sourced picks, so their auto-generated OSM/Wikipedia
+     places are withheld here. This is the SINGLE read point for real internet
+     places (blendCategory's step 2 AND generateOneCategoryPoint both call it), so
+     one guard covers every consumer — the Explore commercial cards and All Things
+     Local alike. Scaffold categories (park/trail/history/art) are never gated;
+     already-captured pins are kept elsewhere (reblendHuntInPlace's foundSet), so
+     this never un-shows a place you visited. Default 'all' = no change. */
+  if(state.browseSource === 'wordofmouth' && isCommercialCategory(category)) return [];
   const cache = state.realPlaces;
   const list = (cache && cache.byCat && cache.byCat[category]) || [];
   const ex = excludeIds || [];
@@ -6042,6 +6068,7 @@ let state = {
   profile: null,       // #23 — {display_name, status} for THIS user, or null if never loaded
   simulating: false,
   currentHunt: null,    // {key, name, mode, points:[{id,name,lat,lng,desc}]}
+  browseSource: 'wordofmouth',  // #294 — Explore source filter DEFAULT: 'wordofmouth' (human-sourced only for commercial cards) | 'all' (gems + auto OSM/Wiki). Hydrated from localStorage in init(); read by nearbyRealPlaces().
   lastSeenAt: null,     // #27 — ms epoch of the previous app-open, from user_state 'freshness:lastSeen'. Stored now, consumed later by push (#175). Cannot be backfilled, which is why it is written from day one.
   progress: {},         // { huntKey: { foundIds:[...], foundAt:{id:ts} } }
   myHunts: [],          // custom hunts saved personally
@@ -7005,6 +7032,7 @@ async function init(){
   setupBaseMap();
   wirePinSheet();
   wireDrawer();         // swipe-down-to-close on the nearby drawer, mirroring wirePinSheet()
+  hydrateBrowseSource(); // #294 — read the saved Explore source filter and light the correct pill
   wirePlaceSuggest();   // #88 — both location search fields get the dropdown
   /* Anchor the FIRST content paint to the remembered map view (#120), not the
      downtown FALLBACK_LOCATION. setupBaseMap() already opens the map at the
@@ -7372,7 +7400,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.14b';
+const APP_VERSION = '2026.08.19b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10673,6 +10701,43 @@ function assertGemBucketsAgree(){
     else console.log('[#68] gem buckets agree (' + accepted.length + ' accepted, all consumed)');
   }catch(e){ console.warn('[#68] bucket check failed', e); }
 }
+/* #294 — Explore source filter ("Word of mouth" vs "All places").
+   The segmented control under the Explore heading flips whether the COMMERCIAL
+   categories blend in auto-generated OSM/Wikipedia places or show ONLY
+   human-sourced picks (approved gems + the seed layer). The scaffold categories
+   are never gated (see nearbyRealPlaces). One localStorage flag + that one guard
+   is the whole feature; it flips back with a tap, and the default is now
+   'wordofmouth' (commercial cards are human-first out of the box; a saved 'all'
+   is honoured). The first reversible slice of
+   #275 (OSM-commercial-as-backstop). isCommercialCategory / readBrowseSource are
+   function declarations so hoisting lets nearbyRealPlaces (defined above) call
+   them. */
+const BROWSE_SOURCE_KEY = 'nahgoo-browse-source';
+function isCommercialCategory(cat){ return cat==='bars' || cat==='restaurants' || cat==='shops'; }
+function readBrowseSource(){ try{ return localStorage.getItem(BROWSE_SOURCE_KEY)==='all' ? 'all' : 'wordofmouth'; }catch(e){ return 'wordofmouth'; } }
+function hydrateBrowseSource(){ state.browseSource = readBrowseSource(); applyBrowseSourceUI(); }
+function applyBrowseSourceUI(){
+  const wrap = document.getElementById('source-toggle');
+  if(!wrap) return;
+  const wom = state.browseSource === 'wordofmouth';
+  wrap.querySelectorAll('button[data-src]').forEach(b=>{
+    const on = (b.getAttribute('data-src') === 'wordofmouth') === wom;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+}
+function setBrowseSource(mode){
+  const next = mode === 'wordofmouth' ? 'wordofmouth' : 'all';
+  if(state.browseSource === next){ applyBrowseSourceUI(); return; }
+  state.browseSource = next;
+  try{ localStorage.setItem(BROWSE_SOURCE_KEY, next); }catch(e){}
+  applyBrowseSourceUI();
+  /* Re-blend the live hunt so a commercial category already on the map reflects
+     the flip immediately; opening a card fresh already rebuilds via selectExplore.
+     Guarded — a guide/no hunt is a safe no-op. */
+  if(state.currentHunt){ try{ reblendHuntInPlace(state.currentHunt); refreshTargetsUI(); }catch(e){} }
+}
+
 function selectExplore(cat){
   /* #116 — HONOUR THE BROWSE/SEARCH ANCHOR, don't hardcode GPS.
      This hardcoded state.me, so picking a category from the hunt-name list while
