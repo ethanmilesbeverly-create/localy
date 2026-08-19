@@ -127,21 +127,28 @@
     position:absolute;top:60px;left:16px;right:16px;z-index:500;
     display:flex;align-items:center;gap:8px;
   }
+  /* #295 — the guide/explore chip MOVED into #topbar (see the #topbar markup +
+     the .on-map rule below). It renders ONLY on the map screen, keeps its own
+     nearly-opaque fill so its text survives over bright tiles even though the
+     topbar scrim is 0.5 alpha (the #34/#88 "a tint the map reads through" rule),
+     and is display:none everywhere else so it never shows on Explore/Submit/etc.
+     max-width is a vw now (it lives in the full-width topbar, not the search row). */
   #hunt-chip{
+    display:none;
     flex-shrink:0;
-    display:flex;
     align-items:center;
     gap:6px;
     background:rgba(23,50,41,0.95);
     backdrop-filter:blur(8px);
     border:1px solid var(--line);
     border-radius:999px;
-    padding:10px 12px;
-    font-size:12px;
+    padding:6px 11px;
+    font-size:13px;
     color:var(--text-dim);
     cursor:pointer;
-    max-width:38%;
+    max-width:42vw;
   }
+  #topbar.on-map #hunt-chip{display:flex;}
   #hunt-chip .name{
     overflow:hidden;
     text-overflow:ellipsis;
@@ -149,26 +156,37 @@
     color:var(--text);
     font-weight:600;
   }
-  /* #88 — position:relative added so the suggest dropdown can hang off the pill.
+  #hunt-chip .chip-caret{flex-shrink:0;width:14px;height:14px;color:var(--text-dim);}
+  /* #88 — position:relative added so the suggest dropdown can hang off the field.
      Without it the dropdown resolves against #map-top-row, which is 16px inset
-     from BOTH edges and shares its box with #hunt-chip, so the list rendered
-     under the chip as well as the input. */
+     from BOTH edges. Since #295 moved the chip to the topbar, the search field
+     now owns the whole #map-top-row width. */
   #map-search-row{
     flex:1;min-width:0;
     display:flex;gap:6px;
     position:relative;
   }
-  /* #11 (regression fix) — this rule is MORE SPECIFIC than the shared input rule
-     and was still setting 13px, so the header search pill kept triggering iOS
-     focus-zoom after the viewport lock was removed. Any sub-16px font-size on a
-     focusable input reintroduces that zoom no matter what the shared rule says.
-     Padding drops 9px -> 7px so the pill's overall height is within a pixel of
-     what it was; the text is the only thing that grows. */
-  #map-search-row input{
-    flex:1;min-width:0;background:rgba(23,50,41,0.95);backdrop-filter:blur(8px);
-    border:1px solid var(--line);color:var(--text);
-    border-radius:999px;padding:7px 12px;font-size:16px;font-family:inherit;
+  /* #295 — the map search field now matches the SUBMIT-FORM field look (the shared
+     input rule ~line 799): solid --surface, square 10px radius, 1px --line border,
+     orange focus outline — replacing the old translucent-green 999px pill. A
+     leading magnifier sits inside on the left; the input pads left to clear it.
+     font-size STAYS 16px: anything smaller re-triggers iOS focus-zoom, which is
+     the exact reason this ID-scoped rule (#11) exists and must keep overriding the
+     shared rule. */
+  #map-search-row .map-search-icon{
+    position:absolute;left:12px;top:50%;
+    transform:translateY(-50%);
+    width:18px;height:18px;
+    color:var(--text-dim);
+    pointer-events:none;
   }
+  #map-search-row input{
+    flex:1;min-width:0;
+    background:var(--surface);
+    border:1px solid var(--line);color:var(--text);
+    border-radius:10px;padding:11px 12px 11px 38px;font-size:16px;font-family:inherit;
+  }
+  #map-search-row input:focus{outline:1px solid var(--orange);}
 
   /* ---------- #88: place suggest dropdown (shared component) ----------
      Used by the map header pill and the hunt-builder location field. One rule
@@ -1042,10 +1060,10 @@
   #screen-map.drawer-open #map-3d-wrap{
     pointer-events:none;
   }
-  #screen-map.drawer-open #hunt-chip{
-    pointer-events:none;
-    opacity:0.55;
-  }
+  /* #295 — the old "#screen-map.drawer-open #hunt-chip" dim/disable rule is GONE.
+     The chip left #screen-map for the global #topbar, so that descendant selector
+     can no longer reach it; the chip is now persistent topbar chrome (like the
+     wordmark) and stays lit + tappable while the nearby drawer is open. */
   .target-row{
     padding:10px 0;
     border-bottom:1px solid var(--line);
@@ -2313,8 +2331,17 @@
        repeat of it arriving a third time. The instrument that finds this is a
        TAG-STRIPPED search of the rendered text, not a search of the source.
        If the name ever changes again, run that one first. -->
-  <div id="topbar">
+  <div id="topbar" class="on-map">
     <div class="brand display">NAH<span>GOO</span></div>
+    <!-- #295 — the guide/explore chip lives here now (was in #map-top-row next to
+         the search). It rides the topbar's empty right slot beside the wordmark and
+         shows ONLY on the map via #topbar.on-map (toggled in showScreen). onclick +
+         ids are unchanged, so goToModeSelect() and setCurrentHunt()'s
+         getElementById('hunt-chip-name') still resolve. -->
+    <div id="hunt-chip" onclick="goToModeSelect()">
+      <span class="name" id="hunt-chip-name">Choose a guide</span>
+      <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
   </div>
 
   <!-- MODE SELECT -->
@@ -2602,11 +2629,11 @@
              binds its own keydown and owns Enter (commit highlighted result, or
              fall back to the single-hit lookup). Leaving the attribute here made
              both fire, so Enter jumped to Photon's top hit AND to Nominatim's,
-             two different places, in that order. -->
-        <input type="text" id="map-search-input" placeholder="Search a place" enterkeyhint="search">
-      </div>
-      <div id="hunt-chip" onclick="goToModeSelect()">
-        <span class="name" id="hunt-chip-name">Choose a guide</span>
+             two different places, in that order.
+             #295 — leading magnifier + full-width square field; the chip that used
+             to share this row moved to the topbar. -->
+        <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="map-search-input" placeholder="Find a place nearby" enterkeyhint="search">
       </div>
     </div>
     <div id="browsing-indicator" onclick="recenterMap()" role="button" aria-label="Return to your real location">
@@ -7200,6 +7227,11 @@ function showScreen(id){
   const el = document.getElementById(id);
   el.classList.add('active');
   el.scrollTop = 0;
+  /* #295 — the guide/explore chip lives in the global #topbar but must only show
+     on the map. This is the one funnel every screen switch passes through, so
+     toggle .on-map here; the topbar carries it initially (map is the boot screen). */
+  const tb = document.getElementById('topbar');
+  if(tb) tb.classList.toggle('on-map', id==='screen-map');
   /* #91 — #app is overflow:hidden, which stops the USER scrolling it but not
      script. Anything that scrolls an ancestor (scrollIntoView, focus() on an
      off-screen input, an IME) can leave the frame permanently offset with the
@@ -7420,7 +7452,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19f';
+const APP_VERSION = '2026.08.19g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
