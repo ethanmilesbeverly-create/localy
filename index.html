@@ -693,33 +693,23 @@
     font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:capitalize;
     padding:2px 7px;border-radius:999px;
   }
-  /* #62 — COLLAPSED SUBMISSIONS. Native <details>/<summary>, no JS toggle and
-     no state: the same call as the confirm() in navTo(). This app has three
-     shipped defects (#95/#97/#98) from hand-built overlays and offsets, and a
-     disclosure widget is not worth a fourth. <details> also survives the screen
-     being hidden and reshown, which a JS open-flag on a re-rendered node would
-     not — renderGemSubmissions() rewrites this innerHTML on every entry. */
-  .gem-subs{
-    margin:0 0 18px;
-    border:1px solid var(--line);border-radius:12px;
-    background:var(--surface);overflow:hidden;
+  /* #296 — MY SUBMISSIONS moved out of the submit form (#screen-suggest-gem) onto
+     its own Settings sub-screen (#screen-my-submissions), reached by a settings-nav
+     chevron row like Account/Privacy/About. On a dedicated screen the #62
+     collapse-by-default is redundant (the chevron row already gates it), so the
+     old <details>/<summary> block is GONE — the list renders expanded. The only
+     surviving decision from #62 is the status line: it counts total/pending/live
+     and DELIBERATELY OMITS a rejection count (a scoreboard of "not approved" is
+     what the collapse existed to hide; that reasoning now lives in the status
+     line, not a widget). */
+  .gs-status{
+    color:var(--text-dim);font-size:12.5px;margin:0 0 12px;
   }
-  .gem-subs summary{
-    list-style:none;cursor:pointer;
-    padding:12px 14px;
-    display:flex;align-items:center;gap:8px;
-    font-size:13px;font-weight:700;color:var(--text);
+  .gs-status .gs-sub{color:var(--text-dim);}
+  .gs-empty{
+    color:var(--text-dim);font-size:14px;line-height:1.4;
+    text-align:center;padding:28px 8px;
   }
-  .gem-subs summary::-webkit-details-marker{display:none;}
-  .gem-subs summary .gs-sub{
-    font-weight:400;color:var(--text-dim);font-size:12px;
-  }
-  .gem-subs summary .gs-chev{
-    margin-left:auto;width:16px;height:16px;color:var(--text-dim);
-    transition:transform .18s ease;flex:none;
-  }
-  .gem-subs[open] summary .gs-chev{transform:rotate(90deg);}
-  .gem-subs .gs-body{padding:0 14px 14px;}
   #hunt-card-menu{
     position:fixed;
     display:none;
@@ -2535,16 +2525,13 @@
     <div class="edit-links-row">
       <button class="link-btn" onclick="cancelSuggestGem()">Cancel</button>
     </div>
-    <!-- #62 — BELOW THE FORM, BY DIRECTIVE, AND IT MOVED HERE FROM ABOVE IT.
-         The above-the-form version shipped for one build on the reasoning that
-         below a map, four fields and three lines of helper text is below the
-         fold — the same burial this row exists to fix. Overruled: submitting a
-         NEW gem is the priority of this screen and the form should be what you
-         land on, not a list of what you already did. What makes that safe is
-         the collapse — this is a single 44px bar, not a list, so "below the
-         form" costs one scroll rather than hiding a screenful. If it is ever
-         expanded by default again, this placement stops being defensible. -->
-    <div id="gem-submissions-section"></div>
+    <!-- #296 — MY SUBMISSIONS MOVED OUT to #screen-my-submissions (reached from
+         Settings). It lived below the form under #62 as a collapsed bar so the
+         screen led with the form, not a list of past submissions. That whole
+         reasoning is now moot: the submit screen is only the form, and the
+         status list is one tap off Settings like Account/Privacy/About. The
+         #gem-submissions-section container moved WITH it (same id), so
+         renderGemSubmissions() and its callers are unchanged. -->
   </div>
 
   <!-- CODE ENTRY -->
@@ -2904,6 +2891,25 @@
     </div>
   </div>
 
+  <!-- #296 — MY SUBMISSIONS, its own screen. Reached from the Settings chevron
+       row (returnTo 'screen-settings'). Same title-row + back-arrow pattern as
+       #screen-privacy / #screen-about; Back returns via state.mySubmissionsReturn.
+       The #gem-submissions-section container moved here verbatim from
+       #screen-suggest-gem — renderGemSubmissions() fills it (or shows the
+       empty / couldn't-load states) and openMySubmissions() calls it on open. -->
+  <div class="screen" id="screen-my-submissions">
+    <div class="title-row">
+      <h1 class="page-title">My submissions</h1>
+      <button class="icon-btn" onclick="closeMySubmissions()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <p class="page-sub">The gems you've submitted, and where each one stands.</p>
+    <div id="gem-submissions-section"></div>
+  </div>
+
   <!-- SETTINGS (#81) — a seventh screen with no nav button. Entered from the
        passport gear, left by the back arrow. See openSettings() for why this
        does not go through setTab(). -->
@@ -2931,6 +2937,18 @@
     <div class="settings-section settings-nav-group">
       <button class="settings-nav" onclick="openAccount('screen-settings')">
         <span>Manage account</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+
+    <!-- #296 — MY SUBMISSIONS. Same chevron-row pattern as Account/Privacy/About,
+         opening #screen-my-submissions. This is the user's own content (the gems
+         they've submitted and each one's status), so it sits directly under
+         Manage account rather than beside Privacy/About. openMySubmissions()
+         renders the list, mirroring how openPrivacy/openAbout seed their screens. -->
+    <div class="settings-section settings-nav-group">
+      <button class="settings-nav" onclick="openMySubmissions('screen-settings')">
+        <span>My submissions</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
     </div>
@@ -7452,7 +7470,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19h';
+const APP_VERSION = '2026.08.19i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8045,6 +8063,29 @@ function openPrivacy(returnTo){
 function closePrivacy(){
   const back = state.privacyReturn || 'screen-settings';
   state.privacyReturn = null;
+  if(back === 'screen-map'){
+    setTab('screen-map');
+  }else{
+    showScreen('screen-settings');
+    setNavActive('screen-passport');
+  }
+}
+
+/* #296 — MY SUBMISSIONS sub-screen, same shape as openPrivacy/openAbout: seed the
+   screen when it opens (render the current list) rather than on the Settings hub.
+   renderGemSubmissions() reads state.gemSubmissions (kept current by loadMyGems on
+   boot / after a submit) and paints the list, the empty state, or the couldn't-load
+   banner. Nav lights Passport because Settings is entered from the passport gear
+   and carries no nav button of its own (#81/#91). */
+function openMySubmissions(returnTo){
+  state.mySubmissionsReturn = (returnTo === 'screen-map') ? 'screen-map' : 'screen-settings';
+  showScreen('screen-my-submissions');
+  setNavActive('screen-passport');
+  renderGemSubmissions();
+}
+function closeMySubmissions(){
+  const back = state.mySubmissionsReturn || 'screen-settings';
+  state.mySubmissionsReturn = null;
   if(back === 'screen-map'){
     setTab('screen-map');
   }else{
@@ -10979,7 +11020,10 @@ function openSuggestGemScreen(){
      keeps whatever tab was lit on arrival. Stating it here means every entrance
      is correct by construction rather than by each caller remembering. */
   setNavActive('screen-suggest-gem');
-  renderGemSubmissions();
+  /* #296 — the My-submissions list moved to #screen-my-submissions (opened from
+     Settings), so it is no longer rendered here; renderGemSubmissions() now runs
+     from openMySubmissions() plus its data-driven callers (loadMyGems, submitGem,
+     retryLoadMyGems). */
   document.getElementById('gem-name').value = '';
   document.getElementById('gem-desc').value = '';
   document.getElementById('gem-address-search').value = '';
@@ -11174,16 +11218,17 @@ async function submitGem(){
   renderPassport();
   checkNewAchievements(SUBMISSION_ACHIEVEMENT_IDS);
 }
-/* #62 — COLLAPSED BY DEFAULT, AND THE COLLAPSE IS THE POINT.
-   Expanded, this list is a running tally of your rejections sitting directly
-   above the form that asks you to try again — and the person reading it is the
-   contributor whose repeat submissions the whole positioning bet (#35) depends
-   on. Twelve rows of "This one wasn't approved" is a scoreboard of failures.
+/* #296 — RENDERS THE MY-SUBMISSIONS LIST INTO #gem-submissions-section, now on
+   its own Settings sub-screen (#screen-my-submissions). No longer a collapsed
+   <details>: on a dedicated screen the chevron row already gates the list, so
+   it renders expanded — the #62 collapse-by-default is retired (its CSS is gone).
 
-   THE SUMMARY LINE DELIBERATELY DOES NOT COUNT REJECTIONS. It states the total
-   and, if any, how many are pending or live — the two facts someone opens this
-   to check. "9 not approved" in the collapsed header would defeat the entire
-   reason for collapsing it. Anyone who wants the breakdown can open it.
+   THE STATUS LINE DELIBERATELY DOES NOT COUNT REJECTIONS (the one #62 decision
+   that survives). It states the total and, if any, how many are pending or live
+   — the two facts someone opens this to check. A "9 not approved" tally is a
+   scoreboard of failures aimed at the contributor whose repeat submissions the
+   whole positioning bet (#35) depends on; the per-card "Not approved" tag is
+   enough. Anyone counting rejections can still read the cards.
 
    REJECTIONS SHOW NO REASON, BY DIRECTIVE, AND THE ALTERNATIVE WAS BUILT AND
    CUT THE SAME DAY. submissions.ai_reason holds a one-sentence verdict for
@@ -11210,7 +11255,11 @@ function renderGemSubmissions(){
         + '<button class="loadfail-retry" type="button" onclick="retryLoadMyGems()">Retry</button>'
         + '</div>';
     }else{
-      el.innerHTML='';
+      /* #296 — this list is now the whole point of its own screen, so a genuine
+         empty state renders a real message rather than nothing (an empty screen
+         reached by a deliberate tap reads as broken). It stays distinct from the
+         couldn't-load banner above — #58's absent-vs-failed honesty. */
+      el.innerHTML = '<p class="gs-empty">You haven\'t submitted a gem yet. Found a spot worth sharing? Add it from the Submit tab.</p>';
     }
     return;
   }
@@ -11242,12 +11291,9 @@ function renderGemSubmissions(){
     </div>`;
   }).join('');
 
-  el.innerHTML = `<details class="gem-subs">
-    <summary>My submissions (${subs.length})${sub}
-      <svg class="gs-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </summary>
-    <div class="gs-body"><div class="mode-grid">${rows}</div></div>
-  </details>`;
+  const count = subs.length + (subs.length === 1 ? ' submission' : ' submissions');
+  el.innerHTML = `<p class="gs-status">${count}${sub}</p>
+    <div class="mode-grid">${rows}</div>`;
 }
 /* #58 — the couldn't-load retry for the My-submissions list. loadMyGems re-runs
    the Supabase query and sets/clears _myGemsLoadFailed itself, so this just
