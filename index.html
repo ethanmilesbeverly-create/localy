@@ -5516,6 +5516,17 @@ function applyRealPlaces(key, base, list){
 let _realFetchInFlight = {};
 async function ensureRealPlaces(base){
   if(!base || base.lat==null) return;
+  /* #294 — Word of mouth shows ONLY stored gems/seeds, all of which are already in
+     memory (state.approvedGems, loaded once at init — no per-area query), so there
+     is nothing to fetch. Skip the Overpass call entirely: this is what makes Word
+     of mouth paint instantly instead of paying the ~15s cold-tile wall (#291/#292)
+     for internet pins it will never show. The tile stays absent (not 'loading'),
+     so an empty category shows the neutral "Nothing here yet" card immediately
+     rather than a spinner. startLocalHunt likewise skips its first-paint hold in
+     this mode; flipping back to All places re-calls ensureRealPlaces (setBrowseSource)
+     so the internet layer loads then. This is the single chokepoint — it covers
+     every caller (the hunt starters, refreshDiscoverLocalIfNeeded, Search here). */
+  if(state.browseSource === 'wordofmouth') return;
   const key = realTileKey(base);
   // #78c — already have it: make sure the UI knows, then bail as before.
   if(state.realPlaces && state.realPlaces.tile===key){ setTileState(key, 'loaded'); return; }
@@ -7409,7 +7420,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19e';
+const APP_VERSION = '2026.08.19f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10289,7 +10300,8 @@ function paintFirstBlend(){
 function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
-  ensureRealPlaces(base);
+  const wom = state.browseSource === 'wordofmouth';   // #294
+  ensureRealPlaces(base);   // #294 — a no-op in Word of mouth (returns immediately, no fetch)
   const key = 'local_v1';
   /* HOLD THE FIRST PAINT until real supply resolves. Cold, state.realPlaces is
      empty, so buildAllThingsLocal() backfills its 15-pin target with gems out to
@@ -10300,9 +10312,11 @@ function startLocalHunt(base){
      #78c/#28 loading card, because ensureRealPlaces set the tile 'loading'
      synchronously just above — and let paintFirstBlend() paint once the fetch
      settles. Both entry points are covered: GPS's first fix also routes through
-     startLocalHunt(), so a fix that lands before its tile does holds too. */
+     startLocalHunt(), so a fix that lands before its tile does holds too.
+     #294 — Word of mouth has NO fetch to wait for (all pins are stored gems/seeds
+     already in memory), so it always takes the immediate path: no shell, no hold. */
   const haveTile = state.realPlaces && state.realPlaces.tile === realTileKey(base);
-  if(haveTile){
+  if(wom || haveTile){
     setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
   } else {
     // #210 — defer the captured-pin restore here: this shell is intentionally
@@ -10766,6 +10780,14 @@ function setBrowseSource(mode){
      fresh also rebuilds via the gate, so this only matters for an already-live
      hunt. Not swallowed — a throw is logged, not hidden. */
   if(state.currentHunt){
+    /* Flipping to "All places" needs the internet layer for this area, which Word
+       of mouth skipped fetching — kick off ensureRealPlaces now; onRealPlacesReady
+       re-blends when it lands. It's a no-op if the tile is already loaded or a
+       fetch is in flight, and it's skipped internally while in Word of mouth. */
+    if(state.browseSource === 'all' && REAL_UPGRADABLE_KEY.test(state.currentHunt.key || '')){
+      const b = state.browsingLocation || state.searchedArea || state.localHuntOrigin || state.me || FALLBACK_LOCATION;
+      ensureRealPlaces(b);
+    }
     try{ reblendHuntInPlace(state.currentHunt); }
     catch(e){ console.warn('[#294] live re-filter failed', e); }
     refreshTargetsUI();
