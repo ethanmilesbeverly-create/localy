@@ -2390,6 +2390,26 @@
       </div>
     </div>
 
+    <!-- #297 — GUIDES MOVED OUT TO THEIR OWN TAB (#screen-guides). The My Guides
+         grid (#my-hunts-section, incl. its Create Your Own row), the ⋮ options
+         popup (#hunt-card-menu), and the Have a code? redeem row used to live
+         here. By directive they are now a dedicated Guides tab, so Explore is
+         purely the six category cards + the source toggle — one job.
+
+         This continues the #62 line of thinking (Explore was a junk drawer doing
+         several unrelated jobs; Submit already left, guides now follow). If any
+         guide entrance ever returns here as a shortcut, it owes a
+         setNavActive('screen-guides') on the way in — the same rule the Submit
+         gravestone records. The moved markup is UNCHANGED apart from its new home;
+         renderMyHunts() still writes into #my-hunts-section wherever it sits, and
+         #hunt-card-menu is position:fixed and tracks its button by live rect
+         (#203), so its DOM parent never mattered. -->
+  </div>
+
+  <!-- GUIDES — #297. The dedicated home for guide surfaces moved off Explore:
+       your saved/redeemed guides, creating one, and redeeming a shared code. -->
+  <div class="screen" id="screen-guides">
+    <p class="page-sub" style="margin:14px 0 10px;font-weight:700;color:var(--text);">Guides</p>
     <div id="my-hunts-section"></div>
     <div id="hunt-card-menu">
       <button id="hunt-menu-edit" onclick="huntCardMenuAction('edit')">Edit guide</button>
@@ -2397,28 +2417,6 @@
       <button onclick="huntCardMenuAction('share')">Share</button>
       <button onclick="huntCardMenuAction('delete')" style="color:var(--danger);">Delete guide</button>
     </div>
-
-    <!-- #62 — THE "Know a hidden gem?" ROW WAS HERE AND IS DELETED, NOT MOVED.
-         It is now the Submit tab. Kept as a gravestone rather than a comment-out
-         because the obvious next thought is "leave it as a shortcut too", and
-         that was considered and rejected: this row's whole complaint is that
-         Explore is a junk drawer doing three unrelated jobs, and a second
-         entrance to a thing that now has a permanent tab adds a fourth. If it
-         ever comes back, it owes a setNavActive('screen-suggest-gem').
-
-         #gem-submissions-section MOVED OUT to #screen-suggest-gem in the same
-         change. It is the user-facing side of #38's review queue and it is what
-         makes the new tab a destination rather than a bare form.
-
-         #56 — "More ways to explore" HEADING IS NOW GONE, AND THAT WAS THE MOVE.
-         It last held exactly one row (Have a code?). By directive that row now
-         sits directly under the My Guides grid (rendered into #my-hunts-section
-         above), so the card is grouped WITH your guides rather than under a
-         separate header. A lone "More ways to explore" heading over a single
-         row was item 14's orphaned-label defect, so the heading was removed
-         rather than kept empty. The gravestone above stays because it records
-         WHY the gem row left Explore; the header it sat under does not. The card
-         markup itself is unchanged apart from its copy. -->
     <div class="code-entry-row" onclick="showScreen('screen-code')">
       <div class="code-entry-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a5 5 0 0 1 10 0v2"/></svg>
@@ -2543,7 +2541,7 @@
       <input type="text" id="code-input" placeholder="e.g. RIVERNORTH" style="text-transform:uppercase;">
     </div>
     <button class="btn" onclick="redeemCode()">Unlock guide</button>
-    <button class="btn ghost" onclick="goToModeSelect()">Back</button>
+    <button class="btn ghost" onclick="goToGuides()">Back</button>
     <p id="code-error" style="color:var(--danger);font-size:13px;display:none;margin-top:10px;"></p>
   </div>
 
@@ -2598,7 +2596,7 @@
       <button type="button" class="cr-copy" onclick="copyGuideCode(this)" aria-label="Copy guide code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
     </div>
     <div class="edit-links-row">
-      <button class="link-btn" onclick="goToModeSelect()">Cancel</button>
+      <button class="link-btn" onclick="goToGuides()">Cancel</button>
       <button class="link-btn" id="delete-hunt-btn" onclick="deleteCurrentHunt()" style="display:none;color:var(--danger);">Delete this guide</button>
     </div>
   </div>
@@ -3159,6 +3157,15 @@
     <button class="nav-btn" data-screen="screen-modes" onclick="navTo('screen-modes')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/></svg>
       Explore
+    </button>
+    <!-- #297 — GUIDES TAB. This is the FIFTH tab, which the #62 gravestone below
+         names as the ceiling ("FOUR IS FINE, FIVE IS THE CEILING"). Added by
+         directive to give guides their own home off Explore. No sixth without
+         moving something out. Icon is the guide pennant/flag — the same identity
+         the purple guide pin and the My Guides cards use (flagSVG). -->
+    <button class="nav-btn" data-screen="screen-guides" onclick="navTo('screen-guides')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0"/></svg>
+      Guides
     </button>
     <!-- #62 — SUBMIT IS A TAB AS OF 2026.07.21k. It was a .code-entry-row buried
          under "More ways to explore", below six cards, #my-hunts-section and
@@ -7264,6 +7271,14 @@ function goToModeSelect(){
   document.getElementById('bottomnav').classList.remove('hidden');
   setTab('screen-modes');
 }
+/* #297 — the Create and Redeem flows now live under the Guides tab, so their
+   Back/Cancel returns HERE, not to Explore (goToModeSelect). Mirrors
+   goToModeSelect exactly otherwise. */
+function goToGuides(){
+  state._holdTabOffMap = false; // REFRESH-PERSISTENCE — deliberate nav ends the boot-restore hold (see enterHuntMode)
+  document.getElementById('bottomnav').classList.remove('hidden');
+  setTab('screen-guides');
+}
 /* #91 — split out of setTab() so a screen that is NOT a tab can still say
    which tab it belongs to. Settings needs exactly that: it lights Passport
    while being its own screen. */
@@ -7295,7 +7310,7 @@ function setNavActive(id){
    today (no per-tab back-stepping, no reopening the landing-bounce back-button
    work). Only the four real tab ids are ever written; a stray id is ignored
    rather than persisted as a target init() can't route to. */
-const HASH_TAB_IDS = ['screen-map','screen-modes','screen-suggest-gem','screen-passport'];
+const HASH_TAB_IDS = ['screen-map','screen-modes','screen-guides','screen-suggest-gem','screen-passport'];
 function persistActiveTab(id){
   try{
     if(HASH_TAB_IDS.indexOf(id) === -1) return;
@@ -7349,15 +7364,19 @@ function setTab(id){
   }
   if(id==='screen-modes'){
     updateExploreSelectionIcons();
-    /* LIVE-UPDATE — every navigation to Explore funnels through here, so this is
-       the one place to refresh redeemed guides against the makers' latest shared
-       copies. Fixes the live-session gap the boot sweep didn't cover: land on
-       Explore and the guide cards update in place, instead of only updating after
-       you open a guide (which triggered refreshExternalGuide) and came back.
-       Fire-and-forget so navigation never waits on a shared read; renderMyHunts()
-       re-renders only the guides that actually changed. NOT a push — a card you
-       are already passively staring at won't change until you leave and return
-       (or reopen the app); there is no maker→holder realtime channel. */
+  }
+  if(id==='screen-guides'){
+    /* LIVE-UPDATE — #297 moved guides off Explore onto their own tab, so the
+       refresh-on-nav that used to live in the screen-modes branch moves here
+       with them. Every navigation to Guides funnels through setTab, so this is
+       the one place to refresh redeemed (and #202 own-editable) guides against
+       the makers' latest shared copies. Fixes the live-session gap the boot
+       sweep didn't cover: land on Guides and the cards update in place, instead
+       of only updating after you open a guide and come back. Fire-and-forget so
+       navigation never waits on a shared read; renderMyHunts() re-renders only
+       the guides that actually changed. NOT a push — a card you are passively
+       staring at won't change until you leave and return; there is no
+       maker→holder realtime channel. */
     refreshAllExternalGuides();
   }
 }
@@ -7470,7 +7489,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19i';
+const APP_VERSION = '2026.08.19j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
