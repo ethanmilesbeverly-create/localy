@@ -7400,7 +7400,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19b';
+const APP_VERSION = '2026.08.19c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10732,10 +10732,26 @@ function setBrowseSource(mode){
   state.browseSource = next;
   try{ localStorage.setItem(BROWSE_SOURCE_KEY, next); }catch(e){}
   applyBrowseSourceUI();
-  /* Re-blend the live hunt so a commercial category already on the map reflects
-     the flip immediately; opening a card fresh already rebuilds via selectExplore.
-     Guarded — a guide/no hunt is a safe no-op. */
-  if(state.currentHunt){ try{ reblendHuntInPlace(state.currentHunt); refreshTargetsUI(); }catch(e){} }
+  /* Rebuild the live hunt so a commercial category already on the map re-filters
+     immediately (opening a card fresh already rebuilds via selectExplore). Route
+     through regenerateCurrentHuntAt — the SAME rebuild "Search here" uses, which
+     re-runs the hunt's own starter and repaints reliably. reblendHuntInPlace was
+     the wrong primitive: an in-place merge that left the map unchanged.
+     ONLY the source-affected hunts are rebuilt — All Things Local (mixed),
+     Shops, and Bars & Restaurants — so scaffold hunts (parks/history/art/lore)
+     aren't needlessly rebuilt and a fixed GUIDE never hits regenerate's
+     "spots are fixed" toast. Anchor + preserve-view mirror selectExplore so the
+     camera doesn't snap when browsing an area you're not standing in (#116/#8). */
+  if(state.currentHunt){
+    const k = state.currentHunt.key || '';
+    const affected = k.startsWith('local_') || k.startsWith('shops_') || k.startsWith('barsrest_');
+    if(affected){
+      const base = state.browsingLocation || state.searchedArea || state.me || FALLBACK_LOCATION;
+      if(state.browsingLocation || state.searchedArea) state._preserveViewOnNextHunt = true;
+      try{ regenerateCurrentHuntAt(base); }
+      finally{ state._preserveViewOnNextHunt = false; }
+    }
+  }
 }
 
 function selectExplore(cat){
