@@ -7452,7 +7452,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19g';
+const APP_VERSION = '2026.08.19h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10235,7 +10235,19 @@ function defaultFrameZoom(center){
    proximity, rather than the map ever reframing itself to show "everything." */
 function centerOnPlayer(opts){
   if(!state.leafletMap) return;
-  const center = state.browsingLocation || state.me;
+  /* #185 — center precedence now matches the content anchor used everywhere else
+     (applyRealPlaces / reblend / regenerateCurrentHuntAt): browsingLocation ||
+     searchedArea || me. It previously OMITTED searchedArea, so a caller that ran
+     while content was anchored to a panned-to area would snap the camera home
+     while the pins stayed put. That was latent, not active: every live caller
+     either clears searchedArea first (exitLocationBrowseMode, recenterMap's
+     early-return branch) or is guarded by _preserveViewOnNextHunt (setCurrentHunt,
+     set by searchThisArea #8 and selectExplore #184). This reconcile closes the
+     trap for any FUTURE caller so the omission can't silently reappear. The
+     preserve-view flag is DELIBERATELY KEPT (not made redundant): it holds the
+     user's EXACT zoom/pan, whereas this function reframes to defaultFrameZoom —
+     different behaviour, and the flag's is the one #8/#184 want. */
+  const center = state.browsingLocation || state.searchedArea || state.me;
   if(!center) return;
   /* #60 — position and zoom are two different requests, and this button used to
      answer both: zoom into a block, press locate, and you got your position back
@@ -10286,12 +10298,13 @@ function centerOnPlayer(opts){
     state._programmaticViewChange = true;
     state.leafletMap.setView([center.lat, center.lng], targetZoom);
     state.leafletMap.setMinZoom(targetZoom - 2); // real headroom to pinch out from the default framing, instead of being frozen half a level below it
-    // #90 — remember ONLY a genuine self-centering frame. `center` is
-    // browsingLocation||me, so when browsing we must not persist it: a reload has
-    // to reopen on the user, never on a place they were merely looking at. Passing
+    // #90 — remember ONLY a genuine self-centering frame. `center` is now
+    // browsingLocation||searchedArea||me (#185), so when browsing OR anchored to a
+    // searched area we must not persist it: a reload has to reopen on the user,
+    // never on a place they were merely looking at or had searched. Passing
     // targetZoom's frame (the overview) also means the next reload's first fix
     // reframes to the SAME zoom, so there's no zoom jump either.
-    if(!state.browsingLocation && state.me) rememberMapView(state.me);
+    if(!state.browsingLocation && !state.searchedArea && state.me) rememberMapView(state.me);
   });
 }
 
