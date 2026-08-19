@@ -5946,6 +5946,10 @@ function injectCapturedPins(hunt, base){
 
   near.forEach(entry=>{
     const id = entry.id, m = entry.m;
+    /* #294 — Word of mouth hides internet captures. injectCapturedPins only runs
+       on shared-progress (auto) hunts, so no guide stop is affected; the foundMeta
+       entry carries no source flag, so judge by id prefix (isHumanSourcedPin). */
+    if(state.browseSource === 'wordofmouth' && !isHumanSourcedPin({id})) return;
     if(presentIds.has(id)) return; // already in the list — isFound() handles it
     const nk = normName(m.name);
     /* Same place, regenerated under a different id. Adopt the captured id onto
@@ -5992,7 +5996,14 @@ function reblendHuntInPlace(h){
             || state.localHuntOrigin || state.me || FALLBACK_LOCATION;
   const prog = state.progress[h.key] || {};
   const foundSet = new Set(prog.foundIds || []);
-  const keptFound = h.points.filter(p=>foundSet.has(p.id));
+  /* #294 — on an auto/category hunt in "Word of mouth" mode, a captured INTERNET
+     place (OSM/Wiki) is dropped from the kept set too, so the human-only map
+     doesn't retain landmarks you happened to capture. The capture itself is
+     untouched (passport/progress) and returns under "All places"; gem/seed
+     captures are always kept. Guides (not REAL_UPGRADABLE_KEY) are never
+     source-filtered. Pairs with the same skip in injectCapturedPins. */
+  const womAuto = state.browseSource === 'wordofmouth' && REAL_UPGRADABLE_KEY.test(h.key);
+  const keptFound = h.points.filter(p=>foundSet.has(p.id) && (!womAuto || isHumanSourcedPin(p)));
   const fresh = buildPointsForKey(h.key, base) || h.points;
   const keptNames = new Set(keptFound.map(p=>normName(p.name)));
   const merged = [...keptFound];
@@ -7398,7 +7409,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19d';
+const APP_VERSION = '2026.08.19e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10712,6 +10723,21 @@ function assertGemBucketsAgree(){
    slice of #275. readBrowseSource is a function declaration so hoisting lets
    nearbyRealPlaces (defined above) reach it. */
 const BROWSE_SOURCE_KEY = 'nahgoo-browse-source';
+/* #294 — a captured pin re-injected from foundMeta carries no source/isGem flag
+   (only id/name/coords/category), so in "Word of mouth" mode an INTERNET place you
+   captured earlier is told from a gem/seed capture by its ID PREFIX: every gem
+   point is minted by gemPoint with a catgem/gem/dlg/lore prefix, and real OSM/Wiki
+   ids never carry one. A LIVE point is judged by isGem/source first; the id prefix
+   is only the fallback for a re-injected capture. Asymmetric on purpose — a gem is
+   never mis-hidden (it always has the flag or the prefix); at worst one internet
+   pin leaks, which is the pre-fix behaviour. */
+const GEM_ID_RE = /^(catgem|dlg|lore|gem)/;
+function isHumanSourcedPin(p){
+  if(!p) return false;
+  if(p.isGem) return true;
+  if(p.source) return false;
+  return !!(p.id && GEM_ID_RE.test(p.id));
+}
 function readBrowseSource(){ try{ return localStorage.getItem(BROWSE_SOURCE_KEY)==='all' ? 'all' : 'wordofmouth'; }catch(e){ return 'wordofmouth'; } }
 function hydrateBrowseSource(){ state.browseSource = readBrowseSource(); applyBrowseSourceUI(); }
 function applyBrowseSourceUI(){
