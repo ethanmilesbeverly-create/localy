@@ -741,11 +741,15 @@
   }
   .code-entry-row:hover{background:var(--surface);}
   .code-entry-row:active{transform:scale(0.98);}
-  /* #56 — mirrors the inter-card grid gap. This card lives OUTSIDE the
-     guide grid (it must stay independent of renderMyHunts so a failed guide
-     load can never hide the redeem entry point), so its spacing is a margin
-     rather than a grid gap — same value, same var. */
-  #screen-modes .code-entry-row{margin-top:var(--card-gap);}
+  /* #56 — mirrors the inter-card grid gap. These cards live OUTSIDE the guide
+     grid (Create Your Own must stay independent of renderMyHunts so a failed
+     guide load can never hide it, and Have a code? is static markup), so their
+     spacing is a margin rather than a grid gap — same value, same var.
+     #297 — guides moved from Explore to their own tab, so the scope is
+     #screen-guides now. Both action rows (Create Your Own, Have a code?) get the
+     same --card-gap above them, so the space guide-grid → Create → Have-a-code
+     matches the space between two rows of guide cards. */
+  #screen-guides .code-entry-row{margin-top:var(--card-gap);}
   .code-entry-icon{
     width:40px;height:40px;border-radius:50%;flex-shrink:0;
     background:rgba(154,127,191,0.15);
@@ -7494,7 +7498,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19k';
+const APP_VERSION = '2026.08.19l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12043,9 +12047,11 @@ function renderMyHunts(){
      code-entry-row, so it shares one shape with the Have a code? row below it
      (the two ACTION rows on this screen, distinct from guide/category cards).
      It stays the last child of #my-hunts-section, directly above Have a code?,
-     and keeps the purple plus dropped into the row's icon slot. */
-  el.innerHTML = loadFailBannerHTML() + `<p class="page-sub" style="margin:24px 0 10px;font-weight:700;color:var(--text);">My Guides</p>
-    <div class="mode-grid explore-grid">` +
+     and keeps the purple plus dropped into the row's icon slot.
+     #297 — the "My Guides" heading is REMOVED: the tab is already titled
+     "Guides" (static markup in #screen-guides), so a second heading here was
+     redundant. The grid now follows the tab title directly. */
+  el.innerHTML = loadFailBannerHTML() + `<div class="mode-grid explore-grid">` +
     state.myHunts.map(h=>`
       <div class="mode-card" data-hunt-id="${h.id}" onclick="startMyHunt('${h.id}')">
         <div class="icon-wrap"><div class="blaze">${flagSVG('#9A7FBF',false)}</div></div>
