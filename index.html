@@ -4197,10 +4197,18 @@ function blazeSVG(color, filled){
       fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round" opacity="${filled?1:0.9}"/>
   </svg>`;
 }
+/* #298b (user request) — the guide mark is now the #297 Guides BOTTOM-NAV pennant
+   (pole line + wavy banner), so a guide's card icon matches the tab it lives under.
+   Replaces the old triangular pole-rect+pennant. `filled` fills the banner for a
+   card's active state (that guide is the open hunt); the pole is always a stroked
+   line. THREE hand-synced copies of this one pennant (#56): this fn (My Guides
+   cards), the #hunt-chip-free nav <button> svg in #screen-guides, and
+   ACH_ICONS.flag (the Guides achievement family) — change all three together. */
 function flagSVG(color, filled){
   const fill = filled ? color : 'none';
-  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 3h1.2v18h-1.2z M7.2 4l10 3-10 3z" fill="${fill}" stroke="${color}" stroke-width="1.6" stroke-linejoin="round"/>
+  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round">
+    <path d="M5 21V4"/>
+    <path d="M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0" fill="${fill}"/>
   </svg>`;
 }
 /* Classic map-pin, used specifically to represent an attraction/spot itself
@@ -7507,7 +7515,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19m';
+const APP_VERSION = '2026.08.19n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -14529,14 +14537,15 @@ const ACH_ICONS = {
      no other consumer, so it is renamed rather than left orphaned (#24's
      removed-not-stranded rule). */
   walk: {vb:'0 0 24 24', negativeFill:true, body:'M12 5.706c-0.001 -1.118 1.21 -1.818 2.179 -1.26 0.45 0.26 0.728 0.74 0.727 1.26 0.001 1.118 -1.21 1.818 -2.179 1.26 -0.45 -0.26 -0.728 -0.74 -0.727 -1.26Zm-1.014 4.58c-0.03 0.012 -0.058 0.024 -0.088 0.036l-0.242 0.106c-0.496 0.221 -0.878 0.642 -1.05 1.156l-0.079 0.236c-0.17 0.509 -0.717 0.781 -1.226 0.611s-0.781 -0.717 -0.611 -1.226l0.079 -0.236c0.345 -1.032 1.108 -1.874 2.101 -2.316l0.242 -0.106c0.63 -0.278 1.311 -0.424 2.001 -0.424 1.35 0 2.567 0.811 3.084 2.055l0.466 1.117 0.648 0.324c0.478 0.239 0.672 0.82 0.433 1.299s-0.82 0.672 -1.299 0.433l-0.811 -0.403c-0.312 -0.157 -0.557 -0.418 -0.69 -0.742l-0.291 -0.696 -0.584 1.983 1.498 1.635c0.163 0.179 0.278 0.394 0.339 0.63l0.696 2.788c0.13 0.518 -0.185 1.044 -0.705 1.174s-1.044 -0.185 -1.174 -0.705l-0.666 -2.667 -2.14 -2.334c-0.448 -0.487 -0.614 -1.168 -0.445 -1.807l0.512 -1.922Zm-1.75 6.015 0.757 -1.889c0.064 0.091 0.136 0.176 0.212 0.26l1.232 1.344 -0.439 1.096c-0.073 0.182 -0.182 0.348 -0.321 0.487l-1.868 1.868c-0.378 0.378 -0.993 0.378 -1.371 0s-0.378 -0.993 0 -1.371l1.798 -1.795Z'},
-  /* #63 — the GUIDES achievement family renders the GUIDE FLAG — the exact mark on
-     the My Guides cards in Explore (flagSVG: pole + pennant) — per the user's
-     request. Single filled body (pole rect + pennant triangle): solid when earned,
-     outline when locked. Key renamed 'plus' → 'flag'; the six Guides badges repoint
-     here and the plus glyph is removed (removed-not-stranded, #24). Kept in sync
-     with flagSVG() by hand — they are two copies of one pennant path (the card uses
-     the function; achievements need a path in the ACH_ICONS body/accent shape). */
-  flag: {vb:'0 0 24 24', body:'M6 3h1.2v18h-1.2z M7.2 4l10 3-10 3z'},
+  /* #63 / #298b — the GUIDES achievement family renders the GUIDE PENNANT — the exact
+     mark on the My Guides cards AND the #297 Guides bottom-nav tab (pole line + wavy
+     banner) — per the user's request. Single `body` carrying BOTH subpaths: EARNED
+     fills the banner (the open pole line has no area, so it just strokes) → a solid
+     pennant on a stroked pole; LOCKED outlines both. Key was renamed 'plus' → 'flag'
+     (#63); the six Guides badges point here. Kept in sync BY HAND with flagSVG() and
+     the nav <button> svg — three copies of one pennant path (#56): the card uses the
+     function, the nav uses inline markup, achievements need the path in ACH_ICONS. */
+  flag: {vb:'0 0 24 24', body:'M5 21V4 M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0'},
   trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'},
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
