@@ -7515,7 +7515,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19n';
+const APP_VERSION = '2026.08.19o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -14539,13 +14539,15 @@ const ACH_ICONS = {
   walk: {vb:'0 0 24 24', negativeFill:true, body:'M12 5.706c-0.001 -1.118 1.21 -1.818 2.179 -1.26 0.45 0.26 0.728 0.74 0.727 1.26 0.001 1.118 -1.21 1.818 -2.179 1.26 -0.45 -0.26 -0.728 -0.74 -0.727 -1.26Zm-1.014 4.58c-0.03 0.012 -0.058 0.024 -0.088 0.036l-0.242 0.106c-0.496 0.221 -0.878 0.642 -1.05 1.156l-0.079 0.236c-0.17 0.509 -0.717 0.781 -1.226 0.611s-0.781 -0.717 -0.611 -1.226l0.079 -0.236c0.345 -1.032 1.108 -1.874 2.101 -2.316l0.242 -0.106c0.63 -0.278 1.311 -0.424 2.001 -0.424 1.35 0 2.567 0.811 3.084 2.055l0.466 1.117 0.648 0.324c0.478 0.239 0.672 0.82 0.433 1.299s-0.82 0.672 -1.299 0.433l-0.811 -0.403c-0.312 -0.157 -0.557 -0.418 -0.69 -0.742l-0.291 -0.696 -0.584 1.983 1.498 1.635c0.163 0.179 0.278 0.394 0.339 0.63l0.696 2.788c0.13 0.518 -0.185 1.044 -0.705 1.174s-1.044 -0.185 -1.174 -0.705l-0.666 -2.667 -2.14 -2.334c-0.448 -0.487 -0.614 -1.168 -0.445 -1.807l0.512 -1.922Zm-1.75 6.015 0.757 -1.889c0.064 0.091 0.136 0.176 0.212 0.26l1.232 1.344 -0.439 1.096c-0.073 0.182 -0.182 0.348 -0.321 0.487l-1.868 1.868c-0.378 0.378 -0.993 0.378 -1.371 0s-0.378 -0.993 0 -1.371l1.798 -1.795Z'},
   /* #63 / #298b — the GUIDES achievement family renders the GUIDE PENNANT — the exact
      mark on the My Guides cards AND the #297 Guides bottom-nav tab (pole line + wavy
-     banner) — per the user's request. Single `body` carrying BOTH subpaths: EARNED
-     fills the banner (the open pole line has no area, so it just strokes) → a solid
-     pennant on a stroked pole; LOCKED outlines both. Key was renamed 'plus' → 'flag'
-     (#63); the six Guides badges point here. Kept in sync BY HAND with flagSVG() and
-     the nav <button> svg — three copies of one pennant path (#56): the card uses the
-     function, the nav uses inline markup, achievements need the path in ACH_ICONS. */
-  flag: {vb:'0 0 24 24', body:'M5 21V4 M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0'},
+     banner) — per the user's request. SPLIT body/accent (not one combined path): the
+     BANNER is `body` so it fills the tier colour when earned; the POLE is a stroke-only
+     `accent` line drawn on top. Packing both into one filled `body` made the fill
+     collide with the pole at the join and throw a spur on the earned badge (QA finding
+     on the large render) — the same reason flagSVG() draws pole and banner as two
+     separate <path>s. LOCKED outlines the banner + strokes the pole; EARNED fills the
+     banner + strokes the pole (same colour, clean join). Kept in sync BY HAND with
+     flagSVG() and the nav <button> svg — three copies of one pennant (#56). */
+  flag: {vb:'0 0 24 24', body:'M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0', accent:'M5 21V4'},
   trophy: {vb:'0 0 24 24', body:'M7 3h10v6a5 5 0 0 1-10 0z M9 19h6v2H9z M11 15h2v4h-2z'},
   /* #24 — a faceted gem for the submit-a-gem stamp. body is the outline (filled
      when earned); accent draws the crown facets as stroke-only lines, same
