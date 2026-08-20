@@ -165,24 +165,81 @@ type Existing = { name: string; lat: number; lng: number; category?: string; sou
 // ---------------------------------------------------------------------------
 // 1) Geocode a name -> coordinates (Photon, unkeyed — the app's #88 provider).
 // ---------------------------------------------------------------------------
-async function geocode(name: string): Promise<{ lat: number; lng: number; label: string } | null> {
+// Does Photon's returned label actually correspond to the venue we searched
+// for? Photon does fuzzy TEXT matching, so "The Green Mill" (a jazz club) can
+// come back as "The Green at 320" and "The Violet Hour" as "Stop The Violence
+// Chicago" — right city, wrong place. A bounding box can't catch that; only a
+// name check can. We normalize both sides (lowercase, strip punctuation, drop
+// short/stopword tokens) and require a strong majority of the venue's
+// distinctive tokens to appear in the label. This deliberately ERRS TOWARD
+// DROPPING: an unverifiable venue becomes a missing pin, never a wrong pin.
+// (The real fix for commercial venues is a places API, not a gazetteer — see
+// the roadmap row for Google Places resolution.)
+const GEO_STOPWORDS = new Set(["the", "and", "for", "of", "at", "on", "in", "to", "a", "an", "de", "la", "le"]);
+function geoTokens(s: string): string[] {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 3 && !GEO_STOPWORDS.has(t));
+}
+function labelMatchesName(name: string, label: string): boolean {
+  const want = geoTokens(name);
+  if (!want.length) return false; // can't verify -> drop (safe direction)
+  const have = new Set(geoTokens(label));
+  const hit = want.filter((t) => have.has(t)).length;
+  return hit / want.length >= 0.6;
+}
+
+async function geocode(
+  name: string,
+): Promise<{ lat: number; lng: number; label: string; nameMatch: boolean } | null> {
+  // Photon's lat/lon is only a soft ranking NUDGE, not a restriction — for a
+  // generically-named venue ("The Green Mill" exists worldwide) the nudge loses
+  // to a more prominent match elsewhere, and limit=1 hands back that one wrong
+  // winner. So we (a) add a HARD bbox around the metro so out-of-region results
+  // can't come back at all, and (b) widen the limit and pick the candidate
+  // NEAREST the city center. bbox radius tracks CITY_MAX_KM (the same fence the
+  // caller rejects on), so geocode never returns something the caller would
+  // then throw out. If CITY_MAX_KM is disabled (0, used for re-runs), fall back
+  // to a generous 75 km box so we still bound, just loosely.
+  const boxKm = CITY_MAX_KM > 0 ? CITY_MAX_KM : 75;
+  const dLat = boxKm / 111; // ~111 km per degree latitude
+  const dLng = boxKm / (111 * Math.max(0.05, Math.cos((CITY.lat * Math.PI) / 180)));
+  const bbox = [CITY.lng - dLng, CITY.lat - dLat, CITY.lng + dLng, CITY.lat + dLat]
+    .map((n) => n.toFixed(6))
+    .join(",");
   const url =
-    "https://photon.komoot.io/api/?limit=1&lat=" +
+    "https://photon.komoot.io/api/?limit=5&lat=" +
     CITY.lat +
     "&lon=" +
     CITY.lng +
+    "&bbox=" +
+    bbox +
     "&q=" +
     encodeURIComponent(name);
   try {
     const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
     if (!r.ok) return null;
     const data = await r.json();
-    const f = data?.features?.[0];
-    if (!f?.geometry?.coordinates) return null;
-    const [lng, lat] = f.geometry.coordinates;
-    const p = f.properties ?? {};
-    const label = [p.name, p.city, p.state].filter(Boolean).join(", ");
-    return { lat, lng, label: label || name };
+    const feats: any[] = Array.isArray(data?.features) ? data.features : [];
+    // Pick the in-box candidate closest to the metro center, not blindly [0].
+    let best: { lat: number; lng: number; label: string } | null = null;
+    let bestDist = Infinity;
+    for (const f of feats) {
+      const c = f?.geometry?.coordinates;
+      if (!c || c.length < 2) continue;
+      const [lng, lat] = c;
+      const d = haversineM(CITY.lat, CITY.lng, lat, lng);
+      if (d < bestDist) {
+        const p = f.properties ?? {};
+        const label = [p.name, p.city, p.state].filter(Boolean).join(", ");
+        best = { lat, lng, label: label || name };
+        bestDist = d;
+      }
+    }
+    if (!best) return null;
+    return { ...best, nameMatch: labelMatchesName(name, best.label) };
   } catch {
     return null;
   }
@@ -592,6 +649,11 @@ async function run() {
     if (CITY_MAX_KM > 0 && distKm > CITY_MAX_KM) {
       report.push({ candidate, outcome: "out-of-metro", geo, distKm: Math.round(distKm) });
       console.log(`  ✗ ${candidate} — geocoded ${Math.round(distKm)} km from ${CITY.name}, skipped`);
+      continue;
+    }
+    if (!geo.nameMatch) {
+      report.push({ candidate, outcome: "name-mismatch", geo });
+      console.log(`  ✗ ${candidate} — resolved to "${geo.label}" (name doesn't match), dropped`);
       continue;
     }
 
