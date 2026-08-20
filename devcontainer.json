@@ -1,0 +1,16 @@
+{
+  "name": "nahgoo seed pipeline",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/deno:1": {}
+  },
+  "remoteEnv": {
+    "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}",
+    "GEMINI_MODEL": "${localEnv:GEMINI_MODEL}",
+    "SUPABASE_URL": "${localEnv:SUPABASE_URL}",
+    "SUPABASE_SERVICE_ROLE_KEY": "${localEnv:SUPABASE_SERVICE_ROLE_KEY}",
+    "NEARBY_PLACES_URL": "${localEnv:NEARBY_PLACES_URL}",
+    "NEARBY_PLACES_KEY": "${localEnv:NEARBY_PLACES_KEY}"
+  },
+  "postCreateCommand": "deno --version"
+}

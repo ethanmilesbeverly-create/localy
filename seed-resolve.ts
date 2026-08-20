@@ -32,28 +32,24 @@
 // strictly stronger than either, because it runs where latency is free.
 //
 // RUN (offline batch, not a deployed function):
-//   GEMINI_API_KEY=... deno run --allow-net --allow-env --allow-read --allow-write \
-//     seed-resolve.ts Seed_Data_-_Sheet1.csv
+//   GEMINI_API_KEY=... deno run --allow-net --allow-env --allow-write seed-resolve.ts
+// optional:
+//   --allow-read  and  pass a names file:  ... seed-resolve.ts names.txt
 //
-// The input is the verified seed CSV (name,location,description,city,source_thread).
-// By DEFAULT only ADDRESS-VERIFIED rows (a ZIP in `location` — the Google
-// "approved" set) are ingested; locality-only rows are left for the human queue.
-// Flags:
-//   --all           ingest every row, not just the address-verified ones
-//   --city=Denver   restrict to one or more cities (--city=Denver,Austin)
-//   --limit=N       stop after N eligible rows (smoke-test a small batch first)
-//
-// Geocoding uses the VERIFIED street address (the payoff of the Google pass),
-// biased to the row's city centre, falling back to "name, city". Descriptions
-// still come from WIKIPEDIA ONLY (#37/#101/#178) — the CSV `description` column
-// is NOT used as a submission description; a place with no matching article
-// ships an honest blank.
-//
-// It writes three files next to itself:
+// It writes up to three files next to itself:
 //   seed_records.json  — the NEW rows, ready to load into `submissions`
-//   seed_report.json   — every verdict (new / already-present / review / skipped)
-//   seed_cache.json    — resumable cache. Re-run in place to continue after a
-//                        crash or a Gemini rate-limit; delete it to start over.
+//   seed_report.json   — every verdict (new / already-present / uncertain / held)
+//   seed_held.txt      — names that were HELD (never judged: 429/5xx/no-key),
+//                        one per line — a ready-to-feed names file for a re-run.
+//                        Only written when there is at least one held name.
+//
+// HELD vs REVIEW (the #264 / #263 lesson — "treat a throttle as a hold, never a
+// silent skip"). A THROTTLE or transport failure (Gemini 429/5xx, a network
+// error, or no API key) means the machine NEVER judged the place — that is a
+// HOLD, and it must be re-run, not treated as a verdict. A genuine "the machine
+// looked and is unsure" is REVIEW. Older runs collapsed both into `review`, so
+// 429 leftovers looked like real reviews and a resume skipped them (#264's 66
+// stranded rows). They are now separate buckets: re-run `held`, eyeball `review`.
 //
 // It does NOT write to the database. Loading seed_records.json into Supabase
 // `submissions` is a deliberate, separate, reviewable step (see the delivery
@@ -65,6 +61,14 @@
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
+// Direct-write config for the --commit path (see run()). BOTH must be set for
+// --commit to insert; a plain run never reads them and never writes to the DB.
+// The service-role key BYPASSES RLS, so it lives ONLY in an env var / Codespaces
+// secret — never in this file, never committed. SUPABASE_URL is the project's
+// API URL, e.g. https://<ref>.supabase.co (no trailing slash, no /rest/v1).
+const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
 // Optional: the deployed nearby-places function. If set, we ask IT what is
 // already on the map (the exact set the app would show, so our dedup matches
 // the app's). If unset, we fall back to a direct Wikipedia geosearch, which
@@ -72,46 +76,22 @@ const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash
 const NEARBY_PLACES_URL = Deno.env.get("NEARBY_PLACES_URL") ?? "";
 const NEARBY_PLACES_KEY = Deno.env.get("NEARBY_PLACES_KEY") ?? "";
 
-// Per-city metro centres + expected state. The centre biases Photon; MAX_KM is
-// a sanity gate that rejects a geocode landing in the wrong metro (a same-named
-// place in another city). Generous enough for real suburbs (Denver→Golden, LA
-// sprawl), tight enough to catch a wrong-state hit. The verified address already
-// carries the correct city/state/ZIP, so this is a backstop, not the main signal.
-type City = { lat: number; lng: number; state: string };
-const CITIES: Record<string, City> = {
-  "New York": { lat: 40.7128, lng: -74.0060, state: "NY" },
-  "Chicago": { lat: 41.8781, lng: -87.6298, state: "IL" },
-  "San Francisco": { lat: 37.7749, lng: -122.4194, state: "CA" },
-  "Los Angeles": { lat: 34.0522, lng: -118.2437, state: "CA" },
-  "Washington DC": { lat: 38.9072, lng: -77.0369, state: "DC" },
-  "Boston": { lat: 42.3601, lng: -71.0589, state: "MA" },
-  "New Orleans": { lat: 29.9511, lng: -90.0715, state: "LA" },
-  "Seattle": { lat: 47.6062, lng: -122.3321, state: "WA" },
-  "Austin": { lat: 30.2672, lng: -97.7431, state: "TX" },
-  "Nashville": { lat: 36.1627, lng: -86.7816, state: "TN" },
-  "Portland": { lat: 45.5152, lng: -122.6784, state: "OR" },
-  "Miami": { lat: 25.7617, lng: -80.1918, state: "FL" },
-  "Denver": { lat: 39.7392, lng: -104.9903, state: "CO" },
-  // --- #9 next 7 metros (2026-08). Single-bucket metros keep suburbs in the
-  //     address; the two two-anchor metros (DFW, Twin Cities) carry their
-  //     municipality as the row's `city`, so each needs its own centre here or
-  //     the row is dropped as unknown-city. CITY_MAX_KM=80 is the backstop. ---
-  "Philadelphia": { lat: 39.9526, lng: -75.1652, state: "PA" },
-  "Atlanta": { lat: 33.7490, lng: -84.3880, state: "GA" },
-  "Houston": { lat: 29.7604, lng: -95.3698, state: "TX" },
-  "Dallas": { lat: 32.7767, lng: -96.7970, state: "TX" },
-  "Fort Worth": { lat: 32.7555, lng: -97.3308, state: "TX" },
-  "Richardson": { lat: 32.9483, lng: -96.7299, state: "TX" },
-  "Plano": { lat: 33.0198, lng: -96.6989, state: "TX" },
-  "Carrollton": { lat: 32.9756, lng: -96.8900, state: "TX" },
-  "Arlington": { lat: 32.7357, lng: -97.1081, state: "TX" },
-  "Phoenix": { lat: 33.4484, lng: -112.0740, state: "AZ" },
-  "San Diego": { lat: 32.7157, lng: -117.1611, state: "CA" },
-  "Minneapolis": { lat: 44.9778, lng: -93.2650, state: "MN" },
-  "St. Paul": { lat: 44.9537, lng: -93.0900, state: "MN" },
+// City bias for geocoding + a bounding sanity check. Env-overridable (the
+// header's "all overridable by env" contract — Chicago is only the default).
+const CITY = {
+  name: Deno.env.get("SEED_CITY_NAME")?.trim() || "Chicago",
+  lat: Number(Deno.env.get("SEED_CITY_LAT") ?? 41.8781),
+  lng: Number(Deno.env.get("SEED_CITY_LNG") ?? -87.6298),
 };
-const CITY_MAX_KM = 80; // sanity radius around each city centre (covers metro suburbs)
-const CACHE_PATH = "seed_cache.json"; // resumable cache (survives crashes / 429s)
+// Reject a geocode that lands outside the metro. Default 60 km (single-city
+// pilot). Set SEED_CITY_MAX_KM=0 to DISABLE the reject — REQUIRED for a re-run
+// batch that spans multiple cities (e.g. the #264 stranded-429 tail, whose 66
+// names are scattered across 13 metros): a single-city radius would wrongly bin
+// every out-of-town name as out-of-metro. Photon's city bias is a soft ranking
+// nudge, so a well-named place ("Space Needle, Seattle") still geocodes right
+// even with the Chicago default bias; it is the reject, not the bias, that
+// blocks a mixed-city list.
+const CITY_MAX_KM = Number(Deno.env.get("SEED_CITY_MAX_KM") ?? 60);
 
 const MATCH_RADIUS_M = 90;      // same constant as index.html dedupeReal() — DEDUP only
 // Enrichment reaches wider than dedup ON PURPOSE. A big park's Wikipedia
@@ -132,10 +112,10 @@ const WIKI_NAME_SANITY_M = 1000;
 const CONF_MIN = 0.75;          // below this, a decision goes to the human, not the machine
 const VALID_CATEGORIES = new Set(["park", "shops", "barsrest", "history", "art"]);
 
-// LEGACY pilot seed list (the original #57 Chicago pilot), kept for reference.
-// The tool now reads the verified CSV; this array is no longer an input path.
-// Tier 1 (named in all three AskChicago threads) then Tier 2 (named in two).
-const _LEGACY_PILOT_NAMES = [
+// The pilot seed list — Tier 1 (named in all three AskChicago threads) then
+// Tier 2 (named in two). Names only; the frequency ranking IS the filter, so
+// nothing here is pre-judged for "quality". Override by passing a names file.
+const DEFAULT_NAMES = [
   // Tier 1
   "International Museum of Surgical Science, Chicago",
   "Institute for the Study of Ancient Cultures, Chicago",
@@ -180,81 +160,19 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-// ---------------------------------------------------------------------------
-// Resilient Wikipedia GET -> parsed JSON, or null after real exhaustion.
-//
-// WHY THIS EXISTS. Every row fires several Wikipedia calls (geosearch for the
-// description, the same lookup again for "what's already here", plus the widen
-// / name-search). Wikipedia rate-limits, and the old raw fetches read a throttle
-// as "nothing found" — so a landmark whose article is metres away would RANDOMLY
-// either dedupe against it or get written as a new blank seed, depending on which
-// calls got throttled that run (QA: two identical Chicago-25 runs disagreed on
-// 14/25 rows). A throttle must be a WAIT, not a wrong answer.
-//
-// The distinction that keeps this honest: a *throttle* (HTTP 429/503, or a
-// non-JSON "too many requests" body) is retried with backoff; a *valid empty
-// result* (200 with real JSON and an empty geosearch) is returned as-is, so a
-// genuine "no article here" still reads as blank. Only a persistent throttle
-// past all retries degrades to null — now rare instead of routine.
-// Self-pacing gate: keep our OWN Wikipedia requests at least WIKI_MIN_GAP_MS
-// apart, globally. The tool fires 2–4 Wikipedia calls per row back-to-back
-// (geosearch + extract + widen), and it was that BURST that tripped Wikipedia's
-// throttle — retries then papered over it unevenly, leaving ~1/10 rows still
-// flipping. Spacing the calls PREVENTS the throttle instead of reacting to it;
-// the cost is ~1s/row on top of the 7s inter-row sleep. Calls are already
-// sequential, so a timestamp gate is enough to serialise them politely.
-const WIKI_MIN_GAP_MS = 350;
-let _wikiNextAt = 0;
-async function wikiPace() {
-  const now = Date.now();
-  const wait = Math.max(0, _wikiNextAt - now);
-  _wikiNextAt = Math.max(now, _wikiNextAt) + WIKI_MIN_GAP_MS;
-  if (wait > 0) await sleep(wait);
-}
-
-async function wikiJSON(url: string, tries = 6): Promise<any | null> {
-  // Backoff caps at 8s (waits: 1,2,4,8,8,8 — up to ~31s for a fully throttled
-  // row) with jitter so parallel-ish calls don't retry in lockstep. A row that
-  // needs no retry pays nothing; only a genuinely throttled one waits. QA showed
-  // 4 tries left ~1/10 rows still flipping under sustained load (National Museum
-  // of Mexican Art, article 6m away, geocode stable — a pure throttle exhaustion,
-  // not a boundary case); the extra headroom is to close that gap.
-  for (let attempt = 1; attempt <= tries; attempt++) {
-    const backoff = Math.min(8000, 1000 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 400);
-    await wikiPace(); // space our own calls to avoid tripping the throttle
-    try {
-      const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0 (map seed dedup; contact via repo)" } });
-      if (r.status === 429 || r.status === 503) { await sleep(backoff); continue; }
-      if (!r.ok) return null; // a non-throttle error (400/404/…) is a real miss
-      const text = await r.text();
-      try {
-        return JSON.parse(text); // valid JSON (incl. a legitimately empty result)
-      } catch {
-        // 200-ish but the body isn't JSON — Wikipedia's throttle/error HTML.
-        // Treat as a throttle and back off; do NOT read it as an empty result.
-        await sleep(backoff);
-        continue;
-      }
-    } catch {
-      await sleep(backoff); // network blip — retry
-    }
-  }
-  return null;
-}
-
 type Existing = { name: string; lat: number; lng: number; category?: string; source?: string };
 
 // ---------------------------------------------------------------------------
 // 1) Geocode a name -> coordinates (Photon, unkeyed — the app's #88 provider).
 // ---------------------------------------------------------------------------
-async function geocode(query: string, center: { lat: number; lng: number }): Promise<{ lat: number; lng: number; label: string } | null> {
+async function geocode(name: string): Promise<{ lat: number; lng: number; label: string } | null> {
   const url =
     "https://photon.komoot.io/api/?limit=1&lat=" +
-    center.lat +
+    CITY.lat +
     "&lon=" +
-    center.lng +
+    CITY.lng +
     "&q=" +
-    encodeURIComponent(query);
+    encodeURIComponent(name);
   try {
     const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
     if (!r.ok) return null;
@@ -264,7 +182,7 @@ async function geocode(query: string, center: { lat: number; lng: number }): Pro
     const [lng, lat] = f.geometry.coordinates;
     const p = f.properties ?? {};
     const label = [p.name, p.city, p.state].filter(Boolean).join(", ");
-    return { lat, lng, label: label || query };
+    return { lat, lng, label: label || name };
   } catch {
     return null;
   }
@@ -278,25 +196,33 @@ async function wikiAt(
   lat: number,
   lng: number,
 ): Promise<{ title: string; intro: string; lat: number; lng: number } | null> {
-  const geo =
-    "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=5&gsradius=" +
-    MATCH_RADIUS_M +
-    "&gscoord=" +
-    lat +
-    "%7C" +
-    lng;
-  const gd = await wikiJSON(geo);
-  const hit = gd?.query?.geosearch?.[0];
-  if (!hit?.title) return null;
+  try {
+    const geo =
+      "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=5&gsradius=" +
+      MATCH_RADIUS_M +
+      "&gscoord=" +
+      lat +
+      "%7C" +
+      lng;
+    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!gr.ok) return null;
+    const gd = await gr.json();
+    const hit = gd?.query?.geosearch?.[0];
+    if (!hit?.title) return null;
 
-  const ex =
-    "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
-    encodeURIComponent(hit.title);
-  const ed = await wikiJSON(ex);
-  const pages = ed?.query?.pages ?? {};
-  const first: any = Object.values(pages)[0] ?? {};
-  const intro = String(first.extract ?? "").trim();
-  return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
+    const ex =
+      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+      encodeURIComponent(hit.title);
+    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!er.ok) return { title: hit.title, intro: "", lat: hit.lat, lng: hit.lon };
+    const ed = await er.json();
+    const pages = ed?.query?.pages ?? {};
+    const first: any = Object.values(pages)[0] ?? {};
+    const intro = String(first.extract ?? "").trim();
+    return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -307,14 +233,10 @@ async function wikiAt(
 //     is rejected. Never used for dedup; never invents text (#101/#178): a name
 //     with no matching article stays blank.
 // ---------------------------------------------------------------------------
-// Per-row extra stopwords (the current city + state words), set by run() before
-// each row, so a title match isn't inflated by the city name.
-let CURRENT_STOPS: Set<string> = new Set();
 function tokens(s: string): Set<string> {
-  const STOP = new Set(["the", "of", "a", "an", "and", "at", "in", "on"]);
+  const STOP = new Set(["the", "of", "a", "an", "and", "at", "in", "on", "chicago", "il", "illinois"]);
   return new Set(
-    (s || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/)
-      .filter((w) => w && !STOP.has(w) && !CURRENT_STOPS.has(w)),
+    (s || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w && !STOP.has(w)),
   );
 }
 function titleMatch(name: string, title: string): number {
@@ -325,13 +247,19 @@ function titleMatch(name: string, title: string): number {
   return hit / a.size; // fraction of the place-name's words the article title covers
 }
 async function wikiIntroFor(title: string): Promise<string> {
-  const ex =
-    "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
-    encodeURIComponent(title);
-  const ed = await wikiJSON(ex);
-  const pages = ed?.query?.pages ?? {};
-  const first: any = Object.values(pages)[0] ?? {};
-  return String(first.extract ?? "").trim();
+  try {
+    const ex =
+      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
+      encodeURIComponent(title);
+    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!er.ok) return "";
+    const ed = await er.json();
+    const pages = ed?.query?.pages ?? {};
+    const first: any = Object.values(pages)[0] ?? {};
+    return String(first.extract ?? "").trim();
+  } catch {
+    return "";
+  }
 }
 
 async function wikiEnrich(
@@ -341,34 +269,38 @@ async function wikiEnrich(
 ): Promise<{ title: string; intro: string } | null> {
   // Path A — coordinate geosearch (300 m) + title gate. Best when Photon
   // dropped the pin near the article's own coordinate.
-  {
+  try {
     const geo =
       "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
       WIKI_ENRICH_RADIUS_M +
       "&gscoord=" + lat + "%7C" + lng;
-    const gd = await wikiJSON(geo);
-    const hits: any[] = gd?.query?.geosearch ?? [];
-    let best: any = null, bestScore = 0;
-    for (const h of hits) {
-      const s = titleMatch(name, h.title || "");
-      if (s > bestScore) { bestScore = s; best = h; }
+    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (gr.ok) {
+      const gd = await gr.json();
+      const hits: any[] = gd?.query?.geosearch ?? [];
+      let best: any = null, bestScore = 0;
+      for (const h of hits) {
+        const s = titleMatch(name, h.title || "");
+        if (s > bestScore) { bestScore = s; best = h; }
+      }
+      if (best && bestScore >= WIKI_TITLE_MIN) {
+        const intro = await wikiIntroFor(best.title);
+        if (intro) return { title: best.title, intro };
+      }
     }
-    if (best && bestScore >= WIKI_TITLE_MIN) {
-      const intro = await wikiIntroFor(best.title);
-      if (intro) return { title: best.title, intro };
-    }
-    // fall through to Path B
-  }
+  } catch { /* fall through to Path B */ }
 
   // Path B — name search, then verify the found article's OWN coordinate is
   // within WIKI_NAME_SANITY_M of the pin. Recovers wide features whose article
   // coordinate sits beyond the 300 m circle (Palmisano, Promontory). The
   // coordinate check is what stops a same-named place elsewhere from attaching.
-  {
+  try {
     const srch =
       "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=5&srsearch=" +
       encodeURIComponent(name);
-    const sd = await wikiJSON(srch);
+    const sr = await fetch(srch, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!sr.ok) return null;
+    const sd = await sr.json();
     const results: any[] = sd?.query?.search ?? [];
     // Keep only results whose title plausibly IS this place, best first.
     const ranked = results
@@ -386,29 +318,26 @@ async function wikiEnrich(
       const q =
         "https://en.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cextracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
         encodeURIComponent(cand.title);
-      const cdj = await wikiJSON(q);
-      if (!cdj) continue;
+      const cr = await fetch(q, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+      if (!cr.ok) continue;
+      const cdj = await cr.json();
       const pages = cdj?.query?.pages ?? {};
       const p: any = Object.values(pages)[0] ?? {};
       const coord = Array.isArray(p?.coordinates) ? p.coordinates[0] : null;
       const cLat = Number(coord?.lat), cLon = Number(coord?.lon ?? coord?.lng);
-      // An article attaches ONLY if it carries its own coordinate AND that
-      // coordinate lands within the sanity radius of the pin. A coordinate-less
-      // article is rejected outright, whatever the title score. The old code
-      // accepted a coord-less article on a perfect title alone ("a perfect name
-      // hit is almost certainly the place") — but a NAMESAKE THAT ISN'T A PLACE
-      // (a TV show, song, or person) has a perfect-token title and no coordinate,
-      // so it sailed through with zero geographic check. That shipped the intro
-      // for the Disney cooking show "5 STAR Kitchen ITC Chef's Special" onto the
-      // Denver restaurant "Star Kitchen" (QA, Denver batch). Every real feature
-      // Path B was built to recover (Palmisano, Promontory) carries a coordinate,
-      // so requiring one keeps those; a place that genuinely lacks a coordinate
-      // gets an honest blank (#101/#178), which is the correct, safe outcome.
-      if (!Number.isFinite(cLat) || !Number.isFinite(cLon)) continue; // no coord -> not a mappable place
-      if (haversineM(lat, lng, cLat, cLon) > WIKI_NAME_SANITY_M) continue; // same name, wrong place
+      // If the article carries a coordinate, it must be within the sanity
+      // radius. If it carries NONE, accept on the exact-title match alone
+      // (a perfect name hit with no coord is still almost certainly the place).
+      if (Number.isFinite(cLat) && Number.isFinite(cLon)) {
+        if (haversineM(lat, lng, cLat, cLon) > WIKI_NAME_SANITY_M) continue; // same name, wrong place
+      } else if (cand.score < 1) {
+        continue; // no coord AND an imperfect title — too risky, skip
+      }
       const intro = String(p?.extract ?? "").trim();
       if (intro) return { title: cand.title, intro };
     }
+    return null;
+  } catch {
     return null;
   }
 }
@@ -418,13 +347,7 @@ async function wikiEnrich(
 //    Prefer the deployed nearby-places function (exact app parity); fall back
 //    to Wikipedia geosearch (covers the wiki-collision class).
 // ---------------------------------------------------------------------------
-// wikiHint is the wikiAt() result run() already computed for this exact spot.
-// Reusing it removes a second identical Wikipedia geosearch per row — the old
-// code called wikiAt() here again, doubling the Wikipedia load AND adding a
-// second independent throttle-failure point, so the direct call and this one
-// could disagree within a single row (one found the article, the other got
-// throttled -> the row saw an empty "existing" and became a spurious new seed).
-async function existingNear(lat: number, lng: number, wikiHint?: { title: string; lat: number; lng: number } | null): Promise<Existing[]> {
+async function existingNear(lat: number, lng: number): Promise<Existing[]> {
   if (NEARBY_PLACES_URL) {
     try {
       const r = await fetch(NEARBY_PLACES_URL, {
@@ -447,7 +370,7 @@ async function existingNear(lat: number, lng: number, wikiHint?: { title: string
       // fall through to Wikipedia
     }
   }
-  const w = wikiHint !== undefined ? wikiHint : await wikiAt(lat, lng);
+  const w = await wikiAt(lat, lng);
   return w && w.title ? [{ name: w.title, lat: w.lat, lng: w.lng, source: "wiki" }] : [];
 }
 
@@ -563,228 +486,186 @@ type SeedRow = {
   category: string | null;
   lat: number;
   lng: number;
+  city: string;          // = CITY.name — the `submissions.city` column; each run is one metro
   status: "approved";
   submitted_by: null;
   source: "seed:reddit";
-  seed_meta: { candidate: string; address: string; city: string; sourceThread: string; geocodeLabel: string; wikiTitle: string | null; confidence: number };
+  seed_meta: { candidate: string; geocodeLabel: string; wikiTitle: string | null; confidence: number };
 };
 
 // ---------------------------------------------------------------------------
-// Minimal RFC4180 CSV parser (quotes, escaped quotes, CRLF). No import so the
-// tool stays dependency-free, matching the rest of this file.
+// --commit: insert the new seed rows into `submissions` via the Supabase REST
+// API, using the service-role key (bypasses RLS). This is the OPTIONAL write
+// half. A plain run never calls this — it writes only seed_records.json and the
+// report, and the review-then-load gate is preserved: --commit is meant to be
+// run AFTER you have read seed_report.json. Rows are inserted in chunks; a blank
+// wiki intro is stored as NULL (not ""), matching how existing seeds were loaded
+// (#279's "NULL description" set). seed_meta has no column and is dropped.
 // ---------------------------------------------------------------------------
-function parseCSV(text: string): Record<string, string>[] {
-  // Delimiter auto-detect from the header line: a spreadsheet CSV export is
-  // comma-separated (fields containing commas are quoted, RFC4180); a value
-  // pasted/saved straight from a sheet is TAB-separated (and needs no quoting,
-  // since addresses contain commas but not tabs). Sniffing the first line lets
-  // this one tool read either a .csv or a .tsv with no flag — the seed files
-  // carry commas inside `location`, so reading a .tsv as comma would shred them.
-  const nl = text.indexOf("\n");
-  const firstLine = nl >= 0 ? text.slice(0, nl) : text;
-  const DELIM = firstLine.includes("\t") ? "\t" : ",";
-  const rows: string[][] = [];
-  let field = "", row: string[] = [], inQ = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQ) {
-      if (c === '"') {
-        if (text[i + 1] === '"') { field += '"'; i++; }
-        else inQ = false;
-      } else field += c;
-    } else if (c === '"') inQ = true;
-    else if (c === DELIM) { row.push(field); field = ""; }
-    else if (c === "\r") { /* handled at \n */ }
-    else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
-    else field += c;
-  }
-  if (field.length || row.length) { row.push(field); rows.push(row); }
-  const header = rows.shift() ?? [];
-  return rows
-    .filter((r) => r.length && !(r.length === 1 && r[0] === ""))
-    .map((r) => {
-      const o: Record<string, string> = {};
-      header.forEach((h, i) => (o[h] = r[i] ?? ""));
-      return o;
-    });
-}
-
-const hasZip = (s: string) => /\b\d{5}(-\d{4})?\b/.test(s || "");
-
-async function run() {
-  const raw = Deno.args;
-  const positional = raw.filter((a) => !a.startsWith("--"));
-  const flags = new Map<string, string>();
-  for (const a of raw) if (a.startsWith("--")) { const [k, v] = a.slice(2).split("="); flags.set(k, v ?? "true"); }
-
-  const csvPath = positional[0];
-  if (!csvPath) {
-    console.error("Usage: seed-resolve.ts <Seed_Data.csv> [--all] [--city=Denver,Austin] [--limit=N]");
+async function commitToSupabase(rows: SeedRow[]): Promise<void> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error(
+      "\n--commit ABORTED: SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY not set. " +
+        "Set both (Codespaces secrets) and re-run, or load seed_records.json manually. Nothing was written.",
+    );
     Deno.exit(1);
   }
-  let text = "";
-  try { text = await Deno.readTextFile(csvPath); }
-  catch (e) { console.error(`Could not read ${csvPath}: ${e}`); Deno.exit(1); }
-  const allRows = parseCSV(text);
+  if (!rows.length) {
+    console.log("\n--commit: 0 new rows to insert, nothing to do.");
+    return;
+  }
 
-  const wantAll = flags.has("all");
-  const cityFilter = flags.get("city") ? new Set(flags.get("city")!.split(",").map((s) => s.trim())) : null;
-  const limit = flags.get("limit") ? parseInt(flags.get("limit")!, 10) : Infinity;
+  // Map to the exact `submissions` columns — drop seed_meta (no column),
+  // NULL a blank description, carry city/source/status/submitted_by. id and
+  // created_at are left to their DB defaults (gen_random_uuid() / now()).
+  const payload = rows.map((r) => ({
+    name: r.name,
+    description: r.description ? r.description : null,
+    category: r.category,
+    lat: r.lat,
+    lng: r.lng,
+    city: r.city,
+    status: r.status,
+    submitted_by: r.submitted_by,
+    source: r.source,
+  }));
 
-  const unknownCity = allRows.filter((r) => !CITIES[r.city]); // no centre -> can't place
-  const eligibleAll = allRows.filter((r) => {
-    if (!CITIES[r.city]) return false;
-    if (cityFilter && !cityFilter.has(r.city)) return false;
-    if (!wantAll && !hasZip(r.location)) return false; // "approved" = address-verified
-    return true;
-  });
-  const eligible = Number.isFinite(limit) ? eligibleAll.slice(0, limit) : eligibleAll;
+  const endpoint = SUPABASE_URL + "/rest/v1/submissions";
+  const CHUNK = 200;
+  let inserted = 0;
+  for (let i = 0; i < payload.length; i += CHUNK) {
+    const batch = payload.slice(i, i + CHUNK);
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(batch),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(
+        `\n--commit FAILED on rows ${i}-${i + batch.length - 1}: HTTP ${res.status} ${body.slice(0, 300)}`,
+      );
+      console.error(`Inserted ${inserted} row(s) before the failure. seed_records.json is unchanged; do NOT blindly re-run --commit (it would double-insert the successful batches). Inspect, then re-run over only the un-inserted names if needed.`);
+      Deno.exit(1);
+    }
+    inserted += batch.length;
+    console.log(`  committed ${inserted}/${payload.length}…`);
+  }
+  console.log(`\n--commit: INSERTED ${inserted} row(s) into submissions (source='seed:reddit', city='${rows[0].city}', status='approved').`);
+  console.log(`Verify: submissions seed:reddit count should have risen by exactly ${inserted}. Back-out: delete from submissions where source='seed:reddit' and city='${rows[0].city}' and created_at > now() - interval '1 hour';`);
+}
 
-  if (!GEMINI_API_KEY) console.warn("WARNING: GEMINI_API_KEY is not set — every place will be HELD (never judged), written to seed_held.txt for a re-run, NOT reviewed (#264).");
-  console.log(
-    `Input ${allRows.length} rows; ${eligible.length} eligible` +
-    `${wantAll ? " (--all)" : " (address-verified only)"}` +
-    `${cityFilter ? ` in ${[...cityFilter].join("/")}` : ""}` +
-    `${Number.isFinite(limit) ? `, limit ${limit}` : ""}` +
-    `${unknownCity.length ? `; ${unknownCity.length} skipped for unknown city` : ""}.`,
-  );
+async function run() {
+  const args = Deno.args.filter((a) => !a.startsWith("--"));
+  const COMMIT = Deno.args.includes("--commit");
+  let names = DEFAULT_NAMES;
+  if (args[0]) {
+    try {
+      const txt = await Deno.readTextFile(args[0]);
+      names = txt.split("\n").map((l) => l.trim()).filter(Boolean);
+      console.log(`Loaded ${names.length} names from ${args[0]}`);
+    } catch (e) {
+      console.error(`Could not read names file ${args[0]}: ${e}`);
+      Deno.exit(1);
+    }
+  } else {
+    console.log(`Using built-in ${names.length}-name Chicago pilot list (pass a file to override).`);
+  }
+  if (!GEMINI_API_KEY) console.warn("WARNING: GEMINI_API_KEY is not set — every place will be HELD (never judged), written to seed_held.txt for a re-run, not reviewed.");
 
-  // Resumable cache: key = name||city. A cached row is never re-fetched, so a
-  // re-run after a crash / 429 continues where it stopped. Outputs are rebuilt
-  // from the cache in CSV order at the end, so a resumed run is complete.
-  type Cached = { record: SeedRow | null; report: any };
-  let cache: Record<string, Cached> = {};
-  try {
-    cache = JSON.parse(await Deno.readTextFile(CACHE_PATH));
-    console.log(`Resuming: ${Object.keys(cache).length} rows already cached.`);
-  } catch { /* fresh run */ }
-  const flush = () => Deno.writeTextFile(CACHE_PATH, JSON.stringify(cache));
+  const rows: SeedRow[] = [];
+  const report: any[] = [];
 
-  // #264: held rows are collected here and deliberately NOT written to the
-  // cache, so a plain re-run of the same CSV (with a working key) re-attempts
-  // exactly them while the cache skips everything already decided.
-  const heldThisRun: any[] = [];
-
-  let done = 0;
-  for (const r of eligible) {
-    done++;
-    const name = r.name, city = r.city, address = r.location, sourceThread = r.source_thread ?? "";
-    const ckey = `${name}||${city}`;
-    if (cache[ckey]) { console.log(`[${done}/${eligible.length}] = cached  ${name} (${city})`); continue; }
-
-    const c = CITIES[city];
-    CURRENT_STOPS = new Set([...city.toLowerCase().split(/\s+/), c.state.toLowerCase()]);
-
-    // Geocode the VERIFIED address first (the Google-pass payoff); fall back to
-    // "name, city" if the address doesn't resolve.
-    let geo = await geocode(address, c);
-    if (!geo) geo = await geocode(`${name}, ${city}`, c);
+  for (const candidate of names) {
+    const geo = await geocode(candidate);
     if (!geo) {
-      cache[ckey] = { record: null, report: { candidate: name, city, address, outcome: "geocode-failed" } };
-      console.log(`  \u2717 ${name} (${city}) — could not geocode`);
-      if (done % 10 === 0) await flush();
+      report.push({ candidate, outcome: "geocode-failed" });
+      console.log(`  ✗ ${candidate} — could not geocode`);
       continue;
     }
-    const distKm = haversineM(c.lat, c.lng, geo.lat, geo.lng) / 1000;
-    if (distKm > CITY_MAX_KM) {
-      cache[ckey] = { record: null, report: { candidate: name, city, address, geo, distKm: Math.round(distKm), outcome: "out-of-metro" } };
-      console.log(`  \u2717 ${name} (${city}) — ${Math.round(distKm)} km from centre, skipped`);
-      if (done % 10 === 0) await flush();
+    const distKm = haversineM(CITY.lat, CITY.lng, geo.lat, geo.lng) / 1000;
+    if (CITY_MAX_KM > 0 && distKm > CITY_MAX_KM) {
+      report.push({ candidate, outcome: "out-of-metro", geo, distKm: Math.round(distKm) });
+      console.log(`  ✗ ${candidate} — geocoded ${Math.round(distKm)} km from ${CITY.name}, skipped`);
       continue;
     }
 
+    // Tight 90 m lookup: the dedup/resolve signal (is there an article right here?).
     const wiki = await wikiAt(geo.lat, geo.lng);
-    const existing = await existingNear(geo.lat, geo.lng, wiki);
-    const verdict = await resolve(name, wiki?.title ?? null, existing);
+    const existing = await existingNear(geo.lat, geo.lng);
+    const verdict = await resolve(candidate, wiki?.title ?? null, existing);
 
+    // Description slot: prefer the tight hit's intro; if blank, widen to 300 m
+    // with a title-match gate. This only fills TEXT — it never changes the
+    // dedup verdict above.
     let wikiTitle = wiki?.title ?? null;
-    let wikiIntro = "";
+    let wikiIntro = wiki?.intro ?? "";
     let wikiWidened = false;
-    if (verdict.decision === "new") {
-      // #263: use the tight 90 m hit's intro as the DESCRIPTION only when its
-      // title actually matches the pin name — otherwise it is a wrong-NEIGHBOUR
-      // article (the 90 m geosearch grabbing the nearest ARTICLED place, e.g.
-      // Golden Gate Park -> "Amoeba Music", Alcatraz -> "Pier 39"). Gate on the
-      // canonicalName (Gemini aligns it to the wiki/existing name when it IS the
-      // same place), then fall through to the wider, coordinate-gated wikiEnrich.
-      // Blank beats wrong (#101/#178). The wiki TITLE stays as a Gemini hint /
-      // dedup signal above; only the description text is gated here.
-      if (wiki?.intro && titleMatch(verdict.canonicalName || name, wiki.title) >= WIKI_TITLE_MIN) {
-        wikiIntro = wiki.intro;
-      } else {
-        const enrich = await wikiEnrich(verdict.canonicalName || name, geo.lat, geo.lng);
-        if (enrich) { wikiTitle = enrich.title; wikiIntro = enrich.intro; wikiWidened = true; }
-      }
+    if (!wikiIntro && verdict.decision === "new") {
+      const enrich = await wikiEnrich(verdict.canonicalName || candidate, geo.lat, geo.lng);
+      if (enrich) { wikiTitle = enrich.title; wikiIntro = enrich.intro; wikiWidened = true; }
     }
 
-    const base = { candidate: name, city, address, geo, wikiTitle, wikiWidened, existing: existing.map((e) => e.name), verdict };
+    const base = {
+      candidate,
+      geo,
+      wikiTitle,
+      wikiWidened,
+      existing: existing.map((e) => e.name),
+      verdict,
+    };
 
     if (verdict.decision === "match") {
-      cache[ckey] = { record: null, report: { ...base, outcome: "already-present" } };
-      console.log(`  = ${name} (${city}) → already present as "${verdict.matchName ?? existing[0]?.name}" (conf ${verdict.confidence.toFixed(2)})`);
-    } else if (verdict.decision === "new" && verdict.category) {
-      const record: SeedRow = {
+      report.push({ ...base, outcome: "already-present" });
+      console.log(`  = ${candidate} → already on the map as "${verdict.matchName ?? existing[0]?.name}" (conf ${verdict.confidence.toFixed(2)})`);
+    } else if (verdict.decision === "new") {
+      const row: SeedRow = {
         name: verdict.canonicalName,
         description: wikiIntro,
         category: verdict.category,
         lat: geo.lat,
         lng: geo.lng,
+        city: CITY.name,
         status: "approved",
         submitted_by: null,
         source: "seed:reddit",
-        seed_meta: { candidate: name, address, city, sourceThread, geocodeLabel: geo.label, wikiTitle, confidence: verdict.confidence },
+        seed_meta: { candidate, geocodeLabel: geo.label, wikiTitle, confidence: verdict.confidence },
       };
-      cache[ckey] = { record, report: { ...base, outcome: "new-seed" } };
-      const desc = record.description ? (wikiWidened ? "wiki\u2713300m" : "wiki\u2713") : "wiki\u2205";
-      console.log(`  + ${verdict.canonicalName} [${verdict.category}] ${desc} (${city}, conf ${verdict.confidence.toFixed(2)})`);
-    } else if (verdict.decision === "new") {
-      // NEW but no valid category: an unclassified 'approved' row is the #68
-      // trap (renders in no tab; approve_submission refuses it). Route to review.
-      cache[ckey] = { record: null, report: { ...base, outcome: "review-uncat" } };
-      console.log(`  ? ${name} (${city}) → REVIEW: new but no category (conf ${verdict.confidence.toFixed(2)})`);
+      rows.push(row);
+      report.push({ ...base, outcome: "new-seed" });
+      const cat = verdict.category ?? "UNCLASSIFIED";
+      const desc = row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
+      console.log(`  + ${verdict.canonicalName} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})`);
     } else if (verdict.decision === "held") {
-      // #264: throttle / transport / no-key — the machine NEVER judged this.
-      // Do NOT cache it (so a resume RE-RUNS it, instead of skipping a cached
-      // "review" the way #264's 66 rows got stranded), and do NOT count it as a
-      // review. It goes to seed_held.txt and is cleared by re-running the CSV.
-      heldThisRun.push({ ...base, outcome: "held", status: verdict.status ?? null });
-      console.log(`  \u23F3 ${name} (${city}) → HELD (re-run): ${verdict.why}`);
+      // Throttle/transport hold — the machine never judged this. Re-runnable,
+      // NOT a review. Carries the HTTP status when there was one, so the report
+      // is filterable (429 leftovers vs a hard 4xx). #264 / #263.
+      report.push({ ...base, outcome: "held", status: verdict.status ?? null });
+      console.log(`  ⏳ ${candidate} → HELD (re-run): ${verdict.why}`);
     } else {
-      cache[ckey] = { record: null, report: { ...base, outcome: "review" } };
-      console.log(`  ? ${name} (${city}) → REVIEW: ${verdict.why} (conf ${verdict.confidence.toFixed(2)})`);
+      report.push({ ...base, outcome: "review" });
+      console.log(`  ? ${candidate} → REVIEW: ${verdict.why} (conf ${verdict.confidence.toFixed(2)})`);
     }
 
-    if (done % 10 === 0) await flush();
-    await sleep(7000); // ~8-9 calls/min — under Gemini free-tier 10 RPM (429s otherwise)
-  }
-  await flush();
-
-  // Rebuild outputs from the cache in eligible (CSV) order — complete even after
-  // a resume, and stable regardless of which rows were done in which run.
-  const rows: SeedRow[] = [];
-  const report: any[] = [];
-  for (const r of eligible) {
-    const cached = cache[`${r.name}||${r.city}`];
-    if (!cached) continue;
-    if (cached.record) rows.push(cached.record);
-    report.push(cached.report);
-  }
-  for (const u of unknownCity) report.push({ candidate: u.name, city: u.city, outcome: "unknown-city-skipped" });
-
-  // #264: held rows were deliberately NOT cached (so a re-run re-attempts them).
-  // Fold them into the report for completeness and emit seed_held.txt — a
-  // human-readable list of what is still UNJUDGED. Recovery is NOT a special
-  // input file: just re-run the SAME CSV with a working key and the cache skips
-  // everything already decided, re-attempting exactly these held rows. Only
-  // written when something is actually held, so a clean run leaves no stale file.
-  for (const h of heldThisRun) report.push(h);
-  const heldList = heldThisRun.map((h) => `${h.candidate} (${h.city})`);
-  if (heldList.length) {
-    await Deno.writeTextFile("seed_held.txt", heldList.join("\n") + "\n");
+    await sleep(7000); // ~8-9 calls/min — stays under Gemini free-tier 10 RPM (429s otherwise)
   }
 
   await Deno.writeTextFile("seed_records.json", JSON.stringify(rows, null, 2));
   await Deno.writeTextFile("seed_report.json", JSON.stringify(report, null, 2));
+
+  // The held names, one per line — a ready-to-feed names file for a recovery
+  // re-run: `... seed-resolve.ts seed_held.txt` with a working key clears them
+  // (#264). Only written when something is actually held, so a clean run leaves
+  // no stale file behind.
+  const heldNames = report.filter((r) => r.outcome === "held").map((r) => r.candidate);
+  if (heldNames.length) {
+    await Deno.writeTextFile("seed_held.txt", heldNames.join("\n") + "\n");
+  }
 
   const counts = report.reduce((m: any, r) => ((m[r.outcome] = (m[r.outcome] ?? 0) + 1), m), {});
   console.log("\n--- summary ---");
@@ -793,12 +674,18 @@ async function run() {
   const blank = rows.filter((r) => !r.description).length;
   console.log(`new seed rows: ${rows.length}  (unclassified category: ${uncat}, no wiki description: ${blank})`);
   console.log("wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).");
-  if (heldList.length) {
-    console.log(`HELD (never judged — re-run these): ${heldList.length} → wrote seed_held.txt. Recovery: re-run the SAME CSV with a working key (the cache skips decided rows). These are NOT reviews (#264).`);
+  if (heldNames.length) {
+    console.log(`HELD (never judged — re-run these): ${heldNames.length} → wrote seed_held.txt. Re-run: seed-resolve.ts seed_held.txt with a working key. These are NOT reviews (#264).`);
   }
   const reviewN = counts.review ?? 0;
   if (reviewN) console.log(`REVIEW (judged, genuinely unsure — eyeball these): ${reviewN} in seed_report.json (outcome:"review").`);
-  console.log("NOTHING was written to the database. Review the report, then load seed_records.json deliberately.");
+
+  if (COMMIT) {
+    console.log("\n--commit passed: writing the new rows to submissions now.");
+    await commitToSupabase(rows);
+  } else {
+    console.log("NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).");
+  }
 }
 
 run();
