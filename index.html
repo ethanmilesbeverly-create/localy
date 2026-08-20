@@ -2331,9 +2331,18 @@
          the search). It rides the topbar's empty right slot beside the wordmark and
          shows ONLY on the map via #topbar.on-map (toggled in showScreen). onclick +
          ids are unchanged, so goToModeSelect() and setCurrentHunt()'s
-         getElementById('hunt-chip-name') still resolve. -->
+         getElementById('hunt-chip-name') still resolve.
+         #298 — after #297 moved guides onto their own #screen-guides tab, this chip
+         is now purely the CATEGORY switcher: setCurrentHunt() paints the active
+         browse category (or an open guide's name) into #hunt-chip-name, and the tap
+         still routes to Explore (#screen-modes), which now holds ONLY the category
+         cards. Routing is DELIBERATELY unchanged — the chip is not a guide selector
+         anymore (Guides has its own tab), so only the stale default label moved:
+         "Choose a guide" -> "Choose a category" names what Explore actually offers.
+         Rejected: repointing the tap to Guides (would break category switching) and
+         splitting the chip in two (no second job left to split off). -->
     <div id="hunt-chip" onclick="goToModeSelect()">
-      <span class="name" id="hunt-chip-name">Choose a guide</span>
+      <span class="name" id="hunt-chip-name">Choose a category</span>
       <svg class="chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
   </div>
@@ -7498,7 +7507,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19l';
+const APP_VERSION = '2026.08.19m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
