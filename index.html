@@ -7538,7 +7538,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19p';
+const APP_VERSION = '2026.08.22a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9597,8 +9597,21 @@ function regenerateCurrentHuntAt(base){
      went. Their presence here is the strongest evidence those cards once
      shipped: nobody writes a regeneration path for a hunt nobody can start. */
   else {
-    // fixed-content hunt (custom/shared code, or nothing active) — spots don't regenerate, just move the map
-    if(state.leafletMap) state.leafletMap.setView([base.lat, base.lng], ZOOM_WALK);
+    /* fixed-content hunt (custom/shared code, or nothing active) — spots don't
+       regenerate, just move the map. #186 — HONOUR THE PRESERVE-VIEW FLAG the
+       location-based arms already respect via setCurrentHunt. This else never
+       reaches setCurrentHunt, so it used to setView(base, ZOOM_WALK=18)
+       UNCONDITIONALLY — a street-level zoom-jump that ignored a deliberately
+       positioned frame. "Search here" on a shared/custom guide sets
+       _preserveViewOnNextHunt (searchThisArea, #8) precisely so the frame you
+       panned to is kept; it was the only arm still overriding it. So: when the
+       flag is set, LEAVE the camera where the user put it; otherwise pan to base
+       at the CURRENT zoom rather than snapping to ZOOM_WALK — the gentle move the
+       #183 lore-arm fix used, minus the reload (a fixed guide's spots correctly
+       don't regenerate; only the view should move, and gently). */
+    if(state.leafletMap && !state._preserveViewOnNextHunt){
+      state.leafletMap.setView([base.lat, base.lng], state.leafletMap.getZoom());
+    }
     if(state.currentHunt) showToast("This guide's spots are fixed — showing the area, but the list won't change");
   }
 }
