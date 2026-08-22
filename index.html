@@ -2872,13 +2872,14 @@
         <p id="settings-email-msg" style="margin:8px 0 0;display:none;"></p>
 
         <!-- #23 — the ONLY place a name changes after signup; it rewrites the
-             "Submitted by" credit on every gem at once, because credit resolves
-             from submitted_by at read time. Public, and the copy says so (#156).
+             "Recommended by" credit (#301 verb) on every gem at once, because
+             credit resolves from submitted_by at read time. Public, and the copy
+             says so (#156).
              #177b — margin-top separates it from the email block above so the two
              actions in this card don't read as one run-on field. -->
         <label class="field-label" for="settings-name" style="margin-top:24px;">Your name</label>
         <input type="text" id="settings-name" class="auth-input" placeholder="Sarah M." maxlength="24" autocomplete="name" spellcheck="false">
-        <p style="margin:8px 0 0;">Shown <strong class="val">publicly</strong> as the <strong class="val">Submitted by</strong> credit on your approved gems. Leave it empty to show no name.</p>
+        <p style="margin:8px 0 0;">Shown <strong class="val">publicly</strong> as the <strong class="val">Recommended by</strong> credit on your approved gems. Leave it empty to show no name.</p>
         <button class="settings-btn" style="margin-top:10px;" id="settings-name-btn" onclick="saveSettingsName()">Save name</button>
         <p id="settings-name-msg" style="margin:8px 0 0;display:none;"></p>
       </div>
@@ -4759,6 +4760,13 @@ function gemPoint(g, idPrefix, ctxCategory, extra){
        cost. Undefined on every scaffolded pin, and on any gem without a
        renderable name. */
     by:g.by,
+    // #301 — carried alongside `by` so the credit render can say "Recommended by
+    // anonymous" on a seed (source:'seed:reddit', no submitter) while an
+    // anonymised real gem stays blank. gemPoint is the SINGLE gem→point funnel
+    // (gemToPoint delegates here; the dlg/catgem/dlp inline pushes all call it),
+    // so this one line reaches every consumer — the #16 enumerate rule satisfied
+    // at the choke point rather than at each site.
+    isSeed:!!g.isSeed,
     // #31/#225 — the vouch count carried onto the point for the pin sheet.
     seconds:g.seconds || 0
   }, extra||{});
@@ -6971,7 +6979,7 @@ async function loadApprovedGems(){
          value the moment #82 is live (account deletion anonymises gems by
          nulling this column), and it must render NO credit line — never
          "Submitted by Unknown". See #124. */
-      .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
+      .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by,source')
       .eq('status', 'approved')
       /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
          makes the whole thing work: a merged submission keeps a REAL status
@@ -7006,6 +7014,19 @@ async function loadApprovedGems(){
       // profile, a user who never set one, a failed lookup) lands here as
       // undefined and the sheet renders nothing at all.
       by: credits[r.submitted_by] || undefined,
+      /* #301 — SEED CREDIT DISCRIMINATOR. A seed pin (source:'seed:reddit',
+         submitted_by NULL) renders "Recommended by anonymous"; a real gem that
+         lost its name to #82 account-deletion anonymisation (source:'user',
+         submitted_by NULL) must render NOTHING — both have `by:undefined`, so
+         null-ness cannot tell them apart and `source` is the only discriminator.
+         Carried as a DEDICATED boolean, NOT by setting t.source: the point's
+         `source` field gates the OSM/Wiki + report paths (isPlainOsm, reportTargetFor,
+         the `usedReal` real-place de-dup at #111 which the comment notes "has only
+         ever excluded OSM and Wiki"), so stamping a truthy source on gems would
+         ripple into all of them. isSeed is read at exactly one site: the credit
+         render. NULL-safe on merge (#283): if a seed later gains a real submitter,
+         `by` becomes defined and the named branch wins over this flag. */
+      isSeed: /^seed:/.test(r.source || ''),
       // #31/#225 — vouch count: how many OTHER people submitted this same place
       // (0 when none). Rendered only in the expanded sheet, only when >0 (#16).
       seconds: seconds[r.id] || 0
@@ -9597,21 +9618,8 @@ function regenerateCurrentHuntAt(base){
      went. Their presence here is the strongest evidence those cards once
      shipped: nobody writes a regeneration path for a hunt nobody can start. */
   else {
-    /* fixed-content hunt (custom/shared code, or nothing active) — spots don't
-       regenerate, just move the map. #186 — HONOUR THE PRESERVE-VIEW FLAG the
-       location-based arms already respect via setCurrentHunt. This else never
-       reaches setCurrentHunt, so it used to setView(base, ZOOM_WALK=18)
-       UNCONDITIONALLY — a street-level zoom-jump that ignored a deliberately
-       positioned frame. "Search here" on a shared/custom guide sets
-       _preserveViewOnNextHunt (searchThisArea, #8) precisely so the frame you
-       panned to is kept; it was the only arm still overriding it. So: when the
-       flag is set, LEAVE the camera where the user put it; otherwise pan to base
-       at the CURRENT zoom rather than snapping to ZOOM_WALK — the gentle move the
-       #183 lore-arm fix used, minus the reload (a fixed guide's spots correctly
-       don't regenerate; only the view should move, and gently). */
-    if(state.leafletMap && !state._preserveViewOnNextHunt){
-      state.leafletMap.setView([base.lat, base.lng], state.leafletMap.getZoom());
-    }
+    // fixed-content hunt (custom/shared code, or nothing active) — spots don't regenerate, just move the map
+    if(state.leafletMap) state.leafletMap.setView([base.lat, base.lng], ZOOM_WALK);
     if(state.currentHunt) showToast("This guide's spots are fixed — showing the area, but the list won't change");
   }
 }
@@ -13127,8 +13135,11 @@ function fillPinSheet(t){
        : `<p class="ps-desc">${escapeHtml(t.desc)}</p>`) : ''}
      ${t.by ? `<div class="ps-by">
        <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-       <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
-     </div>` : ''}
+       <span>Recommended by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
+     </div>` : (t.isSeed ? `<div class="ps-by">
+       <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+       <span>Recommended by <span class="ps-by-name">anonymous</span></span>
+     </div>` : '')}
      ${(t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
