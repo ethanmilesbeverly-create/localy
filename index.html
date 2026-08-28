@@ -2680,7 +2680,7 @@
          shapes tried and why this one is the safest of them. onclick is the
          guideline's required route to the licence text, so it must keep
          leading to Settings → Credits. -->
-    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · CARTO</button>
+    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -3109,7 +3109,7 @@
         </p>
         <p class="credit-row">
           <strong>Map tiles</strong>
-          © <a class="credit-link" href="https://carto.com/" target="_blank" rel="noopener noreferrer">CARTO</a>, built from OpenStreetMap data.
+          Vector tiles from <a class="credit-link" href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> © <a class="credit-link" href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a>, with <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'s standard tiles as the fallback. All built from OpenStreetMap data.
         </p>
         <p class="credit-row">
           <strong>Place search</strong>
@@ -3427,7 +3427,7 @@
      both L and maplibregl to already exist). If either of these two fails to
      load (CDN blocked, offline, ancient WebGL-less browser), addBaseLayer()
      detects the missing L.maplibreGL / WebGL and SILENTLY falls back to the
-     old CARTO raster layer, which itself falls back to StylizedGrid — so a
+     OSM.org raster layer, which itself falls back to StylizedGrid — so a
      failed vector load degrades to exactly today's behaviour, never a blank map.
      maplibre-gl pinned to major 5; the binding pinned to an exact version.
      Tighten maplibre-gl@5 to its exact resolved patch on the next pass if drift
@@ -7538,7 +7538,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19p';
+const APP_VERSION = '2026.08.28a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9125,29 +9125,44 @@ const StylizedGrid = L.GridLayer.extend({
 function addBaseLayer(map){
   /* #256 — VECTOR-FIRST BASEMAP with a raster fallback ladder.
      PRIMARY: a GPU MapLibre GL vector layer drawn INSIDE this Leaflet map via
-     L.maplibreGL, using CARTO's VOYAGER vector style
-     (basemaps.cartocdn.com/gl/voyager-gl-style/style.json) — the SAME warm Voyager
-     palette the app used as CARTO raster from day one, now rendered as GPU vector.
-     Vector + WebGL is what gives the continuous, crisp fractional zoom deflock has
-     and raster could not (#250's stated honest limit): raster PNGs CSS-scale soft
-     between integer levels, a GL renderer redraws crisply at every fractional
-     level — so the zoomSnap:0 already on the L.map finally pairs with a renderer
-     that can honour it. Keeping Voyager (not a busier style like OpenFreeMap
-     'liberty', which #256's first build shipped and was reverted) is deliberate:
-     Voyager is muted, so the category pins keep the contrast the #326 credit-scrim
-     math was tuned against — a colourful basemap washed the pins out. All three
-     app maps (#leaflet-map, #suggest-gem-map, #create-map) build through here, so
-     one change covers all three.
+     L.maplibreGL, using OpenFreeMap's POSITRON vector style
+     (tiles.openfreemap.org/styles/positron).
+     PROVIDER SWAP (2026.08.28) — CARTO began requiring an API key for its
+     basemaps and started stamping unauthenticated tile requests with an "API KEY
+     REQUIRED" watermark (industry-wide, hit us on the iOS raster path first). We
+     left CARTO entirely rather than take a keyed free tier that can be gated again.
+     OpenFreeMap is keyless, has no request limit, and is self-hostable — so the
+     exact failure that bit us (a provider gating us with no recourse) cannot recur
+     the same way. Vector + WebGL is what gives the continuous, crisp fractional
+     zoom deflock has and raster could not (#250's stated honest limit): raster PNGs
+     CSS-scale soft between integer levels, a GL renderer redraws crisply at every
+     fractional level — so the zoomSnap:0 already on the L.map finally pairs with a
+     renderer that can honour it. POSITRON (light grey, muted), NOT OpenFreeMap
+     'liberty' (which #256's first build shipped and was reverted for washing the
+     pins out) and NOT the old warm Voyager: positron is muted with even MORE pin
+     contrast than Voyager, so the category pins keep — actually gain — the contrast
+     the #326 credit-scrim math was tuned against. The one real loss is warmth: the
+     basemap now reads grey rather than the old cream. All three app maps
+     (#leaflet-map, #suggest-gem-map, #create-map) build through here, so one change
+     covers all three.
      LADDER, so a failed vector load is NEVER a blank map: vector -> (binding
-     missing / WebGL unavailable / repeated GL error) -> CARTO raster -> (tileerror)
-     -> StylizedGrid. The bottom two rungs are the exact pre-#256 behaviour, and the
-     raster fallback is Voyager too, so vector and fallback look identical.
-     ATTRIBUTION / RECIPIENT UNCHANGED FROM THE APP'S WHOLE HISTORY: the tile
-     provider is still CARTO (raster then, vector now), so the #map-attrib pill +
-     Credits modal keep OpenStreetMap / CARTO and privacy.html's recipient list is
-     unchanged — no new disclosure category, same terms the app always ran under.
-     STYLE is a one-word URL swap if ever wanted: voyager-gl-style ->
-     positron-gl-style (light grey, even more pin contrast) -> dark-matter-gl-style. */
+     missing / WebGL unavailable / repeated GL error) -> OSM.org raster -> (tileerror)
+     -> StylizedGrid. The bottom two rungs are the exact pre-#256 structure; the
+     raster rung is now OSM.org standard, not Voyager, so vector (grey positron) and
+     the raster fallback (colourful OSM standard) NO LONGER look identical — the
+     fallback is a visibly different, busier style. On iOS the raster rung is the
+     PRIMARY path (see the isIOS gate below), so most iOS users see OSM standard.
+     ATTRIBUTION / RECIPIENT CHANGED with the 2026.08.28 provider swap: tiles now
+     come from OpenFreeMap (vector) and OSM.org (raster) instead of CARTO, so the
+     #map-attrib pill + Credits modal were updated and privacy.html's tile-recipient
+     row was rewritten (CARTO out, OpenFreeMap + OSMF in). Keep those three in sync
+     on any future provider change — a provider change is a credits AND privacy change.
+     INTERIM NOTE: OSM.org's tile usage policy discourages high-volume apps using it
+     as a primary basemap. The durable answer for the raster/iOS path is self-hosted
+     raster tiles (our own storage), which also removes the OpenFreeMap dependency on
+     the vector path. That's the next hardening step; this swap kills the watermark now.
+     STYLE is a one-word URL swap if ever wanted: styles/positron ->
+     styles/liberty (warm, but washes pins) -> styles/bright -> styles/dark. */
 
   /* RASTER FALLBACK — the pre-#256 path, byte-for-byte, reused only when vector
      can't run. #205 lives here: a single uninterrupted swipe outran the tile
@@ -9157,11 +9172,12 @@ function addBaseLayer(map){
      requests a tile only as it enters the viewport; it does not pre-fetch a ring
      ahead of the pan) and no TileLayer option removes it. The VECTOR path has no
      such band at all — MapLibre paints the whole GL viewport — so whenever vector
-     is running, #205 is moot. landing.html builds its own CARTO layer inline and
-     does NOT route through here, so it keeps the raster band and is a separate fix. */
+     is running, #205 is moot. landing.html builds its own OSM.org raster layer inline
+     (also de-CARTO'd on 2026.08.28) and does NOT route through here, so it keeps the
+     raster band and is a separate fix. */
   function addRasterFallback(){
-    const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
-    const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
+    const TILE_OPTS = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
+    const real = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', TILE_OPTS);
     let errorCount = 0, fellBack = false;
     real.on('tileerror', () => {
       errorCount++;
@@ -9221,7 +9237,7 @@ function addBaseLayer(map){
     addRasterFallback();
   }
   try {
-    gl = L.maplibreGL({ style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', attributionControl: false });
+    gl = L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', attributionControl: false });
     gl.addTo(map);
   } catch(_){
     toRaster();
@@ -9464,8 +9480,8 @@ function setupBaseMap(){
      #256 the basemap IS a vector renderer (MapLibre GL via addBaseLayer), so this
      zoomSnap now pairs with a renderer that redraws crisply at every quarter
      level — the soft-between-levels raster limit this note used to record only
-     applies on the CARTO raster FALLBACK (binding/WebGL unavailable), not the
-     happy path. wheelPxPerZoomLevel:120
+     applies on the OSM.org raster FALLBACK (binding/WebGL unavailable, and the
+     iOS primary path), not the desktop happy path. wheelPxPerZoomLevel:120
      (up from 60) slows desktop scroll-zoom so it glides rather than jumps (no
      effect on mobile pinch). This is NOT the #59/#246 zoom-snap-BACK behaviour
      (that re-centres the map on you during a zoom while following) — this is the
