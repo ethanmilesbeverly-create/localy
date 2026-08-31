@@ -869,6 +869,15 @@
   }
   #map-3d-wrap.tilt-3d{transform:rotateX(38deg) scale(2.1);}
   #leaflet-map{position:absolute;inset:0;width:100%;height:100%;}
+  /* WARM RASTER TINT (2026.08.31b) — pushes the keyless OSM.org raster basemap
+     (iOS primary + desktop fallback) toward the old CARTO Voyager warmth: a touch
+     of sepia for warmth, calmed saturation (OSM standard is vivid pink/green),
+     a small warm hue nudge, and a hair brighter/softer toward cream. This is a
+     UNIFORM tint of the whole raster, not a per-layer Voyager match — tune the
+     four knobs to taste; drop the whole rule to revert. Applied only to
+     .nahgoo-warm-tiles (the tagged OSM.org layer), so pins/labels (separate
+     panes) and the desktop vector map are unaffected. */
+  .nahgoo-warm-tiles{ filter:sepia(0.32) saturate(0.82) hue-rotate(-8deg) brightness(1.05) contrast(0.95); }
   #target-drawer{
     display:flex;
     flex-direction:column;
@@ -7538,7 +7547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.31a';
+const APP_VERSION = '2026.08.31b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9234,7 +9243,12 @@ function addBaseLayer(map){
      (also de-CARTO'd on 2026.08.28) and does NOT route through here, so it keeps the
      raster band and is a separate fix. */
   function addRasterFallback(){
-    const TILE_OPTS = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
+    /* className warms these tiles toward the old Voyager look via a CSS filter
+       (see .nahgoo-warm-tiles in <style>). Scoped to THIS OSM.org raster layer —
+       iOS primary + the desktop raster fallback — so the stylized-grid fallback
+       (its own options) and the desktop positron vector map (recoloured in JS,
+       not a tile img) are untouched. 2026.08.31b. */
+    const TILE_OPTS = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80, className:'nahgoo-warm-tiles' };
     const real = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', TILE_OPTS);
     let errorCount = 0, fellBack = false;
     real.on('tileerror', () => {
