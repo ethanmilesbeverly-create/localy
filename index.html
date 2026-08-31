@@ -7547,7 +7547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.31c';
+const APP_VERSION = '2026.08.31d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9243,61 +9243,73 @@ function addBaseLayer(map){
      (also de-CARTO'd on 2026.08.28) and does NOT route through here, so it keeps the
      raster band and is a separate fix. */
   function addRasterFallback(){
-    /* RASTER LADDER (2026.08.31c): Stadia Alidade Smooth (retina, sharp on hi-DPI
-       phones) → OSM.org standard (keyless) → stylized grid. This is the answer to
-       the iOS "blurry map" — OSM.org serves only 1x tiles, which upscale soft on a
-       Retina iPhone; Stadia serves @2x. Each rung falls to the next on a burst of
-       tile errors, so the map NEVER breaks:
-         · Stadia uses DOMAIN AUTH — no API key in this file. nahgoo.com must be
-           added in the Stadia dashboard (client → Authentication). Until it is,
-           Stadia 401s → we drop to OSM.org, so a deploy BEFORE registration just
-           shows today's map. If the key/domain is ever gated later, same fall —
-           this is the CARTO-proofing: a provider gate degrades, never breaks.
-         · {r} → @2x on Retina (Leaflet fills it when detectRetina is on).
-         · Only the OSM.org rung carries .nahgoo-warm-tiles (the warm CSS tint);
-           Stadia renders its own designed look, clean and already soft-warm.
-           If Alidade reads too cool vs. old Voyager, add the class to STADIA_OPTS —
-           one-line warmth, no re-architecture. */
-    const STADIA_OPTS = { maxZoom:20, keepBuffer:6, updateWhenIdle:false, updateInterval:80, detectRetina:true, crossOrigin:true };
+    /* RASTER LADDER (2026.08.31d): OSM.org shows INSTANTLY (there is always a map),
+       then we PROBE Stadia and UPGRADE to its retina tiles only if auth succeeds.
+       WHY A PROBE, not a tileerror fallback: an unauthenticated Stadia request
+       returns HTTP 401, but the browser still DECODES Stadia's "401 Error"
+       placeholder image, so Leaflet's tileerror NEVER fires — a naive fallback
+       can't catch it (that was the "401 Error tiles across the whole map" bug in
+       2026.08.31c). A fetch() reads the real status, so we add Stadia ONLY on a
+       clean 200. Outcomes:
+         · domain not registered / key gated / offline → stay on warm OSM.org, no
+           401 tiles ever. THIS is the real CARTO-proofing (a gate degrades, never
+           breaks).
+         · registered → crisp @2x Stadia; OSM.org is removed once Stadia paints.
+       nahgoo.com must be added in the Stadia dashboard (client → Authentication)
+       for the upgrade to fire. @2x is HARDCODED on hi-DPI rather than using
+       Leaflet detectRetina (which ALSO applies a zoom-offset and over-sharpens).
+       Only the OSM.org rung carries .nahgoo-warm-tiles (the warm CSS tint); Stadia
+       renders its own designed look — if Alidade reads too cool vs. old Voyager,
+       add that class to STADIA_OPTS (one-line warmth). */
+    const retina = (window.devicePixelRatio || 1) > 1.3;
+    const STADIA_URL = retina
+      ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}@2x.png'
+      : 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png';
+    const STADIA_OPTS = { maxZoom:20, keepBuffer:6, updateWhenIdle:false, updateInterval:80, crossOrigin:true };
     const OSM_OPTS    = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80, className:'nahgoo-warm-tiles' };
 
+    let osm = null, dead = false;
+
     function addStylizedGrid(){
+      dead = true;
       /* Same options on the fallback grid so the stylized map matches the buffer
-         behaviour; it draws synchronously on canvas so it never showed the band,
-         but keeping the options identical avoids a future divergence. */
+         behaviour; it draws synchronously on canvas so it never showed the band. */
       new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
       showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
     }
     function addOSM(){
-      const real = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', OSM_OPTS);
+      osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', OSM_OPTS);
       let errorCount = 0, fellBack = false;
-      real.on('tileerror', () => {
+      osm.on('tileerror', () => {
         errorCount++;
         if(errorCount >= 4 && !fellBack){
           fellBack = true;
-          try { map.removeLayer(real); } catch(_){}
+          try { map.removeLayer(osm); osm = null; } catch(_){}
           addStylizedGrid();
         }
       });
-      real.addTo(map);
+      osm.addTo(map);
     }
 
-    /* PRIMARY: Stadia Alidade Smooth, retina. Falls to keyless OSM.org on an error
-       burst (unregistered domain, gated key, blocked network). */
-    let stadia;
+    /* Always paint a map right away with the keyless layer. */
+    addOSM();
+
+    /* Probe one Stadia tile; upgrade to crisp retina Stadia only on a real 200
+       (registered domain). fetch reads the true status even though an <img> would
+       have decoded the 401 placeholder. crossOrigin already works (Stadia serves
+       permissive CORS, which is how the 401 image rendered at all). */
     try {
-      stadia = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', STADIA_OPTS);
-    } catch(_){ addOSM(); return; }
-    let sErr = 0, sFell = false;
-    stadia.on('tileerror', () => {
-      sErr++;
-      if(sErr >= 4 && !sFell){
-        sFell = true;
-        try { map.removeLayer(stadia); } catch(_){}
-        addOSM();
-      }
-    });
-    stadia.addTo(map);
+      fetch('https://tiles.stadiamaps.com/tiles/alidade_smooth/3/4/3.png', { mode:'cors', cache:'no-store' })
+        .then(r => {
+          if(!r || !r.ok || dead) return;   /* 401 / gated / already stylized → stay on OSM.org */
+          const stadia = L.tileLayer(STADIA_URL, STADIA_OPTS);
+          /* Drop the OSM.org underlay once Stadia has actually painted, so we don't
+             sit on a double-fetch or flash a gap if Stadia is slow. */
+          stadia.on('load', () => { try { if(osm){ map.removeLayer(osm); osm = null; } } catch(_){} });
+          stadia.addTo(map);
+        })
+        .catch(() => {});   /* network / CORS error → stay on OSM.org */
+    } catch(_){}
   }
 
   /* WebGL + binding availability. maplibregl.supported was REMOVED in maplibre-gl
