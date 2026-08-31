@@ -7538,7 +7538,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.28a';
+const APP_VERSION = '2026.08.31a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9118,6 +9118,64 @@ const StylizedGrid = L.GridLayer.extend({
   }
 });
 
+/* WARM VOYAGER-MATCH BASEMAP THEME (2026.08.31a). The desktop vector basemap is
+   OpenFreeMap `positron` — a cool grey style. Users asked to restore the warmer
+   look the app had on CARTO Voyager (retired when CARTO went keyed, #304/#305).
+   CARTO Voyager's own style.json is no longer fetchable, so this does NOT clone
+   it; it recolours positron's layers toward a Voyager-like warm palette at
+   runtime (setPaintProperty), after the style loads. The tile DATA is untouched —
+   still OpenFreeMap, keyless, auto-updated — only the paint is overridden, so the
+   map stays HOSTED with no self-hosting and no owning updates. Matching is by
+   layer TYPE + id keyword (not exact ids) so it survives positron layer-list
+   drift; every set is wrapped because a paint prop that doesn't apply to a layer
+   type throws. iOS is NOT affected: it runs OSM.org raster (there is no vector
+   style to paint). Tune the VOYAGER palette below to taste — colour tweaks are
+   one-line edits here. */
+const VOYAGER = {
+  land:     '#F5F0E7', /* warm cream land / background */
+  water:    '#A9C9D6', /* muted soft blue */
+  green:    '#D7E3C6', /* pale warm green parks/woods */
+  building: '#EBE2D2', /* warm beige, a touch darker than land */
+  road:     '#FEFCF8', /* warm near-white road fill */
+  roadCasing:'#E6DBC8',/* warm tan road casing/outline */
+  boundary: '#CBBEA8', /* warm grey-tan admin lines */
+  label:    '#6B6252', /* warm dark label text */
+  labelHalo:'#F6F1E9'  /* cream label halo */
+};
+function applyWarmBasemapTheme(ml){
+  if(!ml || !ml.getStyle || !ml.setPaintProperty) return;
+  let style;
+  try { style = ml.getStyle(); } catch(_){ return; }
+  if(!style || !Array.isArray(style.layers)) return;
+  const has = (id, ...words) => words.some(w => id.indexOf(w) !== -1);
+  const set = (id, prop, val) => { try { ml.setPaintProperty(id, prop, val); } catch(_){} };
+  for(const layer of style.layers){
+    const id = (layer.id || '').toLowerCase();
+    const type = layer.type;
+    if(type === 'background'){
+      set(id, 'background-color', VOYAGER.land);
+    } else if(type === 'fill'){
+      if(has(id,'water') && !has(id,'name'))      set(id,'fill-color',VOYAGER.water);
+      else if(has(id,'building'))                 set(id,'fill-color',VOYAGER.building);
+      else if(has(id,'park','wood','forest','grass','golf','cemetery','pitch','meadow','scrub','garden','recreation','nature'))
+                                                  set(id,'fill-color',VOYAGER.green);
+      else if(has(id,'landuse','landcover','residential','sand','rock','earth'))
+                                                  set(id,'fill-color',VOYAGER.land);
+    } else if(type === 'fill-extrusion'){
+      set(id,'fill-extrusion-color',VOYAGER.building);
+    } else if(type === 'line'){
+      if(has(id,'water','river','waterway'))      set(id,'line-color',VOYAGER.water);
+      else if(has(id,'boundary','admin'))         set(id,'line-color',VOYAGER.boundary);
+      else if(has(id,'casing','outline','_case')) set(id,'line-color',VOYAGER.roadCasing);
+      else if(has(id,'road','transportation','highway','street','motorway','trunk','primary','secondary','tertiary','bridge','tunnel','service','minor','path'))
+                                                  set(id,'line-color',VOYAGER.road);
+    } else if(type === 'symbol'){
+      set(id,'text-color',VOYAGER.label);
+      set(id,'text-halo-color',VOYAGER.labelHalo);
+    }
+  }
+}
+
 /* Tries real map tiles (real roads, real buildings) first. Some preview/sandbox
    environments block requests to non-cdnjs domains, which shows up as tiles
    silently failing to load — if enough of them error out, this falls back to
@@ -9250,7 +9308,13 @@ function addBaseLayer(map){
      just don't wire the error-fallback in that (rare) case. */
   try {
     const ml = gl.getMaplibreMap && gl.getMaplibreMap();
-    if(ml && ml.on){ ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); }); }
+    if(ml && ml.on){
+      ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); });
+      /* Warm-recolour positron toward the old Voyager look once the style loads,
+         and immediately if it's already loaded from a warm cache (2026.08.31a). */
+      try { if(ml.isStyleLoaded && ml.isStyleLoaded()) applyWarmBasemapTheme(ml); } catch(_){}
+      ml.on('load', () => applyWarmBasemapTheme(ml));
+    }
     /* PAN-SYNC CATCH-UP (2026.08.11e). Reported + reproduced from a device
        screenshot: zoom all the way out, then pan, and the map paints only PART of
        the viewport — a blank vertical band on one side, WITHIN the world (the
