@@ -3118,7 +3118,7 @@
         </p>
         <p class="credit-row">
           <strong>Map tiles</strong>
-          Vector tiles from <a class="credit-link" href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> © <a class="credit-link" href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a>, with <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'s standard tiles as the fallback. All built from OpenStreetMap data.
+          Vector tiles from <a class="credit-link" href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> © <a class="credit-link" href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a> on desktop, and retina map tiles from <a class="credit-link" href="https://stadiamaps.com/" target="_blank" rel="noopener noreferrer">Stadia Maps</a> © <a class="credit-link" href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a> on phones, with <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'s standard tiles as the keyless fallback. All built from OpenStreetMap data.
         </p>
         <p class="credit-row">
           <strong>Place search</strong>
@@ -7547,7 +7547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.31b';
+const APP_VERSION = '2026.08.31c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9243,27 +9243,61 @@ function addBaseLayer(map){
      (also de-CARTO'd on 2026.08.28) and does NOT route through here, so it keeps the
      raster band and is a separate fix. */
   function addRasterFallback(){
-    /* className warms these tiles toward the old Voyager look via a CSS filter
-       (see .nahgoo-warm-tiles in <style>). Scoped to THIS OSM.org raster layer —
-       iOS primary + the desktop raster fallback — so the stylized-grid fallback
-       (its own options) and the desktop positron vector map (recoloured in JS,
-       not a tile img) are untouched. 2026.08.31b. */
-    const TILE_OPTS = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80, className:'nahgoo-warm-tiles' };
-    const real = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', TILE_OPTS);
-    let errorCount = 0, fellBack = false;
-    real.on('tileerror', () => {
-      errorCount++;
-      if(errorCount >= 4 && !fellBack){
-        fellBack = true;
-        map.removeLayer(real);
-        /* Same options on the fallback grid so the stylized map matches the buffer
-           behaviour; it draws synchronously on canvas so it never showed the band,
-           but keeping the options identical avoids a future divergence. */
-        new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
-        showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
+    /* RASTER LADDER (2026.08.31c): Stadia Alidade Smooth (retina, sharp on hi-DPI
+       phones) → OSM.org standard (keyless) → stylized grid. This is the answer to
+       the iOS "blurry map" — OSM.org serves only 1x tiles, which upscale soft on a
+       Retina iPhone; Stadia serves @2x. Each rung falls to the next on a burst of
+       tile errors, so the map NEVER breaks:
+         · Stadia uses DOMAIN AUTH — no API key in this file. nahgoo.com must be
+           added in the Stadia dashboard (client → Authentication). Until it is,
+           Stadia 401s → we drop to OSM.org, so a deploy BEFORE registration just
+           shows today's map. If the key/domain is ever gated later, same fall —
+           this is the CARTO-proofing: a provider gate degrades, never breaks.
+         · {r} → @2x on Retina (Leaflet fills it when detectRetina is on).
+         · Only the OSM.org rung carries .nahgoo-warm-tiles (the warm CSS tint);
+           Stadia renders its own designed look, clean and already soft-warm.
+           If Alidade reads too cool vs. old Voyager, add the class to STADIA_OPTS —
+           one-line warmth, no re-architecture. */
+    const STADIA_OPTS = { maxZoom:20, keepBuffer:6, updateWhenIdle:false, updateInterval:80, detectRetina:true, crossOrigin:true };
+    const OSM_OPTS    = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80, className:'nahgoo-warm-tiles' };
+
+    function addStylizedGrid(){
+      /* Same options on the fallback grid so the stylized map matches the buffer
+         behaviour; it draws synchronously on canvas so it never showed the band,
+         but keeping the options identical avoids a future divergence. */
+      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
+      showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
+    }
+    function addOSM(){
+      const real = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', OSM_OPTS);
+      let errorCount = 0, fellBack = false;
+      real.on('tileerror', () => {
+        errorCount++;
+        if(errorCount >= 4 && !fellBack){
+          fellBack = true;
+          try { map.removeLayer(real); } catch(_){}
+          addStylizedGrid();
+        }
+      });
+      real.addTo(map);
+    }
+
+    /* PRIMARY: Stadia Alidade Smooth, retina. Falls to keyless OSM.org on an error
+       burst (unregistered domain, gated key, blocked network). */
+    let stadia;
+    try {
+      stadia = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', STADIA_OPTS);
+    } catch(_){ addOSM(); return; }
+    let sErr = 0, sFell = false;
+    stadia.on('tileerror', () => {
+      sErr++;
+      if(sErr >= 4 && !sFell){
+        sFell = true;
+        try { map.removeLayer(stadia); } catch(_){}
+        addOSM();
       }
     });
-    real.addTo(map);
+    stadia.addTo(map);
   }
 
   /* WebGL + binding availability. maplibregl.supported was REMOVED in maplibre-gl
