@@ -7547,7 +7547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.31d';
+const APP_VERSION = '2026.09.01a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13249,7 +13249,7 @@ function fillPinSheet(t){
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
        #23 decision (2) and #82's null submitted_by. */
     `${whatItis ? `<div class="ps-slot"><span class="ps-slot-label">What it is</span><p class="ps-desc">${escapeHtml(whatItis)}</p></div>` : ''}
-     ${t.desc ? (whatItis
+     ${t.desc ? ((whatItis || t.gemId) /* #315 — a gem's text is the TAKE, never the card's FACT. It is labelled "A local's take" whenever there is a resolved "What it is" ABOVE it (whatItis) OR the pin is a gem (t.gemId) — so a gem whose online "what it is" did not resolve shows its user text as a clearly-labelled take, NOT as a bare .ps-desc that reads as the factual line. Only a NON-gem plain pin (no gemId, no whatItis) shows t.desc bare, and there t.desc IS the online-resolved fact (maybeEnrichRealDesc / maybeResolveSpotDesc overwrite it). Blank fact + labelled take beats a user guess masquerading as fact (#101/#178). */
        ? `<div class="ps-slot"><span class="ps-slot-label">A local's take</span><p class="ps-desc">${escapeHtml(t.desc)}</p></div>`
        : `<p class="ps-desc">${escapeHtml(t.desc)}</p>`) : ''}
      ${t.by ? `<div class="ps-by">
