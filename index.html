@@ -7547,7 +7547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01d';
+const APP_VERSION = '2026.09.01e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12962,8 +12962,15 @@ function maybeEnrichWhatItis(t){
       // 2) #54 — no OSM twin: resolve the wiki "what it is" BY NAME server-side
       //    (Mr. Beef is famous, Wikipedia-documented, and simply not in OSM). The
       //    function verifies name + coordinate and returns text or null.
+      // #318 — this path only runs for a credited gem (guarded on t.by above), so
+      //    t.desc IS the submitter's stored writeup (#315 keeps it in the record but
+      //    never displays it). Forward it as `hint`: a descriptively-named gem
+      //    ("Dillinger died here") whose name can't match any article now resolves
+      //    by RECALL from its writeup (→ the Biograph Theater), still gated on the
+      //    pin's coordinate server-side. The val guard below already drops any
+      //    result equal to t.desc, so the user's own words can never surface.
       if(!wt){
-        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng, hint:t.desc } });
         const place = r2 && r2.data && r2.data.place;
         if(place && place.desc) wt = String(place.desc).trim();
       }
