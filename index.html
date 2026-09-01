@@ -75,6 +75,17 @@
            SAME line as the drawer's. Both sheets top out together and track this
            one number. */
     --sheet-max:calc(100vh - 150px - env(safe-area-inset-top));
+    /* MUST track #app's OWN height basis. #app is `height:100vh; height:100dvh`
+       (progressive enhancement — a dvh-aware browser uses the DYNAMIC viewport,
+       which SHRINKS when the iOS Safari address bar is showing; a browser with no
+       dvh support keeps the 100vh line above). --sheet-max was left on 100vh only,
+       so whenever the address bar was up (100vh > 100dvh by the bar's height) the
+       two content-sized sheets were capped against a viewport ~60-90px TALLER than
+       the app itself — they ate the 150px reserve and their tops climbed into the
+       map. The second declaration mirrors #app exactly, so both sheets and the app
+       are now measured against the SAME viewport. Keep the two lines paired: a
+       dvh-less browser discards this one and falls back to the 100vh line above. */
+    --sheet-max:calc(100dvh - 150px - env(safe-area-inset-top));
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -7547,7 +7558,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01e';
+const APP_VERSION = '2026.09.01f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
