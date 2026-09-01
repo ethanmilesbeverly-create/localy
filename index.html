@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01h';
+const APP_VERSION = '2026.09.01i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13258,15 +13258,23 @@ function fillPinSheet(t){
        • a SEED / OSM / real pin (no submitter): its t.desc, which is itself a
          SOURCED description (the #313 Wikipedia backfill, or maybeEnrichRealDesc /
          maybeResolveSpotDesc's resolved line) — shown, unchanged.
-     #154 fix — KEYED ON t.hasSubmitter (raw submitter PRESENCE), not t.by (the
-     resolved credit NAME). `by` goes undefined on a transient fetchGemCredits race
-     as well as on a genuine no-submitter pin, so keying the hide on `by` LEAKED a
-     user gem's typed take for the heartbeat before its name loaded (the observed
-     flip). `hasSubmitter` is stable across that race: a credited gem hides its take
-     even before its name resolves. (The credit LINE below still keys on t.by — it
-     should only render once a NAME exists.) Residual: an anonymised gem (#82 nulls
-     submitted_by) reads as no-submitter; that's the deferred account-deletion case. */
-  const factDesc = whatItis || (t.hasSubmitter ? '' : (t.desc || ''));
+     #154 fix — take-hiding is derived AUTHORITATIVELY from the canonical gem record
+     (state.approvedGems, looked up by gemId), NOT from the pin object's own flag.
+     The console proved the failure: a credited gem (canonical hasSubmitter=true) still
+     rendered its typed take, because a pin-BUILD path that doesn't thread hasSubmitter
+     produced the object this render used. Threading the flag through every build path
+     is unwinnable — there is always one more. Looking it up here, at the one render
+     point, makes the hide correct no matter which object arrived: a GEM (t.gemId) is a
+     user submission iff its canonical record has a submitter; only then is t.desc (the
+     take) suppressed. Seeds (canonical hasSubmitter=false) and non-gem pins keep
+     showing their SOURCED t.desc. Residual: an anonymised gem (#82 nulls submitted_by)
+     reads as no-submitter — the deferred account-deletion case. The credit LINE below
+     still keys on t.by (a NAME only renders once resolved). */
+  const _gemHasSubmitter = t.gemId
+    ? (state.approvedGems || []).some(g => g && g.id === t.gemId && g.hasSubmitter)
+    : false;
+  const _hasSubmitter = !!(t.hasSubmitter || _gemHasSubmitter);
+  const factDesc = whatItis || (_hasSubmitter ? '' : (t.desc || ''));
   const expandEl = document.getElementById('pin-sheet-expand');
   const expandHTML =
     /* #101 — render NO description block when there is no real description,
