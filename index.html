@@ -7547,7 +7547,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01b';
+const APP_VERSION = '2026.09.01c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13219,18 +13219,6 @@ function fillPinSheet(t){
   }
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   const whatItis = whatItisFor(t);
-  /* #315/#318 — the card shows ONE factual "what it is", ALWAYS sourced ONLINE, and
-     NEVER the user's submitted text. A gem's fact is the online-resolved `whatItis`
-     (Wikipedia via #54/resolveWiki today; the #318 cascade — Wikidata / OSM /
-     Google Places / curated — fills the blanks next). A gem's SUBMITTED TEXT
-     (`t.desc`) is no longer displayed at all: the "A local's take" slot is retired
-     by directive (cleaner, and it aligns a gem with #16 "a gem reads like any other
-     pin"); the user's words survive only as a HINT the resolver may use, not as
-     shown content. A NON-gem plain pin has no take — its `t.desc` IS the online-
-     resolved fact (`maybeEnrichRealDesc` / `maybeResolveSpotDesc` overwrite it), so
-     it renders bare. If nothing clears the #316 gate → factDesc is '' → BLANK, and
-     blank beats a user guess masquerading as fact (#101/#178). */
-  const factDesc = whatItis || (t.gemId ? '' : (t.desc || ''));
   const expandEl = document.getElementById('pin-sheet-expand');
   const expandHTML =
     /* #101 — render NO description block when there is no real description,
@@ -13260,7 +13248,10 @@ function fillPinSheet(t){
        layer reachable everywhere, not by making the other layer scarce.
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
        #23 decision (2) and #82's null submitted_by. */
-    `${factDesc ? `<p class="ps-desc">${escapeHtml(factDesc)}</p>` : ''}
+    `${whatItis ? `<div class="ps-slot"><span class="ps-slot-label">What it is</span><p class="ps-desc">${escapeHtml(whatItis)}</p></div>` : ''}
+     ${t.desc ? (t.by /* #315 — a CREDITED user submission's text is that person's TAKE, never the card's authoritative fact. Render it under the "A local's take" label whether or not an online "What it is" resolved above, so a gem whose name does not match a Wikipedia article (e.g. "Dillinger died here", "Site of the Great Chicago Fire") still shows the human writeup — clearly marked as a take, not as the sourced factual line. A pin with NO credit (t.by absent) is a SEED or an OSM/real pin whose t.desc is an ONLINE-sourced fact (the #313 Wikipedia backfill / maybeEnrichRealDesc / maybeResolveSpotDesc), so it renders BARE, unchanged. This keys on t.by (the resolved credit), NOT t.gemId, because SEEDS are gems too and their desc is sourced — gating on gemId would mislabel or blank the #313 seed descriptions. */
+       ? `<div class="ps-slot"><span class="ps-slot-label">A local's take</span><p class="ps-desc">${escapeHtml(t.desc)}</p></div>`
+       : `<p class="ps-desc">${escapeHtml(t.desc)}</p>`) : ''}
      ${t.by ? `<div class="ps-by">
        <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
        <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
