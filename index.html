@@ -4779,6 +4779,10 @@ function gemPoint(g, idPrefix, ctxCategory, extra){
        cost. Undefined on every scaffolded pin, and on any gem without a
        renderable name. */
     by:g.by,
+    // #154 fix — submitter-presence boolean (see nearbyApprovedGems). #315 keys
+    // its take-hiding on this, NOT on `by`, so a credit-name fetch race can't
+    // un-hide a user gem's typed take. Undefined→falsy on every scaffolded pin.
+    hasSubmitter:!!g.hasSubmitter,
     // #31/#225 — the vouch count carried onto the point for the pin sheet.
     seconds:g.seconds || 0
   }, extra||{});
@@ -7026,6 +7030,14 @@ async function loadApprovedGems(){
       // profile, a user who never set one, a failed lookup) lands here as
       // undefined and the sheet renders nothing at all.
       by: credits[r.submitted_by] || undefined,
+      // #154 fix — whether this gem HAS a submitter at all (a raw-uid presence
+      // boolean, never the uid itself, never rendered). #315's take-hiding must key
+      // on THIS, not on `by` (the resolved NAME), because `by` also goes undefined
+      // on a transient fetchGemCredits race — and keying the hide on `by` then
+      // leaks the user's typed take for a heartbeat until the name loads. A seed
+      // has no submitter (false → its sourced desc still shows); a user gem always
+      // has one (true → sourced-or-blank, never the take).
+      hasSubmitter: !!r.submitted_by,
       // #31/#225 — vouch count: how many OTHER people submitted this same place
       // (0 when none). Rendered only in the expanded sheet, only when >0 (#16).
       seconds: seconds[r.id] || 0
@@ -7558,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01g';
+const APP_VERSION = '2026.09.01h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13239,17 +13251,22 @@ function fillPinSheet(t){
   const whatItis = whatItisFor(t);
   /* #315 — the card shows ONE description and it is ALWAYS a sourced one, NEVER a
      user's typed take. `factDesc` resolves to:
-       • a CREDITED user submission (t.by present): the online-resolved wiki "what
-         it is" (`whatItis`) if it resolved, otherwise BLANK. The submitter's typed
-         text (t.desc) is NEVER shown — if the name did not resolve to a Wikipedia
-         article, the card is blank for now (a credible-source cascade fills these
-         next — #318).
-       • a SEED / OSM / real pin (no t.by): its t.desc, which is itself a SOURCED
-         description (the #313 Wikipedia backfill, or maybeEnrichRealDesc /
+       • a USER submission (t.hasSubmitter true): the online-resolved wiki "what it
+         is" (`whatItis`) if it resolved, otherwise BLANK. The submitter's typed
+         text (t.desc) is NEVER shown — if nothing sourced resolved, the card is
+         blank for now (the credible-source cascade fills these — #318).
+       • a SEED / OSM / real pin (no submitter): its t.desc, which is itself a
+         SOURCED description (the #313 Wikipedia backfill, or maybeEnrichRealDesc /
          maybeResolveSpotDesc's resolved line) — shown, unchanged.
-     Keyed on t.by (the resolved credit), NOT t.gemId: seeds are gems too and their
-     desc is sourced, so gating on gemId would wrongly blank the seed descriptions. */
-  const factDesc = whatItis || (t.by ? '' : (t.desc || ''));
+     #154 fix — KEYED ON t.hasSubmitter (raw submitter PRESENCE), not t.by (the
+     resolved credit NAME). `by` goes undefined on a transient fetchGemCredits race
+     as well as on a genuine no-submitter pin, so keying the hide on `by` LEAKED a
+     user gem's typed take for the heartbeat before its name loaded (the observed
+     flip). `hasSubmitter` is stable across that race: a credited gem hides its take
+     even before its name resolves. (The credit LINE below still keys on t.by — it
+     should only render once a NAME exists.) Residual: an anonymised gem (#82 nulls
+     submitted_by) reads as no-submitter; that's the deferred account-deletion case. */
+  const factDesc = whatItis || (t.hasSubmitter ? '' : (t.desc || ''));
   const expandEl = document.getElementById('pin-sheet-expand');
   const expandHTML =
     /* #101 — render NO description block when there is no real description,
