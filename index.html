@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01j';
+const APP_VERSION = '2026.09.01k';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12992,6 +12992,12 @@ function maybeEnrichWhatItis(t){
       //    by RECALL from its writeup (→ the Biograph Theater), still gated on the
       //    pin's coordinate server-side. The val guard below already drops any
       //    result equal to t.desc, so the user's own words can never surface.
+      // #318 FINAL RUNG ("B") — when NO wiki article resolves in any rung, the server
+      //    may instead return a neutral factual line GENERATED from the writeup (a
+      //    lore place no encyclopedia documents). It arrives here as an ordinary
+      //    place.desc and renders like any other line (operator: no label). The raw
+      //    take never surfaces — the model neutralises it, the server anti-launder
+      //    check + the val!==t.desc guard below both reject a mere reword.
       if(!wt){
         const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng, hint:t.desc } });
         const place = r2 && r2.data && r2.data.place;
@@ -13093,7 +13099,7 @@ function maybeResolveSpotDesc(t){
    osmDesc() lines (which would be a #155 two-copy of that function). An overwrite
    is therefore always an upgrade or a guarded no-op, never a downgrade of real
    text.
-   SCOPED to the facts categories (history/park/trail): a bar/restaurant/shop is
+   SCOPED to the facts categories (history/park/trail/art): a bar/restaurant/shop is
    #275's user-gen/backstop territory and effectively never has a Wikipedia
    article, so firing resolveWiki on every commercial pin the user opens is cost
    with no payoff. Documented, not silent — widen REAL_DESC_FACTS_CATS if a real
@@ -13123,7 +13129,13 @@ function maybeResolveSpotDesc(t){
    commercial seed's value is the recommendation, not a wiki fact). A seed that
    later GRADUATES (a human adds a take → gains t.by + a real desc) leaves this
    branch and is handled by maybeEnrichWhatItis, which layers facts ABOVE the take. */
-const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1 };
+const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1, art:1 };
+/* art ADDED — a #193 public-art pin (sculpture/mural/statue) was the one facts
+   category never wired into this by-name resolve, so a notable artwork (e.g. Cloud
+   Gate) stayed on osmDesc's "A public sculpture." even with a real article. Now it
+   resolves the same way park/trail/history do — a gate-passing article upgrades the
+   line, anything else keeps the osmDesc fallback (never a wrong line). Operator ask:
+   "for osm lets source wiki descriptions ... if none we leave that fallback." */
 function maybeEnrichRealDesc(t){
   if(!t || t._descEnriched || !t.name || t.by) return;
   // Plain browsed OSM pin, OR an uncredited seed with no take and no description
