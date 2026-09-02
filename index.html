@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01l';
+const APP_VERSION = '2026.09.01m';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13688,7 +13688,19 @@ function flyToStop(lat, lng){
   const zoom = map.getZoom();
   const pt = map.project([lat, lng], zoom);
   pt.y += 80;
-  map.flyTo(map.unproject(pt, zoom), zoom, { duration: 0.6 });
+  const target = map.unproject(pt, zoom);
+  /* #330 — was map.flyTo(target, zoom, {duration:0.6}). The zoom NEVER changes
+     here (target zoom = current zoom), so flyTo's parabolic zoom-pan easing did
+     nothing useful — and on the iOS native-raster basemap (#274) its per-frame
+     zoom interpolation against zoomSnap:0.25 + raster tile loading read as a
+     rapid shake-then-settle on EVERY menu tap. panTo is a pure translate (no
+     zoom animation) and is the smooth-pan idiom the rest of the app already
+     uses (the #9078-region regenerate/search pan) with no shake — the
+     differential (flyTo shakes, panTo doesn't, everywhere else) is what points
+     here. Same destination, same 80px sheet nudge, same ~0.4s glide. If a
+     residual shake survives even this, the next step is animate:false (instant)
+     — but that rules flyTo out, it doesn't patch it blind. */
+  map.panTo(target, { animate: true, duration: 0.4 });
 }
 function wirePinSheet(){
   const sheet = document.getElementById('pin-sheet');
