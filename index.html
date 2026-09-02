@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.02a';
+const APP_VERSION = '2026.09.02b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13146,13 +13146,36 @@ function maybeResolveSpotDesc(t){
    later GRADUATES (a human adds a take → gains t.by + a real desc) leaves this
    branch and is handled by maybeEnrichWhatItis, which layers facts ABOVE the take. */
 const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1, art:1 };
+/* #334 — how many facts pins get a NETWORK prewarm per marker rebuild. The free
+   tile-twin upgrade (step 1) runs for EVERY visible facts pin (zero network); this
+   caps only the by-name resolveWiki hop the #327 WATCH note flagged as the burst
+   risk for facts pins ("far more numerous" than gems — a dense metro view could
+   otherwise fire dozens of concurrent resolveWiki/Gemini calls, which 429 under
+   load — the seed-throttle lesson). The nearest ones are the ones a user walks up
+   to and opens; a pin beyond the cap still resolves on its own tap, exactly as
+   today. Tune this ONE number if description load ever stalls on paint. */
+const REAL_DESC_PREWARM_MAX = 12;
 /* art ADDED — a #193 public-art pin (sculpture/mural/statue) was the one facts
    category never wired into this by-name resolve, so a notable artwork (e.g. Cloud
    Gate) stayed on osmDesc's "A public sculpture." even with a real article. Now it
    resolves the same way park/trail/history do — a gate-passing article upgrades the
    line, anything else keeps the osmDesc fallback (never a wrong line). Operator ask:
    "for osm lets source wiki descriptions ... if none we leave that fallback." */
-function maybeEnrichRealDesc(t){
+function maybeEnrichRealDesc(t, prewarmBudget){
+  /* #334 — prewarmBudget is passed ONLY by the marker-render loop (the DISPLAY
+     moment), a mutable { n } shared across that pass's pins. When present, this call
+     is a PREWARM: the free tile-twin upgrade below still runs, but the NETWORK rung
+     is skipped once the budget is spent (bounds concurrent resolveWiki hops to
+     REAL_DESC_PREWARM_MAX per rebuild, regardless of pin mix). The ON-OPEN call from
+     fillPinSheet passes NO budget, so a tapped pin ALWAYS resolves — unchanged.
+     Prewarm-safety, the load-bearing bit: every write path below now applies t.desc /
+     the cached value UNCONDITIONALLY (an in-memory upgrade — the marker label reads
+     t.name, not t.desc, so it's invisible while unselected) and gates ONLY the
+     fillPinSheet re-render on selection. So warming an UNSELECTED pin leaves t.desc /
+     the cache holding the real line, and the later tap paints it on the FIRST frame —
+     no round-trip delay, no filler flash. (Setting _descEnriched without setting
+     t.desc — the pre-#334 step-1 shape — would have latched the pin blank forever
+     once prewarmed; that is why step 1 changed.) */
   if(!t || t._descEnriched || !t.name || t.by) return;
   // Plain browsed OSM pin, OR an uncredited seed with no take and no description
   // yet (a facts-category scaffold whose seed-resolve enrichment missed it).
@@ -13175,7 +13198,8 @@ function maybeEnrichRealDesc(t){
     const wt = String(best.desc).trim();
     if(wt && wt !== cur){
       t._descEnriched = true;
-      if(state.selectedPinId === t.id){ t.desc = wt; fillPinSheet(t); }
+      t.desc = wt; // apply in-memory always (prewarm-safe); the twin's own text only (#334)
+      if(state.selectedPinId === t.id) fillPinSheet(t);
       return; // upgraded from the loaded tile — no network needed
     }
   }
@@ -13184,8 +13208,21 @@ function maybeEnrichRealDesc(t){
   const key = t.id;
   if(key in cache){
     const v = cache[key];
-    if(v && state.selectedPinId === key && cur !== v){ t._descEnriched = true; t.desc = v; fillPinSheet(t); }
-    return;
+    // Apply a cached upgrade to THIS (possibly rebuilt) pin object unconditionally —
+    // a prewarm that ran earlier this session put the real line here, so the tap
+    // paints it immediately. A null (pending) or '' (resolved-empty) falls through.
+    if(v && cur !== v){
+      t._descEnriched = true; t.desc = v;
+      if(state.selectedPinId === key) fillPinSheet(t);
+    }
+    return; // no new fetch — cache hit never spends prewarm budget
+  }
+  // 2b) NETWORK — a genuinely uncached facts pin. On a PREWARM pass, spend from the
+  // shared budget so the display burst is bounded; the on-open call (no budget)
+  // always proceeds.
+  if(prewarmBudget){
+    if(prewarmBudget.n <= 0) return;
+    prewarmBudget.n--;
   }
   cache[key] = null; // pending — blocks a duplicate fetch while in flight
   (async () => {
@@ -13195,7 +13232,13 @@ function maybeEnrichRealDesc(t){
       const wt = (place && place.desc) ? String(place.desc).trim() : '';
       const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
       cache[key] = val;
-      if(val && state.selectedPinId === key){ t._descEnriched = true; t.desc = val; fillPinSheet(t); }
+      // Land the value in the cache (durable channel) and on the captured object;
+      // re-render only if it's still the selected pin. A prewarm that landed while
+      // unselected leaves the line ready for the tap via the cache-hit branch above.
+      if(val){
+        t._descEnriched = true; t.desc = val;
+        if(state.selectedPinId === key) fillPinSheet(t);
+      }
     }catch(e){
       delete cache[key]; // retry next open — a failed fetch is not "no desc"
       console.warn('[#54] plain-pin what-it-is resolve failed', (e && e.message) || e);
@@ -13390,10 +13433,10 @@ function fillPinSheet(t){
   // function is SELF-GATING (returns once t._descEnriched is set or its cache key exists),
   // so calling it every fillPinSheet is a fast no-op after the first resolve — no flash,
   // no re-fetch, no scroll jump (only a real desc change re-renders). No-op unless t is a
-  // facts-category OSM pin or empty seed. maybeEnrichWhatItis (gems) is already prewarmed
-  // from the marker loop (#327); OSM facts pins are deliberately NOT prewarmed, so this
-  // on-open call is their ONLY resolve trigger — which is exactly why the guard skip
-  // silently blanked them.
+  // facts-category OSM pin or empty seed. As of #334 facts pins ARE prewarmed from the
+  // marker loop too (bounded), so on a warm pin this on-open call is usually a cache HIT
+  // that paints on the first frame; it stays here as the resolve trigger for a pin beyond
+  // the prewarm cap, or one tapped before its background resolve returned.
   maybeEnrichRealDesc(t);
 }
 /* =========================================================
@@ -13905,6 +13948,11 @@ function refreshTargetsUI(){
   state.markersLayer.clearLayers();
   state.guideLayer.clearLayers();
 
+  // #334 — shared budget for the facts-pin NETWORK prewarm this rebuild (see the
+  // call inside the loop). Resets each rebuild; cached/already-enriched pins don't
+  // spend it, so after the first pass subsequent GPS-tick rebuilds cost ~0.
+  const _factsPrewarm = { n: REAL_DESC_PREWARM_MAX };
+
   targets.forEach((t, idx)=>{
     const color = colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
@@ -13967,9 +14015,26 @@ function refreshTargetsUI(){
        the burst is a handful today; WATCH as coverage grows (a dense metro view
        could fire N concurrent resolvers, each up to a cold-Overpass tile hop +
        a Gemini-backed resolveWiki that 429s under load), and cap to nearest-N if
-       load tanks. Only the credited-gem path is prewarmed; plain OSM/seed facts
-       pins (maybeEnrichRealDesc) are deliberately NOT, being far more numerous. */
+       load tanks. Plain OSM/seed facts pins (maybeEnrichRealDesc) are ALSO prewarmed
+       now (#334, the call below) but BOUNDED — free for a loaded twin, capped to
+       REAL_DESC_PREWARM_MAX network resolves per rebuild — because they are far more
+       numerous, the burst risk this note names. */
     if(t.isGem) maybeEnrichWhatItis(t);
+    /* #334 — PREWARM a plain OSM / empty-seed FACTS pin's Wikipedia "what it is" on
+       DISPLAY too, extending the #327 gem treatment to the facts categories
+       (art/park/trail/history) that #327 deliberately left out as "too numerous".
+       The delay opening an art pin was maybeEnrichRealDesc's ON-OPEN resolve (#331) —
+       a live resolveWiki hop landing AFTER the sheet was up. Kicking the SAME resolver
+       here, as the pin paints, warms state._realDescCache + t.desc while the pin is
+       UNSELECTED (the function's own selectedPinId gate keeps that write SILENT — no
+       fillPinSheet, no flicker), so the tap is a cache HIT and the line is on the
+       first frame. Self-gating (t.by / non-facts / already-enriched → instant no-op),
+       so this is harmless for gems (handled above) and commercial pins. BOUNDED by
+       _factsPrewarm: the free tile-twin upgrade runs for every visible facts pin, but
+       the network rung stops after REAL_DESC_PREWARM_MAX genuinely-uncached pins per
+       rebuild — the #327 WATCH lever, honoured. A pin beyond the cap still resolves on
+       its own tap, as before. */
+    maybeEnrichRealDesc(t, _factsPrewarm);
   });
   updatePinLabels();
 
