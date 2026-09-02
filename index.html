@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01m';
+const APP_VERSION = '2026.09.02a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13364,13 +13364,6 @@ function fillPinSheet(t){
     // and the not-in-tile case #26's twin-adoption doesn't cover). No-op unless t
     // is the carried shared-spot pin (real place, pre-twin-adoption).
     maybeResolveSpotDesc(t);
-    // #54 — a PLAIN browsed OSM pin, OR an uncredited seed with no take and an
-    // empty description (a facts-category scaffold seed-resolve missed, e.g. The
-    // 606), shows only filler / nothing; resolve its real Wikipedia/OSM "what it
-    // is" and fill the desc so facts appear everywhere, not just on gems. No-op
-    // unless t is a facts-category (history/park/trail) OSM pin or empty seed. Its
-    // result re-enters fillPinSheet with a changed body, re-rendering here.
-    maybeEnrichRealDesc(t);
     // Coords render instantly; the address swaps in if/when the lookup lands.
     // The copy payload has to swap with it, or a slow lookup leaves the row
     // showing a street address while copying raw coordinates.
@@ -13387,6 +13380,21 @@ function fillPinSheet(t){
       });
     }
   }
+  // #331 — resolve a PLAIN OSM/seed FACTS pin's real Wikipedia/OSM "what it is" and fill
+  // the desc so facts appear on browsed pins, not just gems (#54). This runs OUTSIDE the
+  // _pinFillSig guard above, unlike the other enrich calls, on purpose: a facts pin can
+  // arrive from a CACHED TILE already carrying its osmDesc filler, so its fill signature
+  // MATCHES a prior render and the guarded block is skipped on open — the by-name resolve
+  // then never fires and the pin sits on the OSM tag forever (A Signal of Peace stuck on
+  // "A statue by Cyrus Dallin." while its real article resolved fine server-side). The
+  // function is SELF-GATING (returns once t._descEnriched is set or its cache key exists),
+  // so calling it every fillPinSheet is a fast no-op after the first resolve — no flash,
+  // no re-fetch, no scroll jump (only a real desc change re-renders). No-op unless t is a
+  // facts-category OSM pin or empty seed. maybeEnrichWhatItis (gems) is already prewarmed
+  // from the marker loop (#327); OSM facts pins are deliberately NOT prewarmed, so this
+  // on-open call is their ONLY resolve trigger — which is exactly why the guard skip
+  // silently blanked them.
+  maybeEnrichRealDesc(t);
 }
 /* =========================================================
    #25 — REPORT A PIN
