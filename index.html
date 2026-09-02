@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01k';
+const APP_VERSION = '2026.09.01l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12936,6 +12936,22 @@ function _placeNameMatch(a, b){
 function whatItisFor(t){
   if(t && t.whatItis) return String(t.whatItis).trim();
   if(!t || !t.by || !t.name) return '';
+  /* #325 — a rebuilt pin object (currentTargetsSorted rebuilds pins every GPS
+     tick / every reopen) arrives with t.whatItis UNSET, even for a gem whose
+     line resolved on an earlier open or was prewarmed on display (#327). That
+     value is held in state._whatItisCache by pin id. Read it SYNCHRONOUSLY here
+     so the sourced line is present on the FIRST paint of a reopen — no blank
+     frame, and no reliance on maybeEnrichWhatItis's re-entrant second fillPinSheet
+     to clobber a blank render before the browser paints. Only a credited gem
+     (t.gemId, matching maybeEnrichWhatItis's scope) uses that cache; a null entry
+     is a still-pending fetch (fall through, stay blank until it lands) and a ''
+     is a resolved-empty (fall through to the local-tile scan below). A cached
+     non-empty value already passed the val!==t.desc anti-take guard where it was
+     written (#315/#323), so surfacing it here can never leak the typed take. */
+  if(t.gemId && state._whatItisCache && (t.id in state._whatItisCache)){
+    const c = state._whatItisCache[t.id];
+    if(c) return String(c).trim();
+  }
   const all = (state.realPlaces && state.realPlaces.all) || [];
   let best = null, bestD = Infinity;
   for(const r of all){
