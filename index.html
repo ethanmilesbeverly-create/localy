@@ -7570,7 +7570,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.01i';
+const APP_VERSION = '2026.09.01j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13902,6 +13902,26 @@ function refreshTargetsUI(){
        labels flickering on and off while you drag. */
     m._pinLabel = { id:t.id, name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx };
     m.on('click', ()=> openPinSheet(t));
+    /* #327 — PREWARM the "what it is" on DISPLAY, not on open. A credited gem's
+       description isn't stored (read-time, #23/#54); it resolves live via
+       maybeEnrichWhatItis (tile lookup → server resolveWiki), which historically
+       fired only from fillPinSheet on tap, so the text appended a beat AFTER the
+       sheet was already up. Kicking the SAME resolver here, as the pin renders,
+       lands the result in state._whatItisCache while the pin is unselected — the
+       function's `state.selectedPinId === key` gate makes that write SILENT (no
+       fillPinSheet, no flicker) — so by the time the user taps, fillPinSheet's
+       own maybeEnrichWhatItis call is a cache HIT and fills in the same synchronous
+       pass. maybeEnrichWhatItis self-gates (t.by + t.gemId + not-already-resolved
+       + cache-key-present), so this is a no-op for non-gems and a no-op on every
+       GPS-tick rebuild after the first fire for each gem — the per-pin cache is
+       what bounds it to ONE resolve per gem per session. SCOPE: all gems currently
+       on the map (currentTargetsSorted is radius-capped, ~25 pins), by directive —
+       the burst is a handful today; WATCH as coverage grows (a dense metro view
+       could fire N concurrent resolvers, each up to a cold-Overpass tile hop +
+       a Gemini-backed resolveWiki that 429s under load), and cap to nearest-N if
+       load tanks. Only the credited-gem path is prewarmed; plain OSM/seed facts
+       pins (maybeEnrichRealDesc) are deliberately NOT, being far more numerous. */
+    if(t.isGem) maybeEnrichWhatItis(t);
   });
   updatePinLabels();
 
