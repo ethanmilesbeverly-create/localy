@@ -7571,7 +7571,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.08a';
+const APP_VERSION = '2026.09.08b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13675,8 +13675,12 @@ function openPinSheet(t){
   if(drawer && !drawer.classList.contains('collapsed')) toggleDrawer();
   fillPinSheet(t);
   // The body-rebuild guard in fillPinSheet skips re-rendering when reopening the
-  // same pin with unchanged content, so scroll can survive a close/reopen. A
-  // fresh open should always start at the top.
+  // same pin with unchanged content, so scroll can survive a close/reopen. The
+  // authoritative reset now lives in closePinSheet(), which writes scrollTop=0
+  // while #pin-sheet-expand is still a live scroll container (.expanded /
+  // overflow-y:auto). This write is a harmless backstop and is a no-op here,
+  // because the sheet opens COLLAPSED (max-height:0/overflow:hidden) where
+  // scrollTop cannot be set.
   const expandEl = document.getElementById('pin-sheet-expand');
   if(expandEl) expandEl.scrollTop = 0;
   const sheet = document.getElementById('pin-sheet');
@@ -13691,6 +13695,15 @@ function openPinSheet(t){
 function closePinSheet(){
   const sheet = document.getElementById('pin-sheet');
   if(!sheet) return;
+  // Reset the body scroll BEFORE dropping .expanded. #pin-sheet-expand is only a
+  // scroll container while .expanded is set (overflow-y:auto); once collapsed it is
+  // max-height:0/overflow:hidden, so a scrollTop write there is a no-op and the
+  // browser retains the old offset — which then reappears the next time the sheet
+  // expands. Committing scrollTop=0 here, while the element is still scrollable,
+  // is what makes the sheet always reopen at the top. (openPinSheet's reset runs
+  // while the sheet is collapsed and so cannot do this.)
+  const expandEl = document.getElementById('pin-sheet-expand');
+  if(expandEl) expandEl.scrollTop = 0;
   sheet.classList.remove('open','expanded');
   sheet.setAttribute('aria-hidden','true');
   document.getElementById('screen-map').classList.remove('sheet-open');
@@ -13864,12 +13877,17 @@ function scheduleLabelUpdate(){
    map stays clean. A zoom LEVEL (not a distance), so it lives here rather than in
    the #65 distance register. The map's default frame sits around zoom 13, so 15.5
    is roughly "a few blocks in" — raise it to reveal names later, lower it to
-   reveal them sooner. Was 16, then 15.5; dropped again to 15.0 (#270) because the
-   expanded pill reads as valuable enough to show a touch sooner when zoomed out —
-   half a level more, deliberately not a full one (a full level roughly doubles the
-   map area shown before any name appears, which crowds). Above the floor, the
-   collision pass still decides which fit. */
-const MIN_LABEL_ZOOM = 15.0;
+   reveal them sooner. Was 16, then 15.5; dropped to 15.0 (#270) because the
+   expanded pill reads as valuable enough to show a touch sooner when zoomed out.
+   DROPPED AGAIN 15.0 -> 14.0 (2026.09.08b) to restore the reveal DEPTH after the
+   #304/#305 basemap swap: Leaflet's zoom numbering did not change (Stadia @2x is a
+   URL suffix, NOT detectRetina's zoom-offset — see the tile block), but the retina
+   Stadia / positron-vector basemap makes a given zoom level READ as more zoomed-out
+   than the old CARTO raster did, so names that used to appear "a few blocks in" now
+   demanded a visibly deeper zoom. 14.0 is a full level earlier than 15.0 — it puts
+   the reveal back where it sat before the swap. If this now crowds, 14.5 is the
+   intermediate; the collision pass above still decides which names actually fit. */
+const MIN_LABEL_ZOOM = 14.0;
 /* #270 — set a pill's label reveal r in [0,1]: 0 = collapsed to the glyph (a
    round pin), 1 = fully unfurled. A partway r clips the name, which reads as the
    label sliding open. The arrow and glyph never move; only the name span animates. */
