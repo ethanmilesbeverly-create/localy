@@ -1305,18 +1305,19 @@
   }
   .ps-by-name{color:var(--text);font-weight:600;}
   .ps-by-icon{width:13px;height:13px;flex:0 0 13px;opacity:.75;}
-  /* #31/#74 — "+N others also submitted", the vouch count. Renders whenever
-     t.seconds>0 — a vouch is a property of the PLACE (#162), so it shows even
-     when the canonical (oldest-wins) submitter has no rendered credit, which is
-     the common case for a folded pair. When a credit line precedes it, the
-     negative top margin tucks it under the credit and the 20px indent aligns it
-     under the credit TEXT (past the 13px icon + 7px gap); standalone it sits
-     just under the take as a dim footnote. A pin with no vouch is byte-identical
-     to before — the #16 seam still only ever appears inside the expanded sheet,
-     never on the pin or peek row. */
+  /* #31/#74 — "+N others also submitted", the vouch count. As of #301 the vouch
+     is FOLDED onto the `.ps-by` credit line ("Submitted by <name> + N others")
+     whenever a credit renders, so this standalone line now appears ONLY in the
+     no-credit case: a canonical (oldest-wins) submitter with no rendered name but
+     with other vouchers — the folded-pair case #31/#74 named, where the vouch is a
+     property of the PLACE (#162) and must still show. Because it is now always
+     standalone (never tucked under a credit above it), the former -9px tuck and
+     20px indent are gone; it sits on its own as a dim footnote. A pin with no vouch
+     is byte-identical to before — the #16 seam still only ever appears inside the
+     expanded sheet, never on the pin or peek row. */
   .ps-seconds{
     font-size:12px; line-height:1.4; color:var(--text-dim);
-    margin:-9px 0 13px; padding-left:20px;
+    margin:0 0 13px;
   }
   /* #61(b) — padding-bottom lives HERE as well as on #pin-sheet, and the reason
      is not redundancy. #pin-sheet.expanded #pin-sheet-expand is
@@ -7570,7 +7571,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.02b';
+const APP_VERSION = '2026.09.08a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13374,13 +13375,18 @@ function fillPinSheet(t){
        scaffolded pin can carry one too; the seam closes by making the human
        layer reachable everywhere, not by making the other layer scarce.
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
-       #23 decision (2) and #82's null submitted_by. */
+       #23 decision (2) and #82's null submitted_by.
+       #301 — the vouch count (#31/#74) is now folded ONTO this one credit line as
+       "Submitted by <name> + N other/others" instead of a second line below. The
+       standalone `.ps-seconds` line survives ONLY for the no-credit folded-pair
+       case (a canonical submitter with no rendered name but with other vouchers),
+       so that vouch signal is not lost. When #301's seed "Anonymous" lead lands,
+       a seed's canonical becomes a rendered lead and that case largely disappears. */
     `${factDesc ? `<p class="ps-desc">${escapeHtml(factDesc)}</p>` : ''}
      ${t.by ? `<div class="ps-by">
        <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-       <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
-     </div>` : ''}
-     ${(t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
+       <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span>${t.seconds > 0 ? ` + ${t.seconds} ${t.seconds === 1 ? 'other' : 'others'}` : ''}</span>
+     </div>` : ((t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : '')}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
   /* fillPinSheet re-runs on EVERY GPS tick (refreshTargetsUI, to keep the live
