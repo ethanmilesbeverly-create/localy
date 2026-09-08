@@ -7571,7 +7571,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.08b';
+const APP_VERSION = '2026.09.08c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13676,11 +13676,11 @@ function openPinSheet(t){
   fillPinSheet(t);
   // The body-rebuild guard in fillPinSheet skips re-rendering when reopening the
   // same pin with unchanged content, so scroll can survive a close/reopen. The
-  // authoritative reset now lives in closePinSheet(), which writes scrollTop=0
-  // while #pin-sheet-expand is still a live scroll container (.expanded /
-  // overflow-y:auto). This write is a harmless backstop and is a no-op here,
-  // because the sheet opens COLLAPSED (max-height:0/overflow:hidden) where
-  // scrollTop cannot be set.
+  // authoritative reset lives in expandPinSheet()/togglePinSheetExpand() — the
+  // instant .expanded is added is the only moment #pin-sheet-expand is a live
+  // scroll container, so that is where scrollTop can actually be zeroed. This
+  // write is a harmless no-op here (the sheet opens COLLAPSED —
+  // max-height:0/overflow:hidden — where scrollTop cannot be set).
   const expandEl = document.getElementById('pin-sheet-expand');
   if(expandEl) expandEl.scrollTop = 0;
   const sheet = document.getElementById('pin-sheet');
@@ -13695,15 +13695,6 @@ function openPinSheet(t){
 function closePinSheet(){
   const sheet = document.getElementById('pin-sheet');
   if(!sheet) return;
-  // Reset the body scroll BEFORE dropping .expanded. #pin-sheet-expand is only a
-  // scroll container while .expanded is set (overflow-y:auto); once collapsed it is
-  // max-height:0/overflow:hidden, so a scrollTop write there is a no-op and the
-  // browser retains the old offset — which then reappears the next time the sheet
-  // expands. Committing scrollTop=0 here, while the element is still scrollable,
-  // is what makes the sheet always reopen at the top. (openPinSheet's reset runs
-  // while the sheet is collapsed and so cannot do this.)
-  const expandEl = document.getElementById('pin-sheet-expand');
-  if(expandEl) expandEl.scrollTop = 0;
   sheet.classList.remove('open','expanded');
   sheet.setAttribute('aria-hidden','true');
   document.getElementById('screen-map').classList.remove('sheet-open');
@@ -13726,9 +13717,24 @@ function closePinSheet(){
   refreshTargetsUI();
   refreshTrackUI();
 }
-function expandPinSheet(){ document.getElementById('pin-sheet').classList.add('expanded'); }
+/* The body always opens at the top. #pin-sheet-expand only becomes a scroll
+   container the instant .expanded is added (overflow-y:auto); collapsed it is
+   max-height:0/overflow:hidden, so a scrollTop write anywhere else is a no-op and
+   the browser keeps the last offset, which then reappears on the next expand. The
+   swipe-down detent (wirePinSheet) removes .expanded via collapsePinSheet() BEFORE
+   closePinSheet() ever runs, so a close-time reset lands on an already-collapsed,
+   non-scrollable body — which is why the reset must fire HERE, at expand time,
+   where it is path-independent. */
+function resetPinSheetScroll(){
+  const expandEl = document.getElementById('pin-sheet-expand');
+  if(expandEl) expandEl.scrollTop = 0;
+}
+function expandPinSheet(){ document.getElementById('pin-sheet').classList.add('expanded'); resetPinSheetScroll(); }
 function collapsePinSheet(){ document.getElementById('pin-sheet').classList.remove('expanded'); }
-function togglePinSheetExpand(){ document.getElementById('pin-sheet').classList.toggle('expanded'); }
+function togglePinSheetExpand(){
+  const nowExpanded = document.getElementById('pin-sheet').classList.toggle('expanded');
+  if(nowExpanded) resetPinSheetScroll();   // toggled OPEN → start at top; toggled closed → leave as-is
+}
 function captureFromSheet(){
   // ORDER IS LOAD-BEARING as of the clear above: this used to set the focus and
   // then call closePinSheet(), which now wipes it. Close first, then focus.
