@@ -7083,34 +7083,53 @@ async function fetchGemSeconds(ids){
 }
 async function loadApprovedGems(){
   try{
-    const { data, error } = await sb
-      .from('submissions')
-      /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
-         only to look a display name up. A null here is a real and reachable
-         value the moment #82 is live (account deletion anonymises gems by
-         nulling this column), and it must render NO credit line — never
-         "Submitted by Unknown". See #124. */
-      .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
-      .eq('status', 'approved')
-      /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
-         makes the whole thing work: a merged submission keeps a REAL status
-         (it mirrors the pin it was folded into), so without this filter an
-         approved duplicate would render as a second pin at the same spot —
-         precisely the defect the feature exists to remove.
+    /* #346 — PAGINATE PAST THE 1,000-ROW REST CAP. PostgREST returns at most
+       1,000 rows per response (the same cap graves-resolve.ts pages past, #338).
+       This read was a single unpaginated select, so once the approved + unmerged
+       submission set crossed 1,000 rows (the grave-seed rollout #310/#335/#338
+       pushed it there), it silently loaded only the FIRST 1,000 gems/seeds and
+       DROPPED the rest — human-submitted gems past the cutoff never entered
+       state.approvedGems and so could never blend, paint, or be captured, even
+       though the backend served them fine. We now page until a short page ends
+       it, ORDERED BY id (a stable, unique total order — REQUIRED, or PostgREST
+       range pagination can skip or duplicate rows across page boundaries). */
+    const GEM_PAGE = 1000;
+    const rows = [];
+    for(let from = 0; ; from += GEM_PAGE){
+      const { data, error } = await sb
+        .from('submissions')
+        /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
+           only to look a display name up. A null here is a real and reachable
+           value the moment #82 is live (account deletion anonymises gems by
+           nulling this column), and it must render NO credit line — never
+           "Submitted by Unknown". See #124. */
+        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
+        .eq('status', 'approved')
+        /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
+           makes the whole thing work: a merged submission keeps a REAL status
+           (it mirrors the pin it was folded into), so without this filter an
+           approved duplicate would render as a second pin at the same spot —
+           precisely the defect the feature exists to remove.
 
-         `merged_into IS NULL` is the single discriminator. Any future consumer
-         that must not double-count submissions filters on it: a leaderboard, a
-         contributor count, app-report's by_status totals (which DO currently
-         count merged rows inside their mirrored status — noted, not fixed
-         here, since that function is not in this repo). */
-      .is('merged_into', null);
-    if(error) throw error;
+           `merged_into IS NULL` is the single discriminator. Any future consumer
+           that must not double-count submissions filters on it: a leaderboard, a
+           contributor count, app-report's by_status totals (which DO currently
+           count merged rows inside their mirrored status — noted, not fixed
+           here, since that function is not in this repo). */
+        .is('merged_into', null)
+        .order('id', { ascending: true })
+        .range(from, from + GEM_PAGE - 1);
+      if(error) throw error;
+      const page = data || [];
+      for(const r of page) rows.push(r);
+      if(page.length < GEM_PAGE) break;   // a short (or empty) page is the last one
+    }
     // #12 display: prefer the mechanics-only cleaned text for what the map
     // SHOWS, falling back to the raw words when there is no clean value (the
     // guard discarded it, or nothing needed fixing). The raw name/description
     // stay canonical in the DB and are never overwritten — this is a display
     // preference only, so reverting this map restores the raw text everywhere.
-    const rows = data || [];
+    // (rows now holds the FULL approved+unmerged set, not a capped 1,000.)
     // #23 — one extra round trip for the whole map, not one per pin.
     const credits = await fetchGemCredits(rows.map(r=>r.submitted_by));
     // #31/#225 — a second round trip for the whole map: the vouch count per
@@ -7665,7 +7684,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.08h';
+const APP_VERSION = '2026.09.09a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
