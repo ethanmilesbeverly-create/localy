@@ -7665,7 +7665,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.08g';
+const APP_VERSION = '2026.09.08h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10325,27 +10325,21 @@ function recenterMap(){
     if(state.me) regenerateCurrentHuntAt(state.me);
     return; // regenerate -> setCurrentHunt already recenters
   }
-  // #60 kept your zoom on EVERY plain press so a street-level look survived a
-  // recenter — but zooming OUT and then pressing locate left you stranded wide,
-  // panning to you without ever bringing you home. #174 makes the default frame
-  // a CEILING on how wide this button leaves you, resolving both directions:
-  //   - currently WIDER than the default frame -> reframe (zoom back in);
-  //   - currently AT or TIGHTER than default   -> keep your zoom (still #60), so
-  //     zooming into a block and tapping locate does not yank you out to the
-  //     overview — the exact case #60 was protecting.
-  // Compared against defaultFrameZoom() — the same number centerOnPlayer would
-  // pick — so the threshold and the destination can never disagree. The map is
-  // already visible and sized here (the user is looking at it and just tapped a
-  // button on it), so the synchronous getBoundsZoom inside defaultFrameZoom is
-  // reliable WITHOUT the invalidateSize/rAF dance centerOnPlayer needs on a
-  // container that may have only just been shown.
-  const curZoom = state.leafletMap.getZoom();
-  const defZoom = defaultFrameZoom(state.me);
-  if(Number.isFinite(curZoom) && Number.isFinite(defZoom) && curZoom < defZoom){
-    centerOnPlayer();                 // wider than default -> re-frame and zoom in
-  }else{
-    centerOnPlayer({keepZoom:true});  // at/tighter than default -> just recenter, keep zoom
-  }
+  // #343 — locate ALWAYS returns to the default view with the user centered.
+  // GRAVESTONE (#60/#174, reversed by directive 2026-09-08): this button used to
+  // KEEP your zoom whenever you were AT or TIGHTER than the default frame (#60,
+  // capped by #174 so it only reframed when you were zoomed OUT wider than
+  // default). That keep-zoom-as-ceiling behaviour is removed: the button now
+  // reframes to defaultFrameZoom() on every plain press, regardless of current
+  // zoom — "return to the default view, centered on me," which is how it read
+  // before the keep-zoom arm existed. The felt trigger for re-deciding this was
+  // the #304/#341 basemap swap (the vector/retina map reads more zoomed-out at a
+  // given level, so the keep-zoom arm fired far more often and locate stopped
+  // feeling like it went home). Note the zoom-comparison (curZoom vs defZoom)
+  // and its keep-zoom call are GONE: no live caller passes {keepZoom:true} now,
+  // so centerOnPlayer's keepZoom arm is dormant (kept as a capability, its
+  // comment updated so it doesn't claim a caller it no longer has).
+  centerOnPlayer();
 }
 function toggleTilt(){
   state.is3D = !state.is3D;
@@ -10638,12 +10632,12 @@ function centerOnPlayer(opts){
      different behaviour, and the flag's is the one #8/#184 want. */
   const center = state.browsingLocation || state.searchedArea || state.me;
   if(!center) return;
-  /* #60 — position and zoom are two different requests, and this button used to
-     answer both: zoom into a block, press locate, and you got your position back
-     at the cost of the zoom you chose. Keep-zoom is passed ONLY from
-     recenterMap()'s plain local branch — and since #174, only its tighter-than-
-     default arm; when the user is wider than the default frame that branch calls
-     centerOnPlayer() with no opts so the reframe below runs instead.
+  /* #60 — position and zoom are two different requests, and this arm answers
+     "recenter WITHOUT reframing" (panTo only, keep the caller's zoom). As of
+     #343 (2026-09-08) NO live caller passes {keepZoom:true}: recenterMap() was
+     the only one, and it now always reframes to the default view. This branch is
+     kept as a dormant capability (a future "recenter but hold my zoom" affordance
+     can reuse it) — do NOT assume recenterMap still routes here.
      Three things are deliberately skipped on this path, and the last is the trap:
        - the zoom computation: there is no zoom to compute, so panTo is enough
          and is smoother than setView;
