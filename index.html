@@ -2437,25 +2437,41 @@
         <div class="icon-wrap"></div>
         <div><h3>Bars &amp; Restaurants</h3><p>Notable spots with a story.</p></div>
       </div>
-      <!-- #192 — HISTORY AND LORE MERGED INTO ONE CARD. Formerly two cards
-           (History / Lore & Legends) split on the "landmark vs. something-happened"
-           line (#13/#15/#162). Merged because at current scale a standalone Lore
-           tab is near-empty, and the merged bucket reads cleanly as "places with a
-           past". data-cat stays 'history' so all existing history routing
-           (startHistoryHunt, history_v1, buildPointsForKey's history_ arm, ATL,
-           the route guard) is reused unchanged; the former-lore gems are migrated
-           to category 'history' in the DB so they surface here. 'lore' is retired
-           as a stored value — see the migration in this pass's notes. -->
-      <div class="mode-card" data-cat="history" onclick="selectExplore('history')">
-        <div class="icon-wrap"></div>
-        <div><h3>History &amp; Lore</h3><p>Landmarks and where things happened.</p></div>
-      </div>
       <!-- #193 — Art: public art split out of History (murals, sculptures,
            statues, installations). Scaffolds from OSM tourism=artwork, so unlike
            the old Lore tab it is not empty by design. -->
       <div class="mode-card" data-cat="art" onclick="selectExplore('art')">
         <div class="icon-wrap"></div>
         <div><h3>Art &amp; Statues</h3><p>Murals, sculptures, and public art.</p></div>
+      </div>
+      <!-- #80 pass 2 — THE HISTORY & LORE CARD IS REMOVED AND ITS PINS PARTITIONED
+           ACROSS THREE KIND CARDS. Under the pivot (#308) EVERY pin earns its map
+           spot from a story, so "History & Lore" as its own card was redundant —
+           it was the axis the whole map already lives on. Its content (all
+           category:'history' pins) is now split, WITHOUT LOSS, by the KIND facet
+           (historyKindFacet): graves/memorials → Graves & Memorials, museums →
+           Museums, everything else (historic sites, plaques, attractions, history
+           gems, history wiki pins) → Lore. The facet is total, so removing the
+           History card strands nothing. startHistoryHunt / history_v1 / the
+           history_ blend arm / the regenerate arm all STAY (legacy history_v1
+           captures + All Things Local still read them); only the CARD is gone. -->
+      <div class="mode-card" data-cat="graves_memorials" onclick="selectExplore('graves_memorials')">
+        <div class="icon-wrap"></div>
+        <div><h3>Graves &amp; Memorials</h3><p>Notable resting places.</p></div>
+      </div>
+      <div class="mode-card" data-cat="museums" onclick="selectExplore('museums')">
+        <div class="icon-wrap"></div>
+        <div><h3>Museums</h3><p>Collections worth a visit.</p></div>
+      </div>
+      <!-- #80 pass 2 — "Lore" is the STORY RESIDUAL: history-family pins with no
+           distinct kind (historic sites, plaques, alleys, the type=historic/
+           attraction/null bucket, history gems, history wiki pins). Internally
+           keyed 'lorespots_' / mode 'lorespots', DELIBERATELY NOT the legacy
+           'lore' key/mode/category — that legacy value (#192-retired "Lore &
+           Legends") still exists for old lore_v1 captures and must not collide. -->
+      <div class="mode-card" data-cat="lorespots" onclick="selectExplore('lorespots')">
+        <div class="icon-wrap"></div>
+        <div><h3>Lore</h3><p>Plaques, sites, and stories.</p></div>
       </div>
     </div>
 
@@ -4388,7 +4404,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
    longer be either — gemDisplayCategory has never returned it since #16, and
    startHiddenGemsHunt was the last thing that set mode:'gems'. 'discover' went
    with startDiscoverHunt. 'discoverlocal' is All Things Local and stays. */
-const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. */
+const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F', graves:'#7C8B9A', museums:'#B5563C', lorespots:'#B08D57' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. #80 pass 2 — graves/museums/lorespots are the new kind-card hunt modes; graves stone, museums sienna, lorespots gold (= history, the residual). These set the hunt DEFAULT colour, but grave/museum PINS carry category:'history' so colorFor still paints them gold on the map today — facet pin-recolour is the deferred Build-3 half. */
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 /* #103 — startBuiltinHunt() (the tourist-route STARTER) was deleted 2026-08-04;
@@ -5949,6 +5965,49 @@ function dedupePoints(points){
   return out;
 }
 
+/* #80 pass 2 — THE KIND FACET for the History & Lore family, and the single
+   place the graves-are-gems gap is handled. The `type` (place-KIND) axis added
+   in pass 1 exists ONLY on OSM real places (typeOsm); GEMS carry no type —
+   including the #310 notable graves, loaded as `submissions` named
+   "Grave of <person>", category 'history'. So a pure type filter would route
+   every seed grave into Lore and leave Graves & Memorials near-empty (the
+   #16/#193 empty-card trap). The NAME test ("Grave of ") catches the gem graves
+   the type field misses; OSM tombs/memorials match on type; museums are OSM
+   (type 'museum'); everything else in the history family is the Lore residual.
+   Returns exactly one of 'graves' | 'museums' | 'lore' — the facet is TOTAL, so
+   removing the History card lost nothing. */
+function historyKindFacet(p){
+  const ty = p && p.type;
+  const nm = (p && p.name) || '';
+  if(ty === 'grave' || ty === 'memorial' || /^grave of /i.test(nm)) return 'graves';
+  if(ty === 'museum') return 'museums';
+  return 'lore';
+}
+/* #80 pass 2 — build one of the three history-family kind cards. This is a
+   FILTER over the SAME history blend the old History & Lore card used, NOT a new
+   fetch: it pulls history gems (incl. seed graves) + real internet history
+   places through the existing readers, so the #294 source toggle (word-of-mouth
+   withholds real OSM), the #65 radius, and gem/real precedence all behave
+   identically to every other card. Only pins whose facet matches are kept,
+   nearest-first, deduped by name (the blendCategory contract). */
+function blendHistoryFacet(base, facet, targetCount){
+  const out = [];
+  const used = new Set();
+  const push = p => { const k=normName(p.name); if(k && used.has(k)) return; if(k) used.add(k); out.push(p); };
+  // 1) history gems (user submissions + the #310 seed graves), facet-filtered on the raw gem (which carries .name)
+  nearbyApprovedGems(base, [], targetCount*3, 'history').forEach(g=>{
+    if(historyKindFacet(g) !== facet) return;
+    push(gemToPoint(g, 'history'));
+  });
+  // 2) real internet history places (OSM tombs/museums/historic), facet-filtered on the real place (which carries .type)
+  if(out.length < targetCount*3){
+    nearbyRealPlaces(base, 'history', targetCount*3).forEach(rp=>{
+      if(historyKindFacet(rp) !== facet) return;
+      push({...rp, category:'history'});
+    });
+  }
+  return out.slice(0, targetCount);
+}
 function buildPointsForKey(key, base){
   /* #111 — the third multi-blend branch, and the only one #107 left unwrapped.
      buildAllThingsLocal() dedupes by NAME via its own `seen` set, which is why
@@ -5984,6 +6043,14 @@ function buildPointsForKey(key, base){
   ]);
   if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
   if(key.startsWith('art_'))        return blendCategory(base,'art',8,()=>[],'art'); // #193 — art gems + real OSM artwork; no procedural filler (none exists for art)
+  /* #80 pass 2 — the three kind cards that partition the history family. Each is
+     a facet FILTER over the same history blend (see blendHistoryFacet); no new
+     fetch, no procedural filler. Higher targets than history's 8 because graves
+     cluster densely in a cemetery (#245 label-collision + the list cap handle
+     on-screen clutter). */
+  if(key.startsWith('gravesmem_'))  return blendHistoryFacet(base, 'graves', 40);
+  if(key.startsWith('museums_'))    return blendHistoryFacet(base, 'museums', 20);
+  if(key.startsWith('lorespots_'))  return blendHistoryFacet(base, 'lore', 40);
   // No blendCategory here on purpose: blending would let OSM/Wikipedia places
   // leak into a tab whose entire premise is that everything in it is human.
   /* #149 — was gemPoint(g,'lore'), which minted lore<gemId> while every blend
@@ -6406,6 +6473,10 @@ async function loadKey(key, apply, fallback){
 const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
   'restaurants','barsrest','history','gems','lore','stateparks','nationalparks',
   'trails','discover','random',
+  'gravesmem','museums','lorespots', /* #80 pass 2 — the three kind cards are
+    auto-generated location hunts, so their captures inject back via #40b and
+    reconcile via #147; each MUST also get a CAPTURED_MODE_ACCEPT entry below or
+    capturedModeFilterFor defaults to accept-all and paints foreign captures. */
   'art' /* #229 — Art (#193) was missed here. Without it art_v1 is not a shared
            key, so isFound() takes the single-bucket branch on the Art card and a
            place captured under All Things Local reads as un-captured there; it
@@ -6493,6 +6564,16 @@ const CAPTURED_MODE_ACCEPT = {
   barsrest:      ['bars','restaurants','barsrest'],
   history:       ['history'],
   lore:          ['lore'],
+  /* #80 pass 2 — the three kind cards accept ONLY their own capture mode (the
+     #229 conservative rule: capturedModeFilterFor defaults to accept-all when a
+     key is absent, which would paint foreign history captures onto these cards).
+     These are NEW cards so there are no legacy captures under them; a grave
+     captured from All Things Local (mode null) or the retired History card
+     (mode 'history') won't re-inject here, but it still shows whenever the facet
+     blend re-produces it — acceptable, and it keeps each card clean. */
+  gravesmem:     ['graves'],
+  museums:       ['museums'],
+  lorespots:     ['lorespots'],
   art:           ['art']  /* #229 — restore ONLY art captures onto the Art card
                              (the #147 category-promise rule). Load-bearing now that
                              'art' is a shared prefix: capturedModeFilterFor defaults
@@ -7584,7 +7665,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.08f';
+const APP_VERSION = '2026.09.08g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9768,6 +9849,9 @@ function regenerateCurrentHuntAt(base){
   else if(key.startsWith('barsrest_')) startBarsAndRestaurantsHunt(base);
   else if(key.startsWith('history_')) startHistoryHunt(base);
   else if(key.startsWith('art_')) startArtHunt(base); // #193/#183 — art is location-based; without this arm it falls to the fixed-guide else and gets "spots are fixed"
+  else if(key.startsWith('gravesmem_')) startGravesHunt(base); // #80 pass 2 — location-based facet card; needs its own regenerate arm or Search-this-area falls to the fixed-guide else
+  else if(key.startsWith('museums_')) startMuseumsHunt(base); // #80 pass 2
+  else if(key.startsWith('lorespots_')) startLoreSpotsHunt(base); // #80 pass 2
   else if(key.startsWith('lore_')) startLoreHunt(base); // lore IS location-based (nearbyApprovedGems 'lore'); without this arm it fell to the fixed-guide else below and got ZOOM_WALK + the "spots are fixed" toast while never reloading the area's stories — see startLoreHunt / buildPointsForKey's lore_ arm, the two minting sites that already exist
   /* #67 — stateparks_ / nationalparks_ arms deleted. They could only fire on an
      already-active hunt with that key, which became unreachable when the cards
@@ -10349,8 +10433,14 @@ const EXPLORE_CAT_KEYPREFIX = {
   parks_trails: 'parkstrails_',
   shops: 'shops_',
   bars_restaurants: 'barsrest_',
-  history: 'history_',
-  art: 'art_' // #193
+  art: 'art_', // #193
+  // #80 pass 2 — the three kind cards that replaced History & Lore. 'history'
+  // entry removed with its card (updateExploreSelectionIcons iterates the live
+  // .mode-card[data-cat] nodes, so a keyless card just never lights — but drop
+  // it for cleanliness, matching the #192 lore-entry removal).
+  graves_memorials: 'gravesmem_',
+  museums: 'museums_',
+  lorespots: 'lorespots_'
   /* #67 — gems and national_parks entries deleted; neither has a card, so
      updateExploreSelectionIcons() could never match them. #192 — the 'lore'
      entry went with its card in the History & Lore merge. */
@@ -10360,8 +10450,15 @@ const EXPLORE_CAT_COLOR = {
   parks_trails: '#6FA85C',
   shops: '#4C8FC0',
   bars_restaurants: '#C1587A',
-  history: '#B08D57',
-  art: '#3E9C8F' // #193 — the teal freed by the lore merge
+  art: '#3E9C8F', // #193 — the teal freed by the lore merge
+  // #80 pass 2 — the three kind cards. New distinct CARD colours: graves stone
+  // blue-grey, museums sienna. Lore keeps history's gold (#B08D57) because Lore
+  // IS the history residual. NB: these colour the CARD ICONS; MAP PINS still
+  // colour by category ('history' → gold) — recolouring pins by facet is the
+  // deferred Build-3 half (colorFor keys on t.category at ~3 render sites).
+  graves_memorials: '#7C8B9A',
+  museums: '#B5563C',
+  lorespots: '#B08D57'
   /* #67 — gems and national_parks deleted with their cards. */
 };
 const EXPLORE_ICON_DEFS = {
@@ -10384,7 +10481,13 @@ const EXPLORE_ICON_DEFS = {
   // #214 — body is the FRAME only; the sun moved to `dot` and the mountains are
   // `accent`, so the selected (filled) state can knock the interior out of the
   // filled frame instead of flooding it solid. See exploreCategoryIconSVG.
-  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4', dot:'M16.2 9a1.3 1.3 0 1 0 0.01 0', knockout:true}
+  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4', dot:'M16.2 9a1.3 1.3 0 1 0 0.01 0', knockout:true},
+  // #80 pass 2 — the three kind cards' icons. Simple fillable silhouettes like
+  // shops/art: `body` fills with the card colour when active, `accent` is a
+  // stroked line over it (both sit fine over the fill). Keyed by data-cat.
+  graves_memorials: {vb:'0 0 24 24', body:'M6.5 21V10a5.5 5.5 0 0 1 11 0v11z', accent:'M12 12.5v5.5M9.4 14.8h5.2'}, // headstone + cross
+  museums: {vb:'0 0 24 24', body:'M12 3.5 21 9.5H3zM4 20h16v1.6H4z', accent:'M6.4 10.5v8.5M9.6 10.5v8.5M14.4 10.5v8.5M17.6 10.5v8.5'}, // pediment + base, columns as strokes
+  lorespots: {vb:'0 0 24 24', body:'M4 5c3-1 6-1 8 .9 2-1.9 5-1.9 8-.9v13.6c-3-1-6-1-8 .9-2-1.9-5-1.9-8-.9z', accent:'M12 5.9v13.6'} // open book + spine
 };
 function exploreCategoryIconSVG(cat, color, filled){
   const def = EXPLORE_ICON_DEFS[cat];
@@ -10693,6 +10796,29 @@ function startArtHunt(base){
   ensureRealPlaces(base);
   const key = 'art_v1';
   setCurrentHunt({key, name:'Art & Statues', mode:'art', points:buildPointsForKey(key, base)}); // #80 pass 2 — browse header matches the "Art & Statues" card title; PIN_CAT_LABEL.art stays singular 'Art' for a single pin's kind line
+}
+/* #80 pass 2 — the three kind cards that replaced History & Lore. Each mirrors
+   startHistoryHunt but keys on its own stable prefix (gravesmem_/museums_/
+   lorespots_) and its own mode, and buildPointsForKey routes it through the
+   facet filter. mode 'lorespots' is DELIBERATELY not legacy 'lore' (which still
+   serves old lore_v1 captures). */
+function startGravesHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'gravesmem_v1';
+  setCurrentHunt({key, name:'Graves & Memorials', mode:'graves', points:buildPointsForKey(key, base)});
+}
+function startMuseumsHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'museums_v1';
+  setCurrentHunt({key, name:'Museums', mode:'museums', points:buildPointsForKey(key, base)});
+}
+function startLoreSpotsHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'lorespots_v1';
+  setCurrentHunt({key, name:'Lore', mode:'lorespots', points:buildPointsForKey(key, base)});
 }
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
@@ -11170,8 +11296,11 @@ function selectExplore(cat){
     else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
     else if(cat==='shops'){ startShopsHunt(base); }
     else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
-    else if(cat==='history'){ startHistoryHunt(base); } // #192 — now "History & Lore"; the lore card/route were merged in here
+    else if(cat==='history'){ startHistoryHunt(base); } // #192 — no card since #80 pass 2, but the arm stays: regenerateCurrentHuntAt still calls startHistoryHunt for a legacy history_v1 hunt
     else if(cat==='art'){ startArtHunt(base); } // #193
+    else if(cat==='graves_memorials'){ startGravesHunt(base); } // #80 pass 2
+    else if(cat==='museums'){ startMuseumsHunt(base); } // #80 pass 2
+    else if(cat==='lorespots'){ startLoreSpotsHunt(base); } // #80 pass 2 — the story residual card
   }finally{
     state._preserveViewOnNextHunt = false;
   }
