@@ -2416,13 +2416,26 @@
         <div class="icon-wrap"></div>
         <div><h3>Parks &amp; Trails</h3><p>Free places to walk.</p></div>
       </div>
+      <!-- #80 pass 2 — copy set to the POST-PIVOT reality: commercial is off the
+           map unless the specific place is independently documented (own
+           Wikipedia/Wikidata entry or an OSM inscription — the #13 notability
+           gate, upstream in nearby-places, NOT loosened here). So this card
+           shows only notable/historic shops and will read sparse, which is the
+           gate working, not a bug. The card reads the ALREADY-GATED set; it must
+           never get its own fetch or a looser filter to "fill" it — that would
+           reopen what #309/#312 removed. -->
       <div class="mode-card" data-cat="shops" onclick="selectExplore('shops')">
         <div class="icon-wrap"></div>
-        <div><h3>Shops</h3><p>Shops and boutiques.</p></div>
+        <div><h3>Shops</h3><p>Historic &amp; notable shops.</p></div>
       </div>
+      <!-- #80 pass 2 — same post-pivot rule as Shops: only bars/restaurants that
+           are independently documented (Wikipedia/Wikidata/inscription, the #13
+           gate upstream) survive onto the map, so this is "storied spots", not a
+           restaurant finder. Reads the already-gated set — never widen the gate
+           to fill this card (#309/#312). -->
       <div class="mode-card" data-cat="bars_restaurants" onclick="selectExplore('bars_restaurants')">
         <div class="icon-wrap"></div>
-        <div><h3>Bars &amp; Restaurants</h3><p>Food and drink nearby.</p></div>
+        <div><h3>Bars &amp; Restaurants</h3><p>Notable spots with a story.</p></div>
       </div>
       <!-- #192 — HISTORY AND LORE MERGED INTO ONE CARD. Formerly two cards
            (History / Lore & Legends) split on the "landmark vs. something-happened"
@@ -2442,7 +2455,7 @@
            the old Lore tab it is not empty by design. -->
       <div class="mode-card" data-cat="art" onclick="selectExplore('art')">
         <div class="icon-wrap"></div>
-        <div><h3>Art</h3><p>Murals, sculptures, and public art.</p></div>
+        <div><h3>Art &amp; Statues</h3><p>Murals, sculptures, and public art.</p></div>
       </div>
     </div>
 
@@ -7571,7 +7584,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.08e';
+const APP_VERSION = '2026.09.08f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10679,7 +10692,7 @@ function startArtHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'art_v1';
-  setCurrentHunt({key, name:'Art', mode:'art', points:buildPointsForKey(key, base)});
+  setCurrentHunt({key, name:'Art & Statues', mode:'art', points:buildPointsForKey(key, base)}); // #80 pass 2 — browse header matches the "Art & Statues" card title; PIN_CAT_LABEL.art stays singular 'Art' for a single pin's kind line
 }
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
