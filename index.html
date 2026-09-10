@@ -1877,26 +1877,28 @@
   }
 
   /* #348 — the passport PHOTOS collection: the keepsake photos (#209) the user
-     snapped at captured pins. A 3-across grid of square thumbnails on the card
-     (the 3 most recent) and on the view-all screen (all of them, newest first),
-     sharing the .place-stamp-grid's 3-column shape so it reads as a sibling of
-     the Stamps card. Each thumb is a real photo (object-fit:cover fills the
-     square; the pin sheet's own #262 letterbox is for the single detail view, a
-     grid tile crops to a clean square on purpose), tap to open the viewer. A
-     tile with no resolvable bytes removes itself, so a stale photo flag can't
-     leave an empty box. */
+     snapped at captured pins. A 3-across grid of thumbnails on the card (the 3
+     most recent) and on the view-all screen (all of them, newest first), sharing
+     the .place-stamp-grid's 3-column shape so it reads as a sibling of the Stamps
+     card. The image is shown WHOLE at its true aspect ratio (object-fit:contain,
+     letterboxed onto the --surface-2 mat — the #262 pin-sheet decision, never a
+     crop), inside a square tile so the grid stays even. Tiles are tappable ONLY on
+     the view-all page (.is-tappable) — the card previews are display-only. A tile
+     with no resolvable bytes removes itself, so a stale photo flag can't leave an
+     empty box. */
   .photo-thumb-grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
   }
   .photo-thumb{
     position:relative;width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;
-    background:var(--surface-2);border:1px solid var(--line);cursor:pointer;
+    background:var(--surface-2);border:1px solid var(--line);
     -webkit-tap-highlight-color:transparent;
   }
   .photo-thumb img{
-    display:block;width:100%;height:100%;object-fit:cover;
+    display:block;width:100%;height:100%;object-fit:contain;
   }
-  .photo-thumb:active{opacity:0.85;}
+  .photo-thumb.is-tappable{cursor:pointer;}
+  .photo-thumb.is-tappable:active{opacity:0.85;}
   /* #348 — full-screen single-photo viewer, opened by tapping a thumbnail. Same
      overlay language as the #209 capture prompt (.cpp-overlay): map faint behind,
      X top-right, tap the backdrop to dismiss. Display-only, no editing. */
@@ -7760,7 +7762,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.09b';
+const APP_VERSION = '2026.09.09c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -15119,18 +15121,24 @@ async function passportPhotoEntries(){
   const flagged = foundMetaPhotoIds();
   return entries.filter(e => localIds.has(e.id) || flagged.has(e.id));
 }
-/* Paint a set of photo entries into a grid mount as square thumbnails, hydrating
-   each tile's bytes asynchronously. `token` is the render token captured by the
-   caller; a resolve that lands after a newer render is dropped. */
-function paintPhotoGrid(mountEl, entries, token){
-  mountEl.innerHTML = entries.map((e, i)=>
-    '<div class="photo-thumb" data-ph-idx="' + i + '" role="button" tabindex="0" aria-label="' + escapeHtml('Photo of ' + (e.name || 'a spot')) + '"></div>'
-  ).join('');
-  entries.forEach((entry, i)=>{ hydratePhotoThumb(mountEl, entry, i, token); });
+/* Paint a set of photo entries into a grid mount as thumbnails, hydrating each
+   tile's bytes asynchronously. `token` is the render token captured by the caller
+   (a resolve that lands after a newer render is dropped). `clickable` gates the
+   tap-to-open-viewer affordance: true on the view-all grid, false on the card
+   previews (which are display-only). */
+function paintPhotoGrid(mountEl, entries, token, clickable){
+  mountEl.innerHTML = entries.map((e, i)=>{
+    const label = escapeHtml('Photo of ' + (e.name || 'a spot'));
+    return clickable
+      ? '<div class="photo-thumb is-tappable" data-ph-idx="' + i + '" role="button" tabindex="0" aria-label="' + label + '"></div>'
+      : '<div class="photo-thumb" data-ph-idx="' + i + '"></div>';
+  }).join('');
+  entries.forEach((entry, i)=>{ hydratePhotoThumb(mountEl, entry, i, token, clickable); });
 }
 /* Resolve one thumbnail's bytes (local by id → remote fallback) and paint it, or
-   remove the tile if there is nothing to show. Re-entrancy safe via the token. */
-async function hydratePhotoThumb(mountEl, entry, idx, token){
+   remove the tile if there is nothing to show. Re-entrancy safe via the token.
+   Only wires the tap-to-open handlers when `clickable`. */
+async function hydratePhotoThumb(mountEl, entry, idx, token, clickable){
   let blob = null;
   try{ const r = await loadPhotoBlobForId(entry.id); blob = r ? r.blob : null; }catch(e){ blob = null; }
   if(!blob){
@@ -15143,9 +15151,11 @@ async function hydratePhotoThumb(mountEl, entry, idx, token){
   const url = URL.createObjectURL(blob);
   _passportPhotoURLs.push(url);
   cell.innerHTML = '<img alt="' + escapeHtml('Photo of ' + (entry.name || 'a spot')) + '" src="' + url + '">';
-  const open = ()=>openPhotoViewer(url, entry.name || 'a spot');
-  cell.onclick = open;
-  cell.onkeydown = (ev)=>{ if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); open(); } };
+  if(clickable){
+    const open = ()=>openPhotoViewer(url, entry.name || 'a spot');
+    cell.onclick = open;
+    cell.onkeydown = (ev)=>{ if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); open(); } };
+  }
 }
 /* #348 — the passport's Photos section: the 3 most-recent photos + a "View all"
    into #screen-photos-all (shown only when there are more than 3). Async; a newer
@@ -15172,7 +15182,7 @@ function renderPhotosSection(){
     const grid = document.createElement('div');
     grid.className = 'photo-thumb-grid';
     el.appendChild(grid);
-    paintPhotoGrid(grid, entries.slice(0, PREVIEW), token);
+    paintPhotoGrid(grid, entries.slice(0, PREVIEW), token, false);   // #348 — card previews are display-only
   }).catch(()=>{
     if(token !== _passportPhotoRenderToken) return;
     el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2></div>'
@@ -15196,7 +15206,7 @@ function renderAllPhotos(){
     const grid = document.createElement('div');
     grid.className = 'photo-thumb-grid';
     el.appendChild(grid);
-    paintPhotoGrid(grid, entries, token);
+    paintPhotoGrid(grid, entries, token, true);   // #348 — view-all tiles open the viewer
   }).catch(()=>{
     if(token !== _passportPhotoRenderToken) return;
     el.innerHTML = '<p class="passport-empty">Couldn\'t load your photos right now.</p>';
