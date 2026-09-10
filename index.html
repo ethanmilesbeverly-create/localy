@@ -1877,25 +1877,27 @@
   }
 
   /* #348 — the passport PHOTOS collection: the keepsake photos (#209) the user
-     snapped at captured pins. A 3-across grid of thumbnails on the card (the 3
-     most recent) and on the view-all screen (all of them, newest first), sharing
-     the .place-stamp-grid's 3-column shape so it reads as a sibling of the Stamps
-     card. The image is shown WHOLE at its true aspect ratio (object-fit:contain,
-     letterboxed onto the --surface-2 mat — the #262 pin-sheet decision, never a
-     crop), inside a square tile so the grid stays even. Tiles are tappable ONLY on
-     the view-all page (.is-tappable) — the card previews are display-only. A tile
-     with no resolvable bytes removes itself, so a stale photo flag can't leave an
-     empty box. */
+     snapped at captured pins. A 3-column grid on the card (the 3 most recent) and
+     on the view-all screen (all of them, newest first). Each image fills the full
+     column WIDTH and the tile GROWS to the image's natural HEIGHT (width:100% +
+     height:auto), so the whole photo shows at its true aspect ratio with NO crop
+     and NO letterbox bars — tiles in a row can differ in height (a portrait sits
+     taller than a landscape). `align-items:start` keeps each tile its own height
+     rather than stretching to the row. `:empty` gives a square placeholder only
+     while a tile is still loading its bytes; a tile whose bytes can't be resolved
+     removes itself. Tiles are tappable ONLY on the view-all page (.is-tappable) —
+     the card previews are display-only. */
   .photo-thumb-grid{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start;
   }
   .photo-thumb{
-    position:relative;width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;
+    position:relative;border-radius:12px;overflow:hidden;
     background:var(--surface-2);border:1px solid var(--line);
     -webkit-tap-highlight-color:transparent;
   }
+  .photo-thumb:empty{ aspect-ratio:1/1; }   /* loading placeholder, dropped once the image lands */
   .photo-thumb img{
-    display:block;width:100%;height:100%;object-fit:contain;
+    display:block;width:100%;height:auto;
   }
   .photo-thumb.is-tappable{cursor:pointer;}
   .photo-thumb.is-tappable:active{opacity:0.85;}
@@ -7762,7 +7764,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.09c';
+const APP_VERSION = '2026.09.09d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
