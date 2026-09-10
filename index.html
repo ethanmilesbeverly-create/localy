@@ -1911,9 +1911,25 @@
   .pv-overlay.show{
     display:flex;align-items:center;justify-content:center;padding:24px;animation:cppFade .2s ease;
   }
+  /* #348 — the viewer stacks the photo over a caption (place name + capture date);
+     the image shrinks (flex + min-height:0) so the caption always stays on-screen. */
+  .pv-content{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    max-width:100%;max-height:100%;
+  }
   .pv-overlay img{
-    max-width:100%;max-height:100%;border-radius:12px;
-    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    max-width:100%;min-height:0;flex:0 1 auto;object-fit:contain;
+    border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  }
+  .pv-caption{
+    text-align:center;max-width:min(100%,520px);flex-shrink:0;
+  }
+  .pv-caption:empty{display:none;}
+  .pv-caption .pv-name{
+    font-size:16px;font-weight:700;color:var(--text);line-height:1.3;
+  }
+  .pv-caption .pv-date{
+    font-size:13px;color:var(--text-dim);margin-top:4px;
   }
   .pv-close{
     position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;
@@ -3294,7 +3310,10 @@
     <button type="button" class="pv-close" onclick="closePhotoViewer()" aria-label="Close photo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <img id="photo-viewer-img" alt="">
+    <div class="pv-content" onclick="if(event.target===this)closePhotoViewer()">
+      <img id="photo-viewer-img" alt="">
+      <div id="photo-viewer-caption" class="pv-caption"></div>
+    </div>
   </div>
 
   <div id="pin-sheet" aria-hidden="true">
@@ -7764,7 +7783,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.09d';
+const APP_VERSION = '2026.09.09e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -15154,7 +15173,7 @@ async function hydratePhotoThumb(mountEl, entry, idx, token, clickable){
   _passportPhotoURLs.push(url);
   cell.innerHTML = '<img alt="' + escapeHtml('Photo of ' + (entry.name || 'a spot')) + '" src="' + url + '">';
   if(clickable){
-    const open = ()=>openPhotoViewer(url, entry.name || 'a spot');
+    const open = ()=>openPhotoViewer(url, entry.name || 'a spot', entry.ts);
     cell.onclick = open;
     cell.onkeydown = (ev)=>{ if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); open(); } };
   }
@@ -15214,21 +15233,40 @@ function renderAllPhotos(){
     el.innerHTML = '<p class="passport-empty">Couldn\'t load your photos right now.</p>';
   });
 }
-/* #348 — full-screen single-photo viewer. Reuses a live thumbnail object URL. */
-function openPhotoViewer(url, name){
+/* #348 — a caption date for the viewer: sentence-case "Aug 5, 2026" (not the
+   Stamps ALL-CAPS form), blank when there is no timestamp (legacy capture). */
+function fmtPhotoDate(ts){
+  if(typeof ts !== 'number') return '';
+  const d = new Date(ts);
+  if(isNaN(d.getTime())) return '';
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return M[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+/* #348 — full-screen single-photo viewer. Reuses a live thumbnail object URL and
+   shows a caption below the image: what the place is (its name) + when it was
+   captured. */
+function openPhotoViewer(url, name, ts){
   const el = document.getElementById('photo-viewer');
   const img = document.getElementById('photo-viewer-img');
+  const cap = document.getElementById('photo-viewer-caption');
   if(!el || !img) return;
   img.src = url;
   img.alt = 'Photo of ' + (name || 'a spot');
+  if(cap){
+    const dateStr = fmtPhotoDate(ts);
+    cap.innerHTML = '<div class="pv-name">' + escapeHtml(name || 'A spot') + '</div>'
+      + (dateStr ? '<div class="pv-date">Captured ' + escapeHtml(dateStr) + '</div>' : '');
+  }
   el.classList.add('show');
   el.setAttribute('aria-hidden', 'false');
 }
 function closePhotoViewer(){
   const el = document.getElementById('photo-viewer');
   const img = document.getElementById('photo-viewer-img');
+  const cap = document.getElementById('photo-viewer-caption');
   if(el){ el.classList.remove('show'); el.setAttribute('aria-hidden', 'true'); }
   if(img){ img.removeAttribute('src'); }
+  if(cap){ cap.innerHTML = ''; }
 }
 
 function handleOrientation(e){
