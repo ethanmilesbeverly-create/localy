@@ -1876,6 +1876,50 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   }
 
+  /* #348 — the passport PHOTOS collection: the keepsake photos (#209) the user
+     snapped at captured pins. A 3-across grid of square thumbnails on the card
+     (the 3 most recent) and on the view-all screen (all of them, newest first),
+     sharing the .place-stamp-grid's 3-column shape so it reads as a sibling of
+     the Stamps card. Each thumb is a real photo (object-fit:cover fills the
+     square; the pin sheet's own #262 letterbox is for the single detail view, a
+     grid tile crops to a clean square on purpose), tap to open the viewer. A
+     tile with no resolvable bytes removes itself, so a stale photo flag can't
+     leave an empty box. */
+  .photo-thumb-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  }
+  .photo-thumb{
+    position:relative;width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;
+    background:var(--surface-2);border:1px solid var(--line);cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .photo-thumb img{
+    display:block;width:100%;height:100%;object-fit:cover;
+  }
+  .photo-thumb:active{opacity:0.85;}
+  /* #348 — full-screen single-photo viewer, opened by tapping a thumbnail. Same
+     overlay language as the #209 capture prompt (.cpp-overlay): map faint behind,
+     X top-right, tap the backdrop to dismiss. Display-only, no editing. */
+  .pv-overlay{
+    position:fixed;inset:0;z-index:4000;display:none;
+    background:rgba(16,35,28,0.92);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  }
+  .pv-overlay.show{
+    display:flex;align-items:center;justify-content:center;padding:24px;animation:cppFade .2s ease;
+  }
+  .pv-overlay img{
+    max-width:100%;max-height:100%;border-radius:12px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  }
+  .pv-close{
+    position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(0,0,0,0.35);color:var(--text);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .pv-close svg{width:20px;height:20px;}
+  .pv-close:active{background:rgba(0,0,0,0.55);}
+
   /* ---------- Create hunt screen ---------- */
   #create-map{height:220px;border-radius:12px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line);}
   #suggest-gem-map{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
@@ -2832,6 +2876,11 @@
          now shows only the most-recently-earned, the full grid living on its own
          screen. -->
     <div id="passport-stamps-section"></div>
+    <!-- #348 — PHOTOS collection: the keepsake photos (#209) taken at captured
+         pins. Same recent-preview + "View all" pattern as Stamps; renderPassport()
+         fills it. Sits below Stamps (both are per-capture collections) and above
+         Achievements. -->
+    <div id="passport-photos-section"></div>
     <div id="passport-achievements-section"></div>
   </div>
 
@@ -2848,6 +2897,22 @@
       </button>
     </div>
     <div id="stamps-all-grid"></div>
+  </div>
+
+  <!-- #348 — VIEW-ALL: every photo, newest first, in a 3-column grid. Same no-nav
+       sub-screen pattern as #screen-stamps-all (#81/#177): shown via showScreen(),
+       Back returns to the passport, the Passport nav tab stays lit.
+       renderAllPhotos() fills the grid on open. -->
+  <div class="screen" id="screen-photos-all">
+    <div class="title-row">
+      <h1 class="page-title">Your Photos</h1>
+      <button class="icon-btn" onclick="closeAllPhotos()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div id="photos-all-grid"></div>
   </div>
 
   <!-- #63 — VIEW-ALL: the full tiered achievements grid (earned + locked), moved
@@ -3215,6 +3280,17 @@
       </button>
       <button type="button" class="cpp-skip" onclick="closeCapturePhotoPrompt()">Skip — no photo for this one</button>
     </div>
+  </div>
+
+  <!-- #348 — full-screen single-photo viewer, opened by tapping a passport photo
+       thumbnail. Display-only; the X or a backdrop tap dismisses. The <img> src is
+       set by openPhotoViewer() to a live object URL owned by the grid that opened
+       it. -->
+  <div id="photo-viewer" class="pv-overlay" aria-hidden="true" role="dialog" aria-modal="true" onclick="if(event.target===this)closePhotoViewer()">
+    <button type="button" class="pv-close" onclick="closePhotoViewer()" aria-label="Close photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img id="photo-viewer-img" alt="">
   </div>
 
   <div id="pin-sheet" aria-hidden="true">
@@ -7684,7 +7760,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.09a';
+const APP_VERSION = '2026.09.09b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8345,6 +8421,17 @@ function openAllStamps(){
   setNavActive('screen-passport');
 }
 function closeAllStamps(){
+  setTab('screen-passport');
+  renderPassport();
+}
+/* #348 — the passport PHOTOS view-all, mirroring openAllStamps/closeAllStamps. */
+function openAllPhotos(){
+  renderAllPhotos();
+  showScreen('screen-photos-all');
+  setNavActive('screen-passport');
+}
+function closeAllPhotos(){
+  closePhotoViewer();          // don't leave the viewer open behind the passport
   setTab('screen-passport');
   renderPassport();
 }
@@ -14962,6 +15049,176 @@ async function hydrateCapturePhoto(key, id, name){
   }
 }
 
+/* =========================================================
+   #348 — PASSPORT PHOTOS CARD
+   ---------------------------------------------------------
+   A collection of the keepsake photos (#209) the user snapped at captured pins.
+   The card shows the 3 most-recent (newest first); "View all" opens a 3-column
+   grid of every photo on #screen-photos-all. Tapping a thumbnail opens a
+   full-screen viewer.
+
+   WHICH CAPTURES HAVE A PHOTO. Photos live in IndexedDB keyed `huntKey::pinId`
+   (#209) and, for logged-in users, mirror to owner-scoped Supabase Storage by pin
+   id (#209 Build 2). The candidate set is therefore the UNION of:
+     (1) ids present in the local IndexedDB store (definitive on THIS device), and
+     (2) ids whose progress `foundMeta[id].photo` flag is set (catches a photo that
+         lives only in remote Storage — a fresh device / cleared cache).
+   The list is ORDERED by capturedStampEntries() (the same newest-first construction
+   the Stamps list uses, so the two collections agree #63/#148), then filtered to the
+   candidate set. Each thumbnail resolves its bytes the SAME way the pin sheet does
+   (loadPhotoBlobForId by id → downloadPhotoRemote fallback); a candidate whose bytes
+   can't be resolved (e.g. a pre-Build-2 photo lost to a cache clear, #232) removes
+   its own tile, so a stale flag never leaves an empty box.
+
+   Object URLs created for thumbnails are tracked and revoked on the next render; a
+   monotonic render token guards against a stale async resolve painting the wrong
+   pass. */
+let _passportPhotoURLs = [];
+let _passportPhotoRenderToken = 0;
+function _revokePassportPhotoURLs(){
+  _passportPhotoURLs.forEach(u=>{ try{ URL.revokeObjectURL(u); }catch(e){} });
+  _passportPhotoURLs = [];
+}
+/* Ids that have a photo blob in the local IndexedDB store (key suffix `::id`). */
+function localPhotoIdSet(){
+  return photoDB().then(db=>new Promise((resolve)=>{
+    const out = new Set();
+    try{
+      const tx = db.transaction('photos','readonly');
+      const kr = tx.objectStore('photos').getAllKeys();
+      kr.onsuccess = ()=>{
+        (kr.result||[]).forEach(k=>{
+          if(typeof k !== 'string') return;
+          const i = k.lastIndexOf('::');
+          if(i >= 0) out.add(k.slice(i+2));
+        });
+        resolve(out);
+      };
+      kr.onerror = ()=>resolve(out);
+    }catch(e){ resolve(out); }
+  })).catch(()=>new Set());
+}
+/* Ids flagged photo:true in progress (the #209 "has a photo" bit that rides with
+   progress; catches a remote-only photo the local store doesn't have yet). */
+function foundMetaPhotoIds(){
+  const out = new Set();
+  Object.values(state.progress || {}).forEach(b=>{
+    const meta = b && b.foundMeta;
+    if(!meta) return;
+    Object.keys(meta).forEach(id=>{ if(meta[id] && meta[id].photo) out.add(id); });
+  });
+  return out;
+}
+/* Captured entries that have a photo, newest first — a filter over
+   capturedStampEntries() (so name/date/order match the Stamps collection). Async
+   because the local-store read is async. */
+async function passportPhotoEntries(){
+  const entries = capturedStampEntries();
+  let localIds = new Set();
+  try{ localIds = await localPhotoIdSet(); }catch(e){ localIds = new Set(); }
+  const flagged = foundMetaPhotoIds();
+  return entries.filter(e => localIds.has(e.id) || flagged.has(e.id));
+}
+/* Paint a set of photo entries into a grid mount as square thumbnails, hydrating
+   each tile's bytes asynchronously. `token` is the render token captured by the
+   caller; a resolve that lands after a newer render is dropped. */
+function paintPhotoGrid(mountEl, entries, token){
+  mountEl.innerHTML = entries.map((e, i)=>
+    '<div class="photo-thumb" data-ph-idx="' + i + '" role="button" tabindex="0" aria-label="' + escapeHtml('Photo of ' + (e.name || 'a spot')) + '"></div>'
+  ).join('');
+  entries.forEach((entry, i)=>{ hydratePhotoThumb(mountEl, entry, i, token); });
+}
+/* Resolve one thumbnail's bytes (local by id → remote fallback) and paint it, or
+   remove the tile if there is nothing to show. Re-entrancy safe via the token. */
+async function hydratePhotoThumb(mountEl, entry, idx, token){
+  let blob = null;
+  try{ const r = await loadPhotoBlobForId(entry.id); blob = r ? r.blob : null; }catch(e){ blob = null; }
+  if(!blob){
+    try{ blob = await downloadPhotoRemote(entry.id); }catch(e){ blob = null; }
+  }
+  if(token !== _passportPhotoRenderToken) return;   // a newer render superseded this pass
+  const cell = mountEl.querySelector('[data-ph-idx="' + idx + '"]');
+  if(!cell) return;
+  if(!blob){ cell.remove(); return; }               // no bytes anywhere — don't show an empty frame
+  const url = URL.createObjectURL(blob);
+  _passportPhotoURLs.push(url);
+  cell.innerHTML = '<img alt="' + escapeHtml('Photo of ' + (entry.name || 'a spot')) + '" src="' + url + '">';
+  const open = ()=>openPhotoViewer(url, entry.name || 'a spot');
+  cell.onclick = open;
+  cell.onkeydown = (ev)=>{ if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); open(); } };
+}
+/* #348 — the passport's Photos section: the 3 most-recent photos + a "View all"
+   into #screen-photos-all (shown only when there are more than 3). Async; a newer
+   call supersedes an in-flight one via the render token. */
+function renderPhotosSection(){
+  const el = document.getElementById('passport-photos-section');
+  if(!el) return;
+  const token = ++_passportPhotoRenderToken;
+  _revokePassportPhotoURLs();
+  el.className = 'passport-section';
+  el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2></div>'
+    + '<p class="passport-empty">Loading your photos…</p>';
+  passportPhotoEntries().then(entries=>{
+    if(token !== _passportPhotoRenderToken) return;
+    const PREVIEW = 3;
+    const viewAll = entries.length > PREVIEW
+      ? '<button class="view-all-link" onclick="openAllPhotos()">View all ' + entries.length + ' →</button>'
+      : '';
+    el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2>' + viewAll + '</div>';
+    if(!entries.length){
+      el.insertAdjacentHTML('beforeend', '<p class="passport-empty">No photos yet — snap one when you capture a spot to start your collection.</p>');
+      return;
+    }
+    const grid = document.createElement('div');
+    grid.className = 'photo-thumb-grid';
+    el.appendChild(grid);
+    paintPhotoGrid(grid, entries.slice(0, PREVIEW), token);
+  }).catch(()=>{
+    if(token !== _passportPhotoRenderToken) return;
+    el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2></div>'
+      + '<p class="passport-empty">Couldn\'t load your photos right now.</p>';
+  });
+}
+/* #348 — every photo, newest first, on #screen-photos-all (rendered on open). */
+function renderAllPhotos(){
+  const el = document.getElementById('photos-all-grid');
+  if(!el) return;
+  const token = ++_passportPhotoRenderToken;
+  _revokePassportPhotoURLs();
+  el.innerHTML = '<p class="passport-empty">Loading your photos…</p>';
+  passportPhotoEntries().then(entries=>{
+    if(token !== _passportPhotoRenderToken) return;
+    if(!entries.length){
+      el.innerHTML = '<p class="passport-empty">No photos yet — snap one when you capture a spot to start your collection.</p>';
+      return;
+    }
+    el.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'photo-thumb-grid';
+    el.appendChild(grid);
+    paintPhotoGrid(grid, entries, token);
+  }).catch(()=>{
+    if(token !== _passportPhotoRenderToken) return;
+    el.innerHTML = '<p class="passport-empty">Couldn\'t load your photos right now.</p>';
+  });
+}
+/* #348 — full-screen single-photo viewer. Reuses a live thumbnail object URL. */
+function openPhotoViewer(url, name){
+  const el = document.getElementById('photo-viewer');
+  const img = document.getElementById('photo-viewer-img');
+  if(!el || !img) return;
+  img.src = url;
+  img.alt = 'Photo of ' + (name || 'a spot');
+  el.classList.add('show');
+  el.setAttribute('aria-hidden', 'false');
+}
+function closePhotoViewer(){
+  const el = document.getElementById('photo-viewer');
+  const img = document.getElementById('photo-viewer-img');
+  if(el){ el.classList.remove('show'); el.setAttribute('aria-hidden', 'true'); }
+  if(img){ img.removeAttribute('src'); }
+}
+
 function handleOrientation(e){
   let heading = null;
   if(typeof e.webkitCompassHeading === 'number'){
@@ -15910,6 +16167,7 @@ function renderPassport(){
      screen is already correct the instant it's opened. */
   renderAchievements();
   renderStampsSection();
+  renderPhotosSection();   // #348 — keepsake-photos collection, below Stamps
   renderRecentAchievements();
   renderLeaderboardEntry();
 
