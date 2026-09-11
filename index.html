@@ -2535,7 +2535,7 @@
            Legends") still exists for old lore_v1 captures and must not collide. -->
       <div class="mode-card" data-cat="lorespots" onclick="selectExplore('lorespots')">
         <div class="icon-wrap"></div>
-        <div><h3>Lore</h3><p>Plaques, sites, and stories.</p></div>
+        <div><h3>History &amp; Lore</h3><p>Plaques, sites, and stories.</p></div>
       </div>
     </div>
 
@@ -7817,7 +7817,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.10a';
+const APP_VERSION = '2026.09.10b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10977,7 +10977,7 @@ function startLoreSpotsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'lorespots_v1';
-  setCurrentHunt({key, name:'Lore', mode:'lorespots', points:buildPointsForKey(key, base)});
+  setCurrentHunt({key, name:'History & Lore', mode:'lorespots', points:buildPointsForKey(key, base)}); // #80 — card/header title; internal key/mode stay 'lorespots'/'lore', never the legacy 'lore'
 }
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
