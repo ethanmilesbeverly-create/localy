@@ -4503,7 +4503,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
    longer be either — gemDisplayCategory has never returned it since #16, and
    startHiddenGemsHunt was the last thing that set mode:'gems'. 'discover' went
    with startDiscoverHunt. 'discoverlocal' is All Things Local and stays. */
-const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F', graves:'#7C8B9A', museums:'#B5563C', lorespots:'#B08D57' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. #80 pass 2 — graves/museums/lorespots are the new kind-card hunt modes; graves stone, museums sienna, lorespots gold (= history, the residual). These set the hunt DEFAULT colour, but grave/museum PINS carry category:'history' so colorFor still paints them gold on the map today — facet pin-recolour is the deferred Build-3 half. */
+const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F', graves:'#7C8B9A', museums:'#B5563C', lorespots:'#B08D57' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. #80 pass 2 — graves/museums/lorespots are the new kind-card hunt modes; graves stone, museums sienna, lorespots gold (= history, the residual). These set the hunt DEFAULT colour. grave/museum PINS carry category:'history', but as of Build 3 (2026.09.10a) the render path derives the KIND via pinKind()/historyKindFacet and prefers PIN_KIND_COLOR, so a grave paints stone and a museum sienna on the map/drawer/sheet — matching these hunt colours. The 'lore' residual still falls through to the history gold below. */
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 /* #103 — startBuiltinHunt() (the tourist-route STARTER) was deleted 2026-08-04;
@@ -6081,6 +6081,40 @@ function historyKindFacet(p){
   if(ty === 'grave' || ty === 'memorial' || /^grave of /i.test(nm)) return 'graves';
   if(ty === 'museum') return 'museums';
   return 'lore';
+}
+/* #80 Build 3 — FACET-AWARE PIN RENDER. A history-family pin carries ONE
+   category ('history'), so colour/label/glyph keyed on t.category alone paint
+   every grave, museum and lore pin history-gold + "History" on the map, the
+   drawer and the sheet — even though pass 2 already groups them onto distinctly
+   coloured Discover cards (graves stone, museums sienna). This derives the
+   visible KIND from historyKindFacet so the map matches the cards: grave pins
+   render stone + "Grave" + a headstone glyph, museum pins sienna + "Museum" + a
+   pediment glyph. The LORE RESIDUAL (genuine lore gems AND OSM historic /
+   attraction) is deliberately LEFT as history-gold + "History": historyKindFacet
+   folds OSM historic buildings into 'lore', and relabelling a historic courthouse
+   "Lore" would OVERCLAIM — the specific OSM-subtype micro-label is #80's still-open
+   residual, an operator decision recorded in the roadmap row, NOT settled here. So
+   pinKind returns only the two kinds that recolour; 'lore' falls through to the
+   unchanged history render (gold + "History" + the columned-building glyph).
+   NOTE — the grave detection is historyKindFacet's SAME name heuristic
+   (/^grave of /i on gem names, since seed graves carry no `type`), so if #342
+   ever relabels "Grave of X" the facet AND this render move together, in one place. */
+const PIN_KIND_COLOR = { graves:'#7C8B9A', museums:'#B5563C' };
+const PIN_KIND_LABEL = { graves:'Grave', museums:'Museum' };
+const PIN_KIND_GLYPH = {
+  graves:'<path d="M7 21V10a5 5 0 0 1 10 0v11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 12.5v4.6M9.7 14.3h4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', // headstone + cross
+  museums:'<path d="M12 3 21 9H3zM5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 10.5v8M10 10.5v8M14 10.5v8M17.5 10.5v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' // pediment + columns
+};
+function pinKind(t){
+  if(!t || t.category !== 'history') return null;
+  const f = historyKindFacet(t);
+  return (f === 'graves' || f === 'museums') ? f : null; // 'lore' residual -> null -> unchanged history render
+}
+function pinKindColor(t){ const k = pinKind(t); return k ? PIN_KIND_COLOR[k] : null; }
+function pinKindLabel(t){ const k = pinKind(t); return k ? PIN_KIND_LABEL[k] : null; }
+function kindGlyphSVG(kind, ink){
+  const g = PIN_KIND_GLYPH[kind]; if(!g) return '';
+  return `<svg viewBox="0 0 24 24" width="14" height="14" style="color:${ink}">${g}</svg>`;
 }
 /* #80 pass 2 — build one of the three history-family kind cards. This is a
    FILTER over the SAME history blend the old History & Lore card used, NOT a new
@@ -7783,7 +7817,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.09f';
+const APP_VERSION = '2026.09.10a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10576,9 +10610,11 @@ const EXPLORE_CAT_COLOR = {
   art: '#3E9C8F', // #193 — the teal freed by the lore merge
   // #80 pass 2 — the three kind cards. New distinct CARD colours: graves stone
   // blue-grey, museums sienna. Lore keeps history's gold (#B08D57) because Lore
-  // IS the history residual. NB: these colour the CARD ICONS; MAP PINS still
-  // colour by category ('history' → gold) — recolouring pins by facet is the
-  // deferred Build-3 half (colorFor keys on t.category at ~3 render sites).
+  // IS the history residual. These colour the CARD ICONS; as of Build 3
+  // (2026.09.10a) MAP PINS, drawer rows and the pin sheet now match — pinKind()
+  // derives graves/museums from historyKindFacet and PIN_KIND_COLOR paints them,
+  // so grave/museum pins are stone/sienna, not history-gold. The two colour
+  // tables (this CARD map + PIN_KIND_COLOR) are kept in sync by hand — same hex.
   graves_memorials: '#7C8B9A',
   museums: '#B5563C',
   lorespots: '#B08D57'
@@ -13529,13 +13565,13 @@ function maybeEnrichRealDesc(t, prewarmBudget){
   })();
 }
 function fillPinSheet(t){
-  const color = pinSheetColor(t);
+  const color = pinKindColor(t) || pinSheetColor(t);   // #80 Build 3 — grave stone / museum sienna on the sheet's category dot
   /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
      Gem" marker: the end state is that every spot on the map is user-submitted,
      so flagging which ones already are would advertise a distinction that is
      meant to disappear. The OSM/Wikipedia places are scaffolding until real
      submissions fill in behind them, not a second class of content. */
-  const cat = PIN_CAT_LABEL[t.category] || 'Spot';
+  const cat = pinKindLabel(t) || PIN_CAT_LABEL[t.category] || 'Spot';   // #80 Build 3 — grave/museum kind line; lore residual stays "History"
   const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
   const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
   /* #211/#222 — captured state is ONE line now. The meta-row status word carries
@@ -14247,7 +14283,8 @@ function refreshTargetsUI(){
   const _factsPrewarm = { n: REAL_DESC_PREWARM_MAX };
 
   targets.forEach((t, idx)=>{
-    const color = colorFor(t);
+    const kind = pinKind(t);                          // #80 Build 3 — grave/museum recolour + glyph; null for everything else
+    const color = (kind && PIN_KIND_COLOR[kind]) || colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
     const isSelected = selectedTarget && t.id===selectedTarget.id;
     /* #270 — selected pill always unfurls its name (and is lifted above neighbours
@@ -14274,7 +14311,7 @@ function refreshTargetsUI(){
       html:`<div class="fm-wrap">
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-pill${isSelected ? ' sel' : ''}" style="background:${pinColor};color:${ink}">
-          <span class="fm-gly">${categoryGlyphSVG(t.category, ink)}</span>
+          <span class="fm-gly">${kind ? kindGlyphSVG(kind, ink) : categoryGlyphSVG(t.category, ink)}</span>
           <span class="fm-txt">${t.name ? escapeHtml(t.name) : ''}</span>
           ${checkHtml}
         </div>
@@ -14463,12 +14500,12 @@ function renderNearbyList(){
     : '';
 
   list.innerHTML = note + targets.map(t=>{
-    const color = colorFor(t);
+    const color = pinKindColor(t) || colorFor(t);   // #80 Build 3 — grave stone / museum sienna on the drawer mini-pin too
     /* Same category vocabulary as the pin sheet's meta row (fillPinSheet ->
        PIN_CAT_LABEL[t.category] || 'Spot'), so the drawer and the opened sheet
        agree. Falls back to 'Spot' for a target with no/unknown category (a guide
        stop, a data anomaly) rather than rendering blank. */
-    const cat = PIN_CAT_LABEL[t.category] || 'Spot';
+    const cat = pinKindLabel(t) || PIN_CAT_LABEL[t.category] || 'Spot';   // #80 Build 3 — grave/museum kind line; lore residual stays "History"
     /* #236 — THE DRAWER META LINE IS THE CONSOLIDATED MIRROR OF THE PIN SHEET'S.
        Same order the opened sheet uses (fillPinSheet): category, then distance,
        then status — never status-before-distance. This is the LIGHT version of
