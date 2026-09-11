@@ -75,6 +75,17 @@
            SAME line as the drawer's. Both sheets top out together and track this
            one number. */
     --sheet-max:calc(100vh - 150px - env(safe-area-inset-top));
+    /* MUST track #app's OWN height basis. #app is `height:100vh; height:100dvh`
+       (progressive enhancement — a dvh-aware browser uses the DYNAMIC viewport,
+       which SHRINKS when the iOS Safari address bar is showing; a browser with no
+       dvh support keeps the 100vh line above). --sheet-max was left on 100vh only,
+       so whenever the address bar was up (100vh > 100dvh by the bar's height) the
+       two content-sized sheets were capped against a viewport ~60-90px TALLER than
+       the app itself — they ate the 150px reserve and their tops climbed into the
+       map. The second declaration mirrors #app exactly, so both sheets and the app
+       are now measured against the SAME viewport. Keep the two lines paired: a
+       dvh-less browser discards this one and falls back to the 100vh line above. */
+    --sheet-max:calc(100dvh - 150px - env(safe-area-inset-top));
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -869,6 +880,15 @@
   }
   #map-3d-wrap.tilt-3d{transform:rotateX(38deg) scale(2.1);}
   #leaflet-map{position:absolute;inset:0;width:100%;height:100%;}
+  /* WARM RASTER TINT (2026.08.31b) — pushes the keyless OSM.org raster basemap
+     (iOS primary + desktop fallback) toward the old CARTO Voyager warmth: a touch
+     of sepia for warmth, calmed saturation (OSM standard is vivid pink/green),
+     a small warm hue nudge, and a hair brighter/softer toward cream. This is a
+     UNIFORM tint of the whole raster, not a per-layer Voyager match — tune the
+     four knobs to taste; drop the whole rule to revert. Applied only to
+     .nahgoo-warm-tiles (the tagged OSM.org layer), so pins/labels (separate
+     panes) and the desktop vector map are unaffected. */
+  .nahgoo-warm-tiles{ filter:sepia(0.32) saturate(0.82) hue-rotate(-8deg) brightness(1.05) contrast(0.95); }
   #target-drawer{
     display:flex;
     flex-direction:column;
@@ -1285,18 +1305,19 @@
   }
   .ps-by-name{color:var(--text);font-weight:600;}
   .ps-by-icon{width:13px;height:13px;flex:0 0 13px;opacity:.75;}
-  /* #31/#74 — "+N others also submitted", the vouch count. Renders whenever
-     t.seconds>0 — a vouch is a property of the PLACE (#162), so it shows even
-     when the canonical (oldest-wins) submitter has no rendered credit, which is
-     the common case for a folded pair. When a credit line precedes it, the
-     negative top margin tucks it under the credit and the 20px indent aligns it
-     under the credit TEXT (past the 13px icon + 7px gap); standalone it sits
-     just under the take as a dim footnote. A pin with no vouch is byte-identical
-     to before — the #16 seam still only ever appears inside the expanded sheet,
-     never on the pin or peek row. */
+  /* #31/#74 — "+N others also submitted", the vouch count. As of #301 the vouch
+     is FOLDED onto the `.ps-by` credit line ("Submitted by <name> + N others")
+     whenever a credit renders, so this standalone line now appears ONLY in the
+     no-credit case: a canonical (oldest-wins) submitter with no rendered name but
+     with other vouchers — the folded-pair case #31/#74 named, where the vouch is a
+     property of the PLACE (#162) and must still show. Because it is now always
+     standalone (never tucked under a credit above it), the former -9px tuck and
+     20px indent are gone; it sits on its own as a dim footnote. A pin with no vouch
+     is byte-identical to before — the #16 seam still only ever appears inside the
+     expanded sheet, never on the pin or peek row. */
   .ps-seconds{
     font-size:12px; line-height:1.4; color:var(--text-dim);
-    margin:-9px 0 13px; padding-left:20px;
+    margin:0 0 13px;
   }
   /* #61(b) — padding-bottom lives HERE as well as on #pin-sheet, and the reason
      is not redundancy. #pin-sheet.expanded #pin-sheet-expand is
@@ -1855,6 +1876,70 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   }
 
+  /* #348 — the passport PHOTOS collection: the keepsake photos (#209) the user
+     snapped at captured pins. A 3-column grid on the card (the 3 most recent) and
+     on the view-all screen (all of them, newest first). Each image fills the full
+     column WIDTH and the tile GROWS to the image's natural HEIGHT (width:100% +
+     height:auto), so the whole photo shows at its true aspect ratio with NO crop
+     and NO letterbox bars — tiles in a row can differ in height (a portrait sits
+     taller than a landscape). `align-items:start` keeps each tile its own height
+     rather than stretching to the row. `:empty` gives a square placeholder only
+     while a tile is still loading its bytes; a tile whose bytes can't be resolved
+     removes itself. Tiles are tappable ONLY on the view-all page (.is-tappable) —
+     the card previews are display-only. */
+  .photo-thumb-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start;
+  }
+  .photo-thumb{
+    position:relative;border-radius:12px;overflow:hidden;
+    background:var(--surface-2);border:1px solid var(--line);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .photo-thumb:empty{ aspect-ratio:1/1; }   /* loading placeholder, dropped once the image lands */
+  .photo-thumb img{
+    display:block;width:100%;height:auto;
+  }
+  .photo-thumb.is-tappable{cursor:pointer;}
+  .photo-thumb.is-tappable:active{opacity:0.85;}
+  /* #348 — full-screen single-photo viewer, opened by tapping a thumbnail. Same
+     overlay language as the #209 capture prompt (.cpp-overlay): map faint behind,
+     X top-right, tap the backdrop to dismiss. Display-only, no editing. */
+  .pv-overlay{
+    position:fixed;inset:0;z-index:4000;display:none;
+    background:rgba(16,35,28,0.92);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  }
+  .pv-overlay.show{
+    display:flex;align-items:center;justify-content:center;padding:24px;animation:cppFade .2s ease;
+  }
+  /* #348 — the viewer stacks the photo over a caption (place name + capture date);
+     the image shrinks (flex + min-height:0) so the caption always stays on-screen. */
+  .pv-content{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    max-width:100%;max-height:100%;
+  }
+  .pv-overlay img{
+    max-width:100%;min-height:0;flex:0 1 auto;object-fit:contain;
+    border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  }
+  .pv-caption{
+    text-align:center;max-width:min(100%,520px);flex-shrink:0;
+  }
+  .pv-caption:empty{display:none;}
+  .pv-caption .pv-name{
+    font-size:16px;font-weight:700;color:var(--text);line-height:1.3;
+  }
+  .pv-caption .pv-date{
+    font-size:13px;color:var(--text-dim);margin-top:4px;
+  }
+  .pv-close{
+    position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(0,0,0,0.35);color:var(--text);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .pv-close svg{width:20px;height:20px;}
+  .pv-close:active{background:rgba(0,0,0,0.55);}
+
   /* ---------- Create hunt screen ---------- */
   #create-map{height:220px;border-radius:12px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line);}
   #suggest-gem-map{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
@@ -2395,33 +2480,62 @@
         <div class="icon-wrap"></div>
         <div><h3>Parks &amp; Trails</h3><p>Free places to walk.</p></div>
       </div>
+      <!-- #80 pass 2 — copy set to the POST-PIVOT reality: commercial is off the
+           map unless the specific place is independently documented (own
+           Wikipedia/Wikidata entry or an OSM inscription — the #13 notability
+           gate, upstream in nearby-places, NOT loosened here). So this card
+           shows only notable/historic shops and will read sparse, which is the
+           gate working, not a bug. The card reads the ALREADY-GATED set; it must
+           never get its own fetch or a looser filter to "fill" it — that would
+           reopen what #309/#312 removed. -->
       <div class="mode-card" data-cat="shops" onclick="selectExplore('shops')">
         <div class="icon-wrap"></div>
-        <div><h3>Shops</h3><p>Shops and boutiques.</p></div>
+        <div><h3>Shops</h3><p>Historic &amp; notable shops.</p></div>
       </div>
+      <!-- #80 pass 2 — same post-pivot rule as Shops: only bars/restaurants that
+           are independently documented (Wikipedia/Wikidata/inscription, the #13
+           gate upstream) survive onto the map, so this is "storied spots", not a
+           restaurant finder. Reads the already-gated set — never widen the gate
+           to fill this card (#309/#312). -->
       <div class="mode-card" data-cat="bars_restaurants" onclick="selectExplore('bars_restaurants')">
         <div class="icon-wrap"></div>
-        <div><h3>Bars &amp; Restaurants</h3><p>Food and drink nearby.</p></div>
-      </div>
-      <!-- #192 — HISTORY AND LORE MERGED INTO ONE CARD. Formerly two cards
-           (History / Lore & Legends) split on the "landmark vs. something-happened"
-           line (#13/#15/#162). Merged because at current scale a standalone Lore
-           tab is near-empty, and the merged bucket reads cleanly as "places with a
-           past". data-cat stays 'history' so all existing history routing
-           (startHistoryHunt, history_v1, buildPointsForKey's history_ arm, ATL,
-           the route guard) is reused unchanged; the former-lore gems are migrated
-           to category 'history' in the DB so they surface here. 'lore' is retired
-           as a stored value — see the migration in this pass's notes. -->
-      <div class="mode-card" data-cat="history" onclick="selectExplore('history')">
-        <div class="icon-wrap"></div>
-        <div><h3>History &amp; Lore</h3><p>Landmarks and where things happened.</p></div>
+        <div><h3>Bars &amp; Restaurants</h3><p>Notable spots with a story.</p></div>
       </div>
       <!-- #193 — Art: public art split out of History (murals, sculptures,
            statues, installations). Scaffolds from OSM tourism=artwork, so unlike
            the old Lore tab it is not empty by design. -->
       <div class="mode-card" data-cat="art" onclick="selectExplore('art')">
         <div class="icon-wrap"></div>
-        <div><h3>Art</h3><p>Murals, sculptures, and public art.</p></div>
+        <div><h3>Art &amp; Statues</h3><p>Murals, sculptures, and public art.</p></div>
+      </div>
+      <!-- #80 pass 2 — THE HISTORY & LORE CARD IS REMOVED AND ITS PINS PARTITIONED
+           ACROSS THREE KIND CARDS. Under the pivot (#308) EVERY pin earns its map
+           spot from a story, so "History & Lore" as its own card was redundant —
+           it was the axis the whole map already lives on. Its content (all
+           category:'history' pins) is now split, WITHOUT LOSS, by the KIND facet
+           (historyKindFacet): graves/memorials → Graves & Memorials, museums →
+           Museums, everything else (historic sites, plaques, attractions, history
+           gems, history wiki pins) → Lore. The facet is total, so removing the
+           History card strands nothing. startHistoryHunt / history_v1 / the
+           history_ blend arm / the regenerate arm all STAY (legacy history_v1
+           captures + All Things Local still read them); only the CARD is gone. -->
+      <div class="mode-card" data-cat="graves_memorials" onclick="selectExplore('graves_memorials')">
+        <div class="icon-wrap"></div>
+        <div><h3>Graves &amp; Memorials</h3><p>Notable resting places.</p></div>
+      </div>
+      <div class="mode-card" data-cat="museums" onclick="selectExplore('museums')">
+        <div class="icon-wrap"></div>
+        <div><h3>Museums</h3><p>Collections worth a visit.</p></div>
+      </div>
+      <!-- #80 pass 2 — "Lore" is the STORY RESIDUAL: history-family pins with no
+           distinct kind (historic sites, plaques, alleys, the type=historic/
+           attraction/null bucket, history gems, history wiki pins). Internally
+           keyed 'lorespots_' / mode 'lorespots', DELIBERATELY NOT the legacy
+           'lore' key/mode/category — that legacy value (#192-retired "Lore &
+           Legends") still exists for old lore_v1 captures and must not collide. -->
+      <div class="mode-card" data-cat="lorespots" onclick="selectExplore('lorespots')">
+        <div class="icon-wrap"></div>
+        <div><h3>History &amp; Lore</h3><p>Plaques, sites, and stories.</p></div>
       </div>
     </div>
 
@@ -2680,7 +2794,7 @@
          shapes tried and why this one is the safest of them. onclick is the
          guideline's required route to the licence text, so it must keep
          leading to Settings → Credits. -->
-    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap · CARTO</button>
+    <button id="map-attrib" onclick="openCredits()" aria-label="Map data credits and licences">© OpenStreetMap</button>
     <button id="locate-btn" onclick="recenterMap()" aria-label="Center on me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -2782,6 +2896,11 @@
          now shows only the most-recently-earned, the full grid living on its own
          screen. -->
     <div id="passport-stamps-section"></div>
+    <!-- #348 — PHOTOS collection: the keepsake photos (#209) taken at captured
+         pins. Same recent-preview + "View all" pattern as Stamps; renderPassport()
+         fills it. Sits below Stamps (both are per-capture collections) and above
+         Achievements. -->
+    <div id="passport-photos-section"></div>
     <div id="passport-achievements-section"></div>
   </div>
 
@@ -2798,6 +2917,22 @@
       </button>
     </div>
     <div id="stamps-all-grid"></div>
+  </div>
+
+  <!-- #348 — VIEW-ALL: every photo, newest first, in a 3-column grid. Same no-nav
+       sub-screen pattern as #screen-stamps-all (#81/#177): shown via showScreen(),
+       Back returns to the passport, the Passport nav tab stays lit.
+       renderAllPhotos() fills the grid on open. -->
+  <div class="screen" id="screen-photos-all">
+    <div class="title-row">
+      <h1 class="page-title">Your Photos</h1>
+      <button class="icon-btn" onclick="closeAllPhotos()" aria-label="Back to passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div id="photos-all-grid"></div>
   </div>
 
   <!-- #63 — VIEW-ALL: the full tiered achievements grid (earned + locked), moved
@@ -3109,7 +3244,7 @@
         </p>
         <p class="credit-row">
           <strong>Map tiles</strong>
-          © <a class="credit-link" href="https://carto.com/" target="_blank" rel="noopener noreferrer">CARTO</a>, built from OpenStreetMap data.
+          Vector tiles from <a class="credit-link" href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> © <a class="credit-link" href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a> on desktop, and retina map tiles from <a class="credit-link" href="https://stadiamaps.com/" target="_blank" rel="noopener noreferrer">Stadia Maps</a> © <a class="credit-link" href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a> on phones, with <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'s standard tiles as the keyless fallback. All built from OpenStreetMap data.
         </p>
         <p class="credit-row">
           <strong>Place search</strong>
@@ -3117,11 +3252,11 @@
         </p>
         <p class="credit-row">
           <strong>Place descriptions</strong>
-          Some come from <a class="credit-link" href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia</a>, under CC BY-SA.
+          What a place <em>is</em> comes from public sources — the <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> data credited above and <a class="credit-link" href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia</a> (under CC BY-SA), matched to the spot by name and location. We never write these ourselves, and a pin is left blank when nothing reliable fits.
         </p>
         <p class="credit-row">
-          <strong>Everything else</strong>
-          Gems are written by the people who submitted them. That part isn't borrowed from anywhere.
+          <strong>What people add</strong>
+          When someone adds a place, what they're contributing is the recommendation itself — a real person vouching that it's worth finding. The description is sourced above, not written by them; their own words aren't published.
         </p>
       </div>
     </div>
@@ -3164,6 +3299,20 @@
         Take a photo
       </button>
       <button type="button" class="cpp-skip" onclick="closeCapturePhotoPrompt()">Skip — no photo for this one</button>
+    </div>
+  </div>
+
+  <!-- #348 — full-screen single-photo viewer, opened by tapping a passport photo
+       thumbnail. Display-only; the X or a backdrop tap dismisses. The <img> src is
+       set by openPhotoViewer() to a live object URL owned by the grid that opened
+       it. -->
+  <div id="photo-viewer" class="pv-overlay" aria-hidden="true" role="dialog" aria-modal="true" onclick="if(event.target===this)closePhotoViewer()">
+    <button type="button" class="pv-close" onclick="closePhotoViewer()" aria-label="Close photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="pv-content" onclick="if(event.target===this)closePhotoViewer()">
+      <img id="photo-viewer-img" alt="">
+      <div id="photo-viewer-caption" class="pv-caption"></div>
     </div>
   </div>
 
@@ -3427,7 +3576,7 @@
      both L and maplibregl to already exist). If either of these two fails to
      load (CDN blocked, offline, ancient WebGL-less browser), addBaseLayer()
      detects the missing L.maplibreGL / WebGL and SILENTLY falls back to the
-     old CARTO raster layer, which itself falls back to StylizedGrid — so a
+     OSM.org raster layer, which itself falls back to StylizedGrid — so a
      failed vector load degrades to exactly today's behaviour, never a blank map.
      maplibre-gl pinned to major 5; the binding pinned to an exact version.
      Tighten maplibre-gl@5 to its exact resolved patch on the next pass if drift
@@ -4354,7 +4503,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
    longer be either — gemDisplayCategory has never returned it since #16, and
    startHiddenGemsHunt was the last thing that set mode:'gems'. 'discover' went
    with startDiscoverHunt. 'discoverlocal' is All Things Local and stays. */
-const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. */
+const MODE_COLOR = { tourist:'#E8622C', discoverlocal:'#EDE9DD', local:'#4C8FC0', random:'#D9B44A', code:'#9A7FBF', custom:'#9A7FBF', park:'#6FA85C', trail:'#D9B44A', shops:'#4C8FC0', bars:'#C1587A', restaurants:'#C1587A', history:'#B08D57', barsrest:'#C1587A', lore:'#3E9C8F', art:'#3E9C8F', graves:'#7C8B9A', museums:'#B5563C', lorespots:'#B08D57' }; /* #193 — art reuses lore's freed teal; lore kept for legacy lore_v1 hunt pins. #273 — restaurants recoloured #E8622C→#C1587A so the whole food family (bars/restaurants/barsrest) is one pink; #E8622C stays the `tourist`/fallback colour, so freeing it here is not a removal. #80 pass 2 — graves/museums/lorespots are the new kind-card hunt modes; graves stone, museums sienna, lorespots gold (= history, the residual). These set the hunt DEFAULT colour. grave/museum PINS carry category:'history', but as of Build 3 (2026.09.10a) the render path derives the KIND via pinKind()/historyKindFacet and prefers PIN_KIND_COLOR, so a grave paints stone and a museum sienna on the map/drawer/sheet — matching these hunt colours. The 'lore' residual still falls through to the history gold below. */
 const FALLBACK_LOCATION = {lat:41.8827, lng:-87.6233}; // used only until a real/simulated fix arrives
 
 /* #103 — startBuiltinHunt() (the tourist-route STARTER) was deleted 2026-08-04;
@@ -4759,6 +4908,10 @@ function gemPoint(g, idPrefix, ctxCategory, extra){
        cost. Undefined on every scaffolded pin, and on any gem without a
        renderable name. */
     by:g.by,
+    // #154 fix — submitter-presence boolean (see nearbyApprovedGems). #315 keys
+    // its take-hiding on this, NOT on `by`, so a credit-name fetch race can't
+    // un-hide a user gem's typed take. Undefined→falsy on every scaffolded pin.
+    hasSubmitter:!!g.hasSubmitter,
     // #31/#225 — the vouch count carried onto the point for the pin sheet.
     seconds:g.seconds || 0
   }, extra||{});
@@ -5911,6 +6064,83 @@ function dedupePoints(points){
   return out;
 }
 
+/* #80 pass 2 — THE KIND FACET for the History & Lore family, and the single
+   place the graves-are-gems gap is handled. The `type` (place-KIND) axis added
+   in pass 1 exists ONLY on OSM real places (typeOsm); GEMS carry no type —
+   including the #310 notable graves, loaded as `submissions` named
+   "Grave of <person>", category 'history'. So a pure type filter would route
+   every seed grave into Lore and leave Graves & Memorials near-empty (the
+   #16/#193 empty-card trap). The NAME test ("Grave of ") catches the gem graves
+   the type field misses; OSM tombs/memorials match on type; museums are OSM
+   (type 'museum'); everything else in the history family is the Lore residual.
+   Returns exactly one of 'graves' | 'museums' | 'lore' — the facet is TOTAL, so
+   removing the History card lost nothing. */
+function historyKindFacet(p){
+  const ty = p && p.type;
+  const nm = (p && p.name) || '';
+  if(ty === 'grave' || ty === 'memorial' || /^grave of /i.test(nm)) return 'graves';
+  if(ty === 'museum') return 'museums';
+  return 'lore';
+}
+/* #80 Build 3 — FACET-AWARE PIN RENDER. A history-family pin carries ONE
+   category ('history'), so colour/label/glyph keyed on t.category alone paint
+   every grave, museum and lore pin history-gold + "History" on the map, the
+   drawer and the sheet — even though pass 2 already groups them onto distinctly
+   coloured Discover cards (graves stone, museums sienna). This derives the
+   visible KIND from historyKindFacet so the map matches the cards: grave pins
+   render stone + "Grave" + a headstone glyph, museum pins sienna + "Museum" + a
+   pediment glyph. The LORE RESIDUAL (genuine lore gems AND OSM historic /
+   attraction) is deliberately LEFT as history-gold + "History": historyKindFacet
+   folds OSM historic buildings into 'lore', and relabelling a historic courthouse
+   "Lore" would OVERCLAIM — the specific OSM-subtype micro-label is #80's still-open
+   residual, an operator decision recorded in the roadmap row, NOT settled here. So
+   pinKind returns only the two kinds that recolour; 'lore' falls through to the
+   unchanged history render (gold + "History" + the columned-building glyph).
+   NOTE — the grave detection is historyKindFacet's SAME name heuristic
+   (/^grave of /i on gem names, since seed graves carry no `type`), so if #342
+   ever relabels "Grave of X" the facet AND this render move together, in one place. */
+const PIN_KIND_COLOR = { graves:'#7C8B9A', museums:'#B5563C' };
+const PIN_KIND_LABEL = { graves:'Grave', museums:'Museum' };
+const PIN_KIND_GLYPH = {
+  graves:'<path d="M7 21V10a5 5 0 0 1 10 0v11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 12.5v4.6M9.7 14.3h4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', // headstone + cross
+  museums:'<path d="M12 3 21 9H3zM5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 10.5v8M10 10.5v8M14 10.5v8M17.5 10.5v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' // pediment + columns
+};
+function pinKind(t){
+  if(!t || t.category !== 'history') return null;
+  const f = historyKindFacet(t);
+  return (f === 'graves' || f === 'museums') ? f : null; // 'lore' residual -> null -> unchanged history render
+}
+function pinKindColor(t){ const k = pinKind(t); return k ? PIN_KIND_COLOR[k] : null; }
+function pinKindLabel(t){ const k = pinKind(t); return k ? PIN_KIND_LABEL[k] : null; }
+function kindGlyphSVG(kind, ink){
+  const g = PIN_KIND_GLYPH[kind]; if(!g) return '';
+  return `<svg viewBox="0 0 24 24" width="14" height="14" style="color:${ink}">${g}</svg>`;
+}
+/* #80 pass 2 — build one of the three history-family kind cards. This is a
+   FILTER over the SAME history blend the old History & Lore card used, NOT a new
+   fetch: it pulls history gems (incl. seed graves) + real internet history
+   places through the existing readers, so the #294 source toggle (word-of-mouth
+   withholds real OSM), the #65 radius, and gem/real precedence all behave
+   identically to every other card. Only pins whose facet matches are kept,
+   nearest-first, deduped by name (the blendCategory contract). */
+function blendHistoryFacet(base, facet, targetCount){
+  const out = [];
+  const used = new Set();
+  const push = p => { const k=normName(p.name); if(k && used.has(k)) return; if(k) used.add(k); out.push(p); };
+  // 1) history gems (user submissions + the #310 seed graves), facet-filtered on the raw gem (which carries .name)
+  nearbyApprovedGems(base, [], targetCount*3, 'history').forEach(g=>{
+    if(historyKindFacet(g) !== facet) return;
+    push(gemToPoint(g, 'history'));
+  });
+  // 2) real internet history places (OSM tombs/museums/historic), facet-filtered on the real place (which carries .type)
+  if(out.length < targetCount*3){
+    nearbyRealPlaces(base, 'history', targetCount*3).forEach(rp=>{
+      if(historyKindFacet(rp) !== facet) return;
+      push({...rp, category:'history'});
+    });
+  }
+  return out.slice(0, targetCount);
+}
 function buildPointsForKey(key, base){
   /* #111 — the third multi-blend branch, and the only one #107 left unwrapped.
      buildAllThingsLocal() dedupes by NAME via its own `seen` set, which is why
@@ -5946,6 +6176,14 @@ function buildPointsForKey(key, base){
   ]);
   if(key.startsWith('history_'))    return blendCategory(base,'history',8,()=>generateLocalHistory(base),'history');
   if(key.startsWith('art_'))        return blendCategory(base,'art',8,()=>[],'art'); // #193 — art gems + real OSM artwork; no procedural filler (none exists for art)
+  /* #80 pass 2 — the three kind cards that partition the history family. Each is
+     a facet FILTER over the same history blend (see blendHistoryFacet); no new
+     fetch, no procedural filler. Higher targets than history's 8 because graves
+     cluster densely in a cemetery (#245 label-collision + the list cap handle
+     on-screen clutter). */
+  if(key.startsWith('gravesmem_'))  return blendHistoryFacet(base, 'graves', 40);
+  if(key.startsWith('museums_'))    return blendHistoryFacet(base, 'museums', 20);
+  if(key.startsWith('lorespots_'))  return blendHistoryFacet(base, 'lore', 40);
   // No blendCategory here on purpose: blending would let OSM/Wikipedia places
   // leak into a tab whose entire premise is that everything in it is human.
   /* #149 — was gemPoint(g,'lore'), which minted lore<gemId> while every blend
@@ -6368,6 +6606,10 @@ async function loadKey(key, apply, fallback){
 const STABLE_HUNT_PREFIXES = ['local','parkstrails','localparks','shops','bars',
   'restaurants','barsrest','history','gems','lore','stateparks','nationalparks',
   'trails','discover','random',
+  'gravesmem','museums','lorespots', /* #80 pass 2 — the three kind cards are
+    auto-generated location hunts, so their captures inject back via #40b and
+    reconcile via #147; each MUST also get a CAPTURED_MODE_ACCEPT entry below or
+    capturedModeFilterFor defaults to accept-all and paints foreign captures. */
   'art' /* #229 — Art (#193) was missed here. Without it art_v1 is not a shared
            key, so isFound() takes the single-bucket branch on the Art card and a
            place captured under All Things Local reads as un-captured there; it
@@ -6455,6 +6697,16 @@ const CAPTURED_MODE_ACCEPT = {
   barsrest:      ['bars','restaurants','barsrest'],
   history:       ['history'],
   lore:          ['lore'],
+  /* #80 pass 2 — the three kind cards accept ONLY their own capture mode (the
+     #229 conservative rule: capturedModeFilterFor defaults to accept-all when a
+     key is absent, which would paint foreign history captures onto these cards).
+     These are NEW cards so there are no legacy captures under them; a grave
+     captured from All Things Local (mode null) or the retired History card
+     (mode 'history') won't re-inject here, but it still shows whenever the facet
+     blend re-produces it — acceptable, and it keeps each card clean. */
+  gravesmem:     ['graves'],
+  museums:       ['museums'],
+  lorespots:     ['lorespots'],
   art:           ['art']  /* #229 — restore ONLY art captures onto the Art card
                              (the #147 category-promise rule). Load-bearing now that
                              'art' is a shared prefix: capturedModeFilterFor defaults
@@ -6964,34 +7216,53 @@ async function fetchGemSeconds(ids){
 }
 async function loadApprovedGems(){
   try{
-    const { data, error } = await sb
-      .from('submissions')
-      /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
-         only to look a display name up. A null here is a real and reachable
-         value the moment #82 is live (account deletion anonymises gems by
-         nulling this column), and it must render NO credit line — never
-         "Submitted by Unknown". See #124. */
-      .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
-      .eq('status', 'approved')
-      /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
-         makes the whole thing work: a merged submission keeps a REAL status
-         (it mirrors the pin it was folded into), so without this filter an
-         approved duplicate would render as a second pin at the same spot —
-         precisely the defect the feature exists to remove.
+    /* #346 — PAGINATE PAST THE 1,000-ROW REST CAP. PostgREST returns at most
+       1,000 rows per response (the same cap graves-resolve.ts pages past, #338).
+       This read was a single unpaginated select, so once the approved + unmerged
+       submission set crossed 1,000 rows (the grave-seed rollout #310/#335/#338
+       pushed it there), it silently loaded only the FIRST 1,000 gems/seeds and
+       DROPPED the rest — human-submitted gems past the cutoff never entered
+       state.approvedGems and so could never blend, paint, or be captured, even
+       though the backend served them fine. We now page until a short page ends
+       it, ORDERED BY id (a stable, unique total order — REQUIRED, or PostgREST
+       range pagination can skip or duplicate rows across page boundaries). */
+    const GEM_PAGE = 1000;
+    const rows = [];
+    for(let from = 0; ; from += GEM_PAGE){
+      const { data, error } = await sb
+        .from('submissions')
+        /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
+           only to look a display name up. A null here is a real and reachable
+           value the moment #82 is live (account deletion anonymises gems by
+           nulling this column), and it must render NO credit line — never
+           "Submitted by Unknown". See #124. */
+        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
+        .eq('status', 'approved')
+        /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
+           makes the whole thing work: a merged submission keeps a REAL status
+           (it mirrors the pin it was folded into), so without this filter an
+           approved duplicate would render as a second pin at the same spot —
+           precisely the defect the feature exists to remove.
 
-         `merged_into IS NULL` is the single discriminator. Any future consumer
-         that must not double-count submissions filters on it: a leaderboard, a
-         contributor count, app-report's by_status totals (which DO currently
-         count merged rows inside their mirrored status — noted, not fixed
-         here, since that function is not in this repo). */
-      .is('merged_into', null);
-    if(error) throw error;
+           `merged_into IS NULL` is the single discriminator. Any future consumer
+           that must not double-count submissions filters on it: a leaderboard, a
+           contributor count, app-report's by_status totals (which DO currently
+           count merged rows inside their mirrored status — noted, not fixed
+           here, since that function is not in this repo). */
+        .is('merged_into', null)
+        .order('id', { ascending: true })
+        .range(from, from + GEM_PAGE - 1);
+      if(error) throw error;
+      const page = data || [];
+      for(const r of page) rows.push(r);
+      if(page.length < GEM_PAGE) break;   // a short (or empty) page is the last one
+    }
     // #12 display: prefer the mechanics-only cleaned text for what the map
     // SHOWS, falling back to the raw words when there is no clean value (the
     // guard discarded it, or nothing needed fixing). The raw name/description
     // stay canonical in the DB and are never overwritten — this is a display
     // preference only, so reverting this map restores the raw text everywhere.
-    const rows = data || [];
+    // (rows now holds the FULL approved+unmerged set, not a capped 1,000.)
     // #23 — one extra round trip for the whole map, not one per pin.
     const credits = await fetchGemCredits(rows.map(r=>r.submitted_by));
     // #31/#225 — a second round trip for the whole map: the vouch count per
@@ -7006,6 +7277,14 @@ async function loadApprovedGems(){
       // profile, a user who never set one, a failed lookup) lands here as
       // undefined and the sheet renders nothing at all.
       by: credits[r.submitted_by] || undefined,
+      // #154 fix — whether this gem HAS a submitter at all (a raw-uid presence
+      // boolean, never the uid itself, never rendered). #315's take-hiding must key
+      // on THIS, not on `by` (the resolved NAME), because `by` also goes undefined
+      // on a transient fetchGemCredits race — and keying the hide on `by` then
+      // leaks the user's typed take for a heartbeat until the name loads. A seed
+      // has no submitter (false → its sourced desc still shows); a user gem always
+      // has one (true → sourced-or-blank, never the take).
+      hasSubmitter: !!r.submitted_by,
       // #31/#225 — vouch count: how many OTHER people submitted this same place
       // (0 when none). Rendered only in the expanded sheet, only when >0 (#16).
       seconds: seconds[r.id] || 0
@@ -7538,7 +7817,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.08.19p';
+const APP_VERSION = '2026.09.10b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8199,6 +8478,17 @@ function openAllStamps(){
   setNavActive('screen-passport');
 }
 function closeAllStamps(){
+  setTab('screen-passport');
+  renderPassport();
+}
+/* #348 — the passport PHOTOS view-all, mirroring openAllStamps/closeAllStamps. */
+function openAllPhotos(){
+  renderAllPhotos();
+  showScreen('screen-photos-all');
+  setNavActive('screen-passport');
+}
+function closeAllPhotos(){
+  closePhotoViewer();          // don't leave the viewer open behind the passport
   setTab('screen-passport');
   renderPassport();
 }
@@ -9118,6 +9408,64 @@ const StylizedGrid = L.GridLayer.extend({
   }
 });
 
+/* WARM VOYAGER-MATCH BASEMAP THEME (2026.08.31a). The desktop vector basemap is
+   OpenFreeMap `positron` — a cool grey style. Users asked to restore the warmer
+   look the app had on CARTO Voyager (retired when CARTO went keyed, #304/#305).
+   CARTO Voyager's own style.json is no longer fetchable, so this does NOT clone
+   it; it recolours positron's layers toward a Voyager-like warm palette at
+   runtime (setPaintProperty), after the style loads. The tile DATA is untouched —
+   still OpenFreeMap, keyless, auto-updated — only the paint is overridden, so the
+   map stays HOSTED with no self-hosting and no owning updates. Matching is by
+   layer TYPE + id keyword (not exact ids) so it survives positron layer-list
+   drift; every set is wrapped because a paint prop that doesn't apply to a layer
+   type throws. iOS is NOT affected: it runs OSM.org raster (there is no vector
+   style to paint). Tune the VOYAGER palette below to taste — colour tweaks are
+   one-line edits here. */
+const VOYAGER = {
+  land:     '#F5F0E7', /* warm cream land / background */
+  water:    '#A9C9D6', /* muted soft blue */
+  green:    '#D7E3C6', /* pale warm green parks/woods */
+  building: '#EBE2D2', /* warm beige, a touch darker than land */
+  road:     '#FEFCF8', /* warm near-white road fill */
+  roadCasing:'#E6DBC8',/* warm tan road casing/outline */
+  boundary: '#CBBEA8', /* warm grey-tan admin lines */
+  label:    '#6B6252', /* warm dark label text */
+  labelHalo:'#F6F1E9'  /* cream label halo */
+};
+function applyWarmBasemapTheme(ml){
+  if(!ml || !ml.getStyle || !ml.setPaintProperty) return;
+  let style;
+  try { style = ml.getStyle(); } catch(_){ return; }
+  if(!style || !Array.isArray(style.layers)) return;
+  const has = (id, ...words) => words.some(w => id.indexOf(w) !== -1);
+  const set = (id, prop, val) => { try { ml.setPaintProperty(id, prop, val); } catch(_){} };
+  for(const layer of style.layers){
+    const id = (layer.id || '').toLowerCase();
+    const type = layer.type;
+    if(type === 'background'){
+      set(id, 'background-color', VOYAGER.land);
+    } else if(type === 'fill'){
+      if(has(id,'water') && !has(id,'name'))      set(id,'fill-color',VOYAGER.water);
+      else if(has(id,'building'))                 set(id,'fill-color',VOYAGER.building);
+      else if(has(id,'park','wood','forest','grass','golf','cemetery','pitch','meadow','scrub','garden','recreation','nature'))
+                                                  set(id,'fill-color',VOYAGER.green);
+      else if(has(id,'landuse','landcover','residential','sand','rock','earth'))
+                                                  set(id,'fill-color',VOYAGER.land);
+    } else if(type === 'fill-extrusion'){
+      set(id,'fill-extrusion-color',VOYAGER.building);
+    } else if(type === 'line'){
+      if(has(id,'water','river','waterway'))      set(id,'line-color',VOYAGER.water);
+      else if(has(id,'boundary','admin'))         set(id,'line-color',VOYAGER.boundary);
+      else if(has(id,'casing','outline','_case')) set(id,'line-color',VOYAGER.roadCasing);
+      else if(has(id,'road','transportation','highway','street','motorway','trunk','primary','secondary','tertiary','bridge','tunnel','service','minor','path'))
+                                                  set(id,'line-color',VOYAGER.road);
+    } else if(type === 'symbol'){
+      set(id,'text-color',VOYAGER.label);
+      set(id,'text-halo-color',VOYAGER.labelHalo);
+    }
+  }
+}
+
 /* Tries real map tiles (real roads, real buildings) first. Some preview/sandbox
    environments block requests to non-cdnjs domains, which shows up as tiles
    silently failing to load — if enough of them error out, this falls back to
@@ -9125,29 +9473,44 @@ const StylizedGrid = L.GridLayer.extend({
 function addBaseLayer(map){
   /* #256 — VECTOR-FIRST BASEMAP with a raster fallback ladder.
      PRIMARY: a GPU MapLibre GL vector layer drawn INSIDE this Leaflet map via
-     L.maplibreGL, using CARTO's VOYAGER vector style
-     (basemaps.cartocdn.com/gl/voyager-gl-style/style.json) — the SAME warm Voyager
-     palette the app used as CARTO raster from day one, now rendered as GPU vector.
-     Vector + WebGL is what gives the continuous, crisp fractional zoom deflock has
-     and raster could not (#250's stated honest limit): raster PNGs CSS-scale soft
-     between integer levels, a GL renderer redraws crisply at every fractional
-     level — so the zoomSnap:0 already on the L.map finally pairs with a renderer
-     that can honour it. Keeping Voyager (not a busier style like OpenFreeMap
-     'liberty', which #256's first build shipped and was reverted) is deliberate:
-     Voyager is muted, so the category pins keep the contrast the #326 credit-scrim
-     math was tuned against — a colourful basemap washed the pins out. All three
-     app maps (#leaflet-map, #suggest-gem-map, #create-map) build through here, so
-     one change covers all three.
+     L.maplibreGL, using OpenFreeMap's POSITRON vector style
+     (tiles.openfreemap.org/styles/positron).
+     PROVIDER SWAP (2026.08.28) — CARTO began requiring an API key for its
+     basemaps and started stamping unauthenticated tile requests with an "API KEY
+     REQUIRED" watermark (industry-wide, hit us on the iOS raster path first). We
+     left CARTO entirely rather than take a keyed free tier that can be gated again.
+     OpenFreeMap is keyless, has no request limit, and is self-hostable — so the
+     exact failure that bit us (a provider gating us with no recourse) cannot recur
+     the same way. Vector + WebGL is what gives the continuous, crisp fractional
+     zoom deflock has and raster could not (#250's stated honest limit): raster PNGs
+     CSS-scale soft between integer levels, a GL renderer redraws crisply at every
+     fractional level — so the zoomSnap:0 already on the L.map finally pairs with a
+     renderer that can honour it. POSITRON (light grey, muted), NOT OpenFreeMap
+     'liberty' (which #256's first build shipped and was reverted for washing the
+     pins out) and NOT the old warm Voyager: positron is muted with even MORE pin
+     contrast than Voyager, so the category pins keep — actually gain — the contrast
+     the #326 credit-scrim math was tuned against. The one real loss is warmth: the
+     basemap now reads grey rather than the old cream. All three app maps
+     (#leaflet-map, #suggest-gem-map, #create-map) build through here, so one change
+     covers all three.
      LADDER, so a failed vector load is NEVER a blank map: vector -> (binding
-     missing / WebGL unavailable / repeated GL error) -> CARTO raster -> (tileerror)
-     -> StylizedGrid. The bottom two rungs are the exact pre-#256 behaviour, and the
-     raster fallback is Voyager too, so vector and fallback look identical.
-     ATTRIBUTION / RECIPIENT UNCHANGED FROM THE APP'S WHOLE HISTORY: the tile
-     provider is still CARTO (raster then, vector now), so the #map-attrib pill +
-     Credits modal keep OpenStreetMap / CARTO and privacy.html's recipient list is
-     unchanged — no new disclosure category, same terms the app always ran under.
-     STYLE is a one-word URL swap if ever wanted: voyager-gl-style ->
-     positron-gl-style (light grey, even more pin contrast) -> dark-matter-gl-style. */
+     missing / WebGL unavailable / repeated GL error) -> OSM.org raster -> (tileerror)
+     -> StylizedGrid. The bottom two rungs are the exact pre-#256 structure; the
+     raster rung is now OSM.org standard, not Voyager, so vector (grey positron) and
+     the raster fallback (colourful OSM standard) NO LONGER look identical — the
+     fallback is a visibly different, busier style. On iOS the raster rung is the
+     PRIMARY path (see the isIOS gate below), so most iOS users see OSM standard.
+     ATTRIBUTION / RECIPIENT CHANGED with the 2026.08.28 provider swap: tiles now
+     come from OpenFreeMap (vector) and OSM.org (raster) instead of CARTO, so the
+     #map-attrib pill + Credits modal were updated and privacy.html's tile-recipient
+     row was rewritten (CARTO out, OpenFreeMap + OSMF in). Keep those three in sync
+     on any future provider change — a provider change is a credits AND privacy change.
+     INTERIM NOTE: OSM.org's tile usage policy discourages high-volume apps using it
+     as a primary basemap. The durable answer for the raster/iOS path is self-hosted
+     raster tiles (our own storage), which also removes the OpenFreeMap dependency on
+     the vector path. That's the next hardening step; this swap kills the watermark now.
+     STYLE is a one-word URL swap if ever wanted: styles/positron ->
+     styles/liberty (warm, but washes pins) -> styles/bright -> styles/dark. */
 
   /* RASTER FALLBACK — the pre-#256 path, byte-for-byte, reused only when vector
      can't run. #205 lives here: a single uninterrupted swipe outran the tile
@@ -9157,25 +9520,77 @@ function addBaseLayer(map){
      requests a tile only as it enters the viewport; it does not pre-fetch a ring
      ahead of the pan) and no TileLayer option removes it. The VECTOR path has no
      such band at all — MapLibre paints the whole GL viewport — so whenever vector
-     is running, #205 is moot. landing.html builds its own CARTO layer inline and
-     does NOT route through here, so it keeps the raster band and is a separate fix. */
+     is running, #205 is moot. landing.html builds its own OSM.org raster layer inline
+     (also de-CARTO'd on 2026.08.28) and does NOT route through here, so it keeps the
+     raster band and is a separate fix. */
   function addRasterFallback(){
-    const TILE_OPTS = { maxZoom:19, subdomains:'abcd', keepBuffer:6, updateWhenIdle:false, updateInterval:80 };
-    const real = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', TILE_OPTS);
-    let errorCount = 0, fellBack = false;
-    real.on('tileerror', () => {
-      errorCount++;
-      if(errorCount >= 4 && !fellBack){
-        fellBack = true;
-        map.removeLayer(real);
-        /* Same options on the fallback grid so the stylized map matches the buffer
-           behaviour; it draws synchronously on canvas so it never showed the band,
-           but keeping the options identical avoids a future divergence. */
-        new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
-        showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
-      }
-    });
-    real.addTo(map);
+    /* RASTER LADDER (2026.08.31d): OSM.org shows INSTANTLY (there is always a map),
+       then we PROBE Stadia and UPGRADE to its retina tiles only if auth succeeds.
+       WHY A PROBE, not a tileerror fallback: an unauthenticated Stadia request
+       returns HTTP 401, but the browser still DECODES Stadia's "401 Error"
+       placeholder image, so Leaflet's tileerror NEVER fires — a naive fallback
+       can't catch it (that was the "401 Error tiles across the whole map" bug in
+       2026.08.31c). A fetch() reads the real status, so we add Stadia ONLY on a
+       clean 200. Outcomes:
+         · domain not registered / key gated / offline → stay on warm OSM.org, no
+           401 tiles ever. THIS is the real CARTO-proofing (a gate degrades, never
+           breaks).
+         · registered → crisp @2x Stadia; OSM.org is removed once Stadia paints.
+       nahgoo.com must be added in the Stadia dashboard (client → Authentication)
+       for the upgrade to fire. @2x is HARDCODED on hi-DPI rather than using
+       Leaflet detectRetina (which ALSO applies a zoom-offset and over-sharpens).
+       Only the OSM.org rung carries .nahgoo-warm-tiles (the warm CSS tint); Stadia
+       renders its own designed look — if Alidade reads too cool vs. old Voyager,
+       add that class to STADIA_OPTS (one-line warmth). */
+    const retina = (window.devicePixelRatio || 1) > 1.3;
+    const STADIA_URL = retina
+      ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}@2x.png'
+      : 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png';
+    const STADIA_OPTS = { maxZoom:20, keepBuffer:6, updateWhenIdle:false, updateInterval:80, crossOrigin:true };
+    const OSM_OPTS    = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80, className:'nahgoo-warm-tiles' };
+
+    let osm = null, dead = false;
+
+    function addStylizedGrid(){
+      dead = true;
+      /* Same options on the fallback grid so the stylized map matches the buffer
+         behaviour; it draws synchronously on canvas so it never showed the band. */
+      new StylizedGrid({tileSize:256, minZoom:2, maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80}).addTo(map);
+      showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
+    }
+    function addOSM(){
+      osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', OSM_OPTS);
+      let errorCount = 0, fellBack = false;
+      osm.on('tileerror', () => {
+        errorCount++;
+        if(errorCount >= 4 && !fellBack){
+          fellBack = true;
+          try { map.removeLayer(osm); osm = null; } catch(_){}
+          addStylizedGrid();
+        }
+      });
+      osm.addTo(map);
+    }
+
+    /* Always paint a map right away with the keyless layer. */
+    addOSM();
+
+    /* Probe one Stadia tile; upgrade to crisp retina Stadia only on a real 200
+       (registered domain). fetch reads the true status even though an <img> would
+       have decoded the 401 placeholder. crossOrigin already works (Stadia serves
+       permissive CORS, which is how the 401 image rendered at all). */
+    try {
+      fetch('https://tiles.stadiamaps.com/tiles/alidade_smooth/3/4/3.png', { mode:'cors', cache:'no-store' })
+        .then(r => {
+          if(!r || !r.ok || dead) return;   /* 401 / gated / already stylized → stay on OSM.org */
+          const stadia = L.tileLayer(STADIA_URL, STADIA_OPTS);
+          /* Drop the OSM.org underlay once Stadia has actually painted, so we don't
+             sit on a double-fetch or flash a gap if Stadia is slow. */
+          stadia.on('load', () => { try { if(osm){ map.removeLayer(osm); osm = null; } } catch(_){} });
+          stadia.addTo(map);
+        })
+        .catch(() => {});   /* network / CORS error → stay on OSM.org */
+    } catch(_){}
   }
 
   /* WebGL + binding availability. maplibregl.supported was REMOVED in maplibre-gl
@@ -9221,7 +9636,7 @@ function addBaseLayer(map){
     addRasterFallback();
   }
   try {
-    gl = L.maplibreGL({ style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', attributionControl: false });
+    gl = L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', attributionControl: false });
     gl.addTo(map);
   } catch(_){
     toRaster();
@@ -9234,7 +9649,13 @@ function addBaseLayer(map){
      just don't wire the error-fallback in that (rare) case. */
   try {
     const ml = gl.getMaplibreMap && gl.getMaplibreMap();
-    if(ml && ml.on){ ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); }); }
+    if(ml && ml.on){
+      ml.on('error', () => { glErrors++; if(glErrors >= 5) toRaster(); });
+      /* Warm-recolour positron toward the old Voyager look once the style loads,
+         and immediately if it's already loaded from a warm cache (2026.08.31a). */
+      try { if(ml.isStyleLoaded && ml.isStyleLoaded()) applyWarmBasemapTheme(ml); } catch(_){}
+      ml.on('load', () => applyWarmBasemapTheme(ml));
+    }
     /* PAN-SYNC CATCH-UP (2026.08.11e). Reported + reproduced from a device
        screenshot: zoom all the way out, then pan, and the map paints only PART of
        the viewport — a blank vertical band on one side, WITHIN the world (the
@@ -9464,8 +9885,8 @@ function setupBaseMap(){
      #256 the basemap IS a vector renderer (MapLibre GL via addBaseLayer), so this
      zoomSnap now pairs with a renderer that redraws crisply at every quarter
      level — the soft-between-levels raster limit this note used to record only
-     applies on the CARTO raster FALLBACK (binding/WebGL unavailable), not the
-     happy path. wheelPxPerZoomLevel:120
+     applies on the OSM.org raster FALLBACK (binding/WebGL unavailable, and the
+     iOS primary path), not the desktop happy path. wheelPxPerZoomLevel:120
      (up from 60) slows desktop scroll-zoom so it glides rather than jumps (no
      effect on mobile pinch). This is NOT the #59/#246 zoom-snap-BACK behaviour
      (that re-centres the map on you during a zoom while following) — this is the
@@ -9591,6 +10012,9 @@ function regenerateCurrentHuntAt(base){
   else if(key.startsWith('barsrest_')) startBarsAndRestaurantsHunt(base);
   else if(key.startsWith('history_')) startHistoryHunt(base);
   else if(key.startsWith('art_')) startArtHunt(base); // #193/#183 — art is location-based; without this arm it falls to the fixed-guide else and gets "spots are fixed"
+  else if(key.startsWith('gravesmem_')) startGravesHunt(base); // #80 pass 2 — location-based facet card; needs its own regenerate arm or Search-this-area falls to the fixed-guide else
+  else if(key.startsWith('museums_')) startMuseumsHunt(base); // #80 pass 2
+  else if(key.startsWith('lorespots_')) startLoreSpotsHunt(base); // #80 pass 2
   else if(key.startsWith('lore_')) startLoreHunt(base); // lore IS location-based (nearbyApprovedGems 'lore'); without this arm it fell to the fixed-guide else below and got ZOOM_WALK + the "spots are fixed" toast while never reloading the area's stories — see startLoreHunt / buildPointsForKey's lore_ arm, the two minting sites that already exist
   /* #67 — stateparks_ / nationalparks_ arms deleted. They could only fire on an
      already-active hunt with that key, which became unreachable when the cards
@@ -10064,27 +10488,21 @@ function recenterMap(){
     if(state.me) regenerateCurrentHuntAt(state.me);
     return; // regenerate -> setCurrentHunt already recenters
   }
-  // #60 kept your zoom on EVERY plain press so a street-level look survived a
-  // recenter — but zooming OUT and then pressing locate left you stranded wide,
-  // panning to you without ever bringing you home. #174 makes the default frame
-  // a CEILING on how wide this button leaves you, resolving both directions:
-  //   - currently WIDER than the default frame -> reframe (zoom back in);
-  //   - currently AT or TIGHTER than default   -> keep your zoom (still #60), so
-  //     zooming into a block and tapping locate does not yank you out to the
-  //     overview — the exact case #60 was protecting.
-  // Compared against defaultFrameZoom() — the same number centerOnPlayer would
-  // pick — so the threshold and the destination can never disagree. The map is
-  // already visible and sized here (the user is looking at it and just tapped a
-  // button on it), so the synchronous getBoundsZoom inside defaultFrameZoom is
-  // reliable WITHOUT the invalidateSize/rAF dance centerOnPlayer needs on a
-  // container that may have only just been shown.
-  const curZoom = state.leafletMap.getZoom();
-  const defZoom = defaultFrameZoom(state.me);
-  if(Number.isFinite(curZoom) && Number.isFinite(defZoom) && curZoom < defZoom){
-    centerOnPlayer();                 // wider than default -> re-frame and zoom in
-  }else{
-    centerOnPlayer({keepZoom:true});  // at/tighter than default -> just recenter, keep zoom
-  }
+  // #343 — locate ALWAYS returns to the default view with the user centered.
+  // GRAVESTONE (#60/#174, reversed by directive 2026-09-08): this button used to
+  // KEEP your zoom whenever you were AT or TIGHTER than the default frame (#60,
+  // capped by #174 so it only reframed when you were zoomed OUT wider than
+  // default). That keep-zoom-as-ceiling behaviour is removed: the button now
+  // reframes to defaultFrameZoom() on every plain press, regardless of current
+  // zoom — "return to the default view, centered on me," which is how it read
+  // before the keep-zoom arm existed. The felt trigger for re-deciding this was
+  // the #304/#341 basemap swap (the vector/retina map reads more zoomed-out at a
+  // given level, so the keep-zoom arm fired far more often and locate stopped
+  // feeling like it went home). Note the zoom-comparison (curZoom vs defZoom)
+  // and its keep-zoom call are GONE: no live caller passes {keepZoom:true} now,
+  // so centerOnPlayer's keepZoom arm is dormant (kept as a capability, its
+  // comment updated so it doesn't claim a caller it no longer has).
+  centerOnPlayer();
 }
 function toggleTilt(){
   state.is3D = !state.is3D;
@@ -10172,8 +10590,14 @@ const EXPLORE_CAT_KEYPREFIX = {
   parks_trails: 'parkstrails_',
   shops: 'shops_',
   bars_restaurants: 'barsrest_',
-  history: 'history_',
-  art: 'art_' // #193
+  art: 'art_', // #193
+  // #80 pass 2 — the three kind cards that replaced History & Lore. 'history'
+  // entry removed with its card (updateExploreSelectionIcons iterates the live
+  // .mode-card[data-cat] nodes, so a keyless card just never lights — but drop
+  // it for cleanliness, matching the #192 lore-entry removal).
+  graves_memorials: 'gravesmem_',
+  museums: 'museums_',
+  lorespots: 'lorespots_'
   /* #67 — gems and national_parks entries deleted; neither has a card, so
      updateExploreSelectionIcons() could never match them. #192 — the 'lore'
      entry went with its card in the History & Lore merge. */
@@ -10183,8 +10607,17 @@ const EXPLORE_CAT_COLOR = {
   parks_trails: '#6FA85C',
   shops: '#4C8FC0',
   bars_restaurants: '#C1587A',
-  history: '#B08D57',
-  art: '#3E9C8F' // #193 — the teal freed by the lore merge
+  art: '#3E9C8F', // #193 — the teal freed by the lore merge
+  // #80 pass 2 — the three kind cards. New distinct CARD colours: graves stone
+  // blue-grey, museums sienna. Lore keeps history's gold (#B08D57) because Lore
+  // IS the history residual. These colour the CARD ICONS; as of Build 3
+  // (2026.09.10a) MAP PINS, drawer rows and the pin sheet now match — pinKind()
+  // derives graves/museums from historyKindFacet and PIN_KIND_COLOR paints them,
+  // so grave/museum pins are stone/sienna, not history-gold. The two colour
+  // tables (this CARD map + PIN_KIND_COLOR) are kept in sync by hand — same hex.
+  graves_memorials: '#7C8B9A',
+  museums: '#B5563C',
+  lorespots: '#B08D57'
   /* #67 — gems and national_parks deleted with their cards. */
 };
 const EXPLORE_ICON_DEFS = {
@@ -10207,7 +10640,13 @@ const EXPLORE_ICON_DEFS = {
   // #214 — body is the FRAME only; the sun moved to `dot` and the mountains are
   // `accent`, so the selected (filled) state can knock the interior out of the
   // filled frame instead of flooding it solid. See exploreCategoryIconSVG.
-  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4', dot:'M16.2 9a1.3 1.3 0 1 0 0.01 0', knockout:true}
+  art: {vb:'0 0 24 24', body:'M4 5h16v14H4z', accent:'M4.6 16.4l3.2-3.8 2.4 2.4 3.4-4.2 5.8 5.4', dot:'M16.2 9a1.3 1.3 0 1 0 0.01 0', knockout:true},
+  // #80 pass 2 — the three kind cards' icons. Simple fillable silhouettes like
+  // shops/art: `body` fills with the card colour when active, `accent` is a
+  // stroked line over it (both sit fine over the fill). Keyed by data-cat.
+  graves_memorials: {vb:'0 0 24 24', body:'M6.5 21V10a5.5 5.5 0 0 1 11 0v11z', accent:'M12 12.5v5.5M9.4 14.8h5.2'}, // headstone + cross
+  museums: {vb:'0 0 24 24', body:'M12 3.5 21 9.5H3zM4 20h16v1.6H4z', accent:'M6.4 10.5v8.5M9.6 10.5v8.5M14.4 10.5v8.5M17.6 10.5v8.5'}, // pediment + base, columns as strokes
+  lorespots: {vb:'0 0 24 24', body:'M4 5c3-1 6-1 8 .9 2-1.9 5-1.9 8-.9v13.6c-3-1-6-1-8 .9-2-1.9-5-1.9-8-.9z', accent:'M12 5.9v13.6'} // open book + spine
 };
 function exploreCategoryIconSVG(cat, color, filled){
   const def = EXPLORE_ICON_DEFS[cat];
@@ -10358,12 +10797,12 @@ function centerOnPlayer(opts){
      different behaviour, and the flag's is the one #8/#184 want. */
   const center = state.browsingLocation || state.searchedArea || state.me;
   if(!center) return;
-  /* #60 — position and zoom are two different requests, and this button used to
-     answer both: zoom into a block, press locate, and you got your position back
-     at the cost of the zoom you chose. Keep-zoom is passed ONLY from
-     recenterMap()'s plain local branch — and since #174, only its tighter-than-
-     default arm; when the user is wider than the default frame that branch calls
-     centerOnPlayer() with no opts so the reframe below runs instead.
+  /* #60 — position and zoom are two different requests, and this arm answers
+     "recenter WITHOUT reframing" (panTo only, keep the caller's zoom). As of
+     #343 (2026-09-08) NO live caller passes {keepZoom:true}: recenterMap() was
+     the only one, and it now always reframes to the default view. This branch is
+     kept as a dormant capability (a future "recenter but hold my zoom" affordance
+     can reuse it) — do NOT assume recenterMap still routes here.
      Three things are deliberately skipped on this path, and the last is the trap:
        - the zoom computation: there is no zoom to compute, so panTo is enough
          and is smoother than setView;
@@ -10515,7 +10954,30 @@ function startArtHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'art_v1';
-  setCurrentHunt({key, name:'Art', mode:'art', points:buildPointsForKey(key, base)});
+  setCurrentHunt({key, name:'Art & Statues', mode:'art', points:buildPointsForKey(key, base)}); // #80 pass 2 — browse header matches the "Art & Statues" card title; PIN_CAT_LABEL.art stays singular 'Art' for a single pin's kind line
+}
+/* #80 pass 2 — the three kind cards that replaced History & Lore. Each mirrors
+   startHistoryHunt but keys on its own stable prefix (gravesmem_/museums_/
+   lorespots_) and its own mode, and buildPointsForKey routes it through the
+   facet filter. mode 'lorespots' is DELIBERATELY not legacy 'lore' (which still
+   serves old lore_v1 captures). */
+function startGravesHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'gravesmem_v1';
+  setCurrentHunt({key, name:'Graves & Memorials', mode:'graves', points:buildPointsForKey(key, base)});
+}
+function startMuseumsHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'museums_v1';
+  setCurrentHunt({key, name:'Museums', mode:'museums', points:buildPointsForKey(key, base)});
+}
+function startLoreSpotsHunt(base){
+  base = base || state.me || FALLBACK_LOCATION;
+  ensureRealPlaces(base);
+  const key = 'lorespots_v1';
+  setCurrentHunt({key, name:'History & Lore', mode:'lorespots', points:buildPointsForKey(key, base)}); // #80 — card/header title; internal key/mode stay 'lorespots'/'lore', never the legacy 'lore'
 }
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
@@ -10582,6 +11044,23 @@ function toggleDrawer(){
   // with it visually but leaves it "open" in state: reopening the drawer would
   // then show a stale list against a query the user has forgotten typing.
   if(!nowCollapsed) closeAllPlaceSuggest();
+  /* Reopen the nearby list at the TOP. #drawer-body keeps its scroll offset across
+     a close/reopen: it only carries overflow-y:auto while the drawer is open, but
+     the offset it held survives the collapsed spell (the parent just clips it via
+     max-height:0/overflow:hidden — see #target-drawer), so it reappears scrolled on
+     the next open. toggleDrawer() never rebuilds #target-list on open (the GPS-tick
+     refresh does that out of band), so nothing else zeroes it. Reset here on the
+     OPEN edge, once the collapsed class is already off so #drawer-body is a live
+     scroll container — then again next frame, because the max-height open-transition
+     means the body isn't laid out to its full height on this synchronous tick and a
+     lone write can land before it's scrollable. */
+  if(!nowCollapsed){
+    const db = document.getElementById('drawer-body');
+    if(db){
+      db.scrollTop = 0;
+      requestAnimationFrame(()=>{ db.scrollTop = 0; });
+    }
+  }
 }
 /* Idempotent drawer close, used when LEAVING the map (showScreen). The drawer
    lives INSIDE #screen-map, so a tab switch merely HIDES it with the map rather
@@ -10976,8 +11455,11 @@ function selectExplore(cat){
     else if(cat==='parks_trails'){ startParksAndTrailsHunt(base); }
     else if(cat==='shops'){ startShopsHunt(base); }
     else if(cat==='bars_restaurants'){ startBarsAndRestaurantsHunt(base); }
-    else if(cat==='history'){ startHistoryHunt(base); } // #192 — now "History & Lore"; the lore card/route were merged in here
+    else if(cat==='history'){ startHistoryHunt(base); } // #192 — no card since #80 pass 2, but the arm stays: regenerateCurrentHuntAt still calls startHistoryHunt for a legacy history_v1 hunt
     else if(cat==='art'){ startArtHunt(base); } // #193
+    else if(cat==='graves_memorials'){ startGravesHunt(base); } // #80 pass 2
+    else if(cat==='museums'){ startMuseumsHunt(base); } // #80 pass 2
+    else if(cat==='lorespots'){ startLoreSpotsHunt(base); } // #80 pass 2 — the story residual card
   }finally{
     state._preserveViewOnNextHunt = false;
   }
@@ -12773,6 +13255,22 @@ function _placeNameMatch(a, b){
 function whatItisFor(t){
   if(t && t.whatItis) return String(t.whatItis).trim();
   if(!t || !t.by || !t.name) return '';
+  /* #325 — a rebuilt pin object (currentTargetsSorted rebuilds pins every GPS
+     tick / every reopen) arrives with t.whatItis UNSET, even for a gem whose
+     line resolved on an earlier open or was prewarmed on display (#327). That
+     value is held in state._whatItisCache by pin id. Read it SYNCHRONOUSLY here
+     so the sourced line is present on the FIRST paint of a reopen — no blank
+     frame, and no reliance on maybeEnrichWhatItis's re-entrant second fillPinSheet
+     to clobber a blank render before the browser paints. Only a credited gem
+     (t.gemId, matching maybeEnrichWhatItis's scope) uses that cache; a null entry
+     is a still-pending fetch (fall through, stay blank until it lands) and a ''
+     is a resolved-empty (fall through to the local-tile scan below). A cached
+     non-empty value already passed the val!==t.desc anti-take guard where it was
+     written (#315/#323), so surfacing it here can never leak the typed take. */
+  if(t.gemId && state._whatItisCache && (t.id in state._whatItisCache)){
+    const c = state._whatItisCache[t.id];
+    if(c) return String(c).trim();
+  }
   const all = (state.realPlaces && state.realPlaces.all) || [];
   let best = null, bestD = Infinity;
   for(const r of all){
@@ -12822,8 +13320,21 @@ function maybeEnrichWhatItis(t){
       // 2) #54 — no OSM twin: resolve the wiki "what it is" BY NAME server-side
       //    (Mr. Beef is famous, Wikipedia-documented, and simply not in OSM). The
       //    function verifies name + coordinate and returns text or null.
+      // #318 — this path only runs for a credited gem (guarded on t.by above), so
+      //    t.desc IS the submitter's stored writeup (#315 keeps it in the record but
+      //    never displays it). Forward it as `hint`: a descriptively-named gem
+      //    ("Dillinger died here") whose name can't match any article now resolves
+      //    by RECALL from its writeup (→ the Biograph Theater), still gated on the
+      //    pin's coordinate server-side. The val guard below already drops any
+      //    result equal to t.desc, so the user's own words can never surface.
+      // #318 FINAL RUNG ("B") — when NO wiki article resolves in any rung, the server
+      //    may instead return a neutral factual line GENERATED from the writeup (a
+      //    lore place no encyclopedia documents). It arrives here as an ordinary
+      //    place.desc and renders like any other line (operator: no label). The raw
+      //    take never surfaces — the model neutralises it, the server anti-launder
+      //    check + the val!==t.desc guard below both reject a mere reword.
       if(!wt){
-        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng, hint:t.desc } });
         const place = r2 && r2.data && r2.data.place;
         if(place && place.desc) wt = String(place.desc).trim();
       }
@@ -12923,7 +13434,7 @@ function maybeResolveSpotDesc(t){
    osmDesc() lines (which would be a #155 two-copy of that function). An overwrite
    is therefore always an upgrade or a guarded no-op, never a downgrade of real
    text.
-   SCOPED to the facts categories (history/park/trail): a bar/restaurant/shop is
+   SCOPED to the facts categories (history/park/trail/art): a bar/restaurant/shop is
    #275's user-gen/backstop territory and effectively never has a Wikipedia
    article, so firing resolveWiki on every commercial pin the user opens is cost
    with no payoff. Documented, not silent — widen REAL_DESC_FACTS_CATS if a real
@@ -12953,8 +13464,37 @@ function maybeResolveSpotDesc(t){
    commercial seed's value is the recommendation, not a wiki fact). A seed that
    later GRADUATES (a human adds a take → gains t.by + a real desc) leaves this
    branch and is handled by maybeEnrichWhatItis, which layers facts ABOVE the take. */
-const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1 };
-function maybeEnrichRealDesc(t){
+const REAL_DESC_FACTS_CATS = { history:1, park:1, trail:1, art:1 };
+/* #334 — how many facts pins get a NETWORK prewarm per marker rebuild. The free
+   tile-twin upgrade (step 1) runs for EVERY visible facts pin (zero network); this
+   caps only the by-name resolveWiki hop the #327 WATCH note flagged as the burst
+   risk for facts pins ("far more numerous" than gems — a dense metro view could
+   otherwise fire dozens of concurrent resolveWiki/Gemini calls, which 429 under
+   load — the seed-throttle lesson). The nearest ones are the ones a user walks up
+   to and opens; a pin beyond the cap still resolves on its own tap, exactly as
+   today. Tune this ONE number if description load ever stalls on paint. */
+const REAL_DESC_PREWARM_MAX = 12;
+/* art ADDED — a #193 public-art pin (sculpture/mural/statue) was the one facts
+   category never wired into this by-name resolve, so a notable artwork (e.g. Cloud
+   Gate) stayed on osmDesc's "A public sculpture." even with a real article. Now it
+   resolves the same way park/trail/history do — a gate-passing article upgrades the
+   line, anything else keeps the osmDesc fallback (never a wrong line). Operator ask:
+   "for osm lets source wiki descriptions ... if none we leave that fallback." */
+function maybeEnrichRealDesc(t, prewarmBudget){
+  /* #334 — prewarmBudget is passed ONLY by the marker-render loop (the DISPLAY
+     moment), a mutable { n } shared across that pass's pins. When present, this call
+     is a PREWARM: the free tile-twin upgrade below still runs, but the NETWORK rung
+     is skipped once the budget is spent (bounds concurrent resolveWiki hops to
+     REAL_DESC_PREWARM_MAX per rebuild, regardless of pin mix). The ON-OPEN call from
+     fillPinSheet passes NO budget, so a tapped pin ALWAYS resolves — unchanged.
+     Prewarm-safety, the load-bearing bit: every write path below now applies t.desc /
+     the cached value UNCONDITIONALLY (an in-memory upgrade — the marker label reads
+     t.name, not t.desc, so it's invisible while unselected) and gates ONLY the
+     fillPinSheet re-render on selection. So warming an UNSELECTED pin leaves t.desc /
+     the cache holding the real line, and the later tap paints it on the FIRST frame —
+     no round-trip delay, no filler flash. (Setting _descEnriched without setting
+     t.desc — the pre-#334 step-1 shape — would have latched the pin blank forever
+     once prewarmed; that is why step 1 changed.) */
   if(!t || t._descEnriched || !t.name || t.by) return;
   // Plain browsed OSM pin, OR an uncredited seed with no take and no description
   // yet (a facts-category scaffold whose seed-resolve enrichment missed it).
@@ -12977,7 +13517,8 @@ function maybeEnrichRealDesc(t){
     const wt = String(best.desc).trim();
     if(wt && wt !== cur){
       t._descEnriched = true;
-      if(state.selectedPinId === t.id){ t.desc = wt; fillPinSheet(t); }
+      t.desc = wt; // apply in-memory always (prewarm-safe); the twin's own text only (#334)
+      if(state.selectedPinId === t.id) fillPinSheet(t);
       return; // upgraded from the loaded tile — no network needed
     }
   }
@@ -12986,8 +13527,21 @@ function maybeEnrichRealDesc(t){
   const key = t.id;
   if(key in cache){
     const v = cache[key];
-    if(v && state.selectedPinId === key && cur !== v){ t._descEnriched = true; t.desc = v; fillPinSheet(t); }
-    return;
+    // Apply a cached upgrade to THIS (possibly rebuilt) pin object unconditionally —
+    // a prewarm that ran earlier this session put the real line here, so the tap
+    // paints it immediately. A null (pending) or '' (resolved-empty) falls through.
+    if(v && cur !== v){
+      t._descEnriched = true; t.desc = v;
+      if(state.selectedPinId === key) fillPinSheet(t);
+    }
+    return; // no new fetch — cache hit never spends prewarm budget
+  }
+  // 2b) NETWORK — a genuinely uncached facts pin. On a PREWARM pass, spend from the
+  // shared budget so the display burst is bounded; the on-open call (no budget)
+  // always proceeds.
+  if(prewarmBudget){
+    if(prewarmBudget.n <= 0) return;
+    prewarmBudget.n--;
   }
   cache[key] = null; // pending — blocks a duplicate fetch while in flight
   (async () => {
@@ -12997,7 +13551,13 @@ function maybeEnrichRealDesc(t){
       const wt = (place && place.desc) ? String(place.desc).trim() : '';
       const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
       cache[key] = val;
-      if(val && state.selectedPinId === key){ t._descEnriched = true; t.desc = val; fillPinSheet(t); }
+      // Land the value in the cache (durable channel) and on the captured object;
+      // re-render only if it's still the selected pin. A prewarm that landed while
+      // unselected leaves the line ready for the tap via the cache-hit branch above.
+      if(val){
+        t._descEnriched = true; t.desc = val;
+        if(state.selectedPinId === key) fillPinSheet(t);
+      }
     }catch(e){
       delete cache[key]; // retry next open — a failed fetch is not "no desc"
       console.warn('[#54] plain-pin what-it-is resolve failed', (e && e.message) || e);
@@ -13005,13 +13565,13 @@ function maybeEnrichRealDesc(t){
   })();
 }
 function fillPinSheet(t){
-  const color = pinSheetColor(t);
+  const color = pinKindColor(t) || pinSheetColor(t);   // #80 Build 3 — grave stone / museum sienna on the sheet's category dot
   /* #16 — a gem reads exactly like any other pin of its category. No "Hidden
      Gem" marker: the end state is that every spot on the map is user-submitted,
      so flagging which ones already are would advertise a distinction that is
      meant to disappear. The OSM/Wikipedia places are scaffolding until real
      submissions fill in behind them, not a second class of content. */
-  const cat = PIN_CAT_LABEL[t.category] || 'Spot';
+  const cat = pinKindLabel(t) || PIN_CAT_LABEL[t.category] || 'Spot';   // #80 Build 3 — grave/museum kind line; lore residual stays "History"
   const distTxt = (typeof t.dist === 'number') ? fmtDist(t.dist) + ' away' : '';
   const inRange = (typeof t.dist === 'number') && t.dist <= effectiveCaptureRange();
   /* #211/#222 — captured state is ONE line now. The meta-row status word carries
@@ -13079,6 +13639,32 @@ function fillPinSheet(t){
   }
   const cachedAddr = state._addrCache.get(addrCacheKey(t.lat, t.lng)) || null;
   const whatItis = whatItisFor(t);
+  /* #315 — the card shows ONE description and it is ALWAYS a sourced one, NEVER a
+     user's typed take. `factDesc` resolves to:
+       • a USER submission (t.hasSubmitter true): the online-resolved wiki "what it
+         is" (`whatItis`) if it resolved, otherwise BLANK. The submitter's typed
+         text (t.desc) is NEVER shown — if nothing sourced resolved, the card is
+         blank for now (the credible-source cascade fills these — #318).
+       • a SEED / OSM / real pin (no submitter): its t.desc, which is itself a
+         SOURCED description (the #313 Wikipedia backfill, or maybeEnrichRealDesc /
+         maybeResolveSpotDesc's resolved line) — shown, unchanged.
+     #154 fix — take-hiding is derived AUTHORITATIVELY from the canonical gem record
+     (state.approvedGems, looked up by gemId), NOT from the pin object's own flag.
+     The console proved the failure: a credited gem (canonical hasSubmitter=true) still
+     rendered its typed take, because a pin-BUILD path that doesn't thread hasSubmitter
+     produced the object this render used. Threading the flag through every build path
+     is unwinnable — there is always one more. Looking it up here, at the one render
+     point, makes the hide correct no matter which object arrived: a GEM (t.gemId) is a
+     user submission iff its canonical record has a submitter; only then is t.desc (the
+     take) suppressed. Seeds (canonical hasSubmitter=false) and non-gem pins keep
+     showing their SOURCED t.desc. Residual: an anonymised gem (#82 nulls submitted_by)
+     reads as no-submitter — the deferred account-deletion case. The credit LINE below
+     still keys on t.by (a NAME only renders once resolved). */
+  const _gemHasSubmitter = t.gemId
+    ? (state.approvedGems || []).some(g => g && g.id === t.gemId && g.hasSubmitter)
+    : false;
+  const _hasSubmitter = !!(t.hasSubmitter || _gemHasSubmitter);
+  const factDesc = whatItis || (_hasSubmitter ? '' : (t.desc || ''));
   const expandEl = document.getElementById('pin-sheet-expand');
   const expandHTML =
     /* #101 — render NO description block when there is no real description,
@@ -13107,16 +13693,18 @@ function fillPinSheet(t){
        scaffolded pin can carry one too; the seam closes by making the human
        layer reachable everywhere, not by making the other layer scarce.
        NOTHING RENDERS when there is no name — never "Submitted by Unknown", per
-       #23 decision (2) and #82's null submitted_by. */
-    `${whatItis ? `<div class="ps-slot"><span class="ps-slot-label">What it is</span><p class="ps-desc">${escapeHtml(whatItis)}</p></div>` : ''}
-     ${t.desc ? (whatItis
-       ? `<div class="ps-slot"><span class="ps-slot-label">A local's take</span><p class="ps-desc">${escapeHtml(t.desc)}</p></div>`
-       : `<p class="ps-desc">${escapeHtml(t.desc)}</p>`) : ''}
+       #23 decision (2) and #82's null submitted_by.
+       #301 — the vouch count (#31/#74) is now folded ONTO this one credit line as
+       "Submitted by <name> + N other/others" instead of a second line below. The
+       standalone `.ps-seconds` line survives ONLY for the no-credit folded-pair
+       case (a canonical submitter with no rendered name but with other vouchers),
+       so that vouch signal is not lost. When #301's seed "Anonymous" lead lands,
+       a seed's canonical becomes a rendered lead and that case largely disappears. */
+    `${factDesc ? `<p class="ps-desc">${escapeHtml(factDesc)}</p>` : ''}
      ${t.by ? `<div class="ps-by">
        <svg class="ps-by-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-       <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span></span>
-     </div>` : ''}
-     ${(t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : ''}
+       <span>Submitted by <span class="ps-by-name">${escapeHtml(t.by)}</span>${t.seconds > 0 ? ` + ${t.seconds} ${t.seconds === 1 ? 'other' : 'others'}` : ''}</span>
+     </div>` : ((t.seconds > 0) ? `<div class="ps-seconds">+${t.seconds} ${t.seconds === 1 ? 'other' : 'others'} also submitted</div>` : '')}
      ${renderPinLocationRow(t, cachedAddr)}
      <div class="ps-actions">${actions}</div>`;
   /* fillPinSheet re-runs on EVERY GPS tick (refreshTargetsUI, to keep the live
@@ -13143,13 +13731,6 @@ function fillPinSheet(t){
     // and the not-in-tile case #26's twin-adoption doesn't cover). No-op unless t
     // is the carried shared-spot pin (real place, pre-twin-adoption).
     maybeResolveSpotDesc(t);
-    // #54 — a PLAIN browsed OSM pin, OR an uncredited seed with no take and an
-    // empty description (a facts-category scaffold seed-resolve missed, e.g. The
-    // 606), shows only filler / nothing; resolve its real Wikipedia/OSM "what it
-    // is" and fill the desc so facts appear everywhere, not just on gems. No-op
-    // unless t is a facts-category (history/park/trail) OSM pin or empty seed. Its
-    // result re-enters fillPinSheet with a changed body, re-rendering here.
-    maybeEnrichRealDesc(t);
     // Coords render instantly; the address swaps in if/when the lookup lands.
     // The copy payload has to swap with it, or a slow lookup leaves the row
     // showing a street address while copying raw coordinates.
@@ -13166,6 +13747,21 @@ function fillPinSheet(t){
       });
     }
   }
+  // #331 — resolve a PLAIN OSM/seed FACTS pin's real Wikipedia/OSM "what it is" and fill
+  // the desc so facts appear on browsed pins, not just gems (#54). This runs OUTSIDE the
+  // _pinFillSig guard above, unlike the other enrich calls, on purpose: a facts pin can
+  // arrive from a CACHED TILE already carrying its osmDesc filler, so its fill signature
+  // MATCHES a prior render and the guarded block is skipped on open — the by-name resolve
+  // then never fires and the pin sits on the OSM tag forever (A Signal of Peace stuck on
+  // "A statue by Cyrus Dallin." while its real article resolved fine server-side). The
+  // function is SELF-GATING (returns once t._descEnriched is set or its cache key exists),
+  // so calling it every fillPinSheet is a fast no-op after the first resolve — no flash,
+  // no re-fetch, no scroll jump (only a real desc change re-renders). No-op unless t is a
+  // facts-category OSM pin or empty seed. As of #334 facts pins ARE prewarmed from the
+  // marker loop too (bounded), so on a warm pin this on-open call is usually a cache HIT
+  // that paints on the first frame; it stays here as the resolve trigger for a pin beyond
+  // the prewarm cap, or one tapped before its background resolve returned.
+  maybeEnrichRealDesc(t);
 }
 /* =========================================================
    #25 — REPORT A PIN
@@ -13467,7 +14063,19 @@ function flyToStop(lat, lng){
   const zoom = map.getZoom();
   const pt = map.project([lat, lng], zoom);
   pt.y += 80;
-  map.flyTo(map.unproject(pt, zoom), zoom, { duration: 0.6 });
+  const target = map.unproject(pt, zoom);
+  /* #330 — was map.flyTo(target, zoom, {duration:0.6}). The zoom NEVER changes
+     here (target zoom = current zoom), so flyTo's parabolic zoom-pan easing did
+     nothing useful — and on the iOS native-raster basemap (#274) its per-frame
+     zoom interpolation against zoomSnap:0.25 + raster tile loading read as a
+     rapid shake-then-settle on EVERY menu tap. panTo is a pure translate (no
+     zoom animation) and is the smooth-pan idiom the rest of the app already
+     uses (the #9078-region regenerate/search pan) with no shake — the
+     differential (flyTo shakes, panTo doesn't, everywhere else) is what points
+     here. Same destination, same 80px sheet nudge, same ~0.4s glide. If a
+     residual shake survives even this, the next step is animate:false (instant)
+     — but that rules flyTo out, it doesn't patch it blind. */
+  map.panTo(target, { animate: true, duration: 0.4 });
 }
 function wirePinSheet(){
   const sheet = document.getElementById('pin-sheet');
@@ -13574,12 +14182,17 @@ function scheduleLabelUpdate(){
    map stays clean. A zoom LEVEL (not a distance), so it lives here rather than in
    the #65 distance register. The map's default frame sits around zoom 13, so 15.5
    is roughly "a few blocks in" — raise it to reveal names later, lower it to
-   reveal them sooner. Was 16, then 15.5; dropped again to 15.0 (#270) because the
-   expanded pill reads as valuable enough to show a touch sooner when zoomed out —
-   half a level more, deliberately not a full one (a full level roughly doubles the
-   map area shown before any name appears, which crowds). Above the floor, the
-   collision pass still decides which fit. */
-const MIN_LABEL_ZOOM = 15.0;
+   reveal them sooner. Was 16, then 15.5; dropped to 15.0 (#270) because the
+   expanded pill reads as valuable enough to show a touch sooner when zoomed out.
+   DROPPED AGAIN 15.0 -> 14.0 (2026.09.08b) to restore the reveal DEPTH after the
+   #304/#305 basemap swap: Leaflet's zoom numbering did not change (Stadia @2x is a
+   URL suffix, NOT detectRetina's zoom-offset — see the tile block), but the retina
+   Stadia / positron-vector basemap makes a given zoom level READ as more zoomed-out
+   than the old CARTO raster did, so names that used to appear "a few blocks in" now
+   demanded a visibly deeper zoom. 14.0 is a full level earlier than 15.0 — it puts
+   the reveal back where it sat before the swap. If this now crowds, 14.5 is the
+   intermediate; the collision pass above still decides which names actually fit. */
+const MIN_LABEL_ZOOM = 14.0;
 /* #270 — set a pill's label reveal r in [0,1]: 0 = collapsed to the glyph (a
    round pin), 1 = fully unfurled. A partway r clips the name, which reads as the
    label sliding open. The arrow and glyph never move; only the name span animates. */
@@ -13664,8 +14277,14 @@ function refreshTargetsUI(){
   state.markersLayer.clearLayers();
   state.guideLayer.clearLayers();
 
+  // #334 — shared budget for the facts-pin NETWORK prewarm this rebuild (see the
+  // call inside the loop). Resets each rebuild; cached/already-enriched pins don't
+  // spend it, so after the first pass subsequent GPS-tick rebuilds cost ~0.
+  const _factsPrewarm = { n: REAL_DESC_PREWARM_MAX };
+
   targets.forEach((t, idx)=>{
-    const color = colorFor(t);
+    const kind = pinKind(t);                          // #80 Build 3 — grave/museum recolour + glyph; null for everything else
+    const color = (kind && PIN_KIND_COLOR[kind]) || colorFor(t);
     const isNearest = haloTarget && t.id===haloTarget.id;
     const isSelected = selectedTarget && t.id===selectedTarget.id;
     /* #270 — selected pill always unfurls its name (and is lifted above neighbours
@@ -13692,7 +14311,7 @@ function refreshTargetsUI(){
       html:`<div class="fm-wrap">
         ${isNearest ? '<div class="fm-halo"></div>' : ''}
         <div class="fm-pill${isSelected ? ' sel' : ''}" style="background:${pinColor};color:${ink}">
-          <span class="fm-gly">${categoryGlyphSVG(t.category, ink)}</span>
+          <span class="fm-gly">${kind ? kindGlyphSVG(kind, ink) : categoryGlyphSVG(t.category, ink)}</span>
           <span class="fm-txt">${t.name ? escapeHtml(t.name) : ''}</span>
           ${checkHtml}
         </div>
@@ -13709,6 +14328,43 @@ function refreshTargetsUI(){
        labels flickering on and off while you drag. */
     m._pinLabel = { id:t.id, name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx };
     m.on('click', ()=> openPinSheet(t));
+    /* #327 — PREWARM the "what it is" on DISPLAY, not on open. A credited gem's
+       description isn't stored (read-time, #23/#54); it resolves live via
+       maybeEnrichWhatItis (tile lookup → server resolveWiki), which historically
+       fired only from fillPinSheet on tap, so the text appended a beat AFTER the
+       sheet was already up. Kicking the SAME resolver here, as the pin renders,
+       lands the result in state._whatItisCache while the pin is unselected — the
+       function's `state.selectedPinId === key` gate makes that write SILENT (no
+       fillPinSheet, no flicker) — so by the time the user taps, fillPinSheet's
+       own maybeEnrichWhatItis call is a cache HIT and fills in the same synchronous
+       pass. maybeEnrichWhatItis self-gates (t.by + t.gemId + not-already-resolved
+       + cache-key-present), so this is a no-op for non-gems and a no-op on every
+       GPS-tick rebuild after the first fire for each gem — the per-pin cache is
+       what bounds it to ONE resolve per gem per session. SCOPE: all gems currently
+       on the map (currentTargetsSorted is radius-capped, ~25 pins), by directive —
+       the burst is a handful today; WATCH as coverage grows (a dense metro view
+       could fire N concurrent resolvers, each up to a cold-Overpass tile hop +
+       a Gemini-backed resolveWiki that 429s under load), and cap to nearest-N if
+       load tanks. Plain OSM/seed facts pins (maybeEnrichRealDesc) are ALSO prewarmed
+       now (#334, the call below) but BOUNDED — free for a loaded twin, capped to
+       REAL_DESC_PREWARM_MAX network resolves per rebuild — because they are far more
+       numerous, the burst risk this note names. */
+    if(t.isGem) maybeEnrichWhatItis(t);
+    /* #334 — PREWARM a plain OSM / empty-seed FACTS pin's Wikipedia "what it is" on
+       DISPLAY too, extending the #327 gem treatment to the facts categories
+       (art/park/trail/history) that #327 deliberately left out as "too numerous".
+       The delay opening an art pin was maybeEnrichRealDesc's ON-OPEN resolve (#331) —
+       a live resolveWiki hop landing AFTER the sheet was up. Kicking the SAME resolver
+       here, as the pin paints, warms state._realDescCache + t.desc while the pin is
+       UNSELECTED (the function's own selectedPinId gate keeps that write SILENT — no
+       fillPinSheet, no flicker), so the tap is a cache HIT and the line is on the
+       first frame. Self-gating (t.by / non-facts / already-enriched → instant no-op),
+       so this is harmless for gems (handled above) and commercial pins. BOUNDED by
+       _factsPrewarm: the free tile-twin upgrade runs for every visible facts pin, but
+       the network rung stops after REAL_DESC_PREWARM_MAX genuinely-uncached pins per
+       rebuild — the #327 WATCH lever, honoured. A pin beyond the cap still resolves on
+       its own tap, as before. */
+    maybeEnrichRealDesc(t, _factsPrewarm);
   });
   updatePinLabels();
 
@@ -13844,12 +14500,12 @@ function renderNearbyList(){
     : '';
 
   list.innerHTML = note + targets.map(t=>{
-    const color = colorFor(t);
+    const color = pinKindColor(t) || colorFor(t);   // #80 Build 3 — grave stone / museum sienna on the drawer mini-pin too
     /* Same category vocabulary as the pin sheet's meta row (fillPinSheet ->
        PIN_CAT_LABEL[t.category] || 'Spot'), so the drawer and the opened sheet
        agree. Falls back to 'Spot' for a target with no/unknown category (a guide
        stop, a data anomaly) rather than rendering blank. */
-    const cat = PIN_CAT_LABEL[t.category] || 'Spot';
+    const cat = pinKindLabel(t) || PIN_CAT_LABEL[t.category] || 'Spot';   // #80 Build 3 — grave/museum kind line; lore residual stays "History"
     /* #236 — THE DRAWER META LINE IS THE CONSOLIDATED MIRROR OF THE PIN SHEET'S.
        Same order the opened sheet uses (fillPinSheet): category, then distance,
        then status — never status-before-distance. This is the LIGHT version of
@@ -14451,6 +15107,203 @@ async function hydrateCapturePhoto(key, id, name){
   } else {
     block.innerHTML = '';
   }
+}
+
+/* =========================================================
+   #348 — PASSPORT PHOTOS CARD
+   ---------------------------------------------------------
+   A collection of the keepsake photos (#209) the user snapped at captured pins.
+   The card shows the 3 most-recent (newest first); "View all" opens a 3-column
+   grid of every photo on #screen-photos-all. Tapping a thumbnail opens a
+   full-screen viewer.
+
+   WHICH CAPTURES HAVE A PHOTO. Photos live in IndexedDB keyed `huntKey::pinId`
+   (#209) and, for logged-in users, mirror to owner-scoped Supabase Storage by pin
+   id (#209 Build 2). The candidate set is therefore the UNION of:
+     (1) ids present in the local IndexedDB store (definitive on THIS device), and
+     (2) ids whose progress `foundMeta[id].photo` flag is set (catches a photo that
+         lives only in remote Storage — a fresh device / cleared cache).
+   The list is ORDERED by capturedStampEntries() (the same newest-first construction
+   the Stamps list uses, so the two collections agree #63/#148), then filtered to the
+   candidate set. Each thumbnail resolves its bytes the SAME way the pin sheet does
+   (loadPhotoBlobForId by id → downloadPhotoRemote fallback); a candidate whose bytes
+   can't be resolved (e.g. a pre-Build-2 photo lost to a cache clear, #232) removes
+   its own tile, so a stale flag never leaves an empty box.
+
+   Object URLs created for thumbnails are tracked and revoked on the next render; a
+   monotonic render token guards against a stale async resolve painting the wrong
+   pass. */
+let _passportPhotoURLs = [];
+let _passportPhotoRenderToken = 0;
+function _revokePassportPhotoURLs(){
+  _passportPhotoURLs.forEach(u=>{ try{ URL.revokeObjectURL(u); }catch(e){} });
+  _passportPhotoURLs = [];
+}
+/* Ids that have a photo blob in the local IndexedDB store (key suffix `::id`). */
+function localPhotoIdSet(){
+  return photoDB().then(db=>new Promise((resolve)=>{
+    const out = new Set();
+    try{
+      const tx = db.transaction('photos','readonly');
+      const kr = tx.objectStore('photos').getAllKeys();
+      kr.onsuccess = ()=>{
+        (kr.result||[]).forEach(k=>{
+          if(typeof k !== 'string') return;
+          const i = k.lastIndexOf('::');
+          if(i >= 0) out.add(k.slice(i+2));
+        });
+        resolve(out);
+      };
+      kr.onerror = ()=>resolve(out);
+    }catch(e){ resolve(out); }
+  })).catch(()=>new Set());
+}
+/* Ids flagged photo:true in progress (the #209 "has a photo" bit that rides with
+   progress; catches a remote-only photo the local store doesn't have yet). */
+function foundMetaPhotoIds(){
+  const out = new Set();
+  Object.values(state.progress || {}).forEach(b=>{
+    const meta = b && b.foundMeta;
+    if(!meta) return;
+    Object.keys(meta).forEach(id=>{ if(meta[id] && meta[id].photo) out.add(id); });
+  });
+  return out;
+}
+/* Captured entries that have a photo, newest first — a filter over
+   capturedStampEntries() (so name/date/order match the Stamps collection). Async
+   because the local-store read is async. */
+async function passportPhotoEntries(){
+  const entries = capturedStampEntries();
+  let localIds = new Set();
+  try{ localIds = await localPhotoIdSet(); }catch(e){ localIds = new Set(); }
+  const flagged = foundMetaPhotoIds();
+  return entries.filter(e => localIds.has(e.id) || flagged.has(e.id));
+}
+/* Paint a set of photo entries into a grid mount as thumbnails, hydrating each
+   tile's bytes asynchronously. `token` is the render token captured by the caller
+   (a resolve that lands after a newer render is dropped). `clickable` gates the
+   tap-to-open-viewer affordance: true on the view-all grid, false on the card
+   previews (which are display-only). */
+function paintPhotoGrid(mountEl, entries, token, clickable){
+  mountEl.innerHTML = entries.map((e, i)=>{
+    const label = escapeHtml('Photo of ' + (e.name || 'a spot'));
+    return clickable
+      ? '<div class="photo-thumb is-tappable" data-ph-idx="' + i + '" role="button" tabindex="0" aria-label="' + label + '"></div>'
+      : '<div class="photo-thumb" data-ph-idx="' + i + '"></div>';
+  }).join('');
+  entries.forEach((entry, i)=>{ hydratePhotoThumb(mountEl, entry, i, token, clickable); });
+}
+/* Resolve one thumbnail's bytes (local by id → remote fallback) and paint it, or
+   remove the tile if there is nothing to show. Re-entrancy safe via the token.
+   Only wires the tap-to-open handlers when `clickable`. */
+async function hydratePhotoThumb(mountEl, entry, idx, token, clickable){
+  let blob = null;
+  try{ const r = await loadPhotoBlobForId(entry.id); blob = r ? r.blob : null; }catch(e){ blob = null; }
+  if(!blob){
+    try{ blob = await downloadPhotoRemote(entry.id); }catch(e){ blob = null; }
+  }
+  if(token !== _passportPhotoRenderToken) return;   // a newer render superseded this pass
+  const cell = mountEl.querySelector('[data-ph-idx="' + idx + '"]');
+  if(!cell) return;
+  if(!blob){ cell.remove(); return; }               // no bytes anywhere — don't show an empty frame
+  const url = URL.createObjectURL(blob);
+  _passportPhotoURLs.push(url);
+  cell.innerHTML = '<img alt="' + escapeHtml('Photo of ' + (entry.name || 'a spot')) + '" src="' + url + '">';
+  if(clickable){
+    const open = ()=>openPhotoViewer(url, entry.name || 'a spot', entry.ts);
+    cell.onclick = open;
+    cell.onkeydown = (ev)=>{ if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); open(); } };
+  }
+}
+/* #348 — the passport's Photos section: the 3 most-recent photos + a "View all"
+   into #screen-photos-all (shown only when there are more than 3). Async; a newer
+   call supersedes an in-flight one via the render token. */
+function renderPhotosSection(){
+  const el = document.getElementById('passport-photos-section');
+  if(!el) return;
+  const token = ++_passportPhotoRenderToken;
+  _revokePassportPhotoURLs();
+  el.className = 'passport-section';
+  el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2></div>'
+    + '<p class="passport-empty">Loading your photos…</p>';
+  passportPhotoEntries().then(entries=>{
+    if(token !== _passportPhotoRenderToken) return;
+    const PREVIEW = 3;
+    const viewAll = entries.length > PREVIEW
+      ? '<button class="view-all-link" onclick="openAllPhotos()">View all ' + entries.length + ' →</button>'
+      : '';
+    el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2>' + viewAll + '</div>';
+    if(!entries.length){
+      el.insertAdjacentHTML('beforeend', '<p class="passport-empty">No photos yet — snap one when you capture a spot to start your collection.</p>');
+      return;
+    }
+    const grid = document.createElement('div');
+    grid.className = 'photo-thumb-grid';
+    el.appendChild(grid);
+    paintPhotoGrid(grid, entries.slice(0, PREVIEW), token, false);   // #348 — card previews are display-only
+  }).catch(()=>{
+    if(token !== _passportPhotoRenderToken) return;
+    el.innerHTML = '<div class="passport-section-head"><h2 class="section-title">Photos</h2></div>'
+      + '<p class="passport-empty">Couldn\'t load your photos right now.</p>';
+  });
+}
+/* #348 — every photo, newest first, on #screen-photos-all (rendered on open). */
+function renderAllPhotos(){
+  const el = document.getElementById('photos-all-grid');
+  if(!el) return;
+  const token = ++_passportPhotoRenderToken;
+  _revokePassportPhotoURLs();
+  el.innerHTML = '<p class="passport-empty">Loading your photos…</p>';
+  passportPhotoEntries().then(entries=>{
+    if(token !== _passportPhotoRenderToken) return;
+    if(!entries.length){
+      el.innerHTML = '<p class="passport-empty">No photos yet — snap one when you capture a spot to start your collection.</p>';
+      return;
+    }
+    el.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'photo-thumb-grid';
+    el.appendChild(grid);
+    paintPhotoGrid(grid, entries, token, true);   // #348 — view-all tiles open the viewer
+  }).catch(()=>{
+    if(token !== _passportPhotoRenderToken) return;
+    el.innerHTML = '<p class="passport-empty">Couldn\'t load your photos right now.</p>';
+  });
+}
+/* #348 — a caption date for the viewer: sentence-case "Aug 5, 2026" (not the
+   Stamps ALL-CAPS form), blank when there is no timestamp (legacy capture). */
+function fmtPhotoDate(ts){
+  if(typeof ts !== 'number') return '';
+  const d = new Date(ts);
+  if(isNaN(d.getTime())) return '';
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return M[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+/* #348 — full-screen single-photo viewer. Reuses a live thumbnail object URL and
+   shows a caption below the image: what the place is (its name) + when it was
+   captured. */
+function openPhotoViewer(url, name, ts){
+  const el = document.getElementById('photo-viewer');
+  const img = document.getElementById('photo-viewer-img');
+  const cap = document.getElementById('photo-viewer-caption');
+  if(!el || !img) return;
+  img.src = url;
+  img.alt = 'Photo of ' + (name || 'a spot');
+  if(cap){
+    const dateStr = fmtPhotoDate(ts);
+    cap.innerHTML = '<div class="pv-name">' + escapeHtml(name || 'A spot') + '</div>'
+      + (dateStr ? '<div class="pv-date">Visited ' + escapeHtml(dateStr) + '</div>' : '');
+  }
+  el.classList.add('show');
+  el.setAttribute('aria-hidden', 'false');
+}
+function closePhotoViewer(){
+  const el = document.getElementById('photo-viewer');
+  const img = document.getElementById('photo-viewer-img');
+  const cap = document.getElementById('photo-viewer-caption');
+  if(el){ el.classList.remove('show'); el.setAttribute('aria-hidden', 'true'); }
+  if(img){ img.removeAttribute('src'); }
+  if(cap){ cap.innerHTML = ''; }
 }
 
 function handleOrientation(e){
@@ -15401,6 +16254,7 @@ function renderPassport(){
      screen is already correct the instant it's opened. */
   renderAchievements();
   renderStampsSection();
+  renderPhotosSection();   // #348 — keepsake-photos collection, below Stamps
   renderRecentAchievements();
   renderLeaderboardEntry();
 
