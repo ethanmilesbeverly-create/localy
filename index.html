@@ -7841,7 +7841,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.15c';
+const APP_VERSION = '2026.09.15d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13550,8 +13550,27 @@ const REAL_DESC_FILLER_RE = [
 function isFillerDesc(d){
   const s = String(d == null ? '' : d).trim();
   if(s === '') return true;
+  // #358 — CLIENT-ONLY guard (a justified divergence from gate-tiles' copy, which only
+  // ever sees short osmDesc output): on the client, `cur` can be a full resolved Wikipedia
+  // article, and the greedy `/^A .+ by .+\.$/` template below would falsely match one like
+  // "A Signal of Peace is an 1890 … sculpture by Cyrus Edwin Dallin located in …". Every
+  // real osmDesc filler is short, so anything long is a real description, never filler.
+  if(s.length > 60) return false;
   if(REAL_DESC_FILLER_EXACT.has(s)) return true;
   return REAL_DESC_FILLER_RE.some(re => re.test(s));
+}
+/* #333/#358 — should a resolved line REPLACE the current one? A FILLER line (osmDesc
+   template / blank) is beaten by ANY real resolve; a NON-filler line (a gate-baked wiki
+   intro, or a thin OSM description tag like "Totem pole") is only replaced by a RICHER
+   (longer) one. That single rule does two jobs at once: it upgrades a thin real tag to
+   its fuller article (the Kwa-Ma-Rolas "Totem pole" → Kwanusila case a naive
+   non-filler-keeps-it short-circuit wrongly blocked), and it stops a live re-resolve from
+   DOWNGRADING a rich baked/adopted article to a thinner variant (the "A Signal of Peace"
+   no-downgrade the short-circuit had been protecting). */
+function _descIsRicher(cur, next){
+  const c = String(cur == null ? '' : cur).trim();
+  const n = String(next == null ? '' : next).trim();
+  return !!n && n !== c && (isFillerDesc(c) || n.length > c.length);
 }
 /* #358 — BOUNDED RETRY for the client by-name resolve. A resolve that returns
    200+empty is a genuine no-article miss OR a transient Wikipedia 429 — INDISTINGUISHABLE
@@ -13586,15 +13605,11 @@ function maybeEnrichRealDesc(t, prewarmBudget){
   if(!REAL_DESC_FACTS_CATS[t.category]) return;
   if(state._spotPin && t.id === state._spotPin.id) return; // maybeResolveSpotDesc owns the shared-spot pin
   const cur = String(t.desc || '').trim();
-  /* #358 — PREFER AN ALREADY-BAKED / HUMAN LINE OVER A LIVE RE-RESOLVE. A gated tile
-     (gate-tiles.ts) serves the resolved article baked into `desc`, and OSM's own
-     description/inscription tag is a real line too — neither is a filler TEMPLATE.
-     Re-resolving those was needless work that also risked a 429 (the very throttle that
-     latches the filler pins below), so if the pin already carries a non-filler line, keep
-     it and stop. An empty seed (cur==='') and every osmDesc filler template fall through
-     to resolve. This is why a gate-baked pin now shows its real line on the FIRST paint
-     instead of after a "search here" refetch. */
-  if(cur && !isFillerDesc(cur)){ t._descEnriched = true; return; }
+  /* #358 — NO short-circuit on a non-filler line. An earlier build kept any non-filler
+     desc and skipped the resolve, which blocked upgrading a THIN OSM tag ("Totem pole")
+     to its article. Instead the resolve always runs and the no-downgrade rule
+     (_descIsRicher) decides whether its result replaces the current line — so a thin tag
+     upgrades and a rich baked/adopted article is never downgraded. */
   // 1) FREE — a wiki twin already loaded in the tile carries the real line.
   const all = (state.realPlaces && state.realPlaces.all) || [];
   let best = null, bestD = Infinity;
@@ -13606,7 +13621,7 @@ function maybeEnrichRealDesc(t, prewarmBudget){
   }
   if(best){
     const wt = String(best.desc).trim();
-    if(wt && wt !== cur){
+    if(_descIsRicher(cur, wt)){
       t._descEnriched = true;
       t.desc = wt; // apply in-memory always (prewarm-safe); the twin's own text only (#334)
       if(state.selectedPinId === t.id) fillPinSheet(t);
@@ -13620,10 +13635,10 @@ function maybeEnrichRealDesc(t, prewarmBudget){
     const v = cache[key];
     if(v === null) return;                 // in flight — one fetch at a time
     if(typeof v === 'string'){
-      // A resolved value: a hit (non-empty → apply, painting the tap's first frame,
-      // #334) or a terminal empty '' (retries exhausted / same-as-current → the honest
-      // filler stays). Either way it is settled — never re-fetch.
-      if(v && cur !== v){
+      // A resolved value: a hit (non-empty → apply if it's richer than the current line,
+      // painting the tap's first frame, #334) or a terminal empty '' (retries exhausted /
+      // resolve wasn't richer → the current line stands). Either way it is settled.
+      if(v && _descIsRicher(cur, v)){
         t._descEnriched = true; t.desc = v;
         if(state.selectedPinId === key) fillPinSheet(t);
       }
@@ -13656,15 +13671,19 @@ function maybeEnrichRealDesc(t, prewarmBudget){
       const r2 = await sb.functions.invoke('nearby-places', { body:_rwBody });
       const place = r2 && r2.data && r2.data.place;
       const wt = (place && place.desc) ? String(place.desc).trim() : '';
-      const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
-      if(val){
-        cache[key] = val;                  // terminal hit
-        t._descEnriched = true; t.desc = val;
+      const cur2 = String(t.desc || '').trim(); // re-read: t.desc may have changed since the call
+      if(_descIsRicher(cur2, wt)){
+        cache[key] = wt;                   // terminal hit (a richer line)
+        t._descEnriched = true; t.desc = wt;
         if(state.selectedPinId === key) fillPinSheet(t);
+      } else if(wt){
+        // A real answer that isn't richer than the current line (same, or thinner than a
+        // rich baked/adopted article). Keep what we have; terminal, no retry.
+        cache[key] = '';
       } else {
-        // #358 — 200+empty: a real no-article miss OR a transient throttle. Bound the
-        // retries so a resolvable-but-throttled pin (Lily Pool) gets another shot, while
-        // a genuinely storyless pin (Chevron) settles on its honest filler after MAX.
+        // #358 — 200+empty: a real no-article miss OR a transient Wikipedia 429
+        // (indistinguishable here). Bound the retries so a resolvable-but-throttled pin
+        // gets another shot, while a genuinely storyless pin settles after MAX.
         const miss = _prevMiss + 1;
         cache[key] = (miss >= REAL_DESC_RETRY_MAX) ? '' : { miss, at: Date.now() };
       }
