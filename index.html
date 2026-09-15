@@ -7817,7 +7817,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.15a';
+const APP_VERSION = '2026.09.15b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13482,28 +13482,62 @@ const REAL_DESC_PREWARM_MAX = 12;
    resolves the same way park/trail/history do — a gate-passing article upgrades the
    line, anything else keeps the osmDesc fallback (never a wrong line). Operator ask:
    "for osm lets source wiki descriptions ... if none we leave that fallback." */
-/* #358 — CLIENT ARTIST SIGNAL FOR THE BY-NAME RESOLVE. The server's osmDesc bakes an
-   OSM art pin as `A <type> by <artist>.` (nearby-places), and #355 added a
-   creator-qualified recall to resolveWikiByName(name,lat,lng,hint,ARTIST) so a
-   title-only artwork ("The Alarm", "Goethe Monument") resolves past the bare-name
-   miss. gate-tiles.ts already feeds that signal when it bakes a tile; the CLIENT's
-   own resolveWiki did NOT — it posted name+coord only — so a title-only art pin
-   sitting on an UNGATED tile (a cold-miss / SWR rebuild, or a boot view outside the
-   committed gate set) MISSED and stayed on filler until a "search here" refetched the
-   gate-baked tile (the #358 symptom). Extract the artist from the pin's OWN filler,
-   the same ART_BY_RE gate-tiles uses, so the pin self-heals on display/open whether
-   or not its tile is gated. Guarded to category 'art' + the `by` template → "" for
-   any park/history/trail filler (byte-identical for non-art pins); a wrong extract
-   can't wrong-attach — the server's #316 coordinate gate still decides (blank beats
-   wrong, #101/#178). This is the OSM TILE layer, so it is independent of #344 brick 5
-   (which reads the persisted resolved_description for GEMS — a different layer that
-   never touches an OSM art pin). */
+/* #358 (RECALL HELPER — NOT the fix). The server's osmDesc bakes an OSM art pin as
+   `A <type> by <artist>.`, and #355 added a creator-qualified recall to
+   resolveWikiByName(name,lat,lng,hint,ARTIST) so a title-only artwork ("The Alarm",
+   "Goethe Monument") resolves past the bare-name miss. gate-tiles.ts feeds that signal
+   when it bakes a tile; the CLIENT's own resolveWiki did not, so a title-only art pin on
+   an UNGATED tile had to match on the bare name. Extracting the artist from the pin's own
+   filler (the same ART_BY_RE gate-tiles uses) lets it hit #355's recall on the client too.
+   Guarded to category 'art' + the `by` template → "" for any park/history/trail filler
+   (byte-identical for non-art pins); a wrong extract can't wrong-attach — the server's
+   #316 coordinate gate still decides (blank beats wrong, #101/#178).
+   THIS ALONE DID NOT FIX #358 (built 2026.09.15a, QA-failed): the reported pins were not
+   missing on the bare name — the Lily Pool resolves cleanly WITHOUT an artist, and the
+   Chevron has no article at all. The real #358 symptom (a filler pin that never fills
+   until "search here" lands a gate-baked tile) is the 429-LATCH fixed in
+   maybeEnrichRealDesc below. The artist forward is kept only as a recall helper for
+   ungated title-only art. This is the OSM TILE layer, independent of #344 brick 5
+   (which reads persisted resolved_description for GEMS — a different layer). */
 const ART_BY_RE = /^A .+? by (.+)\.$/i;
 function artistFromDesc(t){
   if(!t || t.category !== 'art') return '';
   const m = ART_BY_RE.exec(String(t.desc || '').trim());
   return m ? m[1].trim().slice(0, 120) : '';
 }
+/* #358 — CLIENT MIRROR of gate-tiles.ts / nearby-places osmDesc() filler templates.
+   A facts pin whose desc matches one of these is on a no-story TEMPLATE and is worth a
+   live resolve; anything else is a real line (a wiki intro baked onto a gated tile, or an
+   OSM description/inscription tag) that maybeEnrichRealDesc should PREFER, not re-roll.
+   Kept in sync with gate-tiles' isFillerDesc / osmDesc — if osmDesc ever adds a fallback
+   string the worst case is an over-resolved pin (harmless), never a kept filler line. */
+const REAL_DESC_FILLER_EXACT = new Set([
+  'A local green space to wander.', 'A local garden to wander.', 'A protected local nature area.',
+  'A trailhead — the start of a marked trail.', 'A marked hiking route.', 'A marked mountain-bike route.',
+  'An unpaved track worth a walk.', 'A walking trail nearby.',
+  'A piece of public art.',
+  'A local memorial.', 'A war memorial.', 'A local museum.',
+  'A local spot worth a look.',
+]);
+const REAL_DESC_FILLER_RE = [
+  /^A hiking trail \(.+\)\.$/, /^A public .+\.$/, /^A .+ by .+\.$/,
+  /^A local landmark \(.+\)\.$/, /^A local memorial \(.+\)\.$/, /^A local .*museum\.$/,
+];
+function isFillerDesc(d){
+  const s = String(d == null ? '' : d).trim();
+  if(s === '') return true;
+  if(REAL_DESC_FILLER_EXACT.has(s)) return true;
+  return REAL_DESC_FILLER_RE.some(re => re.test(s));
+}
+/* #358 — BOUNDED RETRY for the client by-name resolve. A resolve that returns
+   200+empty is a genuine no-article miss OR a transient Wikipedia 429 — INDISTINGUISHABLE
+   here (the #355 "429 ≠ absence" problem, now on the client recall path). The old code
+   cached that empty as a permanent '' and latched the pin on filler for the whole session
+   (the #358 bug). Give it up to MAX shots instead; the cooldown keeps a GPS-tick rebuild
+   from bursting the re-rolls (an explicit on-open tap ignores it). Once #357's resolve
+   bank holds the pin, any of these shots returns it deterministically. */
+const REAL_DESC_RETRY_MAX = 3;
+const REAL_DESC_RETRY_COOLDOWN_MS = 15000;
 function maybeEnrichRealDesc(t, prewarmBudget){
   /* #334 — prewarmBudget is passed ONLY by the marker-render loop (the DISPLAY
      moment), a mutable { n } shared across that pass's pins. When present, this call
@@ -13528,6 +13562,15 @@ function maybeEnrichRealDesc(t, prewarmBudget){
   if(!REAL_DESC_FACTS_CATS[t.category]) return;
   if(state._spotPin && t.id === state._spotPin.id) return; // maybeResolveSpotDesc owns the shared-spot pin
   const cur = String(t.desc || '').trim();
+  /* #358 — PREFER AN ALREADY-BAKED / HUMAN LINE OVER A LIVE RE-RESOLVE. A gated tile
+     (gate-tiles.ts) serves the resolved article baked into `desc`, and OSM's own
+     description/inscription tag is a real line too — neither is a filler TEMPLATE.
+     Re-resolving those was needless work that also risked a 429 (the very throttle that
+     latches the filler pins below), so if the pin already carries a non-filler line, keep
+     it and stop. An empty seed (cur==='') and every osmDesc filler template fall through
+     to resolve. This is why a gate-baked pin now shows its real line on the FIRST paint
+     instead of after a "search here" refetch. */
+  if(cur && !isFillerDesc(cur)){ t._descEnriched = true; return; }
   // 1) FREE — a wiki twin already loaded in the tile carries the real line.
   const all = (state.realPlaces && state.realPlaces.all) || [];
   let best = null, bestD = Infinity;
@@ -13551,41 +13594,62 @@ function maybeEnrichRealDesc(t, prewarmBudget){
   const key = t.id;
   if(key in cache){
     const v = cache[key];
-    // Apply a cached upgrade to THIS (possibly rebuilt) pin object unconditionally —
-    // a prewarm that ran earlier this session put the real line here, so the tap
-    // paints it immediately. A null (pending) or '' (resolved-empty) falls through.
-    if(v && cur !== v){
-      t._descEnriched = true; t.desc = v;
-      if(state.selectedPinId === key) fillPinSheet(t);
+    if(v === null) return;                 // in flight — one fetch at a time
+    if(typeof v === 'string'){
+      // A resolved value: a hit (non-empty → apply, painting the tap's first frame,
+      // #334) or a terminal empty '' (retries exhausted / same-as-current → the honest
+      // filler stays). Either way it is settled — never re-fetch.
+      if(v && cur !== v){
+        t._descEnriched = true; t.desc = v;
+        if(state.selectedPinId === key) fillPinSheet(t);
+      }
+      return;
     }
-    return; // no new fetch — cache hit never spends prewarm budget
+    /* #358 — v is a bounded-retry marker {miss,at}: an earlier resolve came back
+       200+empty, which a transient Wikipedia 429 produces INDISTINGUISHABLY from a real
+       miss. The old code cached that as a permanent '' and LATCHED the pin on filler for
+       the session (the bug). Give it up to REAL_DESC_RETRY_MAX shots: fall through and
+       re-roll, unless exhausted, or — on a PREWARM pass only — still cooling down so a
+       GPS-tick rebuild can't burst the re-rolls. An explicit on-open tap (no budget)
+       ignores the cooldown. */
+    if(v.miss >= REAL_DESC_RETRY_MAX) return;                                 // exhausted — filler stays
+    if(prewarmBudget && (Date.now() - v.at) < REAL_DESC_RETRY_COOLDOWN_MS) return; // cooling down
+    // else fall through and re-roll (bounded)
   }
-  // 2b) NETWORK — a genuinely uncached facts pin. On a PREWARM pass, spend from the
-  // shared budget so the display burst is bounded; the on-open call (no budget)
+  // 2b) NETWORK — an uncached OR retry-eligible facts pin. On a PREWARM pass, spend from
+  // the shared budget so the display burst is bounded; the on-open call (no budget)
   // always proceeds.
   if(prewarmBudget){
     if(prewarmBudget.n <= 0) return;
     prewarmBudget.n--;
   }
+  const _prevMiss = (cache[key] && typeof cache[key] === 'object') ? cache[key].miss : 0; // #358 — carry the attempt count across a re-roll
   cache[key] = null; // pending — blocks a duplicate fetch while in flight
   (async () => {
     try{
       const _rwBody = { action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng };
-      const _artist = artistFromDesc(t); if(_artist) _rwBody.artist = _artist; // #358 — forward the creator so a title-only art pin hits #355's recall instead of missing on the bare name
+      const _artist = artistFromDesc(t); if(_artist) _rwBody.artist = _artist; // recall helper (see ART_BY_RE note), NOT the #358 fix
       const r2 = await sb.functions.invoke('nearby-places', { body:_rwBody });
       const place = r2 && r2.data && r2.data.place;
       const wt = (place && place.desc) ? String(place.desc).trim() : '';
       const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
-      cache[key] = val;
-      // Land the value in the cache (durable channel) and on the captured object;
-      // re-render only if it's still the selected pin. A prewarm that landed while
-      // unselected leaves the line ready for the tap via the cache-hit branch above.
       if(val){
+        cache[key] = val;                  // terminal hit
         t._descEnriched = true; t.desc = val;
         if(state.selectedPinId === key) fillPinSheet(t);
+      } else {
+        // #358 — 200+empty: a real no-article miss OR a transient throttle. Bound the
+        // retries so a resolvable-but-throttled pin (Lily Pool) gets another shot, while
+        // a genuinely storyless pin (Chevron) settles on its honest filler after MAX.
+        const miss = _prevMiss + 1;
+        cache[key] = (miss >= REAL_DESC_RETRY_MAX) ? '' : { miss, at: Date.now() };
       }
     }catch(e){
-      delete cache[key]; // retry next open — a failed fetch is not "no desc"
+      // #358 — a thrown fetch error is retryable too, but now BOUNDED (the old code
+      // deleted the key, which under the prewarm burst could re-fetch a hard-down
+      // endpoint indefinitely). Same marker path as the empty case.
+      const miss = _prevMiss + 1;
+      cache[key] = (miss >= REAL_DESC_RETRY_MAX) ? '' : { miss, at: Date.now() };
       console.warn('[#54] plain-pin what-it-is resolve failed', (e && e.message) || e);
     }
   })();
