@@ -4931,8 +4931,11 @@ function generateOneCategoryPoint(category, base, placed, excludeGemIds, exclude
        could both select the same place. The caller now passes accumulated sets;
        this list is kept as the floor, not the whole rule.
 
-       It also filters on `p.source`, so it has only ever excluded OSM and Wiki
-       records — gems and #40b's injected captures were never in it. */
+       It also filters on `p.source`, so it excludes OSM and Wiki records; gems stay out
+       (source-less). #358 note: an injected INTERNET capture now carries its source, so it
+       too is excluded from fresh re-selection here — benign, since injectCapturedPins
+       already dedups a place it re-injects (presentIds / twin adoption), so the place is
+       represented exactly once either way; #40b's gem captures remain source-less. */
     const usedReal = (state.currentHunt && state.currentHunt.points || [])
       .filter(p=>p.source && p.id).map(p=>p.id);
     const real = nearbyRealPlaces(base, category, 5, usedReal);
@@ -6319,15 +6322,36 @@ function injectCapturedPins(hunt, base){
       presentIds.add(id);
       return;
     }
+    /* #358 — the captured record stores desc AS IT WAS AT CAPTURE TIME, which for an
+       internet pin captured before its tile was story-gated is a stale osmDesc filler
+       ("A statue by Cyrus Dallin.") — and it carries NO source. Two fixes so the injected
+       capture can show its real line instead of the stale filler, without a "search here":
+       (a) if the current tile is loaded and holds this place, adopt its (gate-baked /
+       enriched) desc; (b) stamp `source` from the id so maybeEnrichRealDesc will RESOLVE a
+       still-filler internet capture on open — its guard needs source==='osm' (or an empty
+       seed), so a source-less capture was silently skipped, which is exactly why the pin
+       sat on filler until a tile refetch. Human-sourced captures (gems/seeds) stay
+       source-less (isHumanSourcedPin) — unchanged. */
+    let capDesc = m.desc || '';
+    let capSource;
+    if(!isHumanSourcedPin({id})){
+      capSource = String(id).startsWith('wiki') ? 'wiki' : 'osm';
+      const tileAll = (state.realPlaces && state.realPlaces.all) || [];
+      const fresh = tileAll.find(r => r && r.id === id && r.desc && !isFillerDesc(r.desc))
+        || (nk ? tileAll.find(r => r && r.desc && !isFillerDesc(r.desc) &&
+              normName(r.name) === nk && haversine(r.lat, r.lng, m.lat, m.lng) <= CAPTURED_TWIN_M) : null);
+      if(fresh) capDesc = String(fresh.desc);
+    }
     hunt.points.push({
       id,
       name: m.name || 'Captured spot',
       lat: m.lat,
       lng: m.lng,
-      desc: m.desc || '',
+      desc: capDesc,
       // mode was stored as `target.category || hunt.mode`, so it is already a
       // valid MODE_COLOR key — the injected pin keeps the colour it had.
-      category: m.mode || hunt.mode
+      category: m.mode || hunt.mode,
+      source: capSource   // #358 — internet captures carry their real source so the desc resolver runs; gems/seeds stay source-less
     });
     presentIds.add(id);
   });
@@ -7817,7 +7841,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.15b';
+const APP_VERSION = '2026.09.15c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
