@@ -7817,7 +7817,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.10b';
+const APP_VERSION = '2026.09.15a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13397,7 +13397,9 @@ function maybeResolveSpotDesc(t){
       wt = best ? String(best.desc).trim() : '';
       // 2) No OSM twin — resolve the wiki "what it is" BY NAME server-side.
       if(!wt){
-        const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+        const _rwBody = { action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng };
+        const _artist = artistFromDesc(t); if(_artist) _rwBody.artist = _artist; // #358 — same creator signal for a title-only art shared-spot (#16 enumerate-consumers)
+        const r2 = await sb.functions.invoke('nearby-places', { body:_rwBody });
         const place = r2 && r2.data && r2.data.place;
         if(place && place.desc) wt = String(place.desc).trim();
       }
@@ -13480,6 +13482,28 @@ const REAL_DESC_PREWARM_MAX = 12;
    resolves the same way park/trail/history do — a gate-passing article upgrades the
    line, anything else keeps the osmDesc fallback (never a wrong line). Operator ask:
    "for osm lets source wiki descriptions ... if none we leave that fallback." */
+/* #358 — CLIENT ARTIST SIGNAL FOR THE BY-NAME RESOLVE. The server's osmDesc bakes an
+   OSM art pin as `A <type> by <artist>.` (nearby-places), and #355 added a
+   creator-qualified recall to resolveWikiByName(name,lat,lng,hint,ARTIST) so a
+   title-only artwork ("The Alarm", "Goethe Monument") resolves past the bare-name
+   miss. gate-tiles.ts already feeds that signal when it bakes a tile; the CLIENT's
+   own resolveWiki did NOT — it posted name+coord only — so a title-only art pin
+   sitting on an UNGATED tile (a cold-miss / SWR rebuild, or a boot view outside the
+   committed gate set) MISSED and stayed on filler until a "search here" refetched the
+   gate-baked tile (the #358 symptom). Extract the artist from the pin's OWN filler,
+   the same ART_BY_RE gate-tiles uses, so the pin self-heals on display/open whether
+   or not its tile is gated. Guarded to category 'art' + the `by` template → "" for
+   any park/history/trail filler (byte-identical for non-art pins); a wrong extract
+   can't wrong-attach — the server's #316 coordinate gate still decides (blank beats
+   wrong, #101/#178). This is the OSM TILE layer, so it is independent of #344 brick 5
+   (which reads the persisted resolved_description for GEMS — a different layer that
+   never touches an OSM art pin). */
+const ART_BY_RE = /^A .+? by (.+)\.$/i;
+function artistFromDesc(t){
+  if(!t || t.category !== 'art') return '';
+  const m = ART_BY_RE.exec(String(t.desc || '').trim());
+  return m ? m[1].trim().slice(0, 120) : '';
+}
 function maybeEnrichRealDesc(t, prewarmBudget){
   /* #334 — prewarmBudget is passed ONLY by the marker-render loop (the DISPLAY
      moment), a mutable { n } shared across that pass's pins. When present, this call
@@ -13546,7 +13570,9 @@ function maybeEnrichRealDesc(t, prewarmBudget){
   cache[key] = null; // pending — blocks a duplicate fetch while in flight
   (async () => {
     try{
-      const r2 = await sb.functions.invoke('nearby-places', { body:{ action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng } });
+      const _rwBody = { action:'resolveWiki', name:t.name, lat:t.lat, lng:t.lng };
+      const _artist = artistFromDesc(t); if(_artist) _rwBody.artist = _artist; // #358 — forward the creator so a title-only art pin hits #355's recall instead of missing on the bare name
+      const r2 = await sb.functions.invoke('nearby-places', { body:_rwBody });
       const place = r2 && r2.data && r2.data.place;
       const wt = (place && place.desc) ? String(place.desc).trim() : '';
       const val = (wt && wt !== String(t.desc || '').trim()) ? wt : '';
