@@ -4807,8 +4807,30 @@ function generateDiscoverLocal(base){
 // that constant's site, ~#4090) so gems and real places share one radius — see
 // the #65 register above. It cannot be declared here: REAL_INCLUDE_RADIUS_M is
 // defined further down, and nearbyApprovedGems is only ever CALLED after load.
+/* #344 brick 5 — the client STORY-GATE, in ONE home. A gem/seed whose persisted
+   resolved_source is 'none' (checked by the resolver, no sourced story) is hidden
+   from DISCOVERY so the map becomes "things you can actually learn about" (#308).
+   Applied HERE, at the single blend every gem-on-map path routes through
+   (approvedGemPoints, buildPointsForKey's arms, ATL, lore) — so a hidden gem never
+   paints, never lists, never counts, in one place rather than at N render sites.
+   TWO deliberate non-hides: resolved_source null (never checked → stays visible,
+   the gate hides 'none' not null, so nothing un-resolved vanishes — it owes a #319
+   resolve, surfaced by the app-report descriptions arm), and CAPTURED pins (injected
+   separately, never through this blend — a place you've visited stays yours).
+   The OSM/tile layer is NOT gated here — it is gated offline by gate-tiles.ts and the
+   client trusts the baked tile (#344 brick 4). ESCAPE HATCH: append ?showhidden=1 to
+   the URL to DISABLE the hide and eyeball every 'none' pin on the map without a
+   redeploy — the operator's "hidden and we don't know it" safety valve, alongside
+   the app-report count. */
+const STORY_GATE_SHOW_HIDDEN = (() => {
+  try { return new URLSearchParams(location.search).get('showhidden') === '1'; }
+  catch(_) { return false; }
+})();
 function nearbyApprovedGems(base, excludeIds, limit, bucket){
   return (state.approvedGems||[])
+    // #344 brick 5 — hide storyless gems (resolved_source='none') unless the escape
+    // hatch is on. null/real values pass; 'none' is the only value hidden.
+    .filter(g=> STORY_GATE_SHOW_HIDDEN || g.resolvedSource !== 'none')
     /* #192 — a retired 'lore' gem counts as 'history' here, so the merged
        History & Lore card surfaces it WHETHER OR NOT the DB migration
        (lore->history) has run. Without this the blend matches g.bucket==='history'
@@ -4913,7 +4935,12 @@ function gemPoint(g, idPrefix, ctxCategory, extra){
     // un-hide a user gem's typed take. Undefined→falsy on every scaffolded pin.
     hasSubmitter:!!g.hasSubmitter,
     // #31/#225 — the vouch count carried onto the point for the pin sheet.
-    seconds:g.seconds || 0
+    seconds:g.seconds || 0,
+    // #344 brick 5 — carry the persisted story line + verdict onto the pin so the
+    // sheet can PREFER resolvedDesc over a live resolve (fillPinSheet), and so a
+    // searched-to/captured twin keeps its verdict. Undefined on every non-gem pin
+    // (they fall through to the tile-baked t.desc, gated by gate-tiles, not here).
+    resolvedDesc:g.resolvedDesc, resolvedSource:g.resolvedSource
   }, extra||{});
 }
 
@@ -7260,7 +7287,19 @@ async function loadApprovedGems(){
            value the moment #82 is live (account deletion anonymises gems by
            nulling this column), and it must render NO credit line — never
            "Submitted by Unknown". See #124. */
-        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by')
+        /* #344 brick 5 — resolved_description / resolved_source are the PERSISTED
+           story columns (populated at the AI gate #344b2 + the brick-3 backfill).
+           They are what makes the map "things with a story": the sheet PREFERS
+           resolved_description over the flaky live resolve (deterministic, everyone
+           sees the same line — subsumes #333), and a gem with resolved_source='none'
+           is HIDDEN from discovery (nearbyApprovedGems). Both carry an anon+
+           authenticated SELECT grant from #344 brick 1 — CONFIG OUTSIDE THE FILE: if
+           that grant is ever dropped (e.g. a restore re-runs 276_lock_moderation_
+           columns.sql ALONE, which re-grants only its 12 columns), THIS select fails
+           and the catch below blanks the ENTIRE gem map — the #339 add-a-client-
+           column-is-two-steps trap. Keep them in #276's allowlist / always run 344
+           after 276. */
+        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by,resolved_description,resolved_source')
         .eq('status', 'approved')
         /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
            makes the whole thing work: a merged submission keeps a REAL status
@@ -7311,7 +7350,15 @@ async function loadApprovedGems(){
       hasSubmitter: !!r.submitted_by,
       // #31/#225 — vouch count: how many OTHER people submitted this same place
       // (0 when none). Rendered only in the expanded sheet, only when >0 (#16).
-      seconds: seconds[r.id] || 0
+      seconds: seconds[r.id] || 0,
+      // #344 brick 5 — the PERSISTED story verdict. resolvedDesc is the sourced
+      // line the sheet prefers over a live resolve (deterministic); resolvedSource
+      // is the visibility verdict: 'none' = checked, no story → HIDE; a real value
+      // (wiki/wikidata/gen/…) = show the line; null = never checked → stays VISIBLE
+      // (the gate hides 'none', never null — nothing un-checked vanishes). Empty
+      // string / null normalised so a downstream truthiness test is clean.
+      resolvedDesc: (r.resolved_description || ''),
+      resolvedSource: (r.resolved_source || null)
     }));
   }catch(e){ state.approvedGems = []; }
 }
@@ -7841,7 +7888,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.15d';
+const APP_VERSION = '2026.09.15e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13317,7 +13364,10 @@ function whatItisFor(t){
    (deleted), so it retries next open — the #78c rule that a failed fetch is not
    evidence of an empty area. Guarded to credited gems with no local twin. */
 function maybeEnrichWhatItis(t){
-  if(!t || t.whatItis || !t.by || !t.gemId || !t.name) return;
+  // #344 brick 5 — a gem with a PERSISTED line needs no live resolve; the sheet
+  // prefers t.resolvedDesc, so firing the resolver here is wasted network AND
+  // reintroduces the nondeterministic gen/thin overwrite this brick removes.
+  if(!t || t.resolvedDesc || t.whatItis || !t.by || !t.gemId || !t.name) return;
   if(whatItisFor(t)) return; // local tile already has the twin — it will render
   const key = t.id;
   const cache = state._whatItisCache || (state._whatItisCache = {});
@@ -13797,7 +13847,18 @@ function fillPinSheet(t){
     ? (state.approvedGems || []).some(g => g && g.id === t.gemId && g.hasSubmitter)
     : false;
   const _hasSubmitter = !!(t.hasSubmitter || _gemHasSubmitter);
-  const factDesc = whatItis || (_hasSubmitter ? '' : (t.desc || ''));
+  /* #344 brick 5 — PREFER the persisted resolved_description. It is the sourced
+     line the AI gate / brick-3 backfill resolved and stored, so it is deterministic
+     and identical for everyone (the "same description for all" intent), and it wins
+     over a flaky read-time resolve (subsumes #333 — a rich stored line never
+     downgrades to a thin live one; this is why Disney's stored gen line and Grave of
+     Al Capone's stored wiki line now show reliably instead of blank). Only a GEM
+     carries resolvedDesc; a non-gem/tile pin has it undefined and falls through to
+     the existing whatItis-or-t.desc path unchanged. When there is NO stored line,
+     the prior #315 rule stands: a submitter's typed take is still never shown. */
+  const factDesc = (t.resolvedDesc && String(t.resolvedDesc).trim())
+    ? t.resolvedDesc
+    : (whatItis || (_hasSubmitter ? '' : (t.desc || '')));
   const expandEl = document.getElementById('pin-sheet-expand');
   const expandHTML =
     /* #101 — render NO description block when there is no real description,
