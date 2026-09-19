@@ -5930,6 +5930,46 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
   return out.slice(0, targetCount);
 }
 
+/* #376 — FACET-DIVERSIFY THE "ALL THINGS LOCAL" HISTORY SLOT.
+   blendCategory fills gems-first up to targetCount and only THEN reaches real
+   OSM (its step 2). In a grave-dense frame the nearest history gems are all
+   #310/#335 seed graves ("Grave of X"), so they fill every ATL_POOL history slot
+   and step 2 never runs — the real OSM landmarks that ARE in byCat.history (the
+   Tomb of the Unknown Soldier, Arlington House, museums) never enter the blend
+   (Arlington: 6 "Grave of" + 2 gems = 8/8). This assembles the history slot for
+   All Things Local with a CAP ON SEED-GRAVE GEMS and leads with the non-grave
+   content, so the landmarks surface in this diversified "bit of everything" view.
+
+   The cap predicate is the "Grave of " NAME test, NOT historyKindFacet==='graves':
+   the facet also routes an OSM `type:'memorial'` to 'graves', which would wrongly
+   cap the Tomb of the Unknown Soldier — the very landmark this row exists to
+   rescue. The name test targets exactly the #310/#335 seed-grave gems that
+   monopolise the slot and leaves real OSM memorials/historic/museums uncapped.
+
+   Capped graves are NOT lost — buildAllThingsLocal's loose-gems tail can still
+   backfill them toward ATL_TARGET, so a frame that is genuinely all-cemetery still
+   fills. Scoped to All Things Local ONLY: the Graves & Memorials kind card
+   (blendHistoryFacet) is untouched and still shows every grave. Word-of-mouth
+   (#294) still withholds real OSM via nearbyRealPlaces, so that mode simply shows
+   the non-grave history gems + up-to-cap graves, exactly as its policy intends. */
+const ATL_HISTORY_GRAVE_CAP = 3;
+function blendHistoryForATL(base, targetCount){
+  const lead = [], graves = [];   // non-grave history leads; seed graves capped behind it, each nearest-first
+  const usedNames = new Set();
+  const isSeedGrave = p => /^grave of /i.test((p && p.name) || '');
+  const consider = p => {
+    const k = normName(p.name); if(k && usedNames.has(k)) return; if(k) usedNames.add(k);
+    (isSeedGrave(p) ? graves : lead).push(p);
+  };
+  // blendCategory precedence — gems (incl. seed graves) first, then real OSM
+  // history, then procedural filler — but partitioned so graves can be capped.
+  // A wider pull than targetCount so capped graves don't starve the lead list.
+  nearbyApprovedGems(base, [], targetCount*3, 'history').forEach(g=> consider(gemToPoint(g, 'history')));
+  nearbyRealPlaces(base, 'history', targetCount*3).forEach(rp=> consider({...rp, category:'history'}));
+  if(SHOW_PROCEDURAL_FILLER){ (generateLocalHistory(base)||[]).forEach(p=> consider({...p, category:(p.category||'history')})); }
+  return lead.concat(graves.slice(0, ATL_HISTORY_GRAVE_CAP)).slice(0, targetCount);
+}
+
 /* ---- Point builders (shared by the hunt starters AND the in-place
    re-blend that runs when real data arrives), so both stay identical. ---- */
 function buildAllThingsLocal(base){
@@ -5971,10 +6011,13 @@ function buildAllThingsLocal(base){
     ['shops',       ()=>generateShops(base).slice(0,ATL_POOL),       'shops'],
     ['bars',        ()=>generateBars(base).slice(0,ATL_POOL),        'barsrest'],
     ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_POOL), 'barsrest'],
-    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'],
+    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'], // #376 — assembled by blendHistoryForATL, not blendCategory, so seed graves can't monopolise the slot (the procFn/bucket here are unused for history but kept so CATS stays uniform)
     ['art',         ()=>[],                                          'art'], // #193 — real OSM artwork + art gems; no procedural filler
   ];
-  const lists = CATS.map(([cat,procFn,bucket]) => blendCategory(base, cat, ATL_POOL, procFn, bucket));
+  const lists = CATS.map(([cat,procFn,bucket]) =>
+    cat === 'history'
+      ? blendHistoryForATL(base, ATL_POOL)          // #376 — grave-capped, landmark-leading history slot
+      : blendCategory(base, cat, ATL_POOL, procFn, bucket));
 
   // Read the current frame once. Guarded: no map, or bounds not yet valid, means
   // no in-view split and the passes below collapse to plain round-robin.
@@ -7888,7 +7931,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.15e';
+const APP_VERSION = '2026.09.19a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
