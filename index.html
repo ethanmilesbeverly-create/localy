@@ -6172,16 +6172,35 @@ function historyKindFacet(p){
    NOTE — the grave detection is historyKindFacet's SAME name heuristic
    (/^grave of /i on gem names, since seed graves carry no `type`), so if #342
    ever relabels "Grave of X" the facet AND this render move together, in one place. */
-const PIN_KIND_COLOR = { graves:'#7C8B9A', museums:'#B5563C' };
-const PIN_KIND_LABEL = { graves:'Grave', museums:'Museum' };
+/* #377 — 'memorials' is a RENDER-ONLY sub-kind of the graves facet, NOT a facet
+   value: historyKindFacet still returns 'graves' for an OSM type:'memorial' (so
+   the "Graves & Memorials" card membership + the #278/#353 dedupe, both keyed on
+   the facet, are unchanged), but the map/drawer/sheet must not call a cenotaph a
+   "Grave". So a memorial gets its own label ("Memorial"), its own glyph (an
+   obelisk, not a headstone-with-cross), and shares the graves stone colour —
+   the two are the same card family, distinguished by label + glyph, not hue. */
+const PIN_KIND_COLOR = { graves:'#7C8B9A', museums:'#B5563C', memorials:'#7C8B9A' };
+const PIN_KIND_LABEL = { graves:'Grave', museums:'Museum', memorials:'Memorial' };
 const PIN_KIND_GLYPH = {
   graves:'<path d="M7 21V10a5 5 0 0 1 10 0v11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 12.5v4.6M9.7 14.3h4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', // headstone + cross
-  museums:'<path d="M12 3 21 9H3zM5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 10.5v8M10 10.5v8M14 10.5v8M17.5 10.5v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' // pediment + columns
+  museums:'<path d="M12 3 21 9H3zM5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 10.5v8M10 10.5v8M14 10.5v8M17.5 10.5v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', // pediment + columns
+  memorials:'<path d="M12 2.6 13.7 7 13 17H11L10.3 7Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M8.7 17h6.6v3.9H8.7z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>' // obelisk on a plinth (cenotaph/monument)
 };
 function pinKind(t){
   if(!t || t.category !== 'history') return null;
   const f = historyKindFacet(t);
-  return (f === 'graves' || f === 'museums') ? f : null; // 'lore' residual -> null -> unchanged history render
+  if(f === 'museums') return 'museums';
+  if(f === 'graves'){
+    /* #377 — split the graves facet at RENDER time. An OSM type:'memorial' that
+       is not itself an actual grave marker (the Tomb of the Unknown Soldier,
+       surfaced by #376) renders as a Memorial; a type:'grave' and every gem named
+       "Grave of X" (which carries no type) stay a Grave. The name test wins so a
+       node that is BOTH named "Grave of X" and tagged memorial is treated as the
+       grave it is named. */
+    if(t.type === 'memorial' && !/^grave of /i.test(t.name || '')) return 'memorials';
+    return 'graves';
+  }
+  return null; // 'lore' residual -> null -> unchanged history render
 }
 function pinKindColor(t){ const k = pinKind(t); return k ? PIN_KIND_COLOR[k] : null; }
 function pinKindLabel(t){ const k = pinKind(t); return k ? PIN_KIND_LABEL[k] : null; }
@@ -7931,7 +7950,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.19a';
+const APP_VERSION = '2026.09.20a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
