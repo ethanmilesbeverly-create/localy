@@ -611,18 +611,36 @@ function renderMap(points){
      apply. ONE-FACT-TWO-PLACES: these options are now set in two files with no
      shared source — addBaseLayer (index.html) and here. Change one, change both
      (the #182/#155 duplicated-fact shape).
-     PROVIDER SWAP (2026.08.28): was CARTO Voyager raster; CARTO began watermarking
-     unauthenticated tiles, so this is now OSM.org standard (keyless). Single-host,
-     no {s} subdomains and no {r}/@2x — OSM.org serves neither. Same interim caveat
-     as index.html's raster path: OSM.org's usage policy discourages high-volume
-     primary use; self-hosted raster is the durable answer. */
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom:19,
+     PROVIDER SWAP (2026.09.22, #307): was OSM.org standard raster (the 2026.08.28
+     CARTO->OSM.org keyless swap); now Stadia Alidade Smooth @2x to match the app's
+     raster path (index.html's iOS basemap, #305) — retina-crisp, and no longer the
+     bare washed-out OSM.org look. Stadia's keyed free tier is authed by the
+     nahgoo.com Pages domain (already registered for #305; see #306 for the terms).
+     OSM.org standard is kept as the keyless FALLBACK: if a Stadia tile errors (e.g.
+     the domain isn't authed) the whole layer swaps to OSM.org ONCE, so the preview
+     never goes blank — the #305 401-as-a-decoded-image gravestone (a keyed provider
+     can fail silently). ONE-FACT-TWO-PLACES: the pan-smoothness options
+     (updateWhenIdle/keepBuffer/updateInterval) are still set here AND in index.html's
+     addBaseLayer — change one, change both (#182/#155). */
+  const _osmFallback = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19, updateWhenIdle:false, keepBuffer:6, updateInterval:80,
+    attribution:'&copy; OpenStreetMap contributors'
+  });
+  const _base = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}@2x.png', {
+    maxZoom:20,
     updateWhenIdle:false,
     keepBuffer:6,
     updateInterval:80,
-    attribution:'&copy; OpenStreetMap contributors'
-  }).addTo(map);
+    attribution:'&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  });
+  let _stadiaSwapped = false;
+  _base.on('tileerror', () => {
+    if (_stadiaSwapped) return;
+    _stadiaSwapped = true;
+    map.removeLayer(_base);
+    _osmFallback.addTo(map);
+  });
+  _base.addTo(map);
 
   const icon = L.divIcon({
     className:'',
