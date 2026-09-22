@@ -7950,7 +7950,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.20a';
+const APP_VERSION = '2026.09.22a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9363,6 +9363,12 @@ function enableSimulateOnClick(){
     });
   }
 }
+/* #186 — ZOOM_WALK's last LIVE use was removed 2026-09-22: regenerateCurrentHuntAt's
+   fixed-guide else-branch no longer hard-zooms to street level (it preserves the
+   user's frame or frames the guide's pins instead). Kept as a named constant because
+   the lore_ arm's comment references it as the historical "what used to happen", and
+   because it documents the street-level zoom value; wire a new caller through it if a
+   deliberate walk-level zoom is ever wanted again. */
 const ZOOM_WALK = 18;
 /* Safety floor only — the real framing is computed from FRAME_RADIUS_M below. */
 const ZOOM_OVERVIEW = 16;
@@ -10154,8 +10160,26 @@ function regenerateCurrentHuntAt(base){
      went. Their presence here is the strongest evidence those cards once
      shipped: nobody writes a regeneration path for a hunt nobody can start. */
   else {
-    // fixed-content hunt (custom/shared code, or nothing active) — spots don't regenerate, just move the map
-    if(state.leafletMap) state.leafletMap.setView([base.lat, base.lng], ZOOM_WALK);
+    /* #186 — fixed-content hunt (custom/shared code, or nothing active): the
+       spots don't regenerate, so ONLY the view moves — and it now moves the same
+       way the location-based arms above do (through setCurrentHunt), never the old
+       street-level ZOOM_WALK snap. That hard zoom-to-a-block was the bug: panning
+       + "Search here" (or recenter / browse-return) while a fixed guide was active
+       jumped you to level 18 and ignored the frame you'd positioned.
+         - _preserveViewOnNextHunt set (the "Search here" path, and recenterMap's
+           searched-area return): the user chose this frame — keep it, exactly as
+           setCurrentHunt's #8 arm does. Don't touch the view.
+         - otherwise, for a guide: frame its pins (fitMapToHunt), mirroring
+           setCurrentHunt's #7 guide arm — the honest "show the whole guide" move.
+         - otherwise (no active hunt to frame): hold the current zoom and pan to
+           base, rather than hard-zooming to a block. */
+    if(!state._preserveViewOnNextHunt){
+      if(state.currentHunt && isGuideHunt(state.currentHunt)){
+        fitMapToHunt(state.currentHunt);
+      } else if(state.leafletMap){
+        state.leafletMap.setView([base.lat, base.lng], state.leafletMap.getZoom());
+      }
+    }
     if(state.currentHunt) showToast("This guide's spots are fixed — showing the area, but the list won't change");
   }
 }
