@@ -4008,46 +4008,68 @@ function show(id, on){
    #14 drew against fabricated attribution and #33 drew against a self-declared
    verified-local badge.
 
-   WHAT THE NORMALISATION ACTUALLY DOES, CORRECTED 2026-07-27 — THE SENTENCE
-   THAT USED TO SIT HERE WAS FALSE AND SHIPPED THAT WAY. It claimed that
-   stripping non-letters made "L0caly 0fficial" collapse to "localyofficial".
-   It does not. `.replace(/[^a-z]/g,'')` DELETES the digit rather than folding
-   it back to the letter it imitates, so "L0caly 0fficial" collapses to
-   "lcalyfficial" and passes, and "N4hgoo 0fficial" collapses to
-   "nhgoofficial" and passes for the same reason. What the strip genuinely
-   catches is SPACING AND PUNCTUATION: "Nahgoo Official", "nahgoo-official"
-   and "Nahgoo.Official" all land on "nahgoofficial" and are refused.
+   WHAT THE NORMALISATION DOES — REWRITTEN 2026-09-23 (#155 + #165 + #169).
+   A name is refused if ANY of three forms of it is on the list:
+     (1) the letters only (digits and punctuation deleted) — catches spacing
+         and appended digits: "Nahgoo Official", "nahgoo-official", "Admin1",
+         "Staff 2024";
+     (2) look-alike digits folded back to letters (0→o 3→e 4→a 5→s 7→t 8→b
+         9→g) with 1 read as i — catches "Adm1n", "N4hgoo 0fficial";
+     (3) the same fold with 1 read as l — catches "1ocaly".
+   Checking all three keeps the old behaviour (form 1) and ADDS leetspeak, so
+   no name that was refused before is accepted now. #165 CLOSED: until this
+   build the digit was only deleted, so "L0caly 0fficial" became
+   "lcalyfficial" and passed — the comment that once claimed otherwise was
+   false (rewritten 2026-07-27, fixed now).
 
-   THE LEETSPEAK HOLE IS THEREFORE REAL, KNOWN, AND DELIBERATELY LEFT OPEN HERE
-   rather than patched inside a rename pass. Folding digits to letters is a
-   behaviour change with false-positive risk on legitimate names carrying
-   numbers, and it would have to land in profiles.sql in the same breath or the
-   two copies drift — which is the exact bug the paragraph below exists to warn
-   about. `profiles.status` plus a human is still what moderates a name, and
-   that path is unaffected by this gap. Tracked as its own row.
+   A SECOND HOLE FOUND AND CLOSED THE SAME DAY: the list carried
+   'nahgoofficial', but "Nahgoo" + "Official" is nahgoo-O-official — three o's.
+   So "Nahgoo Official", the exact name this list exists to stop, was accepted
+   everywhere. 'nahgooofficial' is now listed (the two-o spelling is kept, it
+   costs nothing).
 
-   ALL THREE BRANDS ARE RESERVED AND THAT IS NOT AN OVERSIGHT (#50). Localy and
+   KNOWN RESIDUAL, NOT FIXED: accented look-alikes ("Nähgoo") drop the accented
+   letter in both copies and are not refused. Moderation by `profiles.status`
+   plus a human still covers any name that gets through.
+
+   ALL BRANDS ARE RESERVED AND THAT IS NOT AN OVERSIGHT (#50). Localy and
    Stowmark stay blocked because links, screenshots and word-of-mouth carrying an
    old name outlive the rename, and "Localy Official" claims exactly the same
-   authority the day after the rename as the day before. Stowmark earned its place
-   here by reaching a real deployed build on 2026-07-27, however briefly. Reserving
-   a name costs nothing; unreserving one is only ever discovered by someone taking
-   it.
+   authority the day after the rename as the day before. Roaminator (#239, the
+   decided next name) is reserved AHEAD of its rename so nobody can claim
+   "Roaminator Official" first. Reserving a name costs nothing; unreserving one
+   is only ever discovered by someone taking it.
 
-   THIS LIST IS ONE OF TWO COPIES AND profiles.sql IS AUTHORITATIVE. The copy
-   here exists so the user gets an instant inline message instead of a Postgres
-   constraint error; the DB is what actually enforces it. Same shape as #25's
-   REPORT_REASONS. If you add a word, add it in both places.
+   THIS LIST IS ONE OF TWO COPIES AND THE DATABASE IS AUTHORITATIVE. The DB copy
+   is the function public.display_name_is_reserved(), created by
+   169_reserved_display_names.sql and called by the
+   profiles_display_name_reserved CHECK. (The "profiles.sql" older comments name
+   was never committed to the repo — the live DB is the source.) The copy here
+   exists so the user gets an instant inline message instead of a failed save.
+   Same shape as #25's REPORT_REASONS. IF YOU ADD A WORD, ADD IT IN BOTH PLACES:
+   here, in the function's array, AND in the must-refuse list of the QA query at
+   the bottom of that SQL file, which is the #155 drift test.
    ========================================================= */
 const DISPLAY_NAME_MIN = 2;
 const DISPLAY_NAME_MAX = 24;
 const RESERVED_DISPLAY_NAMES = new Set([
-  'nahgoo','nahgooapp','nahgooteam','nahgoofficial','nahgoostaff',
+  'roaminator','roaminatorapp','roaminatorteam','roaminatorofficial','roaminatorstaff',
+  'nahgoo','nahgooapp','nahgooteam','nahgooofficial','nahgoofficial','nahgoostaff',
   'stowmark','stowmarkapp','stowmarkteam','stowmarkofficial','stowmarkstaff',
   'localy','localyapp','localyteam','localyofficial','localystaff',
   'admin','administrator','moderator','mod','staff','support','helpdesk',
   'official','verified','verifiedlocal','team','system','root','owner'
 ]);
+/* #165 — the three comparison forms described above. Must match
+   public.display_name_is_reserved() in 169_reserved_display_names.sql
+   character for character: same digit map, same two readings of 1. */
+const DISPLAY_NAME_LEET = {'0':'o','3':'e','4':'a','5':'s','7':'t','8':'b','9':'g'};
+function reservedNameForms(n){
+  const low = String(n).toLowerCase();
+  const letters = s => s.replace(/[^a-z]/g, '');
+  const fold = one => low.replace(/[0-9]/g, d => d === '1' ? one : (DISPLAY_NAME_LEET[d] || d));
+  return [letters(low), letters(fold('i')), letters(fold('l'))];
+}
 /* Collapses runs of whitespace and trims. Stored exactly as rendered — there is
    no separate "clean" name and no First+Initial reformatting. Storing a full
    name in order to display an abbreviated one would hold MORE identity than is
@@ -4064,7 +4086,7 @@ function displayNameProblem(raw){
   if(n.length < DISPLAY_NAME_MIN) return 'That name is too short.';
   if(n.length > DISPLAY_NAME_MAX) return 'Names can be up to ' + DISPLAY_NAME_MAX + ' characters.';
   if(!/^[\p{L}\p{N} '.\-]+$/u.test(n)) return 'Letters, numbers, spaces, apostrophes, periods and hyphens only.';
-  if(RESERVED_DISPLAY_NAMES.has(n.toLowerCase().replace(/[^a-z]/g, ''))) return 'That name is reserved. Pick another.';
+  if(reservedNameForms(n).some(f => RESERVED_DISPLAY_NAMES.has(f))) return 'That name is reserved. Pick another.';
   return null;
 }
 function setAuthMode(mode){
@@ -7943,7 +7965,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.22b';
+const APP_VERSION = '2026.09.23a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
