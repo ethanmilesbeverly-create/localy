@@ -693,12 +693,7 @@
      scale it to sit like the explore cards' 24px category icons. Only My Guides
      cards render a `.blaze`, so this never touches an explore card. */
   .explore-grid .mode-card .blaze{ width:20px; height:28px; }
-  /* #294 — Explore source filter segmented control ("Word of mouth" vs "All
-     places"). Track = --surface, active pill = --orange with --bg text for
-     contrast; inactive is dim. Sits directly under the "Explore Nearby" heading. */
-  #source-toggle{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:3px; gap:3px; margin:0 0 14px; }
-  #source-toggle button{ flex:1; border:0; cursor:pointer; background:transparent; color:var(--text-dim); border-radius:8px; padding:9px 6px; font-size:13px; font-weight:400; font-family:inherit; line-height:1.2; transition:background .12s, color .12s; }
-  #source-toggle button.active{ background:var(--orange); color:var(--bg); font-weight:700; }
+  /* #294/#396 — the Explore source toggle CSS lived here; the toggle was removed (#396, the pivot: always all places). */
   .icon-wrap.plus-icon{
     width:40px;height:40px;border-radius:50%;
     background:rgba(154,127,191,0.15);
@@ -2457,15 +2452,8 @@
          The screen's 52px top padding + the class's 14px top margin are the spacing
          to the topbar, so no compensating margin is needed here. -->
     <h1 class="screen-title">Explore Nearby</h1>
-    <!-- #294 — SOURCE FILTER. "Word of mouth" shows only human-sourced picks
-         (approved gems + the seed layer) across ALL six cards; "All places" adds
-         auto-generated OSM/Wikipedia (today's behaviour). Static markup defaults
-         to "Word of mouth"; applyBrowseSourceUI() corrects it from the saved value
-         on hydrate. -->
-    <div id="source-toggle" role="tablist" aria-label="Place source">
-      <button type="button" role="tab" data-src="wordofmouth" aria-selected="true" onclick="setBrowseSource('wordofmouth')">Word of mouth</button>
-      <button type="button" role="tab" data-src="all" aria-selected="false" onclick="setBrowseSource('all')">All places</button>
-    </div>
+    <!-- #396 — the #294 "Word of mouth / All places" toggle was removed here: the map
+         always shows every pin (gems + seeds + OSM/Wikipedia story places). -->
     <div class="mode-grid explore-grid">
       <div class="mode-card" data-cat="local" onclick="selectExplore('local')">
         <div class="icon-wrap"></div>
@@ -5847,17 +5835,6 @@ function applyRealPlaces(key, base, list){
 let _realFetchInFlight = {};
 async function ensureRealPlaces(base){
   if(!base || base.lat==null) return;
-  /* #294 — Word of mouth shows ONLY stored gems/seeds, all of which are already in
-     memory (state.approvedGems, loaded once at init — no per-area query), so there
-     is nothing to fetch. Skip the Overpass call entirely: this is what makes Word
-     of mouth paint instantly instead of paying the ~15s cold-tile wall (#291/#292)
-     for internet pins it will never show. The tile stays absent (not 'loading'),
-     so an empty category shows the neutral "Nothing here yet" card immediately
-     rather than a spinner. startLocalHunt likewise skips its first-paint hold in
-     this mode; flipping back to All places re-calls ensureRealPlaces (setBrowseSource)
-     so the internet layer loads then. This is the single chokepoint — it covers
-     every caller (the hunt starters, refreshDiscoverLocalIfNeeded, Search here). */
-  if(state.browseSource === 'wordofmouth') return;
   const key = realTileKey(base);
   // #78c — already have it: make sure the UI knows, then bail as before.
   if(state.realPlaces && state.realPlaces.tile===key){ setTileState(key, 'loaded'); return; }
@@ -5924,15 +5901,6 @@ async function ensureRealPlaces(base){
 
 /* Nearest real internet places of a category (mirrors nearbyApprovedGems). */
 function nearbyRealPlaces(base, category, limit, excludeIds){
-  /* #294 — in "Word of mouth" mode the app surfaces only human-sourced picks
-     (approved gems + the seed layer, both via nearbyApprovedGems), so ALL
-     auto-generated OSM/Wikipedia places are withheld here — every category,
-     History and Parks included, not just commercial. This is the SINGLE read
-     point for real internet places (blendCategory's step 2 AND
-     generateOneCategoryPoint both call it), so one guard covers every consumer
-     and every card. Already-captured pins are kept elsewhere (reblendHuntInPlace's
-     foundSet), so this never un-shows a place you visited. */
-  if(state.browseSource === 'wordofmouth') return [];
   const cache = state.realPlaces;
   const list = (cache && cache.byCat && cache.byCat[category]) || [];
   const ex = excludeIds || [];
@@ -6435,10 +6403,6 @@ function injectCapturedPins(hunt, base){
 
   near.forEach(entry=>{
     const id = entry.id, m = entry.m;
-    /* #294 — Word of mouth hides internet captures. injectCapturedPins only runs
-       on shared-progress (auto) hunts, so no guide stop is affected; the foundMeta
-       entry carries no source flag, so judge by id prefix (isHumanSourcedPin). */
-    if(state.browseSource === 'wordofmouth' && !isHumanSourcedPin({id})) return;
     if(presentIds.has(id)) return; // already in the list — isFound() handles it
     const nk = normName(m.name);
     /* Same place, regenerated under a different id. Adopt the captured id onto
@@ -6506,14 +6470,7 @@ function reblendHuntInPlace(h){
             || state.localHuntOrigin || state.me || FALLBACK_LOCATION;
   const prog = state.progress[h.key] || {};
   const foundSet = new Set(prog.foundIds || []);
-  /* #294 — on an auto/category hunt in "Word of mouth" mode, a captured INTERNET
-     place (OSM/Wiki) is dropped from the kept set too, so the human-only map
-     doesn't retain landmarks you happened to capture. The capture itself is
-     untouched (passport/progress) and returns under "All places"; gem/seed
-     captures are always kept. Guides (not REAL_UPGRADABLE_KEY) are never
-     source-filtered. Pairs with the same skip in injectCapturedPins. */
-  const womAuto = state.browseSource === 'wordofmouth' && REAL_UPGRADABLE_KEY.test(h.key);
-  const keptFound = h.points.filter(p=>foundSet.has(p.id) && (!womAuto || isHumanSourcedPin(p)));
+  const keptFound = h.points.filter(p=>foundSet.has(p.id));
   const fresh = buildPointsForKey(h.key, base) || h.points;
   const keptNames = new Set(keptFound.map(p=>normName(p.name)));
   const merged = [...keptFound];
@@ -6587,7 +6544,6 @@ let state = {
   profile: null,       // #23 — {display_name, status} for THIS user, or null if never loaded
   simulating: false,
   currentHunt: null,    // {key, name, mode, points:[{id,name,lat,lng,desc}]}
-  browseSource: 'wordofmouth',  // #294 — Explore source filter DEFAULT: 'wordofmouth' (human-sourced only — gems + seed, no auto OSM/Wiki, ANY category) | 'all' (adds auto OSM/Wiki, today). Hydrated from localStorage in init(); read by nearbyRealPlaces().
   lastSeenAt: null,     // #27 — ms epoch of the previous app-open, from user_state 'freshness:lastSeen'. Stored now, consumed later by push (#175). Cannot be backfilled, which is why it is written from day one.
   progress: {},         // { huntKey: { foundIds:[...], foundAt:{id:ts} } }
   myHunts: [],          // custom hunts saved personally
@@ -7611,7 +7567,7 @@ async function init(){
   setupBaseMap();
   wirePinSheet();
   wireDrawer();         // swipe-down-to-close on the nearby drawer, mirroring wirePinSheet()
-  hydrateBrowseSource(); // #294 — read the saved Explore source filter and light the correct pill
+  try{ localStorage.removeItem('nahgoo-browse-source'); }catch(e){} // #396 — retire the #294 toggle's saved choice (the toggle is gone)
   wirePlaceSuggest();   // #88 — both location search fields get the dropdown
   /* Anchor the FIRST content paint to the remembered map view (#120), not the
      downtown FALLBACK_LOCATION. setupBaseMap() already opens the map at the
@@ -7996,7 +7952,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.23b';
+const APP_VERSION = '2026.09.23c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11075,8 +11031,7 @@ function paintFirstBlend(){
 function startLocalHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   state.localHuntOrigin = base;
-  const wom = state.browseSource === 'wordofmouth';   // #294
-  ensureRealPlaces(base);   // #294 — a no-op in Word of mouth (returns immediately, no fetch)
+  ensureRealPlaces(base);
   const key = 'local_v1';
   /* HOLD THE FIRST PAINT until real supply resolves. Cold, state.realPlaces is
      empty, so buildAllThingsLocal() backfills its 15-pin target with gems out to
@@ -11087,11 +11042,9 @@ function startLocalHunt(base){
      #78c/#28 loading card, because ensureRealPlaces set the tile 'loading'
      synchronously just above — and let paintFirstBlend() paint once the fetch
      settles. Both entry points are covered: GPS's first fix also routes through
-     startLocalHunt(), so a fix that lands before its tile does holds too.
-     #294 — Word of mouth has NO fetch to wait for (all pins are stored gems/seeds
-     already in memory), so it always takes the immediate path: no shell, no hold. */
+     startLocalHunt(), so a fix that lands before its tile does holds too. */
   const haveTile = state.realPlaces && state.realPlaces.tile === realTileKey(base);
-  if(wom || haveTile){
+  if(haveTile){
     setCurrentHunt({key, name:'All Things Local', mode:'discoverlocal', points:buildAllThingsLocal(base)});
   } else {
     // #210 — defer the captured-pin restore here: this shell is intentionally
@@ -11539,74 +11492,20 @@ function assertGemBucketsAgree(){
     else console.log('[#68] gem buckets agree (' + accepted.length + ' accepted, all consumed)');
   }catch(e){ console.warn('[#68] bucket check failed', e); }
 }
-/* #294 — Explore source filter ("Word of mouth" vs "All places").
-   The segmented control under the Explore heading flips whether the map blends
-   in auto-generated OSM/Wikipedia places (All places = today) or shows ONLY
-   human-sourced picks (approved gems + the seed layer) across EVERY category —
-   History and Parks included. One localStorage flag + one guard in
-   nearbyRealPlaces is the whole feature; it flips back with a tap, and the
-   default is 'wordofmouth' (the map is human-first out of the box; a saved 'all'
-   is honoured). The scaffold categories (History/Art/Parks) can read sparse or
-   empty in "Word of mouth" where few gems/seeds exist — that is the accepted cost
-   of a human-only map (#94's "empty is empty"), not a bug. The first reversible
-   slice of #275. readBrowseSource is a function declaration so hoisting lets
-   nearbyRealPlaces (defined above) reach it. */
-const BROWSE_SOURCE_KEY = 'nahgoo-browse-source';
-/* #294 — a captured pin re-injected from foundMeta carries no source/isGem flag
-   (only id/name/coords/category), so in "Word of mouth" mode an INTERNET place you
-   captured earlier is told from a gem/seed capture by its ID PREFIX: every gem
-   point is minted by gemPoint with a catgem/gem/dlg/lore prefix, and real OSM/Wiki
-   ids never carry one. A LIVE point is judged by isGem/source first; the id prefix
-   is only the fallback for a re-injected capture. Asymmetric on purpose — a gem is
-   never mis-hidden (it always has the flag or the prefix); at worst one internet
-   pin leaks, which is the pre-fix behaviour. */
+/* #294/#396 — isHumanSourcedPin tells a gem/seed from an OSM/Wikipedia place. It was
+   written for the removed "Word of mouth" toggle (#396 took the toggle out — the map
+   always shows all pins); it stays because #358's captured-pin re-injection uses it
+   to decide which captures get a `source` stamp so their real line can resolve.
+   A re-injected capture carries no source/isGem flag (only id/name/coords/category),
+   so it is judged by ID PREFIX: every gem point is minted by gemPoint with a
+   catgem/gem/dlg/lore prefix, and real OSM/Wiki ids never carry one. A LIVE point is
+   judged by isGem/source first. */
 const GEM_ID_RE = /^(catgem|dlg|lore|gem)/;
 function isHumanSourcedPin(p){
   if(!p) return false;
   if(p.isGem) return true;
   if(p.source) return false;
   return !!(p.id && GEM_ID_RE.test(p.id));
-}
-function readBrowseSource(){ try{ return localStorage.getItem(BROWSE_SOURCE_KEY)==='all' ? 'all' : 'wordofmouth'; }catch(e){ return 'wordofmouth'; } }
-function hydrateBrowseSource(){ state.browseSource = readBrowseSource(); applyBrowseSourceUI(); }
-function applyBrowseSourceUI(){
-  const wrap = document.getElementById('source-toggle');
-  if(!wrap) return;
-  const wom = state.browseSource === 'wordofmouth';
-  wrap.querySelectorAll('button[data-src]').forEach(b=>{
-    const on = (b.getAttribute('data-src') === 'wordofmouth') === wom;
-    b.classList.toggle('active', on);
-    b.setAttribute('aria-selected', on ? 'true' : 'false');
-  });
-}
-function setBrowseSource(mode){
-  const next = mode === 'wordofmouth' ? 'wordofmouth' : 'all';
-  if(state.browseSource === next){ applyBrowseSourceUI(); return; }
-  state.browseSource = next;
-  try{ localStorage.setItem(BROWSE_SOURCE_KEY, next); }catch(e){}
-  applyBrowseSourceUI();
-  /* Re-filter the live hunt QUIETLY so if the map is already showing a category
-     it updates without a jump — reblendHuntInPlace rebuilds the hunt's points in
-     place (through the now-gated buildPointsForKey) and NEVER switches tabs or
-     reframes the camera (that "jump back to the map" came from routing through
-     the hunt starters, which force the map tab). refreshTargetsUI repaints the
-     markers from the rebuilt points. A fixed GUIDE is a safe no-op
-     (buildPointsForKey returns null → points unchanged, no toast). Opening a card
-     fresh also rebuilds via the gate, so this only matters for an already-live
-     hunt. Not swallowed — a throw is logged, not hidden. */
-  if(state.currentHunt){
-    /* Flipping to "All places" needs the internet layer for this area, which Word
-       of mouth skipped fetching — kick off ensureRealPlaces now; onRealPlacesReady
-       re-blends when it lands. It's a no-op if the tile is already loaded or a
-       fetch is in flight, and it's skipped internally while in Word of mouth. */
-    if(state.browseSource === 'all' && REAL_UPGRADABLE_KEY.test(state.currentHunt.key || '')){
-      const b = state.browsingLocation || state.searchedArea || state.localHuntOrigin || state.me || FALLBACK_LOCATION;
-      ensureRealPlaces(b);
-    }
-    try{ reblendHuntInPlace(state.currentHunt); }
-    catch(e){ console.warn('[#294] live re-filter failed', e); }
-    refreshTargetsUI();
-  }
 }
 
 function selectExplore(cat){
