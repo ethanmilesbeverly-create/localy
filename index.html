@@ -4028,9 +4028,22 @@ function show(id, on){
    everywhere. 'nahgooofficial' is now listed (the two-o spelling is kept, it
    costs nothing).
 
-   KNOWN RESIDUAL, NOT FIXED: accented look-alikes ("Nähgoo") drop the accented
-   letter in both copies and are not refused. Moderation by `profiles.status`
-   plus a human still covers any name that gets through.
+   ACCENTED LOOK-ALIKES CLOSED 2026-09-23 (#388). Until build 2026.09.23b an
+   accented letter was simply deleted in both copies, so "Nähgoo Official"
+   became "nhgooofficial" and passed. Now every form above is checked twice:
+   once as typed, once after the name is FOLDED to plain letters — NFKD (splits
+   off accents, flattens fullwidth ｎａｈｇｏｏ and ligatures) plus a short map
+   for letters NFKD can't split (æ ð ø þ ß đ ħ ı ĸ ł ŋ œ ŧ). Checking both
+   keeps every earlier refusal ("Ænahgoo" is still refused as typed). The DB
+   twin is public.display_name_fold() / display_name_is_reserved_folded() in
+   388_accent_fold_reserved_names.sql (unaccent + NFKD), called by a second
+   CHECK, profiles_display_name_reserved_folded. The map here is a SUBSET of
+   unaccent's rules on purpose: the DB is never looser than this copy, and an
+   exotic letter this map misses still gets refused there (#155's safe
+   direction — a generic save error, not a hole). Real names are untouched:
+   "José" folds to jose, which is not reserved. Moderation by
+   `profiles.status` plus a human still covers anything else (homoglyphs from
+   other scripts, e.g. a Cyrillic "а", are NOT folded by either copy).
 
    ALL BRANDS ARE RESERVED AND THAT IS NOT AN OVERSIGHT (#50). Localy and
    Stowmark stay blocked because links, screenshots and word-of-mouth carrying an
@@ -4062,13 +4075,31 @@ const RESERVED_DISPLAY_NAMES = new Set([
 ]);
 /* #165 — the three comparison forms described above. Must match
    public.display_name_is_reserved() in 169_reserved_display_names.sql
-   character for character: same digit map, same two readings of 1. */
+   character for character: same digit map, same two readings of 1. The #388
+   accent fold below mirrors public.display_name_fold() in
+   388_accent_fold_reserved_names.sql. */
 const DISPLAY_NAME_LEET = {'0':'o','3':'e','4':'a','5':'s','7':'t','8':'b','9':'g'};
+/* #388 — letters NFKD cannot split into base + accent. Every entry here is also
+   in Postgres unaccent's rules, so the DB fold is never looser than this one. */
+const DISPLAY_NAME_ACCENT_MAP = {
+  'æ':'ae','ð':'d','ø':'o','þ':'th','ß':'ss','đ':'d','ħ':'h','ı':'i',
+  'ĸ':'q','ł':'l','ŋ':'n','œ':'oe','ŧ':'t'
+};
+function foldDisplayNameAccents(s){
+  return String(s).toLowerCase()
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[æðøþßđħıĸłŋœŧ]/g, c => DISPLAY_NAME_ACCENT_MAP[c]);
+}
 function reservedNameForms(n){
-  const low = String(n).toLowerCase();
-  const letters = s => s.replace(/[^a-z]/g, '');
-  const fold = one => low.replace(/[0-9]/g, d => d === '1' ? one : (DISPLAY_NAME_LEET[d] || d));
-  return [letters(low), letters(fold('i')), letters(fold('l'))];
+  // #388: the three #165 forms of the name as typed, then of its folded form.
+  const forms = raw => {
+    const low = String(raw).toLowerCase();
+    const letters = s => s.replace(/[^a-z]/g, '');
+    const fold = one => low.replace(/[0-9]/g, d => d === '1' ? one : (DISPLAY_NAME_LEET[d] || d));
+    return [letters(low), letters(fold('i')), letters(fold('l'))];
+  };
+  return [...forms(n), ...forms(foldDisplayNameAccents(n))];
 }
 /* Collapses runs of whitespace and trims. Stored exactly as rendered — there is
    no separate "clean" name and no First+Initial reformatting. Storing a full
@@ -7965,7 +7996,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.23a';
+const APP_VERSION = '2026.09.23b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
