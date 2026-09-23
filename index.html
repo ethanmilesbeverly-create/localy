@@ -512,22 +512,18 @@
   #screen-settings .settings-scroll{ flex:1 1 auto; overflow-y:auto; min-height:0; -webkit-overflow-scrolling:touch; }
   .settings-footer{ margin:0; }
   #screen-map.active{display:flex;flex-direction:column;padding:0;min-height:0;}
-  /* PERSPECTIVE GATED TO TILT (2026.08.11i) — root cause of "zoom all the way out,
-     pan → blank/partial map on iOS", confirmed by the MAP_DEBUG reads: in the blank
-     state the GL canvas, buffer, transform, context, tiles and centre are ALL
-     healthy (buffer painted, ctxLost:false, tiles:true, centre valid) yet nothing
-     shows — a compositing failure, not a render failure. A WebGL canvas inside a CSS
-     `perspective` ancestor intermittently stops compositing on iOS Safari after a
-     re-layer (a pan resets Leaflet's panes). This perspective:800px was ALWAYS on
-     #screen-map.active but is only needed for tilt-3d's rotateX (off by default), so
-     it was keeping the basemap in a 3D context for no visible benefit in 2D. Now it
-     is applied only while tilted (toggleTilt adds .tilt-on in the same call that adds
-     .tilt-3d), so normal 2D map use has no 3D context and the canvas composites. This
-     also happens to make #hunt-empty/#hunt-loading fixed-anchoring correct in 2D (see
-     the #95 gravestone) — they anchor to the window instead of #screen-map. Raster
-     tiles were never affected (img layers composite fine in 3D), which is why only
-     the GL basemap showed it. */
-  #screen-map.active.tilt-on{perspective:800px;perspective-origin:50% 25%;}
+  /* 3D TILT REMOVED 2026.09.22b (#95, #7) — gravestone, not a silent deletion.
+     The map once had a 2D/3D toggle (#map-3d-wrap.tilt-3d rotateX + a
+     perspective:800px on #screen-map). The toggle button had been display:none
+     for months, and the 3D idea is dead by operator decision — do not rebuild it.
+     History worth keeping: (1) a WebGL canvas inside a CSS `perspective` ancestor
+     intermittently stops compositing on iOS Safari after a re-layer, which is why
+     2026.08.11i had already gated perspective to tilt-only; (2) perspective on
+     #screen-map re-based the position:fixed #hunt-empty/#hunt-loading cards onto
+     the map column instead of the window (#95). With tilt gone, NO ancestor of
+     those cards carries transform/perspective/filter, so they anchor to the
+     window for real. If a future change needs any of those properties on
+     #screen-map or #app, read #95 first — assertViewportCentred() will name it. */
 
   h1.page-title{
     font-size:26px;
@@ -872,13 +868,13 @@
   .field{margin-bottom:16px;}
 
   /* ---------- Map screen ---------- */
+  /* #map-3d-wrap keeps its historical id (the 3D tilt it was named for is gone,
+     2026.09.22b) — renaming it would touch every selector for no gain. It must
+     NOT regain a transform: it is an ancestor of the map's fixed cards (#95). */
   #map-3d-wrap{
     flex:1;width:100%;min-height:0;position:relative;
     overflow:hidden;
-    transform-origin:50% 85%;
-    transition:transform .45s ease;
   }
-  #map-3d-wrap.tilt-3d{transform:rotateX(38deg) scale(2.1);}
   #leaflet-map{position:absolute;inset:0;width:100%;height:100%;}
   /* WARM RASTER TINT (2026.08.31b) — pushes the keyless OSM.org raster basemap
      (iOS primary + desktop fallback) toward the old CARTO Voyager warmth: a touch
@@ -1079,7 +1075,6 @@
 
   #screen-map.drawer-open #locate-btn,
   #screen-map.drawer-open #frame-guide-btn,
-  #screen-map.drawer-open #tilt-toggle-btn,
   #screen-map.drawer-open #list-toggle-btn,
   #screen-map.drawer-open #stale-hunt-banner,
   #screen-map.drawer-open #map-search-row,
@@ -1332,6 +1327,17 @@
   }
   .ps-btn:active{transform:scale(0.99);}
   .ps-btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
+  /* #240 — Save + Share paired on one row: half-width, slightly smaller type and
+     padding than the full-width Capture button so the hierarchy reads Capture >
+     Save/Share > Report. min-width:0 lets a long label shrink instead of
+     overflowing on a narrow phone. */
+  .ps-btn-row{display:flex;gap:10px;}
+  .ps-btn-half{
+    flex:1 1 0;width:auto;min-width:0;padding:10px 8px;font-size:13px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .ps-btn-half svg{width:16px;height:16px;flex-shrink:0;color:var(--text-dim);}
+  .ps-btn-half span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   /* #18 — location row: address when we have one, coords when we don't. Plain
      text plus a copy icon — no background or border, because the filled surface
      read as a tappable button and competed with the real actions below it.
@@ -1373,16 +1379,7 @@
     position:absolute;inset:0;pointer-events:none;z-index:450;
     box-shadow:inset 0 0 90px 18px rgba(6,16,12,0.65);
   }
-  /* In 3D mode, the tilted plane is still a finite rectangle — this fades its
-     far edge into the background so it reads as a horizon, not a hard cutoff. */
-  #map-3d-wrap.tilt-3d ~ #map-vignette{
-    background:linear-gradient(to bottom,
-      var(--bg) 0%,
-      rgba(16,35,28,0.85) 8%,
-      rgba(16,35,28,0.4) 20%,
-      rgba(16,35,28,0) 38%);
-  }
-  #locate-btn, #tilt-toggle-btn, #frame-guide-btn{
+  #locate-btn, #frame-guide-btn{
     position:absolute;right:14px;z-index:500;
     width:44px;height:44px;border-radius:50%;
     background:rgba(23,50,41,0.92);border:1px solid var(--line);
@@ -1390,8 +1387,7 @@
     cursor:pointer;
   }
   #locate-btn{bottom:calc(96px + env(safe-area-inset-bottom));}
-  #frame-guide-btn{bottom:calc(148px + env(safe-area-inset-bottom));} /* #7 — the tilt slot; tilt is display:none */
-  #tilt-toggle-btn{bottom:calc(148px + env(safe-area-inset-bottom));font-size:12px;font-weight:700;letter-spacing:0.02em;display:none;}
+  #frame-guide-btn{bottom:calc(148px + env(safe-area-inset-bottom));} /* #7 — the slot the removed 3D toggle used to hold */
   #list-toggle-btn{
     position:absolute;left:14px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:500;
     width:44px;height:44px;border-radius:50%;
@@ -1400,7 +1396,6 @@
     cursor:pointer;
   }
   #locate-btn svg, #list-toggle-btn svg, #frame-guide-btn svg{width:20px;height:20px;}
-  #tilt-toggle-btn.is-2d{color:var(--text-dim);}
   .badge-dot{
     position:absolute;top:-3px;right:-3px;
     min-width:17px;height:17px;padding:0 4px;border-radius:999px;
@@ -2788,7 +2783,6 @@
       <span class="lf-text"><b>Can't reach your progress.</b> Captured spots may show unchecked until this reconnects.</span>
       <button class="loadfail-retry" type="button" onclick="retryLoadPersonal()">Retry</button>
     </div>
-    <button id="tilt-toggle-btn" class="is-2d" onclick="toggleTilt()" aria-label="Toggle 3D view">2D</button>
     <!-- #91 — always visible, centred, text only. The (i) icon and the
          collapse behaviour were both removed; see the CSS block for the three
          shapes tried and why this one is the safest of them. onclick is the
@@ -6558,7 +6552,6 @@ let state = {
   meMarker: null,
   heading: 0,
   followMe: true,
-  is3D: false,
   totalWalkedMeters: 0,
   unlockedAchievements: new Set(),
   /* #180 — per-badge earned timestamps {id: epoch ms}, written when a badge
@@ -7950,7 +7943,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.22a';
+const APP_VERSION = '2026.09.22b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8167,33 +8160,24 @@ function assertContainerMeasured(id, ids, label){
     el);
 }
 
-/* #95 — THE BOOT WARNING THE ROW ASKED FOR WAS BUILT AND CUT. Gravestone, not
-   a deletion, because it is a good idea that this codebase specifically cannot
-   take.
+/* #95 — CLOSED 2026.09.22b. The boot warning the row first asked for was built
+   and cut (gravestone): building it showed #screen-map.active carried
+   `perspective:800px`, which anchored the position:fixed #hunt-empty and
+   #hunt-loading cards to the map column instead of the window — right place,
+   wrong reason — and a boot warning would have fired on every start for a
+   harmless condition, which is how an alarm channel gets muted.
 
-   The row's recommendation was a one-line boot check reading
-   getComputedStyle(#app).transform. Building it surfaced that THE INVARIANT IS
-   ALREADY BROKEN AND THE ROW NAMED THE WRONG ELEMENT: #screen-map.active
-   carries `perspective:800px` (for the compass/AR framing), and perspective
-   establishes a containing block for fixed descendants exactly the way a
-   transform does. So #hunt-empty and #hunt-loading have NEVER been anchored to
-   the window — they are anchored to #screen-map, which is the #app column.
+   HOW IT CLOSED: 2026.08.11i gated perspective to tilt-only (an iOS compositing
+   fix), and 2026.09.22b removed the dead 3D tilt entirely. No ancestor of the
+   cards now carries transform/perspective/filter/backdrop-filter/will-change/
+   contain, so they anchor to the window for real. Re-anchoring them to a known
+   container (the row's option (a)) was not built — gravestoned as cost with
+   nothing left to protect against.
 
-   It is invisible today because that column is `margin:0 auto` and full-height,
-   so its box and the viewport coincide to within a pixel on both phone and
-   desktop. The cards are in the right place for the wrong reason.
-
-   A boot warning would therefore have fired on EVERY start, for a condition
-   that is currently harmless, which is precisely how an alarm channel gets
-   muted — and a muted alarm is a sixth sighting of this pattern rather than a
-   fix for it. The outcome check (assertViewportCentred) stays as the alarm: it
-   is silent while the geometry is right and fires the moment it is not, and it
-   names #screen-map when it does. The standing state is readable on demand via
-   localyInvariants() below instead of being shouted at boot.
-
-   WHAT THIS DOES NOT DO IS DECIDE #95. Whether to re-anchor the cards to a
-   known containing block or to accept and document the coincidence is that
-   row's call, and it now has a fact it did not have. */
+   The outcome check (assertViewportCentred) STAYS as a free alarm: silent while
+   the geometry is right, and it names the offending ancestor and property the
+   moment someone adds one. localyInvariants() below should report both cards as
+   'the viewport (correct)'. */
 
 /* Console helper: run `localyInvariants()` in DevTools for a one-shot reading
    of every invariant this file assumes but cannot see. Deliberately a REPORT
@@ -10660,18 +10644,6 @@ function recenterMap(){
   // so centerOnPlayer's keepZoom arm is dormant (kept as a capability, its
   // comment updated so it doesn't claim a caller it no longer has).
   centerOnPlayer();
-}
-function toggleTilt(){
-  state.is3D = !state.is3D;
-  const wrap = document.getElementById('map-3d-wrap');
-  const btn = document.getElementById('tilt-toggle-btn');
-  wrap.classList.toggle('tilt-3d', state.is3D);
-  // Perspective lives on #screen-map and is needed ONLY while tilted; adding it in
-  // the same call keeps the 3D context off the GL canvas in 2D (see the CSS note at
-  // #screen-map.active.tilt-on — the iOS compositing fix).
-  document.getElementById('screen-map').classList.toggle('tilt-on', state.is3D);
-  btn.classList.toggle('is-2d', !state.is3D);
-  btn.textContent = state.is3D ? '3D' : '2D';
 }
 async function setupHeadingListener(){
   if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
@@ -13893,9 +13865,20 @@ function fillPinSheet(t){
      The identical copy in the capture toast is deliberately KEPT: that is the
      path where nothing else on screen explains the failure, and it is the case
      #51 was really about. Deleting both would reintroduce the silence. */
-  actions += `<button class="ps-btn" onclick="openSaveToHuntPicker('${t.id}')">+ Save to a guide</button>`;
-  // #26 — share this pin as a self-contained ?spot= deep-link (see shareSpot).
-  actions += `<button class="ps-btn" onclick="shareSpot('${t.id}')">Share this spot</button>`;
+  /* #240 — the two secondary actions share ONE row as half-width labelled
+     buttons (icon + words), so they read lighter than the full-width Capture
+     button above and still say exactly what they do. Labels kept (not icon-only)
+     so neither action has to be guessed. Both render into #pin-sheet-expand,
+     outside the #pin-sheet-drag surface, so no #235 tap-guard is needed.
+     #26 — Share is the self-contained ?spot= deep-link (see shareSpot). */
+  actions += `<div class="ps-btn-row">`
+    + `<button class="ps-btn ps-btn-half" onclick="openSaveToHuntPicker('${t.id}')">`
+    +   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M12 7v6M9 10h6"/></svg>`
+    +   `<span>Save to a guide</span></button>`
+    + `<button class="ps-btn ps-btn-half" onclick="shareSpot('${t.id}')">`
+    +   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>`
+    +   `<span>Share this spot</span></button>`
+    + `</div>`;
   /* #25 — last, quietest, and only on pins that have somewhere for a report to
      go (see reportTargetFor). Once reported in this session it becomes inert
      text rather than disappearing: a button that vanishes reads as a failed tap,
