@@ -7952,7 +7952,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.23c';
+const APP_VERSION = '2026.09.23d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -12108,7 +12108,14 @@ function shareHunt(id){
   if(!h){ return; }
   if(!h.code){ showToast('No code yet — edit and save once to generate one'); return; }
   const link = GUIDE_LINK_BASE + '?code=' + encodeURIComponent(h.code);
-  const text = `Check out my guide "${h.name}" on Nahgoo!\n${link}\n(Or enter code ${h.code} in the app.)`;
+  /* #129 — THE LINK MUST BE THE LAST THING IN THE MESSAGE. iMessage only
+     builds a preview card (the og-image.png card landing.html now carries)
+     when the URL ends the message; a URL with text after it renders as a plain
+     blue link and the preview tags are never used. QA-proven 2026-09-23: the
+     bare landing link unfurled with the image, the mid-message link did not.
+     The code line stays (the #85 recovery path above) — it just moves BEFORE
+     the link. Do not add anything after ${link}. */
+  const text = `Check out my guide "${h.name}" on Nahgoo! (Or enter code ${h.code} in the app.)\n${link}`;
   window.location.href = 'sms:&body=' + encodeURIComponent(text);
 }
 /* ============================================================
