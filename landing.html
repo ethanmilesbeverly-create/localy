@@ -14,6 +14,34 @@
      the exact key for. Off by default; removing this is a deliberate decision,
      not something that should happen by omission. Adjacent to #5. -->
 <meta name="robots" content="noindex, nofollow">
+<!-- #129 — LINK PREVIEW (Open Graph / Twitter Card). A shared guide link is sent
+     by text, and the preview card iMessage/WhatsApp/Slack build from it is the
+     first thing the recipient sees. Unfurl bots do NOT run JavaScript, so these
+     tags are static and generic: the per-guide name/stops are fetched client-side
+     and can never reach a preview from here (a per-guide card needs a
+     server-rendered function — a separate, undecided build on #129).
+     THE noindex ABOVE STAYS, deliberately (#129 decision 2026-09-23): it keeps
+     search engines from indexing guide pages, which is the #5 concern; the major
+     unfurl bots ignore robots meta, so it does not block the preview.
+     og:image MUST be an absolute URL to a raster file — messaging apps won't
+     render SVG or a data: URI. og-image.png sits beside this file at the site
+     root. NO og:url on purpose: a fixed og:url makes some apps canonicalise to
+     the bare page and drop ?guide=, and nothing here needs it.
+     RENAME NOTE (#239): the brand name appears in these tags AND is baked into
+     og-image.png — both change when the rename ships. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nahgoo">
+<meta property="og:title" content="A guide on Nahgoo">
+<meta property="og:description" content="Someone shared a walking guide with you. Open it to see the stops on a map.">
+<meta property="og:image" content="https://nahgoo.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nahgoo — a dotted walking route between stops, ending at a flag">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A guide on Nahgoo">
+<meta name="twitter:description" content="Someone shared a walking guide with you. Open it to see the stops on a map.">
+<meta name="twitter:image" content="https://nahgoo.com/og-image.png">
+<meta name="description" content="Someone shared a walking guide with you. Open it to see the stops on a map.">
 
 <!-- ============================================================
      landing.html — SHARE-LINK LANDING PAGE (roadmap item 49a)
@@ -85,7 +113,7 @@
    copied: the main script below calls these same two globals.
    One definition, moved earlier — not a second copy that drifts.
    ============================================================ */
-const LANDING_VERSION = '2026.08.03a';
+const LANDING_VERSION = '2026.09.23a';
 console.log('%c[landing] ' + LANDING_VERSION, 'font-weight:700');
 
 /* Coarse pointer OR narrow viewport. Deliberately generous: a false
