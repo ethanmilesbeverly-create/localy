@@ -7,6 +7,28 @@
      is now prevented the correct way, by 16px font-size on every input below. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nahgoo</title>
+<!-- #397 — LINK PREVIEW TAGS. "Share this spot" (#26) links point straight at
+     this page (?spot=), so without these a shared spot unfurled as a bare link.
+     Same shape as landing.html's #129 tags. These show for EVERY link to this
+     page (the bare app URL, auth emails, ?spot=), so the copy stays generic:
+     unfurl bots do not run JavaScript, and the spot's name is base64 in the URL.
+     og:image MUST be an absolute URL to a raster file (og-image.png at the site
+     root). NO og:url on purpose — a fixed og:url makes some apps drop ?spot=.
+     RENAME NOTE (#239): the brand name appears in these tags AND is baked into
+     og-image.png — both change when the rename ships. -->
+<meta name="description" content="Find the stories around you: real places with a sourced story, on a map you explore on foot.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nahgoo">
+<meta property="og:title" content="Nahgoo">
+<meta property="og:description" content="Find the stories around you: real places with a sourced story, on a map you explore on foot.">
+<meta property="og:image" content="https://nahgoo.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nahgoo — a dotted walking route between stops, ending at a flag">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nahgoo">
+<meta name="twitter:description" content="Find the stories around you: real places with a sourced story, on a map you explore on foot.">
+<meta name="twitter:image" content="https://nahgoo.com/og-image.png">
 <!-- Tab favicon. Inline SVG data URI on purpose: keeps this a single-file
      drag-and-drop deploy (no favicon.ico binary to manage as a second file).
      The mark is the Explore nav globe (circle + equator + meridian, see the
@@ -3234,7 +3256,11 @@
         </p>
         <p class="credit-row">
           <strong>Place descriptions</strong>
-          What a place <em>is</em> comes from public sources — the <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> data credited above and <a class="credit-link" href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia</a> (under CC BY-SA), matched to the spot by name and location. We never write these ourselves, and a pin is left blank when nothing reliable fits.
+          <!-- #398 / #403 — names every source a description can come from. Google
+               Places was dropped as a source by #403 (its terms forbid storing
+               its text), so it is deliberately NOT listed. If a source is added
+               or removed, change this row AND privacy.html's place-data note. -->
+          What a place <em>is</em> comes from public sources — the <a class="credit-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> data credited above, <a class="credit-link" href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia</a> (under CC BY-SA) and <a class="credit-link" href="https://www.wikidata.org/" target="_blank" rel="noopener noreferrer">Wikidata</a> — matched to the spot by name and location. When none of them covers a place, we write a short factual line ourselves from the place's own or other public sources, and for a few spots people added, the line is drafted by AI from what they wrote. A pin is left blank when nothing reliable fits.
         </p>
         <p class="credit-row">
           <strong>What people add</strong>
@@ -7952,7 +7978,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.23d';
+const APP_VERSION = '2026.09.24a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
