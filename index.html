@@ -7986,14 +7986,32 @@ function enterEstimatedArea(area){
 function leaveEstimatedArea(){
   state._estimatedArea = false;
 }
-const GEO_DENIED_MSG = 'Location is off for this site. Turn it on in your browser settings to see what\u2019s near you.';
+/* #416 (25n) — shown ONLY when the browser refuses without showing its prompt
+   (a denial that comes back faster than a person could read and tap — the site
+   is blocked in browser settings). A person who declines the prompt themselves
+   gets no message, by directive. */
+const GEO_DENIED_MSG = 'Location is blocked for this site. Allow it in your browser settings to see what\u2019s near you.';
+const GEO_BLOCKED_FAST_MS = 700;
 /* The locate button with no fix yet: ask for location (the browser prompt shows
    on the first call). The view stays on the current area until a real fix
    lands; onLocation's first fix then leaves browse mode and centres on you. */
 function requestLocationFromTap(){
   state._locateRequested = true;
-  if(state._geoDenied){ showToast(GEO_DENIED_MSG); return; }
-  if(state._locatingStarted){ showToast('Finding your location\u2026'); return; }
+  if(state._locatingStarted && !state._geoDenied){ showToast('Finding your location\u2026'); return; }
+  state._geoAskAt = Date.now();
+  /* #416 (25n) — ASK AGAIN AFTER A DECLINE, by directive. A decline used to be
+     final for the page (every later tap only showed a message). Now a tap
+     re-requests: the dead watch is cleared and startLocating() runs again, so
+     the browser shows its prompt again whenever it is willing to. Whether it is
+     willing is the BROWSER's call, not ours — Chrome remembers an explicit
+     "Block" for the site until it is reset in site settings; that case comes
+     back instantly with no prompt, and only then is GEO_DENIED_MSG shown. */
+  if(state._geoDenied){
+    state._geoDenied = false;
+    if(state.watchId !== null){ try{ navigator.geolocation.clearWatch(state.watchId); }catch(e){} state.watchId = null; }
+    startLocating();
+    return;
+  }
   ensureLocating();
 }
 
@@ -8479,7 +8497,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25m';
+const APP_VERSION = '2026.09.25n';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9870,7 +9888,10 @@ function startLocating(){
       if(err && err.code === 1){
         state._geoDenied = true;
         noteLocationAllowed(false);
-        showToast(GEO_DENIED_MSG);
+        /* #416 (25n) — no message when the person declined the prompt. Only an
+           instant refusal after a locate tap (no prompt was shown — blocked in
+           browser settings) explains itself; otherwise the tap would look dead. */
+        if(state._geoAskAt && (Date.now() - state._geoAskAt) < GEO_BLOCKED_FAST_MS) showToast(GEO_DENIED_MSG);
         return;
       }
       if(demoBypassActive()){
