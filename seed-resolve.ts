@@ -176,19 +176,57 @@ type Existing = { name: string; lat: number; lng: number; category?: string; sou
 // (The real fix for commercial venues is a places API, not a gazetteer — see
 // the roadmap row for Google Places resolution.)
 const GEO_STOPWORDS = new Set(["the", "and", "for", "of", "at", "on", "in", "to", "a", "an", "de", "la", "le"]);
-function geoTokens(s: string): string[] {
+// #303 (a) — FOLD DIACRITICS BEFORE TOKENIZING. The old `[^a-z0-9]` strip ran on
+// the raw lowercase string, so an accented letter became a SPLIT point:
+// "Kościuszko" -> "ko" + "ciuszko", and a correct Photon match ("Tadeusz
+// Kościuszko") dropped at 0.33 against the typed "Kosciuszko". NFD splits each
+// accented letter into base + combining mark, and the mark range is deleted;
+// the few letters NFD does NOT decompose (ł, ø, đ, ß, æ, œ) are mapped by hand.
+const GEO_FOLD: Record<string, string> = { "ł": "l", "ø": "o", "đ": "d", "ß": "ss", "æ": "ae", "œ": "oe", "ı": "i" };
+function geoFold(s: string): string {
   return s
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[łøđßæœı]/g, (c) => GEO_FOLD[c] ?? c);
+}
+function geoTokens(s: string): string[] {
+  return geoFold(s)
     .replace(/[^a-z0-9]+/g, " ")
     .split(/\s+/)
     .filter((t) => t.length >= 3 && !GEO_STOPWORDS.has(t));
 }
+// #303 (b) — GENERIC TYPE WORDS CAN'T CARRY A MATCH. A place type word ("house",
+// "museum", "sphere") is shared by many different places, so a match built on it
+// is no evidence of identity. Live cases: "Gibson House Museum" -> "Otis House
+// Museum" (Boston) and "Noyes Armillary Sphere" -> "Sarah Rittenhouse Armillary
+// Sphere" (DC) both passed at 0.67 because the shared type words carried the ratio
+// while the identifying proper noun MISSED. A bare type word with no proper noun is
+// still a fine search term, so these are NOT stopwords — they still count in the
+// overall ratio. What changes is a SECOND test below: the name's DISTINCTIVE
+// (non-type) tokens must also match at >= 0.6 on their own.
+const GEO_GENERIC_TYPE = new Set([
+  "house", "home", "museum", "park", "monument", "memorial", "site", "garden", "gardens",
+  "center", "centre", "hall", "building", "statue", "sculpture", "fountain", "sphere",
+  "square", "plaza", "church", "cathedral", "chapel", "library", "theater", "theatre",
+  "tower", "bridge", "station", "market", "cemetery", "trail", "beach", "lake", "pier",
+  "gallery", "historic", "historical", "national", "state", "district", "street", "avenue",
+]);
 function labelMatchesName(name: string, label: string): boolean {
   const want = geoTokens(name);
   if (!want.length) return false; // can't verify -> drop (safe direction)
   const have = new Set(geoTokens(label));
   const hit = want.filter((t) => have.has(t)).length;
-  return hit / want.length >= 0.6;
+  if (hit / want.length < 0.6) return false; // the original test, unchanged
+  // #303 (b): STRICTLY TIGHTER than before — this can only turn a pass into a
+  // drop, never a drop into a pass, so it cannot mint a new wrong pin (the guard's
+  // purpose is err-toward-dropping). It only bites when generic type words were
+  // doing the carrying. A name made ONLY of type words has no distinctive tokens
+  // and keeps the original behaviour.
+  const distinctive = want.filter((t) => !GEO_GENERIC_TYPE.has(t));
+  if (!distinctive.length) return true;
+  const dHit = distinctive.filter((t) => have.has(t)).length;
+  return dHit / distinctive.length >= 0.6;
 }
 
 async function geocode(

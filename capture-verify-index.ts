@@ -44,7 +44,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 // Bump on every deployed change so QA step 1 can confirm the running build.
-const ENGINE_VERSION = "capture-verify-v1";
+const ENGINE_VERSION = "capture-verify-v2";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -265,7 +265,7 @@ Deno.serve(async (req: Request) => {
   // outcome, and its last_* powers the physics gate on the verified path).
   const { data: scoreRow } = await supabase
     .from("leaderboard_scores")
-    .select("distinct_pins,last_lat,last_lng,last_at")
+    .select("distinct_pins,last_lat,last_lng,last_at,verified_distance_m")
     .eq("user_id", user.id)
     .maybeSingle();
   const currentCount: number = scoreRow?.distinct_pins ?? 0;
@@ -325,10 +325,19 @@ Deno.serve(async (req: Request) => {
 
   // --- accept: bank it. Update the score + physics-gate state atomically-ish. --
   const newCount = currentCount + (isNewPin ? 1 : 0);
+  // #254 — accumulate SERVER-VERIFIED distance: straight-line from the previous
+  // verified capture to this one. Only verified captures reach here, so this can't
+  // be padded by a client-reported walk — the #127 posture applied to distance.
+  const addedDistance =
+    (scoreRow?.last_lat != null && scoreRow?.last_lng != null)
+      ? haversine(scoreRow.last_lat, scoreRow.last_lng, deviceLat, deviceLng)
+      : 0;
+  const newDistance = (scoreRow?.verified_distance_m ?? 0) + addedDistance;
   await supabase.from("leaderboard_scores").upsert(
     {
       user_id: user.id,
       distinct_pins: newCount,
+      verified_distance_m: newDistance,
       last_lat: deviceLat,
       last_lng: deviceLng,
       last_at: new Date(now).toISOString(),
