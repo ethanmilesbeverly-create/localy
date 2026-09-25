@@ -12,18 +12,24 @@
     "wikiTitle": "First Avenue (nightclub)",
     "wikiWidened": false,
     "existing": [
+      "First Avenue [submission]",
       "First Avenue (nightclub) [wiki]",
       "Pantages Theatre (Minneapolis) [wiki]"
     ],
+    "arms": "map 0 · subs 1 · wiki 2",
     "verdict": {
-      "decision": "new",
+      "decision": "match",
       "matchName": "First Avenue (nightclub)",
       "canonicalName": "First Avenue",
       "category": "history",
       "confidence": 1,
-      "why": "The candidate 'First Avenue' refers to the same historic nightclub as the existing map entry 'First Avenue (nightclub)', supported by the provided historical context regarding Prince and the venue's origins."
+      "why": "The candidate place is identical to the existing 'First Avenue (nightclub)' entry, which is a well-documented historic music venue."
     },
-    "outcome": "new-seed"
+    "outcome": "story-attached",
+    "attachedTo": [
+      "First Avenue [submission]",
+      "First Avenue (nightclub) [wiki]"
+    ]
   },
   {
     "candidate": "Foshay Tower",
@@ -38,18 +44,22 @@
     "wikiTitle": "Foshay Tower",
     "wikiWidened": false,
     "existing": [
-      "Foshay Tower [wiki]",
+      "Foshay Tower [submission]",
       "901 Marquette [wiki]"
     ],
+    "arms": "map 0 · subs 1 · wiki 2",
     "verdict": {
-      "decision": "new",
+      "decision": "match",
       "matchName": "Foshay Tower",
       "canonicalName": "Foshay Tower",
       "category": "history",
       "confidence": 1,
       "why": "The candidate is identical to the existing map entry 'Foshay Tower', which is a well-known historic landmark in Minneapolis."
     },
-    "outcome": "new-seed"
+    "outcome": "story-attached",
+    "attachedTo": [
+      "Foshay Tower [submission]"
+    ]
   },
   {
     "candidate": "Washburn Park Water Tower",
@@ -66,6 +76,7 @@
     "existing": [
       "Washburn Park Water Tower [map:wiki]"
     ],
+    "arms": "map 1 · subs 0 · wiki 1",
     "verdict": {
       "decision": "match",
       "matchName": "Washburn Park Water Tower",
@@ -95,6 +106,7 @@
       "Witch's Hat Tower [map:osm]",
       "Prospect Park Water Tower [wiki]"
     ],
+    "arms": "map 1 · subs 0 · wiki 1",
     "verdict": {
       "decision": "match",
       "matchName": "Witch's Hat Tower",

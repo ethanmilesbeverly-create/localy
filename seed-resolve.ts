@@ -59,7 +59,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.25e (#419 stories attach to existing pins)";
+const TOOL_VERSION = "seed-resolve 2026.09.25f (#420 Wikipedia check can hold)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -553,18 +553,36 @@ async function wikiEnrich(
 // three, deduped by name, within MATCH_RADIUS_M. If the live map or the
 // submissions read FAILS, the place is HELD (never judged), not waved through on
 // a partial check — the #264 "a failure is a hold, not a verdict" rule.
-async function wikiNear(lat: number, lng: number): Promise<Existing[]> {
-  try {
-    const url = "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
-      MATCH_RADIUS_M + "&gscoord=" + lat + "%7C" + lng;
-    const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!r.ok) return [];
-    const d = await r.json();
-    const hits: any[] = d?.query?.geosearch ?? [];
-    return hits.filter((h) => h?.title).map((h) => ({ name: String(h.title), lat: h.lat, lng: h.lon, source: "wiki" }));
-  } catch {
-    return []; // Wikipedia is the belt; the two checks below are the braces
+// #420 — a FAILED Wikipedia check is not "no article here". It returns null
+// (→ the place is HELD, like the other two arms, #264) on any non-OK response,
+// network error or unreadable body, after one retry on a 429/5xx (honouring
+// Retry-After, capped at 15 s). Only a clean response with zero hits is [].
+// On the 2026-09-25 Mac run a silent failure made First Avenue and Foshay Tower
+// read as brand new.
+async function wikiNear(lat: number, lng: number): Promise<Existing[] | null> {
+  const url = "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
+    MATCH_RADIUS_M + "&gscoord=" + lat + "%7C" + lng;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+      if (!r.ok) {
+        if (attempt === 1 && (r.status === 429 || r.status >= 500)) {
+          const ra = Number(r.headers.get("retry-after"));
+          await sleep(Math.min(15000, Number.isFinite(ra) && ra > 0 ? ra * 1000 : 3000));
+          continue;
+        }
+        return null;
+      }
+      const d = await r.json();
+      if (!d || !d.query || !Array.isArray(d.query.geosearch)) return null; // an error body is not "none"
+      return d.query.geosearch.filter((h: any) => h?.title)
+        .map((h: any) => ({ name: String(h.title), lat: h.lat, lng: h.lon, source: "wiki" }));
+    } catch {
+      if (attempt === 1) { await sleep(3000); continue; }
+      return null;
+    }
   }
+  return null;
 }
 
 async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
@@ -605,19 +623,23 @@ async function submissionsNear(lat: number, lng: number): Promise<Existing[] | n
   }
 }
 
-async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; failed: string | null }> {
+async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; failed: string | null; arms: string }> {
   const [map, subs, wiki] = await Promise.all([mapNear(lat, lng), submissionsNear(lat, lng), wikiNear(lat, lng)]);
-  const failed = map === null ? "live-map check failed" : subs === null ? "submissions check failed" : null;
+  const failed = map === null ? "live-map check failed" : subs === null ? "submissions check failed"
+    : wiki === null ? "Wikipedia check failed" : null;
   const seen = new Set<string>();
   const list: Existing[] = [];
-  for (const e of [...(subs ?? []), ...(map ?? []), ...wiki]) {
+  for (const e of [...(subs ?? []), ...(map ?? []), ...(wiki ?? [])]) {
     if (haversineM(lat, lng, e.lat, e.lng) > MATCH_RADIUS_M) continue;
     const k = e.name.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (!k || seen.has(k)) continue;
     seen.add(k);
     list.push(e);
   }
-  return { list, failed };
+  // #420 — per-arm counts within 90 m, printed per place, so an all-empty result
+  // on a downtown landmark is visible in the run instead of hiding in the report.
+  const near = (xs: Existing[] | null) => xs === null ? "fail" : String(xs.filter((e) => haversineM(lat, lng, e.lat, e.lng) <= MATCH_RADIUS_M).length);
+  return { list, failed, arms: `map ${near(map)} · subs ${near(subs)} · wiki ${near(wiki)}` };
 }
 
 // ---------------------------------------------------------------------------
@@ -950,6 +972,7 @@ async function run() {
       wikiTitle,
       wikiWidened,
       existing: existing.map((e) => `${e.name} [${e.source ?? "?"}]`),
+      arms: near.arms,
       verdict,
     };
 
@@ -1032,6 +1055,7 @@ async function run() {
       const cat = verdict.category ?? "UNCLASSIFIED";
       const desc = line.story ? "story✓" : row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
       console.log(`  + ${verdict.canonicalName} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})`);
+      console.log(`      checked nearby: ${near.arms}`); // #420 — a new pin with nothing found by any arm is worth a second look
     } else if (verdict.decision === "held") {
       // Throttle/transport hold — the machine never judged this. Re-runnable,
       // NOT a review. Carries the HTTP status when there was one, so the report
