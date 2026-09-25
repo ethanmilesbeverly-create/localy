@@ -3503,6 +3503,12 @@
         <button id="auth-back-btn" type="button">Back to log in</button>
       </div>
 
+      <!-- #414 — shown only when the prompt covers the Guides tab: opening a
+           guide by code needs no account (#400), so the tab gate must not hide it. -->
+      <div id="auth-code-row" class="auth-hidden">
+        <button id="auth-code-btn" type="button" onclick="openCodeFromGate()">Have a guide code? Open it</button>
+      </div>
+
       <!-- #400 — the guest's way out of the sign-in prompt, thumb-reachable at
            the bottom of the card (the X above is the same action). -->
       <div id="auth-dismiss-row" class="auth-hidden">
@@ -3531,11 +3537,35 @@
   #auth-overlay{
     position:absolute; inset:0; z-index:5000;
     background:var(--bg);
-    display:flex; align-items:center; justify-content:center;
+    /* #414 — centred by the card's auto margins, not align/justify-content, so
+       a card taller than a small phone scrolls instead of losing its top. */
+    display:flex;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
     padding:24px;
   }
   #auth-overlay.hidden{ display:none; }
+  /* #414 — THE GUEST PROMPT IS A SEE-THROUGH PANEL, NOT A WALL. When the card
+     is a sign-in prompt for a guest (.is-prompt, set by promptSignIn), the
+     backdrop is the same light scrim the onboarding overlay uses (#52), so the
+     screen behind — the passport, the guides list, the submit form — stays
+     visible: the guest sees what an account would give them. The bottom nav is
+     raised above the scrim (body.auth-prompt-open) so it stays tappable, and
+     the padding keeps the card clear of it. The reset screen and the expired-
+     link card never carry .is-prompt, so they keep the opaque background. */
+  #auth-overlay.is-prompt{
+    background:rgba(6,16,12,0.55);
+    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+  }
+  body.auth-prompt-open #bottomnav{ z-index:5001; }
+  #auth-overlay.is-prompt #auth-card{ box-shadow:0 18px 50px rgba(0,0,0,0.45); }
+  #auth-code-row{ margin-top:12px; text-align:center; }
+  #auth-code-btn{
+    background:none; border:none; color:var(--orange);
+    font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; padding:4px;
+  }
   #auth-card{
+    margin:auto;
     width:100%; max-width:360px;
     background:var(--surface);
     border:1px solid var(--line);
@@ -4431,6 +4461,7 @@ function onAuthed(session){
   state.user = session.user;
   document.body.classList.remove('is-guest');
   authDismissible = false;
+  clearPromptChrome(); // #414
   document.getElementById('auth-overlay').classList.add('hidden');
   pingActivity('app_open');        // #10 — a no-op if this device already sent app_open today (e.g. as a guest)
   noteActivityAuthState(true);     // #10 — sends signed_in only on a real no-session → session change
@@ -4598,8 +4629,25 @@ function promptSignIn(reason, ret){
   authDismissible = true;
   if(!state._authWired){ wireAuthUI(); state._authWired = true; }
   setAuthMode('login');
-  document.getElementById('auth-overlay').classList.remove('hidden');
+  /* #414 — the see-through prompt (scrim + nav above it). The guide-code link
+     shows only when the prompt is the Guides tab gate. */
+  const ov = document.getElementById('auth-overlay');
+  ov.classList.add('is-prompt');
+  document.body.classList.add('auth-prompt-open');
+  const codeRow = document.getElementById('auth-code-row');
+  if(codeRow) codeRow.classList.toggle('auth-hidden', !(ret && ret.tab === 'screen-guides'));
+  ov.scrollTop = 0;
+  ov.classList.remove('hidden');
   pingActivity('signin_prompt'); // #10 — the guest met the sign-in card
+}
+/* #414 — drop the prompt-only styling. Called on dismiss and whenever the
+   overlay hides for a signed-in session. */
+function clearPromptChrome(){
+  const ov = document.getElementById('auth-overlay');
+  if(ov) ov.classList.remove('is-prompt');
+  document.body.classList.remove('auth-prompt-open');
+  const codeRow = document.getElementById('auth-code-row');
+  if(codeRow) codeRow.classList.add('auth-hidden');
 }
 function dismissSignInPrompt(){
   if(authMode === 'reset') return; // never an escape hatch out of reset (#2)
@@ -4607,9 +4655,41 @@ function dismissSignInPrompt(){
   clearSignInReturn();
   const tl = document.getElementById('auth-tagline');
   if(tl) tl.textContent = AUTH_TAGLINE_DEFAULT;
+  clearPromptChrome();
   document.getElementById('auth-overlay').classList.add('hidden');
   // The expired-reset-link card is shown before anything has booted.
   if(!state._booted) bootAsGuest();
+}
+/* #414 — is the see-through guest prompt on screen right now? */
+function signInPromptOpen(){
+  const ov = document.getElementById('auth-overlay');
+  return !!(ov && ov.classList.contains('is-prompt') && !ov.classList.contains('hidden'));
+}
+/* #414 — THE TAB GATE. A guest who opens Guides, Submit or Passport sees the
+   screen itself behind the see-through prompt, with the nav still live, instead
+   of an opaque wall (Submit) or no prompt at all (Guides, Passport). "Not now"
+   or the X reveals the screen; every account action on it is still gated by its
+   own promptSignIn() call, so dismissing only lets them look. Shown on every
+   entry to the tab, from the nav or a Back that lands on it (both go through
+   setTab / openSuggestGemScreen); a return from a sub-screen that only calls
+   showScreen (Settings back to Passport) does not re-show it. */
+const TAB_GATE_REASONS = {
+  'screen-guides':      'guide',
+  'screen-suggest-gem': 'submit',
+  'screen-passport':    'passport'
+};
+function showTabGate(id){
+  if(!isGuest()) return;
+  const reason = TAB_GATE_REASONS[id];
+  if(!reason) return;
+  promptSignIn(reason, { tab:id });
+}
+/* #414 — the Guides gate's "Have a guide code?" link: close the prompt and open
+   the code screen, which a guest may use (#400). Nav stays on Guides. */
+function openCodeFromGate(){
+  dismissSignInPrompt();
+  showScreen('screen-code');
+  setNavActive('screen-guides');
 }
 function stashSignInReturn(ret){
   clearSignInReturn();
@@ -7989,6 +8069,10 @@ function closeAllPlaceSuggest(){
 }
 function showScreen(id){
   closeAllPlaceSuggest();
+  /* #414 — the nav stays live under a guest prompt, so any screen change
+     (a nav tap, a Back) closes the prompt first; a gated tab re-opens its own
+     gate after this, in setTab / openSuggestGemScreen. */
+  if(signInPromptOpen()) dismissSignInPrompt();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el = document.getElementById(id);
   el.classList.add('active');
@@ -8086,9 +8170,9 @@ function restoreBootTab(tab, hadDeepLink){
   if(!tab || tab === 'screen-map') return;
   if(hadDeepLink) return;
   if(shouldRunOnboarding()) return;
-  /* #400 — a guest reloading on a persisted Submit hash (e.g. just after
-     signing out from it) would otherwise meet the sign-in prompt at boot. */
-  if(isGuest() && tab === 'screen-suggest-gem') return;
+  /* #400 skipped Submit here for a guest, because its opaque sign-in wall would
+     have met them at boot. #414 retired that: all three gated tabs now restore
+     the same way, the screen behind a see-through prompt the guest can close. */
   /* The boot hunt is a local_ hunt, and the first GPS fix regenerates it
      (onLocation -> startLocalHunt -> setCurrentHunt -> enterHuntMode), which
      would setTab('screen-map') OVER the tab we just restored ~1s in — the "starts
@@ -8123,6 +8207,7 @@ function setTab(id){
        maker→holder realtime channel. */
     refreshAllExternalGuides();
   }
+  showTabGate(id); // #414 — Guides / Passport for a guest; a no-op otherwise
 }
 
 /* =========================================================
@@ -8233,7 +8318,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25b';
+const APP_VERSION = '2026.09.25c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11936,7 +12021,9 @@ function jumpSuggestMapTo(place){
    with where Back actually goes, which a return-target scheme (#91's approach
    for Settings) would NOT have done here without also rewriting Cancel. */
 function openSuggestGemScreen(){
-  if(isGuest()){ promptSignIn('submit', { tab:'screen-suggest-gem' }); return; } // #400
+  /* #414 — a guest now sees the form behind the see-through prompt instead of
+     an opaque wall; submitGem() still gates the actual submit (#400). The gate
+     opens at the end of this function, after the form is reset. */
   showScreen('screen-suggest-gem');
   /* #62 — WAS setNavActive('screen-modes') UNTIL 2026.07.21k. A nav button now
      carries screen-suggest-gem, so this screen lights itself. The explicit call
@@ -12009,6 +12096,7 @@ function openSuggestGemScreen(){
     state.suggestMap.invalidateSize();
     requestAnimationFrame(()=>{ if(state.suggestMap) state.suggestMap.invalidateSize(); });
   }, 60);
+  showTabGate('screen-suggest-gem'); // #414 — guests see the form behind the prompt
 }
 /* #100 — Cancel is a DELIBERATE abandon and does not prompt; see navTo(). It
    clears the draft explicitly rather than relying on openSuggestGemScreen() to
