@@ -448,6 +448,19 @@
     box-shadow:0 6px 18px rgba(0,0,0,0.4);
   }
   #browsing-indicator.show{display:flex;}
+  /* #416 — estimated-area chip: compact, centred under the search row. */
+  #area-chip{
+    position:absolute;top:108px;left:50%;transform:translateX(-50%);z-index:500;
+    display:none;align-items:center;gap:7px;max-width:calc(100% - 32px);
+    background:var(--surface);border:1px solid var(--line);color:var(--text);
+    border-radius:999px;padding:7px 12px 7px 10px;font-size:12.5px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35);white-space:nowrap;
+  }
+  #area-chip.show{display:flex;}
+  #area-chip svg{width:14px;height:14px;flex-shrink:0;color:var(--orange);}
+  #area-chip-text{overflow:hidden;text-overflow:ellipsis;}
+  #area-chip-text b{font-weight:700;}
+  #area-chip .area-chip-change{color:var(--orange);font-weight:700;margin-left:2px;}
   #browsing-indicator .bi-eye{width:15px;height:15px;flex-shrink:0;color:var(--yellow);}
   #browsing-indicator-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   #browsing-indicator-text b{color:var(--yellow);font-weight:700;}
@@ -514,6 +527,7 @@
   #map-loadfail .lf-text{flex:1;min-width:0;line-height:1.3;}
   #map-loadfail .lf-text b{color:var(--danger);font-weight:700;}
   #browsing-indicator.show ~ #map-loadfail.show{top:160px;}
+  #area-chip.show ~ #map-loadfail.show{top:152px;} /* #416 — the estimated-area chip sits in the same slot */
 
   /* ---------- Screens ---------- */
   .screen{
@@ -1096,6 +1110,8 @@
   #screen-map.drawer-open #stale-hunt-banner,
   #screen-map.drawer-open #map-search-row,
   #screen-map.drawer-open #browsing-indicator,
+  #screen-map.drawer-open #area-chip,
+  #screen-map.sheet-open #area-chip,
   #screen-map.drawer-open #map-loadfail,
   #screen-map.drawer-open #search-here-btn,
   #screen-map.sheet-open #search-here-btn,
@@ -2807,6 +2823,13 @@
         <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="map-search-input" placeholder="Find a place nearby" enterkeyhint="search">
       </div>
+    </div>
+    <!-- #416 — the estimated-start-area label. Shown while the map is on the
+         guessed area (no location shared yet); tap opens search. -->
+    <div id="area-chip" onclick="onAreaChipTap()" role="button" aria-label="Change area">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      <span id="area-chip-text"></span>
+      <span class="area-chip-change">Change</span>
     </div>
     <div id="browsing-indicator" onclick="recenterMap()" role="button" aria-label="Return to your real location">
       <svg class="bi-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -7873,9 +7896,132 @@ function onboardingDone(){
         || localStorage.getItem(ONBOARDED_KEY_BASE + 'anon') === '1';
   }catch(e){ return false; }
 }
+/* #416 — THE ONBOARDING SLIDES ARE RETIRED (2026-09-25, by directive: "we have
+   outgrown those"). A visitor now lands straight on the map in an estimated
+   area and is asked for location only when they tap locate (see bootGeoDecision
+   / requestLocationFromTap). The slides' jobs moved: the location prompt to the
+   locate tap, the camera prompt to the capture-photo step (which always asked on
+   its own anyway), and the privacy link to About (reachable with no account).
+   The overlay markup and step handlers are kept, inert, so this is a one-line
+   revert: restore `return !demoBypassActive() && !onboardingDone();`. */
 function shouldRunOnboarding(){
-  return !demoBypassActive() && !onboardingDone();
+  return false;
 }
+/* =========================================================
+   #416 — LOCATION ON REQUEST, AND AN ESTIMATED START AREA
+   ---------------------------------------------------------
+   The app no longer asks for location on load. Boot decides once:
+     • ALREADY ALLOWED — the browser reports 'granted', or this device has had a
+       real fix before and the browser doesn't say 'denied' (GEO_OK_KEY; covers
+       iOS Safari, which re-asks per session and may report 'prompt') → start GPS
+       now, exactly as before. People who said yes are not pushed back a step.
+     • OTHERWISE → the map opens in browse mode on an ESTIMATED area, with the
+       #area-chip label ("Showing Chicago area"), and GPS starts only when they
+       tap locate (requestLocationFromTap), which is when the browser prompt
+       appears. A first real fix then leaves the estimate and centres on them.
+   THE ESTIMATE (startAreaGuess), best first: the last real frame this device
+   saw (rememberedMapView — only ever saved from a real fix, #90), then the
+   browser's TIME ZONE mapped to a seeded metro (no data leaves the device), then
+   downtown Chicago. The time zone can't tell cities in one zone apart (every
+   Central-time visitor gets Chicago); an IP-based city lookup that fixes that is
+   the next pass, a separate row.
+   THE CHICAGO STAND-IN IS RETIRED for real visitors: a denied or failed fix no
+   longer drops you in simulate mode at downtown Chicago with "tap the map to set
+   your location" — you stay on the area you were browsing. Simulate mode remains
+   for the demo iframe only. */
+const GEO_OK_KEY = 'nahgoo:geo-ok:v1';
+const START_METROS = {
+  chicago: { name:'Chicago',     lat:41.8827, lng:-87.6233 },
+  nyc:     { name:'New York',    lat:40.7580, lng:-73.9855 },
+  denver:  { name:'Denver',      lat:39.7392, lng:-104.9903 },
+  phoenix: { name:'Phoenix',     lat:33.4484, lng:-112.0740 },
+  la:      { name:'Los Angeles', lat:34.0522, lng:-118.2437 }
+};
+/* Time zone → the seeded metro that best stands for it. Zones not listed (and
+   every non-US zone) fall back to Chicago, the old default. */
+const TZ_START_METRO = {
+  'America/Chicago':'chicago', 'America/Menominee':'chicago',
+  'America/Indiana/Indianapolis':'chicago', 'America/Indiana/Knox':'chicago', 'America/Indiana/Tell_City':'chicago',
+  'America/Indiana/Vincennes':'chicago', 'America/Indiana/Winamac':'chicago', 'America/Indiana/Marengo':'chicago',
+  'America/Indiana/Petersburg':'chicago', 'America/Indiana/Vevay':'chicago', 'America/Detroit':'chicago',
+  'America/Kentucky/Louisville':'chicago', 'America/Kentucky/Monticello':'chicago',
+  'America/North_Dakota/Center':'chicago', 'America/North_Dakota/New_Salem':'chicago', 'America/North_Dakota/Beulah':'chicago',
+  'America/New_York':'nyc',
+  'America/Denver':'denver', 'America/Boise':'denver',
+  'America/Phoenix':'phoenix',
+  'America/Los_Angeles':'la'
+};
+function startAreaGuess(){
+  const rv = rememberedMapView();
+  if(rv) return { lat:rv.lat, lng:rv.lng, label:'your last location', source:'remembered' };
+  let tz = '';
+  try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(e){}
+  const m = START_METROS[TZ_START_METRO[tz] || 'chicago'];
+  return { lat:m.lat, lng:m.lng, label:m.name + ' area', source: TZ_START_METRO[tz] ? 'timezone' : 'fallback' };
+}
+function locationAllowedBefore(){
+  try{ return localStorage.getItem(GEO_OK_KEY) === '1'; }catch(e){ return false; }
+}
+function noteLocationAllowed(on){
+  try{ if(on) localStorage.setItem(GEO_OK_KEY, '1'); else localStorage.removeItem(GEO_OK_KEY); }catch(e){}
+}
+/* 'locate' = start GPS now; 'estimate' = open on the estimated area. */
+async function bootGeoDecision(){
+  if(demoBypassActive()) return 'locate';
+  if(!navigator.geolocation) return 'estimate';
+  let perm = null;
+  try{
+    if(navigator.permissions && navigator.permissions.query){
+      perm = (await navigator.permissions.query({ name:'geolocation' })).state;
+    }
+  }catch(e){ perm = null; }
+  if(perm === 'granted') return 'locate';
+  if(perm !== 'denied' && locationAllowedBefore()) return 'locate';
+  return 'estimate';
+}
+/* Enter browse mode on the estimated area WITHOUT regenerating content (the
+   boot startLocalHunt builds it around the same point right after). */
+function enterEstimatedArea(area){
+  state._startArea = area;
+  state._estimatedArea = true;
+  state.searchedArea = null;
+  state.browsingLocation = { lat:area.lat, lng:area.lng };
+  state.followMe = false;
+  const lb = document.getElementById('locate-btn');
+  if(lb) lb.classList.remove('following');
+  if(state.leafletMap){
+    if(state.meMarker) state.leafletMap.removeLayer(state.meMarker);
+    if(state.rangeCircle) state.leafletMap.removeLayer(state.rangeCircle);
+  }
+  showAreaChip(area.label);
+}
+function showAreaChip(label){
+  const t = document.getElementById('area-chip-text');
+  if(t) t.innerHTML = 'Showing <b>' + escapeHtml(label) + '</b>';
+  const c = document.getElementById('area-chip');
+  if(c) c.classList.add('show');
+}
+function hideAreaChip(){
+  state._estimatedArea = false;
+  const c = document.getElementById('area-chip');
+  if(c) c.classList.remove('show');
+}
+/* The chip opens search: "not my area? find yours." */
+function onAreaChipTap(){
+  const inp = document.getElementById('map-search-input');
+  if(inp){ try{ inp.focus(); }catch(e){} }
+}
+const GEO_DENIED_MSG = 'Location is off for this site. Turn it on in your browser settings to see what\u2019s near you.';
+/* The locate button with no fix yet: ask for location (the browser prompt shows
+   on the first call). The view stays on the current area until a real fix
+   lands; onLocation's first fix then leaves browse mode and centres on you. */
+function requestLocationFromTap(){
+  state._locateRequested = true;
+  if(state._geoDenied){ showToast(GEO_DENIED_MSG); return; }
+  if(state._locatingStarted){ showToast('Finding your location\u2026'); return; }
+  ensureLocating();
+}
+
 /* #52/#73 — startLocating() must run exactly once whether it is kicked off by
    onboarding step 1 or by init()'s normal path. watchLocation() already guards
    its own double-register; this guards the getCurrentPosition re-fire so the two
@@ -7966,7 +8112,13 @@ async function init(){
      NOT set state.me, so #120's "never set state.me from cache" rule still holds
      and onLocation()'s first fix still reblends around the real position. Falls
      back to FALLBACK_LOCATION on a true first launch with no remembered view. */
-  const bootAnchor = rememberedMapView() || FALLBACK_LOCATION;
+  /* #416 — the boot anchor is now startAreaGuess() (last real frame → time-zone
+     metro → Chicago), and boot decides here whether to start GPS or open on that
+     estimate. The estimate is skipped when a deep link owns the landing (a shared
+     spot, a guide invite); those paths anchor themselves. */
+  const bootAnchor = startAreaGuess();
+  const _geoBoot = await bootGeoDecision();
+  if(_geoBoot === 'estimate' && !_bootDeepLink) enterEstimatedArea(bootAnchor);
   startLocalHunt(bootAnchor); // content immediately near where the map opens, refined once real location resolves
   fixMapSize();
   /* #52 — first-run onboarding, when present, owns the first location prompt
@@ -7977,8 +8129,9 @@ async function init(){
      visitor came for a specific pin, not the cold first-run tour, and the tour
      would overlay the shared-pin landing. Normal first-run onboarding is
      unchanged when no spot link is present. */
-  if(shouldRunOnboarding() && !_pendingSpot){ startOnboarding(); }
-  else { ensureLocating(); }
+  if(shouldRunOnboarding() && !_pendingSpot){ startOnboarding(); } // #416 — retired: shouldRunOnboarding() is false
+  else if(_geoBoot === 'locate'){ ensureLocating(); }
+  /* #416 — otherwise GPS waits for the locate tap (requestLocationFromTap). */
   // #1a — retry the blocked read when the connection returns, so a bad boot is a
   // temporary condition rather than a dead session.
   window.addEventListener('online', ()=>{ flushPendingWrites(); retryLoadPersonal(); });
@@ -8351,7 +8504,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25i';
+const APP_VERSION = '2026.09.25j';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9710,8 +9863,9 @@ function effectiveCaptureRange(){
    ========================================================= */
 function startLocating(){
   if(!navigator.geolocation){
-    showToast('Geolocation unavailable — demo mode, tap map to set location');
-    enableSimulateOnClick();
+    /* #416 — simulate mode only in the demo iframe; a real visitor keeps browsing. */
+    if(demoBypassActive()){ showToast('Geolocation unavailable — demo mode, tap map to set location'); enableSimulateOnClick(); }
+    else { showToast('This browser can\u2019t share your location.'); }
     return;
   }
   /* #73 — THE ACTUAL DEFECT, and it is not where the roadmap row guessed.
@@ -9733,9 +9887,23 @@ function startLocating(){
     pos=>{ onLocation(pos.coords.latitude, pos.coords.longitude, false, pos.coords.accuracy); },
     err=>{
       // Not fatal any more — the watch above is still live and may deliver a fix
-      // seconds later. Simulate-mode is a bridge until then, not a dead end.
-      showToast("Couldn't get your location yet — tap the map to set it, or wait for GPS");
-      enableSimulateOnClick();
+      // seconds later.
+      /* #416 — a DENIAL is remembered for this page (the browser won't ask
+         again) and clears the allowed-before flag, so the next boot opens on the
+         estimate instead of re-trying. The Chicago simulate-mode stand-in is
+         retired for real visitors; the demo iframe keeps it. */
+      if(err && err.code === 1){
+        state._geoDenied = true;
+        noteLocationAllowed(false);
+        showToast(GEO_DENIED_MSG);
+        return;
+      }
+      if(demoBypassActive()){
+        showToast("Couldn't get your location yet — tap the map to set it, or wait for GPS");
+        enableSimulateOnClick();
+      } else {
+        showToast("Couldn\u2019t get your location yet \u2014 still trying");
+      }
     },
     {enableHighAccuracy:true, timeout:8000}
   );
@@ -9812,6 +9980,7 @@ function onLocation(lat,lng,sim,accuracy){
      local `{lat,lng,acc}` at entry and promote once at the end) is the real fix;
      this marker is option (c), the honest minimum until then. */
   state.meIsSim = !!sim;
+  if(!sim && !state._geoOkNoted){ state._geoOkNoted = true; state._geoDenied = false; noteLocationAllowed(true); } // #416
   if(sim){
     state.simEverUsed = true;
   } else if(state.simulating){
@@ -9858,7 +10027,15 @@ function onLocation(lat,lng,sim,accuracy){
   if(state.leafletMap){
     if(!state._centeredOnce){
       state._centeredOnce = true;
-      if(state.currentHunt && isGuideHunt(state.currentHunt)){
+      if(state.browsingLocation && (state._estimatedArea || state._locateRequested)){
+        /* #416 — the first real fix after a locate tap (or on the estimated
+           start area): leave browse mode and centre on the person. With
+           state.me now set, exitLocationBrowseMode re-adds the marker,
+           regenerates around them and frames them. */
+        state._locateRequested = false;
+        hideAreaChip();
+        exitLocationBrowseMode();
+      } else if(state.currentHunt && isGuideHunt(state.currentHunt)){
         // #7 — a guide opened BEFORE the first fix would otherwise be snapped to
         // the player here on arrival, re-creating "landed on my own block" for
         // the pre-fix timing. state.me is already set above (~line 6914). Mirror
@@ -10405,7 +10582,9 @@ function setupBaseMap(){
   // Replay last session's settled frame; fall back to downtown only on a device
   // that has genuinely never had a real fix (true first launch), which the
   // reload complaint never was.
-  const start = rememberedMapView() || {lat:41.8827, lng:-87.6233, zoom:16};
+  /* #416 — with no remembered frame, open on the time-zone estimate rather than
+     downtown Chicago (zoom 13 ≈ the default frame; boot reframes it anyway). */
+  const start = rememberedMapView() || (function(){ const g = startAreaGuess(); return {lat:g.lat, lng:g.lng, zoom:13}; })();
   /* SMOOTH / CONTINUOUS ZOOM. Leaflet's default zoomSnap:1 quantises the map to
      integer zoom levels: a pinch or scroll is continuous DURING the gesture but
      snaps to the nearest whole level the instant you lift off — the "it snaps to
@@ -10982,6 +11161,7 @@ function attachPlaceSuggest(inputId, onPick){
 const SHOW_BROWSING_BANNER = false;
 
 function enterLocationBrowseMode(base, placeName){
+  hideAreaChip(); // #416 — a chosen place replaces the estimated start area
   state.searchedArea = null; // browse mode supersedes a panned search (#8)
   state.browsingLocation = base;
   /* #90 RESOLVED TO "OBEY THE PIN". The pick is used exactly as given: we do not
@@ -11003,6 +11183,7 @@ function enterLocationBrowseMode(base, placeName){
 }
 function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
+  hideAreaChip(); // #416
   state._pendingSpot = null; // #26 — leaving the shared-spot area; stop re-opening its sheet
   state._spotSheetId = null; // #26 — drop protection so the natural rebuild below closes the spot sheet
   state._spotPin = null;     // #26 — stop reblend re-adding the shared pin
@@ -11020,6 +11201,10 @@ function exitLocationBrowseMode(){
   }
 }
 function recenterMap(){
+  /* #416 — no fix yet (location not asked, denied, or still coming): ask, and
+     keep the current view until the fix lands. The browser prompt appears here,
+     on a tap, rather than on page load. */
+  if(!state.me && !demoBypassActive()){ requestLocationFromTap(); return; }
   maybeRequestCompassPermission();
   state.followMe = true;
   document.getElementById('locate-btn').classList.add('following');
