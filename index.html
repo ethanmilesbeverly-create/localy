@@ -4333,6 +4333,8 @@ async function submitAuth(){
 function onAuthed(session){
   state.user = session.user;
   document.getElementById('auth-overlay').classList.add('hidden');
+  pingActivity('app_open');        // #10 — a no-op if this device already sent app_open today (e.g. as a guest)
+  noteActivityAuthState(true);     // #10 — sends signed_in only on a real no-session → session change
   if(!state._booted){
     state._booted = true;
     init();
@@ -4413,10 +4415,20 @@ async function checkAuthAndBoot(){
       onAuthed(data.session);        // already logged in from a previous visit
     } else {
       document.getElementById('auth-overlay').classList.remove('hidden'); // show login
+      activityGuestAtLogin();        // #10
     }
   }catch(e){
     document.getElementById('auth-overlay').classList.remove('hidden');
+    activityGuestAtLogin();          // #10 — usually offline, so these fail silently; still the honest event
   }
+}
+/* #10 — someone with no session reached the sign-in screen. Today that is every
+   guest (the wall); after #400 the sign-in prompt moves to the capture sheet and
+   signin_prompt moves with it — app_open stays here. */
+function activityGuestAtLogin(){
+  pingActivity('app_open');
+  pingActivity('signin_prompt');
+  noteActivityAuthState(false);
 }
 
 /* =========================================================
@@ -5143,6 +5155,7 @@ function maybeShowSearchHere(){
    and localHuntOrigin moves with it so late-arriving real places land in the
    right place. Cleared by recenterMap(), which is the deliberate way home. */
 function searchThisArea(){
+  pingActivity('map_move'); // #10
   const c = state.leafletMap.getCenter();
   const base = {lat: c.lat, lng: c.lng};
   if(state.browsingLocation){
@@ -7717,6 +7730,7 @@ function placeSuggestGuardsMapClick(which){
 }
 function wirePlaceSuggest(){
   placeSuggest.map = attachPlaceSuggest('map-search-input', place=>{
+    pingActivity('map_move'); // #10 — a map search pick counts as moving the map
     document.getElementById('map-search-input').value = '';
     enterLocationBrowseMode({lat:place.lat, lng:place.lng}, place.name);
   });
@@ -7978,7 +7992,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.24b';
+const APP_VERSION = '2026.09.25a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10106,6 +10120,7 @@ function setupBaseMap(){
   });
   // manual panning pauses auto-follow so a walking user's view isn't yanked back mid-look-around
   state.leafletMap.on('dragstart', ()=>{
+    pingActivity('map_move'); // #10 — a HAND pan only; programmatic moves (fit, fly, follow) never fire dragstart
     state.followMe = false;
     document.getElementById('locate-btn').classList.remove('following');
   });
@@ -12214,6 +12229,7 @@ function shareSpot(id){
 function consumeSharedSpot(param){
   const sp = param && decodeSpotPayload(param);
   if(!sp) return;
+  pingActivity('guide_open'); // #10 — a shared-spot link landed (the row counts it with guides)
   enterLocationBrowseMode({ lat:sp.lat, lng:sp.lng }, sp.name);
   /* #26 — the browse hunt runs under key 'local_v1', so onLocation()'s first-fix
      block (`key.startsWith('local_') -> startLocalHunt({player})`) would rebuild
@@ -12711,6 +12727,7 @@ function renderMyHunts(){
 async function startMyHunt(id, skipRefresh){
   const h = state.myHunts.find(x=>x.id===id);
   if(!h) return;
+  if(!skipRefresh) pingActivity('guide_open'); // #10 — skipRefresh is the save-then-show path, not an open
   /* LIVE-UPDATE — a redeemed guide (and, since #202, an OWN editable guide) is
      refreshed from the shared copy at the moment you open it, so the stops you
      walk are current — including any a holder just added. Fails safe: a flaky
@@ -12828,6 +12845,7 @@ async function redeemCodeValue(code){
       renderMyHunts();
     }
     setCurrentHunt({key:'code_'+code, name:data.name+' (code: '+code+')', mode:'code', points:data.points});
+    pingActivity('guide_open'); // #10 — a guide opened by code or invite link
     showToast('Guide unlocked — saved to My Guides');
     return null;
   }catch(e){
@@ -14236,6 +14254,7 @@ async function submitPinReport(){
 }
 function openPinSheet(t){
   state.selectedPinId = t.id;
+  pingActivity('pin_open'); // #10
   // don't stack on top of the nearby-list drawer
   const drawer = document.getElementById('target-drawer');
   if(drawer && !drawer.classList.contains('collapsed')) toggleDrawer();
@@ -14680,6 +14699,134 @@ async function markFreshnessSeen(){
   }catch(e){
     console.warn('[#27] freshness:lastSeen did not persist (harmless):', e);
   }
+}
+
+/* ========================================================================
+   #10 — ANONYMOUS ACTIVITY PINGS (#400's prerequisite).
+   WHY: app-report's active-user numbers are read off user_state, which only a
+   signed-in account ever writes. #400 is about to let people use the map without
+   an account, and from that day every guest would be invisible. This is the
+   instrument: a random per-DEVICE id and a handful of daily "this device did X"
+   rows, so app-report can count devices (guest vs signed in) and the guest →
+   signed-in funnel.
+
+   WHAT A PING CARRIES: {device_id, event}. That is all the client can send —
+   the table grants INSERT on exactly those two columns. The server fills in the
+   UTC day, the time, and signed_in (true only when the request carries a real
+   session). NO user id, NO email, NO coordinates, NO tile or place id (#5). The
+   device id is minted here, never derived from the account, and never sent
+   anywhere else.
+
+   SHAPE (the #27 markFreshnessSeen rule): fire-and-forget. A ping can fail, be
+   blocked or never leave, and nothing in the app notices — it never awaits,
+   never toasts, never touches the load-failure guards (#1a).
+
+   DEDUPE: the FIRST occurrence of each event per device per UTC day. Remembered
+   here in localStorage so a normal day costs a handful of requests; the table's
+   primary key (device_id, day, event) is the real guard, and a duplicate reply
+   (409 / 23505) counts as success. A failed send is un-marked so the next page
+   load retries it, but not re-tried in this page (a missing table must not turn
+   every pin tap into a failing request).
+
+   THE EVENT LIST IS A TWO-FILE FACT: it must match the CHECK constraint in
+   010_activity_pings.sql. Add an event to both in one pass, or the new one is
+   rejected server-side and silently never counted.
+
+   DEMO MODE (the preview iframe) sends nothing. */
+const ACTIVITY_EVENTS = ['app_open','map_move','pin_open','guide_open','capture_tap','signin_prompt','signed_in'];
+const ACTIVITY_DEVICE_KEY = 'nahgoo:device:v1';     // the device id; survives logout (purgeMirror never matches it)
+const ACTIVITY_SENT_KEY   = 'nahgoo:pings:v1';      // {day, sent:{event:1}} — today's already-sent events
+const ACTIVITY_AUTH_KEY   = 'nahgoo:pings-auth:v1'; // '1' / '0' — was this device last seen signed in?
+let _activityDeviceMem = null;           // fallback id when localStorage is unavailable (counts high; accepted)
+let _activitySentMem = null;             // in-memory mirror of ACTIVITY_SENT_KEY
+const _activityFailedThisPage = new Set(); // events that failed once in this page — no retry until reload
+
+function activityUtcDay(){
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD in UTC, the same day the server stamps
+}
+function activityNewId(){
+  try{ if(window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID(); }catch(e){}
+  // RFC 4122 v4 shape from getRandomValues (older Safari has no randomUUID).
+  try{
+    const b = crypto.getRandomValues(new Uint8Array(16));
+    b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+    const h = Array.from(b, x => x.toString(16).padStart(2,'0')).join('');
+    return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);
+  }catch(e){ return null; }
+}
+function activityDeviceId(){
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  try{
+    const have = localStorage.getItem(ACTIVITY_DEVICE_KEY);
+    if(have && UUID_RE.test(have)) return have;
+    const id = activityNewId();
+    if(!id) return null;
+    localStorage.setItem(ACTIVITY_DEVICE_KEY, id);
+    return id;
+  }catch(e){
+    if(!_activityDeviceMem) _activityDeviceMem = activityNewId();
+    return _activityDeviceMem;
+  }
+}
+function activityReadSent(day){
+  if(_activitySentMem && _activitySentMem.day === day) return _activitySentMem;
+  let rec = null;
+  try{ rec = JSON.parse(localStorage.getItem(ACTIVITY_SENT_KEY) || 'null'); }catch(e){ rec = null; }
+  if(!rec || rec.day !== day || !rec.sent || typeof rec.sent !== 'object') rec = { day: day, sent: {} };
+  _activitySentMem = rec;
+  return rec;
+}
+function activityWriteSent(rec){
+  _activitySentMem = rec;
+  try{ localStorage.setItem(ACTIVITY_SENT_KEY, JSON.stringify(rec)); }catch(e){}
+}
+function pingActivity(event){
+  try{
+    if(demoBypassActive()) return;
+    if(ACTIVITY_EVENTS.indexOf(event) === -1) return;
+    if(_activityFailedThisPage.has(event)) return;
+    const day = activityUtcDay();
+    const rec = activityReadSent(day);
+    if(rec.sent[event]) return;
+    const device_id = activityDeviceId();
+    if(!device_id) return;
+    rec.sent[event] = 1;          // mark BEFORE sending so two taps can't both send
+    activityWriteSent(rec);
+    const unmark = ()=>{
+      _activityFailedThisPage.add(event);
+      const cur = activityReadSent(day);
+      if(cur.sent[event]){ delete cur.sent[event]; activityWriteSent(cur); }
+    };
+    /* Plain insert — NOT upsert/ON CONFLICT. Naming a conflict target needs SELECT
+       on the key columns, and this table grants anon no SELECT at all (tested
+       before shipping; the gravestone is in 010_activity_pings.sql). The PK does
+       the dedupe; a duplicate comes back as 23505 and is fine. */
+    Promise.resolve(sb.from('activity_pings').insert({ device_id: device_id, event: event }))
+      .then(res=>{
+        const err = res && res.error;
+        if(err && String(err.code) !== '23505'){
+          unmark();
+          console.warn('[#10] activity ping not recorded (harmless):', event, err.message || err);
+        }
+      })
+      .catch(e=>{ unmark(); console.warn('[#10] activity ping failed (harmless):', event, e); });
+  }catch(e){ /* telemetry must never break the app */ }
+}
+/* signed_in = "this device went from no session to a session". Tracked with a
+   one-flag device memory rather than supabase-js auth events, because a restored
+   session and a fresh sign-in look alike at boot (onAuthed runs for both). A
+   restore finds the flag already '1' and sends nothing; a sign-in after the login
+   screen finds '0' and sends signed_in.
+   KNOWN BLIP: on the first open of this build, an already-signed-in device has no
+   flag yet, so it sends signed_in once. Those devices have no earlier guest ping,
+   so the guest → signed-in funnel is unaffected; only that day's raw signed_in
+   count runs high. */
+function noteActivityAuthState(signedIn){
+  if(demoBypassActive()) return;
+  let prev = null;
+  try{ prev = localStorage.getItem(ACTIVITY_AUTH_KEY); }catch(e){}
+  try{ localStorage.setItem(ACTIVITY_AUTH_KEY, signedIn ? '1' : '0'); }catch(e){}
+  if(signedIn && prev !== '1') pingActivity('signed_in');
 }
 
 /* DEFERRED CONSUMER — the weekly push nudge lands here, on top of #175's PWA
@@ -15174,6 +15321,7 @@ function loadPhotoBlob(key){
    capture. Awaiting here is fine precisely because nothing opens the camera until
    that later tap. */
 async function captureNow(){
+  pingActivity('capture_tap'); // #10 — the attempt, before any gate; success is capture-verify's business
   if(!state.currentHunt){ showToast('Pick a guide first'); return; }
   const id = state._nearestId;
   await attemptMarkFound();

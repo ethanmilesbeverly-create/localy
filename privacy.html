@@ -185,7 +185,7 @@
     <p class="subline">Nahgoo is an app about walking to real places. That means it is
       an app that could very easily know too much about where you go. This page is
       the specific, checkable version of what it actually stores.</p>
-    <p class="updated">Last updated 24 September 2026</p>
+    <p class="updated">Last updated 25 September 2026</p>
   </section>
 
   <h2>The short version</h2>
@@ -256,6 +256,38 @@
     values: a version number, and whether simulate mode was used. It is evidence with
     an expiry, not history.</p>
 
+  <!-- #10 — the anonymous activity pings. Every claim below was read out of
+       index.html's pingActivity() and 010_activity_pings.sql: the client can
+       send only {device_id, event}; the server adds the UTC day, the time and
+       whether the request carried a session; the table has no user id and no
+       location column; the only reader is the operator dashboard (service role);
+       the activity-pings-sweep job deletes rows older than 90 days. If any of
+       that changes, this section changes in the same build. It sits OUTSIDE
+       "What is stored in your account" on purpose: it applies to visitors with
+       no account too, and it is not attached to an account. -->
+  <h2>Anonymous usage counts</h2>
+
+  <p>So we can tell whether anyone is actually using Nahgoo — including people who
+    haven't made an account — the app keeps a simple count of activity.</p>
+  <ul>
+    <li>The first time you open the app on a device, it makes up a <strong>random
+      device ID</strong> and keeps it in your browser. It is not your account, your
+      email or your IP address, and it is not linked to any of them.</li>
+    <li>The first time each day that the device does one of a short, fixed list of
+      things — opens the app, moves the map, opens a place, opens a guide, taps
+      Capture, sees the sign-in screen, or signs in — the app sends that device ID
+      and the name of the thing. Once per thing per day, no more.</li>
+    <li>Our server adds the date, the time, and whether you were signed in at that
+      moment — yes or no, <strong>not who you are</strong>.</li>
+  </ul>
+  <p><strong>No location is included.</strong> Not your position, not the part of the
+    map you were looking at, not which place you opened. These counts are read only
+    by us, as totals, and are <strong>deleted after 90 days</strong>.</p>
+  <p>Because the ID lives in your browser, clearing your browser's storage or using a
+    private window gives you a new one. That makes the counts a little high, which
+    is fine for their purpose: seeing whether people are using the app, not
+    identifying them.</p>
+
   <h2>Who else receives anything</h2>
 
   <p class="lead">A map app cannot work without asking other people's servers for
@@ -320,6 +352,7 @@
     device and never see your IP address.</p>
 
   <p>We do not use advertising networks, third-party analytics, or tracking pixels.
+    The anonymous usage counts above are our own and stay in our own database.
     Nothing here is sold, and nothing here is shared for advertising.</p>
 
   <h2>How long it is kept</h2>
@@ -333,6 +366,8 @@
       two non-locational values.</p>
     <p><strong>The nearby-places cache:</strong> about three weeks, keyed to a 5.5 km
       square, with no user attached.</p>
+    <p><strong>Anonymous usage counts:</strong> 90 days, then deleted automatically.
+      They carry a random device ID and no account or location.</p>
   </div>
 
   <h2>Asking for your data, or its deletion</h2>
@@ -346,8 +381,8 @@
          left unset, an honest sentence renders here instead of a dead address. -->
   </p>
 
-  <p><strong>Two things a deletion does not automatically reach</strong>, stated here
-    because the app states them too:</p>
+  <p><strong>What a deletion does not automatically reach</strong> — the first two are
+    stated in the app too:</p>
   <ul>
     <li><strong>Gems you have submitted.</strong> Once approved, a gem is a public
       place on a shared map that other people navigate to. Removing your account does
@@ -355,6 +390,9 @@
       and we will handle it as part of the same request.</li>
     <li><strong>Guide codes you have already shared.</strong> A code you sent to
       somebody keeps working for them after your own copy is gone.</li>
+    <li><strong>Anonymous usage counts.</strong> They are not attached to your account,
+      so there is nothing in them we could find by your email. They are deleted after
+      90 days regardless.</li>
   </ul>
 
   <h2>Changes to this policy</h2>
