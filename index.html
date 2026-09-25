@@ -3509,11 +3509,9 @@
         <button id="auth-code-btn" type="button" onclick="openCodeFromGate()">Have a guide code? Open it</button>
       </div>
 
-      <!-- #400 — the guest's way out of the sign-in prompt, thumb-reachable at
-           the bottom of the card (the X above is the same action). -->
-      <div id="auth-dismiss-row" class="auth-hidden">
-        <button id="auth-dismiss-btn" type="button" onclick="dismissSignInPrompt()">Not now — keep browsing</button>
-      </div>
+      <!-- #414 — the "Not now — keep browsing" row that sat here (#400) was
+           removed by directive: the X in the card's corner and the live nav
+           under the see-through prompt are the ways out. -->
 
       <!-- #5 — NOTICE HAS TO PRECEDE COLLECTION, and until this build the only
            route to the privacy policy was Settings, which is behind the account
@@ -3553,12 +3551,31 @@
      the padding keeps the card clear of it. The reset screen and the expired-
      link card never carry .is-prompt, so they keep the opaque background. */
   #auth-overlay.is-prompt{
-    background:rgba(6,16,12,0.55);
-    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
-    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    /* 25d — lighter tint and no blur, so the screen behind actually reads. */
+    background:rgba(6,16,12,0.35);
+    padding:16px 16px calc(88px + env(safe-area-inset-bottom));
   }
   body.auth-prompt-open #bottomnav{ z-index:5001; }
   #auth-overlay.is-prompt #auth-card{ box-shadow:0 18px 50px rgba(0,0,0,0.45); }
+  /* #414 (25d) — THE COMPACT PROMPT CARD. Only the guest prompt shrinks; the
+     reset and expired-link cards keep the full size. Inputs stay 16px (#11 —
+     smaller triggers iOS focus-zoom); only padding and spacing tighten. */
+  #auth-overlay.is-prompt #auth-card{ max-width:320px; padding:16px 16px 14px; border-radius:16px; }
+  #auth-overlay.is-prompt #auth-brand{ font-size:20px; }
+  #auth-overlay.is-prompt #auth-tagline{ font-size:13px; margin:2px 28px 12px; }
+  #auth-overlay.is-prompt .auth-label{ margin:8px 0 3px; font-size:12px; }
+  #auth-overlay.is-prompt .auth-input{ padding:8px 10px; border-radius:9px; }
+  #auth-overlay.is-prompt .auth-btn{ margin-top:12px; padding:10px; font-size:14.5px; }
+  #auth-overlay.is-prompt .auth-oauth-btn{ padding:9px; font-size:14.5px; }
+  #auth-overlay.is-prompt #auth-oauth-divider{ margin:10px 0 0; }
+  #auth-overlay.is-prompt .auth-hint{ display:none; }
+  #auth-overlay.is-prompt #auth-msg{ margin-top:8px; }
+  #auth-overlay.is-prompt #auth-forgot-row{ margin-top:6px; }
+  #auth-overlay.is-prompt #auth-switch{ margin-top:8px; }
+  #auth-overlay.is-prompt #auth-back-row{ margin-top:8px; }
+  #auth-overlay.is-prompt #auth-code-row{ margin-top:6px; }
+  #auth-overlay.is-prompt #auth-legal{ margin-top:8px; font-size:11.5px; }
+  #auth-overlay.is-prompt #auth-dismiss-x{ top:6px; right:6px; }
   #auth-code-row{ margin-top:12px; text-align:center; }
   #auth-code-btn{
     background:none; border:none; color:var(--orange);
@@ -3632,11 +3649,6 @@
     background:none; border:none; color:var(--text-dim); cursor:pointer; padding:0;
   }
   #auth-dismiss-x svg{ width:20px; height:20px; }
-  #auth-dismiss-row{ margin-top:14px; text-align:center; }
-  #auth-dismiss-btn{
-    background:none; border:none; color:var(--text-dim);
-    font-weight:600; font-size:13px; cursor:pointer; font-family:inherit; padding:4px;
-  }
   /* #400 — guest vs account surfaces. body.is-guest is set by bootAsGuest() and
      removed by onAuthed(); .acct-only hides account-only controls from a guest,
      .guest-only shows the guest's sign-in entry points. */
@@ -4267,7 +4279,6 @@ function setAuthMode(mode){
   show('auth-back-row',      mode==='forgot');
   // #400 — the guest prompt's way out; same no-escape rule for 'reset'.
   show('auth-dismiss-x',     authDismissible && mode!=='reset');
-  show('auth-dismiss-row',   authDismissible && mode!=='reset');
 
   document.getElementById('auth-password-label').textContent =
     mode==='reset' ? 'New password' : 'Password';
@@ -4583,7 +4594,7 @@ function bootAsGuest(){
    ---------------------------------------------------------
    The existing auth card, reused rather than rebuilt (the auth screen is the
    highest-risk region of this file — item 23), with three additions: a reason
-   line in place of the tagline, a close X and a "Not now" link. Every mode and
+   line in place of the tagline, a close X (#414 removed the "Not now" link). Every mode and
    handler on the card is unchanged — email login, create account, Google,
    forgot password.
 
@@ -4667,8 +4678,8 @@ function signInPromptOpen(){
 }
 /* #414 — THE TAB GATE. A guest who opens Guides, Submit or Passport sees the
    screen itself behind the see-through prompt, with the nav still live, instead
-   of an opaque wall (Submit) or no prompt at all (Guides, Passport). "Not now"
-   or the X reveals the screen; every account action on it is still gated by its
+   of an opaque wall (Submit) or no prompt at all (Guides, Passport). The X
+   reveals the screen; every account action on it is still gated by its
    own promptSignIn() call, so dismissing only lets them look. Shown on every
    entry to the tab, from the nav or a Back that lands on it (both go through
    setTab / openSuggestGemScreen); a return from a sub-screen that only calls
@@ -8318,7 +8329,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25c';
+const APP_VERSION = '2026.09.25d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
