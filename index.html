@@ -3503,12 +3503,6 @@
         <button id="auth-back-btn" type="button">Back to log in</button>
       </div>
 
-      <!-- #414 — shown only when the prompt covers the Guides tab: opening a
-           guide by code needs no account (#400), so the tab gate must not hide it. -->
-      <div id="auth-code-row" class="auth-hidden">
-        <button id="auth-code-btn" type="button" onclick="openCodeFromGate()">Have a guide code? Open it</button>
-      </div>
-
       <!-- #414 — the "Not now — keep browsing" row that sat here (#400) was
            removed by directive: the X in the card's corner and the live nav
            under the see-through prompt are the ways out. -->
@@ -3573,14 +3567,8 @@
   #auth-overlay.is-prompt #auth-forgot-row{ margin-top:6px; }
   #auth-overlay.is-prompt #auth-switch{ margin-top:8px; }
   #auth-overlay.is-prompt #auth-back-row{ margin-top:8px; }
-  #auth-overlay.is-prompt #auth-code-row{ margin-top:6px; }
   #auth-overlay.is-prompt #auth-legal{ margin-top:8px; font-size:11.5px; }
   #auth-overlay.is-prompt #auth-dismiss-x{ top:6px; right:6px; }
-  #auth-code-row{ margin-top:12px; text-align:center; }
-  #auth-code-btn{
-    background:none; border:none; color:var(--orange);
-    font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; padding:4px;
-  }
   #auth-card{
     margin:auto;
     width:100%; max-width:360px;
@@ -4632,21 +4620,20 @@ const SIGNIN_REASONS = {
 const AUTH_TAGLINE_DEFAULT = 'Ask a local. Discover anywhere.';
 let _signInStashedGuide = false; // did THIS prompt write the #128 invite stash?
 
-function promptSignIn(reason, ret){
+function promptSignIn(reason, ret, opts){
   if(!isGuest()) return;
   stashSignInReturn(ret || null);
   const tl = document.getElementById('auth-tagline');
   if(tl) tl.textContent = SIGNIN_REASONS[reason] || SIGNIN_REASONS.account;
-  authDismissible = true;
+  /* #414 — opts.locked hides the X (the Passport tab gate): the only way out is
+     the nav, which closes the prompt through showScreen(). */
+  authDismissible = !(opts && opts.locked);
   if(!state._authWired){ wireAuthUI(); state._authWired = true; }
   setAuthMode('login');
-  /* #414 — the see-through prompt (scrim + nav above it). The guide-code link
-     shows only when the prompt is the Guides tab gate. */
+  /* #414 — the see-through prompt (scrim + nav above it). */
   const ov = document.getElementById('auth-overlay');
   ov.classList.add('is-prompt');
   document.body.classList.add('auth-prompt-open');
-  const codeRow = document.getElementById('auth-code-row');
-  if(codeRow) codeRow.classList.toggle('auth-hidden', !(ret && ret.tab === 'screen-guides'));
   ov.scrollTop = 0;
   ov.classList.remove('hidden');
   pingActivity('signin_prompt'); // #10 — the guest met the sign-in card
@@ -4657,8 +4644,6 @@ function clearPromptChrome(){
   const ov = document.getElementById('auth-overlay');
   if(ov) ov.classList.remove('is-prompt');
   document.body.classList.remove('auth-prompt-open');
-  const codeRow = document.getElementById('auth-code-row');
-  if(codeRow) codeRow.classList.add('auth-hidden');
 }
 function dismissSignInPrompt(){
   if(authMode === 'reset') return; // never an escape hatch out of reset (#2)
@@ -4676,31 +4661,29 @@ function signInPromptOpen(){
   const ov = document.getElementById('auth-overlay');
   return !!(ov && ov.classList.contains('is-prompt') && !ov.classList.contains('hidden'));
 }
-/* #414 — THE TAB GATE. A guest who opens Guides, Submit or Passport sees the
-   screen itself behind the see-through prompt, with the nav still live, instead
-   of an opaque wall (Submit) or no prompt at all (Guides, Passport). The X
-   reveals the screen; every account action on it is still gated by its
-   own promptSignIn() call, so dismissing only lets them look. Shown on every
-   entry to the tab, from the nav or a Back that lands on it (both go through
-   setTab / openSuggestGemScreen); a return from a sub-screen that only calls
-   showScreen (Settings back to Passport) does not re-show it. */
+/* #414 — THE TAB GATE. A guest who opens Submit or Passport sees the screen
+   itself behind the see-through prompt, with the nav still live, instead of an
+   opaque wall (Submit) or no prompt at all (Passport). Shown on every entry to
+   the tab, from the nav or a Back that lands on it (both go through setTab /
+   openSuggestGemScreen); a return from a sub-screen that only calls showScreen
+   does not re-show it.
+     • Submit — closable (X): the form stays visible, and submitGem() still
+       gates the actual submit (#400).
+     • Passport — LOCKED, by directive (25e): no X, the nav is the only way off.
+     • Guides — NOT gated on the tab, by directive (25e): a guest browses it and
+       opens guides by code (#400); only "Create your own" asks for sign-in,
+       through its own promptSignIn('guide', …) call. The "Have a guide code?"
+       link that 25c put on the Guides gate went with it. */
 const TAB_GATE_REASONS = {
-  'screen-guides':      'guide',
   'screen-suggest-gem': 'submit',
   'screen-passport':    'passport'
 };
+const TAB_GATE_LOCKED = { 'screen-passport': true };
 function showTabGate(id){
   if(!isGuest()) return;
   const reason = TAB_GATE_REASONS[id];
   if(!reason) return;
-  promptSignIn(reason, { tab:id });
-}
-/* #414 — the Guides gate's "Have a guide code?" link: close the prompt and open
-   the code screen, which a guest may use (#400). Nav stays on Guides. */
-function openCodeFromGate(){
-  dismissSignInPrompt();
-  showScreen('screen-code');
-  setNavActive('screen-guides');
+  promptSignIn(reason, { tab:id }, { locked: TAB_GATE_LOCKED[id] === true });
 }
 function stashSignInReturn(ret){
   clearSignInReturn();
@@ -8329,7 +8312,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25d';
+const APP_VERSION = '2026.09.25e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
