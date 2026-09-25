@@ -58,6 +58,8 @@
 // ---------------------------------------------------------------------------
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
+// Printed at start so a Codespace run can confirm it is on the build delivered.
+const TOOL_VERSION = "seed-resolve 2026.09.25c (#57 story lines + #418 three-source dedup)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -73,8 +75,13 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "
 // already on the map (the exact set the app would show, so our dedup matches
 // the app's). If unset, we fall back to a direct Wikipedia geosearch, which
 // covers the main collision class (wiki pins — the Lily Pool case).
-const NEARBY_PLACES_URL = Deno.env.get("NEARBY_PLACES_URL") ?? "";
-const NEARBY_PLACES_KEY = Deno.env.get("NEARBY_PLACES_KEY") ?? "";
+// #418 — defaults to the live project, so a run from the Mac (where nothing is
+// injected) no longer silently falls back to a Wikipedia-only duplicate check.
+// The key is the PUBLIC publishable key already shipped in index.html.
+const PUBLIC_KEY = "sb_publishable_sJkeQ89O2geQLB5z6d__Zw_9G6nxLt_";
+const PROJECT_URL = "https://siacjgpqzaylsfefihyr.supabase.co";
+const NEARBY_PLACES_URL = Deno.env.get("NEARBY_PLACES_URL")?.trim() || PROJECT_URL + "/functions/v1/nearby-places";
+const NEARBY_PLACES_KEY = Deno.env.get("NEARBY_PLACES_KEY")?.trim() || PUBLIC_KEY;
 
 // City bias for geocoding + a bounding sanity check. Env-overridable (the
 // header's "all overridable by env" contract — Chicago is only the default).
@@ -110,7 +117,16 @@ const WIKI_TITLE_MIN = 0.5;    // min name/title token overlap to accept an arti
 // another city.
 const WIKI_NAME_SANITY_M = 1000;
 const CONF_MIN = 0.75;          // below this, a decision goes to the human, not the machine
-const VALID_CATEGORIES = new Set(["park", "shops", "barsrest", "history", "art"]);
+// #57 STORY-ONLY (2026-09-25, the #308/#312 pivot applied at the tool). A seed
+// may only land as park / history / art. Gemini may also answer "commercial" —
+// a bar, restaurant, cafe or shop WITHOUT its own story — and that verdict is
+// DROPPED as outcome "commercial-skip" instead of seeding (the 898 commercial
+// seeds were retired by #312; this stops the tool re-minting them). A bar or
+// restaurant WITH its own story (historic landmark, famous event, a century-old
+// institution) files as `history` — submissions has no `type` column, so the
+// OSM path's category:'history' + type:'bar' collapses to plain `history` here.
+// "barsrest" and "shops" are no longer valid seed categories.
+const VALID_CATEGORIES = new Set(["park", "history", "art"]);
 
 // The pilot seed list — Tier 1 (named in all three AskChicago threads) then
 // Tier 2 (named in two). Names only; the frequency ranking IS the filter, so
@@ -283,6 +299,78 @@ async function geocode(
   }
 }
 
+// #57 STORY LINES — ADDRESS MODE. The best hidden stories sit at an ADDRESS, not
+// a named place (the apartment Dillinger shot his way out of, the row house where
+// Fitzgerald wrote his first novel). Photon returns a street address for those,
+// so the NAME guard above would always drop them. Here the guard is the address
+// itself: a candidate counts only if Photon's house number EQUALS the one asked
+// for AND >= 0.6 of the street's distinctive tokens match (suffix/direction words
+// like "Avenue"/"South" don't count). Same err-toward-dropping direction: an
+// address Photon can't place exactly is a missing pin, never a nearby wrong one.
+const STREET_GENERIC = new Set([
+  "street", "avenue", "ave", "parkway", "pkwy", "boulevard", "blvd", "road", "drive", "lane",
+  "place", "court", "terrace", "way", "north", "south", "east", "west", "circle", "trail",
+]);
+function streetTokens(s: string): string[] {
+  return geoTokens(s).filter((t) => !STREET_GENERIC.has(t));
+}
+async function geocodeAddress(
+  address: string,
+): Promise<{ lat: number; lng: number; label: string; nameMatch: boolean } | null> {
+  const m = address.trim().match(/^(\d+[a-z]?)\s+(.+)$/i);
+  if (!m) return null;
+  const wantNum = m[1].toLowerCase();
+  const wantStreet = streetTokens(m[2]);
+  const boxKm = CITY_MAX_KM > 0 ? CITY_MAX_KM : 75;
+  const dLat = boxKm / 111;
+  const dLng = boxKm / (111 * Math.max(0.05, Math.cos((CITY.lat * Math.PI) / 180)));
+  const bbox = [CITY.lng - dLng, CITY.lat - dLat, CITY.lng + dLng, CITY.lat + dLat].map((n) => n.toFixed(6)).join(",");
+  const url = "https://photon.komoot.io/api/?limit=8&lat=" + CITY.lat + "&lon=" + CITY.lng +
+    "&bbox=" + bbox + "&q=" + encodeURIComponent(address);
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!r.ok) return null;
+    const data = await r.json();
+    const feats: any[] = Array.isArray(data?.features) ? data.features : [];
+    let first: { lat: number; lng: number; label: string } | null = null;
+    for (const f of feats) {
+      const c = f?.geometry?.coordinates;
+      if (!c || c.length < 2) continue;
+      const p = f.properties ?? {};
+      const label = [[p.housenumber, p.street].filter(Boolean).join(" "), p.name, p.city].filter(Boolean).join(", ");
+      if (!first) first = { lat: c[1], lng: c[0], label: label || address };
+      const hn = String(p.housenumber ?? "").toLowerCase().split(/[-–;, ]/)[0];
+      if (hn !== wantNum) continue;
+      const have = new Set(streetTokens(String(p.street ?? "")));
+      const hit = wantStreet.filter((t) => have.has(t)).length;
+      if (wantStreet.length && hit / wantStreet.length >= 0.6) {
+        return { lat: c[1], lng: c[0], label, nameMatch: true };
+      }
+    }
+    // Nothing matched exactly: report what Photon offered, as a mismatch (drop).
+    return first ? { ...first, nameMatch: false } : null;
+  } catch {
+    return null;
+  }
+}
+
+// A names-file line is either a bare NAME (the original format) or a STORY LINE:
+//   Name | locate | story | source_url
+// `locate` starting with a house number is an ADDRESS (geocodeAddress); any other
+// `@lat,lng` is a COORDINATE copied from the story's source (Photon has no
+// house number for some famous addresses — 599 Summit comes back as 599
+// Marshall — so a source-published coordinate beats a guessed geocode); any other
+// non-empty `locate` is an alternate NAME to geocode by (e.g. display "Schmidt
+// Brewery", geocode "Schmidt Artist Lofts"); empty = geocode the name. `story` is
+// ONE hand-verified factual sentence with its source (#315/#316 — sourced, never
+// invented); it becomes the pin's persisted story (resolved_source 'curated') and
+// a `curated_descriptions` row. Lines starting with "#" are comments.
+type Line = { name: string; locate: string; story: string; source: string };
+function parseLine(raw: string): Line {
+  const parts = raw.split("|").map((x) => x.trim());
+  return { name: parts[0] ?? "", locate: parts[1] ?? "", story: parts[2] ?? "", source: parts[3] ?? "" };
+}
+
 // ---------------------------------------------------------------------------
 // 2) Wikipedia intro at this spot -> the "what it is" slot (REAL source only).
 //    geosearch for an article within MATCH_RADIUS_M, then pull its intro.
@@ -442,31 +530,78 @@ async function wikiEnrich(
 //    Prefer the deployed nearby-places function (exact app parity); fall back
 //    to Wikipedia geosearch (covers the wiki-collision class).
 // ---------------------------------------------------------------------------
-async function existingNear(lat: number, lng: number): Promise<Existing[]> {
-  if (NEARBY_PLACES_URL) {
-    try {
-      const r = await fetch(NEARBY_PLACES_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(NEARBY_PLACES_KEY ? { Authorization: "Bearer " + NEARBY_PLACES_KEY } : {}),
-        },
-        body: JSON.stringify({ lat, lng }),
-      });
-      if (r.ok) {
-        const d = await r.json();
-        const places: any[] = Array.isArray(d?.places) ? d.places : Array.isArray(d) ? d : [];
-        return places
-          .filter((p) => typeof p?.lat === "number" && typeof p?.lng === "number")
-          .map((p) => ({ name: String(p.name ?? ""), lat: p.lat, lng: p.lng, category: p.category, source: p.source }))
-          .filter((p) => p.name && haversineM(lat, lng, p.lat, p.lng) <= MATCH_RADIUS_M);
-      }
-    } catch {
-      // fall through to Wikipedia
-    }
+// #418 — THREE-SOURCE DUPLICATE CHECK. Each source alone missed real pins on the
+// 2026-09-25 St. Paul runs: the live map's per-area list is CAPPED (it returned
+// nothing near Landmark Center or the Schmidt lofts), a Wikipedia geosearch only
+// knows articled places (it missed Swede Hollow Park and Wakan Tipi), and neither
+// sees `submissions` (graves and earlier seeds — the old #57 blind spot, which is
+// how a second --commit could double-insert). So the check is the UNION of all
+// three, deduped by name, within MATCH_RADIUS_M. If the live map or the
+// submissions read FAILS, the place is HELD (never judged), not waved through on
+// a partial check — the #264 "a failure is a hold, not a verdict" rule.
+async function wikiNear(lat: number, lng: number): Promise<Existing[]> {
+  try {
+    const url = "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
+      MATCH_RADIUS_M + "&gscoord=" + lat + "%7C" + lng;
+    const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    if (!r.ok) return [];
+    const d = await r.json();
+    const hits: any[] = d?.query?.geosearch ?? [];
+    return hits.filter((h) => h?.title).map((h) => ({ name: String(h.title), lat: h.lat, lng: h.lon, source: "wiki" }));
+  } catch {
+    return []; // Wikipedia is the belt; the two checks below are the braces
   }
-  const w = await wikiAt(lat, lng);
-  return w && w.title ? [{ name: w.title, lat: w.lat, lng: w.lng, source: "wiki" }] : [];
+}
+
+async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
+  try {
+    const r = await fetch(NEARBY_PLACES_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + NEARBY_PLACES_KEY },
+      body: JSON.stringify({ lat, lng }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const places: any[] = Array.isArray(d?.places) ? d.places : Array.isArray(d) ? d : [];
+    return places
+      .filter((p) => typeof p?.lat === "number" && typeof p?.lng === "number" && p?.name)
+      .map((p) => ({ name: String(p.name), lat: p.lat, lng: p.lng, category: p.category, source: p.source ?? "map" }));
+  } catch {
+    return null;
+  }
+}
+
+async function submissionsNear(lat: number, lng: number): Promise<Existing[] | null> {
+  // The same read the app does (approved, not merged), so the public key is enough.
+  const dLat = (MATCH_RADIUS_M * 2) / 111000;
+  const dLng = (MATCH_RADIUS_M * 2) / (111000 * Math.max(0.05, Math.cos((lat * Math.PI) / 180)));
+  const url = PROJECT_URL + "/rest/v1/submissions?select=name,lat,lng,category" +
+    "&status=eq.approved&merged_into=is.null" +
+    `&lat=gte.${(lat - dLat).toFixed(6)}&lat=lte.${(lat + dLat).toFixed(6)}` +
+    `&lng=gte.${(lng - dLng).toFixed(6)}&lng=lte.${(lng + dLng).toFixed(6)}`;
+  try {
+    const r = await fetch(url, { headers: { apikey: PUBLIC_KEY, Authorization: "Bearer " + PUBLIC_KEY } });
+    if (!r.ok) return null;
+    const rows: any[] = await r.json();
+    return rows.map((x) => ({ name: String(x.name), lat: x.lat, lng: x.lng, category: x.category, source: "submission" }));
+  } catch {
+    return null;
+  }
+}
+
+async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; failed: string | null }> {
+  const [map, subs, wiki] = await Promise.all([mapNear(lat, lng), submissionsNear(lat, lng), wikiNear(lat, lng)]);
+  const failed = map === null ? "live-map check failed" : subs === null ? "submissions check failed" : null;
+  const seen = new Set<string>();
+  const list: Existing[] = [];
+  for (const e of [...(subs ?? []), ...(map ?? []), ...wiki]) {
+    if (haversineM(lat, lng, e.lat, e.lng) > MATCH_RADIUS_M) continue;
+    const k = e.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    list.push(e);
+  }
+  return { list, failed };
 }
 
 // ---------------------------------------------------------------------------
@@ -485,7 +620,7 @@ type Verdict = {
   status?: number; // HTTP status when held on a throttle/error (e.g. 429), for filtering
 };
 
-async function resolve(candidate: string, wikiTitle: string | null, existing: Existing[]): Promise<Verdict> {
+async function resolve(candidate: string, wikiTitle: string | null, existing: Existing[], story = ""): Promise<Verdict> {
   if (!GEMINI_API_KEY) {
     return { decision: "held", matchName: null, canonicalName: candidate, category: null, confidence: 0, why: "no GEMINI_API_KEY set" };
   }
@@ -495,6 +630,7 @@ async function resolve(candidate: string, wikiTitle: string | null, existing: Ex
     "real-world place as one already on the map nearby, or a genuinely NEW place.",
     "",
     `CANDIDATE (from a local's recommendation): "${candidate}"`,
+    story ? `Documented story of this candidate: "${story}"` : "",
     wikiTitle ? `Wikipedia article found at these coordinates: "${wikiTitle}"` : "No Wikipedia article at these coordinates.",
     "",
     "ALREADY ON THE MAP within 90 metres:",
@@ -505,7 +641,8 @@ async function resolve(candidate: string, wikiTitle: string | null, existing: Ex
     "- Clearly a different place, or nothing nearby matches => decision 'new'.",
     "- Genuinely unsure => decision 'uncertain'. Prefer 'uncertain' over guessing.",
     "- canonicalName: the fullest correct name (prefer the Wikipedia/existing name when it is the same place).",
-    "- category: EXACTLY one of park, shops, barsrest, history, art. Museums/landmarks/monuments => history. Public art => art. Restaurants/bars/cafes => barsrest. Stores/markets => shops. Parks/gardens/nature/trails => park.",
+    "- category: EXACTLY one of park, history, art, commercial. Museums/landmarks/monuments/historic buildings/cemeteries => history. Public art, sculpture, murals, galleries => art. Parks/gardens/nature/trails => park.",
+    "- A bar, restaurant, cafe, shop or entertainment business => history ONLY if it has its OWN documented story (a historic landmark building, a famous event happened there, a long-standing institution with a known history); otherwise => commercial. When unsure whether a business has a story, answer commercial.",
     "- confidence: 0..1.",
     'Return ONLY JSON: {"decision":"match|new|uncertain","matchName":string|null,"canonicalName":string,"category":string,"confidence":number,"why":string}',
   ].join("\n");
@@ -546,7 +683,10 @@ async function resolve(candidate: string, wikiTitle: string | null, existing: Ex
 
       let decision = ["match", "new", "uncertain"].includes(parsed.decision) ? parsed.decision : "uncertain";
       const confidence = Number.isFinite(Number(parsed.confidence)) ? Number(parsed.confidence) : 0;
-      let category: string | null = VALID_CATEGORIES.has(parsed.category) ? parsed.category : null;
+      // "commercial" is carried through as a category so run() can drop it
+      // (#57 story-only); anything else outside the story set is unclassified.
+      let category: string | null =
+        VALID_CATEGORIES.has(parsed.category) || parsed.category === "commercial" ? parsed.category : null;
       // Conservative floor: a confident-sounding answer under CONF_MIN is still
       // handed to the human. Nothing auto-merges or auto-drops on a coin-flip.
       if (decision !== "uncertain" && confidence < CONF_MIN) decision = "uncertain";
@@ -586,7 +726,12 @@ type SeedRow = {
   submitted_by: null;
   source: "seed:reddit";
   seed_meta: { candidate: string; geocodeLabel: string; wikiTitle: string | null; confidence: number };
+  // #57 story lines: the hand-verified story is persisted as the pin's story so
+  // brick 5 shows it deterministically (no cascade needed); null for bare names.
+  resolved_description: string | null;
+  resolved_source: "curated" | null;
 };
+type CuratedRow = { name: string; lat: number; lng: number; description: string; source_url: string | null; note: string };
 
 // ---------------------------------------------------------------------------
 // --commit: insert the new seed rows into `submissions` via the Supabase REST
@@ -597,7 +742,7 @@ type SeedRow = {
 // wiki intro is stored as NULL (not ""), matching how existing seeds were loaded
 // (#279's "NULL description" set). seed_meta has no column and is dropped.
 // ---------------------------------------------------------------------------
-async function commitToSupabase(rows: SeedRow[]): Promise<void> {
+async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[]): Promise<void> {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     console.error(
       "\n--commit ABORTED: SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY not set. " +
@@ -623,6 +768,8 @@ async function commitToSupabase(rows: SeedRow[]): Promise<void> {
     status: r.status,
     submitted_by: r.submitted_by,
     source: r.source,
+    resolved_description: r.resolved_description,
+    resolved_source: r.resolved_source,
   }));
 
   const endpoint = SUPABASE_URL + "/rest/v1/submissions";
@@ -651,6 +798,24 @@ async function commitToSupabase(rows: SeedRow[]): Promise<void> {
     inserted += batch.length;
     console.log(`  committed ${inserted}/${payload.length}…`);
   }
+  // #57 story lines: bank each story in curated_descriptions too, so the #318
+  // curated rung serves it on any later re-resolve (#319) of the same pin. The
+  // submission rows above already carry the story, so a failure here does not
+  // blank the map — it is reported, and curated_records.json holds the rows.
+  if (curated.length) {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(curated),
+    });
+    if (res.ok) console.log(`  curated_descriptions: inserted ${curated.length} story row(s).`);
+    else console.error(`  curated_descriptions insert FAILED: HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 300)} — the pins still show their story; load curated_records.json by hand.`);
+  }
   console.log(`\n--commit: INSERTED ${inserted} row(s) into submissions (source='seed:reddit', city='${rows[0].city}', status='approved').`);
   console.log(`Verify: submissions seed:reddit count should have risen by exactly ${inserted}. Back-out: delete from submissions where source='seed:reddit' and city='${rows[0].city}' and created_at > now() - interval '1 hour';`);
 }
@@ -658,11 +823,13 @@ async function commitToSupabase(rows: SeedRow[]): Promise<void> {
 async function run() {
   const args = Deno.args.filter((a) => !a.startsWith("--"));
   const COMMIT = Deno.args.includes("--commit");
+  console.log(`[${TOOL_VERSION}] city=${CITY.name} (${CITY.lat}, ${CITY.lng}) maxKm=${CITY_MAX_KM} model=${GEMINI_MODEL}`);
+  console.log(`  dedup = live map + submissions + Wikipedia (#418); map endpoint ${NEARBY_PLACES_URL}`);
   let names = DEFAULT_NAMES;
   if (args[0]) {
     try {
       const txt = await Deno.readTextFile(args[0]);
-      names = txt.split("\n").map((l) => l.trim()).filter(Boolean);
+      names = txt.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
       console.log(`Loaded ${names.length} names from ${args[0]}`);
     } catch (e) {
       console.error(`Could not read names file ${args[0]}: ${e}`);
@@ -674,10 +841,20 @@ async function run() {
   if (!GEMINI_API_KEY) console.warn("WARNING: GEMINI_API_KEY is not set — every place will be HELD (never judged), written to seed_held.txt for a re-run, not reviewed.");
 
   const rows: SeedRow[] = [];
+  const curatedRows: CuratedRow[] = [];
   const report: any[] = [];
 
-  for (const candidate of names) {
-    const geo = await geocode(candidate);
+  for (const rawLine of names) {
+    const line = parseLine(rawLine);
+    const candidate = line.name;
+    if (!candidate) continue;
+    const byAddress = /^\d/.test(line.locate);
+    const coord = line.locate.match(/^@\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+    const geo = coord
+      ? { lat: Number(coord[1]), lng: Number(coord[2]), label: `source coordinate ${coord[1]},${coord[2]}`, nameMatch: true }
+      : byAddress
+      ? await geocodeAddress(line.locate)
+      : await geocode(line.locate || candidate);
     if (!geo) {
       report.push({ candidate, outcome: "geocode-failed" });
       console.log(`  ✗ ${candidate} — could not geocode`);
@@ -697,8 +874,15 @@ async function run() {
 
     // Tight 90 m lookup: the dedup/resolve signal (is there an article right here?).
     const wiki = await wikiAt(geo.lat, geo.lng);
-    const existing = await existingNear(geo.lat, geo.lng);
-    const verdict = await resolve(candidate, wiki?.title ?? null, existing);
+    const near = await existingNear(geo.lat, geo.lng);
+    const existing = near.list;
+    // #418: a failed dedup source means the place was never fully checked → HOLD.
+    const verdict: Verdict = near.failed
+      ? { decision: "held", matchName: null, canonicalName: candidate, category: null, confidence: 0, why: near.failed }
+      : await resolve(candidate, wiki?.title ?? null, existing, line.story);
+    // A story line IS a storied place by construction (a human sourced the story),
+    // so a "commercial" call on it is overridden to history, never skipped.
+    if (line.story && verdict.category === "commercial") verdict.category = "history";
 
     // Description slot: prefer the tight hit's intro; if blank, widen to 300 m
     // with a title-match gate. This only fills TEXT — it never changes the
@@ -714,19 +898,29 @@ async function run() {
     const base = {
       candidate,
       geo,
+      locate: line.locate || null,
+      story: line.story || null,
       wikiTitle,
       wikiWidened,
-      existing: existing.map((e) => e.name),
+      existing: existing.map((e) => `${e.name} [${e.source ?? "?"}]`),
       verdict,
     };
 
-    if (verdict.decision === "match") {
+    if (verdict.decision === "new" && verdict.category === "commercial") {
+      // #57 story-only: a new business with no story of its own is not a seed.
+      report.push({ ...base, outcome: "commercial-skip" });
+      console.log(`  − ${candidate} → commercial with no story, not seeded (#308/#312) (conf ${verdict.confidence.toFixed(2)})`);
+    } else if (verdict.decision === "match") {
       report.push({ ...base, outcome: "already-present" });
       console.log(`  = ${candidate} → already on the map as "${verdict.matchName ?? existing[0]?.name}" (conf ${verdict.confidence.toFixed(2)})`);
+      if (line.story) console.log(`    ! story NOT attached — the existing pin keeps its own description (report: story on an already-present pin)`);
     } else if (verdict.decision === "new") {
+      // A story line keeps the operator's display name (Gemini may not rename it:
+      // the curated row is keyed to this exact name) and its story is the text.
+      const pinName = line.story ? candidate : verdict.canonicalName;
       const row: SeedRow = {
-        name: verdict.canonicalName,
-        description: wikiIntro,
+        name: pinName,
+        description: line.story || wikiIntro,
         category: verdict.category,
         lat: geo.lat,
         lng: geo.lng,
@@ -735,11 +929,19 @@ async function run() {
         submitted_by: null,
         source: "seed:reddit",
         seed_meta: { candidate, geocodeLabel: geo.label, wikiTitle, confidence: verdict.confidence },
+        resolved_description: line.story || null,
+        resolved_source: line.story ? "curated" : null,
       };
       rows.push(row);
+      if (line.story) {
+        curatedRows.push({
+          name: pinName, lat: geo.lat, lng: geo.lng, description: line.story,
+          source_url: line.source || null, note: `#57 story seed (${CITY.name})`,
+        });
+      }
       report.push({ ...base, outcome: "new-seed" });
       const cat = verdict.category ?? "UNCLASSIFIED";
-      const desc = row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
+      const desc = line.story ? "story✓" : row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
       console.log(`  + ${verdict.canonicalName} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})`);
     } else if (verdict.decision === "held") {
       // Throttle/transport hold — the machine never judged this. Re-runnable,
@@ -757,6 +959,7 @@ async function run() {
 
   await Deno.writeTextFile("seed_records.json", JSON.stringify(rows, null, 2));
   await Deno.writeTextFile("seed_report.json", JSON.stringify(report, null, 2));
+  await Deno.writeTextFile("curated_records.json", JSON.stringify(curatedRows, null, 2));
 
   // The held names, one per line — a ready-to-feed names file for a recovery
   // re-run: `... seed-resolve.ts seed_held.txt` with a working key clears them
@@ -772,17 +975,28 @@ async function run() {
   console.log(counts);
   const uncat = rows.filter((r) => !r.category).length;
   const blank = rows.filter((r) => !r.description).length;
+  const storied = rows.filter((r) => r.resolved_source === "curated").length;
+  console.log(`story lines seeded: ${storied} (their story ships as resolved_source 'curated'; ${curatedRows.length} curated_descriptions rows staged in curated_records.json)`);
   console.log(`new seed rows: ${rows.length}  (unclassified category: ${uncat}, no wiki description: ${blank})`);
   console.log("wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).");
   if (heldNames.length) {
     console.log(`HELD (never judged — re-run these): ${heldNames.length} → wrote seed_held.txt. Re-run: seed-resolve.ts seed_held.txt with a working key. These are NOT reviews (#264).`);
   }
+  const commercialN = counts["commercial-skip"] ?? 0;
+  if (commercialN) console.log(`COMMERCIAL-SKIP (no story of its own, not seeded): ${commercialN} — skim outcome:"commercial-skip" in seed_report.json for a storied place the classifier missed.`);
   const reviewN = counts.review ?? 0;
   if (reviewN) console.log(`REVIEW (judged, genuinely unsure — eyeball these): ${reviewN} in seed_report.json (outcome:"review").`);
 
   if (COMMIT) {
     console.log("\n--commit passed: writing the new rows to submissions now.");
-    await commitToSupabase(rows);
+    await commitToSupabase(rows, curatedRows);
+    // #57 story-only: a new seed lands with resolved_source NULL (visible, never
+    // checked). The #318 cascade stamps it — or hides it — only when the
+    // recheck runs. Until then a seed with no wiki intro shows with no story.
+    console.log("NEXT (#57 checklist): story lines are already stamped. Stamp the BARE-name seeds through the #318 cascade —");
+    console.log("  deno run --allow-net --allow-env recheck-none-places.ts --nulls            # dry run, read it");
+    console.log("  deno run --allow-net --allow-env recheck-none-places.ts --nulls --commit   # persist hits (misses stay visible)");
+    console.log("  then, after eyeballing the misses: add --nulls-miss-to-none to hide the storyless ones.");
   } else {
     console.log("NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).");
   }
