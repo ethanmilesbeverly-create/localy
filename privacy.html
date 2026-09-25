@@ -206,6 +206,29 @@
     though it is assembled out of public coordinates rather than your own. It is
     treated that way below.</p>
 
+  <!-- #400 — guests. Written from index.html: with no session, bootAsGuest()
+       runs the app and mirroredStorage routes every private key to memStorage
+       (in-memory, gone on reload); nothing is written to user_state and no
+       account exists. The only things that leave the device are the requests
+       listed under "Who else receives anything" and the anonymous usage counts.
+       Capture / save / submit / guides / report / leaderboard open the sign-in
+       card instead. If any of that changes, this section changes in the same build. -->
+  <h2>Using Nahgoo without an account</h2>
+
+  <p>You can open Nahgoo and browse the map, open places, search, and follow a guide
+    or a place someone shared with you <strong>without making an account</strong>.</p>
+  <p>While you browse that way, <strong>nothing is stored about you</strong>: there is
+    no account, and anything the app needs to remember — like a guide you opened —
+    is held in your browser's memory only for that visit and is gone when you close
+    or reload the page. The map still has to ask other services for map images,
+    search results and nearby places, exactly as described under
+    <a href="#who-else">Who else receives anything</a>, and the app keeps the
+    <a href="#usage-counts">anonymous usage counts</a> below.</p>
+  <p>Capturing a place, saving it to a guide, building a guide, submitting a gem,
+    reporting a problem and the leaderboard all need an account, because they are
+    the things worth keeping. Tapping one of them asks you to sign in or create a
+    free account; everything in the next section applies from that point on.</p>
+
   <h2>What is stored in your account</h2>
 
   <h3>Your account itself</h3>
@@ -265,7 +288,7 @@
        that changes, this section changes in the same build. It sits OUTSIDE
        "What is stored in your account" on purpose: it applies to visitors with
        no account too, and it is not attached to an account. -->
-  <h2>Anonymous usage counts</h2>
+  <h2 id="usage-counts">Anonymous usage counts</h2>
 
   <p>So we can tell whether anyone is actually using Nahgoo — including people who
     haven't made an account — the app keeps a simple count of activity.</p>
@@ -288,7 +311,7 @@
     is fine for their purpose: seeing whether people are using the app, not
     identifying them.</p>
 
-  <h2>Who else receives anything</h2>
+  <h2 id="who-else">Who else receives anything</h2>
 
   <p class="lead">A map app cannot work without asking other people's servers for
     things. Here is every one of them, and what it sees.</p>
@@ -336,8 +359,9 @@
 
     <div class="who-row">
       <h4>Supabase — accounts, database and the nearby-places service</h4>
-      <p class="gets">Sees: your account, everything listed above as stored, and your
-        exact position at the moment the app asks what is nearby.</p>
+      <p class="gets">Sees: your account and everything listed above as stored, if you
+        have an account; and, signed in or not, your exact position at the moment the
+        app asks what is nearby.</p>
       <p>That position is rounded to a roughly 5.5 km square as soon as it arrives, and
         the results are cached against that square in a shared table that carries
         <strong>no user identifier at all</strong> — so the cache cannot say who asked.</p>

@@ -2332,6 +2332,10 @@
         <h2>Find the good spots near you</h2>
         <p>Nahgoo is a map of real places worth a stop — the ones people who live here actually recommend. Turn on location so it can surface the ones around you.</p>
         <button class="btn" onclick="onboardEnableLocation()">Enable location</button>
+        <!-- #400 / #5 — notice before collection. Guests no longer pass the auth
+             card (and its privacy link) on the way in, and this is the first
+             thing that asks for anything, so the policy link lives here too. -->
+        <p class="onboard-legal"><a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a></p>
       </div>
 
       <div class="onboard-step" id="onboard-step-2">
@@ -3107,7 +3111,16 @@
          two-files hazard #77/#5 warn about — it is trimmed, not dropped. -->
     <!-- #253/#177 — MANAGE ACCOUNT nav row (email/name/resend moved to
          #screen-account). Grouped tight with Privacy + About below. -->
-    <div class="settings-section settings-nav-group">
+    <!-- #400 — a guest has no account to manage, no submissions and no
+         leaderboard opt-out, so these three rows and Log out are .acct-only; the
+         guest gets the sign-in card below instead. -->
+    <div class="settings-section guest-only guest-cta">
+      <div class="settings-card">
+        <p>You're browsing without an account. Create a free one to capture places, keep your stamps, save guides and submit gems.</p>
+        <button class="settings-btn" onclick="openGuestSignIn()">Sign in or create account</button>
+      </div>
+    </div>
+    <div class="settings-section settings-nav-group acct-only">
       <button class="settings-nav" onclick="openAccount('screen-settings')">
         <span>Manage account</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -3119,7 +3132,7 @@
          they've submitted and each one's status), so it sits directly under
          Manage account rather than beside Privacy/About. openMySubmissions()
          renders the list, mirroring how openPrivacy/openAbout seed their screens. -->
-    <div class="settings-section settings-nav-group">
+    <div class="settings-section settings-nav-group acct-only">
       <button class="settings-nav" onclick="openMySubmissions('screen-settings')">
         <span>My submissions</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -3129,7 +3142,7 @@
     <!-- #253 — PRIVACY. A nav row like "About this app" (opens #screen-privacy),
          holding the leaderboard opt-out. Same chevron-row pattern so it scales if
          more privacy controls land later. -->
-    <div class="settings-section settings-nav-group">
+    <div class="settings-section settings-nav-group acct-only">
       <button class="settings-nav" onclick="openPrivacy('screen-settings')">
         <span>Privacy</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -3153,7 +3166,7 @@
          by SHOW_CLEAR_MY_DATA — the mechanism (deleteMyAccount + the
          delete-account edge function) is unchanged. -->
     </div><!-- /.settings-scroll -->
-    <div class="settings-section settings-footer">
+    <div class="settings-section settings-footer acct-only">
       <button class="settings-btn" onclick="logout()">Log out</button>
     </div>
   </div>
@@ -3393,8 +3406,19 @@
   <div id="toast"></div>
 
   <!-- ================= AUTH OVERLAY ================= -->
-  <div id="auth-overlay">
+  <!-- #400 — THE OVERLAY STARTS HIDDEN. It used to be visible in the markup and
+       was hidden by onAuthed(), so every boot flashed the login card while
+       getSession() resolved. With guests allowed in, a signed-out visitor never
+       sees it at boot at all; it is shown only by promptSignIn() (a guest tapping
+       something that needs an account) and by the password-reset paths, which
+       each remove .hidden explicitly. -->
+  <div id="auth-overlay" class="hidden">
     <div id="auth-card">
+      <!-- #400 — close control, shown only when the card is a dismissible
+           sign-in prompt for a guest (never on the reset screen). -->
+      <button id="auth-dismiss-x" class="auth-hidden" type="button" aria-label="Close" onclick="dismissSignInPrompt()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <!-- .display uppercases this, so it renders NAHGOO. Same NAH|GOO
            accent split as #topbar's .brand — see the comment there. -->
       <div id="auth-brand" class="display">Nah<span>goo</span></div>
@@ -3434,9 +3458,10 @@
       </div>
 
       <!-- #23 — OPTIONAL HERE, REQUIRED AT SUBMIT, and the asymmetry is the whole
-           capture design. This screen gates the entire app and every account has
-           to pass through it, so a mandatory field here is friction on the one
-           form that can lose a user before they have seen anything. It is also
+           capture design. This screen gated the entire app until #400, and it is
+           still the form every new account passes through (now at the moment a
+           guest tries to capture/save/submit), so a mandatory field here is
+           friction on the one form that can lose a user. It is also
            the highest-risk region in this file (#2's pinned emailRedirectTo,
            #69's open verification hole, #50's pending rename moving the Site URL
            under it) — worth touching once, lightly. The place a name is actually
@@ -3478,9 +3503,17 @@
         <button id="auth-back-btn" type="button">Back to log in</button>
       </div>
 
+      <!-- #400 — the guest's way out of the sign-in prompt, thumb-reachable at
+           the bottom of the card (the X above is the same action). -->
+      <div id="auth-dismiss-row" class="auth-hidden">
+        <button id="auth-dismiss-btn" type="button" onclick="dismissSignInPrompt()">Not now — keep browsing</button>
+      </div>
+
       <!-- #5 — NOTICE HAS TO PRECEDE COLLECTION, and until this build the only
            route to the privacy policy was Settings, which is behind the account
-           you are being asked to create here. A policy you can only read after
+           you are being asked to create here. (#400 — guests now reach the map
+           without passing this card, so the link also sits on onboarding step 1
+           and on the About screen, both reachable with no account.) A policy you can only read after
            agreeing is not notice. Deliberately quiet — it is a standing
            availability, not a consent gate, and this app has no consent flow
            to hang one on. Shown on BOTH log in and create-account rather than
@@ -3561,6 +3594,28 @@
   #auth-legal{ margin-top:18px; text-align:center; font-size:12px; }
   #auth-legal a{ color:var(--text-dim); text-decoration:underline; text-underline-offset:2px; }
   .auth-hidden{ display:none !important; }
+  /* #400 — the guest sign-in prompt reuses this card; the X sits in its corner. */
+  #auth-card{ position:relative; }
+  #auth-dismiss-x{
+    position:absolute; top:10px; right:10px; width:34px; height:34px;
+    display:flex; align-items:center; justify-content:center;
+    background:none; border:none; color:var(--text-dim); cursor:pointer; padding:0;
+  }
+  #auth-dismiss-x svg{ width:20px; height:20px; }
+  #auth-dismiss-row{ margin-top:14px; text-align:center; }
+  #auth-dismiss-btn{
+    background:none; border:none; color:var(--text-dim);
+    font-weight:600; font-size:13px; cursor:pointer; font-family:inherit; padding:4px;
+  }
+  /* #400 — guest vs account surfaces. body.is-guest is set by bootAsGuest() and
+     removed by onAuthed(); .acct-only hides account-only controls from a guest,
+     .guest-only shows the guest's sign-in entry points. */
+  .guest-only{ display:none !important; }
+  body.is-guest .guest-only{ display:block !important; }
+  body.is-guest .acct-only{ display:none !important; }
+  .guest-cta p{ margin:0 0 12px; color:var(--text-dim); font-size:13.5px; line-height:1.45; }
+  .onboard-legal{ margin:12px 0 0; font-size:12px; text-align:center; }
+  .onboard-legal a{ color:var(--text-dim); text-decoration:underline; text-underline-offset:2px; }
   /* #23 — helper under the optional name field. Sits tight to its input so it
      reads as part of that field, not as a new paragraph in the card. */
   .auth-hint{ font-size:11.5px; line-height:1.45; color:var(--text-dim); opacity:.75; margin:5px 0 0; }
@@ -3636,6 +3691,16 @@ function demoBypassActive(){
   // Accessing window.top cross-origin throws — which also means iframed.
   try { return window.self !== window.top; }
   catch(e){ return true; }
+}
+
+/* #400 — A GUEST IS A REAL VISITOR WITH NO SESSION. The app boots for them
+   (bootAsGuest) and they can browse, search, open pins, open shared spots and
+   guides, and share. Anything that writes to an account — capture, save to a
+   guide, submit a gem, build a guide, report, the leaderboard, account settings —
+   checks isGuest() first and opens the sign-in prompt instead (promptSignIn).
+   Demo mode (the preview iframe) is NOT a guest: it has its own throwaway user. */
+function isGuest(){
+  return !demoBypassActive() && !(state.user && state.user.id);
 }
 
 /* In-memory storage used only in demo mode: the app works fully for
@@ -3835,9 +3900,20 @@ async function flushPendingWrites(){
   }
 }
 
+/* #400 — A GUEST'S PRIVATE KEYS LIVE IN MEMORY FOR THE SESSION. With no user
+   id there is no user_state row to read or write and no mirror namespace, so
+   before this a private write threw 'not signed in'. Guests write very little
+   (the current hunt's progress shell, a redeemed guide in my-hunts, the
+   freshness timestamp) and none of it is an account's data, so it goes to the
+   same in-memory store demo mode uses and is gone on reload. Nothing is carried
+   into the account on sign-in (the hard gate, #400 option (a)): the one thing
+   worth carrying — the guide the guest was in — rides the #128 invite stash
+   instead (promptSignIn). Shared keys are unaffected: a guest reads shared_kv
+   like anyone else. */
 const mirroredStorage = {
   async get(key, shared){
     if(shared) return supabaseStorage.get(key, true);
+    if(isGuest()) return memStorage.get(key, false);
     let res = null, remoteOk = false;
     try{
       res = await supabaseStorage.get(key, false);
@@ -3858,6 +3934,7 @@ const mirroredStorage = {
   },
   async set(key, value, shared){
     if(shared) return supabaseStorage.set(key, value, true);
+    if(isGuest()) return memStorage.set(key, value, false); // #400 — see above
     const mirrored = mirrorSet(key, value);
     try{
       await supabaseStorage.set(key, value, false);
@@ -3882,6 +3959,7 @@ window.storage = demoBypassActive() ? memStorage : mirroredStorage;
    AUTH
    ========================================================= */
 let authMode = 'login'; // 'login' | 'signup' | 'forgot' | 'reset'
+let authDismissible = false; // #400 — true while the card is a guest's closable sign-in prompt
 
 /* #2 — where a recovery link lands. We append our OWN marker rather than
    reading Supabase's, because the SDK's recovery URL format differs between
@@ -4157,6 +4235,9 @@ function setAuthMode(mode){
   show('auth-switch',        mode==='login' || mode==='signup');
   // No escape hatch out of 'reset': leaving it half-done is what strands people.
   show('auth-back-row',      mode==='forgot');
+  // #400 — the guest prompt's way out; same no-escape rule for 'reset'.
+  show('auth-dismiss-x',     authDismissible && mode!=='reset');
+  show('auth-dismiss-row',   authDismissible && mode!=='reset');
 
   document.getElementById('auth-password-label').textContent =
     mode==='reset' ? 'New password' : 'Password';
@@ -4331,7 +4412,25 @@ async function submitAuth(){
   }
 }
 function onAuthed(session){
+  /* #400 — A GUEST WHO SIGNS IN IN-PAGE RELOADS INTO THE ACCOUNT. init() has
+     already run for the guest, with memory-only private storage and no user
+     data loaded, so rather than re-run half of init() under a new user this
+     reboots the page — the same "simplest clean reset" logout() uses. The
+     session is already in supabase-js's storage, so the reload lands in
+     checkAuthAndBoot's has-session branch and init() runs for the account.
+     Where to land is carried across the reload in sessionStorage by
+     promptSignIn() (the pin, the guide, or the tab), and read back in init().
+     No activity ping here: the reload's own onAuthed sends signed_in, because
+     this device's auth flag is still '0' from the guest boot. The OAuth path
+     never reaches this branch — its redirect is already a fresh page load. */
+  if(state._booted && isGuest()){
+    state.user = session.user;
+    try{ location.reload(); }catch(e){}
+    return;
+  }
   state.user = session.user;
+  document.body.classList.remove('is-guest');
+  authDismissible = false;
   document.getElementById('auth-overlay').classList.add('hidden');
   pingActivity('app_open');        // #10 — a no-op if this device already sent app_open today (e.g. as a guest)
   noteActivityAuthState(true);     // #10 — sends signed_in only on a real no-session → session change
@@ -4346,8 +4445,11 @@ async function logout(){
   // one person's progress to the next person who signs in here.
   try{ await flushPendingWrites(); }catch(e){}
   purgeMirror();
+  clearSignInReturn(); // #400 — a half-finished guest prompt must not steer the next boot
   await sb.auth.signOut();
-  location.reload(); // simplest clean reset back to the login screen
+  /* #400 — the reload now boots as a GUEST (no session → bootAsGuest), so
+     signing out returns to browsing the map, not to a login wall. */
+  location.reload();
 }
 async function checkAuthAndBoot(){
   // #128 — capture the invite BEFORE any auth action can navigate the tab away.
@@ -4363,6 +4465,7 @@ async function checkAuthAndBoot(){
     return;
   }
   wireAuthUI();
+  state._authWired = true; // #400 — promptSignIn() must not wire the card a second time
   setAuthMode('login');
 
   /* #2 — THE BACKDOOR THIS CLOSES. supabase-js runs with detectSessionInUrl on
@@ -4391,14 +4494,18 @@ async function checkAuthAndBoot(){
       if(!data.session){
         // Recovery links are single-use and short-lived; say so instead of
         // rendering a password form that cannot possibly save.
+        // #400 — the card is now closable: dismissing it boots as a guest
+        // (dismissSignInPrompt), so a dead link is no longer a dead end.
         state._recovery = false;
         clearResetParam();
+        authDismissible = true;
         setAuthMode('login');
         authMsg("That reset link has expired or was already used. Request a new one.");
       }
     }catch(e){
       state._recovery = false;
       clearResetParam();
+      authDismissible = true;
       setAuthMode('login');
       authMsg("Couldn't verify that reset link. Check your connection and try again.");
     }
@@ -4414,22 +4521,135 @@ async function checkAuthAndBoot(){
     if(data.session){
       onAuthed(data.session);        // already logged in from a previous visit
     } else {
-      document.getElementById('auth-overlay').classList.remove('hidden'); // show login
-      activityGuestAtLogin();        // #10
+      bootAsGuest();                 // #400 — no wall: a visitor with no session gets the map
     }
   }catch(e){
-    document.getElementById('auth-overlay').classList.remove('hidden');
-    activityGuestAtLogin();          // #10 — usually offline, so these fail silently; still the honest event
+    bootAsGuest();                   // #400 — usually offline; browsing still works from what loads
   }
 }
-/* #10 — someone with no session reached the sign-in screen. Today that is every
-   guest (the wall); after #400 the sign-in prompt moves to the capture sheet and
-   signin_prompt moves with it — app_open stays here. */
-function activityGuestAtLogin(){
+/* #400 — BOOT WITHOUT A SESSION. Replaces the login wall: the overlay stays
+   hidden and init() runs for a guest. body.is-guest drives the account-only /
+   guest-only CSS (Settings rows, the Passport sign-in card).
+   #10 — this is where a guest's app_open is sent. signin_prompt is NO LONGER
+   sent at boot (the old activityGuestAtLogin sent it here because every guest
+   met the wall); it now fires from promptSignIn(), when a guest actually meets
+   the sign-in card. The auth flag is set to '0' so a later sign-in on this
+   device counts as signed_in. */
+function bootAsGuest(){
+  state.user = null;
+  document.body.classList.add('is-guest');
+  document.getElementById('auth-overlay').classList.add('hidden');
   pingActivity('app_open');
-  pingActivity('signin_prompt');
   noteActivityAuthState(false);
+  if(!state._booted){
+    state._booted = true;
+    init();
+  }
 }
+
+/* =========================================================
+   #400 — THE SIGN-IN PROMPT (guests)
+   ---------------------------------------------------------
+   The existing auth card, reused rather than rebuilt (the auth screen is the
+   highest-risk region of this file — item 23), with three additions: a reason
+   line in place of the tagline, a close X and a "Not now" link. Every mode and
+   handler on the card is unchanged — email login, create account, Google,
+   forgot password.
+
+   RETURN AFTER SIGN-IN. Signing in reloads the page (onAuthed, or the Google
+   redirect), so where to land is stashed in sessionStorage, which survives a
+   same-tab reload and the same-tab OAuth round trip (#128's reasoning). Three
+   shapes, chosen by the caller:
+     • {spot}  — a pin: the #26 self-contained spot payload, reopened through
+                 consumeSharedSpot(). From Save / Report it lands like a shared
+                 link (area browse around the pin). From CAPTURE it carries
+                 near:true and does NOT enter browse mode — the guest was
+                 standing in capture range, so the map follows them as normal
+                 and the pin's sheet reopens once the first fix lands. Either
+                 way the capture itself is re-tapped: it stays GPS-gated (#4)
+                 and is never replayed automatically.
+     • {guide} — the guest was inside a guide opened by code: the code rides the
+                 #128 invite stash, so the account boots straight back into the
+                 guide and saves it to My Guides.
+     • {tab}   — Submit / Guides / Passport: the tab is restored.
+   KNOWN LIMIT (accepted): an email signup with Confirm Email ON finishes in a
+   NEW tab from the confirmation email, where sessionStorage is empty, so that
+   path lands on the plain map. A guide invite still survives it via user
+   metadata (#128); a pin does not.
+   Dismissing clears the stash so a later reload is not steered by it. */
+const SIGNIN_RETURN_KEY = 'nahgoo_signin_return';
+const SIGNIN_REASONS = {
+  capture:  'Sign in to capture this spot and keep your stamps.',
+  save:     'Sign in to save spots to your own guides.',
+  report:   'Sign in to report a problem with a spot.',
+  submit:   'Sign in to submit a hidden gem.',
+  guide:    'Sign in to build and share your own guides.',
+  passport: 'Sign in to collect stamps and join the leaderboard.',
+  account:  'Sign in or create a free account.'
+};
+const AUTH_TAGLINE_DEFAULT = 'Ask a local. Discover anywhere.';
+let _signInStashedGuide = false; // did THIS prompt write the #128 invite stash?
+
+function promptSignIn(reason, ret){
+  if(!isGuest()) return;
+  stashSignInReturn(ret || null);
+  const tl = document.getElementById('auth-tagline');
+  if(tl) tl.textContent = SIGNIN_REASONS[reason] || SIGNIN_REASONS.account;
+  authDismissible = true;
+  if(!state._authWired){ wireAuthUI(); state._authWired = true; }
+  setAuthMode('login');
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  pingActivity('signin_prompt'); // #10 — the guest met the sign-in card
+}
+function dismissSignInPrompt(){
+  if(authMode === 'reset') return; // never an escape hatch out of reset (#2)
+  authDismissible = false;
+  clearSignInReturn();
+  const tl = document.getElementById('auth-tagline');
+  if(tl) tl.textContent = AUTH_TAGLINE_DEFAULT;
+  document.getElementById('auth-overlay').classList.add('hidden');
+  // The expired-reset-link card is shown before anything has booted.
+  if(!state._booted) bootAsGuest();
+}
+function stashSignInReturn(ret){
+  clearSignInReturn();
+  if(!ret) return;
+  try{
+    if(ret.guide){
+      sessionStorage.setItem(GUIDE_STASH_KEY, String(ret.guide).trim().toUpperCase());
+      _signInStashedGuide = true;
+      return;
+    }
+    if(ret.spot || ret.tab) sessionStorage.setItem(SIGNIN_RETURN_KEY, JSON.stringify(ret));
+  }catch(e){}
+}
+function clearSignInReturn(){
+  try{ sessionStorage.removeItem(SIGNIN_RETURN_KEY); }catch(e){}
+  if(_signInStashedGuide){ clearStashedGuide(); _signInStashedGuide = false; }
+}
+/* Read AND clear, once, at the top of init(). Returns {spot}|{tab}|null. */
+function takeSignInReturn(){
+  let v = null;
+  try{
+    const raw = sessionStorage.getItem(SIGNIN_RETURN_KEY);
+    sessionStorage.removeItem(SIGNIN_RETURN_KEY);
+    v = raw ? JSON.parse(raw) : null;
+  }catch(e){ v = null; }
+  if(!v || typeof v !== 'object') return null;
+  if(typeof v.spot === 'string' && v.spot) return { spot: v.spot, near: v.near === true };
+  if(typeof v.tab === 'string' && HASH_TAB_IDS.indexOf(v.tab) !== -1) return { tab: v.tab };
+  return null;
+}
+/* Where a guest should come back to after signing in from a PIN (capture,
+   save, report). Inside a guide opened by code → back into that guide; anywhere
+   else → the pin itself, as a #26 spot payload. */
+function signInReturnForPin(t, near){
+  const h = state.currentHunt;
+  if(h && h.key && h.key.indexOf('code_') === 0) return { guide: h.key.slice(5) };
+  if(t && isFinite(+t.lat) && isFinite(+t.lng)) return near ? { spot: encodeSpotPayload(t), near: true } : { spot: encodeSpotPayload(t) };
+  return null;
+}
+function openGuestSignIn(){ promptSignIn('account', { tab:'screen-passport' }); }
 
 /* =========================================================
    BLAZE ICON (signature element)
@@ -7533,8 +7753,15 @@ const ONBOARDED_KEY_BASE = 'nahgoo:onboarded:v1:';
 function onboardedKey(){
   return ONBOARDED_KEY_BASE + ((state.user && state.user.id) || 'anon');
 }
+/* #400 — a guest onboards under the 'anon' key; after they sign in the key
+   becomes their user id, and without this they would be walked through the
+   same four cards again on the very next boot. Onboarding is per-device
+   permission priming, so a device that finished it as a guest has finished it. */
 function onboardingDone(){
-  try{ return localStorage.getItem(onboardedKey()) === '1'; }catch(e){ return false; }
+  try{
+    return localStorage.getItem(onboardedKey()) === '1'
+        || localStorage.getItem(ONBOARDED_KEY_BASE + 'anon') === '1';
+  }catch(e){ return false; }
 }
 function shouldRunOnboarding(){
   return !demoBypassActive() && !onboardingDone();
@@ -7582,14 +7809,25 @@ function finishOnboarding(){
 }
 
 async function init(){
-  const _pendingSpot = pendingSpotParam(); // #26 — read BEFORE consumePendingGuideInvite() calls clearResetParam() and strips the URL
+  /* #400 — where a guest who just signed in should land (promptSignIn stashed it
+     before the reload / OAuth redirect). Read and cleared either way; honoured
+     only for an account, so a guest reload is never steered by a stale prompt.
+     A pin return is treated exactly like a ?spot= link; a tab return replaces
+     the persisted hash tab. A guide return rides the #128 invite stash and is
+     picked up by consumePendingGuideInvite() below with no code here. */
+  const _signInReturn = takeSignInReturn();
+  const _ret = (_signInReturn && !isGuest()) ? _signInReturn : null;
+  const _urlSpot = pendingSpotParam();
+  const _pendingSpot = _urlSpot || (_ret && _ret.spot) || null; // #26 — read BEFORE consumePendingGuideInvite() calls clearResetParam() and strips the URL
+  const _spotIsReturn = !_urlSpot && !!_pendingSpot;
+  const _spotReturnNear = _spotIsReturn && !!(_ret && _ret.near);
   /* REFRESH-PERSISTENCE — capture the persisted tab and whether this boot is a
      deep-link arrival, BOTH before clearResetParam() (via consumePendingGuideInvite)
      wipes the hash and clears the guide carriers. _bootDeepLink reads only the
      synchronous URL/stash carriers (metadata-only guide invites are brand-new
      users with no persisted tab, so they can't collide); the restore itself runs
      LAST, after consumeSharedSpot. */
-  const _bootTab = bootTabParam();
+  const _bootTab = (_ret && _ret.tab) || bootTabParam();
   const _bootDeepLink = !!(_pendingSpot || pendingGuideCode() || readStashedGuide() || resetLinkActive());
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
@@ -7668,7 +7906,7 @@ async function init(){
   /* #26 — if a ?spot= link brought us here, open it LAST: the map (setupBaseMap),
      first hunt (startLocalHunt) and sizing (fixMapSize) are all in place, and the
      URL was already read into _pendingSpot above before it got stripped. */
-  consumeSharedSpot(_pendingSpot);
+  consumeSharedSpot(_pendingSpot, _spotIsReturn, _spotReturnNear);
 
   /* REFRESH-PERSISTENCE — LAST, so the deep-link consumers above always win the
      landing; guarded so it only fires on a plain reload. See restoreBootTab. */
@@ -7848,6 +8086,9 @@ function restoreBootTab(tab, hadDeepLink){
   if(!tab || tab === 'screen-map') return;
   if(hadDeepLink) return;
   if(shouldRunOnboarding()) return;
+  /* #400 — a guest reloading on a persisted Submit hash (e.g. just after
+     signing out from it) would otherwise meet the sign-in prompt at boot. */
+  if(isGuest() && tab === 'screen-suggest-gem') return;
   /* The boot hunt is a local_ hunt, and the first GPS fix regenerates it
      (onLocation -> startLocalHunt -> setCurrentHunt -> enterHuntMode), which
      would setTab('screen-map') OVER the tab we just restored ~1s in — the "starts
@@ -7992,7 +8233,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25a';
+const APP_VERSION = '2026.09.25b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -8719,6 +8960,17 @@ async function fetchLeaderboardMe(){
 function renderLeaderboardEntry(){
   const mount = document.getElementById('passport-leaderboard-section');
   if(!mount) return;
+  /* #400 — a guest has no standing and leaderboard_me refuses anon (#391), so
+     the card becomes the Passport's sign-in entry instead of calling it. */
+  if(isGuest()){
+    mount.innerHTML =
+      '<div class="passport-section guest-cta">'
+      + '<div class="passport-section-head"><h2 class="section-title">Start your passport</h2></div>'
+      + '<p>Create a free account to capture places, collect stamps and badges, and join the leaderboard. Browsing the map never needs one.</p>'
+      + '<button class="btn" onclick="promptSignIn(\'passport\', { tab:\'screen-passport\' })">Sign in or create account</button>'
+      + '</div>';
+    return;
+  }
   const me = state._lbMe;
   let inner;
   if(me && me.opted_out){
@@ -8755,6 +9007,7 @@ function renderLeaderboardEntry(){
 }
 
 function openLeaderboard(){
+  if(isGuest()){ promptSignIn('passport', { tab:'screen-passport' }); return; } // #400 — leaderboard_top refuses anon (#391)
   /* First open defaults to Nearby when we have a location (this is a local-
      discovery app); with no GPS fix it defaults to Global so the board never
      opens on the "turn on location" prompt. A prior in-session pick is kept. */
@@ -11683,6 +11936,7 @@ function jumpSuggestMapTo(place){
    with where Back actually goes, which a return-target scheme (#91's approach
    for Settings) would NOT have done here without also rewriting Cancel. */
 function openSuggestGemScreen(){
+  if(isGuest()){ promptSignIn('submit', { tab:'screen-suggest-gem' }); return; } // #400
   showScreen('screen-suggest-gem');
   /* #62 — WAS setNavActive('screen-modes') UNTIL 2026.07.21k. A nav button now
      carries screen-suggest-gem, so this screen lights itself. The explicit call
@@ -11779,6 +12033,7 @@ async function submitGem(){
      an empty string). Name and a dropped pin stay required. */
   if(!state.gemDraftPin){ showToast('Search the address above, or tap the map to drop a pin'); return; }
   const uid = state.user && state.user.id;
+  if(isGuest()){ promptSignIn('submit', { tab:'screen-suggest-gem' }); return; } // #400 — belt; the screen is gated on entry
   if(!uid){ showToast('Please log in again to submit'); return; }
 
   /* #23 / #191 — THE NAME GATE, KEYED OFF THE PROFILE RATHER THAN THE INPUT.
@@ -11989,6 +12244,7 @@ async function retryLoadMyGems(){
    gone, and UPDATE on `submissions` is revoked from app users so it can't come
    back by accident. */
 function openCreateScreen(existingHunt, seedPoint){
+  if(isGuest()){ promptSignIn('guide', { tab:'screen-guides' }); return; } // #400 — building/editing a guide needs an account
   showScreen('screen-create');
   setNavActive('screen-modes');   // #98b — see openSuggestGemScreen for why explicitly
   state.editingHuntId = existingHunt ? existingHunt.id : null;
@@ -12226,10 +12482,30 @@ function shareSpot(id){
    .expanded) so the visitor sees the pin's details and actions on landing.
    Capture stays GPS-gated (#4) — a shared link lets you SEE and navigate to the
    spot, never capture it remotely. */
-function consumeSharedSpot(param){
+function consumeSharedSpot(param, isSignInReturn, nearReturn){
   const sp = param && decodeSpotPayload(param);
   if(!sp) return;
-  pingActivity('guide_open'); // #10 — a shared-spot link landed (the row counts it with guides)
+  /* #10 — a shared-spot link landed (the row counts it with guides). #400 — a
+     return-after-sign-in reuses this arrival but is not a shared link, so it
+     does not count as one. */
+  if(!isSignInReturn) pingActivity('guide_open');
+  /* #400 — CAPTURE RETURN (nearReturn): the person was standing at this pin a
+     moment ago, so do NOT enter browse mode (it hides the you-are-here marker
+     and says "you're not really here") and do NOT pre-mark centering. The first
+     GPS fix rebuilds the local hunt around them as on any boot, and
+     onLocation() then calls openSpotSheet(), which re-selects the pin by
+     gemId / name+proximity or injects the carried point — the same machinery
+     below, minus the browse arrival. */
+  if(nearReturn){
+    const carriedN = { id: sp.gemId ? ('catgem'+sp.gemId)
+        : ('spot'+Math.abs(Math.round(sp.lat*1e5))+'x'+Math.abs(Math.round(sp.lng*1e5))),
+        name:sp.name, lat:sp.lat, lng:sp.lng, category:sp.category || null, desc:sp.desc || '' };
+    if(sp.gemId) carriedN.gemId = sp.gemId;
+    state._spotPin = carriedN;
+    state._pendingSpot = { sp, carried:carriedN };
+    openSpotSheet(); // no-op until the first fix sets state.me
+    return;
+  }
   enterLocationBrowseMode({ lat:sp.lat, lng:sp.lng }, sp.name);
   /* #26 — the browse hunt runs under key 'local_v1', so onLocation()'s first-fix
      block (`key.startsWith('local_') -> startLocalHunt({player})`) would rebuild
@@ -12291,6 +12567,7 @@ function openSaveToHuntPicker(pointId){
   if(!state.currentHunt) return;
   const point = state.currentHunt.points.find(p=>p.id===pointId);
   if(!point) return;
+  if(isGuest()){ promptSignIn('save', signInReturnForPin(point)); return; } // #400
   state.pendingSavePoint = point;
   const ownHunts = (state.myHunts||[]).filter(h=>!h.external);
   const listEl = document.getElementById('save-to-hunt-list');
@@ -12846,7 +13123,7 @@ async function redeemCodeValue(code){
     }
     setCurrentHunt({key:'code_'+code, name:data.name+' (code: '+code+')', mode:'code', points:data.points});
     pingActivity('guide_open'); // #10 — a guide opened by code or invite link
-    showToast('Guide unlocked — saved to My Guides');
+    showToast(isGuest() ? 'Guide unlocked' : 'Guide unlocked — saved to My Guides'); // #400 — a guest's copy is session-only
     return null;
   }catch(e){
     return "That code's data looks corrupted — try generating a new one.";
@@ -14166,6 +14443,7 @@ function openReportPin(pinId){
      would answer 401 — which would arrive as "something went wrong" after the
      person had already picked a reason and typed a note. Fail before the work,
      not after it. */
+  if(isGuest()){ promptSignIn('report', signInReturnForPin(t)); return; } // #400
   if(demoBypassActive() || !state.user || !state.user.id){
     showToast('Sign in to report a spot');
     return;
@@ -14302,6 +14580,14 @@ function expandPinSheet(){ document.getElementById('pin-sheet').classList.add('e
 function collapsePinSheet(){ document.getElementById('pin-sheet').classList.remove('expanded'); }
 function togglePinSheetExpand(){ document.getElementById('pin-sheet').classList.toggle('expanded'); }
 function captureFromSheet(){
+  /* #400 — a guest's Capture opens the sign-in prompt BEFORE the sheet closes,
+     so dismissing the prompt leaves them on the same open pin. */
+  if(isGuest()){
+    pingActivity('capture_tap'); // #10 — the attempt still counts, same as captureNow()
+    const gt = currentTargetsSorted().find(x=>x.id===state.selectedPinId);
+    promptSignIn('capture', signInReturnForPin(gt, true));
+    return;
+  }
   // ORDER IS LOAD-BEARING as of the clear above: this used to set the focus and
   // then call closePinSheet(), which now wipes it. Close first, then focus.
   const id = state.selectedPinId;
@@ -15098,6 +15384,7 @@ function refreshTrackUI(){
 }
 
 async function attemptMarkFound(){
+  if(isGuest()) return; // #400 — belt: every UI path is gated in captureNow/captureFromSheet
   const id = state._nearestId;
   if(!id || !state.currentHunt || !state.me) return;
   const key = state.currentHunt.key;
@@ -15322,6 +15609,12 @@ function loadPhotoBlob(key){
    that later tap. */
 async function captureNow(){
   pingActivity('capture_tap'); // #10 — the attempt, before any gate; success is capture-verify's business
+  if(isGuest()){ // #400 — the conversion moment: capture needs an account (hard gate)
+    const h = state.currentHunt;
+    const gt = h && h.points && h.points.find(p=>p.id===state._nearestId);
+    promptSignIn('capture', signInReturnForPin(gt, true));
+    return;
+  }
   if(!state.currentHunt){ showToast('Pick a guide first'); return; }
   const id = state._nearestId;
   await attemptMarkFound();
