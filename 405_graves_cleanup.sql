@@ -1,0 +1,40 @@
+-- 405_graves_cleanup.sql — RECORD FILE, NOT THE ORIGINAL. DO NOT EXPECT IT TO DO ANYTHING.
+--
+-- The original was a one-shot data migration applied live on 2026-09-24 and
+-- never committed (it was lost before #404 made the repo the source of truth).
+-- #409(b) replaced it with this record instead of reconstructing the SQL:
+-- a one-shot has nothing a future pass rebuilds from, and a rebuilt copy
+-- would be reconstruct-from-memory (handoff §5). Full history: the #405 pass
+-- note and row in nahgoo-roadmap.md; the method: handoff §5 (the
+-- disposition-SQL pattern).
+--
+-- WHAT IT DID (2026-09-24, Supabase SQL editor, one transaction):
+--   Table:   public.submissions, the grave pins graves-resolve.ts loads
+--            (source tag 'seed:wikidata-grave' unless overridden).
+--   Input:   graves-resolve.ts 2026.09.24c's audit — 355 entries = 340 unique
+--            live "Grave of …" pins whose Wikidata burial place (P119) was not
+--            a grave.
+--   Change:  324 pins set status = 'rejected' (reversible; rows, names and
+--            wiki bios kept):
+--              298 on a town / city / county / neighbourhood centre
+--               12 on the centre of a water body or park (scattered ashes)
+--               13 on a building or site that is not the grave
+--                1 junk ("Viro the virus")
+--            16 kept as real burials via graves-resolve.ts 2026.09.24d's
+--            KEEP list (15 burial-place QIDs). No relabels.
+--   Guard:   a temp table of targets (bucket, loaded name, stored lat/lng),
+--            each matched on source + name + coordinate within 0.000001° +
+--            live (approved, not merged); a DO pre-check that raised unless
+--            the count was exact, every target hit exactly one live row and
+--            no row was hit twice; then the update, commit, and a per-bucket
+--            result table as the last statement.
+--   Result:  approved 5,007 → 4,683 (exactly 324); rejected 17 → 341.
+--            A second run aborted on the pre-check and changed nothing.
+--            Same pass: graves-resolve.ts --from-records --commit loaded the
+--            27 held new graves (approved → 4,710; grave rows 4,439 → 4,466).
+--
+-- TO UNDO ONE PIN: flip that row back to 'approved' after moving it to its
+-- true cemetery, the #383 way (#407, parked, describes the recipe).
+--
+-- Running this file is harmless: it only returns the line below.
+select '405_graves_cleanup.sql is a record of a one-shot run on 2026-09-24; nothing was changed' as note;
