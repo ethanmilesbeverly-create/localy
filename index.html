@@ -2081,6 +2081,23 @@
     padding:6px 2px;cursor:pointer;
   }
   .nav-btn.active{color:var(--orange);}
+  /* #414 (25f) — THE GUEST LOCK BADGE on Submit and Passport, the two tabs that
+     are locked behind sign-in for a guest. Shown only while body.is-guest, so it
+     disappears the moment they sign in. Sits on the icon's top-right corner;
+     the ring in the nav's own background colour keeps it legible over the icon.
+     Deliberately dim, not orange: it says "needs an account", not "alert". */
+  .nav-btn{ position:relative; }
+  .nav-lock{ display:none; }
+  body.is-guest .nav-lock{
+    display:flex; align-items:center; justify-content:center;
+    position:absolute; top:3px; left:calc(50% + 5px);
+    width:14px; height:14px; border-radius:50%;
+    background:rgba(16,35,28,1); color:var(--text-dim);
+    box-shadow:0 0 0 1.5px rgba(16,35,28,1);
+    pointer-events:none;
+  }
+  body.is-guest .nav-lock svg{ width:9px; height:9px; }
+  body.is-guest .nav-btn.active .nav-lock{ color:var(--orange); }
   .nav-btn svg{width:22px;height:22px;}
 
   /* toast */
@@ -3385,6 +3402,8 @@
          that list is ever moved off this screen, this tab stops being a
          destination and should become a centre create-button instead. -->
     <button class="nav-btn" data-screen="screen-suggest-gem" onclick="navTo('screen-suggest-gem')">
+      <!-- #414 (25f) — guest-only lock badge: this tab needs an account. -->
+      <span class="nav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M10 3 8 9l4 12 4-12-2-6"/></svg>
       Submit
     </button>
@@ -3398,6 +3417,8 @@
       Guides
     </button>
     <button class="nav-btn" data-screen="screen-passport" onclick="navTo('screen-passport')">
+      <!-- #414 (25f) — guest-only lock badge: this tab needs an account. -->
+      <span class="nav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M9 17h6"/></svg>
       Passport
     </button>
@@ -4667,9 +4688,9 @@ function signInPromptOpen(){
    the tab, from the nav or a Back that lands on it (both go through setTab /
    openSuggestGemScreen); a return from a sub-screen that only calls showScreen
    does not re-show it.
-     • Submit — closable (X): the form stays visible, and submitGem() still
-       gates the actual submit (#400).
-     • Passport — LOCKED, by directive (25e): no X, the nav is the only way off.
+     • Submit and Passport — LOCKED, by directive (Passport 25e, Submit 25f so
+       the two popups are identical): no X, the nav is the only way off.
+       submitGem() still gates the actual submit as a belt (#400).
      • Guides — NOT gated on the tab, by directive (25e): a guest browses it and
        opens guides by code (#400); only "Create your own" asks for sign-in,
        through its own promptSignIn('guide', …) call. The "Have a guide code?"
@@ -4678,7 +4699,7 @@ const TAB_GATE_REASONS = {
   'screen-suggest-gem': 'submit',
   'screen-passport':    'passport'
 };
-const TAB_GATE_LOCKED = { 'screen-passport': true };
+const TAB_GATE_LOCKED = { 'screen-passport': true, 'screen-suggest-gem': true }; // 25f — Submit matches Passport
 function showTabGate(id){
   if(!isGuest()) return;
   const reason = TAB_GATE_REASONS[id];
@@ -8312,7 +8333,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25e';
+const APP_VERSION = '2026.09.25f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9040,17 +9061,11 @@ function renderLeaderboardEntry(){
   const mount = document.getElementById('passport-leaderboard-section');
   if(!mount) return;
   /* #400 — a guest has no standing and leaderboard_me refuses anon (#391), so
-     the card becomes the Passport's sign-in entry instead of calling it. */
-  if(isGuest()){
-    mount.innerHTML =
-      '<div class="passport-section guest-cta">'
-      + '<div class="passport-section-head"><h2 class="section-title">Start your passport</h2></div>'
-      + '<p>Create a free account to capture places, collect stamps and badges, and join the leaderboard. Browsing the map never needs one.</p>'
-      + '<button class="btn" onclick="promptSignIn(\'passport\', { tab:\'screen-passport\' })">Sign in or create account</button>'
-      + '</div>';
-    return;
-  }
-  const me = state._lbMe;
+     it is never called for a guest. #414 (25f) — the card no longer turns into a
+     second sign-in CTA: the locked sign-in prompt already covers Passport, so a
+     guest sees the ordinary empty state behind it (zero standing), by directive. */
+  const guest = isGuest();
+  const me = guest ? { stamps:0, distance_m:0, gems:0, opted_out:false } : state._lbMe;
   let inner;
   if(me && me.opted_out){
     inner = '<div class="lb-entry-hidden">You\u2019re hidden from the leaderboard. Turn it back on in <b>Settings \u2192 Privacy</b>.</div>';
@@ -9080,7 +9095,7 @@ function renderLeaderboardEntry(){
     + '</div>'
     + inner
     + '</div>';
-  if(!me || (Date.now() - (state._lbMeAt||0) > 20000)){
+  if(!guest && (!me || (Date.now() - (state._lbMeAt||0) > 20000))){
     fetchLeaderboardMe().then(function(m){ if(m) renderLeaderboardEntry(); });
   }
 }
