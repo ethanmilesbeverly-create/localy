@@ -448,19 +448,6 @@
     box-shadow:0 6px 18px rgba(0,0,0,0.4);
   }
   #browsing-indicator.show{display:flex;}
-  /* #416 — estimated-area chip: compact, centred under the search row. */
-  #area-chip{
-    position:absolute;top:108px;left:50%;transform:translateX(-50%);z-index:500;
-    display:none;align-items:center;gap:7px;max-width:calc(100% - 32px);
-    background:var(--surface);border:1px solid var(--line);color:var(--text);
-    border-radius:999px;padding:7px 12px 7px 10px;font-size:12.5px;cursor:pointer;
-    box-shadow:0 6px 18px rgba(0,0,0,0.35);white-space:nowrap;
-  }
-  #area-chip.show{display:flex;}
-  #area-chip svg{width:14px;height:14px;flex-shrink:0;color:var(--orange);}
-  #area-chip-text{overflow:hidden;text-overflow:ellipsis;}
-  #area-chip-text b{font-weight:700;}
-  #area-chip .area-chip-change{color:var(--orange);font-weight:700;margin-left:2px;}
   #browsing-indicator .bi-eye{width:15px;height:15px;flex-shrink:0;color:var(--yellow);}
   #browsing-indicator-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   #browsing-indicator-text b{color:var(--yellow);font-weight:700;}
@@ -527,7 +514,6 @@
   #map-loadfail .lf-text{flex:1;min-width:0;line-height:1.3;}
   #map-loadfail .lf-text b{color:var(--danger);font-weight:700;}
   #browsing-indicator.show ~ #map-loadfail.show{top:160px;}
-  #area-chip.show ~ #map-loadfail.show{top:152px;} /* #416 — the estimated-area chip sits in the same slot */
 
   /* ---------- Screens ---------- */
   .screen{
@@ -1110,8 +1096,6 @@
   #screen-map.drawer-open #stale-hunt-banner,
   #screen-map.drawer-open #map-search-row,
   #screen-map.drawer-open #browsing-indicator,
-  #screen-map.drawer-open #area-chip,
-  #screen-map.sheet-open #area-chip,
   #screen-map.drawer-open #map-loadfail,
   #screen-map.drawer-open #search-here-btn,
   #screen-map.sheet-open #search-here-btn,
@@ -2823,13 +2807,6 @@
         <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="map-search-input" placeholder="Find a place nearby" enterkeyhint="search">
       </div>
-    </div>
-    <!-- #416 — the estimated-start-area label. Shown while the map is on the
-         guessed area (no location shared yet); tap opens search. -->
-    <div id="area-chip" onclick="onAreaChipTap()" role="button" aria-label="Change area">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-      <span id="area-chip-text"></span>
-      <span class="area-chip-change">Change</span>
     </div>
     <div id="browsing-indicator" onclick="recenterMap()" role="button" aria-label="Return to your real location">
       <svg class="bi-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -7916,7 +7893,8 @@ function shouldRunOnboarding(){
        iOS Safari, which re-asks per session and may report 'prompt') → start GPS
        now, exactly as before. People who said yes are not pushed back a step.
      • OTHERWISE → the map opens in browse mode on an ESTIMATED area, with the
-       #area-chip label ("Showing Chicago area"), and GPS starts only when they
+       visitor's marker placed on the estimate (no label — 25l removed the
+       25j "Showing Chicago area" pill), and GPS starts only when they
        tap locate (requestLocationFromTap), which is when the browser prompt
        appears. A first real fix then leaves the estimate and centres on them.
    THE ESTIMATE (startAreaGuess), best first: the last real frame this device
@@ -7989,27 +7967,24 @@ function enterEstimatedArea(area){
   state.followMe = false;
   const lb = document.getElementById('locate-btn');
   if(lb) lb.classList.remove('following');
+  /* #416 (25l) — YOUR MARKER SITS ON THE ESTIMATE, by directive: "show my
+     marker in the center of the map wherever I am, even if not accurate". The
+     marker is moved to the estimated point and left on the map; it is DISPLAY
+     ONLY — state.me stays null, so nothing measures distance or capture range
+     from it. The capture-range circle is hidden, because a range drawn around a
+     guess would claim a precision the app does not have. The first real fix
+     moves the marker to you (onLocation's setLatLng) and brings the circle back
+     (exitLocationBrowseMode). */
   if(state.leafletMap){
-    if(state.meMarker) state.leafletMap.removeLayer(state.meMarker);
+    if(state.meMarker){ state.meMarker.setLatLng([area.lat, area.lng]); state.meMarker.addTo(state.leafletMap); }
     if(state.rangeCircle) state.leafletMap.removeLayer(state.rangeCircle);
   }
-  showAreaChip(area.label);
 }
-function showAreaChip(label){
-  const t = document.getElementById('area-chip-text');
-  if(t) t.innerHTML = 'Showing <b>' + escapeHtml(label) + '</b>';
-  const c = document.getElementById('area-chip');
-  if(c) c.classList.add('show');
-}
-function hideAreaChip(){
+/* #416 (25l) — the "Showing Chicago area · Change" pill that sat here in 25j/25k
+   was REMOVED by directive ("the user can use the map to figure that out");
+   this now only drops the estimated-area flag. */
+function leaveEstimatedArea(){
   state._estimatedArea = false;
-  const c = document.getElementById('area-chip');
-  if(c) c.classList.remove('show');
-}
-/* The chip opens search: "not my area? find yours." */
-function onAreaChipTap(){
-  const inp = document.getElementById('map-search-input');
-  if(inp){ try{ inp.focus(); }catch(e){} }
 }
 const GEO_DENIED_MSG = 'Location is off for this site. Turn it on in your browser settings to see what\u2019s near you.';
 /* The locate button with no fix yet: ask for location (the browser prompt shows
@@ -8504,7 +8479,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25j';
+const APP_VERSION = '2026.09.25l';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10033,7 +10008,7 @@ function onLocation(lat,lng,sim,accuracy){
            state.me now set, exitLocationBrowseMode re-adds the marker,
            regenerates around them and frames them. */
         state._locateRequested = false;
-        hideAreaChip();
+        leaveEstimatedArea();
         exitLocationBrowseMode();
       } else if(state.currentHunt && isGuideHunt(state.currentHunt)){
         // #7 — a guide opened BEFORE the first fix would otherwise be snapped to
@@ -11161,7 +11136,7 @@ function attachPlaceSuggest(inputId, onPick){
 const SHOW_BROWSING_BANNER = false;
 
 function enterLocationBrowseMode(base, placeName){
-  hideAreaChip(); // #416 — a chosen place replaces the estimated start area
+  leaveEstimatedArea(); // #416 — a chosen place replaces the estimated start area
   state.searchedArea = null; // browse mode supersedes a panned search (#8)
   state.browsingLocation = base;
   /* #90 RESOLVED TO "OBEY THE PIN". The pick is used exactly as given: we do not
@@ -11183,7 +11158,7 @@ function enterLocationBrowseMode(base, placeName){
 }
 function exitLocationBrowseMode(){
   if(!state.browsingLocation) return;
-  hideAreaChip(); // #416
+  leaveEstimatedArea(); // #416
   state._pendingSpot = null; // #26 — leaving the shared-spot area; stop re-opening its sheet
   state._spotSheetId = null; // #26 — drop protection so the natural rebuild below closes the spot sheet
   state._spotPin = null;     // #26 — stop reblend re-adding the shared pin
@@ -12849,8 +12824,11 @@ function openSpotSheet(){
   if(!pend) return;
   /* Before the first fix, currentTargetsSorted() is empty, so openPinSheet()'s
      trailing refreshTargetsUI() would immediately close the sheet (open/close
-     flash). Wait for state.me — onLocation() re-calls this on the first fix. */
-  if(!state.me) return;
+     flash). Wait for state.me — onLocation() re-calls this on the first fix.
+     #416 (25k) — with no fix the hunt now resolves around the browsed area
+     (currentTargetsSorted), so a shared spot landing in browse mode opens its
+     sheet without waiting for a location that may never be shared. */
+  if(!state.me && !state.browsingLocation) return;
   const sp = pend.sp, carried = pend.carried;
   const h = state.currentHunt;
   let twin = null;
@@ -12871,7 +12849,7 @@ function openSpotSheet(){
      back here after reblendHuntInPlace() rebuilds the hunt under the real pin's
      id, and this re-selects it by name/gemId instead of the sheet being torn
      down for a now-missing id (the "flashed open then removed" case). */
-  if(state.me && twin) state._pendingSpot = null;
+  if((state.me || state.browsingLocation) && twin) state._pendingSpot = null; // #416 (25k)
 }
 function openSaveToHuntPicker(pointId){
   if(!state.currentHunt) return;
@@ -13517,9 +13495,31 @@ function isFound(id, sharedIds){
   return (sharedIds || sharedCapturedIds()).has(id);
 }
 function currentTargetsSorted(){
-  if(!state.currentHunt || !state.me) return [];
+  if(!state.currentHunt) return [];
   // #147 — once per call, not once per point. This runs on every GPS tick.
   const sharedIds = isSharedProgressKey(state.currentHunt.key) ? sharedCapturedIds() : null;
+  /* #416 (25k) — NO FIX YET IS NO LONGER "NOTHING TO SHOW". This used to return
+     [] without state.me, which was harmless while a failed/absent fix always
+     dropped you into the Chicago simulate stand-in (it set state.me). With
+     location now asked on request, a visitor browsing the estimated area has no
+     fix, and the [] blanked the whole map ("Nothing to see here yet"). Without a
+     fix the pins are sorted by distance from the area being shown, and `dist`
+     is left UNDEFINED on purpose: every range gate is written as
+     `typeof t.dist === 'number' && …` or `t.dist <= …`, both false for
+     undefined, so nothing can read as in capture range and no "N mi away" is
+     shown. `_od` (distance from the shown area) carries the sort order. The
+     capture/compass paths (refreshTrackUI, the guide line) still require a real
+     fix and bail without one. */
+  if(!state.me){
+    const o = state.browsingLocation || state.searchedArea || state.localHuntOrigin;
+    if(!o) return [];
+    return state.currentHunt.points.map(p=>({
+      ...p,
+      dist: undefined,
+      _od: haversine(o.lat, o.lng, p.lat, p.lng),
+      found: isFound(p.id, sharedIds)
+    })).sort((a,b)=>a._od-b._od);
+  }
   return state.currentHunt.points.map(p=>({
     ...p,
     dist: haversine(state.me.lat, state.me.lng, p.lat, p.lng),
@@ -13596,7 +13596,11 @@ const LIST_CAP = 25;
    never as a global sort. That stays a one-function change only as long as the
    ranking lives in here and not scattered through the filter. */
 function rankForList(a, b){
-  if(a.dist !== b.dist) return a.dist - b.dist;
+  /* #416 (25k) — with no fix, dist is undefined and _od (distance from the shown
+     area) ranks instead, so the sort never compares NaN. */
+  const da = (typeof a.dist === 'number') ? a.dist : a._od;
+  const db = (typeof b.dist === 'number') ? b.dist : b._od;
+  if(da !== db) return da - db;
   /* Stable, and that matters more than which pin wins. This recomputes on
      every moveend; a non-deterministic tiebreak reshuffles rows when you nudge
      the map ten feet. Never Math.random(), never insertion order. */
@@ -15133,7 +15137,7 @@ function refreshTargetsUI(){
   updateHuntEmptyState(targets.length);
   const defaultColor = MODE_COLOR[state.currentHunt.mode] || '#E8622C';
   const colorFor = t => (t.category && MODE_COLOR[t.category]) || defaultColor;
-  const nearestUnfound = targets.find(t=>!t.found);
+  const nearestUnfound = state.me ? targets.find(t=>!t.found) : null; // #416 (25k) — no "your next pin" halo without a fix
   const selectedTarget = state.selectedPinId && targets.find(t=>t.id===state.selectedPinId);
   const haloTarget = selectedTarget || nearestUnfound;
   /* #66 — the badge used to be computed here as
@@ -15668,6 +15672,16 @@ function refreshTrackUI(){
   const distEl = document.getElementById('track-dist');
   const nameEl = document.getElementById('track-name');
   const mapCameraBtn = document.getElementById('map-camera-btn');
+  /* #416 (25k) — the compass / capture readiness need a real fix; without one
+     (browsing the estimated area) show the idle state and arm nothing. */
+  if(!state.me){
+    if(distEl) distEl.innerHTML = '-- <span>away</span>';
+    if(cameraBtn) cameraBtn.classList.remove('ready');
+    if(mapCameraBtn) mapCameraBtn.classList.remove('show');
+    if(wrap) wrap.classList.remove('in-range');
+    state._nearestId = null;
+    return;
+  }
 
   // If exactly one list item is expanded, the compass/distance follow that
   // specific spot instead of always defaulting to the nearest one.
