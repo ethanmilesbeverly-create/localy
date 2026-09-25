@@ -4648,7 +4648,6 @@ const SIGNIN_RETURN_KEY = 'nahgoo_signin_return';
 const SIGNIN_REASONS = {
   capture:  'Sign in to capture this spot and keep your stamps.',
   save:     'Sign in to save spots to your own guides.',
-  report:   'Sign in to report a problem with a spot.',
   submit:   'Sign in to submit a hidden gem.',
   guide:    'Sign in to build and share your own guides.',
   passport: 'Sign in to collect stamps and join the leaderboard.',
@@ -8349,7 +8348,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25g';
+const APP_VERSION = '2026.09.25h';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -14278,7 +14277,11 @@ function fillPinSheet(t){
      text rather than disappearing: a button that vanishes reads as a failed tap,
      and the acknowledgement is the point. */
   const rKey = reportKeyFor(t);
-  if(rKey){
+  /* #414 (25h) — HIDDEN FOR GUESTS, by directive. A report needs an account
+     (distinct-reporter suppression counts accounts, #25/#141), and nobody signs
+     up in order to report, so a guest never sees the control rather than meeting
+     a sign-in wall mid-favour. Signing in reloads the page, so it reappears. */
+  if(rKey && !isGuest()){
     actions += state.reportedPins.has(rKey)
       ? `<div class="ps-btn ps-btn-report reported" style="text-align:center;">✓ Reported — thanks</div>`
       : `<button class="ps-btn ps-btn-report" onclick="openReportPin('${t.id}')">Report a problem</button>`;
@@ -14557,7 +14560,7 @@ function openReportPin(pinId){
      would answer 401 — which would arrive as "something went wrong" after the
      person had already picked a reason and typed a note. Fail before the work,
      not after it. */
-  if(isGuest()){ promptSignIn('report', signInReturnForPin(t)); return; } // #400
+  if(isGuest()) return; // #400 / #414 (25h) — belt only: the button is not rendered for a guest
   if(demoBypassActive() || !state.user || !state.user.id){
     showToast('Sign in to report a spot');
     return;
