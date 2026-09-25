@@ -48,8 +48,18 @@
 --   counts, which the 90-day sweep ages out. If that ever happens, (b) — a small
 --   writer function with rate limiting — is the recorded escape hatch.
 --
--- RUN ORDER: 0 (read-only) → 1 → 2 → 3 (verify). Each section runs on its own.
--- Section 4 is the revert — do not run it unless backing out.
+-- RUN ORDER: 0 (read-only) → 1 → 2 → 3 (verify). Section 4 is the revert — do
+-- not run it unless backing out. SAFE TO RUN THE WHOLE FILE AT ONCE: nothing in it
+-- uses BEGIN/ROLLBACK any more (see the gravestone at Section 3).
+--
+-- GRAVESTONE — BEGIN … ROLLBACK IN THE VERIFY (the first cut of this file,
+--   2026-09-25). The Supabase SQL editor sends the whole editor contents as ONE
+--   request, which Postgres runs as ONE implicit transaction. A `rollback;` at the
+--   end of the verify therefore rolled back EVERYTHING above it — the table, the
+--   grants, the policy and the cron job — after the verify had already displayed a
+--   perfect result from inside that doomed transaction. The dashboard then reported
+--   the table missing. Lesson: a script meant for the SQL editor must never carry
+--   its own transaction control; undo test data with an explicit DELETE instead.
 -- AFTER RUNNING: the #409 baseline is stale (a new table, policy, grants and a
 --   cron job). Refresh `409_schema_baseline.sql` on the next baseline pass.
 -- =============================================================================
@@ -140,39 +150,48 @@ select cron.schedule(
 
 
 -- -----------------------------------------------------------------------------
--- SECTION 3 — VERIFY. Run the whole section; it ROLLS BACK, so it leaves no rows.
--- It inserts as `anon` exactly the way the app does (plain insert, two columns),
--- then proves the daily dedupe rejects a second identical row.
+-- SECTION 3 — VERIFY. No BEGIN/ROLLBACK (see the gravestone in the header). The
+-- test row is inserted as `anon` inside a DO block exactly the way the app does it
+-- (plain insert, two columns), a second identical row is proven to be refused, and
+-- the final statement DELETES the test row while reporting on it — so the table is
+-- left clean whether this section runs alone or as part of the whole file.
 -- Expected result (one row):
+--   table_exists              = true
 --   anon_can_insert_device_id = true    anon_can_insert_event     = true
 --   anon_can_insert_day       = false   anon_can_insert_signed_in = false
 --   anon_can_select           = false   anon_can_update           = false
 --   anon_can_delete           = false   rls_on                    = true
---   rows_for_test_device      = 1       (second insert was refused as a duplicate)
+--   rows_for_test_device      = 1       (the duplicate was refused; the 1 is now deleted)
 --   test_row_signed_in        = false   (no JWT → guest)
 --   test_row_day_is_utc_today = true
 --   job_schedule              = '23 4 * * *'
--- Plus one NOTICE in the output pane: "OK: duplicate refused (daily dedupe works)".
--- If the first INSERT errors with "permission denied" or "violates row-level
--- security", STOP — the app's pings will fail the same way. Paste the error back
--- rather than loosening grants by hand.
+-- If the DO block errors with "permission denied" or "violates row-level security",
+-- STOP — the app's pings will fail the same way. Paste the error back rather than
+-- loosening grants by hand. If it errors with "FAIL: a second app_open…", the PK
+-- dedupe is missing.
 -- -----------------------------------------------------------------------------
-begin;
-
-set local role anon;
-insert into public.activity_pings (device_id, event)
-  values ('00000000-0000-4000-8000-00000000a010', 'app_open');
 do $$
 begin
+  set local role anon;
   insert into public.activity_pings (device_id, event)
     values ('00000000-0000-4000-8000-00000000a010', 'app_open');
-  raise exception 'FAIL: a second app_open for the same device and day was accepted — the PK dedupe is missing';
-exception when unique_violation then
-  raise notice 'OK: duplicate refused (daily dedupe works)';
+  begin
+    insert into public.activity_pings (device_id, event)
+      values ('00000000-0000-4000-8000-00000000a010', 'app_open');
+    raise exception 'FAIL: a second app_open for the same device and day was accepted — the PK dedupe is missing';
+  exception when unique_violation then
+    null; -- expected: the daily dedupe refused it
+  end;
+  reset role;
 end $$;
-reset role;
 
+with test_row as (
+  delete from public.activity_pings
+  where device_id = '00000000-0000-4000-8000-00000000a010'
+  returning signed_in, day
+)
 select
+  to_regclass('public.activity_pings') is not null                             as table_exists,
   has_column_privilege('anon', 'public.activity_pings', 'device_id', 'INSERT') as anon_can_insert_device_id,
   has_column_privilege('anon', 'public.activity_pings', 'event',     'INSERT') as anon_can_insert_event,
   has_column_privilege('anon', 'public.activity_pings', 'day',       'INSERT') as anon_can_insert_day,
@@ -181,15 +200,20 @@ select
   has_table_privilege ('anon', 'public.activity_pings', 'UPDATE')              as anon_can_update,
   has_table_privilege ('anon', 'public.activity_pings', 'DELETE')              as anon_can_delete,
   (select relrowsecurity from pg_class where oid = 'public.activity_pings'::regclass) as rls_on,
-  (select count(*) from public.activity_pings
-     where device_id = '00000000-0000-4000-8000-00000000a010')                 as rows_for_test_device,
-  (select signed_in from public.activity_pings
-     where device_id = '00000000-0000-4000-8000-00000000a010' limit 1)         as test_row_signed_in,
-  (select day = (now() at time zone 'utc')::date from public.activity_pings
-     where device_id = '00000000-0000-4000-8000-00000000a010' limit 1)         as test_row_day_is_utc_today,
+  (select count(*) from test_row)                                              as rows_for_test_device,
+  (select bool_and(signed_in) from test_row)                                   as test_row_signed_in,
+  (select bool_and(day = (now() at time zone 'utc')::date) from test_row)      as test_row_day_is_utc_today,
   (select schedule from cron.job where jobname = 'activity-pings-sweep')      as job_schedule;
 
-rollback;
+
+-- -----------------------------------------------------------------------------
+-- SECTION 3b — DID IT STICK? Run this ON ITS OWN, as a separate run, after the
+-- file. Expect table_exists = true and sweep_jobs = 1. (This is the check the first
+-- cut of the file was missing: a verify inside the same run can't see a rollback
+-- that happens after it.)
+-- -----------------------------------------------------------------------------
+-- select to_regclass('public.activity_pings') is not null as table_exists,
+--        (select count(*) from cron.job where jobname = 'activity-pings-sweep') as sweep_jobs;
 
 
 -- -----------------------------------------------------------------------------

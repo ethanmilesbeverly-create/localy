@@ -20,6 +20,10 @@
 //      endpoint; treat it like a password and rotate it if it ever leaks.
 //   2. --no-verify-jwt on the deploy command (above). Not a file value, but a
 //      deploy-time flag, and forgetting it looks exactly like a bad token.
+//   (#10, v23) The `activity` section also depends on the `activity_pings` table
+//   from 010_activity_pings.sql (SQL editor). Not a secret or a flag, but DB state
+//   no deploy of this file carries; without it `activity` reads {available:false}
+//   with an info alert — it degrades, it does not break.
 //   SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are auto-injected by the
 //   platform — do NOT set them by hand. GEMINI_MODEL is a project-wide secret
 //   already set for review-submission; this function only READS it, to let you
@@ -28,7 +32,9 @@
 // PRIVACY (item 5). Nothing here exposes a person. `submitted_by` is never
 // selected. `user_state.value` and `shared_kv.value` — the blobs that hold
 // passports, capture anchors and cached tiles — are never read; only keys,
-// user ids (counted, never emitted) and timestamps are. Submission lat/lng ARE
+// user ids (counted, never emitted) and timestamps are. #10's activity_pings
+// carry no user id or location at all; their device ids are counted, never emitted.
+// Submission lat/lng ARE
 // included, but those are the PUBLIC pin coordinate of a place, not a user's
 // position, and coverage is reported only as grid-aggregated counts.
 // =============================================================================
@@ -318,7 +324,29 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 //   One deploy target (this function, --no-verify-jwt), after the #141 SQL. No
 //   index.html/APP_VERSION, no CACHE_VERSION. Observability, so it does NOT move
 //   the %.
-const REPORT_VERSION = "app-report-v22";
+// v22 -> v23 (#10, 2026-09-25): new `activity` section — the anonymous per-device
+//   pings from `activity_pings` (010_activity_pings.sql), the first number here that
+//   can see GUESTS. `engagement.active_users_*` reads user_state, which only accounts
+//   write, so it goes blind to everyone #400 lets in without one. `activity` reports
+//   distinct DEVICES (not people) today / 7d / 30d split guest vs signed-in, devices
+//   reaching each event, and the guest -> signed-in funnel (a device that pinged
+//   without a session and later pinged `signed_in`; same device, never a join to an
+//   account). `cross_check` sets its signed-in 7d devices beside engagement's
+//   active_users_7d — the two should roughly agree once the pings have run a week.
+//   A failed read (e.g. the SQL not run) is NOT a section error: `activity` becomes
+//   {available:false} and an INFO alert fires, so it can never turn the morning read
+//   red. Reads device_id/day/event/signed_in only; no device id is emitted.
+//   WHY v23 AND NOT v22 — TWO FILES CARRIED "v22" ON 2026-09-25: (1) the first #10
+//   build was built on a STALE pre-#141 project copy (v21) and stamped v22, so
+//   deploying it silently REVERTED #141 on the live function (the reports arm went
+//   back to the REPORT_SUPPRESS_THRESHOLD secret + mirrored reason maps, and the
+//   retired `suppress_threshold_unset` alert reappeared; the values agreed, 3/3, so
+//   no pin was judged differently); (2) the corrected rebuild — #141 commit 3577a56
+//   plus #10 — was deployed once still reading v22 because its version edit never
+//   saved. This file is that corrected code with its own string, so the dashboard
+//   can tell it apart. One deploy target (this function, --no-verify-jwt).
+//   Observability, so it does NOT move the %.
+const REPORT_VERSION = "app-report-v23";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -1021,6 +1049,114 @@ function summariseUserState(rows: any[], now: number) {
       capture_anchor: by_key["capture-anchor"] || 0,
     },
     all_keys_seen: by_key,
+  };
+}
+
+// #10 — the anonymous activity pings. One row per (device, UTC day, event), first
+// occurrence only; signed_in was stamped server-side from the request's session.
+// Everything here is DEVICE counts: one person on two devices is two, and private
+// tabs / cleared storage / iOS's 7-day storage wipe mint new ids — so trends and
+// ratios are trustworthy, absolute headcounts run high (accepted, #10).
+const ACTIVITY_EVENTS = ["app_open", "map_move", "pin_open", "guide_open", "capture_tap", "signin_prompt", "signed_in"];
+
+function utcDayString(t: number): string {
+  return new Date(t).toISOString().slice(0, 10);
+}
+
+function summariseActivity(rows: any[], now: number, activeUsers7d: number | null) {
+  const today = utcDayString(now);
+  const from7 = utcDayString(now - 6 * DAY); // today + the 6 days before = 7 calendar days
+  const from30 = utcDayString(now - 29 * DAY);
+
+  type W = { all: Set<string>; guest: Set<string>; signed: Set<string>; byEvent: Record<string, Set<string>> };
+  const mk = (): W => ({ all: new Set(), guest: new Set(), signed: new Set(), byEvent: {} });
+  const win: Record<string, W> = { today: mk(), d7: mk(), d30: mk() };
+
+  // Funnel inputs (30d): each device's FIRST guest day and FIRST signed_in-event day.
+  const firstGuestDay: Record<string, string> = {};
+  const firstSignedInEvent: Record<string, string> = {};
+  // Guest-side depth: of the devices that pinged without a session, how far they got.
+  const guestEvents: Record<string, Set<string>> = {};
+  const unknown_events: Record<string, number> = {};
+  let oldest: string | null = null;
+  let newest: string | null = null;
+
+  for (const r of rows) {
+    const dev = r && r.device_id ? String(r.device_id) : "";
+    const day = r && r.day ? String(r.day).slice(0, 10) : "";
+    const ev = r && r.event ? String(r.event) : "";
+    if (!dev || !day) continue;
+    if (!oldest || day < oldest) oldest = day;
+    if (!newest || day > newest) newest = day;
+    if (ACTIVITY_EVENTS.indexOf(ev) === -1) inc(unknown_events, ev);
+    const signed = r.signed_in === true;
+
+    const put = (w: W) => {
+      w.all.add(dev);
+      (signed ? w.signed : w.guest).add(dev);
+      (w.byEvent[ev] = w.byEvent[ev] || new Set()).add(dev);
+    };
+    if (day >= from30) put(win.d30);
+    if (day >= from7) put(win.d7);
+    if (day === today) put(win.today);
+
+    if (day >= from30) {
+      if (!signed) {
+        if (!firstGuestDay[dev] || day < firstGuestDay[dev]) firstGuestDay[dev] = day;
+        (guestEvents[ev] = guestEvents[ev] || new Set()).add(dev);
+      }
+      if (ev === "signed_in") {
+        if (!firstSignedInEvent[dev] || day < firstSignedInEvent[dev]) firstSignedInEvent[dev] = day;
+      }
+    }
+  }
+
+  const shape = (w: W) => {
+    const by_event: Record<string, number> = {};
+    for (const e of ACTIVITY_EVENTS) by_event[e] = w.byEvent[e] ? w.byEvent[e].size : 0;
+    return { devices: w.all.size, guest_devices: w.guest.size, signed_in_devices: w.signed.size, by_event };
+  };
+
+  const guestDevs = Object.keys(firstGuestDay);
+  let converted = 0;
+  for (const dev of guestDevs) {
+    const s = firstSignedInEvent[dev];
+    if (s && s >= firstGuestDay[dev]) converted++; // same day or later, same device
+  }
+  const guestReached: Record<string, number> = {};
+  for (const e of ACTIVITY_EVENTS) {
+    if (e === "signed_in") continue; // a signed_in ping is never itself a guest ping
+    guestReached[e] = guestEvents[e] ? guestEvents[e].size : 0;
+  }
+
+  const signed7 = win.d7.signed.size;
+  return {
+    available: true,
+    scope: "anonymous per-device pings (activity_pings, #10): first occurrence of each event per device per UTC day. DEVICE counts, not people — they run high (two devices = two; private tabs, cleared storage and iOS's 7-day storage wipe mint new ids). Trust trends, ratios and zero-vs-nonzero; not headcounts.",
+    windows_utc: { today, from_7d: from7, from_30d: from30 },
+    today: shape(win.today),
+    last_7d: shape(win.d7),
+    last_30d: shape(win.d30),
+    // "guest" = the device pinged at least once WITHOUT a session. Until #400 ships,
+    // that is only the sign-in wall (app_open + signin_prompt) — a guest cannot open a
+    // pin yet — so guest depth beyond signin_prompt reads 0 by design until then.
+    funnel_30d: {
+      guest_devices: guestDevs.length,
+      guest_reached: guestReached,
+      later_signed_in: converted,
+      conversion_rate: guestDevs.length ? Math.round((converted / guestDevs.length) * 1000) / 1000 : null,
+      note: "later_signed_in = a device that pinged without a session and then (same UTC day or later) sent signed_in. That includes returning users who had signed out, not only new accounts — accounts.signups_30d is the new-account count.",
+    },
+    cross_check: {
+      signed_in_devices_7d: signed7,
+      engagement_active_users_7d: activeUsers7d,
+      note: "Two independent reads of signed-in activity. Devices >= users is expected (one person, several devices); a large gap the OTHER way means pings are not reaching the table. Only meaningful after the pings have run 7 days.",
+    },
+    rows: rows.length,
+    oldest_day: oldest,
+    newest_day: newest,
+    retention_days: 90,
+    unknown_events, // should always be {} — the table's CHECK constraint forbids anything else
   };
 }
 
@@ -2095,6 +2231,15 @@ function computeAlerts(report: Record<string, any>, opts: { backlogWarnH: number
 
   // #140: a rejected place users keep submitting and that is STILL not live. info —
   // a re-look prompt, never an emergency and never an auto-action (#132).
+  // #10: the activity-pings read failed. INFO, never warn/critical — telemetry being
+  // down hides guest counts but breaks nothing a user sees. Most likely cause before
+  // launch: 010_activity_pings.sql not run yet in the SQL editor.
+  const act = report.activity || {};
+  if (act.available === false) {
+    push("info", "activity_read_failed",
+      `activity pings could not be read (${act.error || "unknown error"}) — guest/device counts are missing from this digest. If 010_activity_pings.sql hasn't been run, run it; otherwise check the table exists and service_role can SELECT it (#10)`);
+  }
+
   const rr = report.rejected_resubmits || {};
   if ((rr.flagged || 0) > 0) {
     const flaggedList = (Array.isArray(rr.clusters) ? rr.clusters : [])
@@ -2309,6 +2454,37 @@ Deno.serve(async (req: Request) => {
     report.engagement = summariseUserState(rows, now);
   } catch (e) {
     errors.push("user_state: " + (e as Error).message);
+  }
+
+  // #10 — anonymous activity pings. Deliberately NOT pushed to `errors` on failure:
+  // errors[] fires the CRITICAL section_read_error, and a missing telemetry table
+  // (SQL not run yet, or reverted) is not an emergency. It becomes {available:false}
+  // and computeAlerts raises an INFO `activity_read_failed` instead. Only the last
+  // 30 UTC days are pulled (the 90-day retention is the sweep's job, not the read's).
+  try {
+    const since = utcDayString(now - 29 * DAY);
+    const page = 1000;
+    const cap = 200000;
+    const rows: any[] = [];
+    for (let from = 0; from < cap; from += page) {
+      const { data, error } = await supabase
+        .from("activity_pings")
+        .select("device_id,day,event,signed_in")
+        .gte("day", since)
+        .order("day", { ascending: true })
+        .order("device_id", { ascending: true })
+        .order("event", { ascending: true })
+        .range(from, from + page - 1);
+      if (error) throw new Error(error.message);
+      if (!data || data.length === 0) break;
+      rows.push(...data);
+      if (data.length < page) break;
+    }
+    const eng = (report.engagement || {}) as Record<string, any>;
+    const act7 = typeof eng.active_users_7d === "number" ? eng.active_users_7d : null;
+    report.activity = summariseActivity(rows, now, act7);
+  } catch (e) {
+    report.activity = { available: false, error: (e as Error).message };
   }
 
   try {
