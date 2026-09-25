@@ -3688,6 +3688,13 @@ let _blocklist = null;
 let _blocklistAt = 0;
 
 // --- #25: USER REPORTS — REASON CODES ---------------------------------------
+// #141 — SUPERSEDED IN ONE RESPECT: the vocabulary, its thresholds and the AI
+// fast path are no longer defined in this file. They live in the table
+// public.report_reason_meta and are read by readReasonMeta() (the #141 block
+// below). The design reasoning in this block and the #132/#134/#347 blocks is
+// still the WHY — it is now enforced by CHECK constraints on that table, not by
+// these comments. Original #25 text follows.
+//
 // The vocabulary is defined HERE and nowhere else. The client renders labels
 // from its own copy for latency reasons, but this object is the validator: an
 // unknown `reason` is a 400, not a row. That ordering matters — a free-text
@@ -3763,18 +3770,14 @@ let _blocklistAt = 0;
 // until someone looks. The worst case in the other direction is obscene
 // content on a public map. Bounded loss against unbounded loss.
 //
-// The env var keeps its existing name and now governs the CROWD reasons only,
-// so an operator who already set it gets the behaviour they set. #3(a)/#70
-// rule verbatim: the code default and the secret must be kept identical,
-// because a default nobody exercises is untested by construction. Live state
-// today: NO secret is set, so every request runs the code default of 3.
-const THRESHOLD_ENV_RAW = Deno.env.get("REPORT_SUPPRESS_THRESHOLD");
-const THRESHOLD_ENV = (() => {
-  const n = parseInt(String(THRESHOLD_ENV_RAW || "").trim(), 10);
-  return Number.isFinite(n) && n >= 1 ? n : null;
-})();
-const CROWD_THRESHOLD = THRESHOLD_ENV ?? 3;
-const THRESHOLD_SOURCE = THRESHOLD_ENV ? "secret" : "fallback";
+// #141 — THE ENV VAR IS RETIRED. REPORT_SUPPRESS_THRESHOLD is no longer read:
+// each suppressing reason's bar is its own `threshold` in
+// public.report_reason_meta (readReasonMeta below). The secret was never set
+// in production (every request ran the code default of 3), and the table was
+// written with 3 for gone/chain/bogus, so nothing a user sees changed. A secret
+// left set would now mislead whoever reads it — app-report raises
+// `report_threshold_secret_ignored` if it finds one. The per-reason split #134
+// argued for is now literal: one row, one bar.
 
 // #347 — BOGUS_THRESHOLD (=1) is RETIRED as bogus's LIVE bar, kept as a
 // gravestone (not deleted — the #134 reasoning above is still the WHY, now
@@ -3799,43 +3802,124 @@ const BOGUS_THRESHOLD = 1; // retired — see #347 note above
 // #134). So gone/chain keep their crowd bar UNCHANGED and receive an advisory
 // overview only; moved/unsafe/wrong_location/wrong_info/private NEVER
 // auto-remove (#132/#134) and receive an overview routed to the human queue.
-const AI_ACT_REASONS = new Set(["bogus"]);
+// #141 — the AI_ACT_REASONS set is now the table's `ai_acts` column
+// (meta.aiActs below), and "content reasons only" is the CHECK constraint
+// report_reason_meta_ai_acts_ck — an edit that would let the AI act on
+// gone/chain/moved/… is refused by the database.
 // #347 — build stamp echoed on the report response so a deploy is confirmable
 // (this function has no APP_VERSION; CACHE_VERSION is NOT bumped — serve-time
 // filtering, the #25 no-bump precedent). Bump this string on any change to the
 // report-review behaviour so QA can confirm the live build from the response.
 const REPORT_REVIEW_VERSION = "349-report-backoff-v1";
 
-const REPORT_REASONS = {
-  gone:           { suppresses: true,  threshold: CROWD_THRESHOLD },  // doesn't exist / permanently closed
-  moved:          { suppresses: false },                              // #132 — relocated. NEVER automated.
-  chain:          { suppresses: true,  threshold: CROWD_THRESHOLD },  // a franchise the #104 filter missed
-  bogus:          { suppresses: true,  threshold: CROWD_THRESHOLD },  // #347 — human bar = crowd; AI acts on ONE report (AI_ACT_REASONS). See the #347 note above.
-  wrong_location: { suppresses: false },                              // pin is off — fix, not a deletion
-  wrong_info:     { suppresses: false },                              // wrong name/category — same
-  private:        { suppresses: false },                              // can't get to it — still exists
-  unsafe:         { suppresses: false },                              // NEVER automated. See above.
-};
-const SUPPRESS_REASONS = Object.keys(REPORT_REASONS).filter((k) => REPORT_REASONS[k].suppresses);
-// One accessor rather than REPORT_REASONS[r].threshold at four call sites, so
+// --- #141: ONE HOME FOR THE VOCABULARY — public.report_reason_meta ------------
+// Until #141 the server rules lived in three places: the REPORT_REASONS object
+// here (the one that actually hid pins), the table report_reason_meta (read by
+// report_target_state, reports_open and resolve_report), and app-report's
+// mirror. Only this file and the client checked each other, so a threshold
+// changed in one place left the moderation queue wrong about which pins were
+// hidden — #126's "wrong at a distance", on the surface that decides deletions.
+// The table is now the ONE server-side source: this function reads it,
+// app-report reads it, the SQL already did. The client keeps its label list,
+// checked against this table by the #25 `reasonCodes` echo.
+//
+// The eight codes as of #141, for a reader here (the TABLE is the truth):
+//   gone / chain / bogus — suppress at 3 distinct open reporters; bogus also
+//     AI-acts (#347: a confident AI 'remove' on ONE report hides the pin);
+//   moved / wrong_location / wrong_info / private / unsafe — never suppress.
+// Policy the table enforces as CHECKs (141_reason_meta_single_source.sql):
+// unsafe and moved can never suppress or be AI-acted (#25/#132); no suppressing
+// bar is below 2, so no lone human tap hides a pin (#347); the AI may act only
+// on a suppressing CONTENT reason (#347). reports.reason is a foreign key to the
+// table, so the database also refuses an undefined code.
+//
+// FAILURE CONTRACT — fail closed, never to an empty vocabulary. Memoised five
+// minutes per isolate (the blocklist/suppression contract), so a threshold
+// edited in the table is live within five minutes, no deploy. A failed read
+// KEEPS the last good vocabulary and retries on the next request. With no good
+// read yet in this isolate there is deliberately nothing to fall back to — a
+// built-in copy would be the extra copy this row exists to remove. Then: a
+// report gets a retryable 503 (the client shows "Couldn't send that — try
+// again"); readSuppression() reports `suppressionFailed` and serves unsuppressed
+// for that request only (the #1a rule it already follows); `reasonCodes` is sent
+// empty, which the client's #25 check reads as "did not ask" and stays silent.
+// An EMPTY table read counts as a failure and is never memoised — an empty
+// vocabulary would 400 every report in flight.
+const REASON_META_VERSION = "141-reason-meta-v1"; // deploy-confirm, echoed on places + report responses
+const REASON_META_MEMO_MS = 5 * 60 * 1000;
+let _reasonMeta = null;       // the last GOOD read — never replaced by a failure
+let _reasonMetaAt = 0;
+let _reasonMetaStale = false; // true while serving the last good read after a failed refresh
+
+function buildReasonMeta(rows) {
+  const reasons = {};
+  for (const r of rows || []) {
+    if (!r || typeof r.reason !== "string" || !r.reason) continue;
+    const suppresses = r.suppresses === true;
+    const t = Number(r.threshold);
+    reasons[r.reason] = {
+      suppresses,
+      // A suppressing row with an unusable bar never crowd-hides (Infinity is
+      // unreachable). The table's CHECKs make that row impossible; belt only.
+      threshold: suppresses && Number.isInteger(t) && t >= 1 ? t : Infinity,
+      aiActs: suppresses && r.ai_acts === true,
+    };
+  }
+  const codes = Object.keys(reasons);
+  const suppressReasons = codes.filter((k) => reasons[k].suppresses);
+  const thresholds = {};
+  suppressReasons.forEach((k) => { if (Number.isFinite(reasons[k].threshold)) thresholds[k] = reasons[k].threshold; });
+  const aiActs = new Set(codes.filter((k) => reasons[k].aiActs));
+  return { reasons, codes, suppressReasons, thresholds, aiActs };
+}
+
+async function readReasonMeta() {
+  if (_reasonMeta && Date.now() - _reasonMetaAt < REASON_META_MEMO_MS) return _reasonMeta;
+  try {
+    const { data, error } = await supabase
+      .from("report_reason_meta")
+      .select("reason,suppresses,threshold,ai_acts")
+      .order("reason");
+    if (error) throw error;
+    const m = buildReasonMeta(data);
+    if (!m.codes.length) throw new Error("report_reason_meta is empty");
+    _reasonMeta = m;
+    _reasonMetaAt = Date.now();
+    _reasonMetaStale = false;
+  } catch (_e) {
+    // Keep serving the last good read; _reasonMetaAt is NOT advanced, so the
+    // next request retries. Null only when this isolate has never read it.
+    if (_reasonMeta) _reasonMetaStale = true;
+  }
+  return _reasonMeta;
+}
+
+// One accessor rather than meta.reasons[r].threshold at every call site, so
 // a non-suppressing reason can never silently read `undefined` and compare
 // false against every count. A reason that does not suppress has no threshold
 // and asking for one is a bug, so this returns Infinity — unreachable — rather
 // than a number that would quietly work.
-function thresholdFor(reason) {
-  const r = REPORT_REASONS[reason];
+function thresholdFor(meta, reason) {
+  const r = meta && meta.reasons[reason];
   if (!r || !r.suppresses) return Infinity;
   return r.threshold;
 }
-const SUPPRESS_THRESHOLDS = SUPPRESS_REASONS.reduce((o, k) => { o[k] = thresholdFor(k); return o; }, {});
-// #25 — echoed on every places response so the client can CHECK its own copy of
-// this vocabulary against the one that validates it, instead of the two drifting
-// silently until a button starts 400ing. It costs seven short strings on a
-// response that already carries dozens of places, and it needs no extra request
-// because the client is already making this one. #68's "three lists that must
-// agree" with the check actually wired up — the version of that row's mistake
-// available here was shipping a comment claiming a check that did not exist.
-const REASON_CODES = Object.keys(REPORT_REASONS);
+
+// #25 — `reasonCodes` is echoed on every places response so the client can
+// CHECK its own copy of the vocabulary against the one that validates it,
+// instead of the two drifting silently until a button starts 400ing. It needs
+// no extra request because the client is already making this one. #68's "lists
+// that must agree" with the check actually wired up.
+//
+// #141 — these read the memo synchronously for the response envelopes. Every
+// path that builds a places response has already awaited readSuppression() in
+// the same request, which awaits readReasonMeta(), so they see this request's
+// state. `thresholdSource` keeps its name and now says where the numbers came
+// from: "table", "table-stale" (a refresh failed, last good read served) or
+// "unavailable" (no good read yet — reasonCodes is empty).
+function reasonCodesNow() { return _reasonMeta ? _reasonMeta.codes : []; }
+function suppressThresholdsNow() { return _reasonMeta ? _reasonMeta.thresholds : {}; }
+function reasonMetaSourceNow() { return !_reasonMeta ? "unavailable" : (_reasonMetaStale ? "table-stale" : "table"); }
 const REPORT_SOURCES = new Set(["osm", "wiki", "gem"]);
 const REPORT_NOTE_CAP = 500;
 
@@ -3926,6 +4010,17 @@ let _suppressionAt = 0;
 async function readSuppression() {
   if (_suppression && Date.now() - _suppressionAt < SUPPRESSION_MEMO_MS) return _suppression;
   try {
+    // #141 — the vocabulary comes from the table. No good read yet → throw into
+    // the existing failure branch below (serve unsuppressed for THIS request,
+    // report suppressionFailed, retry next time). A stale-but-good read is used.
+    const meta = await readReasonMeta();
+    if (!meta) throw new Error("reason vocabulary unavailable");
+    if (!meta.suppressReasons.length) {
+      // No reason suppresses — nothing can be hidden. Not a failure; memoised.
+      _suppression = { ids: new Set(), counts: {}, failed: false };
+      _suppressionAt = Date.now();
+      return _suppression;
+    }
     // #134 — `reason` is now SELECTED, and that one extra column is the whole
     // change. Under a single threshold it was correct to pool every
     // suppressing report on a target into one set of distinct reporters.
@@ -3948,13 +4043,13 @@ async function readSuppression() {
       .from("reports")
       .select("target_id,reported_by,reason,ai_verdict")
       .eq("status", "open")
-      .in("reason", SUPPRESS_REASONS);
+      .in("reason", meta.suppressReasons);
     if (error) throw error;
     const byTargetReason = new Map();
     const aiRemoveIds = new Set();
     (data || []).forEach((r) => {
-      if (!r || !r.target_id || !REPORT_REASONS[r.reason]) return;
-      if (r.ai_verdict === "remove" && AI_ACT_REASONS.has(r.reason)) aiRemoveIds.add(String(r.target_id));
+      if (!r || !r.target_id || !meta.reasons[r.reason]) return;
+      if (r.ai_verdict === "remove" && meta.aiActs.has(r.reason)) aiRemoveIds.add(String(r.target_id));
       const k = String(r.target_id) + "\u0000" + String(r.reason);
       let s = byTargetReason.get(k);
       if (!s) { s = new Set(); byTargetReason.set(k, s); }
@@ -3968,7 +4063,7 @@ async function readSuppression() {
       const reason = k.slice(sep + 1);
       if (!counts[targetId]) counts[targetId] = {};
       counts[targetId][reason] = s.size;
-      if (s.size >= thresholdFor(reason)) ids.add(targetId);
+      if (s.size >= thresholdFor(meta, reason)) ids.add(targetId);
     });
     // #347 — a confident AI 'remove' hides regardless of reporter count.
     aiRemoveIds.forEach((id) => ids.add(id));
@@ -4229,7 +4324,9 @@ async function _runReportReview(row) {
     // ACT only on a confident 'remove' for a content reason. 'keep'/'unsure'/
     // 'error' do nothing here — the report stays open and counts toward the
     // crowd bar, so a pin the AI wrongly cleared can still be pulled by 3 humans.
-    if (verdict === "remove" && AI_ACT_REASONS.has(row.reason)) {
+    // #141 — the AI-acts set is the table's `ai_acts` column (memoised read).
+    const meta = await readReasonMeta();
+    if (verdict === "remove" && meta && meta.aiActs.has(row.reason)) {
       _suppressionAt = 0;                          // this isolate re-reads on the next map request
       if (row.target_source === "gem") await _flipGemToPending(row.target_id);
     }
@@ -4241,7 +4338,12 @@ async function handleReport(req, body) {
   const targetId = String(body.target_id || "").trim();
   const targetSource = String(body.target_source || "").trim();
 
-  if (!REPORT_REASONS[reason]) return { status: 400, body: { error: "unknown_reason" } };
+  // #141 — validate against the table. No good read yet in this isolate → a
+  // retryable 503, never a 400: the reason may be perfectly valid, we just
+  // could not check it, and a 400 would tell the client its button is broken.
+  const meta = await readReasonMeta();
+  if (!meta) return { status: 503, body: { error: "reasons_unavailable", retryable: true, reasonMetaVersion: REASON_META_VERSION } };
+  if (!meta.reasons[reason]) return { status: 400, body: { error: "unknown_reason" } };
   if (!targetId || targetId.length > 200) return { status: 400, body: { error: "bad_target_id" } };
   if (!REPORT_SOURCES.has(targetSource)) return { status: 400, body: { error: "bad_target_source" } };
 
@@ -4292,7 +4394,7 @@ async function handleReport(req, body) {
   // would compare a mixed population to a single number and get both the
   // crossing and the "you are the Nth" wrong.
   let distinct = 0, crossed = false, countFailed = false;
-  if (REPORT_REASONS[reason].suppresses) {
+  if (meta.reasons[reason].suppresses) {
     try {
       const { data, error } = await supabase
         .from("reports")
@@ -4302,7 +4404,7 @@ async function handleReport(req, body) {
         .eq("reason", reason);
       if (error) throw error;
       distinct = new Set((data || []).map((r) => String(r.reported_by))).size;
-      crossed = distinct >= thresholdFor(reason);
+      crossed = distinct >= thresholdFor(meta, reason);
     } catch (_e) { countFailed = true; }
   }
 
@@ -4356,14 +4458,14 @@ async function handleReport(req, body) {
     body: {
       ok: true,
       reason,
-      suppresses: REPORT_REASONS[reason].suppresses,
+      suppresses: meta.reasons[reason].suppresses,
       distinctReporters: distinct,
       // #134 — the threshold that actually applied to THIS report, not a
       // global. `Infinity` does not survive JSON.stringify (it serialises as
       // null), so a non-suppressing reason reports null, which is the honest
       // value: there is no bar because nothing is being counted.
-      threshold: REPORT_REASONS[reason].suppresses ? thresholdFor(reason) : null,
-      thresholdSource: THRESHOLD_SOURCE,
+      threshold: meta.reasons[reason].suppresses ? thresholdFor(meta, reason) : null,
+      thresholdSource: reasonMetaSourceNow(), // #141 — "table" / "table-stale" (was "secret"/"fallback")
       suppressed: crossed,
       countFailed,
       // #347 — build stamp so a deploy of this pass is confirmable from the
@@ -4371,6 +4473,7 @@ async function handleReport(req, body) {
       // report now returns suppressed:false here (was true under the retired
       // 1-tap floor) — the AI verdict lands asynchronously, not in this body.
       reviewVersion: REPORT_REVIEW_VERSION,
+      reasonMetaVersion: REASON_META_VERSION, // #141 deploy-confirm
     },
   };
 }
@@ -4596,7 +4699,7 @@ function cachedEnvelope(tile, cached, s) {
     qidVersion: "164-wikidata-qid-v1", // #164 deploy-confirm (the Q-id bake runs at tile BUILD; a warm tile gains it on its next rebuild)
     swrVersion: SWR_VERSION, // #394 deploy-confirm
     emptyTileVersion: EMPTY_TILE_VERSION, osmEmpty: cached.osmEmpty === true, // #399 deploy-confirm + whether this is a healthy-empty (3-day) row
-    reasonCodes: REASON_CODES,
+    reasonCodes: reasonCodesNow(), reasonMetaVersion: REASON_META_VERSION, // #141 — vocabulary read from report_reason_meta + deploy-confirm
     osmAge: osmAgeHistogram(s.g.places),
   };
 }
@@ -4885,8 +4988,8 @@ Deno.serve(async (req) => {
         // single threshold to report and printing the crowd one would have
         // read as the whole truth. Nothing on the client consumed the old
         // scalar, so this is a free shape change rather than a break.
-        suppressThresholds: SUPPRESS_THRESHOLDS, thresholdSource: THRESHOLD_SOURCE,
-        reasonCodes: REASON_CODES,
+        suppressThresholds: suppressThresholdsNow(), thresholdSource: reasonMetaSourceNow(), // #141 — from report_reason_meta
+        reasonCodes: reasonCodesNow(), reasonMetaVersion: REASON_META_VERSION,
         metaAsked: !!osm.metaAsked, metaSeen: osm.metaSeen || 0,
         metaRetried: !!osm.metaRetried, metaError: osm.metaError || null,
         osmAge: osmAgeHistogram(shown.places),
@@ -4922,7 +5025,7 @@ Deno.serve(async (req) => {
       closedDropped: osm.closedDropped, closedBy: osm.closedBy,
       blocked: shown.blocked, blocklistFailed: !!bl.failed,
       suppressed: shown.suppressed, suppressionFailed: !!sup.failed,
-      reasonCodes: REASON_CODES,
+      reasonCodes: reasonCodesNow(), reasonMetaVersion: REASON_META_VERSION, // #141
     });
   } catch (e) {
     return json({ error: (e && e.message) || String(e) }, 500);

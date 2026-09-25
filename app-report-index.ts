@@ -300,7 +300,25 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 //   again when a roster expansion is pre-warmed. One deploy target (this function),
 //   no index.html/APP_VERSION, no CACHE_VERSION/SQL/RLS/env. Observability, so it
 //   does NOT move the %.
-const REPORT_VERSION = "app-report-v21";
+// v21 -> v22 (#141): the reports arm READS the rules instead of mirroring them.
+//   Until now this block held its own SUPPRESSES and AI_ACTS maps and read the
+//   REPORT_SUPPRESS_THRESHOLD secret itself — a copy that only unknown_reasons
+//   could catch drifting. #141 made public.report_reason_meta the ONE server-side
+//   home (nearby-places reads it too), so this block now reads that table
+//   (reason, suppresses, threshold, ai_acts) and derives every threshold and
+//   AI-act decision from it. A failed read fails the reports section into
+//   `errors` — it never falls back to a built-in copy. `threshold` changes shape:
+//   {source, by_reason, ai_act_reasons, secret_ignored} replaces {crowd,
+//   crowd_source, bogus, ai_act_reasons}. The `suppress_threshold_unset` info
+//   alert (which fired on every run) is retired; NEW warn
+//   `report_threshold_secret_ignored` fires only if REPORT_SUPPRESS_THRESHOLD is
+//   set, because nothing reads it any more. `unknown_reasons` now means "a
+//   report row carries a reason the table doesn't define" — impossible while the
+//   reports_reason_fkey foreign key stands, so non-empty = the key was dropped.
+//   One deploy target (this function, --no-verify-jwt), after the #141 SQL. No
+//   index.html/APP_VERSION, no CACHE_VERSION. Observability, so it does NOT move
+//   the %.
+const REPORT_VERSION = "app-report-v22";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -1051,9 +1069,12 @@ function summariseSharedKv(rows: any[], now: number) {
 // Nothing surfaced whether that sensor has ever fired — the table was invisible
 // in this digest — so this block reads `reports` and reports the crowd signal.
 //
-// TWO deliberate choices, both about NOT becoming a silent extra copy of the
-// rules (the #141/#155/#25 divergence problem — "the vocabulary has three copies
-// and only two check each other"):
+// #141 (v22) — THIS BLOCK NO LONGER MIRRORS THE RULES. It reads them from
+// public.report_reason_meta, the one server-side home nearby-places also reads,
+// so the three points below now hold by construction. Kept as history: they
+// were how v9–v21 tried not to become a silent extra copy (the #141/#155/#25
+// divergence problem — "the vocabulary has three copies and only two check each
+// other"):
 //   1. THRESHOLD is read from the SAME secret the serve path reads
 //      (REPORT_SUPPRESS_THRESHOLD), with the SAME default 3. #350: bogus is NO
 //      LONGER a =1 special case — #347 retired that floor and raised bogus's
@@ -1092,29 +1113,30 @@ function summariseSharedKv(rows: any[], now: number) {
 // NOT served hides nothing; it is counted as stale instead of suppressed. OSM ids
 // and uuids missing from the map (null map = submissions read failed) are treated
 // exactly as before.
-function summariseReports(rows: any[], now: number, sampleN: number, liveGem: Map<string, boolean> | null = null) {
-  // MIRROR of nearby-places REPORT_REASONS.*.suppresses — keep in sync; the
-  // unknown_reasons check below is what catches it if this ever drifts.
-  const SUPPRESSES: Record<string, boolean> = {
-    gone: true, moved: false, chain: true, bogus: true,
-    wrong_location: false, wrong_info: false, private: false, unsafe: false,
-  };
-  // #350 — MIRROR of nearby-places AI_ACT_REASONS: reasons whose confident AI
-  // `ai_verdict='remove'` hides a pin on ONE report (the #347 fast path that
-  // replaced the retired bogus=1 floor). Only `bogus` today. Kept as its own
-  // map so a drift here is as visible as the SUPPRESSES mirror above.
-  const AI_ACTS: Record<string, boolean> = { bogus: true };
-  // MIRROR of the serve path's threshold read: REPORT_SUPPRESS_THRESHOLD as an
-  // int >= 1 else the code default 3. #350 — bogus is NO LONGER a =1 special
-  // case: #347 raised its human bar to the crowd threshold, so every suppressing
-  // reason reads `crowd` here. Reading the SAME secret is what keeps the two from
-  // disagreeing on the number.
-  const envRaw = Deno.env.get("REPORT_SUPPRESS_THRESHOLD");
-  const envN = parseInt(String(envRaw || "").trim(), 10);
-  const crowd = Number.isFinite(envN) && envN >= 1 ? envN : 3;
-  const crowd_source = Number.isFinite(envN) && envN >= 1 ? "secret" : "fallback";
+function summariseReports(rows: any[], metaRows: any[], now: number, sampleN: number, liveGem: Map<string, boolean> | null = null) {
+  // #141 — the rules come from public.report_reason_meta (read by the caller),
+  // the same rows nearby-places validates, suppresses and AI-acts against. No
+  // built-in copy: an empty or failed read throws, and the section lands in
+  // `errors` rather than reporting numbers from a guess.
+  const SUPPRESSES: Record<string, boolean> = {};
+  const AI_ACTS: Record<string, boolean> = {};
+  const THRESHOLDS: Record<string, number> = {};
+  for (const m of metaRows || []) {
+    if (!m || typeof m.reason !== "string" || !m.reason) continue;
+    const sup = m.suppresses === true;
+    SUPPRESSES[m.reason] = sup;
+    AI_ACTS[m.reason] = sup && m.ai_acts === true;
+    const t = Number(m.threshold);
+    if (sup && Number.isInteger(t) && t >= 1) THRESHOLDS[m.reason] = t;
+  }
+  if (!Object.keys(SUPPRESSES).length) throw new Error("report_reason_meta returned no reasons");
+  // A suppressing reason with no usable bar never crowd-hides (the serve path
+  // treats it the same way); the table's CHECKs make that row impossible.
   const thresholdFor = (reason: string): number =>
-    SUPPRESSES[reason] ? crowd : Infinity;
+    SUPPRESSES[reason] && THRESHOLDS[reason] !== undefined ? THRESHOLDS[reason] : Infinity;
+  // Nothing reads this secret any more (#141); report it only so a stale one
+  // left in Edge Functions → Secrets gets noticed and deleted.
+  const secret_ignored = String(Deno.env.get("REPORT_SUPPRESS_THRESHOLD") || "").trim() !== "";
 
   const by_reason: Record<string, number> = {};
   const by_status: Record<string, number> = {};
@@ -1250,13 +1272,19 @@ function summariseReports(rows: any[], now: number, sampleN: number, liveGem: Ma
     distinct_reporters: distinctReporters.size,
     by_reason,
     by_status,
-    // #141 drift alarm: [] = the table holds only reasons this dashboard, the
-    // client and the serve path all know. Non-empty = a vocabulary has drifted.
+    // #141 drift alarm. Since v22: a report row whose reason report_reason_meta
+    // doesn't define. The reports_reason_fkey foreign key makes that impossible,
+    // so non-empty means the key was dropped.
     unknown_reasons: [...unknownReasons].sort(),
     windows,
-    // #350 — bogus now reads the crowd threshold (no =1 special case); ai_act_reasons
+    // #141 (v22) — per-reason bars straight from report_reason_meta; ai_act_reasons
     // names the reasons whose confident AI 'remove' hides on one report (#347).
-    threshold: { crowd, crowd_source, bogus: crowd, ai_act_reasons: Object.keys(AI_ACTS).filter((k) => AI_ACTS[k]) },
+    threshold: {
+      source: "report_reason_meta",
+      by_reason: THRESHOLDS,
+      ai_act_reasons: Object.keys(AI_ACTS).filter((k) => AI_ACTS[k]),
+      secret_ignored,
+    },
     suppression: {
       note:
         "Derived from OPEN reports only, distinct reporters per (target,reason). " +
@@ -1908,8 +1936,8 @@ function summariseRejectedResubmits(rows: any[], opts: { minResubmits: number; c
 //
 // This is observability on an operator surface (the #71/#125/#144/#266/#317 line),
 // so it does NOT by itself move the %. It reads config INDIRECTLY (fallback_rows =>
-// GEMINI_MODEL may be unset; threshold.crowd_source==="fallback" =>
-// REPORT_SUPPRESS_THRESHOLD unset), so the report now does the outside-the-file
+// GEMINI_MODEL may be unset; threshold.secret_ignored => a REPORT_SUPPRESS_THRESHOLD
+// secret nothing reads since #141), so the report now does the outside-the-file
 // config watch for you — but it changes nothing about how the function is deployed.
 function computeAlerts(report: Record<string, any>, opts: { backlogWarnH: number; descHideWarn: number; osmRemoveWarn: number }) {
   const items: Array<{ level: string; code: string; message: string; detail?: unknown }> = [];
@@ -1993,10 +2021,14 @@ function computeAlerts(report: Record<string, any>, opts: { backlogWarnH: number
   if ((supp.targets_one_away || 0) > 0) {
     push("info", "pins_near_suppression", `${supp.targets_one_away} pin(s) one report away from crowd suppression`);
   }
+  // #141 (v22) — `suppress_threshold_unset` retired (it fired on every run; the
+  // bars now live in report_reason_meta). The one config fact left to watch is a
+  // stale secret nothing reads.
   const thr = rep.threshold || {};
-  if (thr.crowd_source === "fallback") {
-    push("info", "suppress_threshold_unset",
-      `REPORT_SUPPRESS_THRESHOLD is not set — the serve path and this report both fall back to ${thr.crowd}`);
+  if (thr.secret_ignored === true) {
+    push("warn", "report_threshold_secret_ignored",
+      "REPORT_SUPPRESS_THRESHOLD is set but nothing reads it since #141 — thresholds live in report_reason_meta. Delete the secret so nobody tunes a dead knob.",
+      { by_reason: thr.by_reason });
   }
 
   // #266 pin_audit — merges waiting for an operator (propose-only; these are safe,
@@ -2263,8 +2295,11 @@ Deno.serve(async (req: Request) => {
     // #350 — ai_verdict is SELECTED so the suppression view can mirror #347's
     // AI-remove fast path (a confident 'remove' hides a pin on one report). The
     // ai_* columns are #347's, server-write-only; this read is service-role.
+    // #141 (v22) — the rules are read, not mirrored: the same table nearby-places
+    // validates and suppresses against. Read first; a failure fails this section.
+    const metaRows = await fetchAll(supabase, "report_reason_meta", "reason,suppresses,threshold,ai_acts");
     const rows = await fetchAll(supabase, "reports", "target_id,reported_by,reason,status,created_at,ai_verdict");
-    report.reports = summariseReports(rows, now, sampleN, liveGem);
+    report.reports = summariseReports(rows, metaRows, now, sampleN, liveGem);
   } catch (e) {
     errors.push("reports: " + (e as Error).message);
   }
