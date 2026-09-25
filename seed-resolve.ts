@@ -59,7 +59,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.25f (#420 Wikipedia check can hold)";
+const TOOL_VERSION = "seed-resolve 2026.09.25h (#422 held lines keep their story; `new` marker)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -379,10 +379,17 @@ async function geocodeAddress(
 // ONE hand-verified factual sentence with its source (#315/#316 — sourced, never
 // invented); it becomes the pin's persisted story (resolved_source 'curated') and
 // a `curated_descriptions` row. Lines starting with "#" are comments.
-type Line = { name: string; locate: string; story: string; source: string };
+// #422 — an optional FIFTH field `new` means "a distinct place, seed it here
+// even though a bigger pin around it looks like the same place" (the Fort
+// Worth Japanese Garden inside the Botanic Garden). It skips the attach and
+// same-place steps for that line only; use it after eyeballing a review.
+type Line = { name: string; locate: string; story: string; source: string; forceNew: boolean; raw: string };
 function parseLine(raw: string): Line {
   const parts = raw.split("|").map((x) => x.trim());
-  return { name: parts[0] ?? "", locate: parts[1] ?? "", story: parts[2] ?? "", source: parts[3] ?? "" };
+  return {
+    name: parts[0] ?? "", locate: parts[1] ?? "", story: parts[2] ?? "", source: parts[3] ?? "",
+    forceNew: (parts[4] ?? "").toLowerCase() === "new", raw: raw.trim(),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -983,9 +990,21 @@ async function run() {
     // the ~20 articles nearest its centre, so Landmark Center, Foshay Tower and
     // First Avenue have articles but no pin. Their Wikipedia title still gets a
     // curated row, so if a tile ever shows that pin it shows the story too.
-    if (line.story && verdict.decision !== "held") {
-      const blob = [candidate, line.locate, geo.label].join(" ");
-      const bare = (n: string) => n.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+    if (line.forceNew && verdict.decision !== "held") {
+      // #422 — operator override: a distinct place inside a bigger pin.
+      verdict.decision = "new";
+      if (!verdict.category || verdict.category === "commercial") verdict.category = "history";
+      console.log(`    (marked \`new\` — seeded as its own pin, attach/same-place check skipped)`);
+    } else if (line.story && verdict.decision !== "held") {
+      // The city's own words ("Fort Worth") are dropped from BOTH sides before
+      // matching: Photon's label always ends in the city, so "Fort Worth Botanic
+      // Garden" otherwise matched a "Fort Worth Japanese Garden" line on
+      // fort+worth+garden — the Denver city-suffix pad (handoff §5), again.
+      const cityWords = new Set(geoTokens(CITY.name));
+      const noCity = (t: string) => geoFold(t).replace(/[^a-z0-9]+/g, " ").split(/\s+/)
+        .filter((w) => w && !cityWords.has(w)).join(" ");
+      const blob = noCity([candidate, line.locate, geo.label].join(" "));
+      const bare = (n: string) => noCity(n.replace(/\s*\([^)]*\)\s*/g, " "));
       const targets = existing.filter((e) => bare(e.name) && labelMatchesName(bare(e.name), blob));
       const onMap = targets.filter((e) => e.source !== "wiki");
       const stagePinRow = (e: Existing) => curatedRows.push({
@@ -1060,7 +1079,7 @@ async function run() {
       // Throttle/transport hold — the machine never judged this. Re-runnable,
       // NOT a review. Carries the HTTP status when there was one, so the report
       // is filterable (429 leftovers vs a hard 4xx). #264 / #263.
-      report.push({ ...base, outcome: "held", status: verdict.status ?? null });
+      report.push({ ...base, outcome: "held", status: verdict.status ?? null, raw: line.raw });
       console.log(`  ⏳ ${candidate} → HELD (re-run): ${verdict.why}`);
     } else {
       report.push({ ...base, outcome: "review" });
@@ -1078,7 +1097,9 @@ async function run() {
   // re-run: `... seed-resolve.ts seed_held.txt` with a working key clears them
   // (#264). Only written when something is actually held, so a clean run leaves
   // no stale file behind.
-  const heldNames = report.filter((r) => r.outcome === "held").map((r) => r.candidate);
+  // #422 — the ORIGINAL line (all its | fields), so a held story line re-runs
+  // with its story and source instead of silently becoming a bare name.
+  const heldNames = report.filter((r) => r.outcome === "held").map((r) => r.raw ?? r.candidate);
   if (heldNames.length) {
     await Deno.writeTextFile("seed_held.txt", heldNames.join("\n") + "\n");
   }

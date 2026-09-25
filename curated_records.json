@@ -1,26 +1,34 @@
 [
   {
-    "name": "First Avenue (nightclub)",
-    "lat": 44.9783,
-    "lng": -93.2761,
-    "description": "Built in 1937 as the Greyhound bus depot, this club is where Prince recorded the album version of \"Purple Rain\" live in August 1983, and he rented it that fall to film the movie's concert scenes.",
-    "source_url": "https://www.mnhs.org/mnopedia/search/index/place/first-avenue-7th-street-entry",
-    "note": "#419 story on existing pin (wiki, Minneapolis)"
+    "name": "Land Title Building",
+    "lat": 32.754855,
+    "lng": -97.3306,
+    "description": "Look up at this ornate brick, sandstone and cast-iron building: it carries the first known stone carving in Fort Worth, the figure of an owl.",
+    "source_url": "https://www.hmdb.org/m.asp?m=88115",
+    "note": "#57 story seed (Fort Worth)"
   },
   {
-    "name": "Washburn Park Water Tower",
-    "lat": 44.91076667,
-    "lng": -93.28401389,
-    "description": "Eight figures called the Guardians of Health ring this art deco water tower, standing watch over the city's water against pollution and bacteria.",
-    "source_url": "https://www.atlasobscura.com/things-to-do/minneapolis-minnesota/architectural-oddities",
-    "note": "#419 story on existing pin (map:wiki, Minneapolis)"
+    "name": "Pioneer's Rest Cemetery",
+    "lat": 32.76568193,
+    "lng": -97.32934543,
+    "description": "This burial ground began in the summer of 1850 with the deaths of Sophie and Willis Arnold, the young children of Major Ripley Arnold, commander of the fort that gave Fort Worth its name.",
+    "source_url": "https://www.hmdb.org/m.asp?m=188851",
+    "note": "#57 story seed (Fort Worth)"
   },
   {
-    "name": "Witch's Hat Tower",
-    "lat": 44.9686651,
-    "lng": -93.2126728,
-    "description": "This landmark water tower was also meant to double as a bandstand that never worked out, and it opens for panoramic views just once a year.",
-    "source_url": "https://www.atlasobscura.com/things-to-do/minneapolis-minnesota/music",
-    "note": "#419 story on existing pin (map:osm, Minneapolis)"
+    "name": "Cowtown Coliseum",
+    "lat": 32.788979,
+    "lng": -97.347917,
+    "description": "A marker here honors Bill Pickett, the Black cowboy who originated bulldogging, the rodeo event now called steer wrestling.",
+    "source_url": "https://www.hmdb.org/m.asp?m=52777",
+    "note": "#57 story seed (Fort Worth)"
+  },
+  {
+    "name": "Douglass and McGar Parks",
+    "lat": 32.76926667,
+    "lng": -97.33818333,
+    "description": "During Jim Crow segregation, from the late 1800s through the 1920s, Douglass and McGar Parks here were the recreation grounds for Fort Worth's African Americans.",
+    "source_url": "https://www.hmdb.org/m.asp?m=107003",
+    "note": "#57 story seed (Fort Worth)"
   }
 ]

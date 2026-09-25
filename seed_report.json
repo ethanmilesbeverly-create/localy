@@ -1,123 +1,111 @@
 [
   {
-    "candidate": "First Avenue",
+    "candidate": "Land Title Building",
     "geo": {
-      "lat": 44.9782606,
-      "lng": -93.2760295,
-      "label": "701 1st Avenue North, First Avenue, Minneapolis",
+      "lat": 32.754855,
+      "lng": -97.3306,
+      "label": "source coordinate 32.754855,-97.3306",
       "nameMatch": true
     },
-    "locate": "701 North 1st Avenue",
-    "story": "Built in 1937 as the Greyhound bus depot, this club is where Prince recorded the album version of \"Purple Rain\" live in August 1983, and he rented it that fall to film the movie's concert scenes.",
-    "wikiTitle": "First Avenue (nightclub)",
+    "locate": "@32.754855,-97.3306",
+    "story": "Look up at this ornate brick, sandstone and cast-iron building: it carries the first known stone carving in Fort Worth, the figure of an owl.",
+    "wikiTitle": "Bass Performance Hall",
     "wikiWidened": false,
     "existing": [
-      "First Avenue [submission]",
-      "First Avenue (nightclub) [wiki]",
-      "Pantages Theatre (Minneapolis) [wiki]"
+      "Knights of Pythias Hall [submission]",
+      "Fort Worth Water Gardens [submission]",
+      "Bass Performance Hall [wiki]",
+      "Downtown Fort Worth [wiki]",
+      "Knights of Pythias Building (Fort Worth, Texas) [wiki]",
+      "Burk Burnett Building [wiki]"
     ],
-    "arms": "map 0 · subs 1 · wiki 2",
+    "arms": "map 0 · subs 2 · wiki 4",
     "verdict": {
-      "decision": "match",
-      "matchName": "First Avenue (nightclub)",
-      "canonicalName": "First Avenue",
+      "decision": "new",
+      "matchName": "Knights of Pythias Building (Fort Worth, Texas)",
+      "canonicalName": "Knights of Pythias Building (Fort Worth, Texas)",
       "category": "history",
-      "confidence": 1,
-      "why": "The candidate place is identical to the existing 'First Avenue (nightclub)' entry, which is a well-documented historic music venue."
+      "confidence": 0.95,
+      "why": "The Land Title Building in Fort Worth is historically known as the Knights of Pythias Building. The description of the owl carving is a well-documented architectural feature of this specific historic building."
     },
-    "outcome": "story-attached",
-    "attachedTo": [
-      "First Avenue [submission]",
-      "First Avenue (nightclub) [wiki]"
-    ]
+    "outcome": "new-seed"
   },
   {
-    "candidate": "Foshay Tower",
+    "candidate": "Pioneer's Rest Cemetery",
     "geo": {
-      "lat": 44.9744713,
-      "lng": -93.2717771,
-      "label": "Foshay Tower, Minneapolis, Minnesota",
+      "lat": 32.76568193,
+      "lng": -97.32934543,
+      "label": "source coordinate 32.76568193,-97.32934543",
       "nameMatch": true
     },
-    "locate": null,
-    "story": "Wilbur Foshay built this Washington Monument look-alike in 1929 and paid John Philip Sousa $20,000 to write a march for its opening, but the check bounced when his empire collapsed weeks later, and Sousa barred the march from being played until the debt was paid.",
-    "wikiTitle": "Foshay Tower",
+    "locate": "@32.76568193,-97.32934543",
+    "story": "This burial ground began in the summer of 1850 with the deaths of Sophie and Willis Arnold, the young children of Major Ripley Arnold, commander of the fort that gave Fort Worth its name.",
+    "wikiTitle": "Pioneers Rest (Fort Worth, Texas)",
     "wikiWidened": false,
     "existing": [
-      "Foshay Tower [submission]",
-      "901 Marquette [wiki]"
+      "Grave of Anna Shelton [submission]",
+      "Grave of Ripley A. Arnold [submission]",
+      "Pioneers Rest (Fort Worth, Texas) [wiki]"
     ],
-    "arms": "map 0 · subs 1 · wiki 2",
+    "arms": "map 0 · subs 2 · wiki 1",
     "verdict": {
-      "decision": "match",
-      "matchName": "Foshay Tower",
-      "canonicalName": "Foshay Tower",
+      "decision": "new",
+      "matchName": "Pioneers Rest (Fort Worth, Texas)",
+      "canonicalName": "Pioneers Rest (Fort Worth, Texas)",
       "category": "history",
       "confidence": 1,
-      "why": "The candidate is identical to the existing map entry 'Foshay Tower', which is a well-known historic landmark in Minneapolis."
+      "why": "The candidate 'Pioneer's Rest Cemetery' refers to the same historic burial ground already mapped as 'Pioneers Rest (Fort Worth, Texas)'."
     },
-    "outcome": "story-attached",
-    "attachedTo": [
-      "Foshay Tower [submission]"
-    ]
+    "outcome": "new-seed"
   },
   {
-    "candidate": "Washburn Park Water Tower",
+    "candidate": "Cowtown Coliseum",
     "geo": {
-      "lat": 44.9107594,
-      "lng": -93.2842828,
-      "label": "Washburn Park Water Tower, Minneapolis, Minnesota",
+      "lat": 32.788979,
+      "lng": -97.347917,
+      "label": "source coordinate 32.788979,-97.347917",
       "nameMatch": true
     },
-    "locate": null,
-    "story": "Eight figures called the Guardians of Health ring this art deco water tower, standing watch over the city's water against pollution and bacteria.",
-    "wikiTitle": "Washburn Park Water Tower",
-    "wikiWidened": false,
+    "locate": "@32.788979,-97.347917",
+    "story": "A marker here honors Bill Pickett, the Black cowboy who originated bulldogging, the rodeo event now called steer wrestling.",
+    "wikiTitle": "Cowtown Coliseum",
+    "wikiWidened": true,
     "existing": [
-      "Washburn Park Water Tower [map:wiki]"
+      "Stockyards Hotel [submission]"
     ],
-    "arms": "map 1 · subs 0 · wiki 1",
+    "arms": "map 0 · subs 1 · wiki 0",
     "verdict": {
-      "decision": "match",
-      "matchName": "Washburn Park Water Tower",
-      "canonicalName": "Washburn Park Water Tower",
+      "decision": "new",
+      "matchName": null,
+      "canonicalName": "Cowtown Coliseum",
       "category": "history",
-      "confidence": 1,
-      "why": "The candidate place name and the existing map entry are identical, and the documented story confirms it is the same historic landmark."
+      "confidence": 0.95,
+      "why": "Cowtown Coliseum is a distinct historic venue in the Fort Worth Stockyards, separate from the Stockyards Hotel. It is a well-known historic landmark with its own documented history, including the Bill Pickett marker."
     },
-    "outcome": "story-attached",
-    "attachedTo": [
-      "Washburn Park Water Tower [map:wiki]"
-    ]
+    "outcome": "new-seed"
   },
   {
-    "candidate": "Witch's Hat Tower",
+    "candidate": "Douglass and McGar Parks",
     "geo": {
-      "lat": 44.9686769,
-      "lng": -93.2126729,
-      "label": "Witch's Hat Tower, Minneapolis, Minnesota",
+      "lat": 32.76926667,
+      "lng": -97.33818333,
+      "label": "source coordinate 32.76926667,-97.33818333",
       "nameMatch": true
     },
-    "locate": null,
-    "story": "This landmark water tower was also meant to double as a bandstand that never worked out, and it opens for panoramic views just once a year.",
-    "wikiTitle": "Prospect Park Water Tower",
+    "locate": "@32.76926667,-97.33818333",
+    "story": "During Jim Crow segregation, from the late 1800s through the 1920s, Douglass and McGar Parks here were the recreation grounds for Fort Worth's African Americans.",
+    "wikiTitle": null,
     "wikiWidened": false,
-    "existing": [
-      "Witch's Hat Tower [map:osm]",
-      "Prospect Park Water Tower [wiki]"
-    ],
-    "arms": "map 1 · subs 0 · wiki 1",
+    "existing": [],
+    "arms": "map 0 · subs 0 · wiki 0",
     "verdict": {
-      "decision": "match",
-      "matchName": "Witch's Hat Tower",
-      "canonicalName": "Prospect Park Water Tower",
+      "decision": "new",
+      "matchName": null,
+      "canonicalName": "Douglass and McGar Parks",
       "category": "history",
-      "confidence": 1,
-      "why": "The candidate 'Witch's Hat Tower' is a well-known local nickname for the 'Prospect Park Water Tower', which is already present on the map."
+      "confidence": 0.9,
+      "why": "There are no existing map entries within 90 metres of the coordinates, and the candidate represents a historical site of significance in Fort Worth."
     },
-    "outcome": "story-attached",
-    "attachedTo": [
-      "Witch's Hat Tower [map:osm]"
-    ]
+    "outcome": "new-seed"
   }
 ]
