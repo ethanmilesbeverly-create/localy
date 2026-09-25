@@ -1,1 +1,40 @@
-[]
+[
+  {
+    "name": "First Avenue",
+    "description": "Built in 1937 as the Greyhound bus depot, this club is where Prince recorded the album version of \"Purple Rain\" live in August 1983, and he rented it that fall to film the movie's concert scenes.",
+    "category": "history",
+    "lat": 44.9782606,
+    "lng": -93.2760295,
+    "city": "Minneapolis",
+    "status": "approved",
+    "submitted_by": null,
+    "source": "seed:reddit",
+    "seed_meta": {
+      "candidate": "First Avenue",
+      "geocodeLabel": "701 1st Avenue North, First Avenue, Minneapolis",
+      "wikiTitle": "First Avenue (nightclub)",
+      "confidence": 1
+    },
+    "resolved_description": "Built in 1937 as the Greyhound bus depot, this club is where Prince recorded the album version of \"Purple Rain\" live in August 1983, and he rented it that fall to film the movie's concert scenes.",
+    "resolved_source": "curated"
+  },
+  {
+    "name": "Foshay Tower",
+    "description": "Wilbur Foshay built this Washington Monument look-alike in 1929 and paid John Philip Sousa $20,000 to write a march for its opening, but the check bounced when his empire collapsed weeks later, and Sousa barred the march from being played until the debt was paid.",
+    "category": "history",
+    "lat": 44.9744713,
+    "lng": -93.2717771,
+    "city": "Minneapolis",
+    "status": "approved",
+    "submitted_by": null,
+    "source": "seed:reddit",
+    "seed_meta": {
+      "candidate": "Foshay Tower",
+      "geocodeLabel": "Foshay Tower, Minneapolis, Minnesota",
+      "wikiTitle": "Foshay Tower",
+      "confidence": 1
+    },
+    "resolved_description": "Wilbur Foshay built this Washington Monument look-alike in 1929 and paid John Philip Sousa $20,000 to write a march for its opening, but the check bounced when his empire collapsed weeks later, and Sousa barred the march from being played until the debt was paid.",
+    "resolved_source": "curated"
+  }
+]

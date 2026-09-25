@@ -1,0 +1,3 @@
+# #57 Minneapolis story lines — Name | locate | story | source_url
+# locate: blank = geocode the name; starts with a digit = street address; @lat,lng = coordinate from the source; anything else = alternate name to geocode.
+Mary Tyler Moore House | 2104 Kenwood Parkway | The Mary Tyler Moore Show used this house for the outside of Mary Richards' apartment, and the tour buses got so heavy that the owners hung an "Impeach Nixon" banner under "her" window to stop further filming. | https://www.postbulletin.com/news/the-mary-tyler-moore-house-is-on-the-market-in-minneapolis

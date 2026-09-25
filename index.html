@@ -6141,7 +6141,8 @@ function applyRealPlaces(key, base, list){
      Counted, not silent (#94). */
   let wikiReclassed = 0;
   filtered.forEach(p => {
-    if(p && p.source === 'wiki' && p.category === 'history'){
+    // #421 — a curated story is not a Wikipedia opener; never reclassify on it.
+    if(p && p.source === 'wiki' && p.category === 'history' && !isStoryReal(p)){
       const c = classifyWikiOpener(p.name, p.desc);
       if(c && c !== 'history'){ p.category = c; wikiReclassed++; }
     }
@@ -6288,15 +6289,36 @@ function nearbyRealPlaces(base, category, limit, excludeIds){
 function gemToPoint(g, ctxCategory){
   return gemPoint(g, 'catgem', ctxCategory, {real:true});
 }
+
+/* #421 — A MAP PLACE WITH A HAND-SOURCED STORY RANKS WITH THE GEMS.
+   Every blend fills gems first and reaches real internet places only when
+   fewer gems are in range. That is the human-first rule (#294), but it meant a
+   map place carrying a sourced story (#419 — the server marks it
+   descSource:'curated', e.g. Mickey's Diner's Mighty Ducks line) was never
+   picked anywhere a few seeds were nearby, even when you stood on it. A curated
+   story is a human line too, so these places join the gems' pass and the pass
+   is ordered nearest-first across both. Plain map places still wait behind. */
+function isStoryReal(p){ return !!p && p.descSource === 'curated'; }
+function humanFirstPass(base, category, gemBucket, limit){
+  const rows = [];
+  if(gemBucket){
+    nearbyApprovedGems(base, [], limit, gemBucket).forEach(g=> rows.push({d:g.dist, p:gemToPoint(g, category)}));
+  }
+  nearbyRealPlaces(base, category, limit*2).filter(isStoryReal)
+    .forEach(rp=> rows.push({d:rp.dist, p:{...rp, category}}));
+  return rows.sort((a,b)=>a.d-b.d).map(r=>r.p);
+}
 function blendCategory(base, category, targetCount, procFn, gemBucket){
   const out = [];
   const usedNames = new Set();
   const push = p => { const k=normName(p.name); if(k && usedNames.has(k)) return; if(k) usedNames.add(k); out.push(p); };
 
-  // 1) real user submissions for this category, nearest first
-  if(gemBucket){
-    nearbyApprovedGems(base, [], targetCount, gemBucket).forEach(g=> push(gemToPoint(g, category)));
-  }
+  // 1) real user submissions for this category + map places with a sourced
+  //    story (#421), nearest first
+  humanFirstPass(base, category, gemBucket, targetCount).forEach(p=>{
+    if(out.length>=targetCount) return;
+    push(p);
+  });
   // 2) real internet places
   if(out.length < targetCount){
     nearbyRealPlaces(base, category, targetCount*2).forEach(rp=>{
@@ -6348,7 +6370,8 @@ function blendHistoryForATL(base, targetCount){
   // blendCategory precedence — gems (incl. seed graves) first, then real OSM
   // history, then procedural filler — but partitioned so graves can be capped.
   // A wider pull than targetCount so capped graves don't starve the lead list.
-  nearbyApprovedGems(base, [], targetCount*3, 'history').forEach(g=> consider(gemToPoint(g, 'history')));
+  // #421 — gems and story-bearing map places together, nearest-first; then the rest.
+  humanFirstPass(base, 'history', 'history', targetCount*3).forEach(consider);
   nearbyRealPlaces(base, 'history', targetCount*3).forEach(rp=> consider({...rp, category:'history'}));
   if(SHOW_PROCEDURAL_FILLER){ (generateLocalHistory(base)||[]).forEach(p=> consider({...p, category:(p.category||'history')})); }
   return lead.concat(graves.slice(0, ATL_HISTORY_GRAVE_CAP)).slice(0, targetCount);
@@ -6604,10 +6627,17 @@ function blendHistoryFacet(base, facet, targetCount){
   const used = new Set();
   const push = p => { const k=normName(p.name); if(k && used.has(k)) return; if(k) used.add(k); out.push(p); };
   // 1) history gems (user submissions + the #310 seed graves), facet-filtered on the raw gem (which carries .name)
+  //    #421 — merged nearest-first with story-bearing map places of the same facet
+  const _gemRows = [];
   nearbyApprovedGems(base, [], targetCount*3, 'history').forEach(g=>{
     if(historyKindFacet(g) !== facet) return;
-    push(gemToPoint(g, 'history'));
+    _gemRows.push({d:g.dist, p:gemToPoint(g, 'history')});
   });
+  nearbyRealPlaces(base, 'history', targetCount*6).filter(isStoryReal).forEach(rp=>{
+    if(historyKindFacet(rp) !== facet) return;
+    _gemRows.push({d:rp.dist, p:{...rp, category:'history'}});
+  });
+  _gemRows.sort((a,b)=>a.d-b.d).forEach(r=> push(r.p));
   // 2) real internet history places (OSM tombs/museums/historic), facet-filtered on the real place (which carries .type)
   if(out.length < targetCount*3){
     nearbyRealPlaces(base, 'history', targetCount*3).forEach(rp=>{
@@ -8496,7 +8526,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25p';
+const APP_VERSION = '2026.09.25r';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.

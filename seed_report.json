@@ -1,207 +1,111 @@
 [
   {
-    "candidate": "Lincoln Court Apartments",
+    "candidate": "First Avenue",
     "geo": {
-      "lat": 44.938655,
-      "lng": -93.146582,
-      "label": "source coordinate 44.938655,-93.146582",
+      "lat": 44.9782606,
+      "lng": -93.2760295,
+      "label": "701 1st Avenue North, First Avenue, Minneapolis",
       "nameMatch": true
     },
-    "locate": "@44.938655,-93.146582",
-    "story": "On March 31, 1934, John Dillinger shot his way out of apartment 303 here during an FBI raid and escaped with a leg wound; J. Edgar Hoover used the fiasco to win the FBI more money and power.",
-    "wikiTitle": null,
+    "locate": "701 North 1st Avenue",
+    "story": "Built in 1937 as the Greyhound bus depot, this club is where Prince recorded the album version of \"Purple Rain\" live in August 1983, and he rented it that fall to film the movie's concert scenes.",
+    "wikiTitle": "First Avenue (nightclub)",
     "wikiWidened": false,
     "existing": [
-      "Lincoln Court Apartments [submission]"
+      "First Avenue (nightclub) [wiki]",
+      "Pantages Theatre (Minneapolis) [wiki]"
     ],
     "verdict": {
-      "decision": "match",
-      "matchName": "Lincoln Court Apartments",
-      "canonicalName": "Lincoln Court Apartments",
+      "decision": "new",
+      "matchName": "First Avenue (nightclub)",
+      "canonicalName": "First Avenue",
       "category": "history",
       "confidence": 1,
-      "why": "The candidate name is identical to the existing map entry, and the historical context provided confirms it is the same location associated with the 1934 John Dillinger event."
+      "why": "The candidate 'First Avenue' refers to the same historic nightclub as the existing map entry 'First Avenue (nightclub)', supported by the provided historical context regarding Prince and the venue's origins."
     },
-    "outcome": "already-present"
+    "outcome": "new-seed"
   },
   {
-    "candidate": "F. Scott Fitzgerald Birthplace",
+    "candidate": "Foshay Tower",
     "geo": {
-      "lat": 44.9455786,
-      "lng": -93.1205104,
-      "label": "481 Laurel Avenue, Saint Paul",
-      "nameMatch": true
-    },
-    "locate": "481 Laurel Avenue",
-    "story": "F. Scott Fitzgerald was born on the second floor of this apartment building on September 24, 1896.",
-    "wikiTitle": "St. Paul Curling Club",
-    "wikiWidened": false,
-    "existing": [
-      "F. Scott Fitzgerald Birthplace [submission]",
-      "St. Paul Curling Club [wiki]"
-    ],
-    "verdict": {
-      "decision": "match",
-      "matchName": "F. Scott Fitzgerald Birthplace",
-      "canonicalName": "F. Scott Fitzgerald Birthplace",
-      "category": "history",
-      "confidence": 1,
-      "why": "The candidate place is identical to an existing entry on the map."
-    },
-    "outcome": "already-present"
-  },
-  {
-    "candidate": "F. Scott Fitzgerald House",
-    "geo": {
-      "lat": 44.941651,
-      "lng": -93.125304,
-      "label": "source coordinate 44.941651,-93.125304",
-      "nameMatch": true
-    },
-    "locate": "@44.941651,-93.125304",
-    "story": "In the summer of 1919 a 22-year-old F. Scott Fitzgerald rewrote This Side of Paradise in a third-floor room of his parents' row house here; the novel's success won him Zelda Sayre's hand.",
-    "wikiTitle": "F. Scott Fitzgerald House",
-    "wikiWidened": false,
-    "existing": [
-      "F. Scott Fitzgerald House [submission]"
-    ],
-    "verdict": {
-      "decision": "match",
-      "matchName": "F. Scott Fitzgerald House",
-      "canonicalName": "F. Scott Fitzgerald House",
-      "category": "history",
-      "confidence": 1,
-      "why": "The candidate place is identical to the existing map entry, sharing the same name and historical significance."
-    },
-    "outcome": "already-present"
-  },
-  {
-    "candidate": "Barker-Karpis Gang Hideout",
-    "geo": {
-      "lat": 44.9152863,
-      "lng": -93.0809842,
-      "label": "1031 Robert Street South, West St Paul",
-      "nameMatch": true
-    },
-    "locate": "1031 South Robert Street",
-    "story": "Gang leaders Fred Barker and Alvin \"Creepy\" Karpis hid out in this house in the early 1930s, and cleared out after the landlord's son recognized them from a wanted ad in True Detective magazine.",
-    "wikiTitle": null,
-    "wikiWidened": false,
-    "existing": [
-      "Barker-Karpis Gang Hideout [submission]"
-    ],
-    "verdict": {
-      "decision": "match",
-      "matchName": "Barker-Karpis Gang Hideout",
-      "canonicalName": "Barker-Karpis Gang Hideout",
-      "category": "history",
-      "confidence": 1,
-      "why": "The candidate place name and the documented story match the existing map entry exactly."
-    },
-    "outcome": "already-present"
-  },
-  {
-    "candidate": "Wabasha Street Caves",
-    "geo": {
-      "lat": 44.9357855,
-      "lng": -93.0870209,
-      "label": "Wabasha Street Caves, Saint Paul, Minnesota",
+      "lat": 44.9744713,
+      "lng": -93.2717771,
+      "label": "Foshay Tower, Minneapolis, Minnesota",
       "nameMatch": true
     },
     "locate": null,
-    "story": "These sandstone caves were mined for silica, then used as a mushroom farm, a Prohibition-era speakeasy and a 1970s disco, and are said to be haunted by gangsters.",
-    "wikiTitle": null,
+    "story": "Wilbur Foshay built this Washington Monument look-alike in 1929 and paid John Philip Sousa $20,000 to write a march for its opening, but the check bounced when his empire collapsed weeks later, and Sousa barred the march from being played until the debt was paid.",
+    "wikiTitle": "Foshay Tower",
     "wikiWidened": false,
     "existing": [
-      "Wabasha Street Caves [submission]"
+      "Foshay Tower [wiki]",
+      "901 Marquette [wiki]"
     ],
     "verdict": {
-      "decision": "match",
-      "matchName": "Wabasha Street Caves",
-      "canonicalName": "Wabasha Street Caves",
+      "decision": "new",
+      "matchName": "Foshay Tower",
+      "canonicalName": "Foshay Tower",
       "category": "history",
       "confidence": 1,
-      "why": "The candidate place is identical to the existing map entry, sharing the same name and historical significance."
+      "why": "The candidate is identical to the existing map entry 'Foshay Tower', which is a well-known historic landmark in Minneapolis."
     },
-    "outcome": "already-present"
+    "outcome": "new-seed"
   },
   {
-    "candidate": "Seventh Street Improvement Arches",
+    "candidate": "Washburn Park Water Tower",
     "geo": {
-      "lat": 44.9565208,
-      "lng": -93.0770554,
-      "label": "Seventh Street Improvement Arches, Saint Paul, Minnesota",
+      "lat": 44.9107594,
+      "lng": -93.2842828,
+      "label": "Washburn Park Water Tower, Minneapolis, Minnesota",
       "nameMatch": true
     },
     "locate": null,
-    "story": "This double-arched stone highway bridge is the only structure of its kind in Minnesota.",
-    "wikiTitle": null,
+    "story": "Eight figures called the Guardians of Health ring this art deco water tower, standing watch over the city's water against pollution and bacteria.",
+    "wikiTitle": "Washburn Park Water Tower",
     "wikiWidened": false,
     "existing": [
-      "Seventh Street Improvement Arches [submission]",
-      "7th Street East [osm]"
+      "Washburn Park Water Tower [map:wiki]"
     ],
     "verdict": {
       "decision": "match",
-      "matchName": "Seventh Street Improvement Arches",
-      "canonicalName": "Seventh Street Improvement Arches",
+      "matchName": "Washburn Park Water Tower",
+      "canonicalName": "Washburn Park Water Tower",
       "category": "history",
       "confidence": 1,
-      "why": "The candidate place is identical to an existing entry on the map with the exact same name."
+      "why": "The candidate place name and the existing map entry are identical, and the documented story confirms it is the same historic landmark."
     },
-    "outcome": "already-present"
+    "outcome": "story-attached",
+    "attachedTo": [
+      "Washburn Park Water Tower [map:wiki]"
+    ]
   },
   {
-    "candidate": "First National Bank Building",
+    "candidate": "Witch's Hat Tower",
     "geo": {
-      "lat": 44.9463783,
-      "lng": -93.0911152,
-      "label": "First National Bank Building, Saint Paul, MN",
+      "lat": 44.9686769,
+      "lng": -93.2126729,
+      "label": "Witch's Hat Tower, Minneapolis, Minnesota",
       "nameMatch": true
     },
     "locate": null,
-    "story": "A small passageway built at this building in 1931 is believed to be the first modern skyway.",
-    "wikiTitle": "First National Bank Building (Saint Paul, Minnesota)",
+    "story": "This landmark water tower was also meant to double as a bandstand that never worked out, and it opens for panoramic views just once a year.",
+    "wikiTitle": "Prospect Park Water Tower",
     "wikiWidened": false,
     "existing": [
-      "First National Bank Building [submission]",
-      "First National Bank Building (Saint Paul, Minnesota) [wiki]"
+      "Witch's Hat Tower [map:osm]",
+      "Prospect Park Water Tower [wiki]"
     ],
     "verdict": {
       "decision": "match",
-      "matchName": "First National Bank Building (Saint Paul, Minnesota)",
-      "canonicalName": "First National Bank Building (Saint Paul, Minnesota)",
+      "matchName": "Witch's Hat Tower",
+      "canonicalName": "Prospect Park Water Tower",
       "category": "history",
       "confidence": 1,
-      "why": "The candidate refers to the same historic building in Saint Paul, Minnesota, which is already present on the map."
+      "why": "The candidate 'Witch's Hat Tower' is a well-known local nickname for the 'Prospect Park Water Tower', which is already present on the map."
     },
-    "outcome": "already-present"
-  },
-  {
-    "candidate": "The Calling",
-    "geo": {
-      "lat": 44.9552278,
-      "lng": -93.1664358,
-      "label": "The Calling, Saint Paul, Minnesota",
-      "nameMatch": true
-    },
-    "locate": null,
-    "story": "This loon sculpture outside Allianz Field has a 90-foot wingspan, making it the world's largest loon sculpture.",
-    "wikiTitle": "Snelling Avenue station",
-    "wikiWidened": false,
-    "existing": [
-      "The Calling [submission]",
-      "Snelling Avenue station [wiki]",
-      "Spruce Tree Centre [wiki]"
-    ],
-    "verdict": {
-      "decision": "match",
-      "matchName": "The Calling",
-      "canonicalName": "The Calling",
-      "category": "art",
-      "confidence": 1,
-      "why": "The candidate name matches an existing entry on the map exactly, and the description confirms it is a public art sculpture."
-    },
-    "outcome": "already-present"
+    "outcome": "story-attached",
+    "attachedTo": [
+      "Witch's Hat Tower [map:osm]"
+    ]
   }
 ]

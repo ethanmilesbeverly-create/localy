@@ -59,7 +59,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.25c (#57 story lines + #418 three-source dedup)";
+const TOOL_VERSION = "seed-resolve 2026.09.25e (#419 stories attach to existing pins)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -176,7 +176,7 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-type Existing = { name: string; lat: number; lng: number; category?: string; source?: string };
+type Existing = { name: string; lat: number; lng: number; category?: string; source?: string; seed?: boolean };
 
 // ---------------------------------------------------------------------------
 // 1) Geocode a name -> coordinates (Photon, unkeyed — the app's #88 provider).
@@ -314,6 +314,18 @@ const STREET_GENERIC = new Set([
 function streetTokens(s: string): string[] {
   return geoTokens(s).filter((t) => !STREET_GENERIC.has(t));
 }
+// The street's DIRECTION must agree too. Without this, "327 14th Avenue SE"
+// (Minneapolis) matched "327 14th Avenue South" in South St. Paul: "SE" is too
+// short to be a token and "south" is a generic word, so only "14th" was
+// compared. A direction named on either side must be the same set on both.
+const DIR_WORDS: Record<string, string> = {
+  north: "n", south: "s", east: "e", west: "w", northeast: "ne", northwest: "nw", southeast: "se", southwest: "sw",
+  n: "n", s: "s", e: "e", w: "w", ne: "ne", nw: "nw", se: "se", sw: "sw",
+};
+function streetDirs(s: string): string {
+  const out = geoFold(s).replace(/[^a-z0-9]+/g, " ").split(/\s+/).map((t) => DIR_WORDS[t]).filter(Boolean);
+  return [...new Set(out)].sort().join(",");
+}
 async function geocodeAddress(
   address: string,
 ): Promise<{ lat: number; lng: number; label: string; nameMatch: boolean } | null> {
@@ -321,6 +333,7 @@ async function geocodeAddress(
   if (!m) return null;
   const wantNum = m[1].toLowerCase();
   const wantStreet = streetTokens(m[2]);
+  const wantDirs = streetDirs(m[2]);
   const boxKm = CITY_MAX_KM > 0 ? CITY_MAX_KM : 75;
   const dLat = boxKm / 111;
   const dLng = boxKm / (111 * Math.max(0.05, Math.cos((CITY.lat * Math.PI) / 180)));
@@ -343,6 +356,7 @@ async function geocodeAddress(
       if (hn !== wantNum) continue;
       const have = new Set(streetTokens(String(p.street ?? "")));
       const hit = wantStreet.filter((t) => have.has(t)).length;
+      if (streetDirs(String(p.street ?? "")) !== wantDirs) continue;
       if (wantStreet.length && hit / wantStreet.length >= 0.6) {
         return { lat: c[1], lng: c[0], label, nameMatch: true };
       }
@@ -565,7 +579,9 @@ async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
     const places: any[] = Array.isArray(d?.places) ? d.places : Array.isArray(d) ? d : [];
     return places
       .filter((p) => typeof p?.lat === "number" && typeof p?.lng === "number" && p?.name)
-      .map((p) => ({ name: String(p.name), lat: p.lat, lng: p.lng, category: p.category, source: p.source ?? "map" }));
+      // Tagged "map:<source>" so a live Wikipedia PIN ("map:wiki") is never confused
+      // with a bare Wikipedia geosearch hit ("wiki" = an article, not a pin) — #419.
+      .map((p) => ({ name: String(p.name), lat: p.lat, lng: p.lng, category: p.category, source: "map:" + (p.source ?? "?") }));
   } catch {
     return null;
   }
@@ -575,7 +591,7 @@ async function submissionsNear(lat: number, lng: number): Promise<Existing[] | n
   // The same read the app does (approved, not merged), so the public key is enough.
   const dLat = (MATCH_RADIUS_M * 2) / 111000;
   const dLng = (MATCH_RADIUS_M * 2) / (111000 * Math.max(0.05, Math.cos((lat * Math.PI) / 180)));
-  const url = PROJECT_URL + "/rest/v1/submissions?select=name,lat,lng,category" +
+  const url = PROJECT_URL + "/rest/v1/submissions?select=name,lat,lng,category,submitted_by" +
     "&status=eq.approved&merged_into=is.null" +
     `&lat=gte.${(lat - dLat).toFixed(6)}&lat=lte.${(lat + dLat).toFixed(6)}` +
     `&lng=gte.${(lng - dLng).toFixed(6)}&lng=lte.${(lng + dLng).toFixed(6)}`;
@@ -583,7 +599,7 @@ async function submissionsNear(lat: number, lng: number): Promise<Existing[] | n
     const r = await fetch(url, { headers: { apikey: PUBLIC_KEY, Authorization: "Bearer " + PUBLIC_KEY } });
     if (!r.ok) return null;
     const rows: any[] = await r.json();
-    return rows.map((x) => ({ name: String(x.name), lat: x.lat, lng: x.lng, category: x.category, source: "submission" }));
+    return rows.map((x) => ({ name: String(x.name), lat: x.lat, lng: x.lng, category: x.category, source: "submission", seed: x.submitted_by == null }));
   } catch {
     return null;
   }
@@ -742,7 +758,8 @@ type CuratedRow = { name: string; lat: number; lng: number; description: string;
 // wiki intro is stored as NULL (not ""), matching how existing seeds were loaded
 // (#279's "NULL description" set). seed_meta has no column and is dropped.
 // ---------------------------------------------------------------------------
-async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[]): Promise<void> {
+type SeedPatch = { name: string; lat: number; lng: number; story: string };
+async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[], patches: SeedPatch[] = []): Promise<void> {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     console.error(
       "\n--commit ABORTED: SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY not set. " +
@@ -750,10 +767,11 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[]): Promise
     );
     Deno.exit(1);
   }
-  if (!rows.length) {
-    console.log("\n--commit: 0 new rows to insert, nothing to do.");
+  if (!rows.length && !curated.length && !patches.length) {
+    console.log("\n--commit: nothing to insert or attach, nothing to do.");
     return;
   }
+  const svc = { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY };
 
   // Map to the exact `submissions` columns — drop seed_meta (no column),
   // NULL a blank description, carry city/source/status/submitted_by. id and
@@ -802,6 +820,34 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[]): Promise
   // curated rung serves it on any later re-resolve (#319) of the same pin. The
   // submission rows above already carry the story, so a failure here does not
   // blank the map — it is reported, and curated_records.json holds the rows.
+  // #419: skip a curated row that already exists for this pin (same name within
+  // 50 m), so re-running a file never stacks duplicate story rows.
+  const fresh: CuratedRow[] = [];
+  for (const c of curated) {
+    try {
+      const nc = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const r = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions?select=lat,lng&name_clean=eq." + encodeURIComponent(nc), { headers: svc });
+      const have: any[] = r.ok ? await r.json() : [];
+      if (have.some((h) => haversineM(c.lat, c.lng, Number(h.lat), Number(h.lng)) <= 50)) {
+        console.log(`  curated row already exists for "${c.name}" — skipped`);
+        continue;
+      }
+    } catch { /* on a read failure, insert anyway: a duplicate row is harmless, a missing one is not */ }
+    fresh.push(c);
+  }
+  curated = fresh;
+  // #419: an existing SEED (uncredited submission) that is this place takes the
+  // story as its persisted description. A user's own gem is never touched.
+  for (const pt of patches) {
+    const q = `?name=eq.${encodeURIComponent(pt.name)}&lat=eq.${pt.lat}&lng=eq.${pt.lng}&submitted_by=is.null&status=eq.approved`;
+    const r = await fetch(SUPABASE_URL + "/rest/v1/submissions" + q, {
+      method: "PATCH",
+      headers: { ...svc, "Content-Type": "application/json", Prefer: "return=representation" },
+      body: JSON.stringify({ resolved_description: pt.story, resolved_source: "curated" }),
+    });
+    const n = r.ok ? ((await r.json().catch(() => [])) as any[]).length : 0;
+    console.log(r.ok ? `  story attached to existing seed "${pt.name}" (${n} row)` : `  attach to seed "${pt.name}" FAILED: HTTP ${r.status}`);
+  }
   if (curated.length) {
     const res = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions", {
       method: "POST",
@@ -816,8 +862,8 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[]): Promise
     if (res.ok) console.log(`  curated_descriptions: inserted ${curated.length} story row(s).`);
     else console.error(`  curated_descriptions insert FAILED: HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 300)} — the pins still show their story; load curated_records.json by hand.`);
   }
-  console.log(`\n--commit: INSERTED ${inserted} row(s) into submissions (source='seed:reddit', city='${rows[0].city}', status='approved').`);
-  console.log(`Verify: submissions seed:reddit count should have risen by exactly ${inserted}. Back-out: delete from submissions where source='seed:reddit' and city='${rows[0].city}' and created_at > now() - interval '1 hour';`);
+  console.log(`\n--commit: INSERTED ${inserted} row(s) into submissions (source='seed:reddit', city='${CITY.name}', status='approved').`);
+  console.log(`Verify: submissions seed:reddit count should have risen by exactly ${inserted}. Back-out: delete from submissions where source='seed:reddit' and city='${CITY.name}' and created_at > now() - interval '1 hour';`);
 }
 
 async function run() {
@@ -842,6 +888,7 @@ async function run() {
 
   const rows: SeedRow[] = [];
   const curatedRows: CuratedRow[] = [];
+  const seedPatches: SeedPatch[] = [];
   const report: any[] = [];
 
   for (const rawLine of names) {
@@ -905,6 +952,48 @@ async function run() {
       existing: existing.map((e) => `${e.name} [${e.source ?? "?"}]`),
       verdict,
     };
+
+    // #419 — WHERE A STORY LINE GOES. A pin that is this place (its name, minus
+    // any "(…)" qualifier, found in the line's name / locate / placed label) gets
+    // the story; a new seed is made only when no LIVE-MAP or submission pin is
+    // this place. A Wikipedia-only match is NOT "on the map": a tile carries only
+    // the ~20 articles nearest its centre, so Landmark Center, Foshay Tower and
+    // First Avenue have articles but no pin. Their Wikipedia title still gets a
+    // curated row, so if a tile ever shows that pin it shows the story too.
+    if (line.story && verdict.decision !== "held") {
+      const blob = [candidate, line.locate, geo.label].join(" ");
+      const bare = (n: string) => n.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+      const targets = existing.filter((e) => bare(e.name) && labelMatchesName(bare(e.name), blob));
+      const onMap = targets.filter((e) => e.source !== "wiki");
+      const stagePinRow = (e: Existing) => curatedRows.push({
+        name: e.name, lat: e.lat, lng: e.lng, description: line.story,
+        source_url: line.source || null, note: `#419 story on existing pin (${e.source}, ${CITY.name})`,
+      });
+      if (onMap.length) {
+        for (const e of targets) {
+          if (e.source === "submission") {
+            if (e.seed) seedPatches.push({ name: e.name, lat: e.lat, lng: e.lng, story: line.story });
+          } else stagePinRow(e);
+        }
+        report.push({ ...base, outcome: "story-attached", attachedTo: targets.map((e) => `${e.name} [${e.source}]`) });
+        console.log(`  ↪ ${candidate} → story attaches to existing: ${targets.map((e) => `${e.name} [${e.source}]`).join(", ")}`);
+        await sleep(7000);
+        continue;
+      }
+      const other = verdict.decision === "match"
+        ? existing.find((e) => e.source !== "wiki" && e.name === verdict.matchName) : undefined;
+      if (other) {
+        // Gemini says a live pin under a DIFFERENT name is this place: attaching
+        // by fuzzy judgement risks the wrong pin, seeding risks a duplicate. Human.
+        report.push({ ...base, outcome: "review", why: `matched live pin "${other.name}" under a different name — attach by hand` });
+        console.log(`  ? ${candidate} → REVIEW: matched live pin "${other.name}" under a different name — attach by hand`);
+        await sleep(7000);
+        continue;
+      }
+      for (const e of targets) stagePinRow(e); // Wikipedia titles for this place
+      verdict.decision = "new";
+      if (!verdict.category || verdict.category === "commercial") verdict.category = "history";
+    }
 
     if (verdict.decision === "new" && verdict.category === "commercial") {
       // #57 story-only: a new business with no story of its own is not a seed.
@@ -976,6 +1065,7 @@ async function run() {
   const uncat = rows.filter((r) => !r.category).length;
   const blank = rows.filter((r) => !r.description).length;
   const storied = rows.filter((r) => r.resolved_source === "curated").length;
+  console.log(`stories attached to existing pins: ${counts["story-attached"] ?? 0} (${seedPatches.length} existing seed(s) updated on commit)`);
   console.log(`story lines seeded: ${storied} (their story ships as resolved_source 'curated'; ${curatedRows.length} curated_descriptions rows staged in curated_records.json)`);
   console.log(`new seed rows: ${rows.length}  (unclassified category: ${uncat}, no wiki description: ${blank})`);
   console.log("wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).");
@@ -989,7 +1079,7 @@ async function run() {
 
   if (COMMIT) {
     console.log("\n--commit passed: writing the new rows to submissions now.");
-    await commitToSupabase(rows, curatedRows);
+    await commitToSupabase(rows, curatedRows, seedPatches);
     // #57 story-only: a new seed lands with resolved_source NULL (visible, never
     // checked). The #318 cascade stamps it — or hides it — only when the
     // recheck runs. Until then a seed with no wiki intro shows with no story.
