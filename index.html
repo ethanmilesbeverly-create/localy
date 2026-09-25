@@ -8219,6 +8219,9 @@ function setTab(id){
   setNavActive(id);
   if(id==='screen-map' && state.leafletMap){
     fixMapSize();
+    /* #415 — a default framing that was skipped while the map was hidden runs
+       now, when the container has a real size (see centerOnPlayer). */
+    if(state._frameOnShow){ state._frameOnShow = false; centerOnPlayer(); }
   }
   if(id==='screen-modes'){
     updateExploreSelectionIcons();
@@ -8348,7 +8351,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25h';
+const APP_VERSION = '2026.09.25i';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11370,6 +11373,16 @@ function centerOnPlayer(opts){
   requestAnimationFrame(()=>{
     if(!state.leafletMap) return;
     state.leafletMap.invalidateSize();
+    /* #415 — A HIDDEN MAP CAN'T BE FRAMED. When the map tab isn't showing (the
+       boot landed on Passport / Submit / Guides — a sign-in return (#400) or a
+       persisted tab), the container measures 0×0, getBoundsZoom has nothing to
+       fit and defaultFrameZoom falls back to its ZOOM_OVERVIEW cap (16): the
+       street-level "prezoomed" map you then find on tapping Map, remembered for
+       the next reload too. So don't frame now — mark it, and setTab frames once
+       the map is actually visible. */
+    const _sz = state.leafletMap.getSize();
+    if(!_sz || !_sz.x || !_sz.y){ state._frameOnShow = true; return; }
+    state._frameOnShow = false;
     state.leafletMap.setMinZoom(2); // clear any leftover floor first, so the calculation below isn't clamped by it
     // Frame a FIXED radius around the player rather than fitting whatever points
     // happen to be loaded right now. That point-driven fit was the bug: on a cold
