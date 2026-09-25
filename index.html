@@ -2160,6 +2160,21 @@
   .modal-card .btn{margin-bottom:10px;}
   .modal-card .btn.ghost{margin-bottom:0;font-size:12.5px;padding:6px;}
 
+  /* #416 (25o) — the location ask. Same scrim as the retired onboarding overlay. */
+  #loc-modal{
+    position:absolute;inset:0;z-index:2000;
+    background:rgba(6,16,12,0.5);backdrop-filter:blur(2px);
+    display:none;align-items:center;justify-content:center;padding:24px;
+  }
+  #loc-modal.show{display:flex;}
+  #loc-modal .modal-card{max-width:340px;}
+  #loc-modal .loc-view{display:none;}
+  #loc-modal .loc-view.active{display:block;}
+  #loc-modal .loc-steps{font-size:13px;color:var(--text);line-height:1.55;text-align:left;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 18px;}
+  #loc-modal .loc-legal{margin:12px 0 0;font-size:12px;}
+  #loc-modal .loc-legal a{color:var(--text-dim);text-decoration:underline;text-underline-offset:2px;}
+
   #achievement-popup{
     position:absolute;inset:0;z-index:1150;
     background:rgba(6,16,12,0.55);
@@ -2401,6 +2416,38 @@
         <span id="onboard-dot-4"></span>
       </div>
 
+    </div>
+  </div>
+
+  <!-- #416 (25o) — THE LOCATION ASK. The browser's own prompt can only be shown
+       while the browser is willing, and after a person declines it most browsers
+       stop showing it (Safari for the rest of the visit or day, Chrome until the
+       site is reset). So the locate button now asks in-app first; "Not now" is
+       our decline, and that one can be asked again on every tap. The browser
+       prompt is fired only after "Share my location". If the browser has already
+       blocked the site, the second view says how to turn it back on. -->
+  <div id="loc-modal" onclick="if(event.target===this) closeLocModal()">
+    <div class="modal-card">
+      <div class="loc-view active" id="loc-view-ask">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        </div>
+        <h2>See what&rsquo;s near you</h2>
+        <p>Share your location so Nahgoo can show the spots around you and let you capture them when you&rsquo;re there.</p>
+        <button class="btn" onclick="locModalShare()">Share my location</button>
+        <button class="btn ghost" onclick="closeLocModal()">Not now</button>
+        <p class="loc-legal"><a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a></p>
+      </div>
+      <div class="loc-view" id="loc-view-blocked">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
+        </div>
+        <h2>Location is off for Nahgoo</h2>
+        <p>Your browser is blocking location for this site. To turn it on:</p>
+        <div class="loc-steps" id="loc-blocked-steps"></div>
+        <button class="btn" onclick="locModalShare()">Try again</button>
+        <button class="btn ghost" onclick="closeLocModal()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -7986,33 +8033,74 @@ function enterEstimatedArea(area){
 function leaveEstimatedArea(){
   state._estimatedArea = false;
 }
-/* #416 (25n) — shown ONLY when the browser refuses without showing its prompt
-   (a denial that comes back faster than a person could read and tap — the site
-   is blocked in browser settings). A person who declines the prompt themselves
-   gets no message, by directive. */
-const GEO_DENIED_MSG = 'Location is blocked for this site. Allow it in your browser settings to see what\u2019s near you.';
+/* #416 (25n/25o) — a browser refusal that comes back faster than a person could
+   read and tap means no prompt was shown (the site is blocked in browser
+   settings). Only that case explains itself — now with the #loc-modal "blocked"
+   view (25o), not a toast. A person who declines the prompt themselves gets no
+   message, by directive. */
 const GEO_BLOCKED_FAST_MS = 700;
-/* The locate button with no fix yet: ask for location (the browser prompt shows
-   on the first call). The view stays on the current area until a real fix
-   lands; onLocation's first fix then leaves browse mode and centres on you. */
-function requestLocationFromTap(){
-  state._locateRequested = true;
-  if(state._locatingStarted && !state._geoDenied){ showToast('Finding your location\u2026'); return; }
+function locIsIOS(){
+  const ua = navigator.userAgent || '';
+  return /iP(hone|od|ad)/.test(ua) || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1);
+}
+function openLocModal(view){
+  const m = document.getElementById('loc-modal');
+  if(!m) return;
+  const blocked = view === 'blocked';
+  document.getElementById('loc-view-ask').classList.toggle('active', !blocked);
+  document.getElementById('loc-view-blocked').classList.toggle('active', blocked);
+  if(blocked){
+    const steps = document.getElementById('loc-blocked-steps');
+    if(steps) steps.innerHTML = locIsIOS()
+      ? 'Tap <b>aA</b> in the address bar &rarr; <b>Website Settings</b> &rarr; <b>Location</b> &rarr; <b>Allow</b>. Then tap Try again.<br><br>If that option is missing: iPhone <b>Settings</b> &rarr; <b>Privacy &amp; Security</b> &rarr; <b>Location Services</b> &rarr; <b>Safari Websites</b> &rarr; <b>While Using</b>.'
+      : 'Tap the icon to the left of the web address &rarr; <b>Permissions</b> (or <b>Site settings</b>) &rarr; <b>Location</b> &rarr; <b>Allow</b>. Then tap Try again.';
+  }
+  m.classList.add('show');
+}
+function closeLocModal(){
+  const m = document.getElementById('loc-modal');
+  if(m) m.classList.remove('show');
+}
+/* "Share my location" / "Try again": the ONLY place the browser prompt is
+   requested from a locate tap. A decline leaves the dead watch behind, so a
+   retry clears it and starts over. */
+function locModalShare(){
+  closeLocModal();
   state._geoAskAt = Date.now();
-  /* #416 (25n) — ASK AGAIN AFTER A DECLINE, by directive. A decline used to be
-     final for the page (every later tap only showed a message). Now a tap
-     re-requests: the dead watch is cleared and startLocating() runs again, so
-     the browser shows its prompt again whenever it is willing to. Whether it is
-     willing is the BROWSER's call, not ours — Chrome remembers an explicit
-     "Block" for the site until it is reset in site settings; that case comes
-     back instantly with no prompt, and only then is GEO_DENIED_MSG shown. */
-  if(state._geoDenied){
+  if(state._geoDenied || state._locatingStarted){
     state._geoDenied = false;
     if(state.watchId !== null){ try{ navigator.geolocation.clearWatch(state.watchId); }catch(e){} state.watchId = null; }
+    state._locatingStarted = true;
     startLocating();
     return;
   }
   ensureLocating();
+}
+/* The locate button with no fix yet: ask for location (the browser prompt shows
+   on the first call). The view stays on the current area until a real fix
+   lands; onLocation's first fix then leaves browse mode and centres on you. */
+/* #416 (25o) — ASK IN-APP FIRST. 25n re-requested straight from the tap, but a
+   browser that has been declined does not show its prompt again (Safari keeps
+   the decline for the visit or longer, Chrome until the site is reset), so the
+   second tap did nothing. Now every tap with no fix opens #loc-modal:
+     • browser says 'granted'  → skip the modal, start locating;
+     • browser says 'denied'   → the "blocked" view with how to turn it on;
+     • otherwise               → the "ask" view; the browser prompt fires only
+                                 on "Share my location". "Not now" costs nothing
+                                 and the next tap asks again.
+   Browsers that can't report the state (older Safari) get the ask view; if the
+   request then comes back refused instantly, the blocked view follows. */
+async function requestLocationFromTap(){
+  state._locateRequested = true;
+  if(state._locatingStarted && !state._geoDenied){ showToast('Finding your location\u2026'); return; }
+  let perm = null;
+  try{
+    if(navigator.permissions && navigator.permissions.query){
+      perm = (await navigator.permissions.query({ name:'geolocation' })).state;
+    }
+  }catch(e){ perm = null; }
+  if(perm === 'granted'){ locModalShare(); return; }
+  openLocModal(perm === 'denied' ? 'blocked' : 'ask');
 }
 
 /* #52/#73 — startLocating() must run exactly once whether it is kicked off by
@@ -8497,7 +8585,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25n';
+const APP_VERSION = '2026.09.25o';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9891,7 +9979,7 @@ function startLocating(){
         /* #416 (25n) — no message when the person declined the prompt. Only an
            instant refusal after a locate tap (no prompt was shown — blocked in
            browser settings) explains itself; otherwise the tap would look dead. */
-        if(state._geoAskAt && (Date.now() - state._geoAskAt) < GEO_BLOCKED_FAST_MS) showToast(GEO_DENIED_MSG);
+        if(state._geoAskAt && (Date.now() - state._geoAskAt) < GEO_BLOCKED_FAST_MS) openLocModal('blocked');
         return;
       }
       if(demoBypassActive()){
