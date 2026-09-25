@@ -2098,6 +2098,18 @@
   }
   body.is-guest .nav-lock svg{ width:9px; height:9px; }
   body.is-guest .nav-btn.active .nav-lock{ color:var(--orange); }
+  /* #414 (25g) — the same guest lock on the Guides tab's "Create Your Own" row,
+     the one Guides action that needs an account. Top-right corner of the row. */
+  .create-row{ position:relative; }
+  .row-lock{ display:none; }
+  body.is-guest .row-lock{
+    display:flex; align-items:center; justify-content:center;
+    position:absolute; top:8px; right:8px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--surface-2); color:var(--text-dim);
+    pointer-events:none;
+  }
+  body.is-guest .row-lock svg{ width:11px; height:11px; }
   .nav-btn svg{width:22px;height:22px;}
 
   /* toast */
@@ -3381,6 +3393,16 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/></svg>
       Explore
     </button>
+    <!-- #297 — GUIDES TAB. This is the FIFTH tab, which the #62 gravestone (on the
+         Submit tab, below since #414 moved it)
+         names as the ceiling ("FOUR IS FINE, FIVE IS THE CEILING"). Added by
+         directive to give guides their own home off Explore. No sixth without
+         moving something out. Icon is the guide pennant/flag — the same identity
+         the purple guide pin and the My Guides cards use (flagSVG). -->
+    <button class="nav-btn" data-screen="screen-guides" onclick="navTo('screen-guides')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0"/></svg>
+      Guides
+    </button>
     <!-- #62 — SUBMIT IS A TAB AS OF 2026.07.21k. It was a .code-entry-row buried
          under "More ways to explore", below six cards, #my-hunts-section and
          #gem-submissions-section — well below the fold on a tab most users do
@@ -3390,10 +3412,11 @@
          FOUR IS FINE, FIVE IS THE CEILING. Do not add a fifth without moving
          something out. (Guides became the fifth — #297.)
 
-         PLACED IN THE CENTER SLOT (position 3 of 5) by directive — a create/
-         contribute action reads naturally as the middle of the bar. This is a
-         reorder only; the tab, its screen and #gem-submissions-section are
-         unchanged.
+         ~~PLACED IN THE CENTER SLOT (position 3 of 5) by directive~~ — MOVED
+         TO SLOT 4 (between Guides and Passport) by directive, #414 (25g), so the
+         two guest-locked tabs (Submit, Passport) sit together at the right end
+         of the bar with their lock badges side by side. A reorder only; the
+         tab, its screen and #gem-submissions-section are unchanged.
 
          THE LABEL NAMES AN ACTION AND THAT IS A KNOWN TENSION, not an oversight.
          Tabs are destinations you return to; "Submit" is a thing you finish and
@@ -3406,15 +3429,6 @@
       <span class="nav-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M10 3 8 9l4 12 4-12-2-6"/></svg>
       Submit
-    </button>
-    <!-- #297 — GUIDES TAB. This is the FIFTH tab, which the #62 gravestone above
-         names as the ceiling ("FOUR IS FINE, FIVE IS THE CEILING"). Added by
-         directive to give guides their own home off Explore. No sixth without
-         moving something out. Icon is the guide pennant/flag — the same identity
-         the purple guide pin and the My Guides cards use (flagSVG). -->
-    <button class="nav-btn" data-screen="screen-guides" onclick="navTo('screen-guides')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4c3-1.5 6 1.5 9 0s5 0 5 0v9s-2 1.5-5 0-6-1.5-9 0"/></svg>
-      Guides
     </button>
     <button class="nav-btn" data-screen="screen-passport" onclick="navTo('screen-passport')">
       <!-- #414 (25f) — guest-only lock badge: this tab needs an account. -->
@@ -3566,8 +3580,10 @@
      the padding keeps the card clear of it. The reset screen and the expired-
      link card never carry .is-prompt, so they keep the opaque background. */
   #auth-overlay.is-prompt{
-    /* 25d — lighter tint and no blur, so the screen behind actually reads. */
-    background:rgba(6,16,12,0.35);
+    /* 25d lightened this to 0.35 with no blur; 25g — a touch darker plus a
+       light blur, because the background read too clearly behind the card. */
+    background:rgba(6,16,12,0.48);
+    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
     padding:16px 16px calc(88px + env(safe-area-inset-bottom));
   }
   body.auth-prompt-open #bottomnav{ z-index:5001; }
@@ -8333,7 +8349,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25f';
+const APP_VERSION = '2026.09.25g';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13088,6 +13104,7 @@ function renderMyHunts(){
       </div>`).join('') +
     `</div>
     <div class="code-entry-row create-row" onclick="openCreateScreen()">
+        <span class="row-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg></span>
         <div class="code-entry-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
