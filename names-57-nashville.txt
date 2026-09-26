@@ -1,0 +1,72 @@
+# #57 Phase A — Nashville story pass 1 (2026-09-26). Source: the Historical Marker Database
+# (Nashville A–C title pages + the Metro Historical Commission series, page 1 of 3).
+# Every line is placed at the marker's own published coordinate and worded only from the
+# marker text. Format: Name | locate | story | source_url   (# = comment)
+#
+# RUN (from ~/roaminator, dry run first — read it, then commit only the eyeballed lines, handoff §6 (l)):
+#   SEED_CITY_NAME=Nashville SEED_CITY_LAT=36.1627 SEED_CITY_LNG=-86.7816 deno run --allow-net --allow-env --allow-read --allow-write seed-resolve.ts names-57-nashville.txt
+#
+# --- Downtown / The District ---
+Battle of the Bluffs | @36.16152206,-86.77642637 | In the Battle of the Bluffs on April 2, 1781, settlers fighting Cherokee warriors around this spot got back to the fort after Mrs. James Robertson set the fort's dogs on the attackers. | https://www.hmdb.org/m.asp?m=72268
+Nashville Desegregation Plaque | @36.16715506,-86.7785398 | After civil rights lawyer Z. Alexander Looby's home was bombed on April 19, 1960, several thousand marchers walked to this courthouse, where Mayor Ben West, pressed by Fisk student Diane Nash, said it was morally wrong to deny Black customers service at lunch counters. | https://www.hmdb.org/m.asp?m=208974
+Site of First Baptist Church Capitol Hill | @36.1642,-86.7856 | The First Baptist Church, Capitol Hill, which once stood here, was headquarters of Nashville's 1960s sit-in movement under Rev. Kelly Miller Smith, hosting its strategy sessions, nonviolence workshops and mass meetings. | https://www.hmdb.org/m.asp?m=74333
+The Jungle and Juanita's | @36.16038611,-86.78237222 | By the early 1960s The Jungle, opened at 715 Commerce Street in 1952, and Juanita's Place next door were known as the first gay bars in Nashville. | https://www.hmdb.org/m.asp?m=147731
+Original Seeing Eye Headquarters | @36.165456,-86.778678 | The Seeing Eye, the famous guide-dog school, was incorporated in Nashville on January 29, 1929, with its first headquarters in the Fourth and First National Bank Building on Union Street. | https://www.hmdb.org/m.asp?m=61940
+First Masonic Hall | @36.16341907,-86.77974752 | Nashville's first Masonic Hall, where Wilkins Tannehill welcomed the Marquis de Lafayette in 1825, served as the Tennessee State Capitol from 1827 to 1829 while Sam Houston was governor. | https://www.hmdb.org/m.asp?m=301805
+1933 Tornado Site | @36.16632866,-86.7783139 | On March 14, 1933, a tornado struck the Public Square here, wrecking buildings on its north and east sides before moving through East Nashville, and at least eleven people were killed. | https://www.hmdb.org/m.asp?m=206242
+Andrew Johnson Residence Site | @36.1647439,-86.78323324 | Andrew Johnson, later the 17th president, lived in a house on this site while he was Tennessee's military governor from 1862 to 1865. | https://www.hmdb.org/m.asp?m=207002
+Vine Street Temple Site | @36.16090913,-86.78179837 | Completed in 1876 with nine Byzantine domes, the Vine Street Temple was Nashville's first synagogue. | https://www.hmdb.org/m.asp?m=147730
+Banner Building | @36.1635067,-86.77716476 | Built in 1913 for furniture and glass firms, this building is best known as the home of the Nashville Banner newspaper from 1920 to 1938. | https://www.hmdb.org/m.asp?m=182288
+Albert Gleaves Birthplace | @36.15728253,-86.78261447 | Admiral Albert Gleaves, born here in 1858, commanded the Navy force that carried Allied troops to France in World War I without losing a man. | https://www.hmdb.org/m.asp?m=147503
+#
+# --- North Nashville / Fisk / Jefferson Street ---
+Z. Alexander Looby Home | @36.16808611,-86.80857222 | In the pre-dawn hours of April 19, 1960, during a civil rights boycott, the home of lawyer and city councilman Z. Alexander Looby was bombed. | https://www.hmdb.org/m.asp?m=147892
+Clark Memorial United Methodist Church | @36.16918056,-86.79998889 | Activist James M. Lawson held classes here in 1959, making this church a center of Nashville's civil rights movement. | https://www.hmdb.org/m.asp?m=147778
+Arna Bontemps Home Site | @36.165181,-86.804887 | Harlem Renaissance poet, novelist and children's author Arna Bontemps lived at this site. | https://www.hmdb.org/m.asp?m=4959
+Adolphus Heiman Home Site | @36.17307,-86.79255 | Prussian-born architect Adolphus Heiman, who designed the suspension bridge over the Cumberland River, lived on this site after coming to Nashville in 1838. | https://www.hmdb.org/m.asp?m=4512
+Germantown Brewery District | @36.17526343,-86.78791598 | Immigrant brewers made Germantown home to four breweries by 1865, among them the North Nashville and Rock City breweries. | https://www.hmdb.org/m.asp?m=163414
+Buena Vista Park | @36.18903248,-86.80553525 | The park is named for Buena Vista Springs on this site, which still flow and were developed into a popular mineral-water spa in the late 1800s. | https://www.hmdb.org/m.asp?m=210489
+Riverside Sanitarium and Hospital Site | @36.2044033,-86.79575514 | Opened in 1927, Riverside Sanitarium and Hospital gave Black Nashvillians modern health care and drew patients and doctors from across the country. | https://www.hmdb.org/m.asp?m=147764
+#
+# --- East Nashville ---
+East Nashville Fire Origin | @36.1752459,-86.77423794 | Nashville's worst fire started near here on March 22, 1916, at the Seagraves Planing Mill, and gales of up to 51 mph drove it east until it was stopped that afternoon. | https://www.hmdb.org/m.asp?m=147761
+Cornelia Fort Airpark | @36.19027778,-86.70401111 | This airfield carries the name of Nashville flight instructor Cornelia Fort, who in 1943 became the first woman pilot in American history to die on war duty. | https://www.hmdb.org/m.asp?m=147711
+#
+# --- Music Row / Hillsboro / Edgehill ---
+Quonset Hut Studio | @36.149334,-86.791951 | In 1955 Owen and Harold Bradley built a studio in a house basement on this site, then added a second in an Army Quonset hut, cutting hits for Patsy Cline, Brenda Lee and Marty Robbins. | https://www.hmdb.org/m.asp?m=59523
+Bradley Studio Hillsboro Village | @36.1361316,-86.80108465 | From 1953 to 1955 brothers Owen and Harold Bradley ran a concrete-block film and recording studio behind this Hillsboro Village storefront. | https://www.hmdb.org/m.asp?m=163031
+Koinonia Coffeehouse | @36.14655,-86.79250278 | Koinonia Coffeehouse opened at Belmont Church in 1973 and became a stage for early contemporary Christian music acts such as Dogwood and Brown Bannister. | https://www.hmdb.org/m.asp?m=147530
+Will Edmondson Home Site | @36.137374,-86.790453 | Sculptor Will Edmondson, born to formerly enslaved parents, lived here and began carving limestone figures in 1931 with no formal training. | https://www.hmdb.org/m.asp?m=147165
+Callie Guy House Marker | @36.1383604,-86.78425886 | Callie Guy House, born enslaved in 1861, co-founded the National Ex-Slave Mutual Relief, Bounty and Pension Association in 1894, one of the earliest reparations movements. | https://www.hmdb.org/m.asp?m=262479
+#
+# --- South Nashville / Green Hills / Battle of Nashville ---
+Shy's Hill | @36.08781667,-86.80801667 | The decisive fight of the Battle of Nashville happened on this hill on December 16, 1864, when a Union assault at 4:15 p.m. broke the Confederate line and Col. W. M. Shy of the 20th Tennessee was killed. | https://www.hmdb.org/m.asp?m=53393
+Dry-Stack Stone Wall | @36.08535,-86.80411667 | Walls like this one were built in the Scots-Irish dry-stack style as adapted by enslaved laborers, and Confederate Brig. Gen. Henry Jackson was captured at this wall during the 1864 Battle of Nashville. | https://www.hmdb.org/m.asp?m=53354
+Site of Glendale Park | @36.09633333,-86.79017778 | A 64-acre woodland amusement park run by the Nashville Railway & Light Co. opened here in 1888, and the Glendale streetcar line turned back toward town at this spot. | https://www.hmdb.org/m.asp?m=147097
+Site of Hampton Field | @36.11658333,-86.81721667 | E. L. Hampton's pasture here became Hampton Field, Nashville's first airfield, when passing airplanes began landing on it during World War I. | https://www.hmdb.org/m.asp?m=248833
+Buchanan's Station | @36.14483333,-86.71160833 | On September 30, 1792, about 300 Creek and Lower Cherokee warriors attacked this Cumberland settlement fort, whose defenders were aided by the courage of Mrs. Buchanan and other women. | https://www.hmdb.org/m.asp?m=147557
+#
+# --- West Nashville / Warner Parks ---
+Hill Forest | @36.07983758,-86.90292652 | In 1910 H.G. Hill Sr. bought this old-growth forest and refused to sell its centuries-old trees for timber, even fencing out his own cattle to protect them. | https://www.hmdb.org/m.asp?m=147416
+Bison Meadow | @36.08004055,-86.83711803 | This 2-acre prairie, planted in 1994, lies on a branch of the historic Natchez Trace, where buffalo, bear and elk once roamed. | https://www.hmdb.org/m.asp?m=188896
+Aaittafama' Archaeological Park | @36.04542407,-86.8641294 | Created in 2014, this park protects one of the few undisturbed Mississippian-period village sites left in Davidson County. | https://www.hmdb.org/m.asp?m=247864
+#
+# --- Madison / Goodlettsville / Hermitage / Joelton (country music homes are marked by the Metro Historical Commission; all their famous residents have died) ---
+Hank Snow's Rainbow Ranch | @36.26055282,-86.72787085 | Hank Snow bought this Madison home in 1950, built one of the first home recording studios in the country here, and named his band the Rainbow Ranch Boys after the property. | https://www.hmdb.org/m.asp?m=234768
+Smith-Carter House | @36.2514,-86.7226 | Country singer Carl Smith bought this 1925 stone house in 1952, weeks before marrying June Carter, and it stayed home to June and her daughter Carlene. | https://www.hmdb.org/m.asp?m=147478
+Patsy Cline's Dream House | @36.28117994,-86.73613519 | This Goodlettsville house was the dream house of country music icon Patsy Cline. | https://www.hmdb.org/m.asp?m=146002
+Mrs. John Donelson Home Site | @36.29657778,-86.69992778 | Andrew Jackson boarded here with the widowed Mrs. John Donelson's family in 1789 and met her youngest daughter, Rachel, whom he later married. | https://www.hmdb.org/m.asp?m=147702
+Site of Blackwood Field | @36.21506453,-86.60496696 | In 1921 the state built two hangars here for the Tennessee National Guard's 105th Observation Squadron on an airfield named for donor H. O. Blackwood. | https://www.hmdb.org/m.asp?m=147683
+Joelton Air Force Station Site | @36.33562402,-86.85967493 | From 1956 to 1961 Paradise Ridge was home to the Joelton Air Force Station, where the 799th Aircraft Control and Warning Squadron was based. | https://www.hmdb.org/m.asp?m=147786
+#
+# --- WAITING on #425 (not run): a same-named Wikipedia ARTICLE sits within 90 m but no live pin does, so today the
+#     tool would seed a second pin for the place. Uncomment once #425 is decided.
+# Hume-Fogg High School | @36.15974283,-86.78122889 | Bettie Page, who became one of the most photographed pin-up models of the 1950s, graduated from Hume-Fogg High School in 1940. | https://www.hmdb.org/m.asp?m=220865
+# Fall School | @36.14183333,-86.77846389 | Built in 1898, Fall School is the oldest public school building still standing in Nashville. | https://www.hmdb.org/m.asp?m=147507
+# --- WAITING on a coordinate (not run): Photon has no house number for this address; the marker gives none.
+# Colonel Tom Parker House | 1215 Gallatin Road South, Madison | Built in 1935, this house was the home and office of Colonel Tom Parker and the headquarters of his partnership with Elvis Presley. | https://www.hmdb.org/m.asp?m=310609
+#
+# --- WAITING (not run): candidates whose marker text was cut off before the claim — read the full marker page next pass ---
+#   Club Baron (m=147885), Amqui Station (m=310609 front side), Building Fort Negley / African American Labor (m=178429),
+#   Hattie Cotton School bombing (m=242725), Berger Building / WDAD (m=183243), Belcourt Theatre (m=286636)
+# --- NEXT PASS: HMdb Nashville title pages D–Z (entries 201–1448) and the Metro series pages 2–3 (entries 101–217).

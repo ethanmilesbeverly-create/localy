@@ -36,6 +36,9 @@
 // optional:
 //   --allow-read  and  pass a names file:  ... seed-resolve.ts names.txt
 //
+// Wikipedia calls identify themselves (WIKI_UA, env-overridable) and back off
+// on throttling (#426); override the contact with WIKI_UA="Tool/1.0 (+url)".
+//
 // It writes up to three files next to itself:
 //   seed_records.json  — the NEW rows, ready to load into `submissions`
 //   seed_report.json   — every verdict (new / already-present / uncertain / held)
@@ -59,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.25h (#422 held lines keep their story; `new` marker)";
+const TOOL_VERSION = "seed-resolve 2026.09.26a (#426 identified Wikipedia calls + back-off; #427 NEXT block only for bare-name seeds)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -174,6 +177,75 @@ function haversineM(aLat: number, aLng: number, bLat: number, bLng: number): num
 
 async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+// ---------------------------------------------------------------------------
+// #426 — EVERY Wikipedia call goes through wikiJson(). Two fixes in one place:
+//  (1) IDENTITY. Wikimedia's 2026 API limits are keyed on who is calling: a
+//      request with a compliant User-Agent (tool name + a real contact URL)
+//      gets the identified bucket (~200/min); the old "nahgoo-seed/1.0" had no
+//      contact and landed in the ~10/min unidentified bucket, which one line's
+//      3-5 calls at the 7 s pace overran — about a third of every Dallas round
+//      was held on "Wikipedia check failed". Same fix nearby-places and
+//      gate-tiles.ts already carry (handoff §5). No origin=* anywhere.
+//  (2) BACK-OFF. A 429/5xx, a network error or a rate-limit ERROR BODY (HTTP
+//      200 with {"error":{"code":"ratelimited"|"maxlag"…}}) is retried at 2, 5,
+//      12 and 25 s (Retry-After honoured, capped 30 s) before giving up. Giving
+//      up still returns null, so the callers keep #420's rule: a failed check
+//      HOLDS the place, it is never read as "nothing here".
+// Counts are printed in the summary so a run shows whether the back-off worked.
+// ---------------------------------------------------------------------------
+const WIKI_UA = Deno.env.get("WIKI_UA")?.trim() ||
+  "Nahgoo/1.0 (+https://github.com/ethanmilesbeverly-create/localy; seed-resolve offline tool)";
+const WIKI_BACKOFF_MS = [2000, 5000, 12000, 25000];
+const wikiStats = { calls: 0, retries: 0, failed: 0 };
+async function wikiJson(url: string): Promise<any | null> {
+  wikiStats.calls++;
+  const tries = WIKI_BACKOFF_MS.length + 1;
+  for (let i = 0; i < tries; i++) {
+    let wait = WIKI_BACKOFF_MS[i] ?? 0;
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": WIKI_UA } });
+      if (r.ok) {
+        const d = await r.json().catch(() => null);
+        if (d && !d.error) return d;
+        const code = String(d?.error?.code ?? "unreadable");
+        // Only throttle-type errors are worth waiting for; a bad request is final.
+        if (!/ratelimit|maxlag|readonly|internal|unreadable/i.test(code)) { wikiStats.failed++; return null; }
+      } else {
+        await r.body?.cancel().catch(() => {});
+        if (!(r.status === 429 || r.status >= 500)) { wikiStats.failed++; return null; }
+        const ra = Number(r.headers.get("retry-after"));
+        if (Number.isFinite(ra) && ra > 0) wait = Math.min(30000, ra * 1000);
+      }
+    } catch { /* network error — retry below */ }
+    if (i < tries - 1) { wikiStats.retries++; await sleep(wait); }
+  }
+  wikiStats.failed++;
+  return null;
+}
+
+// #426 — the 90 m geosearch was asked TWICE per line (wikiAt for the
+// description, wikiNear for the duplicate check) with the same coordinate.
+// One call now serves both; only a successful answer is remembered, so a
+// failure is re-asked by the next caller instead of being replayed.
+// A failure is remembered for 60 s only, so the duplicate check right after a
+// failed description lookup holds the place at once instead of waiting out a
+// second full back-off (~45 s) for the same answer.
+const geoMemo = new Map<string, any[]>();
+const geoFailedAt = new Map<string, number>();
+async function wikiGeo(lat: number, lng: number): Promise<any[] | null> {
+  const k = `${lat}|${lng}`;
+  const hit = geoMemo.get(k);
+  if (hit) return hit;
+  const failedAt = geoFailedAt.get(k);
+  if (failedAt && Date.now() - failedAt < 60000) return null;
+  const d = await wikiJson("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
+    MATCH_RADIUS_M + "&gscoord=" + lat + "%7C" + lng);
+  if (!d || !d.query || !Array.isArray(d.query.geosearch)) { geoFailedAt.set(k, Date.now()); return null; } // an error body is not "none"
+  const hits = d.query.geosearch.filter((h: any) => h?.title);
+  geoMemo.set(k, hits);
+  return hits;
 }
 
 type Existing = { name: string; lat: number; lng: number; category?: string; source?: string; seed?: boolean };
@@ -399,34 +471,16 @@ function parseLine(raw: string): Line {
 async function wikiAt(
   lat: number,
   lng: number,
+  wantIntro = true,
 ): Promise<{ title: string; intro: string; lat: number; lng: number } | null> {
-  try {
-    const geo =
-      "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=5&gsradius=" +
-      MATCH_RADIUS_M +
-      "&gscoord=" +
-      lat +
-      "%7C" +
-      lng;
-    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!gr.ok) return null;
-    const gd = await gr.json();
-    const hit = gd?.query?.geosearch?.[0];
-    if (!hit?.title) return null;
-
-    const ex =
-      "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
-      encodeURIComponent(hit.title);
-    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!er.ok) return { title: hit.title, intro: "", lat: hit.lat, lng: hit.lon };
-    const ed = await er.json();
-    const pages = ed?.query?.pages ?? {};
-    const first: any = Object.values(pages)[0] ?? {};
-    const intro = String(first.extract ?? "").trim();
-    return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
-  } catch {
-    return null;
-  }
+  // #426 — shares the duplicate check's geosearch (wikiGeo), identified + backed off.
+  // A story line never uses the intro (its story IS the description), so it
+  // skips that fetch.
+  const hits = await wikiGeo(lat, lng);
+  const hit = hits?.[0];
+  if (!hit?.title) return null;
+  const intro = wantIntro ? await wikiIntroFor(hit.title) : "";
+  return { title: hit.title, intro, lat: hit.lat, lng: hit.lon };
 }
 
 // ---------------------------------------------------------------------------
@@ -455,9 +509,7 @@ async function wikiIntroFor(title: string): Promise<string> {
     const ex =
       "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
       encodeURIComponent(title);
-    const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!er.ok) return "";
-    const ed = await er.json();
+    const ed = await wikiJson(ex); // #426
     const pages = ed?.query?.pages ?? {};
     const first: any = Object.values(pages)[0] ?? {};
     return String(first.extract ?? "").trim();
@@ -478,9 +530,8 @@ async function wikiEnrich(
       "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
       WIKI_ENRICH_RADIUS_M +
       "&gscoord=" + lat + "%7C" + lng;
-    const gr = await fetch(geo, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (gr.ok) {
-      const gd = await gr.json();
+    const gd = await wikiJson(geo); // #426
+    if (gd) {
       const hits: any[] = gd?.query?.geosearch ?? [];
       let best: any = null, bestScore = 0;
       for (const h of hits) {
@@ -502,9 +553,8 @@ async function wikiEnrich(
     const srch =
       "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=5&srsearch=" +
       encodeURIComponent(name);
-    const sr = await fetch(srch, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-    if (!sr.ok) return null;
-    const sd = await sr.json();
+    const sd = await wikiJson(srch); // #426
+    if (!sd) return null;
     const results: any[] = sd?.query?.search ?? [];
     // Keep only results whose title plausibly IS this place, best first.
     const ranked = results
@@ -522,9 +572,8 @@ async function wikiEnrich(
       const q =
         "https://en.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cextracts&exintro=1&explaintext=1&format=json&redirects=1&titles=" +
         encodeURIComponent(cand.title);
-      const cr = await fetch(q, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-      if (!cr.ok) continue;
-      const cdj = await cr.json();
+      const cdj = await wikiJson(q); // #426
+      if (!cdj) continue;
       const pages = cdj?.query?.pages ?? {};
       const p: any = Object.values(pages)[0] ?? {};
       const coord = Array.isArray(p?.coordinates) ? p.coordinates[0] : null;
@@ -562,34 +611,16 @@ async function wikiEnrich(
 // a partial check — the #264 "a failure is a hold, not a verdict" rule.
 // #420 — a FAILED Wikipedia check is not "no article here". It returns null
 // (→ the place is HELD, like the other two arms, #264) on any non-OK response,
-// network error or unreadable body, after one retry on a 429/5xx (honouring
-// Retry-After, capped at 15 s). Only a clean response with zero hits is [].
+// network error or unreadable body. Only a clean response with zero hits is [].
+// #426 — the single retry became wikiJson()'s back-off (2/5/12/25 s) and the
+// call now identifies itself, so a hold means Wikipedia stayed down ~45 s.
 // On the 2026-09-25 Mac run a silent failure made First Avenue and Foshay Tower
 // read as brand new.
 async function wikiNear(lat: number, lng: number): Promise<Existing[] | null> {
-  const url = "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&format=json&gslimit=10&gsradius=" +
-    MATCH_RADIUS_M + "&gscoord=" + lat + "%7C" + lng;
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
-      if (!r.ok) {
-        if (attempt === 1 && (r.status === 429 || r.status >= 500)) {
-          const ra = Number(r.headers.get("retry-after"));
-          await sleep(Math.min(15000, Number.isFinite(ra) && ra > 0 ? ra * 1000 : 3000));
-          continue;
-        }
-        return null;
-      }
-      const d = await r.json();
-      if (!d || !d.query || !Array.isArray(d.query.geosearch)) return null; // an error body is not "none"
-      return d.query.geosearch.filter((h: any) => h?.title)
-        .map((h: any) => ({ name: String(h.title), lat: h.lat, lng: h.lon, source: "wiki" }));
-    } catch {
-      if (attempt === 1) { await sleep(3000); continue; }
-      return null;
-    }
-  }
-  return null;
+  // #426 — one shared, identified, backed-off geosearch (see wikiJson/wikiGeo).
+  const hits = await wikiGeo(lat, lng);
+  if (hits === null) return null;
+  return hits.map((h: any) => ({ name: String(h.title), lat: h.lat, lng: h.lon, source: "wiki" }));
 }
 
 async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
@@ -949,7 +980,7 @@ async function run() {
     }
 
     // Tight 90 m lookup: the dedup/resolve signal (is there an article right here?).
-    const wiki = await wikiAt(geo.lat, geo.lng);
+    const wiki = await wikiAt(geo.lat, geo.lng, !line.story);
     const near = await existingNear(geo.lat, geo.lng);
     const existing = near.list;
     // #418: a failed dedup source means the place was never fully checked → HOLD.
@@ -966,7 +997,9 @@ async function run() {
     let wikiTitle = wiki?.title ?? null;
     let wikiIntro = wiki?.intro ?? "";
     let wikiWidened = false;
-    if (!wikiIntro && verdict.decision === "new") {
+    // #426 — not for a story line: its story is the description, so the wider
+    // search (up to 7 Wikipedia calls) only fed a title nobody reads.
+    if (!wikiIntro && verdict.decision === "new" && !line.story) {
       const enrich = await wikiEnrich(verdict.canonicalName || candidate, geo.lat, geo.lng);
       if (enrich) { wikiTitle = enrich.title; wikiIntro = enrich.intro; wikiWidened = true; }
     }
@@ -1073,7 +1106,11 @@ async function run() {
       report.push({ ...base, outcome: "new-seed" });
       const cat = verdict.category ?? "UNCLASSIFIED";
       const desc = line.story ? "story✓" : row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
-      console.log(`  + ${verdict.canonicalName} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})`);
+      // #423 — print the name actually SAVED (row.name), not Gemini's suggestion:
+      // a story line keeps its display name, so canonicalName could differ and
+      // mislead the eyeball check. Show Gemini's name only when it differs.
+      const suggested = verdict.canonicalName && verdict.canonicalName !== row.name ? `  (Gemini suggested "${verdict.canonicalName}")` : "";
+      console.log(`  + ${row.name} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})${suggested}`);
       console.log(`      checked nearby: ${near.arms}`); // #420 — a new pin with nothing found by any arm is worth a second look
     } else if (verdict.decision === "held") {
       // Throttle/transport hold — the machine never judged this. Re-runnable,
@@ -1113,6 +1150,9 @@ async function run() {
   console.log(`stories attached to existing pins: ${counts["story-attached"] ?? 0} (${seedPatches.length} existing seed(s) updated on commit)`);
   console.log(`story lines seeded: ${storied} (their story ships as resolved_source 'curated'; ${curatedRows.length} curated_descriptions rows staged in curated_records.json)`);
   console.log(`new seed rows: ${rows.length}  (unclassified category: ${uncat}, no wiki description: ${blank})`);
+  // #426 — did the identified User-Agent + back-off hold? failed > 0 means some
+  // places were HELD on Wikipedia; retries alone are fine.
+  console.log(`Wikipedia calls: ${wikiStats.calls} · retried ${wikiStats.retries} · failed ${wikiStats.failed}`);
   console.log("wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).");
   if (heldNames.length) {
     console.log(`HELD (never judged — re-run these): ${heldNames.length} → wrote seed_held.txt. Re-run: seed-resolve.ts seed_held.txt with a working key. These are NOT reviews (#264).`);
@@ -1125,13 +1165,26 @@ async function run() {
   if (COMMIT) {
     console.log("\n--commit passed: writing the new rows to submissions now.");
     await commitToSupabase(rows, curatedRows, seedPatches);
-    // #57 story-only: a new seed lands with resolved_source NULL (visible, never
-    // checked). The #318 cascade stamps it — or hides it — only when the
-    // recheck runs. Until then a seed with no wiki intro shows with no story.
-    console.log("NEXT (#57 checklist): story lines are already stamped. Stamp the BARE-name seeds through the #318 cascade —");
-    console.log("  deno run --allow-net --allow-env recheck-none-places.ts --nulls            # dry run, read it");
-    console.log("  deno run --allow-net --allow-env recheck-none-places.ts --nulls --commit   # persist hits (misses stay visible)");
-    console.log("  then, after eyeballing the misses: add --nulls-miss-to-none to hide the storyless ones.");
+    // #427 — the recheck step is for BARE-NAME seeds only (they land with
+    // resolved_source NULL and need the #318 cascade to stamp them). Story lines
+    // are already stamped 'curated', and recheck-none-places.ts acts on EVERY
+    // never-checked row in the database, not just this city — so after a
+    // story-only commit it must not be suggested at all. Commands and prose are
+    // on separate lines; every prose line starts with "#", so pasting it into
+    // Terminal by mistake is a harmless shell comment (the Dallas Mount Baldy flip).
+    const bare = rows.filter((r) => r.resolved_source == null).length;
+    if (bare) {
+      console.log(`\nNEXT (#57 checklist): ${bare} BARE-NAME seed(s) were inserted without a story. Stamp them through the #318 cascade.`);
+      console.log("# Commands (copy one line at a time):");
+      console.log("deno run --allow-net --allow-env recheck-none-places.ts --nulls");
+      console.log("deno run --allow-net --allow-env recheck-none-places.ts --nulls --commit");
+      console.log("# Read the dry run first: it covers every never-checked row in the database, not only this city.");
+      console.log("# After eyeballing the misses, the same command with --nulls-miss-to-none hides the storyless ones.");
+    } else if (rows.length) {
+      console.log("\nNEXT: nothing to recheck — every inserted seed was a story line, already stamped 'curated' (#427). Do NOT run recheck-none-places.ts for this load.");
+    } else {
+      console.log("\nNEXT: no new seed rows were inserted, so there is nothing to recheck (#427).");
+    }
   } else {
     console.log("NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).");
   }
