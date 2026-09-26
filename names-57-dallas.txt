@@ -1,0 +1,59 @@
+# #57 Phase A — Dallas story pass 1 (2026-09-25), mined from the Historical Marker Database
+# Dallas list (https://www.hmdb.org/results.asp?Search=Place&Town=Dallas&State=Texas).
+# Every line is placed at the marker's own coordinate and written in our own words from
+# the marker text only. Format: Name | locate | story | source_url [| new]
+#
+# RUN (from ~/roaminator, seed-resolve 2026.09.25i):
+#   SEED_CITY_NAME=Dallas SEED_CITY_LAT=32.7767 SEED_CITY_LNG=-96.7970 \
+#   deno run --allow-net --allow-env --allow-write --allow-read seed-resolve.ts names-57-dallas.txt
+# Eyeball the output, then re-run the same command with --commit.
+#
+# DRY RUN 1 RESULTS APPLIED (handoff §6 (k)):
+#   Zapruder Pedestal → `new` (reviewed vs Dealey Plaza; attaching would overwrite its JFK story).
+#   La Reunion Cemetery → `new` (reviewed vs "Grave of Julien Reverchon"; that grave keeps its own story).
+#   MLK at SMU → renamed to McFarlin Memorial Auditorium so the story attaches to that pin.
+#   Adolphus Hotel and Freedman's Cemetery → commented out (duplicate risk; see notes on each).
+#   DRY RUN 2: First Hilton Hotel cut (duplicate risk). The 8 lines held by the Wikipedia throttle
+#   moved to names-57-dallas-held.txt, so this file holds only lines already eyeballed.
+
+# --- Downtown / West End ---
+Zapruder Pedestal | @32.77919333,-96.80888715 | Dressmaker Abraham Zapruder stood on this concrete pedestal, with his receptionist Marilyn Sitzman steadying him from behind, and became the only photographer known to have filmed the whole Kennedy assassination. | https://www.hmdb.org/m.asp?m=209040 | new
+Martyrs Park | @32.77856825,-96.81013767 | After a fire destroyed most of downtown Dallas on July 8, 1860, a vigilance committee blamed enslaved people and, with no trials, had three men — Sam Smith, Patrick Jennings and a man called Old Cato — hanged here; the ground was named Martyrs Park in 1991 in their memory. | https://www.hmdb.org/m.asp?m=305994
+# HELD dry run 2 → moved to names-57-dallas-held.txt: 1910 Lynching of Allen Brooks Marker
+# HELD dry run 2 → moved to names-57-dallas-held.txt: First Women Jurors Marker
+# CUT dry run 1 (#57): Wikipedia "Adolphus Hotel" is 83 m away yet judged new — would duplicate. Held for a fix.
+# Adolphus Hotel | @32.77987257,-96.80003529 | Dallas businessmen talked brewer Adolphus Busch, co-founder of Anheuser-Busch, into building this hotel in 1911–12 on the site of the 1880s Dallas City Hall. | https://www.hmdb.org/m.asp?m=157862
+# CUT dry run 2 (#57): Wikipedia "Hilton Hotel (Dallas, Texas)" is 23 m away yet judged new — same duplicate bug as Adolphus. Held for the fix.
+# The First Hilton Hotel | @32.78185,-96.79428333 | Built in 1925 for Conrad Hilton, this was the first hotel ever to carry the Hilton name. | https://www.hmdb.org/m.asp?m=138148
+
+# --- Cedars / Old City Park / East Dallas ---
+Browder Springs | @32.7731123,-96.78963188 | These springs helped found Dallas and were the town's main water supply before city mains were laid; they were even reopened during the drought of 1909–10. | https://www.hmdb.org/m.asp?m=165152
+# HELD dry run 2 → moved to names-57-dallas-held.txt: Swiss Avenue
+
+# --- Fair Park / South Dallas ---
+Hall of Negro Life Site | @32.77915861,-96.76458396 | At the 1936 Texas Centennial Exposition the Hall of Negro Life stood here, showing nearly 400 exhibits of African American achievement to about 400,000 visitors before becoming one of only two exhibit buildings torn down after the fair. | https://www.hmdb.org/m.asp?m=258242
+
+# --- Oak Lawn / Uptown / North ---
+Pike Park | @32.79355646,-96.80931974 | The city bought this ground in 1912–13 as Summit Play Park; it became the neighborhood park of a largely Mexican-American community and took the name Pike Park in 1927. | https://www.hmdb.org/m.asp?m=148985
+# CUT dry run 1 (#57): landed among Temple Emanu-El grave pins; its Wikipedia article is 95 m off. Re-place, next pass.
+# Freedman's Cemetery | @32.80235885,-96.79371399 | Formerly enslaved people who settled this area after the Civil War established Freedman's Cemetery in 1869 as a burial ground for African Americans. | https://www.hmdb.org/m.asp?m=149056
+# HELD dry run 2 → moved to names-57-dallas-held.txt: Cedar Springs Marker
+# HELD dry run 2 → moved to names-57-dallas-held.txt: Elm Thicket
+Love Field Airman Memorial | @32.85262884,-96.8483562 | Love Field takes its name from Moss Lee Love, a U.S. Cavalry first lieutenant from Virginia who died in 1913. | https://www.hmdb.org/m.asp?m=97713
+McFarlin Memorial Auditorium | @32.84435278,-96.78569722 | Months after at least 50 SMU students joined the 1965 Selma-to-Montgomery march, Martin Luther King Jr. accepted an invitation to visit this campus. | https://www.hmdb.org/m.asp?m=227163
+Dr. Marcellus Clayton Cooper Marker | @32.86086137,-96.77219908 | Born enslaved on the Caruth farm, Marcellus Clayton Cooper became the first licensed African American dentist in Texas in 1896. | https://www.hmdb.org/m.asp?m=232298
+# HELD dry run 2 → moved to names-57-dallas-held.txt: First Working Integrated Circuit Site
+Little Egypt | @32.86505677,-96.71384509 | The rural settlement of Little Egypt began in 1883, when formerly enslaved Jeff Hill bought about thirty acres across Thurgood Lane from this marker. | https://www.hmdb.org/m.asp?m=243585
+
+# --- East / Southeast ---
+Buckner Log Cabin | @32.78968744,-96.68314963 | R. C. Buckner, who founded the Buckner orphans' home in 1879, was born in this very log cabin in Madisonville, Tennessee, in 1833. | https://www.hmdb.org/m.asp?m=158658
+Joppee Community | @32.717318,-96.7438516 | Founded after emancipation by freed people from the nearby Miller Plantation, Joppee on the banks of the Trinity is one of the few freedman towns left in Texas. | https://www.hmdb.org/m.asp?m=162329
+
+# --- Oak Cliff / West Dallas ---
+# HELD dry run 2 → moved to names-57-dallas-held.txt: Dallas Zoo
+Hord Log Cabin | @32.71235671,-96.89084041 | Judge William H. Hord built this hand-hewn log cabin in 1845, the first permanent structure on the west side of the Trinity River in Dallas. | https://www.hmdb.org/m.asp?m=153633
+La Reunion Colony Site | @32.75963963,-96.85772003 | This is the site of La Réunion, a colony of French settlers founded in 1854. | https://www.hmdb.org/m.asp?m=152481
+La Reunion Cemetery | @32.78349234,-96.86007933 | French, Belgian and Swiss settlers brought to Texas in 1855–58 by a European colonization company are buried here, beside the old road from La Réunion to the colonists' fish traps on the Trinity. | https://www.hmdb.org/m.asp?m=153688 | new
+# HELD dry run 2 → moved to names-57-dallas-held.txt: El Camposanto de Cemento Grande
+Bilbo Jitney Line Headquarters | @32.77119926,-96.83606563 | In 1915, when western Dallas had no public transportation, Victor Bilbo ran a jitney bus line from this headquarters linking downtown with Cement City, Irving and other outlying towns. | https://www.hmdb.org/m.asp?m=152451
+General Ignacio Zaragoza Statue | @32.77975238,-96.90631442 | This statue honors Ignacio Zaragoza, a Texan and the hero of Mexico's victory at the Battle of Puebla on May 5, 1862. | https://www.hmdb.org/m.asp?m=310277

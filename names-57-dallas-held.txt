@@ -1,0 +1,14 @@
+# #57 Dallas pass 1 — the 8 lines the Wikipedia throttle held in dry run 2.
+# Dry run this file on its own, paste the output for an eyeball, THEN commit it.
+# (Dallas Zoo must come out `↪ story attaches`, never `+` — a `+` would duplicate the zoo pin.)
+#   SEED_CITY_NAME=Dallas SEED_CITY_LAT=32.7767 SEED_CITY_LNG=-96.7970 \
+#   deno run --allow-net --allow-env --allow-write --allow-read seed-resolve.ts names-57-dallas-held.txt
+
+1910 Lynching of Allen Brooks Marker | @32.77841667,-96.80753333 | In March 1910 a mob forced its way into the county courthouse here, threw Allen Brooks, a 60-year-old Black laborer awaiting a hearing, from a second-floor window with a rope around his neck, and dragged him half a mile to hang him at Main and Akard as an estimated 5,000 people watched; no one was ever held accountable. | https://www.hmdb.org/m.asp?m=308207
+First Women Jurors Marker | @32.7787945,-96.80705695 | Texas women could vote from 1920 but were barred from jury service until 1954; this marker recalls the first Dallas County juries that seated women. | https://www.hmdb.org/m.asp?m=157921
+Swiss Avenue | @32.80668735,-96.7646026 | Swiss immigrant Henri Boll named this road after his homeland in 1857, when it was still a muddy country lane. | https://www.hmdb.org/m.asp?m=151396
+Cedar Springs Marker | @32.81999833,-96.8153398 | Cedar Springs, the earliest known historic site in Dallas County, gave its name to a rival settlement founded nearby in 1843 that challenged Dallas in an 1848 election. | https://www.hmdb.org/m.asp?m=148843
+Elm Thicket | @32.84099355,-96.8296618 | Elm Thicket began in 1881 as a small farming community of freed people, named for the dense stand of elms among its cornfields. | https://www.hmdb.org/m.asp?m=259001
+First Working Integrated Circuit Site | @32.93231924,-96.75342999 | On September 12, 1958, Texas Instruments engineer Jack Kilby showed colleagues in a semiconductor building on this site the first working integrated circuit, the breakthrough behind the modern microchip. | https://www.hmdb.org/m.asp?m=162240
+Dallas Zoo | @32.74007937,-96.81647309 | The Dallas Zoo began in 1888, when the city bought two deer and two mountain lions and kept them in pens in City Park. | https://www.hmdb.org/m.asp?m=175228
+El Camposanto de Cemento Grande | @32.77873884,-96.90985446 | This was the company cemetery of the cement plant founded here in 1909, where many workers were Mexican immigrants who had fled the Mexican Revolution. | https://www.hmdb.org/m.asp?m=153708
