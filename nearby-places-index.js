@@ -3137,6 +3137,8 @@ async function resolveCuratedByName(name, lat, lng) {
 // (it is small — tens to low thousands of rows), then matched in memory; zero
 // Places quota. Precedence mirrors the action cascade: the bank heal (wiki /
 // wikidata / places) runs FIRST, curated only fills a pin still thin after it.
+// SUPERSEDED BY #419: curated now WINS on any OSM or Wikipedia-feed facts pin it
+// matches, thin or not — see applyCuratedToServe below.
 const CURATED_INDEX_TTL_MS = 5 * 60 * 1000;
 let _curatedIndex = { at: 0, byName: new Map(), ok: false };
 async function loadCuratedIndex() {
@@ -3176,13 +3178,26 @@ function curatedHitFromIndex(index, name, lat, lng) {
 }
 // Returns a NEW array; matched pins are shallow clones, everything else is the
 // same object. Grave-class pins are left to the gravebank (#363); non-facts
-// categories and non-OSM pins are never touched.
+// categories and gems are never touched.
+//
+// #419 — A CURATED LINE NOW WINS, not just fills. #362 applied a curated row only
+// to a STORYLESS OSM pin, and only when longer than the pin's line, so a sourced
+// hidden story could never reach a pin that already had a Wikipedia intro (the
+// #57 story pass: Mickey's Diner's intro says "classic diner", the story is The
+// Mighty Ducks). A curated row is a human, sourced line about THIS pin (exact
+// name + within CURATED_MATCH_M) — it beats a generic encyclopedia intro. Scope:
+// tile pins from OSM AND the Wikipedia feed. Still serve-time on a clone, never
+// persisted: deleting the curated row restores the pin's own line within
+// CURATED_INDEX_TTL_MS. The #358/#53 no-downgrade rule was about MACHINE lines
+// replacing a human one; a curated row IS the human line, so it is not a downgrade.
+const CURATED_WINS_VERSION = "419-curated-wins-v1";
 function applyCuratedToServe(places, index) {
   let curated = 0;
   const out = (places || []).map((p) => {
-    if (!p || !_isStorylessOsm(p) || _isGraveClassPin(p) || !FACTS_DESC_CATS.has(p.category) || !p.name) return p;
+    if (!p || !p.name || (p.source !== "osm" && p.source !== "wiki")) return p;
+    if (_isGraveClassPin(p) || !FACTS_DESC_CATS.has(p.category)) return p;
     const hit = curatedHitFromIndex(index, p.name, p.lat, p.lng);
-    if (!hit || hit.desc.length <= String(p.desc || "").trim().length) return p;
+    if (!hit || hit.desc === String(p.desc || "").trim()) return p;
     curated++;
     return { ...p, desc: hit.desc, descSource: "curated" };
   });
@@ -4694,7 +4709,7 @@ function cachedEnvelope(tile, cached, s) {
     blocked: s.f.blocked, blocklistFailed: false,
     suppressed: s.f.suppressed, suppressionFailed: false,
     storyHidden: s.g.hidden, storyGateVersion: "367-osm-story-gate-v1",
-    osmCurated: s.cur.curated, curatedOsmVersion: "362-curated-osm-v1", // #362 deploy-confirm + curated lines applied this serve
+    osmCurated: s.cur.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
     graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: s.graveStruct.demoted, graveStoryStripped: s.graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
     qidVersion: "164-wikidata-qid-v1", // #164 deploy-confirm (the Q-id bake runs at tile BUILD; a warm tile gains it on its next rebuild)
     swrVersion: SWR_VERSION, // #394 deploy-confirm
@@ -4968,7 +4983,7 @@ Deno.serve(async (req) => {
         tile, places: gated.places, cached: false, ts: Date.now(),
         cacheVersion: CACHE_VERSION,
         storyHidden: gated.hidden, storyGateVersion: "367-osm-story-gate-v1",
-        osmCurated: curC.curated, curatedOsmVersion: "362-curated-osm-v1", // #362 deploy-confirm + curated lines applied this serve
+        osmCurated: curC.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
         graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: graveStruct.demoted, graveStoryStripped: graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
         overpassStatus: osm.status, overpassError: osm.error,
         chainsDropped: osm.chainsDropped, trailsDropped: osm.trailsDropped,
