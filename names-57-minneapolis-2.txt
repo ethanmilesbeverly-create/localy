@@ -1,0 +1,48 @@
+# #57 Minneapolis pass 2 — story lines mined from the Historical Marker Database
+# (Minneapolis town list, page 1 = entries 1–100 of 297, titles to "First Dwelling").
+# Format: Name | locate | story | source_url   — every line placed at the marker's own coordinate.
+# Each story is one sentence in our own words from the marker text; nothing from memory.
+# Pre-checked in the sandbox 2026-09-27: public submissions within 200 m, the live map
+# within 120 m and the Wikipedia titles within 90 m (handoff §6 (q)).
+# Three lines are named to MATCH a live pin so the story attaches to it (#419):
+#   Washburn A Mill Ruins (OSM, 5 m), Walker Library (Minneapolis) (wiki, 51 m),
+#   Uptown Theater (Minneapolis) (wiki, 57 m).
+# City: SEED_CITY_NAME="Minneapolis" SEED_CITY_LAT=44.9778 SEED_CITY_LNG=-93.2650
+
+# --- North Loop / Mill District / St. Anthony ---
+Birthplace of the Milky Way Bar | @44.988195,-93.277378 | Frank Mars moved his young candy company into 718 North Washington Avenue in 1922, and soon after, at a soda fountain, his son Forrest suggested a candy bar that tasted like a malted milk, the idea that became the Milky Way. | https://www.hmdb.org/m.asp?m=255940
+Bloody Friday in Minneapolis | @44.986616,-93.277998 | On July 20, 1934, police shot 67 unarmed workers at this spot during the strike by Teamsters Local 574. | https://www.hmdb.org/m.asp?m=261135
+Gurley's Candy Factory | @44.988976,-93.280871 | For more than 50 years this factory turned out Gurley's candies, best known for Hidden Treasures, boxes of chocolate-covered cherries and nuts. | https://www.hmdb.org/m.asp?m=255674
+Studebaker Buggy Assembly Plant | @44.985641,-93.274361 | Studebaker moved its buggy and wagon production into this building in 1913, even as Henry Ford was building a Model T plant three blocks away. | https://www.hmdb.org/m.asp?m=274228
+Carriages, Crackers and Color TVs Building | @44.984142,-93.273255 | The tallest part of this limestone building began as a warehouse for farm wagons, carriages and sleighs and became a huge soda-cracker bakery in 1902. | https://www.hmdb.org/m.asp?m=283183
+Washburn A Mill Ruins | @44.979156,-93.256971 | The first Washburn A Mill on this site was leveled by a flour-dust explosion on May 2, 1878; the mill rebuilt here in 1879 used this arch as its main entrance, and a plaque beside it honors the memory of 14 people. | https://www.hmdb.org/m.asp?m=231562
+St. Anthony Falls Underground Dam | @44.98306,-93.25638 | Beneath this spot lies an underground dam, built after river water poured through a collapsed tunnel in 1869 and began undermining foundations nearby. | https://www.hmdb.org/m.asp?m=230028
+Eliza Winston Marker | @44.9857,-93.2586 | By 1860 wealthy Southerners summered here at St. Anthony's Winslow House, often with the people they enslaved, among them Eliza Winston, even though slavery was illegal in Minnesota. | https://www.hmdb.org/m.asp?m=42714
+Minneapolis Auditorium Eagles | @44.969997,-93.274746 | These eagles were salvaged from the 1927-era Minneapolis Auditorium, which stood nearby on the site now taken by the Convention Center. | https://www.hmdb.org/m.asp?m=91399
+
+# --- Northeast / Como ---
+Beltrami Park | @44.998509,-93.243692 | This park, once called Maple Hill, is named for Italian explorer Giacomo Beltrami, whom the marker credits with finding the source of the Mississippi on August 19, 1823. | https://www.hmdb.org/m.asp?m=231720
+Stinson Boulevard Parkway Marker | @44.991588,-93.227011 | Stinson Boulevard, laid out on land James Stinson donated in 1885, was the first parkway created in Minneapolis and then marked the city's eastern edge. | https://www.hmdb.org/m.asp?m=269436
+
+# --- Lake Street / Phillips / Longfellow ---
+Burma-Shave Marker | @44.94825,-93.242257 | This Lake Street marker recalls Burma-Shave, the brushless shaving cream Clinton Odell's Burma-Vita company introduced in 1925 and sold with small roadside signs spaced to be read one after another. | https://www.hmdb.org/m.asp?m=134584
+Lake Street Streetcar Station Site | @44.948276,-93.240586 | Opened in 1910, the Lake Street Station was one of six carhouses for the Twin City Rapid Transit streetcars, a system that by 1920 ran nearly 530 miles of track. | https://www.hmdb.org/m.asp?m=134460
+Lauritzen Wagon and Blacksmith Shop | @44.948048,-93.233852 | Martinus Nelson built a blacksmith shop here in 1888 to serve the horses and wagons of the area's dairy farms, and Danish immigrant Christian Lauritzen took it over in 1898. | https://www.hmdb.org/m.asp?m=134477
+Holy Trinity Lutheran Church | @44.946938,-93.231852 | Holy Trinity began in 1904 when younger members of St. Peder's, a Danish-speaking Lutheran church, broke away over using English in Sunday school and services. | https://www.hmdb.org/m.asp?m=135064
+Pauline and Thomane Fjelde Marker | @44.948542,-93.265062 | Norwegian immigrant sisters Pauline and Thomane Fjelde won a gold medal at the 1893 World's Columbian Exposition for embroidering Minnesota's first state flag, which was used until 1957. | https://www.hmdb.org/m.asp?m=234625
+Northwestern Hospital for Women and Children Marker | @44.948591,-93.262806 | In November 1882 civic leader Harriet Walker called 44 women together to plan what became Northwestern Hospital for Women and Children. | https://www.hmdb.org/m.asp?m=245213
+Washburn Fair Oaks Mansion Site | @44.960812,-93.275144 | Washburn Fair Oaks, one of the largest homes in 1880s Minneapolis, was built here by William D. Washburn, and the park that replaced it keeps the mansion's name. | https://www.hmdb.org/m.asp?m=156784
+
+# --- Uptown / Chain of Lakes / Southwest ---
+# CUT (attaches to the Uptown neighbourhood pin too): Uptown Theater (Minneapolis) | @44.949451,-93.298163 | Built in 1913 as the 1,500-seat Lagoon Theater, one of the finest movie houses outside downtown, it was renamed the Uptown in 1929. | https://www.hmdb.org/m.asp?m=238169
+Walker Library (Minneapolis) | @44.949842,-93.298414 | When the Walker Branch library opened here in 1911 the Hennepin and Lake area was still sparsely built up, and library board president T.B. Walker donated the land. | https://www.hmdb.org/m.asp?m=234838
+The Granada Theater | @44.947799,-93.298231 | When the Granada opened in 1928 it was billed as the most elaborate theater ever built outside downtown Minneapolis. | https://www.hmdb.org/m.asp?m=242607
+The Marriage of the Lakes | @44.950038,-93.305759 | Once a canal and lagoon were dredged between them, Lake of the Isles and Lake Calhoun were married in a symbolic ceremony here on July 5, 1911. | https://www.hmdb.org/m.asp?m=237060
+First Dwelling in Minneapolis | @44.939668,-93.303937 | Missionaries Samuel and Gideon Pond built the first dwelling in Minneapolis on the hill above this spot in June 1834. | https://www.hmdb.org/m.asp?m=205658
+The Crash of Flight 307 | @44.908758,-93.294201 | On March 7, 1950, in a blinding snowstorm, Northwest Airlines Flight 307 clipped its left wing on the Fort Snelling Cemetery flagpole, and the wing came off as the captain circled around for another approach. | https://www.hmdb.org/m.asp?m=56011
+
+# --- WAITING on #425 (own same-named article within 90 m, no live pin) ---
+# Cloud Man Village Site | @44.936222,-93.305333 | From 1829 to 1839 the Dakota farming village of Ȟeyáta Othúŋwe, led by Maḣpiya Wic̣aṡta (Cloud Man), stood here on Bde Maka Ska. | https://www.hmdb.org/m.asp?m=306134
+# Dr. Martha Ripley Marker | @44.980403,-93.308605 | Dr. Martha Ripley, founder of the Maternity Hospital here, was a pioneer in medicine and an advocate for women's health and rights. | https://www.hmdb.org/m.asp?m=250555
+# The Ard Godfrey House | @44.98673,-93.25537 | Built in 1848, the Ard Godfrey House is the oldest frame house still standing in Minneapolis, moved here from near Main and Second Streets Southeast. | https://www.hmdb.org/m.asp?m=37774
+# Athletic Park Site (Butler Square) | @44.97977,-93.274836 | Before T.B. Walker built this warehouse, the land held the 1,800-seat Athletic Park, home to the Minneapolis Millers and the St. Paul Saints. | https://www.hmdb.org/m.asp?m=289331
