@@ -1,0 +1,56 @@
+# #57 New Orleans pass 1 — story lines mined from the Historical Marker Database
+# (New Orleans town list, pages 1–2 = entries 1–200, title sort A–E).
+# Format: Name | locate | story | source_url   — every line placed at the marker's own coordinate.
+# Each story is one sentence in our own words from the marker text; nothing from memory.
+# Pre-checked in the sandbox 2026-09-27: public submissions within 200 m, the live map
+# within 120 m and the Wikipedia titles within 90 m (handoff §6 (q)) — no line below has
+# its own same-named article or live pin, except where noted under WAITING.
+# City: SEED_CITY_NAME="New Orleans" SEED_CITY_LAT=29.9511 SEED_CITY_LNG=-90.0715
+
+# --- Lakeview / City Park / Mid-City ---
+17th Street Canal Floodwall Breach Site | @30.017763,-90.120583 | On August 29, 2005, the federal floodwall on the 17th Street Canal, the city's largest drainage canal, gave way here, one of 50 breaks in the federal flood defenses, and the flooding that followed killed hundreds. | https://www.hmdb.org/m.asp?m=92897
+Beatles Only Concert Performance in Louisiana | @29.990395,-90.10036 | The Beatles played their only Louisiana concert on September 16, 1964, at City Park Stadium, and a plaque put up on the show's 20th anniversary marks it. | https://www.hmdb.org/m.asp?m=87847
+Duelling Grounds | @29.987157,-90.09458 | Before the Civil War, young French and Spanish gentlemen came to this corner of City Park to settle their quarrels with swords and pistols. | https://www.hmdb.org/m.asp?m=51296
+Charity Hospital Cemetery | @29.980855,-90.110607 | Charity Hospital bought this ground in 1848 as a potter's field for the city's unclaimed dead, including victims of several yellow fever epidemics. | https://www.hmdb.org/m.asp?m=87256
+
+# --- Uptown / Carrollton ---
+Boré Plantation | @29.92265738,-90.13173336 | From 1781 to 1820 this was the plantation of Jean Etienne Boré, New Orleans's first mayor, who first granulated sugar here in 1795; the land became a park in 1871 and hosted the 1884–85 World's Industrial and Cotton Centennial Exposition. | https://www.hmdb.org/m.asp?m=117167
+Carrollton Neighborhood Marker | @29.95602712,-90.12074409 | In 1833 investors had surveyor Charles Zimpel lay out the old Macarty sugar plantation into the lots and streets of the village of Carrollton, reportedly named for General William Carroll. | https://www.hmdb.org/m.asp?m=155718
+Tom Brown Residence | @29.92473006,-90.085318 | Trombonist and bandleader Tom Brown, who took a group of Jack Laine's musicians to Chicago in 1915 as Tom Brown's Band, lived in this house at 3027 Magazine Street from 1942 to 1946. | https://www.hmdb.org/m.asp?m=261565
+Professor Longhair Residence | @29.93956643,-90.07825071 | Pianist and singer Henry Roeland Byrd, known as Professor Longhair and remembered for 1950s records like "Bald Head" and "Big Chief," lived in this house at 1738-40 Terpsichore Street from 1979 until his death. | https://www.hmdb.org/m.asp?m=163869
+
+# --- Central Business District / Warehouse District ---
+America's First Movie Theater | @29.95311667,-90.06865 | On July 26, 1896, William "Pop" Rock and Walter Wainwright opened Vitascope Hall at 623 Canal Street, the first indoor movie theater with seats in the United States. | https://www.hmdb.org/m.asp?m=170447
+The Birthplace of Dixie | @29.953819,-90.068218 | The Citizens State Bank stood here from 1835 to 1924, and its $10 notes, printed with the French word "Dix" for ten, gave the South the name "Dixie." | https://www.hmdb.org/m.asp?m=122348
+Bienville's Plantation | @29.95105,-90.06741 | Jean Baptiste Le Moyne de Bienville, the founder of New Orleans, had his house here on a plantation granted to him in 1719, which he sold to the Jesuits in 1726. | https://www.hmdb.org/m.asp?m=132517
+Canal Street Under French and Spanish Rule | @29.95376389,-90.07028889 | Canal Street follows the upriver edge of the colonial city, where its earth and stone ramparts once ran. | https://www.hmdb.org/m.asp?m=239614
+The 747 Building | @29.945842,-90.069198 | Built in 1867 as an iron works and machine shop, this building became the Consumer's Ice Company factory in 1886 and was partly destroyed by an explosion in 1891. | https://www.hmdb.org/m.asp?m=54133
+Atlantic Wall Fragments | @29.942831,-90.070852 | These three slabs of steel-reinforced concrete, 20 feet long and 16 tons in all, were part of Germany's Atlantic Wall on D-Day, June 6, 1944, the fortified coastline that ran over 2,400 miles from the Spanish border to Norway. | https://www.hmdb.org/m.asp?m=102717
+The Beginning Marker | @29.94280434,-90.07080841 | Historians Stephen Ambrose and Nick Mueller of the University of New Orleans first talked about creating a D-Day museum in 1990, over glasses of sherry in Ambrose's back yard. | https://www.hmdb.org/m.asp?m=102716
+
+# --- French Quarter ---
+Audubon Room | @29.957017,-90.068346 | This Creole cottage, probably built before 1813, is by tradition where naturalist John James Audubon kept his studio and finished his Birds of America. | https://www.hmdb.org/m.asp?m=51356
+Birthplace of Danny Barker | @29.960493,-90.061458 | Guitarist, banjo player, songwriter and storyteller Danny Barker, a member of the Jazz Hall of Fame, was born here on January 13, 1909. | https://www.hmdb.org/m.asp?m=51525
+Bosque House | @29.957023,-90.064258 | Built in 1795 by Bartholome Bosque of Majorca, whose daughter Suzette became the third wife of W.C.C. Claiborne, Louisiana's first American governor, on the site where the house of Spanish governor Bernardo de Galvez once stood. | https://www.hmdb.org/m.asp?m=51412
+Campanel Cottage | @29.958634,-90.067273 | Barthelemy Campanel, a free man of color who ran a hardware store on North Peters Street, bought this lot in 1806 and likely built the cottage as rental property in 1811. | https://www.hmdb.org/m.asp?m=51359
+Cucullu Row | @29.958764,-90.062445 | Built in 1828 for Simon Cucullu, these six rowhouses are the oldest intact row in the French Quarter, and the Desporte Pharmacy did business here from 1887 to 1970. | https://www.hmdb.org/m.asp?m=51542
+De La Ronde House | @29.959564,-90.062188 | Major General Pierre Denis de la Ronde built this as his city house around 1807; the first fighting of the Battle of New Orleans took place on his St. Bernard Parish plantation on December 23, 1814. | https://www.hmdb.org/m.asp?m=296153
+Commagere-Mercier House | @29.957686,-90.064419 | Pedro Commagère built this house about 1795 after the great fire of December 8, 1794 destroyed the one before it, and in 1806 part of it was occupied by New Orleans mayor John Watkins. | https://www.hmdb.org/m.asp?m=51417
+
+# --- St. Louis Cemeteries No. 1 and No. 2 (inside a cemetery pin: if a dry run reads
+#     review against the cemetery, mark the line | new — they are distinct tombs) ---
+Christophe Duminy de Glapion Tomb | @29.95907877,-90.07127325 | Christophe Duminy de Glapion, Marie Laveau's partner and a War of 1812 veteran of the Battle of New Orleans, was laid in this tomb after his death in June 1855. | https://www.hmdb.org/m.asp?m=275894
+Barbarin Family Tomb | @29.9598273,-90.07143485 | Isidore Barbarin (1872–1960), patriarch of a family that carried New Orleans jazz through several generations, is interred in this tomb. | https://www.hmdb.org/m.asp?m=249630
+Capt. Andre Cailloux Marker | @29.96066,-90.07609 | Louisiana sent more Black Union soldiers to the Civil War than any other state and many are buried here, among them Capt. Andre Cailloux, killed leading a Louisiana Native Guards charge at Port Hudson in 1863. | https://www.hmdb.org/m.asp?m=161738
+
+# --- Algiers (West Bank) ---
+Algiers Point Enslaved Africans Marker | @29.95338312,-90.05514766 | In the 1720s, barracks on a stretch of this riverbank since eroded away held enslaved Africans from the Senegal-Gambia region before they were ferried across the river to be sold. | https://www.hmdb.org/m.asp?m=116900
+Algiers Courthouse | @29.95373872,-90.05414278 | This courthouse went up in 1896 to replace the Duverjé plantation house, which had served as the courthouse from 1866 until the Great Algiers Fire of 1895 burned it. | https://www.hmdb.org/m.asp?m=116882
+Algiers Dry Docks | @29.95397767,-90.05490249 | André Seguin built Algiers' first dry dock here in 1819, and because the city didn't want shipyards on its own bank, shipbuilding and repair grew up on this side of the river. | https://www.hmdb.org/m.asp?m=116923
+Henry Red Allen Residence | @29.94558495,-90.05174148 | Trumpeter and bandleader Henry Allen, leader of the Allen Brass Band, and his son, jazz trumpeter and singer Henry "Red" Allen Jr., lived in this house at 414 Newton Street from 1906 to 1917. | https://www.hmdb.org/m.asp?m=160931
+Battle of New Orleans West Bank | @29.93135505,-89.99597509 | On January 8, 1815, American troops under General David Morgan held the west bank of the river here on the Jourdan Plantation while Andrew Jackson defended the east bank. | https://www.hmdb.org/m.asp?m=116881
+
+# --- WAITING on #425 (a same-named Wikipedia article within 90 m, no live pin) ---
+# Banks' Arcade | @29.949845,-90.067779 | Thomas Banks built a glass-roofed arcade running from Natchez to Gravier Street here in 1833, and these buildings are what remains of that block-long structure. | https://www.hmdb.org/m.asp?m=102527
+# McDonogh No. 19 Civil Rights Pioneers Marker | @29.960443,-90.01261 | On November 14, 1960, three six-year-old girls enrolled here and were among the first four Black children to integrate white-only public elementary schools in the Deep South. | https://www.hmdb.org/m.asp?m=99584
+# (Cut, not waiting: Audubon Zoo's whooping-crane marker — it would attach to the zoo's own pin and replace its line.)

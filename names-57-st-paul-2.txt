@@ -1,0 +1,54 @@
+# #57 St. Paul pass 2 — story lines mined from the Historical Marker Database
+# (Saint Paul town list, pages 1–2 = entries 1–200 of 210).
+# Format: Name | locate | story | source_url   — every line placed at the marker's own coordinate.
+# Each story is one sentence in our own words from the marker text; nothing from memory.
+# Pre-checked in the sandbox 2026-09-27: public submissions within 200 m, the live map
+# within 120 m and the Wikipedia titles within 90 m (handoff §6 (q)).
+# Two lines are named to MATCH a live pin so the story attaches to it (#419):
+#   Norway Lutheran Church (the relocated Old Muskego Church, live pin 25 m) and
+#   Roy Wilkins Memorial (the "Spiral for Justice" sculpture, live OSM pin 8 m).
+# City: SEED_CITY_NAME="St. Paul" SEED_CITY_LAT=44.9537 SEED_CITY_LNG=-93.0900
+
+# --- Downtown / Lowertown / Capitol ---
+Hamm's Bear Statue | @44.946939,-93.09678 | This statue honors the Hamm's Bear, a beer mascot first sketched on a restaurant napkin, who from 1952 starred in one of the 20th century's great advertising campaigns. | https://www.hmdb.org/m.asp?m=76620
+Jacob Fahlstrom Marker | @44.945747,-93.088571 | Jacob Fahlstrom (1793–1857), a fur trader, mail carrier and missionary who farmed in this region before 1838, is remembered here as Minnesota's first Swedish settler. | https://www.hmdb.org/m.asp?m=76665
+Baptist Hill Site | @44.949528,-93.088648 | This spot once rose high above the land around it, and from 1851 it was known as Baptist Hill because members of the First Baptist congregation built their first chapel here. | https://www.hmdb.org/m.asp?m=241471
+Site of Minnesota's First Synagogue | @44.9506569,-93.0959 | Eight German Jewish families who came up the Mississippi from St. Louis founded Mount Zion Hebrew Association, Minnesota's first Jewish congregation, in 1856. | https://www.hmdb.org/m.asp?m=134145
+Minnesota Memorial to Special Forces in Laos | @44.952229,-93.103477 | This memorial to the Secret War in Laos, fought from 1961 to 1975, was driven by children who survived that war and completed by the Hmong and Lao Veterans Statue Committee. | https://www.hmdb.org/m.asp?m=297366
+Roy Wilkins Memorial | @44.952487,-93.103882 | The spiral at the heart of this sculpture has 46 elements, one for each year Roy Wilkins led the NAACP in its fight for equal rights. | https://www.hmdb.org/m.asp?m=79419
+
+# --- Cathedral Hill / Summit Hill / Rondo ---
+Site of First School Patrol Crossing in the World | @44.947171,-93.107648 | The world's first school safety patrol crossing started here on February 17, 1921, set up by Sister Carmela Hanggi, principal of the Cathedral School. | https://www.hmdb.org/m.asp?m=79453
+Selby Streetcar Tunnel | @44.946601,-93.107712 | Beneath this spot runs the 1,500-foot Selby streetcar tunnel, opened by the Twin City Rapid Transit Company in 1907, and its east portal is still intact down the hill. | https://www.hmdb.org/m.asp?m=245938
+Summit Lookout Park | @44.941427,-93.117505 | This small park was the site of the Carpenter's Hotel, a towering wooden building from the late 1850s that stood on the bluff where Summit Avenue meets Ramsey Hill. | https://www.hmdb.org/m.asp?m=41942
+The New York Life Eagle | @44.941717,-93.116987 | Stanford White commissioned this eagle from sculptor Augustus Saint-Gaudens in 1890 for the New York Life Insurance Company, and it was carved in marble from his design. | https://www.hmdb.org/m.asp?m=41946
+Boyd Park | @44.946689,-93.114498 | This park is named for Frank Boyd (1881–1962), who helped organize the Brotherhood of Sleeping Car Porters and fought for better wages for union workers and for the rights of all African Americans. | https://www.hmdb.org/m.asp?m=287081
+Hmong in the Rondo Neighborhood Marker | @44.951066,-93.135112 | In 1976 the Rondo neighborhood became home to Leng Vang, the first Hmong refugee to settle in Minnesota. | https://www.hmdb.org/m.asp?m=246200
+St. Peter Claver Catholic Church | @44.952476,-93.144286 | Founded in 1888 by St. Paul's Black Catholic community, St. Peter Claver was the first African American Catholic church in Minnesota. | https://www.hmdb.org/m.asp?m=207582
+
+# --- East Side / Dayton's Bluff (the old 3M campus) / Railroad Island ---
+3M Minerals Building Explosion Site | @44.964711,-93.063597 | At 8:20 a.m. on February 8, 1951, with the temperature at 12 below zero, an explosion tore through 3M's six-story Minerals Building here and destroyed two of its floors. | https://www.hmdb.org/m.asp?m=175411
+Origin of the Scotch Brand Marker | @44.963597,-93.063457 | 3M's "Scotch" brand name is believed to go back to an auto-body painter who complained that the company's new masking tape wouldn't stick because it wasn't fully coated with adhesive. | https://www.hmdb.org/m.asp?m=182180
+The Mining in 3M Marker | @44.96347,-93.06339 | Despite its name, the Minnesota Mining and Manufacturing Company never did any mining beyond a limited attempt to dig low-grade corundum for abrasives at Crystal Bay in 1904. | https://www.hmdb.org/m.asp?m=181934
+Railroad Island | @44.962667,-93.086344 | The small neighborhood just east of here is called Railroad Island because it was once completely surrounded by railroad tracks. | https://www.hmdb.org/m.asp?m=232442
+Tallest Ice Structure in History | @44.989686,-93.059453 | This marker commemorates the tallest ice structure in history, 128 feet 9 inches high and built from 10,000 blocks of ice cut from Lake Phalen, each weighing 710 pounds. | https://www.hmdb.org/m.asp?m=212609
+Gillette Children's Hospital Marker | @44.98118611,-93.05956389 | In 1897 the Minnesota Legislature created the State Hospital for Indigent Crippled and Deformed Children, the first time public money anywhere in the nation went to a hospital just for children with disabilities. | https://www.hmdb.org/m.asp?m=207672
+
+# --- Holman Field / Indian Mounds Park ---
+Indian Mounds Park Airway Beacon | @44.946359,-93.057455 | Beacons like this one marked out the airway corridor, usually 10 miles wide, serving Holman Field, which was built in 1926 to give St. Paul air service and carry the Post Office's contract airmail. | https://www.hmdb.org/m.asp?m=151067
+Saint Paul Downtown Airport Seaplane Harbor | @44.942788,-93.063985 | From 1929 to 1997 this was one of the earliest seaplane bases in the Twin Cities, and a replica of the stairs down to its loading dock was built in 2009. | https://www.hmdb.org/m.asp?m=232713
+Northwest Airways Hangar Passenger Terminal Site | @44.94281,-93.064064 | Northwest Airways built its first purpose-built corporate headquarters, a hangar and passenger terminal, here in 1930, helping make the Twin Cities its home base for almost 85 years; the building was torn down in 1988. | https://www.hmdb.org/m.asp?m=234253
+Riverside Hangars | @44.941046,-93.058881 | Built in 1942 as a World War II bomber modification center, these hangars are a significant example of glued-laminated wood arch construction. | https://www.hmdb.org/m.asp?m=234013
+
+# --- Highland Park / Mississippi gorge / Merriam Park / St. Anthony Park ---
+Fountain Cave | @44.923397,-93.122676 | Known as a landmark as early as 1811, Fountain Cave was named for the sparkling creek that ran from its mouth down a ravine some 375 feet to the Mississippi. | https://www.hmdb.org/m.asp?m=42305
+Mattocks School | @44.910619,-93.167264 | This small limestone school was finished in 1871 at Randolph and Snelling Avenues, outside St. Paul's city limits until Reserve Township was annexed in 1887. | https://www.hmdb.org/m.asp?m=225160
+Ford Hydro Electric Turbine | @44.914601,-93.198511 | This 15-ton cast-iron turbine is one of four that Ford Motor Company installed in 1924 at the hydroelectric plant below this lookout. | https://www.hmdb.org/m.asp?m=46518
+Red River Ox Cart Trail Marker | @44.957188,-93.197039 | The Red River Ox Cart Trail once passed along here, closely following the route of today's St. Anthony Avenue into St. Paul. | https://www.hmdb.org/m.asp?m=160140
+Norway Lutheran Church | @44.984306,-93.195319 | This church was built in 1844 near Waterford, Wisconsin, by the first congregation of Norwegian Lutheran immigrants in America, and was later rebuilt here on the Luther Seminary campus. | https://www.hmdb.org/m.asp?m=247111
+
+# --- WAITING on #425 (own same-named article within 90 m, or a big-area pin beyond it) ---
+# Pilgrim Baptist Church | @44.952925,-93.131075 | Founded in 1863 by Reverend Robert Hickman and a group of people who had escaped slavery in Boone County, Missouri, Pilgrim Baptist is the oldest African American Baptist congregation in Minnesota. | https://www.hmdb.org/m.asp?m=247197
+# St. Joseph's Academy | @44.94832,-93.115441 | Founded in 1851 by four Sisters of St. Joseph of Carondelet, St. Joseph's Academy is the oldest Catholic school in Minnesota. | https://www.hmdb.org/m.asp?m=134907
+# Chapel of Saint Paul Site | @44.945181,-93.089299 | In 1841 Father Lucien Galtier built the Chapel of Saint Paul near this spot, and the city took its name from it. | https://www.hmdb.org/m.asp?m=76689
+# Meeker Island Lock and Dam Historic Site | @44.954028,-93.206444 | Built between 1899 and 1907 as the first lock and dam on the Mississippi, it ran only five years before it closed in 1912 and the dam was demolished. | https://www.hmdb.org/m.asp?m=131185
