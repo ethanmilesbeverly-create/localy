@@ -1,0 +1,26 @@
+# #57 Houston pass 1 — 2026-09-27. Source: Historical Marker Database, Houston town list pages 1–2 (entries 1–200, "36th Infantry" to "J-2 Engine")
+# plus single marker pages reached from their nearby lists. Every line is placed at the marker's own coordinate and worded only from the marker text.
+# Checked before delivery: live submissions within 200 m (none), live map within 120 m, Wikipedia titles within 90 m (handoff §6 (q)).
+# River Oaks Garden Club and Houston Heights Fire Station are named to match their live map pins so the story ATTACHES (#419).
+# RUN: SEED_CITY_NAME=Houston SEED_CITY_LAT=29.7604 SEED_CITY_LNG=-95.3698 deno run -A seed-resolve.ts names-57-houston.txt
+
+1,000 Houstonians Join the Navy Marker | @29.75633333,-95.3654 | On May 30, 1942, 1,000 Houston volunteers were sworn into the U.S. Navy on this site, pledging to avenge the cruiser USS Houston and her crew, lost in the Battle of the Java Sea. | https://www.hmdb.org/m.asp?m=66151
+The Capture of Santa Anna Marker | @29.7245,-95.21285 | This is roughly where six soldiers of the Texas army captured Santa Anna, the president of Mexico and commander of its army. | https://www.hmdb.org/m.asp?m=60821
+Constitution Bend | @29.74855804,-95.29223624 | Houston's ship-turning basin is this bend of Buffalo Bayou, named for the steamboat Constitution, the first to turn around here, in June 1837 when the city was less than a year old. | https://www.hmdb.org/m.asp?m=246874
+Daughters of the Republic of Texas Founding Site | @29.75638333,-95.35788333 | On November 6, 1891, seventeen women met at Mrs. Andrew Briscoe's home on this site and organized the group that became the Daughters of the Republic of Texas. | https://www.hmdb.org/m.asp?m=62378
+Former Site of Capitol, Republic of Texas | @29.76012131,-95.36265529 | Months after Texas won independence in 1836, the Republic's Congress chose the new town of Houston as its capital, and the Capitol stood on this corner. | https://www.hmdb.org/m.asp?m=140374
+Site of Home of President Sam Houston | @29.75943194,-95.35897902 | Sam Houston lived on this site in 1837–39 while he was president of the Republic of Texas. | https://www.hmdb.org/m.asp?m=116845
+Houston's First Sit-in | @29.73165218,-95.37587045 | On March 4, 1960, thirteen Texas Southern University students marched a mile from campus to the Weingarten's Supermarket that stood here and sat silently at its lunch counter for hours, Houston's first sit-in; the building is now a post office. | https://www.hmdb.org/m.asp?m=140666
+Fair Grounds Base Ball Park | @29.74630164,-95.37574379 | The Texas League's first game was played at a ballpark on these blocks on April 1, 1888, with Houston beating Galveston 4–1. | https://www.hmdb.org/m.asp?m=236007
+El Barrio del Alacrán Marker | @29.76315981,-95.35114907 | Mexican immigrants filled this Second Ward neighborhood from the 1910s, its residents named it El Alacrán, the Scorpion, in the 1930s, and urban renewal and highway building erased it in the 1950s. | https://www.hmdb.org/m.asp?m=235853
+Hidalgo Park Quiosco | @29.74663333,-95.29721667 | Magnolia Park's Mexican American community commissioned this kiosk, built for $2,300 and dedicated when Hidalgo Park opened on September 16, 1934. | https://www.hmdb.org/m.asp?m=170715
+Antioch Missionary Baptist Church | @29.75640593,-95.37196445 | Nine people freed from slavery organized Antioch in 1866 as Houston's first African American Baptist church. | https://www.hmdb.org/m.asp?m=116554
+River Oaks Garden Club | @29.74213333,-95.4179 | Built about 1880, this building was the John Smith School until 1920, and Will Hogg restored it in 1927 as the Forum of Civics. | https://www.hmdb.org/m.asp?m=63842
+1840 Houston City Cemetery | @29.76848697,-95.36793221 | In 1840 the city paid the Allen brothers $750 for five acres here to open Houston's first city-owned cemetery. | https://www.hmdb.org/m.asp?m=225823
+Houston Heights Fire Station | @29.792585,-95.39863959 | After the Houston Heights city hall burned in 1912, this building went up to hold the city offices, a fire station and a small jail. | https://www.hmdb.org/m.asp?m=157818
+
+# WAITING (#425) — the place has its OWN Wikipedia article within 90 m and no live pin found.
+# 1928 Democratic National Convention Site | @29.76197699,-95.36913126 | Jesse H. Jones brought the 1928 Democratic National Convention to Houston, and its 20,000-seat Sam Houston Hall was built on this site in 64 days. | https://www.hmdb.org/m.asp?m=116847
+#   (article "Sam Houston Hall" 84 m)
+# Houston Fire Station No. 7 | @29.74748333,-95.37491667 | Finished in January 1899, this is Houston's oldest fire house. | https://www.hmdb.org/m.asp?m=62757
+#   (articles "Houston Fire Station No. 7" 13 m, "Houston Fire Museum" 15 m)

@@ -1,0 +1,50 @@
+# names-57-dallas-2.txt — #57 Phase A, Dallas pass 2 (2026-09-26; revised after the first dry run)
+# Source: Historical Marker Database (hmdb.org) — Dallas town list, Dallas County geographic list p.4,
+# the downtown "nearby" list, and single marker pages. Every line is placed at the marker's own
+# coordinate and worded only from the marker text. Pass 1 lines live in names-57-dallas.txt.
+# Format: Name | @lat,lng | one-sentence story | source_url
+# Dry run 1: 18 new-seed, 3 review, 2 attached. 4 same-named-article lines moved to WAITING (#425);
+# the 3 review lines are distinct markers inside a bigger pin (Dealey Plaza, Martyrs Park, Fair Park Coliseum)
+# and carry `| new` — DELETE ` | new` from them right after the commit (#429).
+# Run with SEED_CITY_NAME=Dallas SEED_CITY_LAT=32.7767 SEED_CITY_LNG=-96.7970
+
+# --- Downtown / West End ---
+Dallas County Criminal Courts Building | @32.77902327,-96.8075822 | Jack Ruby was tried in this building's east courtroom in 1964 for killing Lee Harvey Oswald, in a jail-and-courts tower the county finished in 1915 with its upper six floors built to hold 200 prisoners. | https://www.hmdb.org/m.asp?m=219767
+Original Site of Neiman-Marcus | @32.78085996,-96.80140874 | The first Neiman-Marcus store opened on this corner on September 10, 1907, founded by Herbert Marcus, his sister Carrie Marcus Neiman and her husband A. L. Neiman, and it burned down in 1913 before the store rebuilt at Main and Ervay. | https://www.hmdb.org/m.asp?m=157394
+Old Cumberland Hill School | @32.7870925,-96.80286539 | Built in 1888 as one of the first brick schools in Dallas, this Victorian schoolhouse later drew pupils of so many nationalities that it was nicknamed the Melting Pot School. | https://www.hmdb.org/m.asp?m=157350
+Site of First Ferry and Bridge | @32.7781,-96.808645 | John Neely Bryan started the first ferry across the Trinity River at this crossing in 1842, and in 1854 Alexander Cockrell replaced it with a wooden toll bridge. | https://www.hmdb.org/m.asp?m=43435
+Jane Elkins Marker | @32.77854509,-96.81025232 | Jane Elkins, the first documented enslaved person bought in Dallas County, was hanged outside the courthouse on May 27, 1853, after a trial with no lawyer and no witnesses, making her the first woman legally hanged in Texas. | https://www.hmdb.org/m.asp?m=305996
+Shadow Lines | @32.77870732,-96.81041162 | This weathered-steel memorial works like a sundial: each year on the anniversary of a racial lynching or hanging in Dallas County between 1853 and 1920, the morning shadow falls on that victim's name. | https://www.hmdb.org/m.asp?m=310282
+Lynching of William Taylor Marker | @32.77447273,-96.82205254 | Near this spot beside the Trinity River on September 12, 1884, a white mob of at least 400 took 25-year-old William Allen Taylor from police custody, still handcuffed, and hanged him from a tree, and no one was ever held accountable. | https://www.hmdb.org/m.asp?m=244468
+
+# --- Little Mexico / Oak Lawn edge ---
+Pike Park | @32.79355646,-96.80931974 | Bought by the city in 1912-13, this park served the mostly Mexican-American Little Mexico neighborhood and was an important gathering place for Mexican-American servicemen during World War II. | https://www.hmdb.org/m.asp?m=148985
+Anshe Sphard Synagogue Site | @32.79069414,-96.80522396 | This neighborhood was called Little Jerusalem when Jewish immigrants founded the Anshe Sphard congregation in 1906, and after the synagogue was sold to the First Mexican Baptist Church in 1918 the area became Little Mexico, the first and largest Mexican American barrio in Dallas. | https://www.hmdb.org/m.asp?m=297296
+The Crossroads Marker | @32.81093333,-96.8112 | A state marker at this Oak Lawn corner records that, despite the city's conservative reputation, Dallas's LGBTQ community was among the first in Texas to organize politically and socially. | https://www.hmdb.org/m.asp?m=125945
+
+# --- Deep Ellum / Old East Dallas ---
+Leadbelly Marker | @32.78367258,-96.78027623 | Folk singer Huddie Ledbetter, known as Leadbelly, met the blues musician Blind Lemon Jefferson in Deep Ellum around 1912 and worked and traveled with him until 1917. | https://www.hmdb.org/m.asp?m=152098
+Original Site of the Coca-Cola Bottling Company of Dallas | @32.78425,-96.78525 | The first bottle of Coca-Cola made in Dallas was filled on this Deep Ellum site on June 10, 1902, by a three-man crew that sold 37 cases on the first day and delivered them by one-horse wagon. | https://hmdb.org/m.asp?m=152107
+William Sidney Pittman Marker | @32.78703657,-96.78969597 | William Sidney Pittman, remembered as the first practicing African American architect in Texas and married to Booker T. Washington's daughter Portia, moved to Dallas in 1913 and designed the 1916 Pythian Temple for the Knights of Pythias. | https://www.hmdb.org/m.asp?m=158474
+
+# --- Oak Cliff ---
+Texas Theatre | @32.74322778,-96.82601111 | Lee Harvey Oswald was arrested in this 1931 movie palace's auditorium on November 22, 1963, beneath a ceiling built with 118 twinkling stars, and the theater later appeared in the 1991 film JFK. | https://www.hmdb.org/m.asp?m=211507
+Officer J.D. Tippit Marker | @32.747335,-96.818674 | At 10th and Patton on November 22, 1963, about 45 minutes after President Kennedy was shot, Dallas police officer J.D. Tippit stopped Lee Harvey Oswald on the sidewalk and was shot dead beside his patrol car. | https://www.hmdb.org/m.asp?m=308436
+
+# --- Old City Park / Cedars ---
+Cherokees in Dallas Marker | @32.77363683,-96.78890069 | About ninety Cherokees led by Chief Bowles moved into this area from Arkansas Territory in 1819 but were driven out two years later by other tribes who resented their arrival. | https://www.hmdb.org/m.asp?m=164952
+Harriet Mason Marker | @32.77349801,-96.7900044 | Harriet Mason, enslaved by the family of General Richard Gano, recalled in a 1930s Federal Writers' Project interview that she was taught to read and write and that Gano gathered the enslaved people in the dining room to tell them they were free. | https://www.hmdb.org/m.asp?m=264422
+
+# --- South and East Dallas ---
+Fabulous Quarter Horse Steel Dust Marker | @32.77920497,-96.75783374 | Steel Dust, a frontier racing champion brought to Texas as a colt in 1844, became the foundation sire of the most popular quarter horse strain of the 20th century. | https://www.hmdb.org/m.asp?m=152094
+Big Spring | @32.72956317,-96.71876084 | This natural spring in the White Rock Creek valley near the Trinity River was claimed in 1842 by John Beeman, head of the first family to settle permanently in Dallas County. | https://www.hmdb.org/m.asp?m=170308
+
+# --- WAITING (not run this pass) ---
+# #425 (dry run 2026-09-26: new-seed, map 0, Sanger Brothers Complex article 70 m (and Dallas College El Centro 29 m)): Site of Sanger Brothers Department Store | @32.7801422,-96.80473561 | The five German-born Sanger brothers ran their department store on this block from 1873 to 1965, offering free home delivery by 1879 and becoming one of the first Dallas customers for telephones and electric lights. | https://www.hmdb.org/m.asp?m=157819
+# #425 (dry run 2026-09-26: new-seed, map 0, Kirby Building article 33 m): Busch-Kirby Building | @32.78077123,-96.79909128 | Adolphus Busch had this Gothic-spired building put up in 1913 as a shops-and-offices companion to his nearby Adolphus Hotel. | https://www.hmdb.org/m.asp?m=157445
+# #425 (dry run 2026-09-26: new-seed, map 0, Alfred Horatio Belo House article 59 m): A. H. Belo House | @32.78811016,-96.79840779 | The family of A. H. Belo, whose Dallas branch of the Galveston News grew into The Dallas Morning News, lived in this Classical Revival mansion until 1922, and it then served as a funeral home for nearly 50 years. | https://www.hmdb.org/m.asp?m=157388
+# #425 (dry run 2026-09-26: new-seed, map 0, First Baptist Church Dallas article 26 m): First Baptist Church | @32.78457953,-96.79967701 | Members paid for this congregation's first one-room church here in 1871 by weaving rugs and selling hominy, preserves and cheese at fairs, and it is the only downtown Dallas church still on its original site. | https://www.hmdb.org/m.asp?m=251857
+# Freedman's Cemetery (m=149056) — its own Wikipedia article sits at 32.803207,-96.793853, so re-placing it there is the #425 class; waits on #425.
+# St. Paul United Methodist Church, Moorland YMCA Building, Millermore, Miller Log Cabin — full text read, but the list gave no marker coordinate; fetch each marker page next pass.
+# WRR Radio (m=126059), Munger Avenue Baptist Church (m=149049), Hamilton Park Community (m=104246), Dallas Baby Camp (m=152454), Flag Pole Hill Park (m=245279), Frank Reaugh (m=152520) — excerpt stops before the claim.
+# Oak Cliff titles beyond Texas Theatre / Tippit — the Dallas title list's pages 3–4 and the county list's page 3 return HTTP 400 to the fetch tool; next pass reads them another way.
