@@ -1,0 +1,38 @@
+# #57 Nashville pass 2 — 2026-09-27. Source: Historical Marker Database, Tennessee Historical Commission series
+# (geographic sort, entries 201–300 = the Nashville neighbourhoods) plus single marker pages reached from its nearby lists.
+# Every line is placed at the marker's own coordinate and worded only from the marker text.
+# Checked before delivery: live submissions within 200 m (Arna Bontemps Home Site is already a pass-1 seed — left out),
+# live map pins within 120 m, and Wikipedia titles within 90 m (handoff §6 (q)).
+# Tom Wilson Park and Meigs School are named to match their live map pins so the story ATTACHES (#419).
+
+Sarah Estell Marker | @36.163649,-86.780596 | Before the Civil War, Sarah Estell, a free Black woman, ran an ice cream parlor and sweet shop near here, and her catering business grew to supply the city's banquets. | https://www.hmdb.org/m.asp?m=81470
+Tom Wilson Park | @36.14528321,-86.76425248 | A ballpark that stood near here from 1929 to 1946, Tom Wilson Park was home field for the Nashville Elite Giants of the Southern Negro League. | https://www.hmdb.org/m.asp?m=147542
+Meigs School | @36.17602081,-86.76052226 | Meigs opened in 1883 as an elementary school for Black students under an African American principal, Robert S. White, and became Nashville's first high school for African Americans. | https://www.hmdb.org/m.asp?m=175905
+DeFord Bailey Marker | @36.1425,-86.7869 | DeFord Bailey, the Grand Ole Opry's first Black musician, lived in Edgehill for nearly 60 years and ran a shoe-shine shop on 12th Avenue South near this corner. | https://www.hmdb.org/m.asp?m=74369
+Carl Van Vechten Gallery | @36.16624,-86.80438 | Finished in 1889, this building was the first gymnasium at any predominantly Black college in the United States, and it became an art gallery in 1949. | https://www.hmdb.org/m.asp?m=4507
+Richardson House | @36.16843,-86.80231 | This 1905 house was home to Reuben B. Richardson, who captained the city's Engine Company No. 4 from 1893 to 1923 as one of the first Black men to hold that post. | https://www.hmdb.org/m.asp?m=4513
+The Little Theatre | @36.16638,-86.80498 | The oldest building on the Fisk campus, the Little Theatre went up around 1860 as part of a Union Army hospital barracks known as the Railroad Hospital. | https://www.hmdb.org/m.asp?m=4506
+James Weldon Johnson Home | @36.16454722,-86.80472222 | James Weldon Johnson, who wrote the poem that became Lift Every Voice and Sing, had this Dutch Colonial house built in 1931. | https://www.hmdb.org/m.asp?m=4520
+Nashville Student Movement Office | @36.16914114,-86.80863813 | This intersection was the headquarters of the Nashville Student Movement, formed in October 1959 by students trained in nonviolent direct action by the Rev. James Lawson. | https://www.hmdb.org/m.asp?m=147893
+Freeland's Station | @36.17865,-86.79501 | One of the main forts of the first Cumberland settlement stood here, and Felix Robertson, the first white child born in the settlement, was born inside it on January 11, 1781, four days before it was attacked. | https://www.hmdb.org/m.asp?m=4131
+National Negro High School Basketball Tournament Marker | @36.16697222,-86.82743056 | From 1945 to 1964 the National Negro High School Basketball Tournament, started in 1929 by Charles H. Williams, was played here at Tennessee State's Kean Hall. | https://www.hmdb.org/m.asp?m=147824
+Jefferson Street Music District | @36.16867518,-86.81284504 | From the 1940s to the early 1960s Jefferson Street was one of the country's best-known jazz, blues and R&B strips, where Little Richard, Jimi Hendrix and Ray Charles played the clubs again and again. | https://www.hmdb.org/m.asp?m=147915
+Bordeaux Community Marker | @36.19213734,-86.8290715 | When Dr. M. O. Randall applied for a post office here in 1866 the community had no name, so he called it Bordeaux after a trip he had just made to France. | https://www.hmdb.org/m.asp?m=174140
+Madison Adventist Origins | @36.25485099,-86.67282014 | In June 1904, while her son Edson's riverboat The Morning Star was moored near here for repairs, Adventist leader Ellen White saw the Ferguson Farm for sale, and the farm became Madison College and, from 1908, the Madison sanitarium. | https://www.hmdb.org/m.asp?m=162447
+Nashville Sit-Ins Marker | @36.16390598,-86.78070941 | On February 13, 1960, 124 students from Nashville's Black colleges sat down at the Woolworth's, Kress and McClellan's lunch counters near here and asked to be served. | https://www.hmdb.org/m.asp?m=219765
+Jesse James House Marker | @36.17380005,-86.75621565 | After the 1876 Northfield bank robbery, Jesse James lived with his family in a house on Fatherland Street nearby for about four and a half years as J.D. Howard, leaving in March 1881 when a gang member was caught in Whites Creek. | https://www.hmdb.org/m.asp?m=221489
+Surrender of Nashville Marker | @36.17290724,-86.76165419 | On February 23, 1862, Mayor R. B. Cheatham met Union officers at banker Charles Fuller's Edgefield home here to discuss surrender, and the city passed to Federal control two days later; the house burned in the 1916 East Nashville fire. | https://www.hmdb.org/m.asp?m=145784
+Hattie Cotton Elementary School | @36.19077954,-86.74782671 | A Black first grader desegregated this school on September 9, 1957, and just after midnight it was dynamited; it reopened within a week and the bombers were never identified. | https://www.hmdb.org/m.asp?m=242725
+The Harris Music Building | @36.167286,-86.803822 | This house was built around 1876 for Richard Harris, owner of Harris Furniture Co., who in the late 1880s became Fisk University's first Black trustee. | https://www.hmdb.org/m.asp?m=4501
+
+# WAITING (#425) — each has its OWN Wikipedia article within 90 m and no live pin found (or is a big-area place). Ready to run once #425 is decided.
+# James K. Polk Home Site | @36.1631663,-86.78339114 | The house James K. Polk bought while president stood about 100 feet west of here; he came home to it in 1849 and died there that June. | https://www.hmdb.org/m.asp?m=188773
+#   (article "Polk Place" 37 m)
+# Maxwell House Hotel Site | @36.163552,-86.779576 | The Maxwell House Hotel stood on this site from 1859, serving as a Civil War barracks, hospital and prison before it opened as a hotel in 1869, until fire destroyed it on Christmas Day 1961. | https://www.hmdb.org/m.asp?m=24145
+#   (article "Maxwell House Hotel" 37 m)
+# Downtown Presbyterian Church | @36.16313,-86.780024 | James K. Polk was inaugurated governor of Tennessee inside this Egyptian Revival church in 1839, a year after Andrew Jackson joined its congregation. | https://www.hmdb.org/m.asp?m=121842
+#   (article "Downtown Presbyterian Church (Nashville)" 25 m)
+# Kelley v. Board of Education Marker | @36.17975624,-86.75024784 | Robert W. Kelley tried to enroll at East High on September 1, 1955, and his father's class-action suit, argued by Z. Alexander Looby, Thurgood Marshall and Avon Williams Jr., forced the grade-a-year desegregation plan that became a model across the South. | https://www.hmdb.org/m.asp?m=145793
+#   (article "East Nashville Magnet High School" 78 m — the school itself)
+# Hadley Park | @36.16625,-86.82047 | Nashville bought 34 acres of the old Hadley plantation in 1912 as a public park for Black residents and dedicated it on July 4th. | https://www.hmdb.org/m.asp?m=4221
+#   (big-area park; its pin can sit beyond 90 m of the marker — the Dallas Zoo case)
