@@ -1,0 +1,33 @@
+# #57 San Diego pass 1 — 2026-09-27. Source: Historical Marker Database, San Diego town list pages 1–2 (entries 1–200) and the Gaslamp Quarter series.
+# Every line is placed at the marker's own coordinate and worded only from the marker text.
+# Checked before delivery: live submissions within 150 m (none), live map within 120 m, Wikipedia titles within 90 m (handoff §6 (q)).
+# Whaley House and Kate Sessions are named to match their live map pins so the story ATTACHES (#419).
+# RUN: SEED_CITY_NAME="San Diego" SEED_CITY_LAT=32.7157 SEED_CITY_LNG=-117.1611 deno run -A seed-resolve.ts names-57-san-diego.txt
+
+1915-16 Isthmus Fun Zone Site | @32.73521699,-117.14693885 | Today's San Diego Zoo parking lot was the Isthmus, the rides-and-amusements zone of the 1915–16 Panama-California Exposition, named for the Isthmus of Panama where the canal had just been finished. | https://www.hmdb.org/m.asp?m=208958
+1906 Old Town Convent | @32.75383,-117.195754 | Built as St. Joseph's Rectory at Fourth Avenue and Beech Street downtown, this house was moved through the city's streets to this site in 1940 and used by the Catholic Church as a seminary and convent. | https://www.hmdb.org/m.asp?m=71059
+Dutch Flats Airport Site | @32.74607581,-117.20127182 | Charles Lindbergh made the first flight of the Spirit of St. Louis here at the old Dutch Flats Airport on April 28, 1927, a 20-minute hop in a plane Ryan Airlines workers had built in 60 days. | https://www.hmdb.org/m.asp?m=186364
+Chinese Fishing and Shipbuilding Site | @32.71909833,-117.23118833 | From about 1860 to the early 1890s a Chinese fishing village stood here on the La Playa Trail, with ten shanties, drying racks and salting tanks, and Chinese junks were built on the shore. | https://www.hmdb.org/m.asp?m=82320
+Development of CDMA Marker | @32.89550278,-117.19606944 | On November 7, 1989, Qualcomm publicly demonstrated its CDMA digital cellular system here, technology that raised the capacity of cell networks and stretched phone battery life. | https://www.hmdb.org/m.asp?m=193674
+Martin Luther King Jr. at San Diego State Marker | @32.77420893,-117.07080441 | Martin Luther King Jr. spoke to a crowd at San Diego State's Open Air Theatre on May 29, 1964. | https://www.hmdb.org/m.asp?m=286139
+Bum the Town Dog | @32.71066667,-117.161 | Bum arrived in San Diego as a stowaway, begged good food from around town, and was the city's official town dog until he died on November 10, 1898, aged 12. | https://www.hmdb.org/m.asp?m=52910
+Father Antonio Ubach Marker | @32.753483,-117.195977 | Father Antonio Ubach, an advocate for California's Native Americans, ran St. Anthony's Indian School on this site from 1856 to 1891. | https://www.hmdb.org/m.asp?m=11647
+First San Diego Courthouse | @32.754136,-117.197201 | Built by the Mormon Battalion in 1847 as San Diego's first fired-brick building, it housed the U.S. Boundary Commission in 1849 and later served as courthouse, church, school and polling place. | https://www.hmdb.org/m.asp?m=84183
+Whaley House | @32.75277778,-117.19454167 | James "Yankee Jim" Robinson was the last man hanged on this site, on September 18, 1852, for grand larceny, from a gallows of two posts, a beam and a mule-drawn wagon. | https://www.hmdb.org/m.asp?m=296375
+Kate Sessions | @32.80541667,-117.22295 | Horticulturist Kate Sessions ran her nursery on this site and was the first woman to receive the International Meyer Medal. | https://www.hmdb.org/m.asp?m=51098
+La Casa de Machado y Wrightington | @32.75464435,-117.1979454 | Juana de Dios Machado, a midwife, married shoemaker Thomas Wrightington in 1842 and lived in this adobe for more than fifty years, caring for the sick. | https://www.hmdb.org/m.asp?m=297868
+Lane Field Ballpark Site | @32.71596111,-117.17280556 | The WPA built a wooden ballpark here in two months for $25,000 in 1936, and it was the first home of the Pacific Coast League San Diego Padres until 1957. | https://www.hmdb.org/m.asp?m=83871
+The Lifeguard Memorial | @32.74890678,-117.25259038 | On Sunday, May 5, 1918, rip currents near the mouth of Mission Bay drowned 13 people here, 11 of them soldiers and sailors. | https://www.hmdb.org/m.asp?m=212933
+St. James Hotel | @32.71416667,-117.159 | The ten-story St. James, built in 1912, was once the tallest building in San Diego. | https://www.hmdb.org/m.asp?m=51793
+San Diego Lumber Company Building | @32.70718964,-117.15942621 | Philip Morse started San Diego's first major lumber yard on this site in 1884, beside a pier where sailing ships and later steamers unloaded timber. | https://www.hmdb.org/m.asp?m=141057
+
+# WAITING (#425) — each has its OWN Wikipedia article within 90 m and no live pin found. Nearly every Gaslamp Quarter building is this class.
+# Callan Hotel | @32.710543,-117.16025 | In 1886 Till Burnes ran his Acme Saloon here with a menagerie of a wildcat, monkeys, an anteater and a pet bear that escaped at least twice. | https://www.hmdb.org/m.asp?m=109358
+# Montijo Building | @32.711178,-117.160413 | From 1881 to 1885 this thick-walled building was County Coroner John Young's morgue, with caskets lowered by rope into its basement vault. | https://www.hmdb.org/m.asp?m=109363
+# McGurck Block | @32.71175111,-117.1600323 | From 1903 to 1984 this was Ferris and Ferris, long San Diego's only all-night drugstore, where Gregory Peck's father worked as the night druggist. | https://www.hmdb.org/m.asp?m=279045
+# Sterling Hardware Building | @32.71095,-117.15938333 | In 1889 half of this building was leased to Ramona Wolf, whose name Helen Hunt Jackson probably borrowed for her novel Ramona. | https://www.hmdb.org/m.asp?m=191976
+# Lewis Brick Block | @32.710992,-117.160386 | Its upper floors were called the Stingaree Hotel after the red-light district around it, above a cigar shop, a billiard hall and a revival center. | https://www.hmdb.org/m.asp?m=109353
+# Timkin Building | @32.71133333,-117.16033333 | Henry Timken, who invented the roller bearing for horse-drawn carriages, built this building in 1894 for $7,200. | https://www.hmdb.org/m.asp?m=51547
+# Royal Pie Bakery | @32.711009,-117.161378 | Built in 1884 as the San Diego Steam Cracker Factory, this building has been a bakery ever since. | https://www.hmdb.org/m.asp?m=311783
+# Ingle Building | @32.71373292,-117.16094609 | For many years the ground floor was the Golden Lion Tavern, and its original lion sculptures still flank the entrance and outer walls. | https://www.hmdb.org/m.asp?m=266077
+# La Punta de los Muertos | @32.711034,-117.1708 | Sailors and Marines were buried at this point in 1782 while the Spanish frigates La Princesa and La Favorita surveyed San Diego Bay. | https://www.hmdb.org/m.asp?m=51076
