@@ -1,0 +1,26 @@
+# #57 Houston pass 2 — 2026-09-27. Source: Historical Marker Database, Harris County list in geographic sort, pages 1–2 (entries 1–200:
+# Baytown, Bellaire, Channelview, Cypress, Deer Park, Galena Park, and Houston's Central Business District / Downtown / Fourth Ward).
+# Every line is placed at the marker's own coordinate and worded only from the marker text.
+# Checked before delivery: live submissions within 200 m, live map within 120 m, Wikipedia titles within 90 m (handoff §6 (q)).
+# Market Square Park is named to match its live map pin so the story ATTACHES (#419).
+# RUN: SEED_CITY_NAME=Houston SEED_CITY_LAT=29.7604 SEED_CITY_LNG=-95.3698 deno run -A seed-resolve.ts names-57-houston-2.txt
+
+Isaac Batterson Home Site | @29.73231088,-95.24150735 | On April 19, 1836, Gen. Sam Houston took the floorboards of Isaac Batterson's house near here to build rafts that ferried his army across the rain-swollen Buffalo Bayou. | https://www.hmdb.org/m.asp?m=247381
+Site of Old Houston Academy | @29.75669479,-95.3602905 | Founded in 1856, the Houston Academy lost most of its male students to the Confederate army, served as an army hospital in 1864–65, and in 1867 held the body of Gen. Albert Sidney Johnston as it lay in state. | https://www.hmdb.org/m.asp?m=125722
+Dr. George Moffit Patrick Home Site | @29.69882719,-95.12397793 | After the Battle of San Jacinto the Texas Army camped at Dr. George Moffit Patrick's home on this site, and the Republic's cabinet met here. | https://www.hmdb.org/m.asp?m=53323
+Lorenzo de Zavala Home Site | @29.7620947,-95.09202843 | Lorenzo de Zavala, a signer of the Texas Declaration of Independence and vice president of the Republic, built a plank-covered log house here in 1829 that became a hospital for the wounded after San Jacinto. | https://www.hmdb.org/m.asp?m=239905
+Pratt Truss Bridge | @29.696432,-95.136988 | This pin-connected truss bridge first opened in 1891 over the Leon River in Coryell County, and it is the last one in Texas built by Iowa's Clinton Bridge and Iron Company. | https://www.hmdb.org/m.asp?m=143302
+Matthew Burnett Homesite | @29.954319,-95.64836 | Matthew and Sarah Burnett settled just south of here on Cypress Creek in 1831, and the Texas Army camped at their homestead on April 16, 1836. | https://www.hmdb.org/m.asp?m=50163
+Site of Confederate Prison Compound | @29.76670858,-95.35967433 | During the Civil War a bayou warehouse here held prisoners of war, including 350 Union soldiers captured by Gen. John B. Magruder's Confederates in January 1863. | https://www.hmdb.org/m.asp?m=119862
+Nichols-Rice-Cherry House | @29.75922699,-95.37188272 | Built in 1850 by Gen. Ebenezer Nichols and sold in 1856 to William Marsh Rice, this Greek Revival house was bought in 1897 by Mrs. E. R. Cherry with a $25 bid and moved twice before landing here. | https://www.hmdb.org/m.asp?m=116857
+West End Park Site | @29.75578527,-95.37373765 | West End Park, opened in April 1905 on the San Felipe streetcar line, was the second ballpark of the Houston Buffaloes of the Texas League. | https://www.hmdb.org/m.asp?m=170893
+St. Nicholas Catholic Church | @29.74598286,-95.35430752 | St. Nicholas was founded in 1887 as Houston's first Catholic church for Black parishioners; this building went up in 1924. | https://www.hmdb.org/m.asp?m=235884
+Market Square Park | @29.76278333,-95.36186667 | Surveyors Gail Borden Jr. and Moses Lapham platted this block in 1836 as Congress Square, where the Allen brothers meant the Republic's permanent Capitol to stand; it never did. | https://www.hmdb.org/m.asp?m=61082
+Site of the Home of A. C. and Charlotte M. Allen | @29.75865326,-95.36379691 | Augustus and Charlotte Allen, who named the new city for Sam Houston, the hero of San Jacinto, had their home on this site in 1836. | https://www.hmdb.org/m.asp?m=140378
+St. Joseph Hospital | @29.74751321,-95.36629964 | Opened in 1887 as St. Joseph's Infirmary by six Sisters of Charity of the Incarnate Word from Galveston, St. Joseph was Houston's first general hospital. | https://www.hmdb.org/m.asp?m=117464
+Hall of Cedar Bayou Masonic Lodge | @29.755096,-94.92788 | Members built this lodge hall largely themselves in 1875–76, and its lumber, cut to order in Florida, arrived by schooner just in time to escape the 1875 hurricane. | https://www.hmdb.org/m.asp?m=158936
+Baytown Mexican School | @29.7235684,-94.955277 | Opened by the Goose Creek school district in 1923, the Baytown Mexican School was the community's first school for Mexican American children. | https://www.hmdb.org/m.asp?m=282288
+
+# WAITING (#425) — own Wikipedia article within 90 m, no live pin found.
+# Kennedy Bakery | @29.76306667,-95.3619 | Irish-born baker John Kennedy had this building put up about 1860 for his steam bakery. | https://www.hmdb.org/m.asp?m=61009
+#   (article "Kennedy Bakery" 59 m)
