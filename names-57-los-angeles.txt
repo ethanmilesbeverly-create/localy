@@ -1,0 +1,51 @@
+# names-57-los-angeles.txt — #57 Phase A, Los Angeles pass 1 (2026-09-28)
+# Source: the Historical Marker Database — Los Angeles town list pages 1–2 (entries 1–200 of 1,253).
+# Each line is placed at the marker's own coordinate and worded only from the marker text.
+# The Holocaust Monument timeline panels, the St. James Park / Van Buren Place NRHP-only plaques
+# and Historic-Cultural Monument name plates with no story were left out.
+# Run: SEED_CITY_NAME="Los Angeles" SEED_CITY_LAT=34.0522 SEED_CITY_LNG=-118.2437 deno run -A seed-resolve.ts names-57-los-angeles.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Named to match a live pin so the story ATTACHES (#419): Adventures of Superman ([map:osm] 9 m),
+#   Portal of the Folded Wings Shrine to Aviation ([map:wiki] 3 m — the Capt. Dale Black marker).
+# Pre-marked `| new` (#438 guard): African American Firefighters Marker ("Fire Station No. 14"
+#   article 23 m), Cahuenga Pass Treasure Marker ("Hollywood Bowl" article 79 m). Strip after commit,
+#   then comment both lines out (§6 (u)).
+# Watch in check (u) / reviews (distinct places — mark `| new` if they review):
+#   - Barack Obama First Speech Marker (Occidental College pin 30 m), C. C. Brown's Ice Cream Site
+#     (Johnny Grant Building pin 31 m), The Aliso Tree (LA Plaza pin 39 m).
+# CUT: 425 North Los Angeles Street (it is the Chinese American Museum's own building, 12 m).
+#
+# WAITING on #425 (own Wikipedia article at the marker, no live pin):
+# 28th Street YMCA | @34.01724634,-118.25708502 | The "Colored Branch" YMCA opened its new building here in November 1926. | https://www.hmdb.org/m.asp?m=229206
+# Adlai Stevenson Birthplace Site | @34.03098333,-118.28502778 | Statesman Adlai E. Stevenson was born here on February 5, 1900. | https://www.hmdb.org/m.asp?m=187045
+# Atomic Cafe | @34.04875992,-118.23849089 | The Atomic Cafe was Little Tokyo's ground zero for the punk rock and downtown arts scenes of the 1970s and '80s. | https://www.hmdb.org/m.asp?m=227986
+# Black Cat Tavern | @34.09189857,-118.27963683 | After an LAPD raid here at midnight on January 1, 1967, the first documented LGBT civil rights demonstration in the nation was held on February 11, 1967. | https://www.hmdb.org/m.asp?m=233806
+# Bella Union Hotel | @34.05464167,-118.241027 | The first Butterfield Overland Mail stage from the East arrived at the Bella Union Hotel here on October 7, 1858, 21 days out of St. Louis. | https://www.hmdb.org/m.asp?m=59812
+
+Bellevue Terrace Hotel Site | @34.05105045,-118.25817615 | From the 1880s, dancers filled the ballroom of the Bellevue Terrace Hotel on this corner, a three-story Victorian hotel with 140 rooms and three turrets. | https://www.hmdb.org/m.asp?m=231316
+Birth of the Curse Marker | @34.14428179,-118.28845067 | On January 5, 1920, Red Sox star Babe Ruth was playing golf on his favourite Los Angeles course here when Yankees manager Miller Huggins came to find him. | https://www.hmdb.org/m.asp?m=168977
+1932 Olympic Village Cottage | @34.05773039,-118.2376544 | Built to house athletes at the 1932 Los Angeles Olympics and used by the Mexican team, this cabin was given to Olvera Street in 1933 and has been run by the same merchant ever since. | https://www.hmdb.org/m.asp?m=239922
+1968 Chicano Student Walkouts Marker | @34.08007189,-118.17862722 | On Friday, March 1, 1968, students at Woodrow Wilson High School walked out of their classrooms to protest the school's discrimination against its Mexican American students. | https://www.hmdb.org/m.asp?m=215310
+1971 Sylmar Earthquake Memorial | @34.32514643,-118.41696431 | This tablet remembers the veterans, nurses and aides of the San Fernando Valley Veterans Hospital who died in the earthquake of February 9, 1971. | https://www.hmdb.org/m.asp?m=150941
+Adobe of the Rancho Los Feliz | @34.13277649,-118.28059734 | This adobe stood on Rancho Los Feliz, granted to Maria Ygnacia Verdugo in 1843 on the strength of a Spanish concession to Vicente Feliz in 1795, and later owned by pioneers Antonio Coronel and James Lick. | https://www.hmdb.org/m.asp?m=167872
+Adventures of Superman | @34.16867473,-118.54466381 | Part of episode 29 of Adventures of Superman, "The Man Who Could Read Minds," was filmed here in June 1953. | https://www.hmdb.org/m.asp?m=125644
+# COMMITTED 2026-09-28 do not re-run: African American Firefighters Marker | @34.01235706,-118.25663478 | During the Jim Crow era, which lasted into the mid-1960s, Los Angeles's all-Black fire stations were a source of community pride. | https://www.hmdb.org/m.asp?m=226526
+Ahn Family Residence | @34.02294164,-118.28414693 | This house was home to the wife and five children of Korean patriot Ahn Chang Ho; he and his wife Helen were the first Koreans to immigrate legally to America as a married couple. | https://www.hmdb.org/m.asp?m=229279
+The Aliso Tree | @34.05675697,-118.23968272 | A great sycamore near the river here, the "council tree," was the center of the Tongva village of Yaanga and one of the early pueblo's best-known landmarks. | https://www.hmdb.org/m.asp?m=250333
+Amir's Garden | @34.14248611,-118.29289167 | After a 1971 fire scorched this hilltop, Amir Dialameh climbed up and carried most of the plants and trees here by hand. | https://www.hmdb.org/m.asp?m=177491
+Ancient Live Oaks and Mission Lime Kilns | @34.217519,-118.639711 | Between 1797 and 1806 Franciscan friars topped these oaks for fuel to fire the lime kilns that made mortar for Mission San Fernando Rey de España. | https://www.hmdb.org/m.asp?m=144163
+# COMMITTED 2026-09-28 do not re-run: Apex and Club Alabam Site | @34.006772,-118.256583 | Bandleader Curtis Mosby opened the Apex nightclub here on Thanksgiving 1928, with revues of showgirls in extravagant costumes. | https://www.hmdb.org/m.asp?m=144912
+Arnold Palmer's 12 at Rancho Park | @34.04063545,-118.41440757 | On January 6, 1961, the first day of the L.A. Open, Arnold Palmer, that year's Golfer of the Year, took a 12 on this hole. | https://www.hmdb.org/m.asp?m=170232
+Arroyo Seco Naming Marker | @34.11126389,-118.18970556 | Explorer Gaspar de Portolà's expedition named this stream Arroyo Seco, Spanish for "dry stream," when it reached its banks in 1770. | https://www.hmdb.org/m.asp?m=228891
+Legion Ascot Speedway Site | @34.07138576,-118.18876173 | The Ascot speedway opened here in 1924 and was taken over in 1927 by American Legion Post 127 of Glendale, becoming the most famous of the Ascot tracks. | https://www.hmdb.org/m.asp?m=228798
+USC Television Final Exam Marker | @34.02204827,-118.28665986 | One day in 1954, 350 students arrived at USC for a final exam, most of whom had never set foot on campus or seen their instructor in person. | https://www.hmdb.org/m.asp?m=229334
+1984 Olympics Time Capsule | @34.01452483,-118.28632164 | A copy of 16 Days of Glory, the official film of the 1984 Olympics, was buried here in 1987 by Mayor Tom Bradley, to be opened on July 28, 2034. | https://www.hmdb.org/m.asp?m=239675
+Birthplace of the Internet | @34.0687153,-118.44267506 | At 10:30 p.m. on October 29, 1969, the first ARPANET message was sent from this UCLA site to the Stanford Research Institute. | https://www.hmdb.org/m.asp?m=218307
+# COMMITTED 2026-09-28 do not re-run: Barack Obama First Speech Marker | @34.1273658,-118.2108324 | Barack Obama made his first political speech, a protest against South African apartheid, on this plaza on February 18, 1981. | https://www.hmdb.org/m.asp?m=130069
+# COMMITTED 2026-09-28 do not re-run: C. C. Brown's Ice Cream Site | @34.10167222,-118.34210833 | C.C. Brown's, the birthplace of the hot fudge sundae, stood here from 1929 to 1996, and stars dropped in after premieres at the Chinese Theatre. | https://www.hmdb.org/m.asp?m=170020
+# COMMITTED 2026-09-28 do not re-run: Cahuenga Pass Treasure Marker | @34.11210148,-118.33862655 | Treasure hunters believe loot from the Cahuenga Pass treasure legend, which begins with France's 1864 invasion of Mexico, is hidden at the Hollywood Bowl. | https://www.hmdb.org/m.asp?m=129805
+Portal of the Folded Wings Shrine to Aviation | @34.1903,-118.353875 | On July 18, 1969, a Navajo aircraft crashed into this shrine to aviation, and Dale Black was the only survivor. | https://www.hmdb.org/m.asp?m=235328
+Buster Keaton Studio Site | @34.08991714,-118.32783892 | Buster Keaton's studio stood here from 1920 to 1928, where he and his team made 10 feature films and 19 shorts. | https://www.hmdb.org/m.asp?m=118887
+Busch Gardens Van Nuys Site | @34.22075711,-118.47749066 | Busch Gardens opened here in 1966 at a cost of $4 million and closed in 1979 to make way for a brewery expansion. | https://www.hmdb.org/m.asp?m=125558
+Bukowski Court | @34.09661907,-118.30149395 | Novelist and poet Charles Bukowski lived here from 1963 to 1972. | https://www.hmdb.org/m.asp?m=224543

@@ -1,0 +1,36 @@
+# names-57-fort-worth-2.txt — #57 Phase A, Fort Worth pass 2 (2026-09-28)
+# Source: the Historical Marker Database — Tarrant County geographic list page 2 (entries 101–200:
+# Colleyville, Euless/Mosier Valley, Fort Worth). Each line is placed at the marker's own coordinate
+# and worded only from the marker text. Cemeteries, graves (Locklear, Muth) and the Confederate
+# park markers were left out.
+# Run: SEED_CITY_NAME="Fort Worth" SEED_CITY_LAT=32.7555 SEED_CITY_LNG=-97.3308 deno run -A seed-resolve.ts names-57-fort-worth-2.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Named to match a live pin so the story ATTACHES (#419): Billy Bob's Texas ([map:wiki] 46 m — the
+#   marker is "Early Site of Southwestern Exposition and Livestock Show").
+# Watch in check (u) / reviews (distinct places — mark `| new` if they review):
+#   - Fort Worth Stock Yards Entrance (Stockyards Hotel pin 24 m), Stockyards Horse and Mule Barns
+#     (Cowtown Coliseum pin 39 m), Quanah Parker Marker (Texas Cowboy Hall of Fame pin 34 m).
+#   - A row under "Fort Worth Stockyards National Historic District" would be WRONG (container).
+# CUT: Armour and Swift Plaza (6 m from our own "Site of Niles City" story pin — same spot).
+#
+# WAITING on #425 (own Wikipedia article at the marker, no live pin):
+# Thistle Hill | @32.73806936,-97.34229231 | Built in 1903 for A.B. Wharton and his bride Electra, daughter of rancher W.T. Waggoner, this mansion was named Thistle Hill by Electra. | https://www.hmdb.org/m.asp?m=287193
+#   ("Wharton–Scott House" 33 m)
+
+Baker Funeral Home | @32.7331789,-97.32340423 | After working as a Pullman porter for the Santa Fe Railroad, James Nathan Baker Sr. opened a funeral home for Cleburne's African American community in 1917, the start of the family business marked here. | https://www.hmdb.org/m.asp?m=287195
+Billy Bob's Texas | @32.79180153,-97.34798953 | This is an early site of the Southwestern Exposition and Livestock Show, which grew out of the stockyards that sprang up along the railroads after Fort Worth became a supply depot for cattle drives in the 1870s. | https://www.hmdb.org/m.asp?m=273312
+First School in Fort Worth | @32.757999,-97.33467 | John Peter Smith opened Fort Worth's first school in 1853, holding classes in the abandoned fort hospital on this block. | https://www.hmdb.org/m.asp?m=52517
+Fort Worth Stock Yards Entrance | @32.788912,-97.348538 | This gateway over Exchange Avenue, finished in 1910 by the Topeka Bridge & Land Co. for the Fort Worth Stock Yards Co., was a major feat of concrete work for its day. | https://www.hmdb.org/m.asp?m=53414
+# SKIPPED 2026-09-28 — curated row already existed: Texas Cowboy Hall of Fame | @32.78876482,-97.34758615 | The Stock Yards' wooden horse and mule barns here burned on March 14, 1911, opening day of the Feeders and Breeders Show, which went ahead as planned anyway. | https://www.hmdb.org/m.asp?m=288237
+Fort Worth-Yuma Mail Route Marker | @32.7214683,-97.50687263 | Star Route No. 31454, opened on August 15, 1878, carried the mail from Fort Worth toward Yuma across frontier country the railroads did not yet serve. | https://www.hmdb.org/m.asp?m=270313
+James E. Guinn School | @32.73264464,-97.32129879 | After Fort Worth's public schools opened in 1882, Black students were still taught in churches until the city finished a schoolhouse for them on East 9th Street in December 1883. | https://www.hmdb.org/m.asp?m=287196
+Paddock Viaduct | @32.75875841,-97.33434157 | Before this viaduct, low-water crossings and ferries were the only ways across the Trinity River here between downtown and the city's north side. | https://www.hmdb.org/m.asp?m=287206
+# COMMITTED 2026-09-28 do not re-run: Quanah Parker Marker | @32.78835,-97.34658333 | Comanche chief Quanah Parker, born about 1845, was the son of Cynthia Ann Parker, taken captive in an 1836 raid and adopted by the Antelope Comanches. | https://www.hmdb.org/m.asp?m=26908
+Steel's Tavern Oaks | @32.757822,-97.3346502 | When dragoons built the fort on this bluff in 1849 they cleared only the parade ground, sparing a small grove of oaks at its eastern edge. | https://www.hmdb.org/m.asp?m=264184
+Texas Spring Palace Site | @32.74637232,-97.32632754 | In 1889 Fort Worth promoters built the Texas Spring Palace here, an exhibition hall for Texas farm products first suggested by railroad officer Gen. R.A. Cameron. | https://www.hmdb.org/m.asp?m=287202
+Tarrant County Criminal Courts Building | @32.757513,-97.334611 | Built in 1917–18 to a Sanguinet and Staats design, this building stands on the land where Camp Worth was set up in 1849. | https://www.hmdb.org/m.asp?m=52720
+Mosier Valley School Site | @32.80766667,-97.12599167 | In 1870 former slaves Robert and Dilsie Johnson received 40 acres here as a wedding gift from plantation owner Lucy Lee; other freedmen followed, and a community school opened in 1883. | https://www.hmdb.org/m.asp?m=170818
+Saint John Missionary Baptist Church | @32.80907704,-97.12274315 | A small group of former slaves founded this congregation in 1874 at the home of Frank Young, first naming it Oak Grove Baptist Church. | https://www.hmdb.org/m.asp?m=192185
+Felps Berry Farm | @32.89738056,-97.16277222 | Andy and Fannie Felps built a home here in 1914, and their farm became the area's biggest berry grower, earning Andy the nickname "berry king." | https://www.hmdb.org/m.asp?m=228336
+The Bidault House | @32.88177206,-97.14535014 | French-born farmer and winemaker Anthelm Bidault built this house of molded concrete blocks, starting in 1905 and finishing six years later. | https://www.hmdb.org/m.asp?m=258365

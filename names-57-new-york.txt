@@ -1,0 +1,45 @@
+# names-57-new-york.txt — #57 Phase A, New York pass 1 (density) (2026-09-28)
+# Target: walkable story density downtown (Alphabet City, the Battery, Battery Park City, the Bowery),
+# where only ~15 story pins existed and most were bars/restaurants.
+# Source: the Historical Marker Database — New York County geographic list page 1 (entries 1–100).
+# Each line is placed at the marker's own coordinate and worded only from the marker text.
+# Run: SEED_CITY_NAME="New York" SEED_CITY_LAT=40.7128 SEED_CITY_LNG=-74.0060 deno run -A seed-resolve.ts names-57-new-york.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m (no live pins near any line),
+# Wikipedia titles 90 m. No line's name contains a nearby article title, so no #438 pre-marks.
+# Expect reviews against nearby articles — Castle Clinton (Battery Wall, Jenny Lind, Norwegian),
+# New Museum / Bowery Mission (Sidewalks, Eisenmann), CBGB / Amato Opera (Alexander's Musee),
+# 97 Bowery (Worth's), Miner's Bowery Theatre (John Brown), St. Joseph Chapel (Berlin Wall).
+# All are distinct places — mark `| new`. A staged row under any of those titles would be WRONG.
+# SKIPPED: CBGB, Charlie Parker Residence, Kehila Kedosha Janina (own articles); Bowery Mission and
+# Faerman's (a few metres from lines kept); "I'm Not a Nice Girl" (8 m from Worth's).
+#
+# WAITING on #425 (own Wikipedia article at the marker, no live pin):
+# 519 East 11th Street | @40.72814601,-73.98080036 | Lower East Side residents rehabbed this building with sweat equity and installed New York City's first wind turbine on its roof. | https://www.hmdb.org/m.asp?m=273368
+# Carmen Pabon Del Amanecer Garden | @40.72450902,-73.97871668 | Carmen Pabon, the "Mother of Loisaida," founded this garden as a sanctuary for children, artists, Nuyorican poets and the elderly. | https://www.hmdb.org/m.asp?m=241352
+# Harry Hopkins at Christodora | @40.72642685,-73.98012397 | Harry Hopkins became a settlement-house worker at Christodora in 1912, where immigrants' struggles shaped his thinking on social reform. | https://www.hmdb.org/m.asp?m=145733
+# Hurricane Maria Memorial | @40.71807673,-74.01499864 | This memorial remembers the victims of Hurricane Maria, which struck Puerto Rico on September 20, 2017. | https://www.hmdb.org/m.asp?m=235466
+# Mother Cabrini Memorial | @40.70661448,-74.01896093 | Mother Cabrini arrived in New York in 1889 on a mission to help Italian immigrants, orphans and the poor. | https://www.hmdb.org/m.asp?m=198659
+
+Ginsberg and Burroughs Apartment | @40.72449698,-73.98005948 | Allen Ginsberg and William S. Burroughs lived here in 1952–53 at the start of their careers and hosted Jack Kerouac, whom Ginsberg famously photographed on the building's fire escape. | https://www.hmdb.org/m.asp?m=286943
+Lead Belly Residence | @40.72549722,-73.9768 | Huddie Ledbetter, the 12-string guitarist known as Lead Belly, lived here at 414 East 10th Street in the 1940s with his wife Martha. | https://www.hmdb.org/m.asp?m=241348
+Louise Nevelson Studio | @40.7242199,-73.97943277 | Sculptor Louise Nevelson, known for her monumental monochrome wooden wall pieces, had her studio on the fourth floor of this building in the 1970s. | https://www.hmdb.org/m.asp?m=286659
+Slocum Memorial Fountain | @40.72693761,-73.9813596 | This 1906 fountain remembers those who died aboard the excursion steamer General Slocum on June 15, 1904, New York's deadliest disaster until September 11, 2001. | https://www.hmdb.org/m.asp?m=145736
+# COMMITTED 2026-09-28 do not re-run: Battery Wall Discovery | @40.703676,-74.01699 | In spring 2006, archaeologists digging for the new South Ferry station found four sections of a colonial-era wall here. | https://www.hmdb.org/m.asp?m=20306
+Jenny Lind Arrival Marker | @40.70322778,-74.01700556 | When the Beatles landed in 1964 they were met by 3,000 fans; Swedish singer Jenny Lind, arriving here in the 1850s, was met on the dock by 30,000. | https://www.hmdb.org/m.asp?m=207515
+Giovanni da Verrazzano Monument | @40.70437795,-74.01638992 | In April 1524 the Florentine navigator Verrazzano sailed the French caravel La Dauphine into New York Harbor and named these shores Angoulême for King Francis I. | https://www.hmdb.org/m.asp?m=127196
+New Pier 1 Marker | @40.70462827,-74.0175025 | New Pier 1 was designed by Civil War general George B. McClellan, the first engineer-in-chief of the Department of Docks, and built between 1872 and 1877. | https://www.hmdb.org/m.asp?m=127121
+Norwegian Maritime Memorial | @40.70382,-74.01718 | In World War II, 1,100 Norwegian ships served the Allied cause, hauling supplies between U.S. ports and the war fronts abroad. | https://www.hmdb.org/m.asp?m=29309
+1871 Bulkhead Line | @40.70791251,-74.01626596 | The line in the pavement here marks the western edge of Manhattan in 1871, already well west of the original shore along today's Greenwich Street. | https://www.hmdb.org/m.asp?m=154067
+Sirius Dog Run | @40.7120244,-74.01701421 | This dog run honors Sirius, a four-year-old yellow Labrador who sniffed for explosives for the Port Authority and died at the World Trade Center. | https://www.hmdb.org/m.asp?m=128900
+Berlin Wall Segment | @40.71171334,-74.01671916 | Berlin gave this piece of the Wall to Battery Park City in November 2004, the 15th anniversary of its fall; it once stood in downtown Berlin near Potsdamer Platz. | https://www.hmdb.org/m.asp?m=132053
+Big Tim Sullivan's Clubhouse | @40.72129769,-73.99344124 | In the 1890s this was the headquarters of "Big Tim" Sullivan, the Five Points-born Tammany Hall boss who dominated city politics from 1890 to 1913. | https://www.hmdb.org/m.asp?m=133644
+Sidewalks of New York Premiere Site | @40.72239472,-73.99302806 | In 1894, at the London Theatre on this site, Lottie Gilson first sang "The Sidewalks of New York." | https://www.hmdb.org/m.asp?m=133318
+Bowery Flophouse Marker | @40.72180407,-73.99325073 | By 1890 some 9,000 homeless men slept in Bowery flophouses, where a spot on a wooden floor in an open ward cost 5 cents. | https://www.hmdb.org/m.asp?m=133762
+Alexander's Musee Site | @40.72532854,-73.99199128 | In 1886 Alexander's Musee, a dime museum here, presented Billy Kersands, the first African American performer to win nationwide popularity with white as well as Black audiences. | https://www.hmdb.org/m.asp?m=136924
+Tony Pastor's Opera House Site | @40.72109913,-73.99351861 | Tony Pastor's Opera House, one of the legendary birthplaces of vaudeville, stood here; Pastor had sung as a child in P.T. Barnum's museum. | https://www.hmdb.org/m.asp?m=133593
+Charles Eisenmann's Photography Studio | @40.72214095,-73.99311793 | This 1876 building was the home and studio of Charles Eisenmann, the leading photographer of the circus and dime-museum sideshow performers of his day. | https://www.hmdb.org/m.asp?m=133271
+Military Hall Emma Goldman Marker | @40.72082877,-73.99362733 | In 1892 anarchist Emma Goldman led a meeting in Military Hall here to defend Alexander Berkman, jailed for his failed attempt to kill industrialist Henry Clay Frick. | https://www.hmdb.org/m.asp?m=133550
+Worth's Dime Museum Site | @40.7175142,-73.99514618 | Worth's Museum, one of the Bowery's dime museums, opened here in 1881 with curiosities including the largest giant squid specimen in North America. | https://www.hmdb.org/m.asp?m=132411
+John Brown's Body on the Bowery | @40.71975995,-73.99407381 | Undertakers McGraw and Taylor secretly prepared the body of abolitionist John Brown for burial here after his execution on December 2, 1859. | https://www.hmdb.org/m.asp?m=179403
+Justus Schwab's Saloon | @40.72397774,-73.98958784 | German-born anarchist Justus Schwab lived and ran a saloon at 50 East 1st Street for nearly 30 years, a gathering place for socialists and anarchists. | https://www.hmdb.org/m.asp?m=124737

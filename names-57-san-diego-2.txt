@@ -1,0 +1,40 @@
+# names-57-san-diego-2.txt — #57 Phase A, San Diego pass 2 (2026-09-28)
+# Source: the Historical Marker Database — San Diego town list page 1 (entries 1–100 of 328),
+# lines not taken in pass 1. Each line is placed at the marker's own coordinate and worded only
+# from the marker text. Graves, Balboa Park / Zoo interior panels and USS Midway exhibits left out.
+# Run: SEED_CITY_NAME="San Diego" SEED_CITY_LAT=32.7157 SEED_CITY_LNG=-117.1611 deno run -A seed-resolve.ts names-57-san-diego-2.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Named to match a live pin so the story ATTACHES (#419):
+#   Initial Point of Boundary Between U.S. and Mexico ([map:wiki] 80 m — the marker's "Boundary Marker 258"),
+#   Belmont Park (San Diego) ([map:wiki] 57 m), Casa de López ([map:wiki] 8 m).
+# Pre-marked `| new` (#438 guard): Bushyhead House sits 16 m from the "Heritage Park (San Diego)"
+#   container article. Strip `| new` after commit, then comment the line out (§6 (u)).
+# Watch in check (u) / reviews (distinct places — mark `| new` if they review):
+#   - Charles W. Hardy Marker (Belmont Park pin 70 m), Army Radio Station at Point Loma (Coast
+#     Defenses of Point Loma pin 60 m), Forester Bowsprit (museum-ship pins 28–56 m),
+#     Derby-Pendleton House (Whaley House pin 30 m).
+# CUT: El Camino Real Southern Terminus (a plaque on Mission San Diego de Alcalá's grounds, 22 m).
+#
+# WAITING on #425 (own Wikipedia article at the marker, no live pin):
+# Callan Hotel | @32.710543,-117.16025 | In 1886 Till Burnes ran his Acme Saloon here with a menagerie of a wildcat, monkeys, an anteater and a pet bear that escaped at least twice. | https://www.hmdb.org/m.asp?m=109358
+# Chinese Laundry | @32.710833,-117.160888 | The Hop Lee Chong Laundry worked here from the building's construction in 1923 until 1964. | https://www.hmdb.org/m.asp?m=52651
+# Casino Theatre | @32.71222741,-117.16002204 | Built in 1912, this was the first theatre put up under San Diego's new fire-safety building ordinance. | https://www.hmdb.org/m.asp?m=203194
+# Derby Dike | @32.7595,-117.1962 | In 1853 Lt. George H. Derby built a dike to stop the San Diego River from dumping debris into the harbor. | https://www.hmdb.org/m.asp?m=11136
+# El Desembarcadero | @32.73423333,-117.2201 | On May 1, 1769, men from the San Antonio and San Carlos landed near here to bring fresh water from the San Diego River. | https://www.hmdb.org/m.asp?m=51079
+# Alcazar Garden | @32.73124435,-117.15164394 | This garden began as the Montezuma Garden for the 1915 Panama-California Exposition. | https://www.hmdb.org/m.asp?m=280998
+# Seaport Village Carousel | @32.709451,-117.171338 | This carousel honours carver Charles I.D. Looff, who came to America in 1870 at 18. | https://www.hmdb.org/m.asp?m=278138
+
+Initial Point of Boundary Between U.S. and Mexico | @32.53455,-117.12278333 | Near this spot the initial point of the boundary between the United States and Mexico was set on October 10, 1849. | https://www.hmdb.org/m.asp?m=51587
+Charles Toliver Airship Marker | @32.71694444,-117.12305556 | Lawyer and part-time tinkerer Charles H. Toliver built the Airship San Diego, later renamed Toliver 1, hoping to cash in on the public's growing interest in flight. | https://www.hmdb.org/m.asp?m=202045
+Charles W. Hardy Marker | @32.77175077,-117.25283852 | One spring afternoon in 1913 a rip current off San Diego swept more than sixty swimmers out to sea, and thirteen drowned despite police rescue attempts. | https://www.hmdb.org/m.asp?m=240990
+Chinese Consolidated Benevolent Association | @32.71352528,-117.16255583 | This building's first tenants were the Gee Goon Tong, known for helping plot the 1912 revolution that created the Republic of China; the Benevolent Society grew out of the Tong in 1920. | https://www.hmdb.org/m.asp?m=52949
+Cotheret Building | @32.70936306,-117.16262667 | This 1903 building has the only original second-story balcony left in the Gaslamp, over rooms rented out over the years as the Cotheret, the Ardmore and the Gaslamp Hotel. | https://www.hmdb.org/m.asp?m=52688
+# COMMITTED 2026-09-28 do not re-run: Derby-Pendleton House | @32.75309727,-117.19447469 | This two-story house was one of a dozen prefabricated houses shipped from Maine in the 1850s; it first stood in New Town before being moved. | https://www.hmdb.org/m.asp?m=296379
+Balboa Park Carousel | @32.73466391,-117.14689031 | The menagerie animals on this merry-go-round were hand-carved in 1910 at the Herschell-Spillman factory in North Tonawanda, New York. | https://www.hmdb.org/m.asp?m=208959
+San Diego Marine Life Refuge Marker | @32.8774,-117.25095556 | The waters here became California's first marine protected area in 1929, as the San Diego Marine Life Refuge. | https://www.hmdb.org/m.asp?m=218330
+# COMMITTED 2026-09-28 do not re-run: Army Radio Station at Point Loma | @32.67325556,-117.24115833 | The U.S. Army built this small building in 1918 as its first radio station for San Diego's harbor defenses, and in World War II it housed a weather station. | https://www.hmdb.org/m.asp?m=295510
+# COMMITTED 2026-09-28 do not re-run: Forester Bowsprit | @32.72071166,-117.17347134 | This huge timber was the bowsprit of the Forester, a four-masted schooner built in 1900 to carry lumber from the Pacific Northwest to growing ports like San Diego. | https://www.hmdb.org/m.asp?m=229834
+# COMMITTED 2026-09-28 do not re-run: Bushyhead House | @32.75385658,-117.19274707 | Edward Wilkerson Bushyhead, an early San Diego sheriff and police chief and owner of the San Diego Union, built this Italianate house as a rental. | https://www.hmdb.org/m.asp?m=295981
+Belmont Park (San Diego) | @32.77092778,-117.25249444 | John D. Spreckels opened the Mission Beach Amusement Park on this site on May 29, 1925; it came to be known as Belmont Park. | https://www.hmdb.org/m.asp?m=295518
+Casa de López | @32.751933,-117.19698 | Built about 1835 by early Spanish settler Juan Francisco Lopez, the Casa Larga, or Long House, was among the first substantial houses in the Pueblo of San Diego. | https://www.hmdb.org/m.asp?m=11128
