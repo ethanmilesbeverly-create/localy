@@ -1,0 +1,43 @@
+# names-57-philadelphia.txt — #57 Phase A, Philadelphia pass 1 (2026-09-28)
+# Source: the Historical Marker Database — Philadelphia town list pages 1–2 (1,922 markers;
+# numbered titles through "Ba"). The Citizens Bank Park plaques (inside the ballpark) and the
+# Market Street "On this block" panels that only describe old photos were left out. Each line
+# is placed at the marker's own coordinate and worded only from the marker text.
+# Run: SEED_CITY_NAME=Philadelphia SEED_CITY_LAT=39.9526 SEED_CITY_LNG=-75.1652 deno run -A seed-resolve.ts names-57-philadelphia.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Named to match a live pin so the story ATTACHES (#419):
+#   16"/50 Caliber Mark 7 Gun Barrel Number 293 ([map:osm] 6 m).
+# Watch in check (u) / reviews:
+#   - Lincoln Flag Raising Spot sits 18 m from the Independence Hall pin -> expect REVIEW, then `| new`.
+#     A row under "Independence Hall" would be WRONG.
+#   - Wanamaker's Grand Depot Marker: a row under "John Wanamaker Store" is acceptable (same site).
+#   - African American Baseball in Philadelphia: a row under "44th and Parkside Ballpark" is acceptable.
+#   - Anything else extra (Dilworth Park, National Liberty Museum, Cathedral Basilica…) is WRONG.
+# CUT: Anne Brancato Wood Marker ("Center City, Philadelphia" district article 65 m — the #430 class).
+
+First Commercial Pretzel Bakery Marker | @39.95051865,-75.14738124 | This marker at 4th and Market tells how the first commercial pretzel bakery, started in 1784 by an entrepreneur from Lancaster County, set Philadelphia's pretzel industry in motion. | https://www.hmdb.org/m.asp?m=213962
+Lit Brothers Marker | @39.95113889,-75.15441111 | In 1893 Samuel and Jacob Lit moved their dress shop from 45 North Eighth Street to this corner, opening the Lit Brothers department store and slowly adding seven more buildings along the block. | https://www.hmdb.org/m.asp?m=191841
+Victoria Theatre Site | @39.95129444,-75.15573056 | The Victoria Theatre, also known as the Nicklette, stood at 913 Market Street and was one of the many movie palaces that once lined East Market Street. | https://www.hmdb.org/m.asp?m=191810
+Wanamaker's Grand Depot Marker | @39.95207304,-75.16176903 | John Wanamaker bought this former Pennsylvania Railroad station in 1876 and turned it into a huge central market called the Grand Depot, which at first sold only men's clothing. | https://www.hmdb.org/m.asp?m=191791
+Western Farmers' Market Site | @39.95287804,-75.16529427 | In 1859 the sheds of the Western Farmers' Market stood here on Market Street west of 15th, taking in produce from farms that were then just outside the city. | https://www.hmdb.org/m.asp?m=191850
+16"/50 Caliber Mark 7 Gun Barrel Number 293 | @39.89390278,-75.17587222 | This barrel was the center gun of Turret 1 on the battleship USS New Jersey from 1943 to 1954, and it was fired in combat in World War II and the Korean War. | https://www.hmdb.org/m.asp?m=146660
+Physick House Site | @39.95038861,-75.17207164 | Dr. Philip Syng Physick, considered the father of American surgery, built a house on this corner in 1839, when it was far from the fashionable center of the city. | https://www.hmdb.org/m.asp?m=191877
+Mastbaum Theatre Site | @39.95351165,-75.17338193 | The lavish Mastbaum Theatre opened here on February 28, 1929, with an orchestra, a chorus and a ballet troupe for the world premiere of the Warner Brothers film Sonny Boy. | https://www.hmdb.org/m.asp?m=194474
+George W. Childs Mansion Site | @39.95099464,-75.17715405 | Public Ledger publisher George W. Childs had a marble mansion on this corner, completed in 1869 and designed by John McArthur Jr. | https://www.hmdb.org/m.asp?m=191919
+Aldine Hotel Site | @39.95186667,-75.17224167 | The Aldine Hotel began as a brick mansion built here in 1850 for Dr. James Rush, son of Declaration signer Benjamin Rush. | https://www.hmdb.org/m.asp?m=192730
+Lincoln Flag Raising Spot | @39.94905,-75.149974 | Abraham Lincoln stood on this spot when he raised the flag over Independence Hall on February 22, 1861. | https://www.hmdb.org/m.asp?m=9259
+Academy of Natural Sciences Founding Site | @39.95011,-75.14599 | The Academy of Natural Sciences, the oldest natural science institution in the Americas, was founded near here in 1812 and moved to Logan Square in 1876. | https://www.hmdb.org/m.asp?m=83404
+African American Baseball in Philadelphia | @39.97762,-75.21356 | For 85 years from 1867, when the Pythians and Excelsiors took the field, Black ball clubs such as the Philadelphia Giants and the Hilldales were a big part of the city's sporting life. | https://www.hmdb.org/m.asp?m=307584
+African Zoar Methodist Episcopal Church | @39.96383,-75.14465 | Zoar was founded here in 1794 by 15 men and three women from St. George's Church, led by Rev. Harry Hosier; it aided the Underground Railroad and is United Methodism's oldest Black congregation. | https://www.hmdb.org/m.asp?m=82644
+AIDS Library of Philadelphia | @39.94796688,-75.16196646 | Opened in 1987, the AIDS Library of Philadelphia was the nation's first library devoted to HIV/AIDS information. | https://www.hmdb.org/m.asp?m=222720
+Alfred J. Reach Marker | @39.95172,-75.17137 | Alfred J. Reach, an early baseball star and the Phillies' first owner, ran his sporting-goods company, A.J. Reach & Co., here. | https://www.hmdb.org/m.asp?m=82960
+A.M.E. Book Concern | @39.94402,-75.1531 | From 1836 a church publishing house here printed hymnals, religious works and books by Black authors, and in 1847 it began publishing The Christian Recorder. | https://www.hmdb.org/m.asp?m=83447
+American Bandstand | @39.958381,-75.212362 | Bandstand began as a local show in 1952, Dick Clark took over as host in 1956, and on August 5, 1957, it went national as American Bandstand. | https://www.hmdb.org/m.asp?m=53101
+America's First Lager | @39.96458,-75.14191 | In 1840 John Wagner brought lager yeast from his native Bavaria and brewed the nation's first lager beer, starting America's lager industry. | https://www.hmdb.org/m.asp?m=157426
+Anthony J. Drexel Office Site | @39.949065,-75.145985 | Anthony J. Drexel built the world's first trans-Atlantic banking network from an office that was first located here. | https://www.hmdb.org/m.asp?m=9532
+Bailey Building | @39.950488,-75.16115419 | Built in 1900, this was the jewelry factory of Bailey Banks & Biddle, the firm that designed the Great Seal of the United States and the Purple Heart. | https://www.hmdb.org/m.asp?m=191758
+Great Central Sanitary Fair Burial Ground Site | @39.95791678,-75.16904712 | When archaeologists dug the eastern part of Logan Square in 2010, before it was rebuilt as Sister Cities Park, they uncovered about 60 grave remnants. | https://www.hmdb.org/m.asp?m=106928
+The Associators Marker | @39.94193168,-75.1413159 | Near this site the Associators, citizen-soldiers organized by Benjamin Franklin and forerunners of the Pennsylvania National Guard, set up the colony's first military installation. | https://www.hmdb.org/m.asp?m=19096
+Coleman Sellers House | @39.96167549,-75.18979816 | Engineer and inventor Coleman Sellers, who oversaw the building of the first hydroelectric dam at Niagara Falls, is remembered here at 3301 Baring Street. | https://www.hmdb.org/m.asp?m=192612
+Anthony Benezet Marker | @39.948861,-75.147103 | Quaker teacher Anthony Benezet, a leading 18th-century abolitionist, taught Black students in his home from 1750 to 1770 and opened a secondary school for girls in 1754. | https://www.hmdb.org/m.asp?m=192904
