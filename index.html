@@ -6399,6 +6399,7 @@ function blendHistoryForATL(base, targetCount){
    yet: captures are too sparse before launch, and a suppressed pin never reaches
    the client. */
 const ATL_DECAY_M = 600;
+const ATL_SPACING_DIV = 12;   // #435 — spacing = view width / 12
 function atlStoryTier(p){
   if(!p) return 1;
   let t;
@@ -6425,29 +6426,50 @@ function atlScore(p, base){
    pass, so a sparse category still shows once and the view stays mixed; (2) the
    remaining slots go to the highest scores overall, no category past catMax.
    Ties keep each list's own order. Returns {pts, seen} so the caller's loose-gems
-   tail dedupes against the same names. Pure — no state, no map. */
-function atlPickScored(lists, scoreFn, inViewFn, target, catMax){
+   tail dedupes against the same names. Pure — no state, no map.
+
+   SPACING (#435, operator 2026-09-28 — "spaced out on the default view and whatever
+   the viewport is"): a candidate closer than minGap metres to a pin already picked
+   is skipped. Without it, 20+ equal-tier curated stories inside a few blocks
+   (SF Chinatown) took all 15 history slots within ~240 m of the search centre and
+   stacked into one clump. Order: in-view spaced → off-screen spaced → in-view
+   unspaced → off-screen unspaced, so spacing only relaxes when the frame can't
+   reach `target` otherwise (a dense zoomed-in view still fills). minGap 0 or
+   absent = no spacing. */
+function atlPickScored(lists, scoreFn, inViewFn, target, catMax, minGap){
   const pts = [], seen = new Set(), perCat = lists.map(()=>0);
   const cands = [];
   lists.forEach((list, ci) => (list||[]).forEach((p, order) => {
     cands.push({p, ci, order, s:scoreFn(p), v: inViewFn ? !!inViewFn(p) : true});
   }));
   const byScore = (a,b) => (b.s - a.s) || (a.order - b.order);
-  const take = c => {
+  const gap = (typeof minGap === 'number' && minGap > 0) ? minGap : 0;
+  const tooClose = p => {
+    if(!gap || typeof p.lat !== 'number' || typeof p.lng !== 'number') return false;
+    for(const q of pts){
+      if(typeof q.lat === 'number' && haversine(p.lat, p.lng, q.lat, q.lng) < gap) return true;
+    }
+    return false;
+  };
+  const take = (c, spaced) => {
     if(pts.length >= target || perCat[c.ci] >= catMax) return false;
-    const k = normName(c.p.name); if(k && seen.has(k)) return false; if(k) seen.add(k);
+    const k = normName(c.p.name); if(k && seen.has(k)) return false;
+    if(spaced && tooClose(c.p)) return false;
+    if(k) seen.add(k);
     pts.push(c.p); perCat[c.ci]++; return true;
   };
-  const pass = pool => {
+  const pass = (pool, spaced) => {
     lists.forEach((_, ci) => {
       if(perCat[ci] > 0) return;
       const mine = pool.filter(c => c.ci === ci).sort(byScore);
-      for(const c of mine){ if(take(c)) break; }
+      for(const c of mine){ if(take(c, spaced)) break; }
     });
-    pool.slice().sort(byScore).forEach(take);
+    pool.slice().sort(byScore).forEach(c => take(c, spaced));
   };
-  pass(cands.filter(c => c.v));
-  if(inViewFn) pass(cands.filter(c => !c.v));
+  const inPool  = cands.filter(c => c.v);
+  const outPool = inViewFn ? cands.filter(c => !c.v) : [];
+  if(gap){ pass(inPool, true); pass(outPool, true); }
+  pass(inPool, false); pass(outPool, false);
   return {pts, seen};
 }
 
@@ -6493,20 +6515,21 @@ function buildAllThingsLocal(base){
      retired here in favour of ATL_CAT_MAX, so a dense category can now out-show
      its own tab in All Things Local — deliberate, by directive. */
   const ATL_TARGET  = 25;  // total pins All Things Local aims to surface (raised 15->25 to fill the tight 2km frame; supply supports it — one tile returned 113 real places)
-  const ATL_CAT_MAX = 15;  // #435 — per-category ceiling AND candidate depth (was ATL_POOL 8)
+  const ATL_CAT_MAX = 15;  // #435 — per-category ceiling (was ATL_POOL 8)
+  const ATL_CAND    = 40;  // #435 — candidates per category offered to the pick; deeper than the cap so the spacing rule can reach past the nearest cluster
   const CATS = [
-    ['park',        ()=>generateLocalParks(base).slice(0,ATL_CAT_MAX),  'park'],
-    ['trail',       ()=>generateTrails(base).slice(0,ATL_CAT_MAX),      'trail'],
-    ['shops',       ()=>generateShops(base).slice(0,ATL_CAT_MAX),       'shops'],
-    ['bars',        ()=>generateBars(base).slice(0,ATL_CAT_MAX),        'barsrest'],
-    ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_CAT_MAX), 'barsrest'],
-    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_CAT_MAX),'history'], // #376 — assembled by blendHistoryForATL, not blendCategory, so seed graves can't monopolise the slot (the procFn/bucket here are unused for history but kept so CATS stays uniform)
+    ['park',        ()=>generateLocalParks(base).slice(0,ATL_CAND),  'park'],
+    ['trail',       ()=>generateTrails(base).slice(0,ATL_CAND),      'trail'],
+    ['shops',       ()=>generateShops(base).slice(0,ATL_CAND),       'shops'],
+    ['bars',        ()=>generateBars(base).slice(0,ATL_CAND),        'barsrest'],
+    ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_CAND), 'barsrest'],
+    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_CAND),'history'], // #376 — assembled by blendHistoryForATL, not blendCategory, so seed graves can't monopolise the slot (the procFn/bucket here are unused for history but kept so CATS stays uniform)
     ['art',         ()=>[],                                             'art'], // #193 — real OSM artwork + art gems; no procedural filler
   ];
   const lists = CATS.map(([cat,procFn,bucket]) =>
     cat === 'history'
-      ? blendHistoryForATL(base, ATL_CAT_MAX)          // #376 — grave-capped (ATL_HISTORY_GRAVE_CAP), landmark-leading history slot
-      : blendCategory(base, cat, ATL_CAT_MAX, procFn, bucket));
+      ? blendHistoryForATL(base, ATL_CAND)             // #376 — grave-capped (ATL_HISTORY_GRAVE_CAP), landmark-leading history slot
+      : blendCategory(base, cat, ATL_CAND, procFn, bucket));
 
   // Read the current frame once. Guarded: no map, or bounds not yet valid, means
   // no in-view split and the scored pick runs over everything in one pass.
@@ -6522,8 +6545,24 @@ function buildAllThingsLocal(base){
     try { return bounds.contains([p.lat, p.lng]); } catch(e){ return false; }
   };
 
-  // #435 — scored pick with a diversity guard (floor 1 per category, cap ATL_CAT_MAX).
-  const picked = atlPickScored(lists, p => atlScore(p, base), bounds ? inView : null, ATL_TARGET, ATL_CAT_MAX);
+  // #435 — minimum spacing between picked pins, scaled to the view read above:
+  // 1/ATL_SPACING_DIV of the frame's width, so the same 25 spread across whatever
+  // is on screen (~250 m at the default frame, tighter zoomed in, wider zoomed out).
+  // No bounds ⇒ the default frame's width (2 × FRAME_RADIUS_M).
+  let minGap = 250;
+  try {
+    if(bounds){
+      const c = bounds.getCenter();
+      const w = haversine(c.lat, bounds.getWest(), c.lat, bounds.getEast());
+      if(w > 0) minGap = w / ATL_SPACING_DIV;
+    } else {
+      minGap = (2 * FRAME_RADIUS_M) / ATL_SPACING_DIV;
+    }
+  } catch(e){ minGap = 250; }
+
+  // #435 — scored pick with a diversity guard (floor 1 per category, cap ATL_CAT_MAX)
+  // and the spacing rule (relaxed only if the view can't fill ATL_TARGET spaced).
+  const picked = atlPickScored(lists, p => atlScore(p, base), bounds ? inView : null, ATL_TARGET, ATL_CAT_MAX, minGap);
   const pts = picked.pts;
   const seen = picked.seen;
 
@@ -8580,7 +8619,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.28a';
+const APP_VERSION = '2026.09.28b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
