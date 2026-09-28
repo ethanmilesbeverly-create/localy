@@ -1,0 +1,46 @@
+# names-57-phoenix.txt — #57 Phase A, Phoenix pass 1 (2026-09-28)
+# Source: the Historical Marker Database — the Phoenix town list (55 markers, all read) and
+# page 1 of the Maricopa County geographic list (Chandler, Gilbert, Glendale, Mesa). Each line
+# is placed at the marker's own coordinate and worded only from the marker text. Wesley
+# Bolin Plaza war memorials, the Luke AFB base exhibits, the Sahuaro Ranch panels and graves
+# were left out.
+# Run: SEED_CITY_NAME=Phoenix SEED_CITY_LAT=33.4484 SEED_CITY_LNG=-112.0740 deno run -A seed-resolve.ts names-57-phoenix.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Named to match a live pin so the story ATTACHES (#419): Anthem Veterans Memorial ([map:wiki] 14 m).
+# Watch in check (u) / reviews (all distinct places — mark `| new` if they review):
+#   - Boras Headframe / Arizona Copper Company Locomotive No. 2 sit outside the Arizona Mining and
+#     Mineral Museum pin (43–46 m); a row under that museum's title would be WRONG.
+#   - The Carriage House / First Latter-day Saint Chapel sit near the Rosson House pins (17–48 m)
+#     and Heritage and Science Park; a row under either title would be WRONG.
+#   - Gilbert Town Hall / Clement's Garage sit near the "Gilbert, Arizona" city article geotag; a row
+#     under the city title would be WRONG (the #430 class).
+
+Anthem Veterans Memorial | @33.86320114,-112.13665008 | Every Veterans Day at exactly 11:11 a.m., the memorial's five pillars line up to cast a single shadow across a circle of pavers. | https://www.hmdb.org/m.asp?m=81043
+Arizona's First Zoo | @33.44729971,-111.98456219 | This concrete trough is a remnant of the E.A. Tovrea Memorial Zoo, announced by the Phoenix Gazette in June 1942 as a zoo of Arizona wildlife with bison, elk, deer, antelope and coyotes. | https://www.hmdb.org/m.asp?m=142633
+Boras Headframe | @33.44833833,-112.092285 | Built in 1917, this was the last wooden mine headframe put up in the Warren Mining District near Bisbee, and it hoisted more than 50,000 tons of copper ore before the mine closed in 1926. | https://www.hmdb.org/m.asp?m=93843
+Arizona Copper Company Locomotive No. 2 | @33.44835,-112.09225667 | Built by H.K. Porter of Pittsburgh in 1882, this small locomotive is one of five the Arizona Copper Company of Morenci bought to haul ore on the Coronado railroad. | https://www.hmdb.org/m.asp?m=93835
+# COMMITTED 2026-09-28 do not re-run: U.S.S. Arizona Signal Mast | @33.448131,-112.09380358 | The upper 26 feet of the battleship Arizona's main mast, known as the signal mast or "pig-stick," stands here; the ship was sunk at Pearl Harbor on December 7, 1941. | https://www.hmdb.org/m.asp?m=26610
+Duppa Homestead | @33.440276,-112.075639 | Darrell "Lord" Duppa, a well-traveled Englishman and classics scholar, lived here after coming with Jack Swilling's party, whose irrigation canal first opened the Salt River Valley to farming in 1868. | https://www.hmdb.org/m.asp?m=113927
+# COMMITTED 2026-09-28 do not re-run: The Carriage House | @33.45005,-112.06605 | This circa-1881 carriage house, moved here from 130 East Taylor, is all that remains of the Francis Marion Mognett Ranch. | https://www.hmdb.org/m.asp?m=27612
+Eastlake Park | @33.44694722,-112.04857778 | Eastlake Park, first called Patton's Park, was developed in the late 1880s by the Phoenix Railway Company as a place for its trolley riders to spend the day. | https://www.hmdb.org/m.asp?m=55058
+First Latter-day Saint Chapel in Phoenix | @33.45005,-112.06551667 | The first Phoenix meetinghouse of the Church of Jesus Christ of Latter-day Saints was built on this site by the 300 members of the Phoenix Ward. | https://www.hmdb.org/m.asp?m=27613
+F.Q. Story Addition | @33.4625,-112.09138889 | The Story neighbourhood grew on land bought in 1887 and 1906 by horticulturist Francis Q. Story, known as the "father of the Sunkist Orange." | https://www.hmdb.org/m.asp?m=39413
+Jacob Waltz Marker | @33.446869,-112.091258 | German-born prospector Jacob Waltz, the Lost Dutchman, is reputed to have found a gold deposit near the Superstition Mountains. | https://www.hmdb.org/m.asp?m=74397
+Tribute to Navajo Code Talkers | @33.48055,-112.07348889 | This tribute honours the more than 400 Navajo Code Talkers, U.S. Marines who used the Navajo language to build an unbreakable secret code in World War II. | https://www.hmdb.org/m.asp?m=50932
+Original Site of the Desert Mission | @33.56973,-112.068076 | The Desert Mission, which cared for the sick and needy of Sunnyslope after the turn of the century, began here and grew into John C. Lincoln Hospital. | https://www.hmdb.org/m.asp?m=111478
+Phoenix Newspapers Marker | @33.45158119,-112.07147894 | The Arizona Republic descends from the Salt River Valley's first newspaper, the Salt River Herald, first published on January 26, 1878. | https://www.hmdb.org/m.asp?m=126695
+Frenchy Sawyer Farm Site | @33.44814833,-112.02931167 | In spring 1868 S. "Frenchy" Sawyer built the first farm dwelling here and harvested barley, the first cultivated crop of the Anglo-American settlement of the Salt River Valley. | https://www.hmdb.org/m.asp?m=30402
+St. Paul's M.E. Church | @33.81746578,-112.14971557 | Built in 1879 in Globe, Arizona Territory, this little church was rebuilt here in 1968 by Mr. and Mrs. Andrew P. Tell and the Tell Foundation. | https://www.hmdb.org/m.asp?m=39863
+1897 Smurthwaite House | @33.44666667,-112.08972222 | This 1897 Shingle Style house is one of fewer than a hundred 19th-century buildings left in Phoenix. | https://www.hmdb.org/m.asp?m=39414
+Arizona Cotton Land | @33.23611111,-111.84805556 | Commercial cotton growing in Arizona began on the land around here in January 1917, when Goodyear Tire and Rubber founded the Southwest Cotton Company to grow long-staple cotton. | https://www.hmdb.org/m.asp?m=34554
+Suhwaro Hotel | @33.304657,-111.842176 | This 1916 Mission Revival building has been a hotel, a school and a bowling alley, and in 1924 the San Marcos Hotel bought it to house its staff. | https://www.hmdb.org/m.asp?m=49867
+Morrison Grocery | @33.303048,-111.8422 | Ernest and Leroy Morrison opened Chandler's first grocery store here in 1912. | https://www.hmdb.org/m.asp?m=71003
+Gilbert Building | @33.30221788,-111.84229994 | Dr. Kramer M. Gilbert, Chandler's first physician, built this office and practiced here for more than thirty years, with Chandler's first dentist working upstairs. | https://www.hmdb.org/m.asp?m=292136
+Gilbert Dance Pavilion | @33.35463714,-111.78955078 | In the late 1930s Mr. Templeton turned this vacant lot into an open-air dance pavilion with a wood floor and lights, where couples paid ten cents to dance on Saturday nights. | https://www.hmdb.org/m.asp?m=88081
+Liberty Market | @33.35480117,-111.78981781 | Eddie and Edith Dong built Liberty Market in 1936, and Ben Ong, who had come from China in 1929, began working there that same year. | https://www.hmdb.org/m.asp?m=88065
+Gilbert Pump House | @33.354723,-111.79041 | Gilbert's domestic water well was drilled here in 1925 and struck a large flow of pure water at 475 feet. | https://www.hmdb.org/m.asp?m=90238
+Gilbert Town Hall | @33.35211,-111.78932833 | Built in 1938 for Gilbert's 1,400 residents, the town hall held a fire station with a jail behind it, plus the courtroom and council chambers. | https://www.hmdb.org/m.asp?m=88082
+Clement's Garage | @33.35326003,-111.78941344 | Gilbert's longest continuously running business, this garage has been run by Tom Clement, who arrived in 1934 and later served as mayor, and then by his sons. | https://www.hmdb.org/m.asp?m=88083
+Sine Brothers Hardware Building | @33.538,-112.18485 | Floyd Holmes Sine, considered the father of Glendale's city water system, bought this site in 1910, when it held the town's only public well. | https://www.hmdb.org/m.asp?m=30440
+Arizona's Honeymoon Trail | @33.41581667,-111.81963333 | For nearly forty years, couples from Arizona settlements set out each fall after harvest on a 400-mile trip to St. George, Utah, along the route remembered as the Honeymoon Trail. | https://www.hmdb.org/m.asp?m=27552
