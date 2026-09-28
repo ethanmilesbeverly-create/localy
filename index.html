@@ -6377,6 +6377,80 @@ function blendHistoryForATL(base, targetCount){
   return lead.concat(graves.slice(0, ATL_HISTORY_GRAVE_CAP)).slice(0, targetCount);
 }
 
+/* #435 — RANK ALL THINGS LOCAL BY STORY QUALITY, NOT DISTANCE ALONE.
+   A pin's score is its story tier divided by (1 + distance / ATL_DECAY_M), so a
+   hand-sourced story a few hundred metres off beats a plain pin across town, while
+   a plain pin right beside you still beats a story 2 km away.
+
+   TIERS (client-side signals only — no server change):
+     3    a human vouch: a user gem (hasSubmitter), or a curated story — a seed or
+          gem with resolvedSource 'curated', or a map place with descSource
+          'curated' (#419/#421)
+     2    a seed/gem with any other sourced story (wiki, wikidata, places, gen)
+     1.5  a seed/gem never checked (resolvedSource null — #344 keeps it visible)
+     1    a plain map place (Wikipedia/OSM, already story-gated by #367)
+     +0.5 when others also submitted the same place (seconds > 0, #225)
+   At ATL_DECAY_M 600: curated at 300 m = 2.0, a plain pin at 100 m = 0.86,
+   curated at 1.5 km = 0.86, a plain park at 2 km = 0.23.
+
+   GRAVESTONE — external notability (Wikipedia sitelinks/pageviews) was left out on
+   purpose: it needs a nearby-places change and ranks the famous landmarks the #57
+   pivot says are not the point. Captures (#249) and reports (#25) are not scored
+   yet: captures are too sparse before launch, and a suppressed pin never reaches
+   the client. */
+const ATL_DECAY_M = 600;
+function atlStoryTier(p){
+  if(!p) return 1;
+  let t;
+  if(p.isGem){
+    if(p.hasSubmitter || p.resolvedSource === 'curated') t = 3;
+    else if(p.resolvedSource) t = 2;
+    else t = 1.5;
+  } else {
+    t = (p.descSource === 'curated') ? 3 : 1;
+  }
+  if((p.seconds || 0) > 0) t += 0.5;
+  return t;
+}
+function atlScore(p, base){
+  const d = (p && typeof p.dist === 'number') ? p.dist
+          : (p && base && typeof p.lat === 'number') ? haversine(base.lat, base.lng, p.lat, p.lng)
+          : 0;
+  return atlStoryTier(p) / (1 + d / ATL_DECAY_M);
+}
+/* The pick. `lists` is one candidate array per category (already deduped within
+   itself and grave-capped for history). Two passes, in-view first (#116), then the
+   rest in range; with no bounds (inViewFn null) everything is one pass. Each pass:
+   (1) FLOOR — a category with nothing picked yet takes its best candidate in this
+   pass, so a sparse category still shows once and the view stays mixed; (2) the
+   remaining slots go to the highest scores overall, no category past catMax.
+   Ties keep each list's own order. Returns {pts, seen} so the caller's loose-gems
+   tail dedupes against the same names. Pure — no state, no map. */
+function atlPickScored(lists, scoreFn, inViewFn, target, catMax){
+  const pts = [], seen = new Set(), perCat = lists.map(()=>0);
+  const cands = [];
+  lists.forEach((list, ci) => (list||[]).forEach((p, order) => {
+    cands.push({p, ci, order, s:scoreFn(p), v: inViewFn ? !!inViewFn(p) : true});
+  }));
+  const byScore = (a,b) => (b.s - a.s) || (a.order - b.order);
+  const take = c => {
+    if(pts.length >= target || perCat[c.ci] >= catMax) return false;
+    const k = normName(c.p.name); if(k && seen.has(k)) return false; if(k) seen.add(k);
+    pts.push(c.p); perCat[c.ci]++; return true;
+  };
+  const pass = pool => {
+    lists.forEach((_, ci) => {
+      if(perCat[ci] > 0) return;
+      const mine = pool.filter(c => c.ci === ci).sort(byScore);
+      for(const c of mine){ if(take(c)) break; }
+    });
+    pool.slice().sort(byScore).forEach(take);
+  };
+  pass(cands.filter(c => c.v));
+  if(inViewFn) pass(cands.filter(c => !c.v));
+  return {pts, seen};
+}
+
 /* ---- Point builders (shared by the hunt starters AND the in-place
    re-blend that runs when real data arrives), so both stay identical. ---- */
 function buildAllThingsLocal(base){
@@ -6410,24 +6484,32 @@ function buildAllThingsLocal(base){
      over the full lists, i.e. exactly the pre-#116 behaviour. ATL_POOL (8) is the
      per-category ceiling, matching the single-tab cap so a category never
      out-shows its own tab. #68 lives on: every bucket is passed explicitly. */
-  const ATL_TARGET = 25;   // total pins All Things Local aims to surface (raised 15->25 to fill the tight 2km frame; supply supports it — one tile returned 113 real places)
-  const ATL_POOL   = 8;    // per-category candidate ceiling (mirrors the single-tab cap)
+  /* #435 — THE ROUND-ROBIN ABOVE IS REPLACED BY A SCORED PICK (see atlPickScored).
+     Round-robin gave every category an equal turn however far away its pins were,
+     so in a story-dense frame (SF Chinatown/FiDi, measured 2026-09-28) ~25 story
+     pins sat within 1.5 km but only ~11 were shown, while parks 1–2.5 km out and
+     art 2–3 km out took the other slots. The in-view-first rule (#116) and the
+     loose-gems tail are unchanged; ATL_POOL (8, "mirrors the single-tab cap") is
+     retired here in favour of ATL_CAT_MAX, so a dense category can now out-show
+     its own tab in All Things Local — deliberate, by directive. */
+  const ATL_TARGET  = 25;  // total pins All Things Local aims to surface (raised 15->25 to fill the tight 2km frame; supply supports it — one tile returned 113 real places)
+  const ATL_CAT_MAX = 15;  // #435 — per-category ceiling AND candidate depth (was ATL_POOL 8)
   const CATS = [
-    ['park',        ()=>generateLocalParks(base).slice(0,ATL_POOL),  'park'],
-    ['trail',       ()=>generateTrails(base).slice(0,ATL_POOL),      'trail'],
-    ['shops',       ()=>generateShops(base).slice(0,ATL_POOL),       'shops'],
-    ['bars',        ()=>generateBars(base).slice(0,ATL_POOL),        'barsrest'],
-    ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_POOL), 'barsrest'],
-    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_POOL),'history'], // #376 — assembled by blendHistoryForATL, not blendCategory, so seed graves can't monopolise the slot (the procFn/bucket here are unused for history but kept so CATS stays uniform)
-    ['art',         ()=>[],                                          'art'], // #193 — real OSM artwork + art gems; no procedural filler
+    ['park',        ()=>generateLocalParks(base).slice(0,ATL_CAT_MAX),  'park'],
+    ['trail',       ()=>generateTrails(base).slice(0,ATL_CAT_MAX),      'trail'],
+    ['shops',       ()=>generateShops(base).slice(0,ATL_CAT_MAX),       'shops'],
+    ['bars',        ()=>generateBars(base).slice(0,ATL_CAT_MAX),        'barsrest'],
+    ['restaurants', ()=>generateRestaurants(base).slice(0,ATL_CAT_MAX), 'barsrest'],
+    ['history',     ()=>generateLocalHistory(base).slice(0,ATL_CAT_MAX),'history'], // #376 — assembled by blendHistoryForATL, not blendCategory, so seed graves can't monopolise the slot (the procFn/bucket here are unused for history but kept so CATS stays uniform)
+    ['art',         ()=>[],                                             'art'], // #193 — real OSM artwork + art gems; no procedural filler
   ];
   const lists = CATS.map(([cat,procFn,bucket]) =>
     cat === 'history'
-      ? blendHistoryForATL(base, ATL_POOL)          // #376 — grave-capped, landmark-leading history slot
-      : blendCategory(base, cat, ATL_POOL, procFn, bucket));
+      ? blendHistoryForATL(base, ATL_CAT_MAX)          // #376 — grave-capped (ATL_HISTORY_GRAVE_CAP), landmark-leading history slot
+      : blendCategory(base, cat, ATL_CAT_MAX, procFn, bucket));
 
   // Read the current frame once. Guarded: no map, or bounds not yet valid, means
-  // no in-view split and the passes below collapse to plain round-robin.
+  // no in-view split and the scored pick runs over everything in one pass.
   let bounds = null;
   try {
     if(state.leafletMap && typeof state.leafletMap.getBounds === 'function'){
@@ -6440,38 +6522,10 @@ function buildAllThingsLocal(base){
     try { return bounds.contains([p.lat, p.lng]); } catch(e){ return false; }
   };
 
-  const pts = [];
-  const seen = new Set();
-  const push = p => {
-    if(pts.length >= ATL_TARGET) return false;
-    const k = normName(p.name); if(k && seen.has(k)) return false; if(k) seen.add(k);
-    pts.push(p); return true;
-  };
-
-  // Round-robin over an array of per-category candidate arrays: each round visits
-  // every category once from a rotating offset, taking its next non-duplicate.
-  // Ends as soon as a full pass adds nothing. `seen`/`pts` are shared across
-  // calls, so pass 2 never re-offers a point pass 1 already placed.
-  const roundRobin = ls => {
-    const ptr = ls.map(()=>0);
-    let progressed = true;
-    for(let round = 0; pts.length < ATL_TARGET && progressed; round++){
-      progressed = false;
-      for(let j = 0; j < ls.length && pts.length < ATL_TARGET; j++){
-        const li = (round + j) % ls.length;
-        const list = ls[li];
-        while(ptr[li] < list.length && pts.length < ATL_TARGET){
-          if(push(list[ptr[li]++])){ progressed = true; break; }
-        }
-      }
-    }
-  };
-
-  // Pass 1 — what's actually in the current frame. Pass 2 — top up from the rest
-  // (in range but off-screen). With no bounds, pass 1 is empty and pass 2 runs
-  // the full lists, which is plain round-robin.
-  roundRobin(lists.map(list => bounds ? list.filter(inView) : []));
-  roundRobin(lists.map(list => bounds ? list.filter(p => !inView(p)) : list));
+  // #435 — scored pick with a diversity guard (floor 1 per category, cap ATL_CAT_MAX).
+  const picked = atlPickScored(lists, p => atlScore(p, base), bounds ? inView : null, ATL_TARGET, ATL_CAT_MAX);
+  const pts = picked.pts;
+  const seen = picked.seen;
 
   // Loose gems tail (any bucket, nearest-first), bounded by the target.
   if(pts.length < ATL_TARGET){
@@ -8526,7 +8580,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.25r';
+const APP_VERSION = '2026.09.28a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
