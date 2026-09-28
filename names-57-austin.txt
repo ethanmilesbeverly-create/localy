@@ -1,0 +1,55 @@
+# names-57-austin.txt — #57 Phase A, Austin pass 1 (2026-09-28)
+# Source: the Historical Marker Database — Austin town list pages 1–2 (titles A–H).
+# Each line is placed at the marker's own coordinate and worded only from the marker text.
+# Texas State Cemetery / Oakwood markers (graves) and Capitol-grounds panels were left out.
+# Run: SEED_CITY_NAME=Austin SEED_CITY_LAT=30.2672 SEED_CITY_LNG=-97.7431 deno run -A seed-resolve.ts names-57-austin.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Lines NAMED to match a live pin so the story ATTACHES (#419):
+#   The Broken Spoke ([map:wiki] 1 m), Aynesworth–Wright House ([map:wiki] 24 m, en dash),
+#   Downs Field ([map:wiki] 52 m), McKinney Gristmill ([map:osm] 8 m).
+# Watch in check (u):
+#   - Henry G. Madison Cabin sits inside Rosewood Park (pins 17 m / 34 m) -> expect REVIEW, then `| new`.
+#   - Crown Tailors is 16 m from the Museum of the Weird pin (a different storefront) -> may REVIEW.
+#   - Clarksville Marker / Austin's Mexico Neighborhood may stage a row under
+#     "Clarksville Historic District (Austin, Texas)" / "Republic Square (Austin)" — both are
+#     the SAME place as the line, so either is acceptable.
+#   - Austin City Limits Marker: Moody Theater article 26 m (ACL's current home) — a row
+#     under "Moody Theater" would be WRONG (the 1974 first show was at KLRU on campus); mark `| new`.
+#
+# WAITING on #425 (own Wikipedia article at the marker, no live pin):
+# Austin State Hospital | @30.30744716,-97.73716586 | Created by the Legislature in 1856 and built from 1857, this is the oldest mental hospital in Texas. | https://www.hmdb.org/m.asp?m=25758
+
+Joe Lung Cafe Site | @30.26723776,-97.7403508 | Joe Lung came to Austin as a teenager after working on California railroad gangs, and in 1897 he opened the Joe Lung Café here, serving classic Southern food rather than Chinese. | https://www.hmdb.org/m.asp?m=267059
+700 Year Old Live Oak | @30.377453,-97.6751 | With a trunk more than 15 feet around, this live oak may be 700 years old, which would put its first growth near the end of the Crusades. | https://www.hmdb.org/m.asp?m=150715
+Austin City Limits Marker | @30.265228,-97.746676 | Austin City Limits, the longest-running music series in American television history, recorded its first show, with Willie Nelson, in October 1974 at KLRU-TV on the University of Texas campus. | https://www.hmdb.org/m.asp?m=130206
+Moonlight Tower at Ninth and Guadalupe | @30.27172,-97.74518 | This is one of 31 moonlight towers put up across Austin in 1895, each lighting a circle 3,000 feet wide with six carbon arc lamps; 17 still stand. | https://www.hmdb.org/m.asp?m=158890
+Booker T. Washington 1911 Speech Site | @30.27206692,-97.74572807 | Booker T. Washington spoke to Austin residents and students here at Wooldridge Square in 1911, on a tour of Texas promoting his ideas for African American advancement. | https://www.hmdb.org/m.asp?m=205248
+The Broken Spoke | @30.24089091,-97.78520618 | Austin native James M. White opened the Broken Spoke in 1964 as a traditional honky-tonk dance hall, south of the city limits on the site of a former lumberyard. | https://www.hmdb.org/m.asp?m=220676
+Cactus Theater | @30.266461,-97.737474 | In the 1930s and '40s vaudeville performer Richard "Skinny" Pryor owned the Cactus Theater, which showed cowboy and Spanish-language movies, while his son Cactus Pryor sold the tickets and popped the popcorn. | https://www.hmdb.org/m.asp?m=69750
+Carrington Building | @30.26668757,-97.73744689 | Edward Carrington, Austin's first Black property owner, built his grocery store and home here in 1872 and lent money to families so they could buy farms. | https://www.hmdb.org/m.asp?m=267128
+Clarksville Marker | @30.28138064,-97.76244127 | Clarksville, one of Austin's historic Black neighborhoods, began in 1871 when freedman Charles Clark bought two acres on what is now Tenth Street. | https://www.hmdb.org/m.asp?m=25800
+Clay Pit Bucket Tower | @30.272089,-97.768965 | This tower is one of three that carried a cable conveyor of clay from pits south of the Colorado River to a nearby brickworks, a system A.J. Zilker put in in 1902. | https://www.hmdb.org/m.asp?m=61094
+Colored Teachers State Association Building | @30.2717,-97.72751 | This building was designed by John S. Chase, the first licensed African American architect in Texas, for the Colored Teachers State Association of Texas, founded in 1884. | https://www.hmdb.org/m.asp?m=149471
+Congress Avenue Bridge Bat Roost | @30.26019225,-97.74529503 | Bats settled under the Congress Avenue Bridge in great numbers only after a 1980 rebuild left crevices 16 inches deep running the length of the bridge. | https://www.hmdb.org/m.asp?m=270242
+Aynesworth–Wright House | @30.368468,-97.65879 | Baptist preacher and cabinetmaker Isaiah Aynesworth built this Greek Revival house around 1852 as two rooms joined by a dog-run hallway; it first stood at 4507 East Avenue. | https://www.hmdb.org/m.asp?m=169102
+The Austin Statesman Marker | @30.25831,-97.74378 | The Austin Statesman began in 1871 as the Democratic Statesman, started by the Democratic Party to oppose Texas's Radical Reconstruction government. | https://www.hmdb.org/m.asp?m=29536
+Boardman-Webb House | @30.272504,-97.747593 | Dentist George T. Boardman, who developed a new process for filling teeth and helped incorporate the American Dental College, bought this property in 1855. | https://www.hmdb.org/m.asp?m=25778
+Espinosa-Olivares-Aguirre Expedition Site | @30.232747,-97.758156 | In 1709, uneasy about its claim to Texas, Spain sent Capt. Pedro de Aguirre and 14 soldiers on a goodwill expedition that reached about this spot. | https://www.hmdb.org/m.asp?m=158917
+Crown Tailors | @30.26710072,-97.73889728 | In 1945 radio DJ Dr. Hepcat, Lavada Durst, was pitching Crown Tailors at 408 East Sixth Street on the air to listeners who wanted to look sharp. | https://www.hmdb.org/m.asp?m=267036
+McKinney Gristmill | @30.18880679,-97.719419 | These stone foundations are all that remain of the first gristmill in southeast Austin; a wooden mill once stood on top of them. | https://www.hmdb.org/m.asp?m=287651
+Downs Field | @30.275705,-97.70908 | Downs Field was built in 1949 as a "separate but equal" alternative to Disch Field and was moved to this spot in 1954. | https://www.hmdb.org/m.asp?m=130650
+Esperanza School Building | @30.269006,-97.77284 | Built on Richard McKenzie's land in 1866, this cabin was one of the earliest one-room schoolhouses in Travis County, teaching farm children before public schools existed. | https://www.hmdb.org/m.asp?m=79395
+F. Weigl Iron Works | @30.262197,-97.738906 | Ironsmith Fortunat Weigl came to Austin from Germany in 1913 and found little work until 1917, when woodcarver Peter Mansbendel gave him a commission. | https://www.hmdb.org/m.asp?m=26728
+O. Henry Wedding Site | @30.27431659,-97.75975179 | William Sidney Porter, the writer O. Henry, married Athol Estes in 1889 at Dr. R.K. Smoot's family home here, built in 1877 of bricks handmade on Barton Creek. | https://www.hmdb.org/m.asp?m=206707
+First Capitol in Austin | @30.27028701,-97.74283523 | Austin's first capitol was built on this site in 1839, and every president of the Republic of Texas carried out some official act inside it. | https://www.hmdb.org/m.asp?m=166289
+First Classes of the University of Texas | @30.272485,-97.74153 | The University of Texas held its first classes on September 15, 1883, in the temporary capitol that stood on this site; 52 of the 218 original students enrolled in law. | https://www.hmdb.org/m.asp?m=25647
+Fortress Home | @30.41020586,-97.6387865 | Martin Wieland, from Dessau, Germany, built this house in the early 1850s, and his neighbours used it as a fort. | https://www.hmdb.org/m.asp?m=161507
+The Gant Family Marker | @30.2786,-97.7232 | The Gant family, musicians who carried songs from Appalachia and the old world, were recorded by folklorist John A. Lomax for the Library of Congress. | https://www.hmdb.org/m.asp?m=178679
+George W. Sampson Home | @30.273883,-97.747859 | Merchant George W. Sampson, whose 1872 marriage to Gov. Edmund J. Davis's niece was the first wedding held in the Governor's Mansion, made his home here. | https://www.hmdb.org/m.asp?m=26497
+Green & White Grocery | @30.26519469,-97.72997585 | Norverto and Susie Lopez opened Green & White Grocery on this corner of Waller and East 7th streets in 1936, living in a house behind the store. | https://www.hmdb.org/m.asp?m=299588
+Grinninger Fence | @30.260578,-97.741489 | The first known use of barbed wire in Texas is credited to John Grinninger, an iron foundry worker who in 1857 strung it around his garden on Waller Creek, northeast of here. | https://www.hmdb.org/m.asp?m=25896
+Austin's Mexico Neighborhood | @30.2681053,-97.74700925 | Austin's original Mexican and Tejano neighbourhood, known as "Mexico," once surrounded this square and stretched from Congress Avenue to Shoal Creek. | https://www.hmdb.org/m.asp?m=266946
+First Train into Austin | @30.26528631,-97.7441421 | On December 25, 1871, the first train into Austin rolled over Waller Creek, making the city the Houston and Texas Central Railroad's western terminus. | https://www.hmdb.org/m.asp?m=167371
+Heman Marion Sweatt Marker | @30.27332321,-97.74485638 | Heman Marion Sweatt was denied admission to the University of Texas School of Law in February 1946 because he was Black, and that May he challenged the university's segregation. | https://www.hmdb.org/m.asp?m=130372
+# COMMITTED 2026-09-28 do not re-run: Henry G. Madison Cabin | @30.2722,-97.714 | Policeman and farmer Henry Green Madison built this cabin around 1863, and it stayed hidden inside a frame house built around it in 1886 until a demolition revealed it. | https://www.hmdb.org/m.asp?m=25672

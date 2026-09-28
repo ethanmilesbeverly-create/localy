@@ -1,0 +1,50 @@
+# names-57-san-francisco.txt — #57 Phase A, San Francisco pass 1 (2026-09-28)
+# Source: the Historical Marker Database — San Francisco City and County geographic list,
+# page 1 (Alamo Square → Embarcadero). Each line is placed at the marker's own coordinate
+# and worded only from the marker text.
+# Run: SEED_CITY_NAME="San Francisco" SEED_CITY_LAT=37.7749 SEED_CITY_LNG=-122.4194 deno run -A seed-resolve.ts names-57-san-francisco.txt
+#
+# Sandbox pre-checks (2026-09-28): public submissions within 200 m, the live map within
+# 120 m, Wikipedia titles within 90 m. Only neighbours, except:
+#   - Comstock Saloon: the line is NAMED for the live OSM pin 15 m away (the same building,
+#     155 Columbus Ave) so the Barbary Coast story ATTACHES (#419).
+#   - Portsmouth Square cluster (Clay Street terminus, First Public School, Jenny Lind):
+#     the "Portsmouth Square" article sits 16–66 m away, no live pin — watch check (u) for it.
+#   - Branch Mint / Norton / Hudson's Bay / Pony Express sit near the SF Historical Society
+#     Museum pin — expect REVIEWs; they are separate sites.
+#   - Crane 14 (inside Crane Cove Park) and the Starr King sarcophagus (First Unitarian
+#     Church grounds) — watch check (u) for the container's article title (#438).
+#
+# CUT: Mint Hill — "San Francisco Mint" drops to {mint}, a subset of {mint, hill}; it
+# would attach to the Mint's pin (#437).
+# Renamed: Kong Chow Temple marker → "Site of the Sze Yup Company" (the temple has moved;
+# its article sits ~300 m away and the marker is about the 1851 site).
+
+Original Site of Bancroft Library | @37.74757816,-122.42037685 | From 1881 to 1906 this was the site of Hubert Howe Bancroft's library, the collection he began in 1860 that became the basis of his history of western North America. | https://www.hmdb.org/m.asp?m=162984
+Sarcophagus of Thomas Starr King | @37.784717,-122.422999 | Unitarian minister Thomas Starr King, credited with binding California to the Union during the Civil War, lies in this sarcophagus. | https://www.hmdb.org/m.asp?m=91855
+Crane 14 | @37.76305181,-122.38678337 | This 50-ton whirley crane was put up over Slip 4 in 1941, when the yard was rebuilt for the World War II shipbuilding boom. | https://www.hmdb.org/m.asp?m=159381
+Salty Fish Alley | @37.79562338,-122.40621115 | Wentworth Place earned the nickname Salty Fish Alley from the hawkers who came here to sell preserved fish and seafood. | https://www.hmdb.org/m.asp?m=175279
+Clay Street Cable Car Terminus | @37.794726,-122.40508 | The world's first street cars pulled by cable, invented by Andrew Hallidie, ran from this end of the line starting August 1, 1873, and kept running until 1947. | https://www.hmdb.org/m.asp?m=143432
+California Star Office Site | @37.795094,-122.40628 | San Francisco's first newspaper, Samuel Brannan's California Star, was published on this site on January 9, 1847. | https://www.hmdb.org/m.asp?m=71460
+First Chinese American Boy Scout Troop | @37.79495494,-122.40850798 | Eight boys founded Troop 3, the first Chinese American troop of the Boy Scouts of America, on this Chinese Methodist Church site in 1914. | https://www.hmdb.org/m.asp?m=186444
+Emperor Norton's Eureka Lodgings Site | @37.79433094,-122.40386779 | Joshua Abraham Norton, Emperor Norton, lived for 17 years from 1863 at the Eureka Lodgings, a boarding house for tradesmen and transients that stood here. | https://www.hmdb.org/m.asp?m=113930
+Hang Ah Tea House | @37.79340846,-122.40736093 | Hang Ah, opened in 1920 in this alley, is marked as the first dim sum house in the United States. | https://www.hmdb.org/m.asp?m=175267
+Home of Benjamen Chinn | @37.793932,-122.40503 | Photographer Benjamen Chinn, known for his pictures of Chinatown and of Paris, was born and raised in this house and lived here nearly all his life. | https://www.hmdb.org/m.asp?m=70834
+Site of the Sze Yup Company | @37.79173141,-122.40461935 | In 1851 Yee Ah Tye founded the Sze Yup Company on this site, one of the first Chinese mutual aid associations in America. | https://www.hmdb.org/m.asp?m=155185
+Pony Express Marker | @37.7946738,-122.4036576 | The first Pony Express rider to reach San Francisco on the final relay from St. Joseph, Missouri, arrived on April 14, 1860, aboard the river steamer Antelope. | https://www.hmdb.org/m.asp?m=268110
+Comstock Saloon | @37.79706,-122.405518 | This building is the last of the Barbary Coast saloons; before the 1906 earthquake and fire its site held the infamous Billy Goat Saloon, run by Pigeon-toed Sal. | https://www.hmdb.org/m.asp?m=58491
+Site of First U.S. Branch Mint | @37.79424225,-122.40353397 | San Francisco's first U.S. Branch Mint, authorized by Congress in 1852, opened on this site on April 3, 1854. | https://www.hmdb.org/m.asp?m=206524
+Site of the First Public School in California | @37.794607,-122.405445 | California's first public school was built on this site in 1847 and opened on April 3, 1848. | https://www.hmdb.org/m.asp?m=53965
+Jenny Lind Theatre Site | @37.795063,-122.4047 | Tom Maguire opened the third Jenny Lind Theatre here in October 1851 after fires destroyed the first two, and in 1852 the city bought it for its City Hall. | https://www.hmdb.org/m.asp?m=143439
+Spofford Alley | @37.79498832,-122.4074889 | The Chee Kung Tong at 36 Spofford Alley was the meeting place of the revolutionaries led by Dr. Sun Yat-sen. | https://www.hmdb.org/m.asp?m=175269
+The Birthplace of a Great City | @37.794678,-122.40653 | On June 25, 1835, William A. Richardson, founder of Yerba Buena, pitched its first dwelling, a tent, on this spot and replaced it with the town's first wooden house that October. | https://www.hmdb.org/m.asp?m=70835
+Willie Woo Woo Wong Marker | @37.79339831,-122.4071088 | Willie "Woo Woo" Wong, all of 5 feet 5 inches tall, honed his game in early-morning workouts nearby and became one of San Francisco's sports stars of the 1940s and 1950s. | https://www.hmdb.org/m.asp?m=175169
+Hudson's Bay Company Site | @37.7941668,-122.40333527 | This block, then on the Yerba Buena waterfront, held the Hudson's Bay Company's California headquarters, begun when chief trader William G. Rae bought the property in 1841. | https://www.hmdb.org/m.asp?m=143484
+Heber Cady Tilden Memorial | @37.75510066,-122.42296033 | On April 22, 1906, Red Cross volunteer Heber C. Tilden was accidentally shot and killed at 22nd and Guerrero streets while helping after the great earthquake and fire. | https://www.hmdb.org/m.asp?m=274413
+AIDS Memorial Quilt Original Site | @37.763289,-122.434558 | The NAMES Project AIDS Memorial Quilt began at this site in 1987. | https://www.hmdb.org/m.asp?m=98206
+Audiffred Building | @37.793535,-122.39262 | Built in 1889 with a cast-iron front and a French mansard roof, this is the only building still standing that watched the Ferry Building go up in 1896–1898. | https://www.hmdb.org/m.asp?m=72608
+Captain Shorey Marker | @37.791001,-122.389834 | Barbados-born Captain William T. Shorey, called "Black Ahab" by his crew, was the only Black captain on the Pacific Coast when San Francisco was America's leading whaling port. | https://www.hmdb.org/m.asp?m=92827
+Fireboat House | @37.790228,-122.388749 | San Francisco's only waterfront firehouse was built here in 1913 for the city's fireboats and their crews. | https://www.hmdb.org/m.asp?m=92890
+Embarcadero Freeway Supports | @37.795188,-122.3941 | The dashed rectangles set into this walkway mark where columns of the old Embarcadero Freeway once stood. | https://www.hmdb.org/m.asp?m=73089
+Hills Brothers Coffee | @37.789739,-122.38871 | Hills Brothers, founded in 1878, became world-famous for inventing vacuum-packed coffee in a can in time for the Klondike Gold Rush of 1898. | https://www.hmdb.org/m.asp?m=72585
+Howard Sperry and Nick Bordoise Memorial | @37.79337409,-122.3932233 | This plaque remembers Howard Sperry and Nick Bordoise, who were fatally shot on Bloody Thursday, July 5, 1934. | https://www.hmdb.org/m.asp?m=26162
