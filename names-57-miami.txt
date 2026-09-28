@@ -1,0 +1,46 @@
+# names-57-miami.txt — #57 Phase A, Miami pass 1 (2026-09-28)
+# Source: the Historical Marker Database — Miami town list page 1 (entries 1–100 of 120).
+# Most of the Coral Way / Cuban Memorial Boulevard monuments were left out (one kept: Pedro Pan).
+# Each line is placed at the marker's own coordinate and worded only from the marker text.
+# Run: SEED_CITY_NAME=Miami SEED_CITY_LAT=25.7617 SEED_CITY_LNG=-80.1918 deno run -A seed-resolve.ts names-57-miami.txt
+#
+# Sandbox pre-checks (2026-09-28): submissions 200 m, live map 120 m, Wikipedia titles 90 m.
+# Named to match a live pin so the story ATTACHES (#419): Brickell Park ([map:osm] 88 m — the
+#   marker's "Mary Brickell Park").
+# Watch in check (u) / reviews:
+#   - Dinner Key Marker is 53 m from the Miami City Hall pin (the old Pan Am terminal); a row under
+#     "Miami City Hall" is acceptable, but if it REVIEWS mark it `| new`.
+#   - Naval Air Station Richmond sits 67 m from the Gold Coast Railroad Museum pin; a row under the
+#     museum title would be WRONG.
+#   - The Art Deco Tower: a row under "Sears, Roebuck and Company Department Store (Miami, Florida)"
+#     is acceptable (same building).
+#   - Housekeepers Club: a row under "Woman's Club of Coconut Grove" is acceptable.
+#
+# WAITING on #425:
+# Chateau Petit Douy | @25.75803866,-80.19332372 | After a 1930 trip to France, Miami lawyers John and Ethel Murrell had architect Martin L. Hampton design this house after a 14th-century priory they saw in Douy. | https://www.hmdb.org/m.asp?m=263514
+# Dr. James Jackson Office | @25.76133333,-80.18996667 | Dr. James M. Jackson, Miami's first resident physician, arrived in 1896 and built this small frame office. | https://www.hmdb.org/m.asp?m=120655
+# Miami Stadium Site | @25.79993333,-80.21115 | On opening night, August 31, 1949, baseball commissioner Happy Chandler called Miami Stadium the most beautiful ballpark he knew. | https://www.hmdb.org/m.asp?m=120653
+#   (Petit Douy / Jackson Office: own article 18 m / 10 m; Miami Stadium: its live pin sits 98 m away, the big-area case.)
+
+Anton J. Cermak Marker | @25.77391788,-80.18615791 | Here on February 15, 1933, an attempt was made to assassinate Franklin D. Roosevelt; Chicago Mayor Anton Cermak was shot instead and died on March 6. | https://www.hmdb.org/m.asp?m=297648
+The Art Deco Tower | @25.7873383,-80.1893611 | This seven-story octagonal tower was built in 1929 as the entrance to Miami's Sears, Roebuck and Company store, the focal point of the city's first Art Deco building. | https://www.hmdb.org/m.asp?m=63894
+Charles Avenue | @25.725726,-80.24529 | The first Black community on the South Florida mainland began here in the late 1880s, when Bahamians who came by way of Key West settled to work at the Peacock Inn. | https://www.hmdb.org/m.asp?m=75597
+Coast Survey Base Marker | @25.71775,-80.1582861 | The U.S. Coast Survey set the Key Biscayne North Base Marker here in April 1855, under superintendent Alexander Dallas Bache, a great-grandson of Benjamin Franklin. | https://www.hmdb.org/m.asp?m=266609
+Coconut Grove Library | @25.726778,-80.240551 | This library stands on land given by Commodore Ralph Middleton Munroe, whose first wife is buried on the grounds. | https://www.hmdb.org/m.asp?m=75209
+The Dice House | @25.677282,-80.326607 | Built around 1920 by storekeeper David Brantly Dice, known as the "unnamed mayor" of the community, this is the oldest surviving building in the Kendall area. | https://www.hmdb.org/m.asp?m=76498
+# COMMITTED 2026-09-28 do not re-run: Dinner Key Marker | @25.728069,-80.234212 | Dinner Key, named by picnickers in the sailboat days, was a naval air base in World War I, and in 1930 Pan American World Airways began flying-boat service to Latin America from here. | https://www.hmdb.org/m.asp?m=75186
+Fleischer Studios in Miami | @25.791454,-80.24271 | This marker remembers the Miami years of Fleischer Studios, the Max and Dave Fleischer studio behind Betty Boop, Popeye the Sailor and the bouncing-ball cartoons. | https://www.hmdb.org/m.asp?m=294120
+The First Five Black Police Officers | @25.78428333,-80.20301667 | In 1944 the City of Miami hired its first five Black police officers, sworn in as "emergency patrolmen" for what was then called the Central Negro District. | https://www.hmdb.org/m.asp?m=228930
+Virginia Key Beach Dance Pavilion | @25.73521667,-80.1563 | A 1918 map shows a dance pavilion for Black visitors on Virginia Key, and when Virginia Key Beach Park opened in 1945 a concrete dance floor was laid here for the Lindy Hop and, later, the Twist and the Hustle. | https://www.hmdb.org/m.asp?m=120688
+Housekeepers Club | @25.726716,-80.239833 | On February 19, 1891, Flora McFarlane and five other pioneer women founded the Housekeepers Club, the first organized women's club in South Florida. | https://www.hmdb.org/m.asp?m=75192
+Jesse L. Holt Jr. Track | @25.81008333,-80.21048333 | In 1961 Jesse Holt became the first African American athlete allowed to compete against whites in the City of Miami, at a track meet here in Moore Park. | https://www.hmdb.org/m.asp?m=229588
+Lemon City Train Station Site | @25.83248333,-80.18788333 | Henry Flagler had the Lemon City station built here in 1896, a yellow wood-frame depot with white trim and a flower garden around it. | https://www.hmdb.org/m.asp?m=150768
+Lemon City Port | @25.83338333,-80.18083333 | Before the City of Miami existed, Lemon City had the first port on Biscayne Bay, thanks to its natural deep-water channel. | https://www.hmdb.org/m.asp?m=150726
+Caribbean Marketplace | @25.83048333,-80.19196667 | Built in 1936 and long left empty, this building became Little Haiti's Caribbean Marketplace after thousands of Haitian immigrants settled the neighbourhood in the 1980s. | https://www.hmdb.org/m.asp?m=128656
+Brickell Park | @25.7681679,-80.1899117 | This park covers part of what was the largest Tequesta village in southeast Florida. | https://www.hmdb.org/m.asp?m=65648
+Menendez on Biscayne Bay | @25.77588,-80.1919 | Pedro Menéndez de Avilés, founder of St. Augustine, landed here at the chief village of the Tequesta early in 1567 and returned several Tequesta who had been held captive on the west coast. | https://www.hmdb.org/m.asp?m=88324
+# COMMITTED 2026-09-28 do not re-run: Naval Air Station Richmond | @25.61685,-80.40016 | In September 1942 the Navy opened a 2,000-acre blimp base here with three hangars, each 17 stories tall. | https://www.hmdb.org/m.asp?m=73415
+Operation Pedro Pan Monument | @25.76422542,-80.21641626 | This monument honours the more than 14,000 Cuban children whose parents sent them to live free in America through Operation Pedro Pan. | https://www.hmdb.org/m.asp?m=295353
+Lyric Theater | @25.78272222,-80.19815833 | Geder Walker, an African American businessman from Georgia, built and ran the Lyric Theater in 1913, and it became the heart of Overtown's entertainment district. | https://www.hmdb.org/m.asp?m=278168
+Pioneer Boat Builders' Site | @25.861836,-80.213006 | The first reinforced fiberglass boats in the southeastern United States were designed and built here in 1947. | https://www.hmdb.org/m.asp?m=77650
+Julia Tuttle Marker | @25.77075,-80.19206667 | Julia Tuttle, the "Mother of Miami," arrived from Cleveland in 1891 as a widow and bought 644 acres on the north bank of the Miami River, including Fort Dallas. | https://www.hmdb.org/m.asp?m=250418
