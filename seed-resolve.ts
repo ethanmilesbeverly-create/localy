@@ -62,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.29a (#425 article-name seeds + big-area review; #432 nearby article titles + near-name review)";
+const TOOL_VERSION = "seed-resolve 2026.09.29b (#425 article-name seeds + big-area review; #432 nearby article titles + near-name review)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -1198,7 +1198,7 @@ async function run() {
       // #423 — print the name actually SAVED (row.name), not Gemini's suggestion:
       // a story line keeps its display name, so canonicalName could differ and
       // mislead the eyeball check. Show Gemini's name only when it differs.
-      const suggested = verdict.canonicalName && verdict.canonicalName !== row.name ? `  (Gemini suggested "${verdict.canonicalName}")` : "";
+      const suggested = !articleAnchor && verdict.canonicalName && verdict.canonicalName !== row.name ? `  (Gemini suggested "${verdict.canonicalName}")` : "";
       console.log(`  + ${row.name} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})${suggested}`);
       console.log(`      checked nearby: ${near.arms}`); // #420 — a new pin with nothing found by any arm is worth a second look
       if (articleAnchor) {
