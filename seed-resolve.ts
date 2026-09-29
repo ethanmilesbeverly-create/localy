@@ -62,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.29b (#425 article-name seeds + big-area review; #432 nearby article titles + near-name review)";
+const TOOL_VERSION = "seed-resolve 2026.09.29c (#437/#438 a pin or article that names a LARGER place goes to review; #425 article-name seeds + big-area review; #432)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -1071,7 +1071,37 @@ async function run() {
         .filter((w) => w && !cityWords.has(w)).join(" ");
       const blob = noCity([candidate, line.locate, geo.label].join(" "));
       const bare = (n: string) => noCity(n.replace(/\s*\([^)]*\)\s*/g, " "));
-      const targets = existing.filter((e) => bare(e.name) && labelMatchesName(bare(e.name), blob));
+      const forward = existing.filter((e) => bare(e.name) && labelMatchesName(bare(e.name), blob));
+      // #437 / #438 — THE MATCH MUST HOLD BOTH WAYS. `forward` only asks whether a
+      // pin's or article's name is found in the line, so a LARGER place whose name
+      // is a subset of the line passed too: Uptown Theater → the "Uptown,
+      // Minneapolis" neighbourhood pin (#437), Oakland Cemetery African American
+      // Burial Grounds → "Oakland Cemetery (Atlanta)" (#438), Bromo Seltzer Arts
+      // Tower → "Bromo Arts District", Battery Wall Discovery → "The Battery
+      // (Manhattan)". Since #425 that also made the line SEED under the larger
+      // place's title. A target now also has to carry the line's own name back:
+      // the line's NAME (or its `locate`, when that is an alternate name — the #419
+      // Schmidt Brewery / Schmidt Artist Lofts case) must match the target's name.
+      // A forward-only hit is a CONTAINER — a bigger place around this one.
+      const lineNames = [candidate];
+      if (line.locate && !/^\d/.test(line.locate) && !line.locate.startsWith("@")) lineNames.push(line.locate);
+      const backMatch = (e: Existing) => lineNames.some((n) => bare(n) && labelMatchesName(bare(n), bare(e.name)));
+      const targets = forward.filter(backMatch);
+      const containers = forward.filter((e) => !backMatch(e));
+      if (containers.length && !targets.length) {
+        // Only a larger place matched. Attaching would put this story on the whole
+        // district / cemetery / park; seeding under it (#425) would take its name.
+        // Human: mark the line `new` to seed it under its own name.
+        const why = `names a LARGER place: ${containers.map((e) => `"${e.name}" [${e.source}]`).join(", ")} (#437/#438) — mark \`new\` to seed it under its own name, or attach by hand if it really is that place`;
+        report.push({ ...base, outcome: "review", why, containers: containers.map((e) => e.name) });
+        console.log(`  ? ${candidate} → REVIEW: ${why}`);
+        await sleep(7000);
+        continue;
+      }
+      if (containers.length) {
+        // The place matched on its own terms too — use those; the larger place is left alone.
+        console.log(`    (larger place${containers.length > 1 ? "s" : ""} left alone: ${containers.map((e) => `"${e.name}"`).join(", ")} — #437/#438)`);
+      }
       const onMap = targets.filter((e) => e.source !== "wiki");
       const stagePinRow = (e: Existing) => curatedRows.push({
         name: e.name, lat: e.lat, lng: e.lng, description: line.story,
