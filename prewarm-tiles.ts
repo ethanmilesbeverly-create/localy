@@ -4,7 +4,7 @@
 // Changes no index.html / function / APP_VERSION / CACHE_VERSION.
 //
 // WHAT IT DOES
-//   Walks every ~5.5 km map tile covering the 21 launch metros and POSTs each tile
+//   Walks every ~5.5 km map tile covering the launch metros (24 since #57 Phase B) and POSTs each tile
 //   centre to the DEPLOYED `nearby-places`. A cold tile makes the function do its own
 //   Overpass + Wikipedia build and write the cache row (`places:<CACHE_VERSION>:<tile>`),
 //   so a real user arriving later gets the instant warm path instead of the ~15 s
@@ -18,7 +18,7 @@
 //
 // MIRRORS (change together or tiles drift):
 //   - TILE_DEG = nearby-places REAL_TILE_DEG (0.05); tile key = round(coord/0.05).
-//   - METROS + enumerateTiles = gate-tiles.ts (same 21 metros, same bbox half-size).
+//   - METROS + enumerateTiles = gate-tiles.ts (same 24 metros, same bbox half-size).
 //   The function snaps every request to the tile centre (#27 fetch-anchor), and this
 //   tool posts the exact centre, so a warm lands on the tile the key names.
 //
@@ -65,7 +65,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.09.24a";
+const BUILD = "2026.09.28a"; // #57 Phase B: roster 21 → 24 (+ Los Angeles, Detroit, Baltimore)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -83,7 +83,7 @@ const DRY_RUN = env("PREWARM_DRY_RUN") === "1";
 const RETRY_FAILED = Deno.args.includes("--retry-failed");
 const FAILED_FILE = "prewarm_failed.json";
 
-// Same roster as gate-tiles.ts (21 launch metros).
+// Same roster as gate-tiles.ts (24 metros since #57 Phase B, 2026-09-28).
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
   { name: "New York", lat: 40.7128, lng: -74.0060 },
@@ -106,6 +106,11 @@ const METROS: Metro[] = [
   { name: "Phoenix", lat: 33.4484, lng: -112.0740 },
   { name: "Minneapolis", lat: 44.9778, lng: -93.2650 },
   { name: "St. Paul", lat: 44.9537, lng: -93.0900 },
+  // #57 Phase B (2026-09-28): the roster grows 21 → 24. Keep all three copies in step
+  // (gate-tiles.ts, prewarm-tiles.ts, graves-resolve.ts — handoff §6).
+  { name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
+  { name: "Detroit", lat: 42.3314, lng: -83.0458 },
+  { name: "Baltimore", lat: 39.2904, lng: -76.6122 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

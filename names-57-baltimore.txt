@@ -1,0 +1,47 @@
+# names-57-baltimore.txt — #57 PHASE B, Baltimore pass 1 (story lines, 2026-09-28)
+# Source: Historical Marker Database, Baltimore list (1,293 markers) — title sort entries 101–200 and
+# geographic sort entries 101–200 (Canton → Downtown). Page 1 of the title sort is Orioles Hall of Fame
+# plaques and house plaques, so it was skipped.
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# RUN ORDER (the #441 lesson): pre-warm Baltimore FIRST (prewarm-tiles.ts 2026.09.28a, PREWARM_METRO=baltimore),
+# then the dry run:
+#   SEED_CITY_NAME=Baltimore SEED_CITY_LAT=39.2904 SEED_CITY_LNG=-76.6122 deno run -A seed-resolve.ts names-57-baltimore.txt
+
+# --- new story pins -------------------------------------------------------------
+Enslavement in Canton Marker | @39.280204,-76.575268 | Captain John O'Donnell founded Canton as a plantation in 1785, and his 1806 probate inventory listed 48 enslaved people of African descent, most of them children who worked the land that is now this neighborhood. | https://www.hmdb.org/m.asp?m=276404
+Harris Creek Marker | @39.279975,-76.57977222 | Harris Creek was once an open stream big enough to sail a ship in; it was filled in for development in the early 1800s and now runs entirely in pipes underground. | https://www.hmdb.org/m.asp?m=212889
+The Railroad to Freedom Marker | @39.27828333,-76.576325 | At twenty, Frederick Douglass — then called Frederick Bailey — was enslaved in Fell's Point, a mile west of here, and escaped with a bold plan, a clever disguise, steady nerves and help from friends. | https://www.hmdb.org/m.asp?m=212894
+Carroll Park Golf Course Integration Marker | @39.27255278,-76.64853611 | The city bought Carroll Park Golf Course in 1923 for white golfers only, and a group of African American golfers pressed several legal actions until they won full access. | https://www.hmdb.org/m.asp?m=220066
+Hippocrates Sycamore | @39.2522023,-76.61339734 | This sycamore grew from a seed of the Tree of Hippocrates on the Greek island of Cos; the seed sprouted in the Druid Hill Conservatory and the sapling was planted here on October 21, 1981. | https://www.hmdb.org/m.asp?m=212962
+Cable Car Wheel Relic | @39.31243056,-76.62108611 | This wheel was part of the underground machinery of Baltimore's cable car system, which arrived to great fanfare in 1891 and lasted only until 1898. | https://www.hmdb.org/m.asp?m=279855
+Mounted Messengers Marker | @39.3214,-76.5869 | Captain Henry Thompson, the first owner of the mansion here, formed the First Baltimore Horse Artillery in 1813, and in August 1814 his troop was picked to report on enemy movements at the Battle of Bladensburg. | https://www.hmdb.org/m.asp?m=79744
+Baltimore College of Dental Surgery Site | @39.288993,-76.617665 | The Baltimore College of Dental Surgery, the first dental college in the world, was founded on this site in 1840. | https://www.hmdb.org/m.asp?m=7037
+Beehler Umbrella Factory Site | @39.291696,-76.61833 | From 1886 to 1908 the Beehler Umbrella Factory stood here — the oldest umbrella house in America, founded in Baltimore by Francis Beehler in 1828. | https://www.hmdb.org/m.asp?m=4895
+First Gas Street Lamp in America | @39.28983417,-76.61033188 | America's first gas street lamp was lit on this site on February 7, 1817. | https://www.hmdb.org/m.asp?m=127234
+Harry Sythe Cummings Marker | @39.2904342,-76.6100975 | Baltimore-born Harry S. Cummings (1866–1917) was the first African American elected to the Baltimore City Council. | https://www.hmdb.org/m.asp?m=202976
+Tru-Fit Fire Memorial | @39.2899,-76.608809 | Six Baltimore firefighters died in the line of duty on February 16, 1955, fighting a fire at the Tru-Fit clothing company at 507–509 East Baltimore Street. | https://www.hmdb.org/m.asp?m=7320
+Indian Queen Tavern Site | @39.2892,-76.6164 | After watching the British bombard Fort McHenry, Francis Scott Key spent his first night back ashore, September 16–17, 1814, at the Indian Queen Tavern, which stood on this site until the 1830s. | https://www.hmdb.org/m.asp?m=79849
+James Cardinal Gibbons Birthplace | @39.29081667,-76.6092 | James Cardinal Gibbons, who became a world-renowned churchman while remaining a parish priest at heart, was born on this site on July 23, 1834. | https://www.hmdb.org/m.asp?m=208811
+Hiltgunt Zassenhaus Marker | @39.291535,-76.609565 | Dr. Hiltgunt Zassenhaus, a Hamburg-born physician who died in Baltimore in 2004, worked during World War II as an interpreter for Scandinavian political prisoners of the Third Reich and used the post to bring many of them medical aid. | https://www.hmdb.org/m.asp?m=2710
+Great Baltimore Fire Marker | @39.289144,-76.606663 | The Great Fire that broke out at 10:48 a.m. on February 7, 1904 burned 140 acres and $100 million in property before it was brought under control the next morning, and not one life was lost. | https://www.hmdb.org/m.asp?m=7321
+American District Telegraph Founding Site | @39.28964777,-76.61117841 | The American District Telegraph Company of Baltimore City was founded here on August 14, 1874, letting homes and businesses summon a messenger boy with a call box. | https://www.hmdb.org/m.asp?m=237127
+American Tennis Association Marker | @39.32241389,-76.63970833 | Druid Hill Park was home to the American Tennis Association's first national championship, in 1917. | https://www.hmdb.org/m.asp?m=212292
+Association of Maryland Pilots Founding Site | @39.28109977,-76.59481019 | On June 3, 1852, some 90 state-licensed bay pilots met in the lobby of the Union Hotel, which stood here, and formed the Association of Maryland Pilots. | https://www.hmdb.org/m.asp?m=109877
+Alexandroffsky Site | @39.28889722,-76.62861667 | This land was once Alexandroffsky, the grand estate of engineer Thomas DeKay Winans, who made his fortune in the 1840s supervising construction of Russia's first great railroad. | https://www.hmdb.org/m.asp?m=166997
+Herring Run Ancient Campsite | @39.32953056,-76.56968056 | On the bluff above this trail, archaeologists found evidence of an 11,000-year-old campsite used by Indigenous Americans. | https://www.hmdb.org/m.asp?m=307509
+The Arabbers Marker | @39.29346667,-76.64906667 | For more than a century West Baltimore's Arabbers have driven brightly colored wagons behind belled horses down narrow streets, calling out chants to sell fresh fruit and vegetables. | https://www.hmdb.org/m.asp?m=101482
+Chimpanzee Betsy Marker | @39.324875,-76.64653056 | In the late 1950s the zoo's chimpanzee Betsy became famous for her colorful finger paintings, which were collected by, among others, Baltimore filmmaker John Waters. | https://www.hmdb.org/m.asp?m=309973
+# Pre-marked new (#438 guard): 11 m from the "Friends Burial Ground (Baltimore)" article, shares "Friends".
+# COMMITTED 2026-09-28 — do not re-run: Patapsco Friends Meeting House Site | @39.3181397,-76.5950703 | The Patapsco Friends Meeting House stood on this site from at least 1681, the meeting's earliest record, until the Quakers moved to Aisquith and Fayette Streets in Baltimore Town in 1781. | https://www.hmdb.org/m.asp?m=65715
+# Pre-marked new (#438 guard): a spot inside the burying ground, 69 m from "Westminster Hall and Burying Ground".
+# COMMITTED 2026-09-28 — do not re-run: Poe's Original Burial Place | @39.289782,-76.623138 | Edgar Allan Poe was first buried on this spot among his relatives on October 8, 1849, and for years no stone marked the grave. | https://www.hmdb.org/m.asp?m=6642
+
+# --- story for a live pin (#419) — named to match the live pin ----------------------
+# CUT after dry run 1 (#437 class): the line also attached to "Bromo Arts District" [wiki] 19 m, so the tower's
+# story would land on the whole district. No rename reaches the tower without the district. Retry when #437 ships.
+# Bromo Seltzer Arts Tower | @39.287654,-76.620734 | The tower was built as a monument to Captain Isaac Emerson, the chemist behind the Bromo-Seltzer headache remedy, which he named after Mount Bromo, an active volcano in Java. | https://www.hmdb.org/m.asp?m=6982
+
+# --- WAITING on #425 (own article at the marker, no live pin seen) — do not run ------
+# Church Home and Hospital | @39.29325392,-76.59397496 | (own article 40 m — where Poe died, October 7, 1849) | https://www.hmdb.org/m.asp?m=259708
+# G. Krug & Son | @39.292726,-76.62191 | ("G. Krug & Son Ironworks and Museum" 28 m) | https://www.hmdb.org/m.asp?m=6619
+# American Psychoanalytic Association Founding Site | @39.298298,-76.615973 | ("The Stafford Apartments" 15 m — likely the building) | https://www.hmdb.org/m.asp?m=6018

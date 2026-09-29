@@ -1,0 +1,66 @@
+# names-57-detroit.txt — #57 PHASE B, Detroit pass 1 (story lines, 2026-09-28)
+# Source: Historical Marker Database, Detroit town list pages 1–2 (228 markers; page 3 is not reachable by the fetch tool).
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# Detroit is NOT on the roster yet (no gate, graves or pre-warm) — this is step (ii) of the five-step checklist only.
+# Run with the city on the command:
+#   SEED_CITY_NAME=Detroit SEED_CITY_LAT=42.3314 SEED_CITY_LNG=-83.0458 deno run -A seed-resolve.ts names-57-detroit.txt
+
+# --- new story pins -------------------------------------------------------------
+# `new` after review, dry run 1: review → Harper University Hospital (81 m): the founding happened there, but the hospital pin keeps its own line.
+American Academy of Pediatrics Founding Site | @42.35139723,-83.0569 | The American Academy of Pediatrics was founded here at Harper Hospital on June 24, 1930, by thirty-four physicians, who elected Isaac A. Abt its first president. | https://www.hmdb.org/m.asp?m=172655
+Bailey Temple Church of God in Christ | @42.34750565,-83.10587307 | Pastor John Seth Bailey founded this congregation on July 4, 1926, holding its first services in a tent on this spot and wintering in a nearby store before a brick church went up in 1928. | https://www.hmdb.org/m.asp?m=172687
+Birthplace of Ford Automobile | @42.33469682,-83.05305859 | Henry Ford began experimenting with a motorized vehicle in a small one-story brick workshop that stood on this site, work the marker dates to 1892. | https://www.hmdb.org/m.asp?m=174295
+Chicago Road Marker | @42.33153,-83.05067 | The road west from here began as the Great Sauk Trail, the most important Indian trail in the Great Lakes region, later used by French explorers, fur traders, missionaries and soldiers. | https://www.hmdb.org/m.asp?m=42298
+Cornelius Henderson Marker | @42.31381768,-83.07690986 | Detroit-born Cornelius Langston Henderson became, in 1911, only the second African American to graduate from the University of Michigan's School of Engineering. | https://www.hmdb.org/m.asp?m=257372
+Detroit Medical College Site | @42.34934,-83.05889 | In 1868 five young physicians, eager to improve medical training after treating the wounded of the Civil War, founded the Detroit Medical College, the city's first medical school, on this site. | https://www.hmdb.org/m.asp?m=172643
+Finney Barn Site | @42.33290278,-83.0493 | A large brick barn on this spot, the Finney House Barn, was a depot on the Underground Railroad, helping people escaping slavery reach Canada from 1833 until the Civil War. | https://www.hmdb.org/m.asp?m=91616
+Elijah McCoy Homesite | @42.358911,-83.081144 | Inventor Elijah McCoy — born in 1844 to parents who had escaped slavery to Canada, and trained as a mechanical engineer in Scotland — lived on this site for much of his adult life. | https://www.hmdb.org/m.asp?m=172647
+Fannie Richards Homesite | @42.335017,-83.035202 | Fannie Richards, Detroit's first Black public school teacher, lived here; she opened a private school for Black children in 1863 and was hired by the public schools two years later. | https://www.hmdb.org/m.asp?m=172548
+Frederick Douglass - John Brown Meeting | @42.3331154,-83.03933636 | On March 12, 1859, Frederick Douglass and John Brown met several Black Detroiters to plan how to end slavery, in William Webb's house about 200 feet north of this spot. | https://www.hmdb.org/m.asp?m=168910
+First Michigan Colored Regiment | @42.3444959,-83.0232 | Camp Ward, where the First Michigan Colored Regiment was organized between August and October 1863, stood on this spot. | https://www.hmdb.org/m.asp?m=14889
+First Mile of Concrete Highway | @42.42094164,-83.10805555 | In 1909 Wayne County paved the world's first mile of concrete highway here, on Woodward between Six and Seven Mile Roads, and road builders came from far away to see how it held up. | https://www.hmdb.org/m.asp?m=173684
+Ford Hunger March Marker | @42.29108887,-83.14368334 | On March 7, 1932, about 3,000 unemployed workers and labor activists marched from here toward the Ford Employment Office with their demands, and five men were killed when Dearborn police met them. | https://www.hmdb.org/m.asp?m=189493
+Ford Motor Company Incorporation Site | @42.326918,-83.044464 | Ford Motor Company's articles of incorporation were drawn up and signed on June 16, 1903, in the office of Alexander Y. Malcomson, whose coal yard stood on this site. | https://www.hmdb.org/m.asp?m=33525
+George DeBaptiste Homesite | @42.331452,-83.04038 | George DeBaptiste, one of Detroit's most active Black community leaders of his day, lived on this site in the 1850s and 1860s. | https://www.hmdb.org/m.asp?m=14479
+Henry Ford House | @42.38365278,-83.08588333 | Henry and Clara Ford lived in this Italian Renaissance Revival house from 1908 to 1915, the first of the auto barons to settle in the Boston-Edison neighborhood. | https://www.hmdb.org/m.asp?m=177724
+James A. Bailey Birthplace | @42.32816944,-83.048775 | Circus showman James A. Bailey was born James A. McGinnis near this site on July 4, 1847, and took the name Bailey when he joined a circus at fourteen. | https://www.hmdb.org/m.asp?m=90963
+Kern Clock | @42.33338611,-83.04807222 | For nearly a century, meeting under the Kern Clock was a Detroit habit; the clock first hung on Kern's Department Store at the corner of Gratiot and Woodward. | https://www.hmdb.org/m.asp?m=211418
+Kresge Korner | @42.33361944,-83.048225 | Sebastian S. Kresge, who founded the S.S. Kresge Company on Woodward in 1899, moved his store to this corner of Woodward and State ten years later and named the spot Kresge Korner. | https://www.hmdb.org/m.asp?m=208627
+# `new` after review, dry run 1: review → Detroit Naval Armory (87 m): a different place.
+Last Tollgate in Detroit | @42.34938056,-82.99765835 | The last tollgate erected in Detroit stood on this site; the marker dates it 1851 to 1895. | https://www.hmdb.org/m.asp?m=271294
+Mexican Detroit Marker | @42.3245789,-83.08129349 | In the late 1910s and early 1920s Detroit became a hub for Mexican and Tejano migrants, many of whom worked on sugar beet farms before taking factory jobs in the city. | https://www.hmdb.org/m.asp?m=239857
+Detroit College of Law Site | @42.33813586,-83.04863932 | The Detroit College of Law, founded in 1891 as the area's first law school, stood on this site from 1935 to 1997. | https://www.hmdb.org/m.asp?m=209233
+Police Radio Dispatch Marker | @42.340299,-82.986935 | Once police and criminals alike had taken to automobiles, Detroit's police pioneered dispatching by radio, beginning in 1921, to win back the advantage. | https://www.hmdb.org/m.asp?m=106391
+Robert Pauli Scherer Marker | @42.36057,-83.06542 | In 1930, at age twenty-four, Detroit native Robert Pauli Scherer invented the rotary die encapsulation machine in a workshop in the basement of this building. | https://www.hmdb.org/m.asp?m=84640
+Shrine Circus Marker | @42.330772,-83.042747 | The nation's first Shrine Circus, a one-ring show put on by Detroit's Moslem Shrine temple, drew some 3,000 spectators near this site on February 26, 1906. | https://www.hmdb.org/m.asp?m=23804
+# `new` after review, dry run 1: review → Guardian Building (33 m, built on the site later): the Guardian keeps its own line.
+Stearns Telephone Site | @42.32965,-83.04571 | On September 22, 1877, a Bell telephone was installed in Frederick Stearns's drugstore on this site, linked by an iron wire over the rooftops to his laboratory half a mile away. | https://www.hmdb.org/m.asp?m=91388
+David Dunbar Buick Marker | @42.33015553,-83.04000833 | David Dunbar Buick, the plumbing inventor whose name went on the Buick automobile, came to Detroit from Scotland at age two in 1856 and later turned to building gasoline engines for boats. | https://www.hmdb.org/m.asp?m=180137
+Vizcaya Naval Cannon | @42.29890085,-83.09801073 | This 1891 breech-loading gun was one of ten on the deck of the Spanish cruiser Vizcaya, which was shelled and sunk at the Battle of Santiago, Cuba, on July 3, 1898. | https://www.hmdb.org/m.asp?m=252511
+Belle Isle Canals Marker | @42.33585278,-82.9846028 | When Detroit bought Belle Isle in 1879 to turn a former livestock range and private estate into a park, it hired Frederick Law Olmsted, the designer of New York's Central Park. | https://www.hmdb.org/m.asp?m=212272
+Conner Creek Marker | @42.364125,-82.95757224 | Conner Creek still flows into the Detroit River, but almost its whole length now runs hidden beneath the city's development. | https://www.hmdb.org/m.asp?m=271300
+# Pre-marked new (#438 guard): 5 m from the "Capitol Park Historic District" article and shares the word "Capitol".
+# COMMITTED 2026-09-28 — do not re-run: Michigan's First Capitol Site | @42.332735,-83.04943 | The cornerstone of the Michigan Territory's capitol was laid on this site at noon on September 22, 1823, after a Masonic procession of citizens and dignitaries. | https://www.hmdb.org/m.asp?m=91622
+
+# --- stories for live pins (#419) — each line is named to match the live pin ----
+# [map:wiki] "Birwood Wall" 23 m
+Birwood Wall | @42.44202779,-83.16602222 | Built in 1941, this wall separated the existing Black community of the Eight Mile–Wyoming area from Blackstone Park, a new white subdivision, and stands as a reminder of institutional segregation. | https://www.hmdb.org/m.asp?m=207681
+# CUT after dry run 1: the Mac's map read did not see the live [map:wiki] pin 3 m away (Detroit is not pre-warmed),
+# so the line read new-seed and would have planted a duplicate pin beside it. Re-try after the Detroit pre-warm.
+# Orsel and Minnie McGhee House | @42.35527303,-83.11947586 | When the McGhees, a Black family, moved here in 1944, a neighboring family won a court order revoking their purchase under a restrictive covenant that barred non-white owners. | https://www.hmdb.org/m.asp?m=172644
+# [map:osm] "Ossian Sweet House" 12 m (article "Ossian H. Sweet House" 13 m is the same house)
+Ossian Sweet House | @42.370189,-82.984341 | The day after Dr. Ossian Sweet and his wife Gladys moved in on September 8, 1925, a mob stoned the house; that evening a white man was shot dead, and the eleven people inside were charged with murder and defended by Clarence Darrow. | https://www.hmdb.org/m.asp?m=173099
+# [map:wiki] "Recreation Park (Detroit)" 53 m
+Recreation Park (Detroit) | @42.350924,-83.055114 | Laid out in 1879 between Brady Street and Willis Avenue, Recreation Park held the ballfield where the National League's Detroit Wolverines played home games from 1881. | https://www.hmdb.org/m.asp?m=172657
+# [map:wiki] "Alpha House (Detroit)" 17 m
+Alpha House (Detroit) | @42.34811872,-83.05379335 | This house, built around 1918, is home to Gamma Lambda, the third graduate chapter of Alpha Phi Alpha, the first Black national Greek-letter fraternity, founded at Cornell in 1906. | https://www.hmdb.org/m.asp?m=172650
+
+# --- WAITING on #425 (own article at the marker, no live pin) — do not run ---------
+# Algiers Motel Site | @42.37642,-83.07769 | ("Algiers Motel killings" 36 m) | https://www.hmdb.org/m.asp?m=257669
+# Battle of Bloody Run Site | @42.34203333,-83.0141 | ("Battle of Bloody Run" 16 m) | https://www.hmdb.org/m.asp?m=21846
+# Detroit July 1967 Marker | @42.376648,-83.099815 | ("1967 Detroit riot" 42 m) | https://www.hmdb.org/m.asp?m=170436
+# Detroit Plaindealer Office Site | @42.33245025,-83.04976163 | ("Detroit Plaindealer" 70 m) | https://www.hmdb.org/m.asp?m=174296
+# Fort Lernoult Site | @42.32988333,-83.0487 | ("Fort Shelby (Michigan)" 28 m — the same fort, renamed) | https://www.hmdb.org/m.asp?m=21736
+# Fort Pontchartrain Site | @42.327446,-83.047924 | ("Fort Pontchartrain du Détroit" 69 m) | https://www.hmdb.org/m.asp?m=21853
+# Sojourner Truth Homes | @42.42676668,-83.05511389 | ("Sojourner Truth Project" 74 m) | https://www.hmdb.org/m.asp?m=267413
+# Women's City Club of Detroit | @42.33717,-83.05312 | ("Detroit Women's City Club" 29 m) | https://www.hmdb.org/m.asp?m=174293

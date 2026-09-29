@@ -238,7 +238,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the 21-metro launch roster (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 24 metros since #57 Phase B (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -262,6 +262,11 @@ const METROS: Metro[] = [
   { name: "Phoenix", lat: 33.4484, lng: -112.0740 },
   { name: "Minneapolis", lat: 44.9778, lng: -93.2650 },
   { name: "St. Paul", lat: 44.9537, lng: -93.0900 },
+  // #57 Phase B (2026-09-28): the roster grows 21 → 24. Keep all three copies in step
+  // (gate-tiles.ts, prewarm-tiles.ts, graves-resolve.ts — handoff §6).
+  { name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
+  { name: "Detroit", lat: 42.3314, lng: -83.0458 },
+  { name: "Baltimore", lat: 39.2904, lng: -76.6122 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -935,7 +940,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-09-22a (#381 _isStructureOnlyName guard in resolveGraveIdentity — offline twin of #375)";
+const BUILD_MARKER = "gate-tiles 2026-09-28a (#57 Phase B roster 21 → 24: + Los Angeles, Detroit, Baltimore; #381 _isStructureOnlyName guard unchanged)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.

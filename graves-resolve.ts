@@ -299,7 +299,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.09.24d (#405 — the operator KEEP list gains 15 burial-place QIDs the 24c audit showed are real burials: Emmy Noether's Old Library, the Schomburg Center, the Noguchi Museum, the Edison park, Salem's Charter Street burying point, two churchyards, Temple University, the Acton site, Hammond Castle, Samuel P. Taylor park, Fairview, Lookout Mountain, Bartram's Garden, Morehouse. Built on 24c [#406].)";
+const BUILD = "graves-resolve 2026.09.28a (#57 Phase B — the METROS roster grows 21 → 24: + Los Angeles, Detroit, Baltimore; Baltimore's 40 km box overlaps Washington, D.C.'s, which cross-metro QID dedup and the #338 already-loaded skip handle. Built on 24d [#405].)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -336,6 +336,11 @@ const METROS: Metro[] = [
   { name: "Phoenix", lat: 33.4484, lng: -112.0740 },
   { name: "Minneapolis", lat: 44.9778, lng: -93.2650 },
   { name: "St. Paul", lat: 44.9537, lng: -93.0900 },
+  // #57 Phase B (2026-09-28): the roster grows 21 → 24. Keep all three copies in step
+  // (gate-tiles.ts, prewarm-tiles.ts, graves-resolve.ts — handoff §6).
+  { name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
+  { name: "Detroit", lat: 42.3314, lng: -83.0458 },
+  { name: "Baltimore", lat: 39.2904, lng: -76.6122 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode
