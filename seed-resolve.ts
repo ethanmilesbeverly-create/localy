@@ -62,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.26a (#426 identified Wikipedia calls + back-off; #427 NEXT block only for bare-name seeds)";
+const TOOL_VERSION = "seed-resolve 2026.09.29a (#425 article-name seeds + big-area review; #432 nearby article titles + near-name review)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -104,6 +104,12 @@ const CITY = {
 const CITY_MAX_KM = Number(Deno.env.get("SEED_CITY_MAX_KM") ?? 60);
 
 const MATCH_RADIUS_M = 90;      // same constant as index.html dedupeReal() — DEDUP only
+// #425 — BIG-AREA REACH for story lines only. A zoo, stadium or park can have
+// its live pin 100-300 m from where a marker stands (Dallas Zoo; Miami Stadium
+// 98 m). 90 m stays the dedup radius — widening it would merge neighbouring
+// downtown buildings — but a SAME-NAMED live pin between 90 m and this radius
+// sends a story line to REVIEW instead of seeding a second pin beside it.
+const BIG_AREA_M = 300;
 // Enrichment reaches wider than dedup ON PURPOSE. A big park's Wikipedia
 // coordinate can sit 200-400 m from where Photon dropped the pin, so a 90 m
 // geosearch misses the article that is genuinely there. This radius is used
@@ -315,6 +321,14 @@ function labelMatchesName(name: string, label: string): boolean {
   if (!distinctive.length) return true;
   const dHit = distinctive.filter((t) => have.has(t)).length;
   return dHit / distinctive.length >= 0.6;
+}
+
+// #432 — the words that can identify a place: geoTokens minus the generic type
+// words above and a few common qualifiers. Used only to decide whether a nearby
+// Wikipedia article is NEAR-NAMED to a story line (→ review), never to match.
+const NEAR_NAME_SKIP = new Set(["old", "new", "first", "saint", "north", "south", "east", "west", "marker", "former", "original"]);
+function distinctiveWords(s: string): Set<string> {
+  return new Set(geoTokens(s).filter((t) => !GEO_GENERIC_TYPE.has(t) && !NEAR_NAME_SKIP.has(t) && !/^\d+$/.test(t)));
 }
 
 async function geocode(
@@ -645,8 +659,11 @@ async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
 
 async function submissionsNear(lat: number, lng: number): Promise<Existing[] | null> {
   // The same read the app does (approved, not merged), so the public key is enough.
-  const dLat = (MATCH_RADIUS_M * 2) / 111000;
-  const dLng = (MATCH_RADIUS_M * 2) / (111000 * Math.max(0.05, Math.cos((lat * Math.PI) / 180)));
+  // #425 — the box reaches BIG_AREA_M so the story-line big-area check can see a
+  // same-named seed or gem up to 300 m away; the dedup list below still keeps
+  // only what sits within MATCH_RADIUS_M.
+  const dLat = BIG_AREA_M / 111000;
+  const dLng = BIG_AREA_M / (111000 * Math.max(0.05, Math.cos((lat * Math.PI) / 180)));
   const url = PROJECT_URL + "/rest/v1/submissions?select=name,lat,lng,category,submitted_by" +
     "&status=eq.approved&merged_into=is.null" +
     `&lat=gte.${(lat - dLat).toFixed(6)}&lat=lte.${(lat + dLat).toFixed(6)}` +
@@ -661,7 +678,7 @@ async function submissionsNear(lat: number, lng: number): Promise<Existing[] | n
   }
 }
 
-async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; failed: string | null; arms: string }> {
+async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; wide: Existing[]; articles: Existing[]; failed: string | null; arms: string }> {
   const [map, subs, wiki] = await Promise.all([mapNear(lat, lng), submissionsNear(lat, lng), wikiNear(lat, lng)]);
   const failed = map === null ? "live-map check failed" : subs === null ? "submissions check failed"
     : wiki === null ? "Wikipedia check failed" : null;
@@ -674,10 +691,24 @@ async function existingNear(lat: number, lng: number): Promise<{ list: Existing[
     seen.add(k);
     list.push(e);
   }
+  // #425 — LIVE pins (map or submission, never a bare article) between 90 m and
+  // BIG_AREA_M, for the story-line big-area check. Not part of the dedup list.
+  const wideSeen = new Set<string>();
+  const wide: Existing[] = [];
+  for (const e of [...(subs ?? []), ...(map ?? [])]) {
+    const d = haversineM(lat, lng, e.lat, e.lng);
+    if (d <= MATCH_RADIUS_M || d > BIG_AREA_M) continue;
+    const k = e.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!k || wideSeen.has(k)) continue;
+    wideSeen.add(k);
+    wide.push(e);
+  }
+  // #432 — every Wikipedia article within 90 m, printed for new story seeds.
+  const articles = (wiki ?? []).filter((e) => haversineM(lat, lng, e.lat, e.lng) <= MATCH_RADIUS_M);
   // #420 — per-arm counts within 90 m, printed per place, so an all-empty result
   // on a downtown landmark is visible in the run instead of hiding in the report.
   const near = (xs: Existing[] | null) => xs === null ? "fail" : String(xs.filter((e) => haversineM(lat, lng, e.lat, e.lng) <= MATCH_RADIUS_M).length);
-  return { list, failed, arms: `map ${near(map)} · subs ${near(subs)} · wiki ${near(wiki)}` };
+  return { list, wide, articles, failed, arms: `map ${near(map)} · subs ${near(subs)} · wiki ${near(wiki)}` };
 }
 
 // ---------------------------------------------------------------------------
@@ -1023,6 +1054,8 @@ async function run() {
     // the ~20 articles nearest its centre, so Landmark Center, Foshay Tower and
     // First Avenue have articles but no pin. Their Wikipedia title still gets a
     // curated row, so if a tile ever shows that pin it shows the story too.
+    // #425 — set when a story line seeds under its matching Wikipedia article.
+    let articleAnchor: Existing | null = null;
     if (line.forceNew && verdict.decision !== "held") {
       // #422 — operator override: a distinct place inside a bigger pin.
       verdict.decision = "new";
@@ -1065,7 +1098,55 @@ async function run() {
         await sleep(7000);
         continue;
       }
-      for (const e of targets) stagePinRow(e); // Wikipedia titles for this place
+      // #425 (c) — BIG-AREA: a same-named LIVE pin 90-300 m away is probably this
+      // place's big footprint (a zoo, stadium, park). Seeding would plant a second
+      // pin beside it; attaching past 90 m by rule could hit a namesake. Human.
+      // Fix by hand: attach the story to that pin, or mark the line `new`.
+      const wideHit = near.wide.find((e) => bare(e.name) && labelMatchesName(bare(e.name), blob));
+      if (wideHit) {
+        const m = Math.round(haversineM(geo.lat, geo.lng, wideHit.lat, wideHit.lng));
+        const why = `same-named live pin "${wideHit.name}" [${wideHit.source}] ${m} m away (big-area, #425) — attach by hand, or mark \`new\` if it is a different place`;
+        report.push({ ...base, outcome: "review", why });
+        console.log(`  ? ${candidate} → REVIEW: ${why}`);
+        await sleep(7000);
+        continue;
+      }
+      if (targets.length) {
+        // #425 (b) — ARTICLE-NAME SEED. The place has its own Wikipedia article
+        // within 90 m but no live pin (a tile carries only the ~20 articles nearest
+        // its centre, #419). The seed takes the article's EXACT title and its
+        // coordinate, so if a tile ever shows the article pin the two share a
+        // name within 90 m and every client surface keeps one (index.html
+        // dedupeReal / blendCategory / the ATL pick all dedupe on normName).
+        // Before this, the seed kept the line's own name beside the article and
+        // the same place could show twice (the 73 lines #425 held back).
+        const byDist = [...targets].sort((a, b) =>
+          haversineM(geo.lat, geo.lng, a.lat, a.lng) - haversineM(geo.lat, geo.lng, b.lat, b.lng));
+        articleAnchor = byDist[0];
+        for (const e of byDist.slice(1)) stagePinRow(e); // any further matching titles keep their row
+      } else {
+        // #432 — NEAR-NAMED ARTICLE. No article matched as this place, but one
+        // within 90 m shares a distinctive word with the line (G. Krug & Son vs
+        // "G. Krug & Son Ironworks and Museum", Fort Lernoult Site vs "Fort
+        // Shelby (Michigan)"). The machine can't tell the same place from a neighbour, so
+        // it goes to REVIEW. Fix by hand: put the article's title as the line's
+        // name to seed under it, or mark the line `new` to keep its own name.
+        const lineWords = distinctiveWords(noCity([candidate, line.locate].join(" ")));
+        const nearNamed = near.articles.filter((a) =>
+          [...distinctiveWords(noCity(bare(a.name)))].some((w) => lineWords.has(w)));
+        // #425 — same building, different name (Thistle Hill = "Wharton–Scott
+        // House"): Gemini calls a nearby ARTICLE this place. Same fix by hand.
+        const geminiArticle = verdict.decision === "match"
+          ? near.articles.find((a) => a.name === verdict.matchName && !nearNamed.includes(a)) : undefined;
+        if (geminiArticle) nearNamed.push(geminiArticle);
+        if (nearNamed.length) {
+          const why = `near-named Wikipedia article within 90 m: ${nearNamed.map((a) => `"${a.name}"`).join(", ")} (#432) — rename the line to the title to seed under it, or mark \`new\``;
+          report.push({ ...base, outcome: "review", why, articles: nearNamed.map((a) => a.name) });
+          console.log(`  ? ${candidate} → REVIEW: ${why}`);
+          await sleep(7000);
+          continue;
+        }
+      }
       verdict.decision = "new";
       if (!verdict.category || verdict.category === "commercial") verdict.category = "history";
     }
@@ -1081,13 +1162,17 @@ async function run() {
     } else if (verdict.decision === "new") {
       // A story line keeps the operator's display name (Gemini may not rename it:
       // the curated row is keyed to this exact name) and its story is the text.
-      const pinName = line.story ? candidate : verdict.canonicalName;
+      // #425 — a story line with a matching article seeds under the article's
+      // exact title and coordinate (see the story branch above).
+      const pinName = articleAnchor ? articleAnchor.name : line.story ? candidate : verdict.canonicalName;
+      const pinLat = articleAnchor ? articleAnchor.lat : geo.lat;
+      const pinLng = articleAnchor ? articleAnchor.lng : geo.lng;
       const row: SeedRow = {
         name: pinName,
         description: line.story || wikiIntro,
         category: verdict.category,
-        lat: geo.lat,
-        lng: geo.lng,
+        lat: pinLat,
+        lng: pinLng,
         city: CITY.name,
         status: "approved",
         submitted_by: null,
@@ -1099,11 +1184,15 @@ async function run() {
       rows.push(row);
       if (line.story) {
         curatedRows.push({
-          name: pinName, lat: geo.lat, lng: geo.lng, description: line.story,
-          source_url: line.source || null, note: `#57 story seed (${CITY.name})`,
+          name: pinName, lat: pinLat, lng: pinLng, description: line.story,
+          source_url: line.source || null,
+          note: articleAnchor ? `#425 story seed under its article (${CITY.name})` : `#57 story seed (${CITY.name})`,
         });
       }
-      report.push({ ...base, outcome: "new-seed" });
+      report.push({
+        ...base, outcome: "new-seed",
+        ...(articleAnchor ? { seededAsArticle: articleAnchor.name, movedM: Math.round(haversineM(geo.lat, geo.lng, pinLat, pinLng)) } : {}),
+      });
       const cat = verdict.category ?? "UNCLASSIFIED";
       const desc = line.story ? "story✓" : row.description ? (wikiWidened ? "wiki✓300m" : "wiki✓") : "wiki∅";
       // #423 — print the name actually SAVED (row.name), not Gemini's suggestion:
@@ -1112,6 +1201,14 @@ async function run() {
       const suggested = verdict.canonicalName && verdict.canonicalName !== row.name ? `  (Gemini suggested "${verdict.canonicalName}")` : "";
       console.log(`  + ${row.name} [${cat}] ${desc} (conf ${verdict.confidence.toFixed(2)})${suggested}`);
       console.log(`      checked nearby: ${near.arms}`); // #420 — a new pin with nothing found by any arm is worth a second look
+      if (articleAnchor) {
+        const m = Math.round(haversineM(geo.lat, geo.lng, pinLat, pinLng));
+        console.log(`      ↳ seeded under its Wikipedia article "${articleAnchor.name}" at the article's coordinate, ${m} m from the marker (#425) — mark the line \`new\` to keep "${candidate}"`);
+      }
+      // #432 — the article titles within 90 m, so a same-place article is visible.
+      if (line.story) {
+        console.log(`      articles within 90 m: ${near.articles.length ? near.articles.map((a) => `"${a.name}"`).join(" · ") : "none"}`);
+      }
     } else if (verdict.decision === "held") {
       // Throttle/transport hold — the machine never judged this. Re-runnable,
       // NOT a review. Carries the HTTP status when there was one, so the report
@@ -1147,9 +1244,11 @@ async function run() {
   const uncat = rows.filter((r) => !r.category).length;
   const blank = rows.filter((r) => !r.description).length;
   const storied = rows.filter((r) => r.resolved_source === "curated").length;
+  const underArticle = report.filter((r) => r.outcome === "new-seed" && r.seededAsArticle).length;
   console.log(`stories attached to existing pins: ${counts["story-attached"] ?? 0} (${seedPatches.length} existing seed(s) updated on commit)`);
   console.log(`story lines seeded: ${storied} (their story ships as resolved_source 'curated'; ${curatedRows.length} curated_descriptions rows staged in curated_records.json)`);
   console.log(`new seed rows: ${rows.length}  (unclassified category: ${uncat}, no wiki description: ${blank})`);
+  console.log(`seeded under their Wikipedia article's title (#425): ${underArticle} — read each "↳ seeded under" line before --commit`);
   // #426 — did the identified User-Agent + back-off hold? failed > 0 means some
   // places were HELD on Wikipedia; retries alone are fine.
   console.log(`Wikipedia calls: ${wikiStats.calls} · retried ${wikiStats.retries} · failed ${wikiStats.failed}`);

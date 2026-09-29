@@ -1,0 +1,28 @@
+{
+  "cacheVersion": "v34",
+  "commit": false,
+  "gen": false,
+  "resume": false,
+  "rewarm": false,
+  "bailed": false,
+  "tiles": 42,
+  "processed": 42,
+  "read": 42,
+  "warmed": 0,
+  "skipped": 0,
+  "committed": 0,
+  "throttledTiles": 0,
+  "totalResolved": 0,
+  "totalGraveResolved": 0,
+  "totalDropped": 0,
+  "perMetro": {
+    "Baltimore": {
+      "tiles": 42,
+      "dropped": 0,
+      "resolved": 0,
+      "graveResolved": 0,
+      "throttled": 0
+    }
+  },
+  "note": "DRY RUN — nothing written. Eyeball the `dropped` lists in gate_tiles_records.json, then commit EXACTLY these results with `--from-records --commit` (writes the reviewed rows with baked descriptions; no re-crawl)."
+}
