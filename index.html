@@ -6562,7 +6562,7 @@ function buildAllThingsLocal(base){
       const w = haversine(c.lat, bounds.getWest(), c.lat, bounds.getEast());
       if(w > 0) minGap = w / ATL_SPACING_DIV;
     } else {
-      minGap = (2 * frameRadiusFor(base)) / ATL_SPACING_DIV;
+      minGap = (2 * FRAME_RADIUS_M) / ATL_SPACING_DIV;
     }
   } catch(e){ minGap = 250; }
 
@@ -7016,17 +7016,9 @@ function onRealPlacesReady(){
   // reblendHuntInPlace() now anchors on the browsed point rather than on you.
   if(!h) return;
   if(!REAL_UPGRADABLE_KEY.test(h.key)) return;
-  /* #435 — the cold first paint of All Things Local: the tile just landed, so the
-     adaptive frame can now be computed. If the camera is still on the default
-     frame (nobody pinched or panned during loading), build against the adaptive
-     frame and move the camera to it; otherwise leave the user's view alone. */
-  const reframe = !!state._firstBlendPending && /^local_/.test(h.key) &&
-                  !isGuideHunt(h) && mapStillOnDefaultFrame();
-  if(reframe) state._atlFrameIntent = 'default';
-  try { reblendHuntInPlace(h); } finally { state._atlFrameIntent = null; }
+  reblendHuntInPlace(h);
   if(typeof refreshTargetsUI==='function') refreshTargetsUI();
   if(typeof refreshTrackUI==='function') refreshTrackUI();
-  if(reframe) centerOnPlayer();
   // #26 — reblend just rebuilt the hunt (a shared real place now carries its own
   // OSM/gem id, and the injected placeholder was dropped). Re-select the shared
   // spot by name/gemId so its sheet survives the rebuild instead of being closed
@@ -8633,7 +8625,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.28c';
+const APP_VERSION = '2026.09.28d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10082,49 +10074,14 @@ const ZOOM_OVERVIEW = 16;
 // #65 register — FRAMING, not content. Deliberately smaller than the blend
 // radius: it frames what is walkable, not what is loaded.
 const FRAME_RADIUS_M = 1500;
-/* #435 — ADAPTIVE DEFAULT FRAME. FRAME_RADIUS_M above is now the WIDEST the map
-   opens, not the only width. Once the tile for the spot is loaded, the frame is
-   fitted to where the pins are: the radius that holds the FRAME_ADAPT_K nearest
-   pins (× FRAME_ADAPT_PAD), clamped to [FRAME_MIN_RADIUS_M, FRAME_RADIUS_M]. A
-   dense downtown opens tight (and #435's spacing, 1/12 of the view width, tightens
-   with it); a suburb opens at the old 1500 m. Operator directive 2026-09-28.
-
-   WHY THIS DOESN'T REOPEN THE #174 TRAP (the old point-driven fit gave a
-   street-level view on a cold boot because it fitted whatever few pins had loaded):
-   the radius is computed ONLY from a LOADED tile for this spot, never from a
-   half-loaded hunt. With no tile yet it reuses the last adaptive radius computed
-   within FRAME_ADAPT_REUSE_M (in memory, or remembered with the last view so a
-   reload doesn't bounce 1500 → tight), else FRAME_RADIUS_M. The pinch-out floor
-   stays derived from FRAME_RADIUS_M (see centerOnPlayer), so a tight open can
-   still pinch out to the whole 4 km of content. */
-const FRAME_MIN_RADIUS_M  = 500;
-const FRAME_ADAPT_K       = 15;
-const FRAME_ADAPT_PAD     = 1.15;
-const FRAME_ADAPT_REUSE_M = 1000;
-function frameRadiusFor(center){
-  if(!center || typeof center.lat !== 'number') return FRAME_RADIUS_M;
-  const rp = state.realPlaces;
-  if(rp && rp.tile === realTileKey(center)){
-    const ds = [];
-    try {
-      (rp.all || []).forEach(p => {
-        if(typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
-        const d = haversine(center.lat, center.lng, p.lat, p.lng);
-        if(d <= REAL_INCLUDE_RADIUS_M) ds.push(d);
-      });
-      nearbyApprovedGems(center, [], 200).forEach(g => ds.push(g.dist));
-    } catch(e){ return FRAME_RADIUS_M; }
-    ds.sort((a,b) => a-b);
-    const r = ds.length >= FRAME_ADAPT_K
-      ? Math.min(FRAME_RADIUS_M, Math.max(FRAME_MIN_RADIUS_M, ds[FRAME_ADAPT_K-1] * FRAME_ADAPT_PAD))
-      : FRAME_RADIUS_M;
-    state._adaptFrame = {lat:center.lat, lng:center.lng, r};
-    return r;
-  }
-  const a = state._adaptFrame;
-  if(a && typeof a.r === 'number' && haversine(center.lat, center.lng, a.lat, a.lng) <= FRAME_ADAPT_REUSE_M) return a.r;
-  return FRAME_RADIUS_M;
-}
+/* #435 GRAVESTONE — ADAPTIVE DEFAULT FRAME (built 2026-09-28 as 2026.09.28c,
+   REJECTED the same day by directive: "not a fan of super zoomed in, it should be
+   like my Chicago view"). It fitted the opening frame to the 15 nearest pins,
+   clamped to 500–1500 m, so dense downtowns (SF Chinatown) opened at ~500 m. The
+   operator wants every place to open at the same walkable width as Chicago, i.e.
+   FRAME_RADIUS_M. Spreading a dense area is handled by #435's spacing rule instead
+   (1/12 of the view width), not by zooming in. Don't reintroduce a density-driven
+   zoom without a new directive. */
 /* The bounds the default frame WILL show around `center` — the same radius in the
    narrower screen dimension that frameZoomForRadius fits. All Things Local reads
    this instead of the live map bounds when its hunt is about to be framed to the
@@ -10132,7 +10089,7 @@ function frameRadiusFor(center){
    centerOnPlayer moves the camera (#435 — the in-view pass and the spacing gap
    must describe the frame the user will actually see). */
 function defaultFrameBounds(center){
-  const r = frameRadiusFor(center);
+  const r = FRAME_RADIUS_M;
   let hx = r, hy = r;
   try {
     const sz = state.leafletMap && state.leafletMap.getSize();
@@ -10143,19 +10100,6 @@ function defaultFrameBounds(center){
   const dLat = hy / 111320;
   const dLng = hx / (111320 * Math.cos(center.lat * Math.PI/180));
   return L.latLngBounds([center.lat - dLat, center.lng - dLng], [center.lat + dLat, center.lng + dLng]);
-}
-/* True while the camera still sits on the last default frame centerOnPlayer set
-   (same zoom; same centre, or following the walker). The first real paint only
-   reframes an untouched view — a pinch or pan during loading is never undone. */
-function mapStillOnDefaultFrame(){
-  const f = state._defaultFrameAt, m = state.leafletMap;
-  if(!f || !m) return false;
-  try {
-    if(Math.abs(m.getZoom() - f.zoom) > 0.01) return false;
-    if(state.followMe) return true;
-    const c = m.getCenter();
-    return haversine(c.lat, c.lng, f.lat, f.lng) < 30;
-  } catch(e){ return false; }
 }
 const HUNT_NEAR_M = 5000; // #7 — "is this hunt walkable from here?" See the #65 distance register (FRAMING). Used for remote-hunt routing and the guide line (#242 dropped fitMapToHunt's use — it now frames pins only).
 function onLocation(lat,lng,sim,accuracy){
@@ -10761,8 +10705,7 @@ function rememberedMapView(){
   if(typeof rec.ts === 'number' && (Date.now() - rec.ts) > LAST_VIEW_TTL_MS) return null;
   const v = rec.value;
   if(typeof v.lat !== 'number' || typeof v.lng !== 'number') return null;
-  return {lat:v.lat, lng:v.lng, zoom:(typeof v.zoom === 'number' ? v.zoom : 16),
-          frameR:(typeof v.frameR === 'number' ? v.frameR : undefined)}; // #435
+  return {lat:v.lat, lng:v.lng, zoom:(typeof v.zoom === 'number' ? v.zoom : 16)};
 }
 /* Persist a frame. NEVER while simulating (meIsSim) — a tapped demo point must
    not become the reload anchor — and callers pass explicit coords so a mid-flight
@@ -10771,11 +10714,7 @@ function rememberMapView(coords){
   if(!state.leafletMap || state.meIsSim) return;
   const c = coords || state.leafletMap.getCenter();
   if(!c || typeof c.lat !== 'number' || typeof c.lng !== 'number') return;
-  // #435 — carry the adaptive frame radius so a reload opens at the same width
-  // before its tile loads (no 1500 → tight bounce).
-  const a = state._adaptFrame;
-  const frameR = (a && typeof a.r === 'number' && haversine(c.lat, c.lng, a.lat, a.lng) <= FRAME_ADAPT_REUSE_M) ? a.r : undefined;
-  mirrorSet(LAST_VIEW_KEY, {lat:c.lat, lng:c.lng, zoom:state.leafletMap.getZoom(), frameR});
+  mirrorSet(LAST_VIEW_KEY, {lat:c.lat, lng:c.lng, zoom:state.leafletMap.getZoom()});
 }
 /* Walking fires onLocation continuously; don't hammer localStorage on every tick. */
 function rememberMapViewThrottled(lat,lng){
@@ -10791,8 +10730,6 @@ function setupBaseMap(){
   /* #416 — with no remembered frame, open on the time-zone estimate rather than
      downtown Chicago (zoom 13 ≈ the default frame; boot reframes it anyway). */
   const start = rememberedMapView() || (function(){ const g = startAreaGuess(); return {lat:g.lat, lng:g.lng, zoom:13}; })();
-  // #435 — seed the adaptive frame from last session so the boot frame matches it.
-  if(typeof start.frameR === 'number') state._adaptFrame = {lat:start.lat, lng:start.lng, r:start.frameR};
   /* SMOOTH / CONTINUOUS ZOOM. Leaflet's default zoomSnap:1 quantises the map to
      integer zoom levels: a pinch or scroll is continuous DURING the gesture but
      snaps to the nearest whole level the instant you lift off — the "it snaps to
@@ -11706,8 +11643,7 @@ function updateFrameGuideBtn(){
    is only a guard for the degenerate case where the container measures zero and
    getBoundsZoom returns something nonsensical. */
 function defaultFrameZoom(center){
-  // #435 — the default frame is now ADAPTIVE (frameRadiusFor); same fit math.
-  return frameZoomForRadius(center, frameRadiusFor(center));
+  return frameZoomForRadius(center, FRAME_RADIUS_M);
 }
 function frameZoomForRadius(center, radiusM){
   if(!state.leafletMap || !center) return ZOOM_OVERVIEW;
@@ -11800,10 +11736,7 @@ function centerOnPlayer(opts){
     // (zoomend fires only when the ZOOM changes, so that is the test.)
     if(Math.abs(state.leafletMap.getZoom() - targetZoom) > 0.01) state._programmaticViewChange = true;
     state.leafletMap.setView([center.lat, center.lng], targetZoom);
-    // #435 — the pinch-out floor stays tied to the FIXED widest frame, not the
-    // adaptive one, so a tight open (500 m) can still pinch out to the full 4 km.
-    state.leafletMap.setMinZoom(frameZoomForRadius(center, FRAME_RADIUS_M) - 2); // real headroom to pinch out from the default framing, instead of being frozen half a level below it
-    state._defaultFrameAt = {lat:center.lat, lng:center.lng, zoom:targetZoom};
+    state.leafletMap.setMinZoom(targetZoom - 2); // real headroom to pinch out from the default framing, instead of being frozen half a level below it
     // #90 — remember ONLY a genuine self-centering frame. `center` is now
     // browsingLocation||searchedArea||me (#185), so when browsing OR anchored to a
     // searched area we must not persist it: a reload has to reopen on the user,
