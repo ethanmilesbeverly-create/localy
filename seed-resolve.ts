@@ -62,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.29c (#437/#438 a pin or article that names a LARGER place goes to review; #425 article-name seeds + big-area review; #432)";
+const TOOL_VERSION = "seed-resolve 2026.09.29d (#429 `new` re-run reads as its own seed; #434 differently named pins go to review; #439 ALREADY CURATED in the dry run; #441 near-empty map read retried then held)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
 
@@ -110,6 +110,16 @@ const MATCH_RADIUS_M = 90;      // same constant as index.html dedupeReal() — 
 // downtown buildings — but a SAME-NAMED live pin between 90 m and this radius
 // sends a story line to REVIEW instead of seeding a second pin beside it.
 const BIG_AREA_M = 300;
+// #441 — a live-map read inside a metro normally returns dozens of places; one
+// that returns this many or fewer is probably a cold tile still building, and an
+// empty-but-successful read would pass as "nothing here" and plant a duplicate
+// beside a live pin it never saw (Orsel and Minnie McGhee House, Detroit). Such a
+// read is retried once after MAP_RETRY_MS; if it is still near-empty the line is
+// HELD (re-run after a pre-warm). SEED_ALLOW_SPARSE_MAP=1 turns the hold off for a
+// place that really sits in an empty tile; a line marked `new` is never held by it.
+const MAP_SPARSE_MAX = 1;
+const MAP_RETRY_MS = Number(Deno.env.get("SEED_MAP_RETRY_MS") ?? 8000);
+const ALLOW_SPARSE_MAP = Deno.env.get("SEED_ALLOW_SPARSE_MAP") === "1";
 // Enrichment reaches wider than dedup ON PURPOSE. A big park's Wikipedia
 // coordinate can sit 200-400 m from where Photon dropped the pin, so a 90 m
 // geosearch misses the article that is genuinely there. This radius is used
@@ -329,6 +339,25 @@ function labelMatchesName(name: string, label: string): boolean {
 const NEAR_NAME_SKIP = new Set(["old", "new", "first", "saint", "north", "south", "east", "west", "marker", "former", "original"]);
 function distinctiveWords(s: string): Set<string> {
   return new Set(geoTokens(s).filter((t) => !GEO_GENERIC_TYPE.has(t) && !NEAR_NAME_SKIP.has(t) && !/^\d+$/.test(t)));
+}
+
+// #434 — DO TWO NAMES NAME DIFFERENT PLACES? Each side keeps its identifying
+// words (geoTokens minus generic type words and common qualifiers). When BOTH
+// sides carry a word the other lacks, they name two different places even if the
+// shared words pass the match threshold: "La Casa de Machado y Wrightington" vs
+// "Casa de Machado y Silvas" share {casa, machado} and differ on Wrightington /
+// Silvas — two separate Old Town adobes. One side merely adding words (Algiers
+// Motel Site vs "Algiers Motel killings", Chateau Petit Douy vs "Petit Douy") is
+// not a difference — that is a fuller or shorter name for the same place. Numbers
+// are compared on their own (geoTokens drops short ones): "No. 6" vs "No. 7" differ.
+function identityWords(s: string): Set<string> {
+  return new Set(geoTokens(s).filter((t) => !GEO_GENERIC_TYPE.has(t) && !NEAR_NAME_SKIP.has(t)));
+}
+function namesDiffer(a: string, b: string): boolean {
+  const A = identityWords(a), B = identityWords(b);
+  if ([...A].some((t) => !B.has(t)) && [...B].some((t) => !A.has(t))) return true;
+  const na = new Set(a.match(/\d+/g) ?? []), nb = new Set(b.match(/\d+/g) ?? []);
+  return na.size > 0 && nb.size > 0 && ![...na].some((n) => nb.has(n));
 }
 
 async function geocode(
@@ -678,8 +707,18 @@ async function submissionsNear(lat: number, lng: number): Promise<Existing[] | n
   }
 }
 
-async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; wide: Existing[]; articles: Existing[]; failed: string | null; arms: string }> {
-  const [map, subs, wiki] = await Promise.all([mapNear(lat, lng), submissionsNear(lat, lng), wikiNear(lat, lng)]);
+async function existingNear(lat: number, lng: number): Promise<{ list: Existing[]; wide: Existing[]; articles: Existing[]; failed: string | null; arms: string; sparse: boolean }> {
+  const [map0, subs, wiki] = await Promise.all([mapNear(lat, lng), submissionsNear(lat, lng), wikiNear(lat, lng)]);
+  // #441 — a near-empty (not failed) live-map read is retried once after a pause.
+  let map = map0;
+  let retried = false;
+  if (map !== null && map.length <= MAP_SPARSE_MAX) {
+    retried = true;
+    await sleep(MAP_RETRY_MS);
+    const again = await mapNear(lat, lng);
+    if (again !== null) map = again;
+  }
+  const sparse = map !== null && map.length <= MAP_SPARSE_MAX;
   const failed = map === null ? "live-map check failed" : subs === null ? "submissions check failed"
     : wiki === null ? "Wikipedia check failed" : null;
   const seen = new Set<string>();
@@ -708,7 +747,8 @@ async function existingNear(lat: number, lng: number): Promise<{ list: Existing[
   // #420 — per-arm counts within 90 m, printed per place, so an all-empty result
   // on a downtown landmark is visible in the run instead of hiding in the report.
   const near = (xs: Existing[] | null) => xs === null ? "fail" : String(xs.filter((e) => haversineM(lat, lng, e.lat, e.lng) <= MATCH_RADIUS_M).length);
-  return { list, wide, articles, failed, arms: `map ${near(map)} · subs ${near(subs)} · wiki ${near(wiki)}` };
+  return { list, wide, articles, failed, sparse,
+    arms: `map ${near(map)}${retried ? (sparse ? " (tile near-empty twice)" : " (retried)") : ""} · subs ${near(subs)} · wiki ${near(wiki)}` };
 }
 
 // ---------------------------------------------------------------------------
@@ -850,6 +890,45 @@ type CuratedRow = { name: string; lat: number; lng: number; description: string;
 // (#279's "NULL description" set). seed_meta has no column and is dropped.
 // ---------------------------------------------------------------------------
 type SeedPatch = { name: string; lat: number; lng: number; story: string };
+
+// #439 — WHAT THE COMMIT WILL SKIP OR REPLACE, SHOWN IN THE DRY RUN. The commit
+// skips a curated row whose pin already has one (same name within 50 m) and
+// rewrites an existing seed's story, but the dry run's staged count is local, so
+// a skipped story (Texas Cowboy Hall of Fame, Fort Worth pass 2) was invisible
+// until the commit's inserted count came up short. The dry run now asks the
+// table. `curated_descriptions` and a seed's `resolved_*` columns are not
+// readable with the public key (RLS / column grants, handoff §6 (n)), so these
+// reads need SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY exported for the dry run
+// too; without them the check says it is OFF instead of reading as "none".
+const HAS_SERVICE = !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+async function curatedAlready(name: string, lat: number, lng: number): Promise<boolean | null> {
+  if (!HAS_SERVICE) return null;
+  try {
+    const nc = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const r = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions?select=lat,lng&name_clean=eq." + encodeURIComponent(nc),
+      { headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY } });
+    if (!r.ok) return null;
+    const have: any[] = await r.json();
+    return have.some((h) => haversineM(lat, lng, Number(h.lat), Number(h.lng)) <= 50);
+  } catch {
+    return null;
+  }
+}
+async function seedStoryNow(pt: SeedPatch): Promise<string | null | undefined> {
+  // undefined = could not read; null = the seed has no story yet.
+  if (!HAS_SERVICE) return undefined;
+  try {
+    const q = `?select=resolved_description,resolved_source&name=eq.${encodeURIComponent(pt.name)}&lat=eq.${pt.lat}&lng=eq.${pt.lng}&submitted_by=is.null&status=eq.approved`;
+    const r = await fetch(SUPABASE_URL + "/rest/v1/submissions" + q,
+      { headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY } });
+    if (!r.ok) return undefined;
+    const rows: any[] = await r.json();
+    const cur = rows.find((x) => x.resolved_source === "curated" && x.resolved_description);
+    return cur ? String(cur.resolved_description) : null;
+  } catch {
+    return undefined;
+  }
+}
 async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[], patches: SeedPatch[] = []): Promise<void> {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     console.error(
@@ -981,6 +1060,9 @@ async function run() {
   const curatedRows: CuratedRow[] = [];
   const seedPatches: SeedPatch[] = [];
   const report: any[] = [];
+  // #439 — which line staged each curated row (kept apart: the rows are posted as-is).
+  const stagedBy = new WeakMap<CuratedRow, string>();
+  if (!HAS_SERVICE) console.log("  (#439 already-curated check OFF — export SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY for the dry run to see which stories the commit will skip)");
 
   for (const rawLine of names) {
     const line = parseLine(rawLine);
@@ -1015,8 +1097,13 @@ async function run() {
     const near = await existingNear(geo.lat, geo.lng);
     const existing = near.list;
     // #418: a failed dedup source means the place was never fully checked → HOLD.
-    const verdict: Verdict = near.failed
-      ? { decision: "held", matchName: null, canonicalName: candidate, category: null, confidence: 0, why: near.failed }
+    // #441: a live map that returned ≤ MAP_SPARSE_MAX places twice is probably a
+    // cold tile — HOLD rather than judge against a map that isn't there yet.
+    const sparseHold = near.sparse && !line.forceNew && !ALLOW_SPARSE_MAP
+      ? `live map returned ${MAP_SPARSE_MAX > 0 ? "≤" + MAP_SPARSE_MAX : "no"} place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty`
+      : null;
+    const verdict: Verdict = near.failed || sparseHold
+      ? { decision: "held", matchName: null, canonicalName: candidate, category: null, confidence: 0, why: (near.failed ?? sparseHold) as string }
       : await resolve(candidate, wiki?.title ?? null, existing, line.story);
     // A story line IS a storied place by construction (a human sourced the story),
     // so a "commercial" call on it is overridden to history, never skipped.
@@ -1056,21 +1143,42 @@ async function run() {
     // curated row, so if a tile ever shows that pin it shows the story too.
     // #425 — set when a story line seeds under its matching Wikipedia article.
     let articleAnchor: Existing | null = null;
+    // The city's own words ("Fort Worth") are dropped from BOTH sides before
+    // matching: Photon's label always ends in the city, so "Fort Worth Botanic
+    // Garden" otherwise matched a "Fort Worth Japanese Garden" line on
+    // fort+worth+garden — the Denver city-suffix pad (handoff §5), again.
+    const cityWords = new Set(geoTokens(CITY.name));
+    const noCity = (t: string) => geoFold(t).replace(/[^a-z0-9]+/g, " ").split(/\s+/)
+      .filter((w) => w && !cityWords.has(w)).join(" ");
+    const bare = (n: string) => noCity(n.replace(/\s*\([^)]*\)\s*/g, " "));
+    const key = (n: string) => n.toLowerCase().replace(/[^a-z0-9]/g, "");
+    // #429 — a `new` line that is ALREADY COMMITTED: its own submission (same
+    // name within 90 m) is in the nearby list, so it reads as present and the
+    // story re-attaches to its own seed (same story, a harmless rewrite) instead
+    // of inserting the pin a second time. The marker still overrides a match to a
+    // DIFFERENTLY named pin, which is what it is for (#422).
+    const ownSeed = line.forceNew && verdict.decision !== "held"
+      ? existing.find((e) => e.source === "submission" && [candidate, verdict.canonicalName].some((n) => key(n) === key(e.name)))
+      : undefined;
+    if (ownSeed) {
+      if (line.story && ownSeed.seed) seedPatches.push({ name: ownSeed.name, lat: ownSeed.lat, lng: ownSeed.lng, story: line.story });
+      report.push({
+        candidate, geo, locate: line.locate || null, story: line.story || null, verdict, arms: near.arms,
+        existing: existing.map((e) => `${e.name} [${e.source ?? "?"}]`),
+        outcome: line.story ? "story-attached" : "already-present", attachedTo: [`${ownSeed.name} [submission]`],
+      });
+      console.log(`  ↪ ${candidate} → already committed (its own seed, ${Math.round(haversineM(geo.lat, geo.lng, ownSeed.lat, ownSeed.lng))} m) — \`new\` line not re-inserted (#429)`);
+      await sleep(7000);
+      continue;
+    }
     if (line.forceNew && verdict.decision !== "held") {
       // #422 — operator override: a distinct place inside a bigger pin.
       verdict.decision = "new";
       if (!verdict.category || verdict.category === "commercial") verdict.category = "history";
       console.log(`    (marked \`new\` — seeded as its own pin, attach/same-place check skipped)`);
     } else if (line.story && verdict.decision !== "held") {
-      // The city's own words ("Fort Worth") are dropped from BOTH sides before
-      // matching: Photon's label always ends in the city, so "Fort Worth Botanic
-      // Garden" otherwise matched a "Fort Worth Japanese Garden" line on
-      // fort+worth+garden — the Denver city-suffix pad (handoff §5), again.
-      const cityWords = new Set(geoTokens(CITY.name));
-      const noCity = (t: string) => geoFold(t).replace(/[^a-z0-9]+/g, " ").split(/\s+/)
-        .filter((w) => w && !cityWords.has(w)).join(" ");
+      // (noCity / bare are defined above, before the #429 check.)
       const blob = noCity([candidate, line.locate, geo.label].join(" "));
-      const bare = (n: string) => noCity(n.replace(/\s*\([^)]*\)\s*/g, " "));
       const forward = existing.filter((e) => bare(e.name) && labelMatchesName(bare(e.name), blob));
       // #437 / #438 — THE MATCH MUST HOLD BOTH WAYS. `forward` only asks whether a
       // pin's or article's name is found in the line, so a LARGER place whose name
@@ -1086,8 +1194,22 @@ async function run() {
       const lineNames = [candidate];
       if (line.locate && !/^\d/.test(line.locate) && !line.locate.startsWith("@")) lineNames.push(line.locate);
       const backMatch = (e: Existing) => lineNames.some((n) => bare(n) && labelMatchesName(bare(n), bare(e.name)));
-      const targets = forward.filter(backMatch);
+      // #434 — a two-way match can still be a DIFFERENT place when each name
+      // carries an identifying word the other lacks (Wrightington / Silvas).
+      const differs = (e: Existing) => lineNames.every((n) => namesDiffer(bare(n), bare(e.name)));
+      const targets = forward.filter((e) => backMatch(e) && !differs(e));
+      const otherNamed = forward.filter((e) => backMatch(e) && differs(e));
       const containers = forward.filter((e) => !backMatch(e));
+      if (otherNamed.length && !targets.length) {
+        const why = `matched a DIFFERENTLY named place: ${otherNamed.map((e) => `"${e.name}" [${e.source}]`).join(", ")} (#434) — rename the line to that name if it really is one place, or mark \`new\` if it is a different place`;
+        report.push({ ...base, outcome: "review", why, otherNamed: otherNamed.map((e) => e.name) });
+        console.log(`  ? ${candidate} → REVIEW: ${why}`);
+        await sleep(7000);
+        continue;
+      }
+      if (otherNamed.length) {
+        console.log(`    (differently named place${otherNamed.length > 1 ? "s" : ""} left alone: ${otherNamed.map((e) => `"${e.name}"`).join(", ")} — #434)`);
+      }
       if (containers.length && !targets.length) {
         // Only a larger place matched. Attaching would put this story on the whole
         // district / cemetery / park; seeding under it (#425) would take its name.
@@ -1103,10 +1225,14 @@ async function run() {
         console.log(`    (larger place${containers.length > 1 ? "s" : ""} left alone: ${containers.map((e) => `"${e.name}"`).join(", ")} — #437/#438)`);
       }
       const onMap = targets.filter((e) => e.source !== "wiki");
-      const stagePinRow = (e: Existing) => curatedRows.push({
-        name: e.name, lat: e.lat, lng: e.lng, description: line.story,
-        source_url: line.source || null, note: `#419 story on existing pin (${e.source}, ${CITY.name})`,
-      });
+      const stagePinRow = (e: Existing) => {
+        const c: CuratedRow = {
+          name: e.name, lat: e.lat, lng: e.lng, description: line.story,
+          source_url: line.source || null, note: `#419 story on existing pin (${e.source}, ${CITY.name})`,
+        };
+        curatedRows.push(c);
+        stagedBy.set(c, candidate);
+      };
       if (onMap.length) {
         for (const e of targets) {
           if (e.source === "submission") {
@@ -1213,11 +1339,13 @@ async function run() {
       };
       rows.push(row);
       if (line.story) {
-        curatedRows.push({
+        const c: CuratedRow = {
           name: pinName, lat: pinLat, lng: pinLng, description: line.story,
           source_url: line.source || null,
           note: articleAnchor ? `#425 story seed under its article (${CITY.name})` : `#57 story seed (${CITY.name})`,
-        });
+        };
+        curatedRows.push(c);
+        stagedBy.set(c, candidate);
       }
       report.push({
         ...base, outcome: "new-seed",
@@ -1253,6 +1381,32 @@ async function run() {
     await sleep(7000); // ~8-9 calls/min — stays under Gemini free-tier 10 RPM (429s otherwise)
   }
 
+  // #439 — ask the table what the commit will skip (an existing curated row) or
+  // replace (a seed that already carries a different story).
+  let alreadyCurated = 0, replacesStory = 0, unreadable = 0;
+  if (HAS_SERVICE && (curatedRows.length || seedPatches.length)) {
+    console.log("\n--- #439 check: what the commit will skip or replace ---");
+    for (const c of curatedRows) {
+      const have = await curatedAlready(c.name, c.lat, c.lng);
+      // #420's rule: a failed read is not "none" — count it and say so.
+      if (have === null) { unreadable++; console.log(`  ? could not read curated_descriptions for "${c.name}" — unknown whether the commit will skip it`); continue; }
+      if (have) {
+        alreadyCurated++;
+        console.log(`  ! ALREADY CURATED: "${c.name}" (from line \"${stagedBy.get(c) ?? "?"}\") — the commit will SKIP this story; cut or rename the line, or accept the skip`);
+      }
+    }
+    for (const pt of seedPatches) {
+      const cur = await seedStoryNow(pt);
+      if (cur === undefined) { unreadable++; console.log(`  ? could not read seed "${pt.name}" — unknown whether its story will be replaced`); continue; }
+      if (typeof cur === "string" && cur.trim() !== pt.story.trim()) {
+        replacesStory++;
+        console.log(`  ! REPLACES STORY on seed "${pt.name}" — its current story will be overwritten on commit`);
+      }
+    }
+    if (unreadable) console.log(`  ${unreadable} check(s) FAILED to read — re-run the dry run before trusting the count`);
+    else if (!alreadyCurated && !replacesStory) console.log("  nothing will be skipped or replaced");
+  }
+
   await Deno.writeTextFile("seed_records.json", JSON.stringify(rows, null, 2));
   await Deno.writeTextFile("seed_report.json", JSON.stringify(report, null, 2));
   await Deno.writeTextFile("curated_records.json", JSON.stringify(curatedRows, null, 2));
@@ -1279,6 +1433,11 @@ async function run() {
   console.log(`story lines seeded: ${storied} (their story ships as resolved_source 'curated'; ${curatedRows.length} curated_descriptions rows staged in curated_records.json)`);
   console.log(`new seed rows: ${rows.length}  (unclassified category: ${uncat}, no wiki description: ${blank})`);
   console.log(`seeded under their Wikipedia article's title (#425): ${underArticle} — read each "↳ seeded under" line before --commit`);
+  console.log(HAS_SERVICE
+    ? (unreadable
+      ? `#439: ${unreadable} check(s) could not be read — the skip/replace count is INCOMPLETE; re-run the dry run`
+      : `#439: ${alreadyCurated} staged story row(s) will be SKIPPED (already curated) → expect the commit to insert ${curatedRows.length - alreadyCurated} story row(s); ${replacesStory} seed story(ies) will be REPLACED`)
+    : `#439: already-curated check OFF (no service key) — compare the commit's inserted count with ${curatedRows.length} staged`);
   // #426 — did the identified User-Agent + back-off hold? failed > 0 means some
   // places were HELD on Wikipedia; retries alone are fine.
   console.log(`Wikipedia calls: ${wikiStats.calls} · retried ${wikiStats.retries} · failed ${wikiStats.failed}`);
