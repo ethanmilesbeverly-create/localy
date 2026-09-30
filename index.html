@@ -8266,6 +8266,7 @@ async function init(){
      tiles paint while the data loads. Pins still arrive when the hunt starts,
      exactly as before — only the basemap moved earlier. */
   setupBaseMap();
+  showBootLoading(); // #467 — "Looking around…" from the moment the map exists until pins paint
   /* #467 — the approved-gem table is the biggest read and needs nothing from
      the personal keys, so it starts NOW and runs alongside loadPersonal. */
   const _approvedGemsLoad = loadApprovedGems();
@@ -8688,7 +8689,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.29e';
+const APP_VERSION = '2026.09.29f';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -15866,6 +15867,37 @@ function dismissHuntEmpty(){
    the place we just removed one. */
 const REALPLACE_BACKED = k => k !== 'lore'; // #67 — 'gems' mode retired with its tab
 
+/* #467 — BOOT LOADING HOLD. The map now paints before any data has loaded
+   (map-first), which opened a window where the basemap is up but there is no
+   hunt, no pins and no card — it read as "loaded, and empty". The #78c card
+   already says the right thing, so boot shows it the moment setupBaseMap()
+   returns and holds it until the first pins paint. While the hold is on,
+   updateHuntEmptyState() keeps the card up for count null (no hunt yet) and for
+   a 0 that isn't an answer yet (tile not settled) — which also stops the
+   "Nothing here yet" verdict flashing over a cold boot. It releases on the
+   first count > 0, or on a real answer (0 with the tile 'loaded'/'empty', or a
+   mode whose content isn't the tile fetch — lore, a fixed guide), and then the
+   normal #78c/#90 logic takes over unchanged. BACKSTOP: a boot path that never
+   builds a hunt (or a fetch that never settles) must not leave a spinner up
+   forever, so BOOT_LOADING_MAX_MS drops the hold and repaints through the
+   normal path. Not dismissable, pointer-events:none — same as #78c. */
+const BOOT_LOADING_MAX_MS = 25000;
+function showBootLoading(){
+  const load = document.getElementById('hunt-loading');
+  if(!load) return;
+  state._bootLoading = true;
+  document.getElementById('hunt-loading-title').textContent = LOADING_COPY.title;
+  document.getElementById('hunt-loading-body').textContent  = LOADING_COPY.body;
+  const empty = document.getElementById('hunt-empty');
+  if(empty) empty.classList.remove('show');
+  load.classList.add('show');
+  setTimeout(()=>{
+    if(!state._bootLoading) return;
+    state._bootLoading = false;
+    if(state.currentHunt) refreshTargetsUI();
+    else load.classList.remove('show');
+  }, BOOT_LOADING_MAX_MS);
+}
 function updateHuntEmptyState(count){
   const el   = document.getElementById('hunt-empty');
   const load = document.getElementById('hunt-loading');
@@ -15874,6 +15906,20 @@ function updateHuntEmptyState(count){
     el.classList.remove('show');
     if(load) load.classList.remove('show');
   };
+  if(state._bootLoading){
+    const hunt = state.currentHunt;
+    const bootMode = (hunt && hunt.mode) || '';
+    const t = hunt ? currentTileState() : null;
+    const answered = count === 0 && hunt &&
+      (t === 'loaded' || t === 'empty' || !REALPLACE_BACKED(bootMode) || isGuideHunt(hunt));
+    if(count > 0 || answered){
+      state._bootLoading = false;   // released — fall through to the normal logic below
+    } else {
+      el.classList.remove('show');
+      if(load) load.classList.add('show');
+      return;
+    }
+  }
   if(count === null || count > 0){ hideAll(); return; }
 
   const mode = (state.currentHunt && state.currentHunt.mode) || '';
