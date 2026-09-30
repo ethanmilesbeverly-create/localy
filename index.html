@@ -8490,15 +8490,22 @@ function closeAllPlaceSuggest(){
    A pin outside the loaded tile is only findable if it is a gem (the gem table
    is loaded whole today, #469); if #469 ever loads gems by area, this loses its
    far-away reach and a server name search becomes the row to file.
-   Ranking: whole-name match, then name starts with the query, then a word starts
-   with it, then anywhere; nearer first within a tier. Capped at SUGGEST_LIMIT so
+   Ranking (2026.09.30c, from phone QA — a "Jess" search listed pins 401, 980 and
+   1,192 mi away above two Chicago graves 12 mi away, because name tier won and
+   distance only broke ties): pins within PIN_SEARCH_NEAR_M of where you are
+   LOOKING come first, nearest first regardless of name tier; farther pins follow,
+   best name match first (whole name, starts with, a word starts with, anywhere),
+   nearer first within a tier. "Where you are looking" is the same anchor order
+   photonSearch uses (browse target, then panned area, then you), so pins and
+   addresses rank against the same place. Capped at SUGGEST_LIMIT so
    pins can never push every address row off a phone screen. Dedup is the file's
    "same place" rule: same normName within CAPTURED_TWIN_M. */
+const PIN_SEARCH_NEAR_M = 80467;   // #433 — 50 mi; "near" for search ranking only, not a content radius (#65 register does not apply)
 function matchLoadedPins(q){
   const nq = normName(q);
   if(nq.length < SUGGEST_MIN_CHARS) return [];
   const lq = String(q).toLowerCase().trim();
-  const anchor = state.me || state.browsingLocation || state.searchedArea || state.localHuntOrigin || null;
+  const anchor = state.browsingLocation || state.searchedArea || state.me || state.localHuntOrigin || null;
   const pool = [];
   const h = state.currentHunt;
   if(h && Array.isArray(h.points)) h.points.forEach(p => pool.push({p, inHunt:true}));
@@ -8528,7 +8535,12 @@ function matchLoadedPins(q){
     if(twin){ if(inHunt && !twin.inHunt){ twin.p = p; twin.inHunt = true; } continue; }
     hits.push({p, inHunt, tier, d});
   }
-  hits.sort((a,b) => a.tier - b.tier || a.d - b.d);
+  hits.sort((a,b) => {
+    const an = anchor && a.d <= PIN_SEARCH_NEAR_M, bn = anchor && b.d <= PIN_SEARCH_NEAR_M;
+    if(an !== bn) return an ? -1 : 1;          // near band first
+    if(an) return a.d - b.d;                    // near: nearest wins, whatever the name tier
+    return a.tier - b.tier || a.d - b.d;        // far: best name match, then nearest
+  });
   /* #433 — the sub line reads exactly like the pin sheet's meta row: the same
      colour (pinKindColor || pinSheetColor), the same label (pinKindLabel ||
      PIN_CAT_LABEL || 'Spot'), the same "N mi away" source (the real fix, else
@@ -8832,7 +8844,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.30b';
+const APP_VERSION = '2026.09.30c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
