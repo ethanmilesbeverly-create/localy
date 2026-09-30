@@ -56,7 +56,7 @@
      Everything else — markers, the #245 label engine, capture, hunt logic —
      stays Leaflet. This stylesheet is REQUIRED for the GL canvas to size/paint
      correctly; without it the vector tiles render but mis-position. -->
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
   :root{
     /* #98 — THE OFFSET #pin-sheet IS ANCHORED BY AND THE DISTANCE IT MUST TRAVEL
@@ -3708,10 +3708,15 @@
      detects the missing L.maplibreGL / WebGL and SILENTLY falls back to the
      OSM.org raster layer, which itself falls back to StylizedGrid — so a
      failed vector load degrades to exactly today's behaviour, never a blank map.
-     maplibre-gl pinned to major 5; the binding pinned to an exact version.
-     Tighten maplibre-gl@5 to its exact resolved patch on the next pass if drift
-     is a concern (the #173 discipline). -->
-<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+     #467 — maplibre-gl PINNED to 5.24.0 (JS + the CSS link in <head>), the #173
+     discipline this comment used to defer. 5.24.0 is the newest 5.x on npm
+     (2026-04-23), i.e. exactly what `@5` resolved to — same bytes, no behaviour
+     change. Why now: a semver RANGE on unpkg is answered with a redirect to the
+     exact version on every cold load, one extra round trip in front of a
+     parser-blocking ~800 KB script, before the app can even start. An exact
+     version is served directly and cached long. A bump is now a deliberate
+     change with a QA pass (desktop vector basemap), never a silent upgrade. -->
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
 <!-- #173 — PINNED, do not revert to the bare `@2` alias. `@2` resolves to
      whatever the latest 2.x is on each page load, and supabase-js has shifted
@@ -4884,15 +4889,16 @@ function installZoomGuard(){
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  document.body.innerHTML = document.body.innerHTML
-    .replace(/\$\{'\{\{BLAZE_ORANGE\}\}'\}/g, `<div class="blaze">${blazeSVG('#E8622C',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_BLUE\}\}'\}/g, `<div class="blaze">${blazeSVG('#4C8FC0',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_YELLOW\}\}'\}/g, `<div class="blaze">${blazeSVG('#D9B44A',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_VIOLET\}\}'\}/g, `<div class="blaze">${blazeSVG('#9A7FBF',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_MOSS\}\}'\}/g, `<div class="blaze">${blazeSVG('#6FA85C',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_PLUM\}\}'\}/g, `<div class="blaze">${blazeSVG('#C1587A',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_BRASS\}\}'\}/g, `<div class="blaze">${blazeSVG('#B08D57',true)}</div>`)
-    .replace(/\$\{'\{\{BLAZE_OUTLINE\}\}'\}/g, `<div class="blaze">${blazeSVG('#EDE9DD',false)}</div>`);
+  /* #467 — GRAVESTONE: a whole-body placeholder rewrite used to run here —
+     document.body.innerHTML = document.body.innerHTML.replace(${'{{BLAZE_*}}'} …)
+     for eight BLAZE_* colours. No placeholder of that shape exists anywhere in
+     the markup any more (blazes are built by blazeSVG() at render time), so every
+     regex matched nothing — but the setter still SERIALISED and RE-PARSED the
+     entire <body>, which holds this ~900 KB inline script, and rebuilt every DOM
+     node before checkAuthAndBoot() could start. Pure boot cost in front of the
+     map. Removed; blazeSVG() and its render-time callers are untouched. If a
+     placeholder is ever needed again, replace the ONE element that carries it,
+     never the whole body. */
   installZoomGuard();
   checkAuthAndBoot();
 });
@@ -7557,16 +7563,23 @@ async function pruneCaptureAnchor(){
 }
 
 async function loadPersonal(quiet){
-  await loadKey('progress',
+  /* #467 — the eight keys are read IN PARALLEL. They used to be eight awaited
+     round trips in a row (≈8× a phone's Supabase latency) in front of the map
+     and every screen. Each loadKey writes a different state field, records its
+     own success/failure in loadFailedKeys() (a Set — order-free), and falls back
+     independently, so running them together changes nothing but the wait.
+     #145(1)'s reconcile still runs only after ALL of them have landed. */
+  await Promise.all([
+  loadKey('progress',
     v=>{ state.progress = v ? JSON.parse(v) : {}; },
-    ()=>{ state.progress = {}; });
-  await loadKey('my-hunts',
+    ()=>{ state.progress = {}; }),
+  loadKey('my-hunts',
     v=>{ state.myHunts = v ? JSON.parse(v) : []; },
-    ()=>{ state.myHunts = []; });
-  await loadKey('stats',
+    ()=>{ state.myHunts = []; }),
+  loadKey('stats',
     v=>{ state.totalWalkedMeters = v ? (JSON.parse(v).totalWalkedMeters||0) : 0; },
-    ()=>{ state.totalWalkedMeters = 0; });
-  await loadKey('unlocked-achievements',
+    ()=>{ state.totalWalkedMeters = 0; }),
+  loadKey('unlocked-achievements',
     /* #180 — prune ledger ids that no longer name a rung in ACHIEVEMENTS. This is
        RETIREMENT, not un-earning: the lore_* ids were removed when Lore merged into
        History & Lore, and a persisted lore_* would otherwise sit in the record with
@@ -7576,29 +7589,31 @@ async function loadPersonal(quiet){
        un-earning a badge that still EXISTS; a retired rung does not. */
     v=>{ const raw = v ? JSON.parse(v) : []; const ids = new Set(ACHIEVEMENTS.map(a=>a.id));
          state.unlockedAchievements = new Set(raw.filter(id=>ids.has(id))); },
-    ()=>{ state.unlockedAchievements = new Set(); });
+    ()=>{ state.unlockedAchievements = new Set(); }),
   /* #180 — the earned-date map, pruned to ids that still name a rung (a retired id
-     carries no rung to date). Loaded after the ledger; unknown-key load returns {}. */
-  await loadKey('achievements-earned-at',
+     carries no rung to date). Independent of the ledger read (both prune to
+     ACHIEVEMENTS ids), so #467 reads them in parallel; unknown-key load returns {}. */
+  loadKey('achievements-earned-at',
     v=>{ const raw = v ? JSON.parse(v) : {}; const ids = new Set(ACHIEVEMENTS.map(a=>a.id));
          state.achievedAt = {}; Object.keys(raw||{}).forEach(id=>{ if(ids.has(id)) state.achievedAt[id] = raw[id]; }); },
-    ()=>{ state.achievedAt = {}; });
-  await loadKey('has-captured-once',
+    ()=>{ state.achievedAt = {}; }),
+  loadKey('has-captured-once',
     v=>{ state.hasCapturedOnce = v ? JSON.parse(v) === true : false; },
-    ()=>{ state.hasCapturedOnce = false; });
+    ()=>{ state.hasCapturedOnce = false; }),
   /* #4 phase 2. A failed read is NOT added to the blocked set in a way that
      matters — loadKey handles that — and the fallback is null, which simply
      means the next capture is the first one this check can see. Losing the
      anchor degrades to no comparison, never to a false accusation. */
-  await loadKey('capture-anchor',
+  loadKey('capture-anchor',
     v=>{ state.captureAnchor = v ? JSON.parse(v) : null; },
-    ()=>{ state.captureAnchor = null; });
+    ()=>{ state.captureAnchor = null; }),
   /* #27 — previous app-open time, for a future "since last visit" consumer
      (#175 push). Absent on first ever open; a bad read degrades to null, which
      just means the next consumer treats everything as unseen. */
-  await loadKey('freshness:lastSeen',
+  loadKey('freshness:lastSeen',
     v=>{ state.lastSeenAt = v ? (parseInt(v, 10) || null) : null; },
-    ()=>{ state.lastSeenAt = null; });
+    ()=>{ state.lastSeenAt = null; })
+  ]);
 
   /* #145(1) — runs here because it needs BOTH 'my-hunts' and
      'unlocked-achievements' in memory, and both are read above. It is
@@ -7840,9 +7855,16 @@ async function loadApprovedGems(){
        it, ORDERED BY id (a stable, unique total order — REQUIRED, or PostgREST
        range pagination can skip or duplicate rows across page boundaries). */
     const GEM_PAGE = 1000;
-    const rows = [];
-    for(let from = 0; ; from += GEM_PAGE){
-      const { data, error } = await sb
+    /* #467 — PAGES IN PARALLEL. The pages below were fetched one after another
+       (6 round trips at 5,840 rows, ~3.9 s measured) while the whole boot waited.
+       Page 0 now also asks for the exact row COUNT, and every remaining page is
+       requested at once. Correctness is unchanged: pages are still ranged over
+       ORDER BY id and concatenated in page order; and if the table grew between
+       the count and the fetch (the last page comes back FULL), the old
+       sequential loop takes over from there until a short page ends it, so a
+       row can never be dropped by a stale count. count:null (header missing)
+       degrades to that same sequential loop from page 1. */
+    const fetchGemPage = (from, withCount)=>sb
         .from('submissions')
         /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
            only to look a display name up. A null here is a real and reachable
@@ -7861,7 +7883,7 @@ async function loadApprovedGems(){
            and the catch below blanks the ENTIRE gem map — the #339 add-a-client-
            column-is-two-steps trap. Keep them in #276's allowlist / always run 344
            after 276. */
-        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by,resolved_description,resolved_source')
+        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by,resolved_description,resolved_source', withCount ? { count:'exact' } : undefined)
         .eq('status', 'approved')
         /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
            makes the whole thing work: a merged submission keeps a REAL status
@@ -7877,6 +7899,27 @@ async function loadApprovedGems(){
         .is('merged_into', null)
         .order('id', { ascending: true })
         .range(from, from + GEM_PAGE - 1);
+    const rows = [];
+    const first = await fetchGemPage(0, true);
+    if(first.error) throw first.error;
+    const firstPage = first.data || [];
+    for(const r of firstPage) rows.push(r);
+    let next = null;                        // where the sequential tail starts, if needed
+    if(firstPage.length === GEM_PAGE){
+      if(typeof first.count === 'number' && first.count > GEM_PAGE){
+        const froms = [];
+        for(let f = GEM_PAGE; f < first.count; f += GEM_PAGE) froms.push(f);
+        const results = await Promise.all(froms.map(f=>fetchGemPage(f, false)));
+        for(const res of results){ if(res.error) throw res.error; }
+        let lastLen = GEM_PAGE;
+        results.forEach(res=>{ const pg = res.data || []; for(const r of pg) rows.push(r); lastLen = pg.length; });
+        if(lastLen === GEM_PAGE) next = froms[froms.length-1] + GEM_PAGE; // grew since the count
+      } else if(first.count !== GEM_PAGE){
+        next = GEM_PAGE;                    // no usable count — fall back to sequential
+      }
+    }
+    for(let from = next; from !== null; from += GEM_PAGE){
+      const { data, error } = await fetchGemPage(from, false);
       if(error) throw error;
       const page = data || [];
       for(const r of page) rows.push(r);
@@ -7889,11 +7932,15 @@ async function loadApprovedGems(){
     // preference only, so reverting this map restores the raw text everywhere.
     // (rows now holds the FULL approved+unmerged set, not a capped 1,000.)
     // #23 — one extra round trip for the whole map, not one per pin.
-    const credits = await fetchGemCredits(rows.map(r=>r.submitted_by));
     // #31/#225 — a second round trip for the whole map: the vouch count per
     // canonical id, for the "+N others also submitted" line. Fail-soft to {} →
     // count 0 → no line, so a failed read is silent, never a wrong number.
-    const seconds = await fetchGemSeconds(rows.map(r=>r.id));
+    // #467 — the two lookups are independent (both fail-soft to {}), so they
+    // run together instead of back to back.
+    const [credits, seconds] = await Promise.all([
+      fetchGemCredits(rows.map(r=>r.submitted_by)),
+      fetchGemSeconds(rows.map(r=>r.id))
+    ]);
     state.approvedGems = rows.map(r=>({
       id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
       lat:r.lat, lng:r.lng, status:'approved',
@@ -8206,19 +8253,35 @@ async function init(){
      LAST, after consumeSharedSpot. */
   const _bootTab = (_ret && _ret.tab) || bootTabParam();
   const _bootDeepLink = !!(_pendingSpot || pendingGuideCode() || readStashedGuide() || resetLinkActive());
+  /* #467 — MAP FIRST. The basemap used to be built only AFTER every boot read
+     had resolved: the session check, loadPersonal's 8 user_state keys ONE AT A
+     TIME, then profile, my-gems and the whole approved-gem table (5,840 rows /
+     ~5.7 MB of JSON in 6 serial pages, then credits, then vouch counts). The
+     #leaflet-map div sat empty for all of it — the "significant delay for the
+     map to display" report. Measured from a datacenter: the gem pages alone
+     took ~3.9 s serial; a phone is slower. setupBaseMap() needs none of that
+     data (it opens on rememberedMapView()/startAreaGuess(), both synchronous
+     localStorage reads, and its moveend/zoomend/click handlers already no-op
+     with no hunt and no fix), so it now runs BEFORE the first await and the
+     tiles paint while the data loads. Pins still arrive when the hunt starts,
+     exactly as before — only the basemap moved earlier. */
+  setupBaseMap();
+  /* #467 — the approved-gem table is the biggest read and needs nothing from
+     the personal keys, so it starts NOW and runs alongside loadPersonal. */
+  const _approvedGemsLoad = loadApprovedGems();
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   migrateLoreGemIds();          // #149 — same constraint: re-key lore<id>→catgem<id> before isFound() runs
   pruneCaptureTelemetry(); // #4/#5 — after the migration, so it sees final hunt keys
   pruneCaptureAnchor();    // #4 phase 2 — same TTL, same reasoning
-  await loadMyProfile(); // #23 — before loadApprovedGems so the gem form prefills on first open
-  await loadMyGems();
-  await loadApprovedGems();
+  /* #23 — profile still resolves before anything renders, so the gem form
+     prefills on first open; #467 just stops it queueing behind the other two
+     independent reads (none of the three reads another's state). */
+  await Promise.all([loadMyProfile(), loadMyGems(), _approvedGemsLoad]);
   renderMyHunts();
   renderGemSubmissions();
   renderPassport();
   markFreshnessSeen(); // #27 — record this open AFTER the previous value was read into state.lastSeenAt in loadPersonal
-  setupBaseMap();
   wirePinSheet();
   wireDrawer();         // swipe-down-to-close on the nearby drawer, mirroring wirePinSheet()
   try{ localStorage.removeItem('nahgoo-browse-source'); }catch(e){} // #396 — retire the #294 toggle's saved choice (the toggle is gone)
@@ -8625,7 +8688,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.28d';
+const APP_VERSION = '2026.09.29e';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
