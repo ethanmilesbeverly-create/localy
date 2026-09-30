@@ -299,7 +299,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.09.28a (#57 Phase B — the METROS roster grows 21 → 24: + Los Angeles, Detroit, Baltimore; Baltimore's 40 km box overlaps Washington, D.C.'s, which cross-metro QID dedup and the #338 already-loaded skip handle. Built on 24d [#405].)";
+const BUILD = "graves-resolve 2026.09.30a (#445 Phase B — the METROS roster grows 24 → 25: + St. Louis; its 40 km box overlaps no other roster metro. Built on 28a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -341,6 +341,9 @@ const METROS: Metro[] = [
   { name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
   { name: "Detroit", lat: 42.3314, lng: -83.0458 },
   { name: "Baltimore", lat: 39.2904, lng: -76.6122 },
+  // #445 Phase B (2026-09-30): the roster grows 24 → 25. Centre is the city centre, like
+  // every row above; the 15 km box reaches ~45% into Illinois across the Mississippi.
+  { name: "St. Louis", lat: 38.6270, lng: -90.1994 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode

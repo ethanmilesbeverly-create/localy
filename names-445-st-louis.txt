@@ -1,0 +1,72 @@
+# names-445-st-louis.txt — #445 PHASE B, St. Louis pass 1 (story lines, 2026-09-30)
+# Source: Historical Marker Database, St. Louis town list (805 markers), title sort page 1 (entries 1–100),
+# plus seven downtown/cemetery markers reached from single marker pages. Skipped on purpose: the Cardinals
+# "Greatest Moments" sidewalk series (each plaque is about a game played elsewhere), the Delmar Loop Walk of
+# Fame stars and the Downtown West "Born ..." biography plaques (people, not places), the America's Center
+# year-by-year plaques, bare National Register plaques, and teasers too short to say what the place is.
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# RUN ORDER (the #441 lesson): St. Louis is pre-warmed (prewarm-tiles.ts 2026.09.30a — 41 of 42 tiles; the one
+# still owed, 775_-1801, is Illinois floodplain north-east of the box and holds none of these lines). Then the
+# dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY exported (#439):
+#   SEED_CITY_NAME="St. Louis" SEED_CITY_LAT=38.6270 SEED_CITY_LNG=-90.1994 deno run -A seed-resolve.ts names-445-st-louis.txt
+
+# --- new story pins -------------------------------------------------------------
+
+# Downtown and the riverfront
+Old Missouri Hotel Site | @38.630663,-90.183275 | Missouri's first state legislature met on this corner in the Missouri Hotel on September 18, 1820, and the state's first governor, Alexander McNair, was sworn in here. | https://www.hmdb.org/m.asp?m=78840
+# ^ the plaque was reported stolen in March 2026; the site and the building (Raeder Place) are still here.
+Scott's Hotel Site | @38.62498832,-90.18818773 | Abraham Lincoln, then an Illinois congressman on his way to Washington, spent the night of October 27, 1847, in Scott's Hotel, which stood on this spot. | https://www.hmdb.org/m.asp?m=141483
+Samuel Clemens Print Shop Marker | @38.628133,-90.187767 | In 1853 a teenage Samuel Clemens, years before he became Mark Twain, worked as a typesetter for the St. Louis Evening News across Fourth Street from here. | https://www.hmdb.org/m.asp?m=122491
+Great Flood of 1993 High-Water Mark | @38.6249,-90.18405 | The bottom edge of this plaque shows where the Mississippi crested on August 1, 1993, at 49.58 feet, the highest river level ever recorded in St. Louis. | https://www.hmdb.org/m.asp?m=141588
+Seventh Street Railroad Tunnel Marker | @38.629183,-90.1909 | Under Seventh Street here, MetroLink runs through a double-arched, two-track tunnel dug in 1875 to carry freight and passenger trains from the Eads Bridge to the rail yards south of downtown. | https://www.hmdb.org/m.asp?m=141183
+American Zinc Building | @38.62436326,-90.18893078 | Its first tenant, a metals company, wanted a building that advertised its trade, so this 1967 office block is wrapped in stainless steel, the same skin as the Gateway Arch. | https://www.hmdb.org/m.asp?m=151978
+Old Busch Stadium Outfield Wall Line | @38.623283,-90.191767 | A green and yellow stripe in the pavement here traces the outfield wall of Busch Memorial Stadium, the Cardinals' home from 1966 to 2005. | https://www.hmdb.org/m.asp?m=133365
+The Meeting of the Waters | @38.630049,-90.207646 | Carl Milles's fountain in Aloe Plaza shows the joining of the Mississippi and Missouri rivers, with the two central figures as the rivers and the smaller water creatures as their tributaries. | https://www.hmdb.org/m.asp?m=62213
+Shrine of St. Joseph | @38.63704746,-90.19287993 | Austrian Jesuits founded this church in 1844 for the city's fast-growing German community, on land given by Ann Biddle, and the Vatican recognized a miracle here on March 16, 1864. | https://www.hmdb.org/m.asp?m=144369
+
+# Midtown, Central West End, the Loop
+T. S. Eliot Birthplace | @38.63442188,-90.21489725 | The poet and Nobel laureate T. S. Eliot was born at 2635 Locust Street in 1888 and spent his boyhood here. | https://www.hmdb.org/m.asp?m=145662
+T. S. Eliot Teenage Home | @38.64658389,-90.25424793 | T. S. Eliot, the poet and later Nobel laureate, lived in this Westminster Place house in his teenage years. | https://www.hmdb.org/m.asp?m=169035
+Delmar Wabash Station | @38.65496415,-90.29441107 | This 1928 Wabash Railroad station was served by the Delmar and City Limits streetcars, buses and Wabash trains, and streetcars stopped running here when the city retired the Delmar line in 1964. | https://www.hmdb.org/m.asp?m=144364
+
+# Forest Park
+Apotheosis of St. Louis | @38.63984413,-90.29408813 | This bronze of King Louis IX of France, the crusader-king the city is named for, shows him as a Christian soldier raising a sword shaped like a cross. | https://www.hmdb.org/m.asp?m=181257
+American Jewish Tercentenary Memorial | @38.64312778,-90.2657 | Dedicated in November 1956, this plaza marks 300 years since the first Jewish settlement in America, at New Amsterdam in 1654. | https://www.hmdb.org/m.asp?m=219544
+Are Trees and Lawns Enough? Marker | @38.64355,-90.28408889 | Between 1911 and 1915 Parks Commissioner Dwight Davis, convinced St. Louisans needed room for organized sport, built tennis courts, athletic fields and a public golf course in Forest Park. | https://www.hmdb.org/m.asp?m=139722
+
+# Missouri Botanical Garden and Tower Grove Park
+English Woodland Garden | @38.61058333,-90.25938333 | Curator John Elsley brought the idea of this garden from his native England in 1976, and it has since grown well beyond its first acre and a half. | https://www.hmdb.org/m.asp?m=219457
+Gox #8 | @38.61084722,-90.25856667 | Ernest Trova made this stainless-steel sculpture in the 1970s as part of a series whose name is short for "geometric exercises." | https://www.hmdb.org/m.asp?m=219502
+Alexander von Humboldt Statue | @38.60626528,-90.25492821 | This statue in Tower Grove Park honors the naturalist and explorer Alexander von Humboldt, whom its inscription calls the greatest traveller of any age. | https://www.hmdb.org/m.asp?m=169659
+
+# Lafayette Square and Soulard
+Lafayette Park Music Pavilion | @38.61591451,-90.21626524 | More than eight thousand people turned out in 1876 to open the Lafayette Park music pavilion, where a thirty-piece band played for the crowd. | https://www.hmdb.org/m.asp?m=140055
+9th Street Abbey | @38.60955824,-90.20357065 | Built as St. Paul's Evangelical Church, this building was wrecked by the great tornado of 1896, rebuilt the next year, became Holy Trinity Slovak Catholic Church in 1924 and was sold by the archdiocese in 1990. | https://www.hmdb.org/m.asp?m=215649
+BWorks Building | @38.60286232,-90.20941754 | Part of a tract the city deeded to founding settler Francis Cabanne in 1837, this property was a stable from 1849 to 1891, then a carriage factory, and sold in 1973 for one dollar. | https://www.hmdb.org/m.asp?m=218900
+
+# Cherokee Street and the Lemp district (Benton Park, Marine Villa, Gravois Park)
+Lemp Mansion | @38.59330278,-90.21603333 | Home of the Lemp brewing family, whose fortunes rose and collapsed over three generations, this mansion is reputed to be haunted. | https://www.hmdb.org/m.asp?m=211828
+Beauvais House | @38.5933,-90.21621667 | Creole businessman Geminien Beauvais, who made his first money in the fur trade as a teenager, built the largest house on this elegant street in the early 1870s. | https://www.hmdb.org/m.asp?m=133132
+Vollberg Building | @38.5933926,-90.22568263 | Robert Vollberg bought this 43-by-100-foot lot on Jefferson Avenue from his mother in the summer of 1883 and had a permit to build a two-story building a month later. | https://www.hmdb.org/m.asp?m=254970
+Cherokee Livery | @38.59348865,-90.22646809 | Undertaker Paul Buol built this as the Cherokee Livery in 1893, its front once two tall arched bays with double doors wide enough for horses and carriages. | https://www.hmdb.org/m.asp?m=124466
+Vandora Theater | @38.59358797,-90.22720249 | The Vandora Amusement Company opened the Vandora Theater here in 1909, in a building designed by the Missouri-born architect Otto J. Boehmer. | https://www.hmdb.org/m.asp?m=124464
+Favorite Amusement Company | @38.59368611,-90.22791944 | Brothers Harry and Eugene Freund bought this empty corner in the spring of 1909 and, three days later, had a permit for a one-story brick movie house. | https://www.hmdb.org/m.asp?m=124461
+Casa Loma Ballroom | @38.59398796,-90.22873715 | Before the ballroom, this corner of Cherokee and Iowa held the Cinderella Airdome, an open-air theater the Freund brothers opened in 1921. | https://www.hmdb.org/m.asp?m=124458
+Pfeifer's Saloon | @38.59368268,-90.22900044 | H. E. Pfeifer hired builder Henry Becker in 1895 for this two-story home and store, in the same style as a building Becker had just finished at Cherokee and Oregon. | https://www.hmdb.org/m.asp?m=124456
+Worth's Store | @38.59368386,-90.22909208 | Architect O. J. Popp designed this building in 1921 on land bought from the St. Louis Brewing Association, and a shoe store and a women's clothing shop moved in the next year. | https://www.hmdb.org/m.asp?m=124455
+Cinderella Building | @38.59384038,-90.22937183 | William Wedemeyer designed the Cinderella Building, finished in 1913 for Harry and Eugene Freund a year after they bought the lot from the Besch family. | https://www.hmdb.org/m.asp?m=124454
+Hess Hardware | @38.5936446,-90.23021512 | August Foell designed this three-story building for Henry W. Heuermann in 1894, and Heuermann ran a dry goods store in its north half for several years. | https://www.hmdb.org/m.asp?m=196100
+Starke's Market | @38.59406356,-90.2312632 | Butcher Jeremiah Thompson built this store with flats above in 1895 and ran his meat shop here through the 1890s, before it became George W. Starke's market in 1911. | https://www.hmdb.org/m.asp?m=124449
+
+# South Grand (Tower Grove South / Tower Grove East)
+Kleekamp's Hall | @38.60218889,-90.24249167 | The Kleekamp Bros. piano company sold pianos downstairs, and the hall on the upper floors hosted student recitals and neighborhood meetings. | https://www.hmdb.org/m.asp?m=124430
+Rain Stick Building | @38.60208889,-90.24244722 | This 1908 building earned the nickname "The Rain Stick" from its first tenant, Louis Onimus's umbrella business, and later housed a Kroger. | https://www.hmdb.org/m.asp?m=124429
+Mausshardt Bakery Building | @38.60167001,-90.24253735 | Built in 1907 for baker Henry Mausshardt, this storefront was home to one bakery after another until the late 1990s. | https://www.hmdb.org/m.asp?m=124433
+Original Tower Grove Bank | @38.60113822,-90.24264163 | Tower Grove Bank opened here in 1911, the year this building with its angled corner entrances was finished. | https://www.hmdb.org/m.asp?m=169560
+Bloemker & Son Undertakers | @38.60083889,-90.24281389 | Built in 1908 for the Bloemker & Son undertaking firm, this building's rear garage was used for storage and probably for embalming. | https://www.hmdb.org/m.asp?m=124438
+Orpheum Cleaners | @38.59933333,-90.24288889 | This 1909 building is trimmed with terra cotta lions' heads along its cornice, and Orpheum Cleaners has been a neighborhood fixture here for decades. | https://www.hmdb.org/m.asp?m=124441
+Jay International Foods Original Store | @38.59807222,-90.24283611 | Jay International Foods got its start in this 1906 South Grand building in the 1970s. | https://www.hmdb.org/m.asp?m=124444
+
+# Bellefontaine Cemetery (graves loaded 2026-09-30; neither of these is a grave pin)
+John Berry Meachum Monument | @38.69595,-90.229033 | John Berry Meachum, who founded and pastored the first Baptist church west of the Mississippi from 1817 until his death in 1854, is buried here. | https://www.hmdb.org/m.asp?m=62184
+Bellefontaine Champion American Elm | @38.687421,-90.226075 | The Missouri Department of Conservation certified this American elm as the largest known tree of its kind in the state. | https://www.hmdb.org/m.asp?m=62186
