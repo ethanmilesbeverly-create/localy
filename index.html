@@ -56,7 +56,33 @@
      Everything else — markers, the #245 label engine, capture, hunt logic —
      stays Leaflet. This stylesheet is REQUIRED for the GL canvas to size/paint
      correctly; without it the vector tiles render but mis-position. -->
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<!-- #468 — THE THREE MAPLIBRE ASSETS ARE NOW WRITTEN ONLY FOR NON-iOS DEVICES.
+     iOS never builds the vector basemap (addBaseLayer's iOS gate, 2026.08.11l /
+     #274 — it goes straight to raster), yet every iPhone cold open downloaded and
+     parsed ~800 KB of maplibre-gl JS + its CSS + the leaflet binding for nothing.
+     nahgooIsIOS() below is now the ONE iOS test in the file: this head check and
+     addBaseLayer's gate both call it, so "skipped the download" and "went raster"
+     can never disagree (a device that skipped the script but then tried vector
+     would just fall to raster via glReady anyway — but one fact, one home).
+     WHY document.write and not an async inject: it keeps desktop/Android
+     BYTE-FOR-BYTE the old behaviour — the tags are still parser-blocking, in the
+     same order, before the app script, so addBaseLayer still reads L.maplibreGL
+     synchronously at map build (the #468 CARE). An async load would race map
+     build and silently put desktop on raster. Known cost: Chrome logs a console
+     warning about document.write'd cross-origin scripts, and on a 2G connection
+     Chrome may refuse to fetch them — which lands on the raster rung, the exact
+     fallback the #256 ladder already provides for "binding missing". -->
+<script>
+  function nahgooIsIOS(){
+    /* iPadOS 13+ reports as MacIntel, so the touch check catches it. */
+    var ua = navigator.userAgent || '';
+    return /iP(hone|od|ad)/.test(ua)
+      || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1);
+  }
+  if(!nahgooIsIOS()){
+    document.write('<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">');
+  }
+</script>
 <style>
   :root{
     /* #98 — THE OFFSET #pin-sheet IS ANCHORED BY AND THE DISTANCE IT MUST TRAVEL
@@ -295,6 +321,13 @@
   .place-suggest-row.active{
     background:var(--surface-2);
     border-left-color:var(--orange);
+  }
+  /* #433 — a row that is one of the app's own pins, not an address. The small
+     orange dot before the title is the only marker (plus "On the map" in the
+     sub line, so colour is never the sole signal). */
+  .place-suggest-row.is-pin .place-suggest-title::before{
+    content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:var(--orange);margin-right:7px;vertical-align:middle;position:relative;top:-1px;
   }
   .place-suggest-title{
     display:block;
@@ -3716,8 +3749,15 @@
      parser-blocking ~800 KB script, before the app can even start. An exact
      version is served directly and cached long. A bump is now a deliberate
      change with a QA pass (desktop vector basemap), never a silent upgrade. -->
-<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
+<!-- #468 — non-iOS only; see the nahgooIsIOS() note in <head>. Same two tags,
+     same order, still parser-blocking. The <\/script> escape keeps the inline
+     block from closing early. -->
+<script>
+  if(!nahgooIsIOS()){
+    document.write('<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"><\/script>');
+    document.write('<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"><\/script>');
+  }
+</script>
 <!-- #173 — PINNED, do not revert to the bare `@2` alias. `@2` resolves to
      whatever the latest 2.x is on each page load, and supabase-js has shifted
      PKCE / `detectSessionInUrl` behaviour WITHIN the 2.x line (see #2, #85).
@@ -8418,8 +8458,9 @@ function wirePlaceSuggest(){
   placeSuggest.map = attachPlaceSuggest('map-search-input', place=>{
     pingActivity('map_move'); // #10 — a map search pick counts as moving the map
     document.getElementById('map-search-input').value = '';
+    if(place.pin){ goToSearchedPin(place.pin); return; }   // #433
     enterLocationBrowseMode({lat:place.lat, lng:place.lng}, place.name);
-  });
+  }, { localMatch: matchLoadedPins });
   placeSuggest.create = attachPlaceSuggest('create-location-search', place=>{
     jumpCreateMapTo(place);
   });
@@ -8434,6 +8475,80 @@ function closeAllPlaceSuggest(){
   if(placeSuggest.map) placeSuggest.map.close();
   if(placeSuggest.create) placeSuggest.create.close();
   if(placeSuggest.gem) placeSuggest.gem.close();
+}
+/* #433 — THE MAP SEARCH BOX FINDS THE APP'S OWN PINS BY NAME. Photon only knows
+   addresses, so a story pin whose building is gone (Tom Wilson Park) or a pin
+   buried in a dense stack could not be found by typing its name. This searches
+   what is ALREADY IN MEMORY — no new request:
+     1. the current hunt's points (what the map is showing now),
+     2. the current tile's OSM/Wikipedia places (state.realPlaces.all — already
+        filtered and tile-gated, #344 brick 4),
+     3. every approved gem/seed/story/grave (state.approvedGems), through the SAME
+        story-gate the map uses (#344 brick 5: resolved_source 'none' stays
+        hidden unless ?showhidden=1) — search must not resurface a hidden pin.
+   A pin outside the loaded tile is only findable if it is a gem (the gem table
+   is loaded whole today, #469); if #469 ever loads gems by area, this loses its
+   far-away reach and a server name search becomes the row to file.
+   Ranking: whole-name match, then name starts with the query, then a word starts
+   with it, then anywhere; nearer first within a tier. Capped at SUGGEST_LIMIT so
+   pins can never push every address row off a phone screen. Dedup is the file's
+   "same place" rule: same normName within CAPTURED_TWIN_M. */
+function matchLoadedPins(q){
+  const nq = normName(q);
+  if(nq.length < SUGGEST_MIN_CHARS) return [];
+  const lq = String(q).toLowerCase().trim();
+  const anchor = state.me || state.browsingLocation || state.searchedArea || state.localHuntOrigin || null;
+  const pool = [];
+  const h = state.currentHunt;
+  if(h && Array.isArray(h.points)) h.points.forEach(p => pool.push({p, inHunt:true}));
+  const tile = (state.realPlaces && state.realPlaces.all) || [];
+  tile.forEach(p => pool.push({p, inHunt:false}));
+  (state.approvedGems || []).forEach(g => {
+    if(!g || g.status !== 'approved') return;
+    if(!STORY_GATE_SHOW_HIDDEN && g.resolvedSource === 'none') return;
+    if(normName(g.name).indexOf(nq) < 0) return;   // cheap name test before building a point (~5.8k gems)
+    pool.push({p: gemPoint(g, 'catgem'), inHunt:false});
+  });
+  const hits = [];
+  for(const {p, inHunt} of pool){
+    if(!p || !p.name || !isFinite(p.lat) || !isFinite(p.lng)) continue;
+    const nn = normName(p.name);
+    if(!nn || nn.indexOf(nq) < 0) continue;
+    const ln = String(p.name).toLowerCase();
+    const tier = nn === nq ? 0
+               : nn.startsWith(nq) ? 1
+               : (lq && new RegExp('(^|[^a-z0-9])' + lq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(ln)) ? 2
+               : 3;
+    const d = anchor ? haversine(anchor.lat, anchor.lng, p.lat, p.lng) : 0;
+    /* Twin check: the hunt copy of a place wins over its tile/gem copy, so a
+       tap on it opens the pin already on the map. */
+    const twin = hits.find(x => normName(x.p.name) === nn &&
+      haversine(x.p.lat, x.p.lng, p.lat, p.lng) <= CAPTURED_TWIN_M);
+    if(twin){ if(inHunt && !twin.inHunt){ twin.p = p; twin.inHunt = true; } continue; }
+    hits.push({p, inHunt, tier, d});
+  }
+  hits.sort((a,b) => a.tier - b.tier || a.d - b.d);
+  return hits.slice(0, SUGGEST_LIMIT).map(({p, inHunt, d}) => {
+    let kind = 'Spot';
+    try{ kind = pinKindLabel(p) || PIN_CAT_LABEL[p.category] || 'Spot'; }catch(_){}
+    const bits = ['On the map', kind];
+    if(anchor) bits.push(fmtDist(d));
+    return { name:p.name, sub:bits.join(' · '), lat:p.lat, lng:p.lng,
+             pin:{ id:p.id, inHunt, name:p.name, lat:p.lat, lng:p.lng,
+                   category:p.category || null, gemId:p.gemId || null, desc:p.desc || '' } };
+  });
+}
+/* #433 — a picked pin. Already on the map → open its sheet in place (the nearby
+   list's own path, openPinSheetById: flies to it, keeps "you are here"). Not in
+   the current set → the #26 shared-spot arrival (arriveAtSpot): browse the area
+   around it and select it, injecting the pin if its tile hasn't loaded yet. */
+function goToSearchedPin(pin){
+  if(pin.inHunt && currentTargetsSorted().some(t => t.id === pin.id)){
+    openPinSheetById(pin.id);
+    return;
+  }
+  arriveAtSpot({ name:pin.name, lat:pin.lat, lng:pin.lng,
+                 category:pin.category, gemId:pin.gemId, desc:pin.desc });
 }
 function showScreen(id){
   closeAllPlaceSuggest();
@@ -8689,7 +8804,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.29f';
+const APP_VERSION = '2026.09.30a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10544,11 +10659,11 @@ function addBaseLayer(map){
      deleted, just not taken on iOS; if the plugin is ever updated/replaced this gate
      is the one line to revisit. iPadOS 13+ reports as MacIntel, so the touch check
      catches it. */
-  const isIOS = (function(){
-    const ua = navigator.userAgent || '';
-    return /iP(hone|od|ad)/.test(ua)
-      || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1);
-  })();
+  /* #468 — the detector moved to <head> (nahgooIsIOS) so the same test decides
+     both "skip the maplibre download" and "go raster" here. On iOS the scripts
+     are no longer loaded at all, so glReady above is already false and this gate
+     is now belt-and-braces — kept so the reason iOS is raster stays written here. */
+  const isIOS = nahgooIsIOS();
   if(isIOS){ addRasterFallback(); return; }
 
   let gl, wentRaster = false, glErrors = 0;
@@ -11088,8 +11203,14 @@ async function geocodeFirstHit(q){
 
 /* Bind a suggest dropdown to a text input.
    onPick(place) fires with {name, sub, lat, lng}. Returns a controller so
-   callers can close it on screen changes. */
-function attachPlaceSuggest(inputId, onPick){
+   callers can close it on screen changes.
+   #433 — optional opts.localMatch(q) returns the app's OWN pins whose name
+   matches ({name, sub, lat, lng, pin}). They are listed ABOVE the Photon rows,
+   shown at once (they need no network), and survive a Photon failure. Only the
+   main map passes it; the two draft-pin hosts (#17, #194) are describing a real
+   address and keep the pure address search. */
+function attachPlaceSuggest(inputId, onPick, opts){
+  opts = opts || {};
   const input = document.getElementById(inputId);
   if(!input || input._suggestBound) return null;
   input._suggestBound = true;
@@ -11156,19 +11277,23 @@ function attachPlaceSuggest(inputId, onPick){
     openWith('<div class="place-suggest-status">' + msg + '</div>');
   }
 
-  function renderResults(){
+  /* #433 — `trailing` is an optional status line under the rows (the
+     "still looking up addresses" / "address search unreachable" notes while
+     pin matches are already showing). It is a plain div, not a button, so it
+     never takes a data-i and the tap/Enter paths cannot select it. */
+  function renderResults(trailing){
     if(!st.results.length){
       renderStatus('No match for that. Try a city, a full address, or a zip code.');
       return;
     }
     const rows = st.results.map((r, i)=>
-      '<button type="button" class="place-suggest-row' + (i === st.active ? ' active' : '') +
+      '<button type="button" class="place-suggest-row' + (r.pin ? ' is-pin' : '') + (i === st.active ? ' active' : '') +
       '" role="option" aria-selected="' + (i === st.active) + '" id="' + list.id + '-opt' + i +
       '" data-i="' + i + '">' +
       '<span class="place-suggest-title">' + escapeHtml(r.name) + '</span>' +
       (r.sub ? '<span class="place-suggest-sub">' + escapeHtml(r.sub) + '</span>' : '') +
       '</button>'
-    ).join('');
+    ).join('') + (trailing ? '<div class="place-suggest-status">' + trailing + '</div>' : '');
     openWith(rows);
     syncActive();
   }
@@ -11210,11 +11335,28 @@ function attachPlaceSuggest(inputId, onPick){
     const my = ++st.seq;
     if(st.ctrl) st.ctrl.abort();
     st.ctrl = new AbortController();
-    renderStatus('Searching…');
+    /* #433 — pin matches first, synchronously, so a pin shows before Photon
+       answers. A throw in the matcher must never break address search. */
+    let local = [];
+    if(typeof opts.localMatch === 'function'){
+      try{ local = opts.localMatch(q) || []; }catch(e){ console.warn('[#433] pin match failed', e); local = []; }
+    }
+    if(local.length){
+      st.results = local;
+      st.active = 0;
+      renderResults('Looking up addresses…');
+    }else{
+      renderStatus('Searching…');
+    }
     try{
-      const results = await photonSearch(q, st.ctrl.signal);
+      const found = await photonSearch(q, st.ctrl.signal);
       if(my !== st.seq) return;            // a newer keystroke already won
       st.failed = false;
+      /* #433 — drop an address row that is the same place as a pin row above it
+         (same normalised name within CAPTURED_TWIN_M, the file's "same place"). */
+      const results = local.concat(found.filter(r => !local.some(p =>
+        normName(p.name) === normName(r.name) &&
+        haversine(p.lat, p.lng, r.lat, r.lng) <= CAPTURED_TWIN_M)));
       st.results = results;
       st.active = results.length ? 0 : -1; // pre-arm Enter on the top hit
       renderResults();
@@ -11222,6 +11364,13 @@ function attachPlaceSuggest(inputId, onPick){
       if(err && err.name === 'AbortError') return;
       if(my !== st.seq) return;
       st.failed = true;
+      if(local.length){
+        /* Pins still work offline-from-Photon; keep them and say the rest is down. */
+        st.results = local;
+        st.active = 0;
+        renderResults('Address search is unreachable right now.');
+        return;
+      }
       renderStatus('Search is unreachable right now. Press <b>Enter</b> to try the basic lookup, or pan the map instead.');
     }
   }
@@ -12696,6 +12845,24 @@ async function submitGem(){
    gravestone, not an unstarted idea — do not re-propose it as-is. The version
    that could ship is submitter-facing copy chosen from a small fixed set, not
    a model sentence passed through. See loadMyGems() for the other half. */
+/* #473 — ONE MAP FROM submissions.status TO WHAT THE SUBMITTER SEES. The old
+   renderer tested approved and rejected and gave EVERY other value the grey
+   "Pending review", so the 5 user rows #312 retired read as pending forever —
+   a promise of a review that will never happen. `status` has no CHECK
+   constraint (409 baseline), so an unknown value is possible and gets a neutral
+   label, NEVER "pending": wrongly saying "we'll look at it" is the bug this row
+   fixed. Merged rows mirror their canonical's status (#470), so they need no
+   entry. Retired copy is plain and not a verdict on the gem — retirement was a
+   cleanup (#312), not a rejection. */
+function submissionStatusMeta(status){
+  switch(status){
+    case 'approved': return {tag:'Live',         line:'Approved',                  color:'#D4AF37', tagBg:'rgba(212,175,55,0.2)', pin:'#D4AF37'};
+    case 'rejected': return {tag:'Not approved', line:"This one wasn't approved", color:'#C0524C', tagBg:'rgba(192,82,76,0.2)',  pin:'#C0524C'};
+    case 'pending':  return {tag:'Pending',      line:'Pending review',            color:'#9FB3A4', tagBg:'rgba(159,179,164,0.2)', pin:'#EDE9DD'};
+    case 'retired':  return {tag:'Retired',      line:'No longer on the map',      color:'#8A9A90', tagBg:'rgba(138,154,144,0.18)', pin:'#6F7D75'};
+    default:         return {tag:'Closed',       line:'Not on the map',            color:'#8A9A90', tagBg:'rgba(138,154,144,0.18)', pin:'#6F7D75'};
+  }
+}
 function renderGemSubmissions(){
   const el = document.getElementById('gem-submissions-section');
   if(!el) return;
@@ -12722,7 +12889,9 @@ function renderGemSubmissions(){
     return;
   }
 
-  const pending  = subs.filter(g=>g.status!=='approved' && g.status!=='rejected').length;
+  /* #473 — COUNT PENDING EXPLICITLY. This used to be "anything not approved and
+     not rejected", which counted a retired row as pending in the status line. */
+  const pending  = subs.filter(g=>g.status==='pending').length;
   const approved = subs.filter(g=>g.status==='approved').length;
   const bits = [];
   if(pending)  bits.push(pending + ' pending');
@@ -12730,21 +12899,14 @@ function renderGemSubmissions(){
   const sub = bits.length ? ' <span class="gs-sub">· ' + bits.join(' · ') + '</span>' : '';
 
   const rows = subs.map(g=>{
+    const m = submissionStatusMeta(g.status);
     const isApproved = g.status==='approved';
-    const isRejected = g.status==='rejected';
-    const pinColor = isApproved ? '#D4AF37' : (isRejected ? '#C0524C' : '#EDE9DD');
-    let tag = '';
-    if(isApproved)      tag = ' <span class="external-tag" style="background:rgba(212,175,55,0.2);color:#D4AF37;">Live</span>';
-    else if(isRejected) tag = ' <span class="external-tag" style="background:rgba(192,82,76,0.2);color:#C0524C;">Not approved</span>';
-    else                tag = ' <span class="external-tag" style="background:rgba(159,179,164,0.2);color:#9FB3A4;">Pending</span>';
-    const line = isApproved ? 'Approved'
-               : isRejected ? "This one wasn't approved"
-               : 'Pending review';
+    const tag = ' <span class="external-tag" style="background:' + m.tagBg + ';color:' + m.color + ';">' + m.tag + '</span>';
     return `<div class="mode-card" style="cursor:default;">
-      <div class="icon-wrap"><div class="blaze">${pinSVG(pinColor, isApproved)}</div></div>
+      <div class="icon-wrap"><div class="blaze">${pinSVG(m.pin, isApproved)}</div></div>
       <div style="flex:1;min-width:0;">
         <h3>${escapeHtml(g.name)}${tag}</h3>
-        <p>${line}</p>
+        <p>${m.line}</p>
       </div>
     </div>`;
   }).join('');
@@ -13037,6 +13199,13 @@ function consumeSharedSpot(param, isSignInReturn, nearReturn){
     openSpotSheet(); // no-op until the first fix sets state.me
     return;
   }
+  arriveAtSpot(sp);
+}
+/* #433 — the browse-arrival half of consumeSharedSpot, extracted UNCHANGED so the
+   map search box (goToSearchedPin) lands on a pin exactly the way a shared-spot
+   link does: one arrival path, not two that drift. `sp` is the decoded payload
+   shape {name, lat, lng, category, gemId, desc}. */
+function arriveAtSpot(sp){
   enterLocationBrowseMode({ lat:sp.lat, lng:sp.lng }, sp.name);
   /* #26 — the browse hunt runs under key 'local_v1', so onLocation()'s first-fix
      block (`key.startsWith('local_') -> startLocalHunt({player})`) would rebuild
