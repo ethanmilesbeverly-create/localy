@@ -322,13 +322,14 @@
     background:var(--surface-2);
     border-left-color:var(--orange);
   }
-  /* #433 — a row that is one of the app's own pins, not an address. The small
-     orange dot before the title is the only marker (plus "On the map" in the
-     sub line, so colour is never the sole signal). */
-  .place-suggest-row.is-pin .place-suggest-title::before{
-    content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
-    background:var(--orange);margin-right:7px;vertical-align:middle;position:relative;top:-1px;
-  }
+  /* #433 — a row that is one of the app's own pins, not an address. Its sub line
+     MIRRORS THE PIN SHEET'S META ROW (fillPinSheet, #236): category-coloured dot
+     + category, then "N mi away", then "Visited" in moss when captured. The
+     category word, not the dot colour, is what tells a pin from an address, so
+     colour is never the only signal. */
+  .place-suggest-row.is-pin .ps-cat-dot{width:8px;height:8px;border-radius:50%;display:inline-block;
+    margin-right:6px;vertical-align:middle;position:relative;top:-1px;}
+  .place-suggest-row.is-pin .psg-visited{color:var(--moss);font-weight:600;}
   .place-suggest-title{
     display:block;
     font-size:14.5px;font-weight:600;color:var(--text);
@@ -8528,15 +8529,42 @@ function matchLoadedPins(q){
     hits.push({p, inHunt, tier, d});
   }
   hits.sort((a,b) => a.tier - b.tier || a.d - b.d);
-  return hits.slice(0, SUGGEST_LIMIT).map(({p, inHunt, d}) => {
-    let kind = 'Spot';
+  /* #433 — the sub line reads exactly like the pin sheet's meta row: the same
+     colour (pinKindColor || pinSheetColor), the same label (pinKindLabel ||
+     PIN_CAT_LABEL || 'Spot'), the same "N mi away" source (the real fix, else
+     the approximate distance from the marker, #416 25m), and "Visited" when the
+     pin is captured. A pin already in the hunt takes found/distance straight from
+     currentTargetsSorted() so the dropdown can never disagree with its sheet;
+     any other pin checks the shared capture buckets (sharedCapturedIds). */
+  const sorted = currentTargetsSorted();
+  const byId = new Map(sorted.map(t => [t.id, t]));
+  let shared = null;
+  try{ shared = sharedCapturedIds(); }catch(_){ shared = new Set(); }
+  const mk = state.meMarker && state.meMarker.getLatLng && state.meMarker.getLatLng();
+  const from = state.me || (mk ? {lat:mk.lat, lng:mk.lng} : null);
+  return hits.slice(0, SUGGEST_LIMIT).map(({p, inHunt}) => {
+    const live = inHunt ? byId.get(p.id) : null;
+    let kind = 'Spot', dot = '#E8622C';
     try{ kind = pinKindLabel(p) || PIN_CAT_LABEL[p.category] || 'Spot'; }catch(_){}
-    const bits = ['On the map', kind];
-    if(anchor) bits.push(fmtDist(d));
-    return { name:p.name, sub:bits.join(' · '), lat:p.lat, lng:p.lng,
+    try{ dot = pinKindColor(p) || pinSheetColor(p); }catch(_){}
+    let dist = live ? ((typeof live.dist === 'number') ? live.dist : live._approxDist) : undefined;
+    if(typeof dist !== 'number' && from) dist = haversine(from.lat, from.lng, p.lat, p.lng);
+    const visited = live ? !!live.found : shared.has(p.id);
+    return { name:p.name, lat:p.lat, lng:p.lng, kind, dot, dist, visited,
              pin:{ id:p.id, inHunt, name:p.name, lat:p.lat, lng:p.lng,
                    category:p.category || null, gemId:p.gemId || null, desc:p.desc || '' } };
   });
+}
+/* #433 — the pin row's sub line, built as HTML because it carries the coloured
+   dot and the moss "Visited". Every text part is escaped; the colour comes from
+   the app's own palette constants, never from pin data. */
+function pinSuggestMeta(r){
+  const parts = [
+    '<span class="ps-cat-dot" style="background:' + r.dot + '"></span>' + escapeHtml(r.kind)
+  ];
+  if(typeof r.dist === 'number') parts.push(escapeHtml(fmtDist(r.dist) + ' away'));
+  if(r.visited) parts.push('<span class="psg-visited">Visited</span>');
+  return '<span class="place-suggest-sub">' + parts.join(' · ') + '</span>';
 }
 /* #433 — a picked pin. Already on the map → open its sheet in place (the nearby
    list's own path, openPinSheetById: flies to it, keeps "you are here"). Not in
@@ -8804,7 +8832,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.30a';
+const APP_VERSION = '2026.09.30b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -11291,7 +11319,8 @@ function attachPlaceSuggest(inputId, onPick, opts){
       '" role="option" aria-selected="' + (i === st.active) + '" id="' + list.id + '-opt' + i +
       '" data-i="' + i + '">' +
       '<span class="place-suggest-title">' + escapeHtml(r.name) + '</span>' +
-      (r.sub ? '<span class="place-suggest-sub">' + escapeHtml(r.sub) + '</span>' : '') +
+      (r.pin ? pinSuggestMeta(r)
+             : (r.sub ? '<span class="place-suggest-sub">' + escapeHtml(r.sub) + '</span>' : '')) +
       '</button>'
     ).join('') + (trailing ? '<div class="place-suggest-status">' + trailing + '</div>' : '');
     openWith(rows);
