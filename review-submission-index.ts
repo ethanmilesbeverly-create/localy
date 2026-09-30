@@ -39,6 +39,52 @@ const MODEL_SOURCE: "secret" | "fallback" = MODEL_ENV ? "secret" : "fallback";
 const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
 const RETRY_DELAY_MS = 1200;
 
+// Returned on every response (and the ?models GET) so a deploy can be
+// confirmed from the response itself, not only the dashboard timestamp.
+// Bump on every change to this file.
+const GATE_VERSION = "gate-471-472-v2";
+
+// --- #471: keep the part of a Gemini error that names the cause -------------
+// Before #471 a non-2xx wrote `raw.slice(0, 200)`. Google's error body is JSON
+// whose `error.details` carries a QuotaFailure (quotaId / quotaValue / the
+// model) and a RetryInfo (retryDelay) — AFTER the long `message`, so the slice
+// cut off exactly the fields that say which limit was hit (#470 took a key swap
+// to learn what the row could have said). Now: parse the body and write a
+// compact summary, cause first, message last so a length cap only trims the
+// message. Falls back to the old raw slice when the body is not JSON. The key
+// is never in Google's error body, and nothing here reads it.
+const GEMINI_ERR_MAX = 300;
+
+function summarizeGeminiError(status: number, raw: string): string {
+  let body: any = null;
+  try { body = JSON.parse(raw); } catch (_e) { /* not JSON */ }
+  if (Array.isArray(body)) body = body[0];   // some endpoints wrap it in [ ]
+  const err = body && typeof body === "object" ? body.error : null;
+  if (!err || typeof err !== "object") {
+    return `gemini ${status} (model ${MODEL}): ${String(raw ?? "").slice(0, 200)}`;
+  }
+  const parts: string[] = [
+    `gemini ${status}${err.status ? " " + String(err.status) : ""} (model ${MODEL})`,
+  ];
+  const details = Array.isArray(err.details) ? err.details : [];
+  for (const d of details) {
+    const t = String(d?.["@type"] ?? "");
+    if (t.endsWith("QuotaFailure") && Array.isArray(d.violations)) {
+      for (const v of d.violations.slice(0, 2)) {
+        const qid = v?.quotaId || v?.quotaMetric || "?";
+        const val = v?.quotaValue != null ? `=${v.quotaValue}` : "";
+        const mdl = v?.quotaDimensions?.model ? ` [${v.quotaDimensions.model}]` : "";
+        parts.push(`quota ${qid}${val}${mdl}`);
+      }
+    } else if (t.endsWith("RetryInfo") && d.retryDelay) {
+      parts.push(`retry in ${d.retryDelay}`);
+    }
+  }
+  const msg = String(err.message ?? "").replace(/\s+/g, " ").trim();
+  if (msg) parts.push(msg.slice(0, 120));
+  return parts.join(" | ").slice(0, GEMINI_ERR_MAX);
+}
+
 // --- #114: the live display buckets the classifier may emit -----------------
 // The gate now CLASSIFIES (it no longer takes the user's category as input): the
 // model picks the category and this Set is the allow-list its answer is
@@ -515,147 +561,39 @@ async function resolveAndStoreDescription(
   await supabase.from("submissions").update(patch).eq("id", sub.id);
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+// =====================================================================
+// #472 — THE GATE, SPLIT INTO STEPS SO A RETRY CAN REUSE IT.
+//
+// Before #472 all of this lived inline in Deno.serve and ran once per row,
+// from the client, right after insert. A row that failed open (#3 — Gemini
+// 429 / 5xx / network) then sat in pending until someone noticed (Reebie,
+// #470). The steps are now functions so the scheduled retry sweep
+// (action "retry_failed", below) runs EXACTLY the same gate — same prompt,
+// same parse, same copy-edit guard, same #344 resolve — never a second copy.
+//
+// processSubmission() = dedup (optional) + gate + guarded write.
+// Behaviour on the normal submit path is unchanged apart from the write
+// guard (see gateWriteGuard).
+// =====================================================================
 
-  // --- #3(a) helper: list models the production key can actually see --------
-  if (req.method === "GET" && new URL(req.url).searchParams.has("models")) {
-    try {
-      const r = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models",
-        { headers: { "x-goog-api-key": Deno.env.get("GEMINI_API_KEY")! } },
-      );
-      const body = await r.json();
-      const names = (body?.models ?? [])
-        .filter((m: any) => (m.supportedGenerationMethods ?? []).includes("generateContent"))
-        .map((m: any) => String(m.name).replace(/^models\//, ""));
-      return json(
-        {
-          pinned: MODEL,
-          pinned_visible: names.includes(MODEL),
-          model_source: MODEL_SOURCE,
-          available: names,
-        },
-        r.status,
-      );
-    } catch (e) {
-      return json({ error: String(e) }, 500);
-    }
-  }
+type GateResult = {
+  decision: string;
+  reason: string;
+  confidence: number | null;
+  aiStatus: AiStatus;
+  httpStatus: number | null;
+  attempts: number;
+  category: string | null;
+  nameClean: string | null;
+  descClean: string | null;
+  nameCleanWhy: string;
+  descCleanWhy: string;
+};
 
-  try {
-    const { id } = await req.json();
-    if (!id) return json({ error: "missing id" }, 400);
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-
-    // #31: lat/lng/submitted_by added for the duplicate check below.
-    const { data: sub, error: readErr } = await supabase
-      .from("submissions")
-      .select("id,name,description,category,lat,lng,submitted_by")
-      .eq("id", id)
-      .single();
-    if (readErr || !sub) return json({ error: "submission not found" }, 404);
-
-    /* =================================================================
-       #31 — DUPLICATE CHECK RUNS BEFORE THE GATE, AND THE ORDER IS THE
-       DESIGN, not an optimisation. A duplicate must not lose its vouch to
-       an unrelated gate verdict, and a merge costs zero Gemini calls. A
-       merged submission reports back EXACTLY like any other and carries a
-       REAL status (its canonical's), with `merged_into` the sole marker;
-       every map read filters `merged_into IS NULL`. The gate did not run,
-       so no ai_decision/ai_status/ai_model/category is written for a
-       merged row — a merged row is filtered off the map, so its (now
-       absent) category is never rendered and cannot hit the #68 trap.
-       ================================================================= */
-    // #31 deterministic matcher first (string + proximity, zero Gemini calls).
-    // #228: only when it misses, try the semantic same-place fallback — it fires
-    // just one strict "same place?" call, and only when a near-miss candidate
-    // exists, so the common path stays call-free.
-    let dup:
-      | { row: any; meters: number; via?: "semantic"; confidence?: number }
-      | null = await findDuplicate(supabase, sub);
-    if (!dup) {
-      const sem = await findSemanticDuplicate(supabase, sub);
-      if (sem) dup = { row: sem.row, meters: sem.meters, via: "semantic", confidence: sem.confidence };
-    }
-    if (dup) {
-      const canonical = dup.row;
-
-      /* Record the vouch. Skipped when there is no submitter to credit
-         (submitted_by nullable since #82/#124) or on a self-second (one
-         person submitting their own place twice is not a signal). */
-      if (sub.submitted_by && sub.submitted_by !== canonical.submitted_by) {
-        await supabase.from("gem_seconds").upsert(
-          {
-            submission_id: canonical.id,
-            user_id: sub.submitted_by,
-            source_submission_id: sub.id,
-          },
-          { onConflict: "submission_id,user_id", ignoreDuplicates: true },
-        );
-      }
-
-      /* CREDIT PROMOTION (2026-08-13) — a user submission that folds into an
-         UNCREDITED canonical (a seed: source seed:reddit, submitted_by NULL)
-         promotes that pin to a human-credited gem by stamping the merging
-         submitter onto the canonical. The positioning bet (#35) is that every
-         recommendation traces to a real person; a seed a real person just
-         re-found should read "Submitted by X", not stay creditless.
-           - Only when the canonical has NO credit yet — the FIRST human to find
-             a seed gets the credit; later duplicates are vouches (the gem_seconds
-             upsert above), never overwrites.
-           - `.is("submitted_by", null)` is the guard AND the race-safety: two
-             concurrent merges → only the first stamps, the second no-ops.
-           - Credit still resolves through submitted_by at read time
-             (loadApprovedGems -> fetchGemCredits), so NO client change is needed
-             and #82's anonymisation still removes it by nulling the column.
-           - A canonical that is already a user gem (submitted_by set) is left
-             untouched; a submitter with no id (nullable since #82/#124) can't
-             promote anything. This is the credit sibling of #139 (a merged dup
-             carrying better DATA than its canonical, surfaced) — here the better
-             datum is the human behind it. */
-      if (sub.submitted_by && !canonical.submitted_by) {
-        await supabase
-          .from("submissions")
-          .update({ submitted_by: sub.submitted_by })
-          .eq("id", canonical.id)
-          .is("submitted_by", null);
-      }
-
-      const mirrored = canonical.status === "approved" ? "approved" : "pending";
-
-      const { error: mErr } = await supabase
-        .from("submissions")
-        .update({
-          status: mirrored,
-          merged_into: canonical.id,
-          ai_reviewed_at: new Date().toISOString(),
-        })
-        .eq("id", id);
-      if (mErr) return json({ error: mErr.message }, 500);
-
-      return json({
-        decision: mirrored === "approved" ? "approve" : "review",
-        reason: dup.via === "semantic"
-          ? "merged into an existing pin (semantic same-place match, gate not run)"
-          : "merged into an existing pin (gate not run)",
-        status: mirrored,
-        duplicate: true,
-        merged_into: canonical.id,
-        meters: Math.round(dup.meters),
-        // #228: how the match was made, so QA and the dashboard can tell a
-        // deterministic fold from a semantic one, and at what confidence.
-        match_via: dup.via ?? "deterministic",
-        match_confidence: dup.confidence ?? null,
-        recommended_by_count: await secondsCount(supabase, canonical.id),
-        gate_skipped: true,
-      });
-    }
-
+/* Calls Gemini once (with the existing single 1.2 s retry on a transient
+   status) and interprets the answer. Never throws; every failure mode lands
+   in aiStatus exactly as before #472. */
+async function runGate(sub: any): Promise<GateResult> {
     // #114: the gate now also CLASSIFIES. `category` is an ordered list, most
     // confident first (#80); the FIRST valid bucket is stored. The user's own
     // category is NO LONGER fed in — the model decides. See VALID_CATEGORIES.
@@ -738,7 +676,9 @@ Description: ${sub.description ?? ""}`;
 
       if (!g!.ok) {
         aiStatus = "http_error";
-        reason = `gemini ${g!.status} (model ${MODEL}): ${raw.slice(0, 200)}`;
+        // #471: keep the part of Google's error that names the cause (which
+        // quota, its limit, when to retry) instead of the first 200 raw chars.
+        reason = summarizeGeminiError(g!.status, raw);
       } else {
         const data = JSON.parse(raw);
         const parts = data?.candidates?.[0]?.content?.parts ?? [];
@@ -800,64 +740,432 @@ Description: ${sub.description ?? ""}`;
       reason = `review error: ${String(e).slice(0, 250)}`;
     }
 
-    const status = decision === "approve" ? "approved"
-                 : decision === "reject" ? "rejected" : "pending";
+    return {
+      decision, reason, confidence, aiStatus, httpStatus, attempts, category,
+      nameClean, descClean, nameCleanWhy, descCleanWhy,
+    };
+}
 
-    const { error: upErr } = await supabase
-      .from("submissions")
-      .update({
-        status,
-        ai_decision: decision,
-        ai_reason: reason,
-        // #3(c): these are what make the pending queue readable.
-        ai_status: aiStatus,
-        ai_http_status: httpStatus,
-        ai_model: MODEL,
-        // #70(B1): "secret" or "fallback".
-        ai_model_source: MODEL_SOURCE,
-        ai_confidence: confidence,
+/* #472 — THE WRITE GUARD. Every write this function makes to a submission is
+   conditional on the row still being in the state the gate read it in. Before
+   #472 the writes were unconditional, so (a) a retry could overwrite a row the
+   operator had approved or rejected in the meantime, and (b) anyone able to
+   call this function with an id could re-gate ANY row — un-approving a live
+   gem, or re-approving a gem that reports had pulled back to pending (#347).
+   The guard is the fence for both:
+     - status still 'pending'          (never touch an operator decision)
+     - reviewed_at still null           (approve/reject_submission stamp it)
+     - merged_into still null           (a merged row follows its canonical)
+     - ai_status unchanged since read   (submit path: null = never gated;
+                                         retry path: the failure it was picked for)
+   A write that matches no row is reported as `skipped`, never an error. */
+function gateWriteGuard(q: any, aiStatusWas: string | null) {
+  q = q.eq("status", "pending").is("reviewed_at", null).is("merged_into", null);
+  return aiStatusWas === null ? q.is("ai_status", null) : q.eq("ai_status", aiStatusWas);
+}
+
+/* Dedup (unless skipped) -> gate -> guarded write -> background resolve.
+   Returns the JSON body the caller sends back. `retry` is set only by the
+   sweep: it bumps ai_retry_count on the row. */
+async function processSubmission(
+  supabase: any,
+  sub: any,
+  opts: { skipDedup: boolean; aiStatusWas: string | null; retry?: { count: number } },
+): Promise<Record<string, unknown>> {
+  const id = sub.id;
+
+  if (!opts.skipDedup) {
+    /* =================================================================
+       #31 — DUPLICATE CHECK RUNS BEFORE THE GATE, AND THE ORDER IS THE
+       DESIGN, not an optimisation. A duplicate must not lose its vouch to
+       an unrelated gate verdict, and a merge costs zero Gemini calls. A
+       merged submission reports back EXACTLY like any other and carries a
+       REAL status (its canonical's), with `merged_into` the sole marker;
+       every map read filters `merged_into IS NULL`. The gate did not run,
+       so no ai_decision/ai_status/ai_model/category is written for a
+       merged row — a merged row is filtered off the map, so its (now
+       absent) category is never rendered and cannot hit the #68 trap.
+       ================================================================= */
+    // #31 deterministic matcher first (string + proximity, zero Gemini calls).
+    // #228: only when it misses, try the semantic same-place fallback — it fires
+    // just one strict "same place?" call, and only when a near-miss candidate
+    // exists, so the common path stays call-free.
+    let dup:
+      | { row: any; meters: number; via?: "semantic"; confidence?: number }
+      | null = await findDuplicate(supabase, sub);
+    if (!dup) {
+      const sem = await findSemanticDuplicate(supabase, sub);
+      if (sem) dup = { row: sem.row, meters: sem.meters, via: "semantic", confidence: sem.confidence };
+    }
+    if (dup) {
+      const canonical = dup.row;
+      const mirrored = canonical.status === "approved" ? "approved" : "pending";
+
+      /* #472: the merge write goes FIRST and is guarded, so the vouch and the
+         credit promotion below only happen when this row really was merged
+         (before #472 they ran before an unconditional write). */
+      const patch: Record<string, unknown> = {
+        status: mirrored,
+        merged_into: canonical.id,
         ai_reviewed_at: new Date().toISOString(),
-        // #114: the AI-chosen bucket is authoritative over the (now-removed)
-        // #gem-category dropdown. Falls back to whatever the row already had if
-        // the gate produced no valid category (fail-open): pre-dropdown-removal
-        // that is the submitter's pick; after removal it is null, and the
-        // approve_submission backstop (#68) holds an unclassified row out of
-        // 'approved' until an operator sets one.
-        category: category ?? sub.category,
-        // #12: cleaned text lives in its OWN columns — the raw user words are
-        // never touched here, so the original is always recoverable. null means
-        // the guard declined the model's clean value and the raw text stands.
-        name_clean: nameClean,
-        description_clean: descClean,
-      })
-      .eq("id", id);
-    if (upErr) return json({ error: upErr.message }, 500);
+      };
+      if (opts.retry) patch.ai_retry_count = opts.retry.count + 1;
+      const { data: mRows, error: mErr } = await gateWriteGuard(
+        supabase.from("submissions").update(patch).eq("id", id),
+        opts.aiStatusWas,
+      ).select("id");
+      if (mErr) return { error: mErr.message, _http: 500 };
+      if (!mRows || !mRows.length) {
+        return { skipped: true, reason: "row changed while it was being reviewed — left alone", gate_version: GATE_VERSION };
+      }
 
-    // #344 — resolve + persist this gem's sourced description at the gate, for
-    // any gem that can reach the map (approve/review; a rejected gem never
-    // shows). Scheduled in the BACKGROUND so the response returns at its
-    // current speed and the submitter never waits on the resolve.
-    if (decision === "approve" || decision === "review") {
-      const task = resolveAndStoreDescription(supabase, {
-        id, name: sub.name, description: sub.description, lat: sub.lat, lng: sub.lng,
-      });
-      const ER = (globalThis as any).EdgeRuntime;
-      if (ER && typeof ER.waitUntil === "function") ER.waitUntil(task);
-      else await task; // no background runtime -> accept the added latency inline
+      /* Record the vouch. Skipped when there is no submitter to credit
+         (submitted_by nullable since #82/#124) or on a self-second (one
+         person submitting their own place twice is not a signal). */
+      if (sub.submitted_by && sub.submitted_by !== canonical.submitted_by) {
+        await supabase.from("gem_seconds").upsert(
+          {
+            submission_id: canonical.id,
+            user_id: sub.submitted_by,
+            source_submission_id: sub.id,
+          },
+          { onConflict: "submission_id,user_id", ignoreDuplicates: true },
+        );
+      }
+
+      /* CREDIT PROMOTION (2026-08-13) — a user submission that folds into an
+         UNCREDITED canonical (a seed: source seed:reddit, submitted_by NULL)
+         promotes that pin to a human-credited gem by stamping the merging
+         submitter onto the canonical. The positioning bet (#35) is that every
+         recommendation traces to a real person; a seed a real person just
+         re-found should read "Submitted by X", not stay creditless.
+           - Only when the canonical has NO credit yet — the FIRST human to find
+             a seed gets the credit; later duplicates are vouches (the gem_seconds
+             upsert above), never overwrites.
+           - `.is("submitted_by", null)` is the guard AND the race-safety: two
+             concurrent merges → only the first stamps, the second no-ops.
+           - Credit still resolves through submitted_by at read time
+             (loadApprovedGems -> fetchGemCredits), so NO client change is needed
+             and #82's anonymisation still removes it by nulling the column.
+           - A canonical that is already a user gem (submitted_by set) is left
+             untouched; a submitter with no id (nullable since #82/#124) can't
+             promote anything. This is the credit sibling of #139 (a merged dup
+             carrying better DATA than its canonical, surfaced) — here the better
+             datum is the human behind it. */
+      if (sub.submitted_by && !canonical.submitted_by) {
+        await supabase
+          .from("submissions")
+          .update({ submitted_by: sub.submitted_by })
+          .eq("id", canonical.id)
+          .is("submitted_by", null);
+      }
+
+      return {
+        decision: mirrored === "approved" ? "approve" : "review",
+        reason: dup.via === "semantic"
+          ? "merged into an existing pin (semantic same-place match, gate not run)"
+          : "merged into an existing pin (gate not run)",
+        status: mirrored,
+        duplicate: true,
+        merged_into: canonical.id,
+        meters: Math.round(dup.meters),
+        // #228: how the match was made, so QA and the dashboard can tell a
+        // deterministic fold from a semantic one, and at what confidence.
+        match_via: dup.via ?? "deterministic",
+        match_confidence: dup.confidence ?? null,
+        recommended_by_count: await secondsCount(supabase, canonical.id),
+        gate_skipped: true,
+        gate_version: GATE_VERSION,
+      };
+    }
+  }
+
+  const g = await runGate(sub);
+  const status = g.decision === "approve" ? "approved"
+               : g.decision === "reject" ? "rejected" : "pending";
+
+  const patch: Record<string, unknown> = {
+    status,
+    ai_decision: g.decision,
+    ai_reason: g.reason,
+    // #3(c): these are what make the pending queue readable.
+    ai_status: g.aiStatus,
+    ai_http_status: g.httpStatus,
+    ai_model: MODEL,
+    // #70(B1): "secret" or "fallback".
+    ai_model_source: MODEL_SOURCE,
+    ai_confidence: g.confidence,
+    ai_reviewed_at: new Date().toISOString(),
+    // #114: the AI-chosen bucket is authoritative over the (now-removed)
+    // #gem-category dropdown. Falls back to whatever the row already had if
+    // the gate produced no valid category (fail-open): pre-dropdown-removal
+    // that is the submitter's pick; after removal it is null, and the
+    // approve_submission backstop (#68) holds an unclassified row out of
+    // 'approved' until an operator sets one.
+    category: g.category ?? sub.category,
+    // #12: cleaned text lives in its OWN columns — the raw user words are
+    // never touched here, so the original is always recoverable. null means
+    // the guard declined the model's clean value and the raw text stands.
+    name_clean: g.nameClean,
+    description_clean: g.descClean,
+  };
+  // #472: only the sweep counts attempts (column added by 472_review_retry.sql).
+  if (opts.retry) patch.ai_retry_count = opts.retry.count + 1;
+
+  const { data: upRows, error: upErr } = await gateWriteGuard(
+    supabase.from("submissions").update(patch).eq("id", id),
+    opts.aiStatusWas,
+  ).select("id");
+  if (upErr) return { error: upErr.message, _http: 500 };
+  if (!upRows || !upRows.length) {
+    return { skipped: true, reason: "row changed while it was being reviewed — left alone", gate_version: GATE_VERSION };
+  }
+
+  // #344 — resolve + persist this gem's sourced description at the gate, for
+  // any gem that can reach the map (approve/review; a rejected gem never
+  // shows). Scheduled in the BACKGROUND so the response returns at its
+  // current speed and the submitter never waits on the resolve.
+  if (g.decision === "approve" || g.decision === "review") {
+    const task = resolveAndStoreDescription(supabase, {
+      id, name: sub.name, description: sub.description, lat: sub.lat, lng: sub.lng,
+    });
+    const ER = (globalThis as any).EdgeRuntime;
+    if (ER && typeof ER.waitUntil === "function") ER.waitUntil(task);
+    else await task; // no background runtime -> accept the added latency inline
+  }
+
+  return {
+    decision: g.decision, reason: g.reason, confidence: g.confidence, status,
+    // #114: expose the stored bucket so QA can see what the gate chose.
+    category: g.category ?? sub.category ?? null,
+    ai_status: g.aiStatus, http_status: g.httpStatus,
+    model: MODEL, model_source: MODEL_SOURCE, attempts: g.attempts,
+    // #12: whether each cleaned value was applied, and the guard's verdict.
+    clean: {
+      name: { applied: g.nameClean !== null, why: g.nameCleanWhy },
+      description: { applied: g.descClean !== null, why: g.descCleanWhy },
+    },
+    gate_version: GATE_VERSION,
+  };
+}
+
+// =====================================================================
+// #472 — THE RETRY SWEEP. Called every 30 minutes by the pg_cron job
+// `review-retry-sweep` (472_review_retry.sql) through pg_net, with the
+// service-role JWT from Vault as the bearer. Nothing else may call it: the
+// action is refused unless the bearer IS this function's own service-role
+// key, so a signed-in user cannot trigger Gemini spend.
+//
+// WHICH ROWS (all must hold):
+//   status='pending', merged_into null, reviewed_at null (no operator has
+//   decided it), source='user', created in the last RETRY_WINDOW_DAYS,
+//   ai_retry_count < RETRY_MAX, and EITHER
+//     - ai_status='http_error' with a TRANSIENT status (429 / 5xx) — never
+//       400/403/404, those are config errors and fail every time (#3); or
+//     - ai_status='network_error' (never reached Google); or
+//     - ai_status null and ai_decision null, created > NEVER_GATED_GRACE_MS
+//       ago — the client's own call never landed (signal lost right after
+//       insert). This one gets the FULL path, dedup included, because dedup
+//       never ran for it.
+//   A genuine ai_status='ok' + decision='review' is a real outcome and is
+//   never picked. A report-pulled gem (#347) is never picked either: it was
+//   gated ok, or it carries reviewed_at from a hand approval.
+//
+// Failed-open rows skip dedup on retry: they already went through it at
+// submit time and were not merged, and re-running it now could fold an
+// OLDER row into a NEWER one (oldest-wins, #31).
+//
+// BACKOFF: a row is due RETRY_BASE_MS * 2^ai_retry_count after its last
+// attempt (ai_reviewed_at), capped at RETRY_CAP_MS — 30 m, 1 h, 2 h, 4 h,
+// 8 h, 12 h: six tries across ~28 h, which spans a daily quota reset.
+// CIRCUIT BREAKER: the first retry that fails again ends the batch, so a
+// quota that is still exhausted costs one call per sweep, not five.
+// =====================================================================
+const RETRY_MAX = 6;
+const RETRY_BATCH = 5;
+const RETRY_WINDOW_DAYS = 14;
+const RETRY_BASE_MS = 30 * 60 * 1000;
+const RETRY_CAP_MS = 12 * 60 * 60 * 1000;
+const NEVER_GATED_GRACE_MS = 10 * 60 * 1000;
+
+function retryDue(row: any, now: number): boolean {
+  if (row.ai_status === null) {
+    if (row.ai_decision !== null) return false;            // pre-telemetry row, not ours
+    return now - new Date(row.created_at).getTime() >= NEVER_GATED_GRACE_MS;
+  }
+  if (row.ai_status === "http_error" && !RETRY_STATUSES.has(Number(row.ai_http_status))) return false;
+  if (row.ai_status !== "http_error" && row.ai_status !== "network_error") return false;
+  const last = new Date(row.ai_reviewed_at ?? row.created_at).getTime();
+  const wait = Math.min(RETRY_BASE_MS * 2 ** (row.ai_retry_count ?? 0), RETRY_CAP_MS);
+  return now - last >= wait;
+}
+
+async function retrySweep(supabase: any): Promise<Record<string, unknown>> {
+  const since = new Date(Date.now() - RETRY_WINDOW_DAYS * 86400000).toISOString();
+  const { data, error } = await supabase
+    .from("submissions")
+    .select("id,name,description,category,lat,lng,submitted_by,status,ai_status,ai_http_status,ai_decision,ai_reviewed_at,ai_retry_count,created_at")
+    .eq("status", "pending")
+    .is("merged_into", null)
+    .is("reviewed_at", null)
+    .eq("source", "user")
+    .or("ai_status.in.(http_error,network_error),ai_status.is.null")
+    .gte("created_at", since)
+    .lt("ai_retry_count", RETRY_MAX)
+    .order("created_at", { ascending: true })
+    .limit(50);
+  if (error) return { error: error.message, _http: 500, gate_version: GATE_VERSION };
+
+  const now = Date.now();
+  const candidates = data ?? [];
+  const due = candidates.filter((r: any) => retryDue(r, now)).slice(0, RETRY_BATCH);
+
+  const results: Record<string, unknown>[] = [];
+  let stoppedEarly = false;
+  for (const row of due) {
+    const neverGated = row.ai_status === null;
+    const out = await processSubmission(supabase, row, {
+      skipDedup: !neverGated,
+      aiStatusWas: row.ai_status,
+      retry: { count: row.ai_retry_count ?? 0 },
+    });
+    results.push({
+      id: row.id,
+      was: neverGated ? "never_gated" : `${row.ai_status}${row.ai_http_status ? " " + row.ai_http_status : ""}`,
+      attempt: (row.ai_retry_count ?? 0) + 1,
+      now: out.skipped ? "skipped" : out.duplicate ? "merged" : `${out.ai_status}${out.http_status ? " " + out.http_status : ""}`,
+      status: out.status ?? null,
+      reason: typeof out.reason === "string" ? out.reason.slice(0, 160) : null,
+    });
+    if (out.error || (!out.skipped && !out.duplicate && out.ai_status !== "ok")) {
+      stoppedEarly = true;   // still failing — the next sweep tries again
+      break;
+    }
+  }
+
+  return {
+    gate_version: GATE_VERSION,
+    looked_at: candidates.length,
+    due: due.length,
+    retried: results.length,
+    stopped_early: stoppedEarly,
+    results,
+  };
+}
+
+/* #472 — IS THIS CALLER THE SERVICE ROLE?
+   v1 compared the bearer byte-for-byte with this function's injected
+   SUPABASE_SERVICE_ROLE_KEY. Live QA (2026-09-30) showed the Vault copy — the
+   dashboard's legacy service_role JWT, 219 chars — did NOT equal the injected
+   value, so the cron was refused. The two can legitimately differ (Supabase may
+   inject a different-format or rotated key), so the string compare is kept only
+   as the fast path. The authoritative test asks PostgREST: select a column that
+   only service_role holds a grant on (`submissions.ai_reason` — #276 locked the
+   moderation trail away from anon/authenticated). PostgREST verifies the token's
+   signature and role, so a user JWT or the publishable key is refused there,
+   and a valid service key is accepted in whatever format it comes. `limit=0`
+   reads no rows. The 403 carries a no-secret diagnostic (kind + length only). */
+async function serviceCaller(req: Request): Promise<{ ok: boolean; diag: Record<string, unknown> }> {
+  const auth = req.headers.get("Authorization") ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  const svc = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim();
+  const kind = (s: string) =>
+    !s ? "none" : s.startsWith("eyJ") ? "jwt" : s.startsWith("sb_secret_") ? "sb_secret"
+      : s.startsWith("sb_publishable_") ? "sb_publishable" : "other";
+  const diag: Record<string, unknown> = {
+    bearer_kind: kind(token), bearer_len: token.length,
+    env_kind: kind(svc), env_len: svc.length, via: "none",
+  };
+  if (!token) return { ok: false, diag };
+  if (svc && token === svc) { diag.via = "env_match"; return { ok: true, diag }; }
+  try {
+    const base = Deno.env.get("SUPABASE_URL");
+    const r = await fetch(`${base}/rest/v1/submissions?select=ai_reason&limit=0`, {
+      headers: { apikey: token, Authorization: `Bearer ${token}` },
+    });
+    diag.probe_status = r.status;
+    await r.body?.cancel();
+    if (r.ok) { diag.via = "postgrest_role"; return { ok: true, diag }; }
+  } catch (e) {
+    diag.probe_error = String(e).slice(0, 120);
+  }
+  return { ok: false, diag };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+
+  // --- #3(a) helper: list models the production key can actually see --------
+  if (req.method === "GET" && new URL(req.url).searchParams.has("models")) {
+    try {
+      const r = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models",
+        { headers: { "x-goog-api-key": Deno.env.get("GEMINI_API_KEY")! } },
+      );
+      const body = await r.json();
+      const names = (body?.models ?? [])
+        .filter((m: any) => (m.supportedGenerationMethods ?? []).includes("generateContent"))
+        .map((m: any) => String(m.name).replace(/^models\//, ""));
+      return json(
+        {
+          pinned: MODEL,
+          pinned_visible: names.includes(MODEL),
+          model_source: MODEL_SOURCE,
+          available: names,
+          gate_version: GATE_VERSION,
+        },
+        r.status,
+      );
+    } catch (e) {
+      return json({ error: String(e) }, 500);
+    }
+  }
+
+  try {
+    const body = await req.json().catch(() => ({}));
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    // --- #472: the scheduled retry sweep ------------------------------------
+    if (body?.action === "retry_failed") {
+      const who = await serviceCaller(req);
+      if (!who.ok) {
+        return json({ error: "forbidden", gate_version: GATE_VERSION, auth: who.diag }, 403);
+      }
+      const out = await retrySweep(supabase);
+      const code = typeof out._http === "number" ? out._http : 200;
+      delete out._http;
+      return json(out, code);
     }
 
-    return json({
-      decision, reason, confidence, status,
-      // #114: expose the stored bucket so QA can see what the gate chose.
-      category: category ?? sub.category ?? null,
-      ai_status: aiStatus, http_status: httpStatus,
-      model: MODEL, model_source: MODEL_SOURCE, attempts,
-      // #12: whether each cleaned value was applied, and the guard's verdict.
-      clean: {
-        name: { applied: nameClean !== null, why: nameCleanWhy },
-        description: { applied: descClean !== null, why: descCleanWhy },
-      },
-    });
+    // --- the normal path: the client, right after it inserts a gem ----------
+    const id = body?.id;
+    if (!id) return json({ error: "missing id", gate_version: GATE_VERSION }, 400);
+
+    // #31: lat/lng/submitted_by for the duplicate check. #472: status,
+    // ai_status, reviewed_at, merged_into for the once-only guard.
+    const { data: sub, error: readErr } = await supabase
+      .from("submissions")
+      .select("id,name,description,category,lat,lng,submitted_by,status,ai_status,reviewed_at,merged_into")
+      .eq("id", id)
+      .single();
+    if (readErr || !sub) return json({ error: "submission not found" }, 404);
+
+    /* #472: the client path gates a row ONCE — a fresh pending row nobody has
+       reviewed yet. Anything else (already gated, merged, decided by an
+       operator, pulled back to pending by reports) is left alone; failed-open
+       rows are the retry sweep's job, not a re-submit's. */
+    if (sub.status !== "pending" || sub.ai_status !== null || sub.reviewed_at !== null || sub.merged_into !== null) {
+      return json({ skipped: true, reason: "already reviewed", status: sub.status, gate_version: GATE_VERSION }, 409);
+    }
+
+    const out = await processSubmission(supabase, sub, { skipDedup: false, aiStatusWas: null });
+    const code = typeof out._http === "number" ? out._http : 200;
+    delete out._http;
+    return json(out, code);
   } catch (e) {
     return json({ error: String(e) }, 500);
   }

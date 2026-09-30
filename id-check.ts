@@ -5,7 +5,8 @@
 // comment names roadmap row N forever. Nothing enforced it, and one 2026-07-21
 // sweep found THREE sets of shipped mis-stamps (`#99` for item 104, `#101` for
 // 105, `#104` for 107). This is the cheap half of #110's fix — option (a):
-// report every ID in a comment that has NO matching row in `nahgoo-roadmap.md`.
+// report every ID in a comment that has NO matching row in `roaminator-roadmap.md`
+// (named `nahgoo-roadmap.md` before 2026-09-30 — same file, renamed by directive, #465 / #239).
 //
 // WHAT IT CANNOT CATCH (stated so nobody over-trusts a clean run): a WRONG-but-
 // EXISTING ID. `#104` written where `#107` was meant resolves to a real row and
@@ -29,7 +30,7 @@
 // only with a reason — an unexplained entry here is the mis-stamp this tool exists
 // to catch, hidden.
 
-const ROADMAP = "nahgoo-roadmap.md";
+const ROADMAP = "roaminator-roadmap.md";
 
 const ROWLESS_OK: Record<number, string> = {
   326: "reserved-as-reference (the #327 mis-stamp correction); never a row by decision",

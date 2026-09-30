@@ -1,0 +1,375 @@
+# graves-prime.txt — #364 stuck-name lists for gate-tiles.ts --prime-graves
+#
+# HOW THIS FILE IS READ: gate-tiles.ts loads it when no --names=/GRAVE_PRIME_NAMES is set.
+# Only FULL-LINE "#" comments are stripped; blank lines are ignored; every other line is
+# ONE person name, resolved through the SAME #356 grave-identity guards + bank. Do NOT put
+# an inline "# note" after a name — it becomes part of the name.
+#
+# NAMESAKE DISCIPLINE (#363): these are plain person names. resolveGraveIdentity resolves
+# each to a Wikipedia bio through the three guards and banks it BANK-ONLY. A bare name can
+# resolve to a NAMESAKE, so ALWAYS run --prime-graves DRY first and READ every title in
+# gate_tiles_prime.json before --commit.
+#
+# DRY-EYEBALL RESULT (2026-09-16): 57/59 resolved, 2 clean-miss. THREE resolved to the WRONG
+# subject and are commented out below so they are NOT banked:
+#   - Jean-Michel Basquiat  -> "List of paintings by..." (a list article, not his bio)
+#   - Oliver Wendell Holmes Sr. -> "Oliver Wendell Holmes Jr." (the son / SCOTUS Justice)
+#   - John C. Pemberton     -> "John Stith Pemberton" (the Coca-Cola inventor, wrong man)
+# The 2 clean-misses (Louis Comfort Tiffany, David Swinson Maynard) bank nothing — left in
+# as active lines; their pins stay filler until re-primed with an exact --rewarm-drop label.
+#
+# The bank key is the person name folded (coreName strips "Grave of"/"Tomb of" + diacritics).
+# Chicago (Oak Woods #363, Graceland #356) omitted; Los Angeles omitted (not in the roster).
+#
+# =====================================================================================
+# NEW 2026-09-18 — 14-METRO EXPANSION (the rest of the #364 roster). NOT YET DRY-RUN.
+# =====================================================================================
+# The blocks below (SAN FRANCISCO through ST. PAUL) are RESEARCHED CANDIDATE names — each a
+# notable burial at that metro's flagship dense/historic cemetery, verified from published
+# sources, NOT yet run through --prime-graves. They have NOT been dry-eyeballed. Treat every
+# one as unverified until the DRY run's gate_tiles_prime.json is read: expect some to resolve
+# to a namesake (comment those out, like the three above) and some to clean-miss (leave them;
+# they bank nothing and their pin stays filler). Watch especially: diacritic names
+# (Carlos Prío Socarrás, Anastasio Somoza García) can DROP on the #303 [^a-z0-9] token strip;
+# common short names (Ah Quin, King Woolsey, Harry Lane, Max Carey) can pull a namesake.
+# RANGE CAVEAT — SAN FRANCISCO: its dense cemeteries are in COLMA, ~11 km S of the SF center,
+# so a default GATE_METRO_KM rewarm may NOT cover them; prime them anyway (priming is
+# coordinate-independent), but to BAKE them either raise GATE_METRO_KM for the SF rewarm or
+# rewarm a Colma-centered point (~37.6790,-122.4550). PHOENIX: Gov. Hunt's tomb is at Papago
+# Park (~10 km E of center) — same possible range note.
+
+# =====================================================================================
+# NEW YORK — Green-Wood Cemetery (Brooklyn)   [prove with SEED_CITY_NAME="New York"]
+# =====================================================================================
+Leonard Bernstein
+# DROPPED (list-article, not a bio): Jean-Michel Basquiat
+Louis Comfort Tiffany
+Horace Greeley
+Samuel Morse
+Elias Howe
+Henry E. Steinway
+James Renwick Jr.
+John La Farge
+Louis Moreau Gottschalk
+Charles Ebbets
+DeWolf Hopper
+Laura Keene
+William M. Tweed
+Frank Morgan
+Henry Chadwick
+
+# =====================================================================================
+# BOSTON — Mount Auburn Cemetery (Cambridge)   [prove with SEED_CITY_NAME="Boston"]
+# =====================================================================================
+Henry Wadsworth Longfellow
+# DROPPED (resolved to the son, O.W. Holmes Jr. / SCOTUS): Oliver Wendell Holmes Sr.
+Mary Baker Eddy
+Winslow Homer
+Julia Ward Howe
+Charles Sumner
+Dorothea Dix
+Isabella Stewart Gardner
+Edwin Booth
+Fannie Farmer
+Bernard Malamud
+Nathaniel Bowditch
+Charles Bulfinch
+Robert Creeley
+Curt Gowdy
+Joyce Chen
+Harold Edgerton
+Mildred Dresselhaus
+Margaret Fuller
+
+# =====================================================================================
+# PHILADELPHIA — Laurel Hill Cemetery (East Falls)   [prove with SEED_CITY_NAME="Philadelphia"]
+# =====================================================================================
+George Meade
+David Rittenhouse
+Thomas McKean
+Harry Kalas
+Frank Furness
+Matthias W. Baldwin
+Sarah Josepha Hale
+Henry Disston
+Elisha Kent Kane
+Peter A. B. Widener
+Charles Thomson
+Hugh Mercer
+# DROPPED (resolved to the Coca-Cola inventor John Stith Pemberton): John C. Pemberton
+Robert Montgomery Bird
+
+# =====================================================================================
+# ADDITIONAL MARQUEE CANDIDATES — confirm EACH metro with its own DRY --rewarm first.
+# =====================================================================================
+
+# SEATTLE — Lake View Cemetery   [prove with SEED_CITY_NAME="Seattle"]
+Bruce Lee
+Brandon Lee
+Henry Yesler
+David Swinson Maynard
+Princess Angeline
+
+# ATLANTA — Oakland Cemetery   [prove with SEED_CITY_NAME="Atlanta"]
+Margaret Mitchell
+Bobby Jones
+Maynard Jackson
+
+# NEW ORLEANS — St. Louis Cemetery No. 1   [prove with SEED_CITY_NAME="New Orleans"]
+Marie Laveau
+Homer Plessy
+
+# =====================================================================================
+# SAN FRANCISCO — Colma cemeteries (Cypress Lawn / Hills of Eternity / Woodlawn)
+#   [prove with SEED_CITY_NAME="San Francisco" — SEE RANGE CAVEAT above, ~11 km S in Colma]
+# =====================================================================================
+Wyatt Earp
+Levi Strauss
+William Randolph Hearst
+Emperor Norton
+Hubert Howe Bancroft
+Thomas O. Larkin
+Elias Jackson Baldwin
+
+# =====================================================================================
+# WASHINGTON, D.C. — Congressional Cemetery   [prove with SEED_CITY_NAME="Washington, D.C."]
+# =====================================================================================
+J. Edgar Hoover
+John Philip Sousa
+Mathew Brady
+Belva Ann Lockwood
+Elbridge Gerry
+Alain Locke
+Pushmataha
+Tobias Lear
+Tom Lantos
+William Thornton
+
+# =====================================================================================
+# HOUSTON — Glenwood Cemetery   [prove with SEED_CITY_NAME="Houston"]
+# =====================================================================================
+Howard Hughes
+Gene Tierney
+Anson Jones
+William P. Hobby
+Oveta Culp Hobby
+Denton Cooley
+Ross Sterling
+Roy Hofheinz
+George R. Brown
+
+# =====================================================================================
+# AUSTIN — Texas State Cemetery   [prove with SEED_CITY_NAME="Austin"]
+# =====================================================================================
+Stephen F. Austin
+Barbara Jordan
+Ann Richards
+John Connally
+Chris Kyle
+Albert Sidney Johnston
+Susanna Dickinson
+James A. Michener
+Darrell Royal
+Bob Bullock
+J. Frank Dobie
+Gene Cernan
+
+# =====================================================================================
+# DALLAS — Sparkman-Hillcrest Memorial Park   [prove with SEED_CITY_NAME="Dallas"]
+#   (Tom Landry's grave is here; his Austin marker is a cenotaph.)
+# =====================================================================================
+Mickey Mantle
+Tom Landry
+Greer Garson
+Mary Kay Ash
+Ross Perot
+Jack Kilby
+Sarah T. Hughes
+Henry Wade
+Freddie King
+Maureen Connolly
+W. Lee O'Daniel
+
+# =====================================================================================
+# FORT WORTH — Greenwood Memorial Park   [prove with SEED_CITY_NAME="Fort Worth"]
+# =====================================================================================
+Van Cliburn
+Ben Hogan
+Amon G. Carter
+Charles Tandy
+Rod Roddy
+Tex Beneke
+Ormer Locklear
+Bobby Bragan
+
+# =====================================================================================
+# NASHVILLE — Mount Olivet Cemetery + Spring Hill (music)   [prove with SEED_CITY_NAME="Nashville"]
+# =====================================================================================
+Adelicia Acklen
+Oswald Avery
+Anne Dallas Dudley
+Cornelia Fort
+Thomas Ryman
+Vern Gosdin
+William B. Bate
+Roy Acuff
+Floyd Cramer
+Pete Drake
+
+# =====================================================================================
+# MIAMI — Miami City Cemetery + Woodlawn Park (Little Havana)   [prove with SEED_CITY_NAME="Miami"]
+# =====================================================================================
+Julia Tuttle
+George E. Merrick
+William Brickell
+Gerardo Machado
+Carlos Prío Socarrás
+Jorge Mas Canosa
+Lydia Cabrera
+Fernando Bujones
+Max Carey
+Anastasio Somoza García
+
+# =====================================================================================
+# SAN DIEGO — Mount Hope Cemetery   [prove with SEED_CITY_NAME="San Diego"]
+# =====================================================================================
+Raymond Chandler
+Alonzo Horton
+Kate Sessions
+Kate Morgan
+Ah Quin
+Nathan Harrison
+
+# =====================================================================================
+# PHOENIX — Pioneer & Military Memorial Park (+ Gov. Hunt's tomb, Papago Park)
+#   [prove with SEED_CITY_NAME="Phoenix" — SEE RANGE CAVEAT above for George W. P. Hunt]
+# =====================================================================================
+Jacob Waltz
+Darrell Duppa
+John Alsap
+King Woolsey
+George W. P. Hunt
+
+# =====================================================================================
+# DENVER — Fairmount Cemetery + Riverside Cemetery   [prove with SEED_CITY_NAME="Denver"]
+# =====================================================================================
+William N. Byers
+Justina Ford
+Frederick Bonfils
+Ralph Carr
+Charles Boettcher
+Emily Griffith
+David Moffat
+Mary Elitch
+Florence Sabin
+Mattie Silks
+Silas Soule
+John Wesley Iliff
+
+# =====================================================================================
+# PORTLAND — Lone Fir Cemetery   [prove with SEED_CITY_NAME="Portland"]
+# =====================================================================================
+Asa Lovejoy
+Daniel Lownsdale
+James B. Stephens
+George Law Curry
+William Wallace Thayer
+John H. Couch
+Harry Lane
+
+# =====================================================================================
+# MINNEAPOLIS — Lakewood Cemetery   [prove with SEED_CITY_NAME="Minneapolis"]
+# =====================================================================================
+Hubert Humphrey
+Paul Wellstone
+Tiny Tim
+George Dayton
+Carl Pohlad
+Rudy Perpich
+Floyd B. Olson
+John S. Pillsbury
+Charles M. Loring
+Bill Goldsworthy
+Frank C. Mars
+
+# =====================================================================================
+# ST. PAUL — Oakland Cemetery   [prove with SEED_CITY_NAME="St. Paul"]
+# =====================================================================================
+Alexander Ramsey
+Henry Hastings Sibley
+Norman Kittson
+Amherst H. Wilder
+Harriet Bishop
+Henry Mower Rice
+James M. Goodhue
+Marshall Sherman
+Archibald Bush
+
+# =====================================================================================
+# NEW 2026-09-19 — #373 ARLINGTON + LA KEEP-NULL PRIME-ADD. NOT YET DRY-RUN.
+# =====================================================================================
+# Arlington HAS per-person OSM nodes (the #364 DC rewarm already baked Taft, the Pearys
+# and Matthew Henson UN-PRIMED — so those are OMITTED here; priming them would be a
+# harmless no-op but they already render). Everything below is a RESEARCHED CANDIDATE,
+# NOT dry-eyeballed. Run --prime-graves DRY, read gate_tiles_prime.json, comment out any
+# namesake resolves, THEN --commit. Because Arlington sits ~5 km SW of the DC center
+# (38.9072,-77.0369), the default GATE_METRO_KM=15 DC-area rewarm reaches it — bake with
+#   SEED_CITY_NAME="Washington, D.C." SEED_CITY_LAT=38.9072 SEED_CITY_LNG=-77.0369 \
+#     deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --rewarm --commit
+#
+# WATCH (expect some of these to need commenting-out after the DRY read):
+#   - Oliver Wendell Holmes Jr.  — MUST stay "Jr." or it pulls the father (the #364 Mount
+#     Auburn gravestone was the reverse: Holmes Sr. → the Jr./SCOTUS son).
+#   - Joe Louis / Walter Reed / Lee Marvin  — short/common names; can pull a namesake or a
+#     namesake INSTITUTION (Walter Reed → the hospital). Verify the DRY title is the person.
+#   - Glenn Miller  — a HEADSTONE/cenotaph (body never recovered); may resolve fine but its
+#     node may be a memorial marker, not a tomb node — check it renders after --rewarm.
+#   - John F. Kennedy  — the OSM node may be labelled "…Gravesite"/"…Eternal Flame" rather
+#     than the bare name; if it stays filler after the bake, re-prime with the node's label.
+
+# =====================================================================================
+# WASHINGTON, D.C. — Arlington National Cemetery   [prove with SEED_CITY_NAME="Washington, D.C."]
+# =====================================================================================
+John F. Kennedy
+Jacqueline Kennedy Onassis
+Robert F. Kennedy
+Ted Kennedy
+Audie Murphy
+Thurgood Marshall
+Oliver Wendell Holmes Jr.
+Earl Warren
+Warren E. Burger
+William Rehnquist
+Ruth Bader Ginsburg
+John J. Pershing
+George C. Marshall
+Omar Bradley
+Philip Sheridan
+John Foster Dulles
+Medgar Evers
+Joe Louis
+Abner Doubleday
+Dashiell Hammett
+Grace Hopper
+Pierre Charles L'Enfant
+Robert Todd Lincoln
+George Westinghouse
+Glenn Miller
+Gus Grissom
+Roger Chaffee
+Richard E. Byrd
+John Wesley Powell
+Hyman G. Rickover
+Ira Hayes
+Lee Marvin
+Pete Conrad
+Walter Reed
+
+# =====================================================================================
+# LOS ANGELES — the 4 #367 keep-null graves (bank-only identity path → #373 prime-add)
+# =====================================================================================
+# PENDING NAME SURFACING: the #367 null-backfill pass left 4 LA grave rows resolved_source
+# NULL because they are the bank-only grave-identity class (a #364/#373 prime-add, not a
+# resolver gap). Their NAMES are not on the roadmap — surface them from the live app-report
+# (or a `submissions` query for grave-class rows with resolved_source IS NULL near LA),
+# add each here as a plain person name, then DRY → eyeball → --commit as above.
