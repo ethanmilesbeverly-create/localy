@@ -5277,6 +5277,10 @@ const STORY_GATE_SHOW_HIDDEN = (() => {
   catch(_) { return false; }
 })();
 function nearbyApprovedGems(base, excludeIds, limit, bucket){
+  /* #469 — gems are held by area now. The single blend every gem-on-map path
+     routes through is also the safety net: if base's cells are not held, start
+     reading them (non-blocking; onGemsReady reblends when they land). */
+  kickGemsNear(base);
   return (state.approvedGems||[])
     // #344 brick 5 — hide storyless gems (resolved_source='none') unless the escape
     // hatch is on. null/real values pass; 'none' is the only value hidden.
@@ -6252,6 +6256,10 @@ function applyRealPlaces(key, base, list){
 let _realFetchInFlight = {};
 async function ensureRealPlaces(base){
   if(!base || base.lat==null) return;
+  /* #469 — every hunt start / tile change passes through here, so the gem cells
+     for the same base are kicked here too: gems and real places load side by
+     side. Non-blocking, and a no-op when the cells are already held. */
+  kickGemsNear(base);
   const key = realTileKey(base);
   // #78c — already have it: make sure the UI knows, then bail as before.
   if(state.realPlaces && state.realPlaces.tile===key){ setTileState(key, 'loaded'); return; }
@@ -7007,11 +7015,14 @@ function injectCapturedPins(hunt, base){
    Preserves the hunt key (and therefore progress) and never touches
    user-made or browse-locked hunts. */
 const REAL_UPGRADABLE_KEY = /^(local_|parkstrails_|shops_|bars_|restaurants_|barsrest_|history_|trails_|discover_)/;
-function reblendHuntInPlace(h){
+function reblendHuntInPlace(h, baseOverride){
   // Order matters: a deliberate relocation outranks both the last hunt origin
   // and your real position. Only startLocalHunt sets localHuntOrigin, so every
   // other category used to re-anchor to the player when places arrived late.
-  const base = state.browsingLocation || state.searchedArea
+  // #469 — baseOverride: refillWhenGemsLand rebuilds a card at the base it was
+  // STARTED at (the cards outside REAL_UPGRADABLE_KEY are not re-anchored by
+  // any generic path, so they keep their own base). Every other caller omits it.
+  const base = baseOverride || state.browsingLocation || state.searchedArea
             || state.localHuntOrigin || state.me || FALLBACK_LOCATION;
   const prog = state.progress[h.key] || {};
   const foundSet = new Set(prog.foundIds || []);
@@ -7114,7 +7125,7 @@ let state = {
   achievedAt: {},
   pendingAchievementPopups: [],
   gemSubmissions: [],   // this user's OWN submissions (from the shared submissions table)
-  approvedGems: [],     // all APPROVED submissions near the user, for discovery
+  approvedGems: [],     // #469 — the APPROVED submissions this session holds: the gem cells around every anchor visited, plus by-id reads (ensureGemsNear / ensureGemsById) — NOT the whole table
   realPlaces: null,     // {tile, center, all[], byCat{}} — real OSM/Wikipedia places for the current tile
   gemDraftPin: null,
   pendingSavePoint: null,
@@ -7883,134 +7894,280 @@ async function fetchGemSeconds(ids){
     return {};
   }
 }
-async function loadApprovedGems(){
-  try{
-    /* #346 — PAGINATE PAST THE 1,000-ROW REST CAP. PostgREST returns at most
-       1,000 rows per response (the same cap graves-resolve.ts pages past, #338).
-       This read was a single unpaginated select, so once the approved + unmerged
-       submission set crossed 1,000 rows (the grave-seed rollout #310/#335/#338
-       pushed it there), it silently loaded only the FIRST 1,000 gems/seeds and
-       DROPPED the rest — human-submitted gems past the cutoff never entered
-       state.approvedGems and so could never blend, paint, or be captured, even
-       though the backend served them fine. We now page until a short page ends
-       it, ORDERED BY id (a stable, unique total order — REQUIRED, or PostgREST
-       range pagination can skip or duplicate rows across page boundaries). */
-    const GEM_PAGE = 1000;
-    /* #467 — PAGES IN PARALLEL. The pages below were fetched one after another
-       (6 round trips at 5,840 rows, ~3.9 s measured) while the whole boot waited.
-       Page 0 now also asks for the exact row COUNT, and every remaining page is
-       requested at once. Correctness is unchanged: pages are still ranged over
-       ORDER BY id and concatenated in page order; and if the table grew between
-       the count and the fetch (the last page comes back FULL), the old
-       sequential loop takes over from there until a short page ends it, so a
-       row can never be dropped by a stale count. count:null (header missing)
-       degrades to that same sequential loop from page 1. */
-    const fetchGemPage = (from, withCount)=>sb
-        .from('submissions')
-        /* #23 — submitted_by added. It is a uid and is NEVER rendered; it exists
-           only to look a display name up. A null here is a real and reachable
-           value the moment #82 is live (account deletion anonymises gems by
-           nulling this column), and it must render NO credit line — never
-           "Submitted by Unknown". See #124. */
-        /* #344 brick 5 — resolved_description / resolved_source are the PERSISTED
-           story columns (populated at the AI gate #344b2 + the brick-3 backfill).
-           They are what makes the map "things with a story": the sheet PREFERS
-           resolved_description over the flaky live resolve (deterministic, everyone
-           sees the same line — subsumes #333), and a gem with resolved_source='none'
-           is HIDDEN from discovery (nearbyApprovedGems). Both carry an anon+
-           authenticated SELECT grant from #344 brick 1 — CONFIG OUTSIDE THE FILE: if
-           that grant is ever dropped (e.g. a restore re-runs 276_lock_moderation_
-           columns.sql ALONE, which re-grants only its 12 columns), THIS select fails
-           and the catch below blanks the ENTIRE gem map — the #339 add-a-client-
-           column-is-two-steps trap. Keep them in #276's allowlist / always run 344
-           after 276. */
-        .select('id,name,description,category,lat,lng,name_clean,description_clean,submitted_by,resolved_description,resolved_source', withCount ? { count:'exact' } : undefined)
-        .eq('status', 'approved')
-        /* #31 — THE ONLY CLIENT-SIDE CHANGE THIS FEATURE NEEDS, and the one that
-           makes the whole thing work: a merged submission keeps a REAL status
-           (it mirrors the pin it was folded into), so without this filter an
-           approved duplicate would render as a second pin at the same spot —
-           precisely the defect the feature exists to remove.
+/* #469 — GEMS LOAD BY AREA, NOT WHOLE.
+   Every app open used to page the ENTIRE approved + unmerged submissions table
+   into state.approvedGems (#346 made it complete, #467 made it parallel): 5,842
+   rows / ~5.8 MB of JSON on 2026-09-30, growing with every metro onboarded
+   (#445–#462) and every graves load, and gating the first pins on a phone.
+   But every MAP consumer only ever used gems within GEM_INCLUDE_RADIUS_M (4 km)
+   of the hunt anchor — nearbyApprovedGems' radius filter threw the rest away.
 
-           `merged_into IS NULL` is the single discriminator. Any future consumer
-           that must not double-count submissions filters on it: a leaderboard, a
-           contributor count, app-report's by_status totals (which DO currently
-           count merged rows inside their mirrored status — noted, not fixed
-           here, since that function is not in this repo). */
-        .is('merged_into', null)
-        .order('id', { ascending: true })
-        .range(from, from + GEM_PAGE - 1);
-    const rows = [];
-    const first = await fetchGemPage(0, true);
-    if(first.error) throw first.error;
-    const firstPage = first.data || [];
-    for(const r of firstPage) rows.push(r);
-    let next = null;                        // where the sequential tail starts, if needed
-    if(firstPage.length === GEM_PAGE){
-      if(typeof first.count === 'number' && first.count > GEM_PAGE){
-        const froms = [];
-        for(let f = GEM_PAGE; f < first.count; f += GEM_PAGE) froms.push(f);
-        const results = await Promise.all(froms.map(f=>fetchGemPage(f, false)));
-        for(const res of results){ if(res.error) throw res.error; }
-        let lastLen = GEM_PAGE;
-        results.forEach(res=>{ const pg = res.data || []; for(const r of pg) rows.push(r); lastLen = pg.length; });
-        if(lastLen === GEM_PAGE) next = froms[froms.length-1] + GEM_PAGE; // grew since the count
-      } else if(first.count !== GEM_PAGE){
-        next = GEM_PAGE;                    // no usable count — fall back to sequential
-      }
+   So the table is now read in fixed GEM_CELL_DEG cells (~11 km of latitude),
+   only the cells that cover the anchor's include radius, cached for the
+   session. A typical open reads a few hundred rows at most (measured: a 0.12°
+   box in central Chicago = 32 rows / 34 KB). The cells are read with the SAME
+   select, filters and #346 id-ordered paging as before — only a lat/lng range
+   is added — so every field on a gem object is exactly what it was.
+
+   WHO TRIGGERS A READ (all non-blocking except boot):
+     • boot — the cells around startAreaGuess() (the remembered view), in
+       parallel with loadPersonal, exactly where the old whole-table read ran;
+     • ensureRealPlaces(base) — every hunt start / tile change kicks the gem
+       cells for the same base, so gems and real places load side by side;
+     • nearbyApprovedGems(base) — the single blend every gem-on-map path uses
+       kicks any missing cell as a safety net (a no-op when loaded);
+     • a pin sheet for a gem whose record is not held (a guide stop, a shared
+       spot, a capture far away) reads that ONE row by id (ensureGemsById).
+   When a read lands, onGemsReady() reblends the current hunt in place the way
+   onRealPlacesReady() does (same REAL_UPGRADABLE_KEY rule, same shared-spot
+   re-select); the location-based cards outside that rule (art, graves,
+   museums, lore) refill through refillWhenGemsLand() at their own base.
+
+   SEARCH (#433) no longer sees every gem in memory — #475's server name search
+   (search_pin_names, 475_search_pin_names.sql) gives it back its far reach.
+   TAKE-HIDING (#315/#154) looks the canonical record up by id; a record not
+   held yet FAILS SAFE (the take stays hidden) until ensureGemsById fills it.
+
+   A failed cell read leaves what we held and retries after GEM_CELL_RETRY_MS —
+   it never blanks the map (the old catch set state.approvedGems = [], wiping
+   every gem on a single transient error). */
+const GEM_CELL_DEG      = 0.1;    // #469 — cell size in degrees (~11 km N–S)
+const GEM_CELL_MARGIN_M = 500;    // #469 — read a little past the include radius so a small move stays inside loaded cells
+const GEM_CELL_RETRY_MS = 15000;  // #469 — a failed cell is retried no sooner than this (no hammering from repaint loops)
+const GEM_ID_RETRY_MS   = 30000;  // #469 — same, for a by-id read that failed or found nothing
+const GEM_PAGE = 1000;            // #346 — PostgREST's per-response cap; pages ordered by id
+/* #23 — submitted_by is a uid and is NEVER rendered; it exists only to look a
+   display name up (null after #82's anonymisation → no credit line, #124).
+   #344 brick 5 — resolved_description / resolved_source carry an anon +
+   authenticated SELECT grant from #344 brick 1 — CONFIG OUTSIDE THE FILE: if
+   that grant is ever dropped (e.g. a restore re-runs 276_lock_moderation_
+   columns.sql ALONE), EVERY gem read fails. Keep them in #276's allowlist /
+   always run 344 after 276 (the #339 add-a-client-column-is-two-steps trap). */
+const GEM_SELECT = 'id,name,description,category,lat,lng,name_clean,description_clean,submitted_by,resolved_description,resolved_source';
+const _gemById = new Map();   // #469 — id → gem object, every gem this session holds (cells + by-id reads)
+const _gemCells = {};         // #469 — cell key → {status:'loading'|'loaded'|'failed', at, promise?}
+const _gemIdMiss = {};        // #469 — id → ms of a by-id read that failed or found no approved row
+const _gemIdInFlight = {};    // #469 — id → promise
+function gemCellIdx(v){ return Math.floor(v / GEM_CELL_DEG + 1e-9); }
+function gemCellBound(i){ return Number((i * GEM_CELL_DEG).toFixed(6)); }
+function gemCellKeyOf(lat, lng){ return gemCellIdx(lat) + '_' + gemCellIdx(lng); }
+/* The cells that cover base's include radius (plus the margin). 1–4 cells in
+   practice; more only far north, where a degree of longitude is short. */
+function gemCellsFor(base){
+  if(!base || !isFinite(base.lat) || !isFinite(base.lng)) return [];
+  const r = GEM_INCLUDE_RADIUS_M + GEM_CELL_MARGIN_M;
+  const dLat = r / 111320;
+  const dLng = r / (111320 * Math.max(0.2, Math.cos(base.lat * Math.PI / 180)));
+  const out = [];
+  for(let i = gemCellIdx(base.lat - dLat); i <= gemCellIdx(base.lat + dLat); i++){
+    for(let j = gemCellIdx(base.lng - dLng); j <= gemCellIdx(base.lng + dLng); j++){
+      out.push({ i, j, key: i + '_' + j });
     }
-    for(let from = next; from !== null; from += GEM_PAGE){
-      const { data, error } = await fetchGemPage(from, false);
-      if(error) throw error;
-      const page = data || [];
-      for(const r of page) rows.push(r);
-      if(page.length < GEM_PAGE) break;   // a short (or empty) page is the last one
-    }
+  }
+  return out;
+}
+function gemsLoadedNear(base){
+  const cells = gemCellsFor(base);
+  return cells.length > 0 && cells.every(c => _gemCells[c.key] && _gemCells[c.key].status === 'loaded');
+}
+function gemRecordById(id){ return id ? (_gemById.get(String(id)) || null) : null; }
+function publishGems(){ state.approvedGems = Array.from(_gemById.values()); }
+/* The anchor content is built around — the same precedence reblendHuntInPlace
+   uses — falling back to the boot estimate before any hunt exists. */
+function gemAnchor(){
+  return state.browsingLocation || state.searchedArea || state.localHuntOrigin || state.me || startAreaGuess();
+}
+/* One submissions row → the gem object every consumer reads. Field for field
+   what the whole-table load produced (#469 changes WHICH rows, never their shape). */
+function gemFromRow(r, credits, seconds){
+  return {
     // #12 display: prefer the mechanics-only cleaned text for what the map
-    // SHOWS, falling back to the raw words when there is no clean value (the
-    // guard discarded it, or nothing needed fixing). The raw name/description
-    // stay canonical in the DB and are never overwritten — this is a display
-    // preference only, so reverting this map restores the raw text everywhere.
-    // (rows now holds the FULL approved+unmerged set, not a capped 1,000.)
-    // #23 — one extra round trip for the whole map, not one per pin.
-    // #31/#225 — a second round trip for the whole map: the vouch count per
-    // canonical id, for the "+N others also submitted" line. Fail-soft to {} →
-    // count 0 → no line, so a failed read is silent, never a wrong number.
-    // #467 — the two lookups are independent (both fail-soft to {}), so they
-    // run together instead of back to back.
-    const [credits, seconds] = await Promise.all([
-      fetchGemCredits(rows.map(r=>r.submitted_by)),
-      fetchGemSeconds(rows.map(r=>r.id))
-    ]);
-    state.approvedGems = rows.map(r=>({
-      id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
-      lat:r.lat, lng:r.lng, status:'approved',
-      // #23 — `by` is the RENDERABLE name or undefined. Anything that cannot
-      // produce a name (null submitted_by from #82's anonymisation, a blocked
-      // profile, a user who never set one, a failed lookup) lands here as
-      // undefined and the sheet renders nothing at all.
-      by: credits[r.submitted_by] || undefined,
-      // #154 fix — whether this gem HAS a submitter at all (a raw-uid presence
-      // boolean, never the uid itself, never rendered). #315's take-hiding must key
-      // on THIS, not on `by` (the resolved NAME), because `by` also goes undefined
-      // on a transient fetchGemCredits race — and keying the hide on `by` then
-      // leaks the user's typed take for a heartbeat until the name loads. A seed
-      // has no submitter (false → its sourced desc still shows); a user gem always
-      // has one (true → sourced-or-blank, never the take).
-      hasSubmitter: !!r.submitted_by,
-      // #31/#225 — vouch count: how many OTHER people submitted this same place
-      // (0 when none). Rendered only in the expanded sheet, only when >0 (#16).
-      seconds: seconds[r.id] || 0,
-      // #344 brick 5 — the PERSISTED story verdict. resolvedDesc is the sourced
-      // line the sheet prefers over a live resolve (deterministic); resolvedSource
-      // is the visibility verdict: 'none' = checked, no story → HIDE; a real value
-      // (wiki/wikidata/gen/…) = show the line; null = never checked → stays VISIBLE
-      // (the gate hides 'none', never null — nothing un-checked vanishes). Empty
-      // string / null normalised so a downstream truthiness test is clean.
-      resolvedDesc: (r.resolved_description || ''),
-      resolvedSource: (r.resolved_source || null)
-    }));
-  }catch(e){ state.approvedGems = []; }
+    // SHOWS, falling back to the raw words when there is no clean value. The raw
+    // name/description stay canonical in the DB — a display preference only.
+    id:r.id, name:(r.name_clean || r.name), desc:(r.description_clean || r.description), bucket:r.category,
+    lat:r.lat, lng:r.lng, status:'approved',
+    // #23 — `by` is the RENDERABLE name or undefined; anything that cannot
+    // produce a name lands here as undefined and the sheet renders nothing.
+    by: credits[r.submitted_by] || undefined,
+    // #154 fix — whether this gem HAS a submitter at all (a raw-uid presence
+    // boolean, never the uid itself, never rendered). #315's take-hiding keys on
+    // THIS, not on `by`, which also goes undefined on a transient credit race.
+    hasSubmitter: !!r.submitted_by,
+    // #31/#225 — vouch count: how many OTHER people submitted this same place.
+    seconds: seconds[r.id] || 0,
+    // #344 brick 5 — the PERSISTED story verdict: 'none' = checked, no story →
+    // HIDE; a real value = show the line; null = never checked → stays VISIBLE.
+    resolvedDesc: (r.resolved_description || ''),
+    resolvedSource: (r.resolved_source || null),
+    cell: gemCellKeyOf(r.lat, r.lng)   // #469 — which cell owns this row, for a cell refresh
+  };
+}
+/* #346 — PAGINATE PAST THE 1,000-ROW REST CAP, ordered by id (a stable, unique
+   total order — REQUIRED, or range pagination can skip or duplicate rows across
+   page boundaries). A cell group rarely reaches one page; the loop is the
+   guarantee for the dense ones. `build` returns a fresh filtered builder. */
+async function fetchGemRows(build){
+  const rows = [];
+  for(let from = 0; ; from += GEM_PAGE){
+    const { data, error } = await build().order('id', { ascending: true }).range(from, from + GEM_PAGE - 1);
+    if(error) throw error;
+    const page = data || [];
+    for(const r of page) rows.push(r);
+    if(page.length < GEM_PAGE) break;   // a short (or empty) page is the last one
+  }
+  return rows;
+}
+function gemBaseQuery(){
+  return sb.from('submissions')
+    .select(GEM_SELECT)
+    .eq('status', 'approved')
+    /* #31 — a merged submission keeps a REAL status (it mirrors the pin it was
+       folded into), so without this an approved duplicate renders as a second
+       pin at the same spot. `merged_into IS NULL` is the single discriminator. */
+    .is('merged_into', null);
+}
+/* #469 — make sure the gem cells around `base` are held. Resolves true when it
+   changed what we hold. opts.refresh re-reads cells even if loaded (a new
+   approval, a display-name change); opts.quiet skips the in-place reblend (the
+   caller repaints itself, or no hunt exists yet — boot). */
+async function ensureGemsNear(base, opts){
+  opts = opts || {};
+  const cells = gemCellsFor(base);
+  if(!cells.length) return false;
+  const now = Date.now();
+  const need = cells.filter(c => {
+    const s = _gemCells[c.key];
+    if(s && s.status === 'loading') return false;
+    if(opts.refresh || !s) return true;
+    return s.status === 'failed' && (now - s.at) >= GEM_CELL_RETRY_MS;
+  });
+  if(!need.length){
+    /* Nothing to start — but a caller that awaits (boot, refillWhenGemsLand) must
+       wait for cells already in flight, and learn whether they changed anything.
+       The read's STARTER owns the onGemsReady() call, so a waiter never repaints. */
+    const pend = cells.map(c => _gemCells[c.key]).filter(s => s && s.status === 'loading' && s.promise).map(s => s.promise);
+    if(!pend.length) return false;
+    try{ return (await Promise.all(pend)).some(Boolean); }catch(_){ return false; }
+  }
+  // One range read for the rectangle of the missing cells (they are adjacent).
+  const i0 = Math.min(...need.map(c=>c.i)), i1 = Math.max(...need.map(c=>c.i));
+  const j0 = Math.min(...need.map(c=>c.j)), j1 = Math.max(...need.map(c=>c.j));
+  const rect = [];
+  for(let i = i0; i <= i1; i++) for(let j = j0; j <= j1; j++) rect.push(i + '_' + j);
+  const prev = {};
+  rect.forEach(k => { prev[k] = _gemCells[k] ? _gemCells[k].status : null; });
+  const p = (async () => {
+    try{
+      const rows = await fetchGemRows(() => gemBaseQuery()
+        .gte('lat', gemCellBound(i0)).lt('lat', gemCellBound(i1 + 1))
+        .gte('lng', gemCellBound(j0)).lt('lng', gemCellBound(j1 + 1)));
+      // #23 / #31/#225 — credits and vouch counts for just these rows, together
+      // (both fail-soft to {}: a failed read is silent, never a wrong number).
+      const [credits, seconds] = await Promise.all([
+        fetchGemCredits(rows.map(r=>r.submitted_by)),
+        fetchGemSeconds(rows.map(r=>r.id))
+      ]);
+      // Replace what we held for these cells: a gem merged or retired since the
+      // last read drops off; everything returned goes in fresh.
+      const rectSet = new Set(rect);
+      for(const [id, g] of _gemById){ if(rectSet.has(g.cell)) _gemById.delete(id); }
+      rows.forEach(r => { const g = gemFromRow(r, credits, seconds); _gemById.set(String(g.id), g); delete _gemIdMiss[String(g.id)]; });
+      const at = Date.now();
+      rect.forEach(k => { _gemCells[k] = { status:'loaded', at }; });
+      publishGems();
+      return true;
+    }catch(e){
+      const at = Date.now();
+      // A cell we already held stays held (a refresh that failed is not an empty area).
+      rect.forEach(k => { _gemCells[k] = { status: prev[k] === 'loaded' ? 'loaded' : 'failed', at }; });
+      console.warn('[#469] gem read failed for cells ' + i0 + '..' + i1 + ' x ' + j0 + '..' + j1 +
+        ' — gems already held stay on the map; retrying after ' + (GEM_CELL_RETRY_MS/1000) + ' s.', (e && e.message) || e);
+      return false;
+    }
+  })();
+  rect.forEach(k => { _gemCells[k] = { status:'loading', at:now, promise:p }; });
+  const changed = await p;
+  if(changed && !opts.quiet) onGemsReady();
+  return changed;
+}
+/* Fire-and-forget form for synchronous callers (nearbyApprovedGems). */
+function kickGemsNear(base){
+  if(!base || gemsLoadedNear(base)) return;
+  ensureGemsNear(base).catch(()=>{});
+}
+/* #469 — read specific gems by id: a gem pin whose cell is not held (a guide
+   stop, a shared spot or a capture far from the anchor) still needs its
+   canonical record for #315's take-hiding. Resolves true when it added any. */
+async function ensureGemsById(ids){
+  const now = Date.now();
+  const want = [...new Set((ids||[]).filter(Boolean).map(String))].filter(id =>
+    !_gemById.has(id) && !_gemIdInFlight[id] && !(_gemIdMiss[id] && (now - _gemIdMiss[id]) < GEM_ID_RETRY_MS));
+  if(!want.length){
+    const pend = (ids||[]).map(String).map(id => _gemIdInFlight[id]).filter(Boolean);
+    if(!pend.length) return false;
+    try{ return (await Promise.all(pend)).some(Boolean); }catch(_){ return false; }
+  }
+  const p = (async () => {
+    try{
+      const rows = await fetchGemRows(() => gemBaseQuery().in('id', want));
+      const [credits, seconds] = await Promise.all([
+        fetchGemCredits(rows.map(r=>r.submitted_by)),
+        fetchGemSeconds(rows.map(r=>r.id))
+      ]);
+      rows.forEach(r => { const g = gemFromRow(r, credits, seconds); _gemById.set(String(g.id), g); });
+      const at = Date.now();
+      want.forEach(id => { if(!_gemById.has(id)) _gemIdMiss[id] = at; });   // retired/merged/pending — stays a miss
+      if(rows.length) publishGems();
+      return rows.length > 0;
+    }catch(e){
+      const at = Date.now();
+      want.forEach(id => { _gemIdMiss[id] = at; });
+      console.warn('[#469] gem by-id read failed for ' + want.length + ' id(s).', (e && e.message) || e);
+      return false;
+    }finally{
+      want.forEach(id => { delete _gemIdInFlight[id]; });
+    }
+  })();
+  want.forEach(id => { _gemIdInFlight[id] = p; });
+  return p;
+}
+/* #469 — REFRESH the gems around the anchor (the old whole-table reload's two
+   callers: a display-name save and a just-submitted gem). Same name so both
+   call sites and every comment that says "loadApprovedGems" still resolve. */
+async function loadApprovedGems(opts){
+  return ensureGemsNear(gemAnchor(), Object.assign({ refresh:true }, opts || {}));
+}
+/* #469 — gems landed: reblend the current hunt in place, mirroring
+   onRealPlacesReady() (same key rule, same shared-spot re-select). Skipped while
+   the first-paint hold is pending — that paint reads state.approvedGems when it
+   fires, so it picks these up without a second repaint. */
+function onGemsReady(){
+  const h = state.currentHunt;
+  if(!h) return;
+  if(state._firstBlendPending) return;
+  if(!REAL_UPGRADABLE_KEY.test(h.key)) return;   // art/graves/museums/lore refill via refillWhenGemsLand
+  reblendHuntInPlace(h);
+  if(typeof refreshTargetsUI==='function') refreshTargetsUI();
+  if(typeof refreshTrackUI==='function') refreshTrackUI();
+  if(state._pendingSpot) openSpotSheet();
+}
+/* #469 — the location-based cards OUTSIDE REAL_UPGRADABLE_KEY (art_, gravesmem_,
+   museums_, lorespots_, legacy lore_) are never reblended by the generic
+   arrival paths, so a card opened in an area whose gems are not held yet would
+   stay gem-less (the Graves card is almost all gems). Each starter calls this
+   right after setCurrentHunt: if the cells are missing, it waits for them and
+   rebuilds THAT hunt at ITS base — only if it is still the current hunt object
+   (a newer hunt or a Search-this-area rebuild wins). */
+function refillWhenGemsLand(base){
+  if(gemsLoadedNear(base)) return;
+  const hRef = state.currentHunt;
+  ensureGemsNear(base, { quiet:true }).then(changed => {
+    if(!changed || !hRef || state.currentHunt !== hRef) return;
+    reblendHuntInPlace(hRef, base);
+    if(typeof refreshTargetsUI==='function') refreshTargetsUI();
+    if(typeof refreshTrackUI==='function') refreshTrackUI();
+    if(state._pendingSpot) openSpotSheet();
+  }).catch(()=>{});
 }
 async function saveGemSubmissions(){
   try{ await window.storage.set('gem-submissions', JSON.stringify(state.gemSubmissions), false); }
@@ -8308,9 +8465,14 @@ async function init(){
      exactly as before — only the basemap moved earlier. */
   setupBaseMap();
   showBootLoading(); // #467 — "Looking around…" from the moment the map exists until pins paint
-  /* #467 — the approved-gem table is the biggest read and needs nothing from
-     the personal keys, so it starts NOW and runs alongside loadPersonal. */
-  const _approvedGemsLoad = loadApprovedGems();
+  /* #467 — the approved-gem read needs nothing from the personal keys, so it
+     starts NOW and runs alongside loadPersonal.
+     #469 — it is no longer the whole table: only the gem cells around the boot
+     anchor (startAreaGuess() — the remembered view, the same anchor
+     startLocalHunt(bootAnchor) paints around below), quiet because no hunt
+     exists yet. A GPS fix, a browse, a shared spot or a guide elsewhere loads
+     its own cells through ensureRealPlaces / nearbyApprovedGems. */
+  const _approvedGemsLoad = ensureGemsNear(startAreaGuess(), { quiet:true });
   await loadPersonal();
   migrateTimestampedProgress(); // must run before any hunt starts, or isFound() misses
   migrateLoreGemIds();          // #149 — same constraint: re-key lore<id>→catgem<id> before isFound() runs
@@ -8461,7 +8623,7 @@ function wirePlaceSuggest(){
     document.getElementById('map-search-input').value = '';
     if(place.pin){ goToSearchedPin(place.pin); return; }   // #433
     enterLocationBrowseMode({lat:place.lat, lng:place.lng}, place.name);
-  }, { localMatch: matchLoadedPins });
+  }, { localMatch: matchLoadedPins, remoteMatch: searchPinNamesRemote }); // #475 — server name search beside the in-memory match
   placeSuggest.create = attachPlaceSuggest('create-location-search', place=>{
     jumpCreateMapTo(place);
   });
@@ -8484,12 +8646,18 @@ function closeAllPlaceSuggest(){
      1. the current hunt's points (what the map is showing now),
      2. the current tile's OSM/Wikipedia places (state.realPlaces.all — already
         filtered and tile-gated, #344 brick 4),
-     3. every approved gem/seed/story/grave (state.approvedGems), through the SAME
-        story-gate the map uses (#344 brick 5: resolved_source 'none' stays
-        hidden unless ?showhidden=1) — search must not resurface a hidden pin.
-   A pin outside the loaded tile is only findable if it is a gem (the gem table
-   is loaded whole today, #469); if #469 ever loads gems by area, this loses its
-   far-away reach and a server name search becomes the row to file.
+     3. every approved gem/seed/story/grave this session HOLDS (state.approvedGems
+        — since #469 the gem cells around the anchors visited, not the whole
+        table), through the SAME story-gate the map uses (#344 brick 5:
+        resolved_source 'none' stays hidden unless ?showhidden=1) — search must
+        not resurface a hidden pin,
+     4. #475 — `extra`: the rows the server name search (searchPinNamesRemote →
+        search_pin_names) returned, merged in when they arrive. That is what
+        finds a gem anywhere and a curated story pin outside the loaded tile
+        (Tom Wilson Park). They go into the pool LAST, so the twin rule below
+        keeps the in-memory copy of a place (the hunt pin first of all).
+   Plain OSM/Wikipedia pins with no curated story are still findable only in the
+   loaded tile — the server search does not index the tile cache (#475 (c)).
    Ranking (2026.09.30c, from phone QA — a "Jess" search listed pins 401, 980 and
    1,192 mi away above two Chicago graves 12 mi away, because name tier won and
    distance only broke ties): pins within PIN_SEARCH_NEAR_M of where you are
@@ -8501,7 +8669,7 @@ function closeAllPlaceSuggest(){
    pins can never push every address row off a phone screen. Dedup is the file's
    "same place" rule: same normName within CAPTURED_TWIN_M. */
 const PIN_SEARCH_NEAR_M = 80467;   // #433 — 50 mi; "near" for search ranking only, not a content radius (#65 register does not apply)
-function matchLoadedPins(q){
+function matchLoadedPins(q, extra){
   const nq = normName(q);
   if(nq.length < SUGGEST_MIN_CHARS) return [];
   const lq = String(q).toLowerCase().trim();
@@ -8514,9 +8682,10 @@ function matchLoadedPins(q){
   (state.approvedGems || []).forEach(g => {
     if(!g || g.status !== 'approved') return;
     if(!STORY_GATE_SHOW_HIDDEN && g.resolvedSource === 'none') return;
-    if(normName(g.name).indexOf(nq) < 0) return;   // cheap name test before building a point (~5.8k gems)
+    if(normName(g.name).indexOf(nq) < 0) return;   // cheap name test before building a point
     pool.push({p: gemPoint(g, 'catgem'), inHunt:false});
   });
+  (extra || []).forEach(p => pool.push({p, inHunt:false}));   // #475 — server rows, last
   const hits = [];
   for(const {p, inHunt} of pool){
     if(!p || !p.name || !isFinite(p.lat) || !isFinite(p.lng)) continue;
@@ -8566,6 +8735,50 @@ function matchLoadedPins(q){
              pin:{ id:p.id, inHunt, name:p.name, lat:p.lat, lng:p.lng,
                    category:p.category || null, gemId:p.gemId || null, desc:p.desc || '' } };
   });
+}
+/* #475 — THE SERVER HALF OF PIN SEARCH. search_pin_names (475_search_pin_names.sql,
+   SECURITY DEFINER, anon-executable) returns ONLY name, lat, lng and category for
+   approved, story-gated gems anywhere plus curated story rows (curated_descriptions,
+   which the client cannot read — RLS on, no policy), nearest-first from the same
+   anchor matchLoadedPins ranks against. Rows become points matchLoadedPins can
+   rank beside the in-memory ones:
+     • a gem → gemPoint with an EMPTY desc (the RPC never sends text; a pick lands
+       through arriveAtSpot and the sheet reads the canonical record by id, #469);
+     • a story → a plain point with no category (its tile pin owns the category,
+       so the row reads "Spot"); a pick lands on the carried point and the tile
+       load adopts the real pin by name (#26), or keeps the carried point if the
+       tile no longer serves it (#475 (b)).
+   Capped by PIN_SEARCH_REMOTE_TIMEOUT_MS so a slow RPC never holds the address
+   rows; a missing function (migration not run) or any error is a console warning
+   and an empty list — search keeps working on memory + Photon. */
+const PIN_SEARCH_REMOTE_MAX = 10;              // #475 — rows asked for; the dropdown still shows at most SUGGEST_LIMIT pins
+const PIN_SEARCH_REMOTE_TIMEOUT_MS = 2500;     // #475
+async function searchPinNamesRemote(q, signal){
+  if(normName(q).length < SUGGEST_MIN_CHARS) return [];
+  const anchor = state.browsingLocation || state.searchedArea || state.me || state.localHuntOrigin || null;
+  let req = sb.rpc('search_pin_names', {
+    q: String(q).slice(0, 100),
+    at_lat: anchor ? anchor.lat : null,
+    at_lng: anchor ? anchor.lng : null,
+    max_rows: PIN_SEARCH_REMOTE_MAX,
+    include_hidden: STORY_GATE_SHOW_HIDDEN
+  });
+  if(signal && req && typeof req.abortSignal === 'function') req = req.abortSignal(signal);
+  const timeout = new Promise(res => setTimeout(() => res({ data:null, error:null, timedOut:true }), PIN_SEARCH_REMOTE_TIMEOUT_MS));
+  const res = await Promise.race([req, timeout]);
+  if(res && res.timedOut){ console.warn('[#475] pin name search timed out — showing loaded pins only'); return []; }
+  if(res && res.error) throw res.error;
+  const out = [];
+  ((res && res.data) || []).forEach(r => {
+    if(!r || !r.name || !isFinite(r.lat) || !isFinite(r.lng)) return;
+    if(r.kind === 'gem'){
+      out.push(gemPoint({ id:r.id, name:r.name, desc:'', bucket:r.category || null,
+                          lat:r.lat, lng:r.lng, status:'approved' }, 'catgem'));
+    } else {
+      out.push({ id:'story' + r.id, name:r.name, lat:r.lat, lng:r.lng, category:null, desc:'' });
+    }
+  });
+  return out;
 }
 /* #433 — the pin row's sub line, built as HTML because it carries the coloured
    dot and the moss "Visited". Every text part is escaped; the colour comes from
@@ -8844,7 +9057,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.30c';
+const APP_VERSION = '2026.09.30d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -9177,7 +9390,10 @@ async function saveSettingsName(){
        purpose. Confirmation is the job here, not narration. */
     showMsg('Saved', true);
     /* Refresh the discovery pool so the change is visible on the map without a
-       reload — the credit lives on the point, and the points are built at load. */
+       reload — the credit lives on the point, and the points are built at load.
+       #469 — this now re-reads the gem cells around the anchor (not the whole
+       table) and reblends the current hunt in place, so the new name reaches the
+       pins on screen; gems elsewhere pick it up when their cells next load. */
     await loadApprovedGems();
   }finally{
     btn.disabled = false;
@@ -11281,6 +11497,8 @@ function attachPlaceSuggest(inputId, onPick, opts){
   const st = {results:[], active:-1, seq:0, ctrl:null, timer:null, failed:false, open:false};
 
   function close(){
+    st.seq++;          // #475 — any search still in flight (Photon, the server pin
+                       // search, or its timeout) is now stale and cannot reopen the list
     st.open = false;
     st.active = -1;
     st.results = [];   // #88a — belt to the commit guard's braces: a late
@@ -11376,44 +11594,88 @@ function attachPlaceSuggest(inputId, onPick, opts){
     const my = ++st.seq;
     if(st.ctrl) st.ctrl.abort();
     st.ctrl = new AbortController();
+    const signal = st.ctrl.signal;
     /* #433 — pin matches first, synchronously, so a pin shows before Photon
        answers. A throw in the matcher must never break address search. */
-    let local = [];
-    if(typeof opts.localMatch === 'function'){
-      try{ local = opts.localMatch(q) || []; }catch(e){ console.warn('[#433] pin match failed', e); local = []; }
-    }
-    if(local.length){
-      st.results = local;
-      st.active = 0;
-      renderResults('Looking up addresses…');
-    }else{
-      renderStatus('Searching…');
-    }
-    try{
-      const found = await photonSearch(q, st.ctrl.signal);
-      if(my !== st.seq) return;            // a newer keystroke already won
-      st.failed = false;
-      /* #433 — drop an address row that is the same place as a pin row above it
-         (same normalised name within CAPTURED_TWIN_M, the file's "same place"). */
-      const results = local.concat(found.filter(r => !local.some(p =>
+    const matchLocal = (extra) => {
+      if(typeof opts.localMatch !== 'function') return [];
+      try{ return opts.localMatch(q, extra) || []; }catch(e){ console.warn('[#433] pin match failed', e); return []; }
+    };
+    let local = matchLocal();
+    /* #475 — the server name search (opts.remoteMatch) runs BESIDE Photon, not
+       after it. Three pieces now arrive independently — memory pins (at once),
+       server pins, Photon addresses — and compose() paints whatever is in hand
+       under the same rules as before: pins above addresses, an address row that
+       is the same place as a pin dropped, the status line saying what is still
+       coming or what failed. A remote failure is silent to the user (memory pins
+       and addresses still work) and a warning in the console. */
+    let photon = null;           // null = pending; [] or rows once answered
+    let photonFailed = false;
+    let remoteDone = typeof opts.remoteMatch !== 'function';
+    const compose = () => {
+      if(my !== st.seq) return;
+      const addr = (photon || []).filter(r => !local.some(p =>
         normName(p.name) === normName(r.name) &&
-        haversine(p.lat, p.lng, r.lat, r.lng) <= CAPTURED_TWIN_M)));
+        haversine(p.lat, p.lng, r.lat, r.lng) <= CAPTURED_TWIN_M));
+      if(photonFailed){
+        st.failed = true;
+        if(local.length){
+          /* Pins still work offline-from-Photon; keep them and say the rest is down. */
+          st.results = local;
+          st.active = 0;
+          renderResults('Address search is unreachable right now.');
+        }else if(remoteDone){
+          renderStatus('Search is unreachable right now. Press <b>Enter</b> to try the basic lookup, or pan the map instead.');
+        }else{
+          renderStatus('Searching…');
+        }
+        return;
+      }
+      if(photon === null){
+        if(local.length){
+          st.results = local;
+          st.active = 0;
+          renderResults('Looking up addresses…');
+        }else{
+          renderStatus('Searching…');
+        }
+        return;
+      }
+      st.failed = false;
+      const results = local.concat(addr);
+      if(!results.length && !remoteDone){ renderStatus('Searching…'); return; }  // pins may still come
       st.results = results;
       st.active = results.length ? 0 : -1; // pre-arm Enter on the top hit
       renderResults();
+    };
+    compose();
+    if(!remoteDone){
+      Promise.resolve()
+        .then(() => opts.remoteMatch(q, signal))
+        .then(rows => {
+          if(my !== st.seq) return;
+          remoteDone = true;
+          if(rows && rows.length) local = matchLocal(rows);
+          compose();
+        })
+        .catch(e => {
+          if(e && e.name === 'AbortError') return;
+          if(my !== st.seq) return;
+          console.warn('[#475] pin name search failed — showing loaded pins only. Is 475_search_pin_names.sql deployed?', (e && e.message) || e);
+          remoteDone = true;
+          compose();
+        });
+    }
+    try{
+      const found = await photonSearch(q, signal);
+      if(my !== st.seq) return;            // a newer keystroke already won
+      photon = found;
     }catch(err){
       if(err && err.name === 'AbortError') return;
       if(my !== st.seq) return;
-      st.failed = true;
-      if(local.length){
-        /* Pins still work offline-from-Photon; keep them and say the rest is down. */
-        st.results = local;
-        st.active = 0;
-        renderResults('Address search is unreachable right now.');
-        return;
-      }
-      renderStatus('Search is unreachable right now. Press <b>Enter</b> to try the basic lookup, or pan the map instead.');
+      photonFailed = true;
     }
+    compose();
   }
 
   input.addEventListener('input', ()=>{
@@ -12102,6 +12364,7 @@ function startArtHunt(base){
   ensureRealPlaces(base);
   const key = 'art_v1';
   setCurrentHunt({key, name:'Art & Statues', mode:'art', points:buildPointsForKey(key, base)}); // #80 pass 2 — browse header matches the "Art & Statues" card title; PIN_CAT_LABEL.art stays singular 'Art' for a single pin's kind line
+  refillWhenGemsLand(base); // #469 — outside REAL_UPGRADABLE_KEY: refill this card when its gem cells land
 }
 /* #80 pass 2 — the three kind cards that replaced History & Lore. Each mirrors
    startHistoryHunt but keys on its own stable prefix (gravesmem_/museums_/
@@ -12113,18 +12376,21 @@ function startGravesHunt(base){
   ensureRealPlaces(base);
   const key = 'gravesmem_v1';
   setCurrentHunt({key, name:'Graves & Memorials', mode:'graves', points:buildPointsForKey(key, base)});
+  refillWhenGemsLand(base); // #469 — outside REAL_UPGRADABLE_KEY: refill this card when its gem cells land
 }
 function startMuseumsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'museums_v1';
   setCurrentHunt({key, name:'Museums', mode:'museums', points:buildPointsForKey(key, base)});
+  refillWhenGemsLand(base); // #469 — outside REAL_UPGRADABLE_KEY: refill this card when its gem cells land
 }
 function startLoreSpotsHunt(base){
   base = base || state.me || FALLBACK_LOCATION;
   ensureRealPlaces(base);
   const key = 'lorespots_v1';
   setCurrentHunt({key, name:'History & Lore', mode:'lorespots', points:buildPointsForKey(key, base)}); // #80 — card/header title; internal key/mode stay 'lorespots'/'lore', never the legacy 'lore'
+  refillWhenGemsLand(base); // #469 — outside REAL_UPGRADABLE_KEY: refill this card when its gem cells land
 }
 /* #67 — startHiddenGemsHunt() DELETED, and the reason is #16 rather than tidiness.
    #16 settled that a gem must be indistinguishable from any other pin: the end
@@ -12162,6 +12428,7 @@ function startLoreHunt(base){
   const points = nearbyApprovedGems(base, [], 40, 'lore').map(g=> gemToPoint(g, 'lore'));
   const key = 'lore_v1';
   setCurrentHunt({key, name:'Lore & Legends', mode:'lore', points});
+  refillWhenGemsLand(base); // #469 — legacy lore is all gems; refill when its cells land
 }
 
 /* #67 — startStateParksHunt(), startNationalParksHunt(), startTrailsHunt() and
@@ -12388,7 +12655,7 @@ function assertGemCreditsResolved(){
     const gems = (state.approvedGems || []).length;
     const shown = (state.approvedGems || []).filter(g => g && g.by).length;
     console.log('[#154] credit lookup ok — asked ' + c.asked + ', resolved ' + c.resolved +
-                '; ' + shown + ' of ' + gems + ' approved gems carry a credit line' +
+                '; ' + shown + ' of ' + gems + ' loaded gems carry a credit line (#469: gems load by area — the last read\'s asked/resolved are shown)' +
                 (c.resolved < c.asked ? ' (' + (c.asked - c.resolved) + ' submitter(s) have no renderable name — a real negative, see #153)' : ''));
   }catch(e){ console.warn('[#154] credit check failed', e); }
 }
@@ -12782,6 +13049,7 @@ async function submitGem(){
     if(!saved){ showToast("Couldn't save your name — check your connection"); return; }
   }
   let newId = null;
+  const _newGemAt = { lat:state.gemDraftPin.lat, lng:state.gemDraftPin.lng }; // #469 — its cells are refreshed after the gate
   try{
     const { data, error } = await sb.from('submissions').insert({
       // #114 — no category is sent. review-submission classifies the place
@@ -12828,7 +13096,13 @@ async function submitGem(){
   }catch(e){ /* review failed → row stays 'pending', a human can look later */ }
 
   await loadMyGems();
-  await loadApprovedGems();
+  /* #469 — refresh the gem cells around the anchor (quiet: the reblend below
+     repaints), and around the new gem's own spot when that is elsewhere, so an
+     approved gem shows up wherever it was placed. */
+  await Promise.all([
+    loadApprovedGems({ quiet:true }),
+    ensureGemsNear(_newGemAt, { refresh:true, quiet:true })
+  ]);
 
   /* MAP-VISIBILITY FIX (2026-08-13d) — DROP THE JUST-APPROVED GEM ONTO THE BROWSE
      MAP WITHOUT A RELOAD. loadApprovedGems() above refreshed the DATA, but the
@@ -14967,7 +15241,7 @@ function fillPinSheet(t){
          SOURCED description (the #313 Wikipedia backfill, or maybeEnrichRealDesc /
          maybeResolveSpotDesc's resolved line) — shown, unchanged.
      #154 fix — take-hiding is derived AUTHORITATIVELY from the canonical gem record
-     (state.approvedGems, looked up by gemId), NOT from the pin object's own flag.
+     (looked up by gemId — gemRecordById since #469), NOT from the pin object's own flag.
      The console proved the failure: a credited gem (canonical hasSubmitter=true) still
      rendered its typed take, because a pin-BUILD path that doesn't thread hasSubmitter
      produced the object this render used. Threading the flag through every build path
@@ -14978,9 +15252,24 @@ function fillPinSheet(t){
      showing their SOURCED t.desc. Residual: an anonymised gem (#82 nulls submitted_by)
      reads as no-submitter — the deferred account-deletion case. The credit LINE below
      still keys on t.by (a NAME only renders once resolved). */
-  const _gemHasSubmitter = t.gemId
-    ? (state.approvedGems || []).some(g => g && g.id === t.gemId && g.hasSubmitter)
-    : false;
+  /* #469 — gems are held by area now, so a gem pin far from the anchor (a guide
+     stop, a shared spot, a capture, a search pick) can reach this render before
+     its canonical record is held. FAIL SAFE: an unknown record counts as HAVING
+     a submitter, so the typed take stays hidden; the one row is read by id and
+     the sheet re-renders when it lands (a seed's sourced desc then appears —
+     the brief blank is the accepted cost; a leaked take is not acceptable). */
+  let _gemHasSubmitter = false;
+  const _canon = t.gemId ? gemRecordById(t.gemId) : null;
+  if(t.gemId){
+    if(_canon) _gemHasSubmitter = !!_canon.hasSubmitter;
+    else {
+      _gemHasSubmitter = true;
+      const _sheetId = t.id;
+      ensureGemsById([t.gemId]).then(added => {
+        if(added && state.selectedPinId === _sheetId) fillPinSheet(t);
+      }).catch(()=>{});
+    }
+  }
   const _hasSubmitter = !!(t.hasSubmitter || _gemHasSubmitter);
   /* #344 brick 5 — PREFER the persisted resolved_description. It is the sourced
      line the AI gate / brick-3 backfill resolved and stored, so it is deterministic
@@ -14991,8 +15280,12 @@ function fillPinSheet(t){
      carries resolvedDesc; a non-gem/tile pin has it undefined and falls through to
      the existing whatItis-or-t.desc path unchanged. When there is NO stored line,
      the prior #315 rule stands: a submitter's typed take is still never shown. */
-  const factDesc = (t.resolvedDesc && String(t.resolvedDesc).trim())
-    ? t.resolvedDesc
+  /* #469 — a carried pin (a search pick, a shared spot) has no resolvedDesc of
+     its own; the canonical record's stored line is the same sourced text the
+     real gem pin would carry, so it is used until the reblend adopts that pin. */
+  const _storedDesc = t.resolvedDesc || (_canon && _canon.resolvedDesc) || '';
+  const factDesc = (_storedDesc && String(_storedDesc).trim())
+    ? _storedDesc
     : (whatItis || (_hasSubmitter ? '' : (t.desc || '')));
   const expandEl = document.getElementById('pin-sheet-expand');
   const expandHTML =
