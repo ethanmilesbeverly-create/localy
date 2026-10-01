@@ -1,0 +1,80 @@
+[gate-tiles] build gate-tiles 2026-09-30a (#445 Phase B roster 24 → 25: + St. Louis; #381 _isStructureOnlyName guard unchanged) — carries #356 grave-identity rung + MONOTONIC GRAVE BANK (#357-style deterministic reuse) + multi-query recall + title⊆name nickname match + --rewarm. #363 adds --prime-graves: resolve a supplied grave list ONCE, paced, out of band, and bank each confident hit so a later --rewarm bakes it onto the real OSM plot without the per-tile rate-limit fight.
+[gate-tiles] function cacheVersion=v34  commit=false  gen=false  metros=single  reads=anon writes=service-role
+[gate-tiles] 1 metro(s) → 42 unique tiles (metroKm=15, tileDeg=0.05)
+[gate-tiles] 1/42 tile=770_-1807 in=18 out=10 resolved=1 dropped=8
+[gate-tiles] 2/42 tile=770_-1806 in=28 out=20 resolved=0 dropped=8
+[gate-tiles] 3/42 tile=770_-1805 in=28 out=16 resolved=1 dropped=12
+[gate-tiles] 4/42 tile=770_-1804 in=9 out=4 resolved=1 dropped=5
+[gate-tiles] 5/42 tile=770_-1803 in=1 out=1 resolved=0 dropped=0
+[gate-tiles] 6/42 tile=770_-1802 in=3 out=1 resolved=1 dropped=2
+[gate-tiles] 7/42 tile=770_-1801 in=16 out=9 resolved=0 dropped=7
+[gate-tiles] 8/42 tile=771_-1807 in=30 out=10 resolved=3 dropped=20
+[gate-tiles] 9/42 tile=771_-1806 in=41 out=14 resolved=7 dropped=27
+[gate-tiles] 10/42 tile=771_-1805 in=43 out=16 resolved=8 dropped=27
+[gate-tiles] 11/42 tile=771_-1804 in=28 out=12 resolved=1 dropped=16
+[gate-tiles] 12/42 tile=771_-1803 in=16 out=8 resolved=0 dropped=8
+[gate-tiles] 13/42 tile=771_-1802 in=10 out=5 resolved=0 dropped=5
+[gate-tiles] 14/42 tile=771_-1801 in=13 out=8 resolved=1 dropped=5
+[gate-tiles] 15/42 tile=772_-1807 in=38 out=9 resolved=1 dropped=29
+[gate-tiles] 16/42 tile=772_-1806 in=60 out=17 resolved=5 dropped=43
+[gate-tiles] 17/42 tile=772_-1805 in=70 out=27 resolved=5 dropped=43
+[gate-tiles] 18/42 tile=772_-1804 in=85 out=37 resolved=5 dropped=48
+[gate-tiles] 19/42 tile=772_-1803 in=40 out=22 resolved=3 dropped=18
+[gate-tiles] 20/42 tile=772_-1802 in=15 out=7 resolved=0 dropped=8
+[gate-tiles] 21/42 tile=772_-1801 in=8 out=4 resolved=0 dropped=4
+[gate-tiles] 22/42 tile=773_-1807 in=70 out=28 resolved=9 dropped=42
+[gate-tiles] 23/42 tile=773_-1806 in=94 out=31 resolved=8 dropped=63
+[gate-tiles] 24/42 tile=773_-1805 in=84 out=32 resolved=2 dropped=52
+[gate-tiles] 25/42 tile=773_-1804 in=84 out=41 resolved=3 dropped=43
+[gate-tiles] 26/42 tile=773_-1803 in=58 out=24 resolved=4 dropped=34
+[gate-tiles] 27/42 tile=773_-1802 in=42 out=18 resolved=5 dropped=24
+[gate-tiles] 28/42 tile=773_-1801 in=38 out=18 resolved=5 dropped=20
+[gate-tiles] 29/42 tile=774_-1807 in=41 out=8 resolved=2 dropped=33
+[gate-tiles] 30/42 tile=774_-1806 in=38 out=11 resolved=2 dropped=27
+[gate-tiles] 31/42 tile=774_-1805 in=61 out=16 resolved=3 dropped=45
+[gate-tiles] 32/42 tile=774_-1804 in=60 out=19 resolved=3 dropped=41
+[gate-tiles] 33/42 tile=774_-1803 in=36 out=10 resolved=1 dropped=26
+[gate-tiles] 34/42 tile=774_-1802 in=30 out=11 resolved=0 dropped=19
+[gate-tiles] 35/42 tile=774_-1801 in=21 out=12 resolved=0 dropped=9
+[gate-tiles] 36/42 tile=775_-1807 in=27 out=10 resolved=0 dropped=17
+[gate-tiles] 37/42 tile=775_-1806 in=32 out=12 resolved=0 dropped=20
+[gate-tiles] 38/42 tile=775_-1805 in=33 out=12 resolved=2 dropped=21
+[gate-tiles] 39/42 tile=775_-1804 in=33 out=18 resolved=5 dropped=15
+[gate-tiles] 40/42 tile=775_-1803 in=27 out=17 resolved=1 dropped=10
+[gate-tiles] 41/42 tile=775_-1802 in=17 out=11 resolved=0 dropped=6
+[gate-tiles] 42/42 tile=775_-1801 in=12 out=9 resolved=0 dropped=3
+
+=== gate-tiles summary ===
+{
+  "cacheVersion": "v34",
+  "commit": false,
+  "gen": false,
+  "resume": false,
+  "rewarm": false,
+  "bailed": false,
+  "tiles": 42,
+  "processed": 42,
+  "read": 42,
+  "warmed": 0,
+  "skipped": 0,
+  "committed": 0,
+  "throttledTiles": 0,
+  "totalResolved": 98,
+  "totalGraveResolved": 3,
+  "totalDropped": 913,
+  "perMetro": {
+    "St. Louis": {
+      "tiles": 42,
+      "dropped": 913,
+      "resolved": 98,
+      "graveResolved": 3,
+      "throttled": 0
+    }
+  },
+  "note": "DRY RUN — nothing written. Eyeball the `dropped` lists in gate_tiles_records.json, then commit EXACTLY these results with `--from-records --commit` (writes the reviewed rows with baked descriptions; no re-crawl)."
+}
+
+#356 grave-identity rung rescued 3 grave-class pin(s) that the coordinate gate would have dropped.
+
+records → gate_tiles_records.json   held → gate_tiles_held.json   report → gate_tiles_report.json
+DRY RUN: eyeball the dropped lists, then commit them with `--from-records --commit`.
