@@ -9063,7 +9063,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.01c';
+const APP_VERSION = '2026.10.01d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13502,11 +13502,20 @@ function shareHunt(id){
    "open the page". #50 METER: every spot link is another Pages URL a repo
    rename / custom-domain move 404s, and unlike a guide there is no 6-char code
    fallback — the link is the only recovery path. Stated, inherent, accepted. */
+/* #493 — THE LINK CARRIES NO DESCRIPTION. It used to carry up to 400 chars of
+   t.desc, which made a gem's link ~750 chars of base64 — iMessage then linked
+   only "https://nahgoo.com/?spot" and dropped the payload, so the recipient
+   landed on a plain map (QA 2026-10-01, Grave of Jimi Hendrix). The recipient
+   never needed it: a gem's sheet reads its canonical record by id
+   (ensureGemsById, #469) and a real place resolves its live line on arrival
+   (#237), so the carried text was only ever a cold-window placeholder. It also
+   put a user gem's typed take — which the sheet deliberately hides (#315) — in
+   the URL. Coordinates go to 5 dp (~1 m, finer than CAPTURED_TWIN_M). The
+   decoder still reads `d` so links already sent keep working. */
 function encodeSpotPayload(t){
-  const o = { n:String(t.name||'').slice(0,120), la:+(+t.lat).toFixed(6), lg:+(+t.lng).toFixed(6) };
+  const o = { n:String(t.name||'').slice(0,120), la:+(+t.lat).toFixed(5), lg:+(+t.lng).toFixed(5) };
   if(t.category) o.c = t.category;
   if(t.gemId)    o.g = t.gemId;
-  if(t.desc)     o.d = String(t.desc).slice(0,400);
   // base64url of UTF-8 bytes so names with punctuation / non-ASCII survive.
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(o))));
   return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
