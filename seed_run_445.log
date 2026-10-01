@@ -1,0 +1,103 @@
+[seed-resolve 2026.09.29d (#429 `new` re-run reads as its own seed; #434 differently named pins go to review; #439 ALREADY CURATED in the dry run; #441 near-empty map read retried then held)] city=St. Louis (38.627, -90.1994) maxKm=60 model=gemini-3.1-flash-lite
+  dedup = live map + submissions + Wikipedia (#418); map endpoint https://siacjgpqzaylsfefihyr.supabase.co/functions/v1/nearby-places
+Loaded 42 names from names-445-st-louis.txt
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Old Missouri Hotel Site [history] story✓ (conf 0.95)  (Gemini suggested "Laclede's Landing")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Laclede's Landing, St. Louis"
+  + National Hotel (St. Louis, Missouri) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "National Hotel (St. Louis, Missouri)" at the article's coordinate, 43 m from the marker (#425) — mark the line `new` to keep "National Hotel (St. Louis, Missouri)"
+      articles within 90 m: "National Hotel (St. Louis, Missouri)"
+  + Samuel Clemens Print Shop Marker [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "Federal Reserve Bank of St. Louis" · "Marquette Building (St. Louis)"
+  + Great Flood of 1993 High-Water Mark [history] story✓ (conf 0.90)
+      checked nearby: map 1 · subs 0 · wiki 3
+      articles within 90 m: "Fair Saint Louis" · "Gateway Arch National Park" · "Gateway Arch"
+  + Seventh Street Railroad Tunnel Marker [history] story✓ (conf 0.90)
+      checked nearby: map 1 · subs 0 · wiki 3
+      articles within 90 m: "International Hat Company" · "Ambassador Theatre (St. Louis)" · "Hotel Saint Louis"
+  + American Zinc Building [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "Southern Hotel (St. Louis)" · "Old Southern Hotel fire"
+  + Old Busch Stadium Outfield Wall Line [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  ↪ Shrine of St. Joseph → story attaches to existing: Shrine of St. Joseph, St. Louis [map:wiki]
+  + T. S. Eliot Birthplace [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + T. S. Eliot Teenage Home [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Delmar Boulevard station [history] story✓ (conf 1.00)
+      checked nearby: map 1 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "Delmar Boulevard station" at the article's coordinate, 26 m from the marker (#425) — mark the line `new` to keep "Delmar Boulevard station"
+      articles within 90 m: "Delmar Boulevard station" · "A&P Food Stores Building" · "Delmar Loop station"
+  + American Jewish Tercentenary Memorial [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Are Trees and Lawns Enough? Marker [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  ⏳ English Woodland Garden → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Gox #8 → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Alexander von Humboldt Statue → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Lafayette Park Music Pavilion [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Lafayette Square, St. Louis"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + 9th Street Abbey [history] story✓ (conf 0.90)
+      checked nearby: map 1 · subs 0 · wiki 1
+      articles within 90 m: "Trinity Lutheran Church (St. Louis, Missouri)"
+  + BWorks Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  ↪ Lemp Mansion → story attaches to existing: Lemp Mansion [map:wiki]
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Beauvais House [history] story✓ (conf 0.95)  (Gemini suggested "Chatillon–DeMenil House")
+      checked nearby: map 2 · subs 0 · wiki 2
+      articles within 90 m: "Chatillon–DeMenil House" · "Lemp Mansion"
+  ⏳ Vollberg Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Cherokee Livery → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Vandora Theater → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Favorite Amusement Company → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Casa Loma Ballroom → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Pfeifer's Saloon → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Worth's Store → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Cinderella Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Hess Hardware → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Starke's Market → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Kleekamp's Hall → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Rain Stick Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Mausshardt Bakery Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Original Tower Grove Bank → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Bloemker & Son Undertakers → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Orpheum Cleaners → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  ⏳ Jay International Foods Original Store → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  + John Berry Meachum Monument [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Bellefontaine Champion American Elm [park] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  ↪ Aloe Plaza → story attaches to existing: Aloe Plaza [map:osm]
+    (larger place left alone: "Apotheosis of St. Louis" — #437/#438)
+  ↪ Apotheosis of Saint Louis → story attaches to existing: Apotheosis of Saint Louis [map:osm]
+
+--- #439 check: what the commit will skip or replace ---
+  nothing will be skipped or replaced
+
+--- summary ---
+{ "new-seed": 18, "story-attached": 4, held: 20 }
+stories attached to existing pins: 4 (0 existing seed(s) updated on commit)
+story lines seeded: 18 (their story ships as resolved_source 'curated'; 22 curated_descriptions rows staged in curated_records.json)
+new seed rows: 18  (unclassified category: 0, no wiki description: 0)
+seeded under their Wikipedia article's title (#425): 2 — read each "↳ seeded under" line before --commit
+#439: 0 staged story row(s) will be SKIPPED (already curated) → expect the commit to insert 22 story row(s); 0 seed story(ies) will be REPLACED
+Wikipedia calls: 42 · retried 0 · failed 0
+wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).
+HELD (never judged — re-run these): 20 → wrote seed_held.txt. Re-run: seed-resolve.ts seed_held.txt with a working key. These are NOT reviews (#264).
+NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).

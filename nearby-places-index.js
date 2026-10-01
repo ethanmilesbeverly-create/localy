@@ -12,6 +12,15 @@ const PLACES_CACHE_TTL_MS = 21 * 24 * 3600 * 1000; // 21 days
 // re-checks it. See rowIsServable / rowTtlMs / isHealthyEmptyOsm.
 const EMPTY_OSM_TTL_MS = 3 * 24 * 3600 * 1000; // 3 days
 const EMPTY_TILE_VERSION = "399-empty-tile-cache-v1"; // #399 deploy-confirm stamp, echoed on every tile response
+// #486 — a tile whose Wikipedia geosearch FAILED (HTTP error, timeout, or a 200
+// carrying an API `error` object) is served but NEVER cached: neither the cold
+// build (path 2) nor the #394 background refresh writes it. The mirror of the
+// Overpass guard below. Before this, the geosearch failure was swallowed as zero
+// articles and an OSM-only tile was cached for 21 days (St. Louis 772_-1805:
+// Tower Grove Park, the Botanical Garden and South Grand with 0 Wikipedia pins,
+// built during a 2026-09-30 pre-warm burst). Deploy-confirm stamp, echoed on
+// every tile response alongside `wikiError` on a cold build.
+const WIKI_FAIL_VERSION = "486-wiki-fail-nocache-v1";
 // Bump this whenever the shape/filtering of cached places changes. It's part of
 // the cache key, so old rows (e.g. ones written before the chain filter existed
 // and still full of Chipotle/McDonald's) are ignored instead of served for the
@@ -1312,6 +1321,11 @@ async function fetchWikipedia(lat, lng) {
     const res = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": WIKI_UA } });
     if (!res.ok) throw new Error("wiki " + res.status);
     const json = await res.json();
+    // #486 — MediaWiki reports throttling (ratelimited, maxlag, …) as a 200 with
+    // an `error` object and no `query`. Read as a page list that is ZERO
+    // articles, which is how a failed geosearch got cached as a real answer.
+    // A genuinely empty geosearch has no `error`, so it still returns [].
+    if (json && json.error) throw new Error("wiki api " + (json.error.code || "error"));
     const pages = (json.query && json.query.pages) || {};
     const out = [];
     let wikiDropped = 0;
@@ -4569,8 +4583,11 @@ async function buildLiveTile(tile, fc) {
   // (#395 — the temporary [#289-timing] probes that wrapped each leg here were
   // stripped: #289 measured the wall (Overpass), #291/#394 own the fix.)
   const osmP = fetchOverpass(fc.lat, fc.lng);
+  // #486 — the catch keeps the SHAPE (#96) but now also says WHY it is empty, so
+  // the cache-write guards (path 2 and _refreshTile) can refuse to persist a
+  // tile whose Wikipedia arm never answered.
   const wikiP = fetchWikipedia(fc.lat, fc.lng)
-    .catch(() => ({ places: [], wikiDropped: 0, wikiNoExtract: 0 }));
+    .catch((e) => ({ places: [], wikiDropped: 0, wikiNoExtract: 0, error: String((e && e.message) || e || "wiki failed").slice(0, 120) }));
   const wpExtractsP = osmP
     .then((o) => {
       const titles = Array.from(new Set(((o && o.places) || [])
@@ -4714,13 +4731,14 @@ function cachedEnvelope(tile, cached, s) {
     qidVersion: "164-wikidata-qid-v1", // #164 deploy-confirm (the Q-id bake runs at tile BUILD; a warm tile gains it on its next rebuild)
     swrVersion: SWR_VERSION, // #394 deploy-confirm
     emptyTileVersion: EMPTY_TILE_VERSION, osmEmpty: cached.osmEmpty === true, // #399 deploy-confirm + whether this is a healthy-empty (3-day) row
+    wikiFailVersion: WIKI_FAIL_VERSION, // #486 deploy-confirm (a warm row was, by construction, written with a healthy Wikipedia arm — or before #486)
     reasonCodes: reasonCodesNow(), reasonMetaVersion: REASON_META_VERSION, // #141 — vocabulary read from report_reason_meta + deploy-confirm
     osmAge: osmAgeHistogram(s.g.places),
   };
 }
 
 // Background rebuild of an expired tile. Writes the row only under the SAME
-// guard path 2 uses (Overpass healthy AND something survives the blocklist),
+// guard path 2 uses (Overpass healthy AND Wikipedia answered [#486] AND something survives the blocklist),
 // so an Overpass outage never overwrites a good stale row with a Wikipedia-only
 // one. A failed/unhealthy refresh leaves the stale row in place (it keeps
 // serving) and starts the cooldown; the next request after it tries again.
@@ -4731,6 +4749,12 @@ async function _refreshTile(tile, fc, bl, sup, curIdx, prevHadOsm) {
   try {
     const b = await buildLiveTile(tile, fc);
     const osmHealthy = !b.osm.error && b.osm.places.length > 0;
+    // #486 — a refresh whose Wikipedia arm failed never overwrites the row: the
+    // stale row (with its articles) keeps serving and the cooldown starts.
+    if (b.wiki && b.wiki.error) {
+      _refreshFailedAt.set(tile, Date.now());
+      return;
+    }
     if (isHealthyEmptyOsm(b.osm)) {
       if (!prevHadOsm) {
         await writeCacheRow(tile, b.merged, true);
@@ -4970,8 +4994,14 @@ Deno.serve(async (req) => {
     // survive — unless an existing row already had OSM places (a tile we believed
     // in answering empty is likelier a bad mirror; keep the old row).
     const osmEmpty = isHealthyEmptyOsm(osm);
+    // #486 — and the mirror: Wikipedia failing while Overpass succeeds produces a
+    // non-empty OSM-only `merged`. Serve it, but don't persist it — neither as a
+    // 21-day row nor as a #399 empty row — so the next request retries both arms.
+    const wikiHealthy = !wiki.error;
     let cacheWritten = false;
-    if (osmHealthy && shown.places.length) {
+    if (!wikiHealthy) {
+      // fall through: cacheWritten stays false; the response carries wikiError
+    } else if (osmHealthy && shown.places.length) {
       await writeCacheRow(tile, merged);
       cacheWritten = true;
     } else if (osmEmpty && !rowHasOsm(cached)) {
@@ -4990,6 +5020,7 @@ Deno.serve(async (req) => {
         closedDropped: osm.closedDropped, closedBy: osm.closedBy,
         wikiDropped: wiki.wikiDropped || 0, wikiNoExtract: wiki.wikiNoExtract || 0,
         osmCount: osm.places.length, wikiCount: wiki.places.length, cacheWritten,
+        wikiError: wiki.error || null, wikiFailVersion: WIKI_FAIL_VERSION, // #486 — why a built tile was not cached + deploy-confirm
         osmEmpty, emptyTileVersion: EMPTY_TILE_VERSION, // #399 — healthy-empty answer + deploy-confirm
         wpLinked: wpEnrich.wpLinked || 0, wpEnriched: wpEnrich.enriched || 0,
         osmResolveDeferred: _lastOsmDeferred, coldResolveVersion: "387-cold-resolve-budget-v1", // #387 deploy-confirm + resolves left running in the background
@@ -5036,6 +5067,7 @@ Deno.serve(async (req) => {
       swrVersion: SWR_VERSION, // #394 deploy-confirm
       cacheWritten, osmEmpty, emptyTileVersion: EMPTY_TILE_VERSION, // #399 — a healthy-empty tile is now cached (3-day row)
       osmCount: osm.places.length, wikiCount: wiki.places.length,
+      wikiError: wiki.error || null, wikiFailVersion: WIKI_FAIL_VERSION, // #486
       overpassStatus: osm.status, overpassError: osm.error,
       closedDropped: osm.closedDropped, closedBy: osm.closedBy,
       blocked: shown.blocked, blocklistFailed: !!bl.failed,

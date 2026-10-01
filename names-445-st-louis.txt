@@ -9,28 +9,34 @@
 # still owed, 775_-1801, is Illinois floodplain north-east of the box and holds none of these lines). Then the
 # dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY exported (#439):
 #   SEED_CITY_NAME="St. Louis" SEED_CITY_LAT=38.6270 SEED_CITY_LNG=-90.1994 deno run -A seed-resolve.ts names-445-st-louis.txt
+# DRY RUN 1 (2026-09-30): 12 new-seed, 2 story-attached, 8 review, 20 HELD (Gemini status null — never judged).
+# The 8 reviews are settled below (each carries a `review →` comment); the 20 held lines are unchanged and get
+# judged on dry run 2, which re-runs this whole file.
 
 # --- new story pins -------------------------------------------------------------
 
 # Downtown and the riverfront
-Old Missouri Hotel Site | @38.630663,-90.183275 | Missouri's first state legislature met on this corner in the Missouri Hotel on September 18, 1820, and the state's first governor, Alexander McNair, was sworn in here. | https://www.hmdb.org/m.asp?m=78840
+# `new` after review, dry run 1: review → "Laclede's Landing, St. Louis" (the district article, not this site).
+Old Missouri Hotel Site | @38.630663,-90.183275 | Missouri's first state legislature met on this corner in the Missouri Hotel on September 18, 1820, and the state's first governor, Alexander McNair, was sworn in here. | https://www.hmdb.org/m.asp?m=78840 | new
 # ^ the plaque was reported stolen in March 2026; the site and the building (Raeder Place) are still here.
-Scott's Hotel Site | @38.62498832,-90.18818773 | Abraham Lincoln, then an Illinois congressman on his way to Washington, spent the night of October 27, 1847, in Scott's Hotel, which stood on this spot. | https://www.hmdb.org/m.asp?m=141483
+# Renamed after review, dry run 1: review → "National Hotel (St. Louis, Missouri)" — the same hotel: it opened in 1832 as
+# Scott's Hotel and was rebuilt in 1847 (Wikipedia), so the line seeds under the article's title (#425).
+National Hotel (St. Louis, Missouri) | @38.62498832,-90.18818773 | Abraham Lincoln, then an Illinois congressman on his way to Washington, spent the night of October 27, 1847, at Scott's Hotel, the hotel on this corner later known as the National Hotel. | https://www.hmdb.org/m.asp?m=141483
 Samuel Clemens Print Shop Marker | @38.628133,-90.187767 | In 1853 a teenage Samuel Clemens, years before he became Mark Twain, worked as a typesetter for the St. Louis Evening News across Fourth Street from here. | https://www.hmdb.org/m.asp?m=122491
 Great Flood of 1993 High-Water Mark | @38.6249,-90.18405 | The bottom edge of this plaque shows where the Mississippi crested on August 1, 1993, at 49.58 feet, the highest river level ever recorded in St. Louis. | https://www.hmdb.org/m.asp?m=141588
 Seventh Street Railroad Tunnel Marker | @38.629183,-90.1909 | Under Seventh Street here, MetroLink runs through a double-arched, two-track tunnel dug in 1875 to carry freight and passenger trains from the Eads Bridge to the rail yards south of downtown. | https://www.hmdb.org/m.asp?m=141183
 American Zinc Building | @38.62436326,-90.18893078 | Its first tenant, a metals company, wanted a building that advertised its trade, so this 1967 office block is wrapped in stainless steel, the same skin as the Gateway Arch. | https://www.hmdb.org/m.asp?m=151978
 Old Busch Stadium Outfield Wall Line | @38.623283,-90.191767 | A green and yellow stripe in the pavement here traces the outfield wall of Busch Memorial Stadium, the Cardinals' home from 1966 to 2005. | https://www.hmdb.org/m.asp?m=133365
-The Meeting of the Waters | @38.630049,-90.207646 | Carl Milles's fountain in Aloe Plaza shows the joining of the Mississippi and Missouri rivers, with the two central figures as the rivers and the smaller water creatures as their tributaries. | https://www.hmdb.org/m.asp?m=62213
 Shrine of St. Joseph | @38.63704746,-90.19287993 | Austrian Jesuits founded this church in 1844 for the city's fast-growing German community, on land given by Ann Biddle, and the Vatican recognized a miracle here on March 16, 1864. | https://www.hmdb.org/m.asp?m=144369
 
 # Midtown, Central West End, the Loop
 T. S. Eliot Birthplace | @38.63442188,-90.21489725 | The poet and Nobel laureate T. S. Eliot was born at 2635 Locust Street in 1888 and spent his boyhood here. | https://www.hmdb.org/m.asp?m=145662
 T. S. Eliot Teenage Home | @38.64658389,-90.25424793 | T. S. Eliot, the poet and later Nobel laureate, lived in this Westminster Place house in his teenage years. | https://www.hmdb.org/m.asp?m=169035
-Delmar Wabash Station | @38.65496415,-90.29441107 | This 1928 Wabash Railroad station was served by the Delmar and City Limits streetcars, buses and Wabash trains, and streetcars stopped running here when the city retired the Delmar line in 1964. | https://www.hmdb.org/m.asp?m=144364
+# Renamed after review, dry run 1: review → "Delmar Boulevard station" (the Wabash station itself; "Delmar Loop station"
+# is the MetroLink stop beneath it) — seeds under the article's title (#425).
+Delmar Boulevard station | @38.65496415,-90.29441107 | This Wabash Railroad station was served by the Delmar and City Limits streetcars, buses and Wabash trains, and streetcars stopped running here when the city retired the Delmar line in 1964. | https://www.hmdb.org/m.asp?m=144364
 
 # Forest Park
-Apotheosis of St. Louis | @38.63984413,-90.29408813 | This bronze of King Louis IX of France, the crusader-king the city is named for, shows him as a Christian soldier raising a sword shaped like a cross. | https://www.hmdb.org/m.asp?m=181257
 American Jewish Tercentenary Memorial | @38.64312778,-90.2657 | Dedicated in November 1956, this plaza marks 300 years since the first Jewish settlement in America, at New Amsterdam in 1654. | https://www.hmdb.org/m.asp?m=219544
 Are Trees and Lawns Enough? Marker | @38.64355,-90.28408889 | Between 1911 and 1915 Parks Commissioner Dwight Davis, convinced St. Louisans needed room for organized sport, built tennis courts, athletic fields and a public golf course in Forest Park. | https://www.hmdb.org/m.asp?m=139722
 
@@ -40,13 +46,18 @@ Gox #8 | @38.61084722,-90.25856667 | Ernest Trova made this stainless-steel scul
 Alexander von Humboldt Statue | @38.60626528,-90.25492821 | This statue in Tower Grove Park honors the naturalist and explorer Alexander von Humboldt, whom its inscription calls the greatest traveller of any age. | https://www.hmdb.org/m.asp?m=169659
 
 # Lafayette Square and Soulard
-Lafayette Park Music Pavilion | @38.61591451,-90.21626524 | More than eight thousand people turned out in 1876 to open the Lafayette Park music pavilion, where a thirty-piece band played for the crowd. | https://www.hmdb.org/m.asp?m=140055
-9th Street Abbey | @38.60955824,-90.20357065 | Built as St. Paul's Evangelical Church, this building was wrecked by the great tornado of 1896, rebuilt the next year, became Holy Trinity Slovak Catholic Church in 1924 and was sold by the archdiocese in 1990. | https://www.hmdb.org/m.asp?m=215649
+# `new` after review, dry run 1: review → "Lafayette Square, St. Louis" (the neighbourhood article).
+Lafayette Park Music Pavilion | @38.61591451,-90.21626524 | More than eight thousand people turned out in 1876 to open the Lafayette Park music pavilion, where a thirty-piece band played for the crowd. | https://www.hmdb.org/m.asp?m=140055 | new
+# `new` after review, dry run 1: Gemini matched live pin "Trinity Lutheran Church (St. Louis, Missouri)" — a different
+# church (Historic Trinity, 1805 S. 8th St.); this is the former St. Paul's Evangelical at 1808 S. 9th St.
+9th Street Abbey | @38.60955824,-90.20357065 | Built as St. Paul's Evangelical Church, this building was wrecked by the great tornado of 1896, rebuilt the next year, became Holy Trinity Slovak Catholic Church in 1924 and was sold by the archdiocese in 1990. | https://www.hmdb.org/m.asp?m=215649 | new
 BWorks Building | @38.60286232,-90.20941754 | Part of a tract the city deeded to founding settler Francis Cabanne in 1837, this property was a stable from 1849 to 1891, then a carriage factory, and sold in 1973 for one dollar. | https://www.hmdb.org/m.asp?m=218900
 
 # Cherokee Street and the Lemp district (Benton Park, Marine Villa, Gravois Park)
 Lemp Mansion | @38.59330278,-90.21603333 | Home of the Lemp brewing family, whose fortunes rose and collapsed over three generations, this mansion is reputed to be haunted. | https://www.hmdb.org/m.asp?m=211828
-Beauvais House | @38.5933,-90.21621667 | Creole businessman Geminien Beauvais, who made his first money in the fur trade as a teenager, built the largest house on this elegant street in the early 1870s. | https://www.hmdb.org/m.asp?m=133132
+# `new` after review, dry run 1: Gemini matched live pin "Chatillon–DeMenil House" — a different house (3352 DeMenil
+# Place); Beauvais built at 3319.
+Beauvais House | @38.5933,-90.21621667 | Creole businessman Geminien Beauvais, who made his first money in the fur trade as a teenager, built the largest house on this elegant street in the early 1870s. | https://www.hmdb.org/m.asp?m=133132 | new
 Vollberg Building | @38.5933926,-90.22568263 | Robert Vollberg bought this 43-by-100-foot lot on Jefferson Avenue from his mother in the summer of 1883 and had a permit to build a two-story building a month later. | https://www.hmdb.org/m.asp?m=254970
 Cherokee Livery | @38.59348865,-90.22646809 | Undertaker Paul Buol built this as the Cherokee Livery in 1893, its front once two tall arched bays with double doors wide enough for horses and carriages. | https://www.hmdb.org/m.asp?m=124466
 Vandora Theater | @38.59358797,-90.22720249 | The Vandora Amusement Company opened the Vandora Theater here in 1909, in a building designed by the Missouri-born architect Otto J. Boehmer. | https://www.hmdb.org/m.asp?m=124464
@@ -70,3 +81,9 @@ Jay International Foods Original Store | @38.59807222,-90.24283611 | Jay Interna
 # Bellefontaine Cemetery (graves loaded 2026-09-30; neither of these is a grave pin)
 John Berry Meachum Monument | @38.69595,-90.229033 | John Berry Meachum, who founded and pastored the first Baptist church west of the Mississippi from 1817 until his death in 1854, is buried here. | https://www.hmdb.org/m.asp?m=62184
 Bellefontaine Champion American Elm | @38.687421,-90.226075 | The Missouri Department of Conservation certified this American elm as the largest known tree of its kind in the state. | https://www.hmdb.org/m.asp?m=62186
+
+# --- stories for live pins (#419) — each line is named to match the live pin ----
+# review after dry run 1: matched live pin "Aloe Plaza" — the fountain is the plaza's centrepiece; attach there.
+Aloe Plaza | @38.630049,-90.207646 | Carl Milles's fountain here, The Meeting of the Waters, shows the joining of the Mississippi and Missouri rivers, with the two central figures as the rivers and the smaller water creatures as their tributaries. | https://www.hmdb.org/m.asp?m=62213
+# review after dry run 1: matched live pin "Apotheosis of Saint Louis" — the same statue under the pin's spelling.
+Apotheosis of Saint Louis | @38.63984413,-90.29408813 | This bronze of King Louis IX of France, the crusader-king the city is named for, shows him as a Christian soldier raising a sword shaped like a cross. | https://www.hmdb.org/m.asp?m=181257
