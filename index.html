@@ -9063,7 +9063,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.01b';
+const APP_VERSION = '2026.10.01c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -10826,6 +10826,8 @@ function addBaseLayer(map){
   function addRasterFallback(){
     /* RASTER LADDER (2026.08.31d): OSM.org shows INSTANTLY (there is always a map),
        then we PROBE Stadia and UPGRADE to its retina tiles only if auth succeeds.
+       (SUPERSEDED IN PART by #491, 2026.10.01c — see below: the instant OSM paint
+       is gone on a known-good device; the probe and 401 reasoning still hold.)
        WHY A PROBE, not a tileerror fallback: an unauthenticated Stadia request
        returns HTTP 401, but the browser still DECODES Stadia's "401 Error"
        placeholder image, so Leaflet's tileerror NEVER fires — a naive fallback
@@ -10849,7 +10851,37 @@ function addBaseLayer(map){
     const STADIA_OPTS = { maxZoom:20, keepBuffer:6, updateWhenIdle:false, updateInterval:80, crossOrigin:true };
     const OSM_OPTS    = { maxZoom:19, keepBuffer:6, updateWhenIdle:false, updateInterval:80, className:'nahgoo-warm-tiles' };
 
-    let osm = null, dead = false;
+    /* #491 (2026.10.01c) — NO MORE OSM-THEN-STADIA FLASH. The ladder above used to
+       paint OSM.org FIRST on every open and swap to Stadia once the probe passed,
+       so iOS users saw the colourful OSM map for about a second before the grey
+       Stadia one. Once #467 (map before the first await) and #468 (iOS skips the
+       maplibre download) made the map appear sooner, that swap was on screen long
+       enough to notice. Now the probe's last answer is remembered on the device
+       (STADIA_OK_KEY), so:
+         · known-good device (every visit after the first, for almost everyone):
+           draw Stadia straight away, no OSM at all. The probe still runs; if it
+           now fails (key gated, domain dropped), Stadia comes off and OSM goes on.
+         · first visit, or Stadia failed last time: wait up to STADIA_WAIT_MS for
+           the probe. 200 → Stadia only. Fail → OSM. Slow → OSM at the deadline,
+           then the old upgrade (Stadia over it, OSM removed on Stadia's load) if
+           the probe passes late — the old flash, now only on a slow first visit.
+         · fetch throws (offline, or the preview blocks the host): OSM, whose
+           tileerror path still drops to StylizedGrid — unchanged. A throw on a
+           known-good device keeps Stadia up (treated as transient) and does NOT
+           clear the memory.
+       Side effect, wanted: no OSM.org tiles are fetched just to be thrown away
+       (their usage policy discourages heavy app use — the INTERIM NOTE above).
+       Worst case is a plain background for up to STADIA_WAIT_MS on a first visit,
+       instead of a colour flash on every visit. */
+    const STADIA_OK_KEY = 'nahgoo:stadia-ok:v1'; // '1' = the last probe passed on this device
+    const STADIA_WAIT_MS = 1000;
+
+    let osm = null, stadia = null, dead = false;
+    let knownOk = false;
+    try { knownOk = localStorage.getItem(STADIA_OK_KEY) === '1'; } catch(_){}
+    function rememberStadia(ok){
+      try { if(ok) localStorage.setItem(STADIA_OK_KEY, '1'); else localStorage.removeItem(STADIA_OK_KEY); } catch(_){}
+    }
 
     function addStylizedGrid(){
       dead = true;
@@ -10859,6 +10891,7 @@ function addBaseLayer(map){
       showToast('Real map tiles are blocked in this preview — showing a stylized map instead');
     }
     function addOSM(){
+      if(osm || dead) return;
       osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', OSM_OPTS);
       let errorCount = 0, fellBack = false;
       osm.on('tileerror', () => {
@@ -10871,26 +10904,52 @@ function addBaseLayer(map){
       });
       osm.addTo(map);
     }
+    function addStadia(){
+      if(stadia || dead) return;
+      stadia = L.tileLayer(STADIA_URL, STADIA_OPTS);
+      /* If OSM went on first (slow first-visit probe), drop it once Stadia has
+         actually painted, so there's no double-fetch and no gap. */
+      stadia.on('load', () => { try { if(osm){ map.removeLayer(osm); osm = null; } } catch(_){} });
+      stadia.addTo(map);
+    }
+    function dropStadia(){
+      try { if(stadia){ map.removeLayer(stadia); stadia = null; } } catch(_){}
+    }
 
-    /* Always paint a map right away with the keyless layer. */
-    addOSM();
+    if(knownOk) addStadia();
+    let settled = false;
+    const waitTimer = knownOk ? null : setTimeout(() => { if(!settled && !stadia) addOSM(); }, STADIA_WAIT_MS);
 
-    /* Probe one Stadia tile; upgrade to crisp retina Stadia only on a real 200
-       (registered domain). fetch reads the true status even though an <img> would
-       have decoded the 401 placeholder. crossOrigin already works (Stadia serves
-       permissive CORS, which is how the 401 image rendered at all). */
+    /* Probe one Stadia tile. fetch reads the true status even though an <img>
+       would have decoded the 401 placeholder. crossOrigin already works (Stadia
+       serves permissive CORS, which is how the 401 image rendered at all). */
     try {
       fetch('https://tiles.stadiamaps.com/tiles/alidade_smooth/3/4/3.png', { mode:'cors', cache:'no-store' })
         .then(r => {
-          if(!r || !r.ok || dead) return;   /* 401 / gated / already stylized → stay on OSM.org */
-          const stadia = L.tileLayer(STADIA_URL, STADIA_OPTS);
-          /* Drop the OSM.org underlay once Stadia has actually painted, so we don't
-             sit on a double-fetch or flash a gap if Stadia is slow. */
-          stadia.on('load', () => { try { if(osm){ map.removeLayer(osm); osm = null; } } catch(_){} });
-          stadia.addTo(map);
+          settled = true;
+          if(waitTimer) clearTimeout(waitTimer);
+          if(r && r.ok){
+            rememberStadia(true);
+            addStadia();
+          }else{
+            /* 401 / gated: never Stadia here, and don't try it first next time. */
+            rememberStadia(false);
+            dropStadia();
+            addOSM();
+          }
         })
-        .catch(() => {});   /* network / CORS error → stay on OSM.org */
-    } catch(_){}
+        .catch(() => {
+          settled = true;
+          if(waitTimer) clearTimeout(waitTimer);
+          /* network / CORS error: keep a known-good Stadia layer up (transient),
+             otherwise OSM (whose tileerror path reaches StylizedGrid). */
+          if(!stadia) addOSM();
+        });
+    } catch(_){
+      settled = true;
+      if(waitTimer) clearTimeout(waitTimer);
+      if(!stadia) addOSM();
+    }
   }
 
   /* WebGL + binding availability. maplibregl.supported was REMOVED in maplibre-gl
