@@ -41,9 +41,15 @@ Loaded 42 names from names-445-st-louis.txt
   + Are Trees and Lawns Enough? Marker [history] story✓ (conf 0.90)
       checked nearby: map 0 · subs 0 · wiki 0
       articles within 90 m: none
-  ⏳ English Woodland Garden → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Gox #8 → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Alexander von Humboldt Statue → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  + English Woodland Garden [park] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Gox #8 [art] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Alexander von Humboldt Statue [art] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
     (marked `new` — seeded as its own pin, attach/same-place check skipped)
   + Lafayette Park Music Pavilion [history] story✓ (conf 0.95)
       checked nearby: map 0 · subs 0 · wiki 1
@@ -60,23 +66,52 @@ Loaded 42 names from names-445-st-louis.txt
   + Beauvais House [history] story✓ (conf 0.95)  (Gemini suggested "Chatillon–DeMenil House")
       checked nearby: map 2 · subs 0 · wiki 2
       articles within 90 m: "Chatillon–DeMenil House" · "Lemp Mansion"
-  ⏳ Vollberg Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Cherokee Livery → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Vandora Theater → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Favorite Amusement Company → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Casa Loma Ballroom → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Pfeifer's Saloon → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Worth's Store → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Cinderella Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Hess Hardware → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Starke's Market → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Kleekamp's Hall → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Rain Stick Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Mausshardt Bakery Building → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Original Tower Grove Bank → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Bloemker & Son Undertakers → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Orpheum Cleaners → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
-  ⏳ Jay International Foods Original Store → HELD (re-run): live map returned ≤1 place(s) for this tile twice — likely a cold tile (#441); pre-warm the metro and re-run, or SEED_ALLOW_SPARSE_MAP=1 if the tile really is empty
+  + Vollberg Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Cherokee Livery [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Vandora Theater [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  ? Favorite Amusement Company → REVIEW: near-named Wikipedia article within 90 m: "Casa Loma Ballroom" (#432) — rename the line to the title to seed under it, or mark `new`
+  + Casa Loma Ballroom [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Casa Loma Ballroom" at the article's coordinate, 19 m from the marker (#425) — mark the line `new` to keep "Casa Loma Ballroom"
+      articles within 90 m: "Casa Loma Ballroom"
+  ? Pfeifer's Saloon → REVIEW: near-named Wikipedia article within 90 m: "Casa Loma Ballroom" (#432) — rename the line to the title to seed under it, or mark `new`
+  ? Worth's Store → REVIEW: near-named Wikipedia article within 90 m: "Casa Loma Ballroom" (#432) — rename the line to the title to seed under it, or mark `new`
+  + Cinderella Building [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Casa Loma Ballroom"
+  + Hess Hardware [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Starke's Market [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Kleekamp's Hall [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Rain Stick Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Mausshardt Bakery Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Original Tower Grove Bank [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Bloemker & Son Undertakers [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Orpheum Cleaners [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Jay International Foods Original Store [history] story✓ (conf 0.90)  (Gemini suggested "Jay International Foods")
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
   + John Berry Meachum Monument [history] story✓ (conf 1.00)
       checked nearby: map 0 · subs 0 · wiki 0
       articles within 90 m: none
@@ -91,13 +126,13 @@ Loaded 42 names from names-445-st-louis.txt
   nothing will be skipped or replaced
 
 --- summary ---
-{ "new-seed": 18, "story-attached": 4, held: 20 }
+{ "new-seed": 35, "story-attached": 4, review: 3 }
 stories attached to existing pins: 4 (0 existing seed(s) updated on commit)
-story lines seeded: 18 (their story ships as resolved_source 'curated'; 22 curated_descriptions rows staged in curated_records.json)
-new seed rows: 18  (unclassified category: 0, no wiki description: 0)
-seeded under their Wikipedia article's title (#425): 2 — read each "↳ seeded under" line before --commit
-#439: 0 staged story row(s) will be SKIPPED (already curated) → expect the commit to insert 22 story row(s); 0 seed story(ies) will be REPLACED
+story lines seeded: 35 (their story ships as resolved_source 'curated'; 39 curated_descriptions rows staged in curated_records.json)
+new seed rows: 35  (unclassified category: 0, no wiki description: 0)
+seeded under their Wikipedia article's title (#425): 3 — read each "↳ seeded under" line before --commit
+#439: 0 staged story row(s) will be SKIPPED (already curated) → expect the commit to insert 39 story row(s); 0 seed story(ies) will be REPLACED
 Wikipedia calls: 42 · retried 0 · failed 0
 wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).
-HELD (never judged — re-run these): 20 → wrote seed_held.txt. Re-run: seed-resolve.ts seed_held.txt with a working key. These are NOT reviews (#264).
+REVIEW (judged, genuinely unsure — eyeball these): 3 in seed_report.json (outcome:"review").
 NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).

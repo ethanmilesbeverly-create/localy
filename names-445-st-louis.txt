@@ -12,6 +12,9 @@
 # DRY RUN 1 (2026-09-30): 12 new-seed, 2 story-attached, 8 review, 20 HELD (Gemini status null — never judged).
 # The 8 reviews are settled below (each carries a `review →` comment); the 20 held lines are unchanged and get
 # judged on dry run 2, which re-runs this whole file.
+# DRY RUN 2 (2026-09-30): the 20 holds were not Gemini — they all sat in tile 772_-1805, cached with 0 Wikipedia
+# pins during the pre-warm (#486). After the #486 deploy + tile rebuild, DRY RUN 3: 35 new-seed, 4 story-attached,
+# 3 review, 0 held. The 3 reviews (all "near Casa Loma Ballroom") are settled `new` below.
 
 # --- new story pins -------------------------------------------------------------
 
@@ -61,10 +64,13 @@ Beauvais House | @38.5933,-90.21621667 | Creole businessman Geminien Beauvais, w
 Vollberg Building | @38.5933926,-90.22568263 | Robert Vollberg bought this 43-by-100-foot lot on Jefferson Avenue from his mother in the summer of 1883 and had a permit to build a two-story building a month later. | https://www.hmdb.org/m.asp?m=254970
 Cherokee Livery | @38.59348865,-90.22646809 | Undertaker Paul Buol built this as the Cherokee Livery in 1893, its front once two tall arched bays with double doors wide enough for horses and carriages. | https://www.hmdb.org/m.asp?m=124466
 Vandora Theater | @38.59358797,-90.22720249 | The Vandora Amusement Company opened the Vandora Theater here in 1909, in a building designed by the Missouri-born architect Otto J. Boehmer. | https://www.hmdb.org/m.asp?m=124464
-Favorite Amusement Company | @38.59368611,-90.22791944 | Brothers Harry and Eugene Freund bought this empty corner in the spring of 1909 and, three days later, had a permit for a one-story brick movie house. | https://www.hmdb.org/m.asp?m=124461
+# `new` after review, dry run 3: review → "Casa Loma Ballroom" (#432, within 90 m) — a different building (2701–2703 Cherokee, its own building).
+Favorite Amusement Company | @38.59368611,-90.22791944 | Brothers Harry and Eugene Freund bought this empty corner in the spring of 1909 and, three days later, had a permit for a one-story brick movie house. | https://www.hmdb.org/m.asp?m=124461 | new
 Casa Loma Ballroom | @38.59398796,-90.22873715 | Before the ballroom, this corner of Cherokee and Iowa held the Cinderella Airdome, an open-air theater the Freund brothers opened in 1921. | https://www.hmdb.org/m.asp?m=124458
-Pfeifer's Saloon | @38.59368268,-90.22900044 | H. E. Pfeifer hired builder Henry Becker in 1895 for this two-story home and store, in the same style as a building Becker had just finished at Cherokee and Oregon. | https://www.hmdb.org/m.asp?m=124456
-Worth's Store | @38.59368386,-90.22909208 | Architect O. J. Popp designed this building in 1921 on land bought from the St. Louis Brewing Association, and a shoe store and a women's clothing shop moved in the next year. | https://www.hmdb.org/m.asp?m=124455
+# `new` after review, dry run 3: review → "Casa Loma Ballroom" (#432, within 90 m) — a different building (2728 Cherokee, its own building).
+Pfeifer's Saloon | @38.59368268,-90.22900044 | H. E. Pfeifer hired builder Henry Becker in 1895 for this two-story home and store, in the same style as a building Becker had just finished at Cherokee and Oregon. | https://www.hmdb.org/m.asp?m=124456 | new
+# `new` after review, dry run 3: review → "Casa Loma Ballroom" (#432, within 90 m) — a different building (the 1921 Popp building on Cherokee).
+Worth's Store | @38.59368386,-90.22909208 | Architect O. J. Popp designed this building in 1921 on land bought from the St. Louis Brewing Association, and a shoe store and a women's clothing shop moved in the next year. | https://www.hmdb.org/m.asp?m=124455 | new
 Cinderella Building | @38.59384038,-90.22937183 | William Wedemeyer designed the Cinderella Building, finished in 1913 for Harry and Eugene Freund a year after they bought the lot from the Besch family. | https://www.hmdb.org/m.asp?m=124454
 Hess Hardware | @38.5936446,-90.23021512 | August Foell designed this three-story building for Henry W. Heuermann in 1894, and Heuermann ran a dry goods store in its north half for several years. | https://www.hmdb.org/m.asp?m=196100
 Starke's Market | @38.59406356,-90.2312632 | Butcher Jeremiah Thompson built this store with flats above in 1895 and ran his meat shop here through the 1890s, before it became George W. Starke's market in 1911. | https://www.hmdb.org/m.asp?m=124449
