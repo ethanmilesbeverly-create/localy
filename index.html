@@ -9063,7 +9063,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.09.30e';
+const APP_VERSION = '2026.10.01b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -15618,6 +15618,7 @@ async function submitPinReport(){
 function openPinSheet(t){
   state.selectedPinId = t.id;
   pingActivity('pin_open'); // #10
+  notePinInterest(t);       // #490
   // don't stack on top of the nearby-list drawer
   const drawer = document.getElementById('target-drawer');
   if(drawer && !drawer.classList.contains('collapsed')) toggleDrawer();
@@ -16200,6 +16201,54 @@ function noteActivityAuthState(signedIn){
   if(signedIn && prev !== '1') pingActivity('signed_in');
 }
 
+/* #490 — WHERE PINS ARE BEING OPENED, as pin data, never user data. When a pin
+   sheet opens, add 1 to today's tally for the 1° square (~70 mi) the PIN sits in,
+   through the pin_interest_add() function from 490_pin_interest.sql. The call
+   carries only that square — two whole numbers, floor(lat) and floor(lng) of the
+   pin's own public coordinate. No device ID, no account, no pin ID, no exact
+   coordinate, and it is NOT tied to #10's activity ping beside it (a separate
+   call to a separate table with no identifier at all). app-report's
+   `pin_interest` section reads the tallies for the morning report's US map.
+
+   RULES:
+   - Once per pin per page session (_pinInterestSent), so one person tapping the
+     same pin ten times counts once. A reload starts a new session.
+   - Demo mode (the preview iframe) sends nothing.
+   - No opt-out switch, by directive (2026-10-01): the operator's own test opens
+     count like anyone's. GRAVESTONE — a hidden "don't count this device" switch
+     (five taps on the version in About, a device-only flag) was built in
+     2026.10.01a and removed in 2026.10.01b before it was ever used.
+   - A square outside the US box is never sent; the server would refuse it
+     anyway (lat 18..71, lng -180..-66 — the SAME bounds as the SQL; a two-file
+     fact, change both together).
+   - Fire-and-forget. After one failure, nothing more is sent this page (a
+     missing function must not turn every pin tap into a failing request). */
+const _pinInterestSent = new Set();
+let _pinInterestFailed = false;
+
+function notePinInterest(t){
+  try{
+    if(demoBypassActive()) return;
+    if(_pinInterestFailed) return;
+    if(!t || t.id == null) return;
+    const lat = +t.lat, lng = +t.lng;
+    if(!isFinite(lat) || !isFinite(lng)) return;
+    const id = String(t.id);
+    if(_pinInterestSent.has(id)) return;
+    const cell_lat = Math.floor(lat), cell_lng = Math.floor(lng);
+    if(cell_lat < 18 || cell_lat > 71 || cell_lng < -180 || cell_lng > -66) return;
+    _pinInterestSent.add(id); // mark BEFORE sending so a double tap can't send twice
+    Promise.resolve(sb.rpc('pin_interest_add', { cell_lat: cell_lat, cell_lng: cell_lng }))
+      .then(res=>{
+        const err = res && res.error;
+        if(err){
+          _pinInterestFailed = true;
+          console.warn('[#490] pin open not counted (harmless):', err.message || err);
+        }
+      })
+      .catch(e=>{ _pinInterestFailed = true; console.warn('[#490] pin-open count failed (harmless):', e); });
+  }catch(e){ /* counting must never break the app */ }
+}
 /* DEFERRED CONSUMER — the weekly push nudge lands here, on top of #175's PWA
    plumbing. It is a no-op today by design (infrastructure without
    notifications). Kept as a

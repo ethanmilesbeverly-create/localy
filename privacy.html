@@ -185,7 +185,7 @@
     <p class="subline">Nahgoo is an app about walking to real places. That means it is
       an app that could very easily know too much about where you go. This page is
       the specific, checkable version of what it actually stores.</p>
-    <p class="updated">Last updated 25 September 2026</p>
+    <p class="updated">Last updated 1 October 2026</p>
   </section>
 
   <h2>The short version</h2>
@@ -311,6 +311,34 @@
     is fine for their purpose: seeing whether people are using the app, not
     identifying them.</p>
 
+  <!-- #490 — pin-open tallies. Every claim below was read out of index.html's
+       notePinInterest() and 490_pin_interest.sql: the client sends only two whole
+       numbers (floor of the opened place's latitude and longitude); the table holds
+       the UTC day, that square and a count — no device ID, account, IP, place ID or
+       exact coordinate; the only writer is pin_interest_add(), which adds 1; the only
+       reader is the operator dashboard (service role); the pin-interest-sweep job
+       deletes rows older than 400 days. It is a separate table from the usage counts
+       above and is not linked to them. If any of that changes, this section changes
+       in the same build. -->
+  <h2 id="place-interest">Where places are being opened</h2>
+
+  <p>So we can see which cities to put more work into, the app also keeps a running
+    tally of where places are being looked at.</p>
+  <ul>
+    <li>When you open a place, the app adds one to a count for the <strong>roughly
+      70-mile square the place sits in</strong>. That is the <em>place's</em> area,
+      from its public map coordinates — not yours. If you're in Chicago reading about
+      a spot in Boston, it counts for Boston.</li>
+    <li>The count holds only the date, that square and a number. <strong>No device ID,
+      no account, no IP address, not which place you opened</strong>, and nothing that
+      links it to the usage counts above. Opening the same place again in the same
+      visit doesn't add to it.</li>
+  </ul>
+  <p>Because people often open places near them, a busy square does suggest people are
+    using Nahgoo around there — that is what it's for — but no count can be traced back
+    to you or your device. These tallies are read only by us, and are
+    <strong>deleted after 400 days</strong>.</p>
+
   <h2 id="who-else">Who else receives anything</h2>
 
   <p class="lead">A map app cannot work without asking other people's servers for
@@ -392,6 +420,9 @@
       square, with no user attached.</p>
     <p><strong>Anonymous usage counts:</strong> 90 days, then deleted automatically.
       They carry a random device ID and no account or location.</p>
+    <p><strong>Where places are being opened:</strong> 400 days, then deleted
+      automatically. Each is a date, a roughly 70-mile square and a count — nothing
+      about who opened anything.</p>
   </div>
 
   <h2>Asking for your data, or its deletion</h2>

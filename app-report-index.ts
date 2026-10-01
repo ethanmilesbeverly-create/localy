@@ -24,6 +24,9 @@
 //   from 010_activity_pings.sql (SQL editor). Not a secret or a flag, but DB state
 //   no deploy of this file carries; without it `activity` reads {available:false}
 //   with an info alert — it degrades, it does not break.
+//   (#490, v24) The `pin_interest` section depends on the `pin_interest` table and
+//   its `pin_interest_add` function from 490_pin_interest.sql (SQL editor). Same
+//   shape: without it `pin_interest` reads {available:false} with an info alert.
 //   SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are auto-injected by the
 //   platform — do NOT set them by hand. GEMINI_MODEL is a project-wide secret
 //   already set for review-submission; this function only READS it, to let you
@@ -34,6 +37,9 @@
 // passports, capture anchors and cached tiles — are never read; only keys,
 // user ids (counted, never emitted) and timestamps are. #10's activity_pings
 // carry no user id or location at all; their device ids are counted, never emitted.
+// #490's pin_interest holds no identifier of any kind — only (UTC day, 1° square of
+// the OPENED PIN, count) — and squares with fewer than 3 opens in 30 days are
+// emitted without their numbers, so a lone rural open can't stand out.
 // Submission lat/lng ARE
 // included, but those are the PUBLIC pin coordinate of a place, not a user's
 // position, and coverage is reported only as grid-aggregated counts.
@@ -346,7 +352,23 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 //   saved. This file is that corrected code with its own string, so the dashboard
 //   can tell it apart. One deploy target (this function, --no-verify-jwt).
 //   Observability, so it does NOT move the %.
-const REPORT_VERSION = "app-report-v23";
+// v23 -> v24 (#490, 2026-10-01): new `pin_interest` section — where pins are being
+//   OPENED, by 1° square (~70 mi), from the anonymous daily tallies in
+//   `pin_interest` (490_pin_interest.sql). Pin data, never user data: the square is
+//   the opened pin's, and no row carries a device, user, IP, pin id or coordinate.
+//   Per square: opens today / 7d / 30d, the seeded pins live in that square (approved,
+//   non-merged submissions, from the SAME submissions pull — no second scan), and
+//   opens per seeded pin over 30 days, the "where do people engage more than the
+//   supply predicts" number the morning report's US map is built on. A square with
+//   fewer than 3 opens in 30 days is emitted with its numbers withheld (few: true);
+//   it still counts in the totals. A failed read is NOT a section error — the #10
+//   pattern: {available:false} + an INFO `pin_interest_read_failed`, never red.
+//   Squares are NOT labelled with metro names here: the roster already lives in three
+//   tool files, and a fourth copy would drift; the report labels squares the way it
+//   labels coverage cells, by nearest metro from the square's centre. One deploy
+//   target (this function, --no-verify-jwt), after the #490 SQL. Observability, so
+//   it does NOT move the %.
+const REPORT_VERSION = "app-report-v24";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -1157,6 +1179,81 @@ function summariseActivity(rows: any[], now: number, activeUsers7d: number | nul
     newest_day: newest,
     retention_days: 90,
     unknown_events, // should always be {} — the table's CHECK constraint forbids anything else
+  };
+}
+
+// #490 — where pins are being opened. Rows are (day, cell_lat, cell_lng, opens):
+// anonymous daily tallies, one per 1° square, the square being the OPENED PIN's
+// (floor of its lat / lng). Nothing here identifies a person or a device.
+const PIN_INTEREST_FEW = 3; // fewer 30-day opens than this → numbers withheld
+const PIN_INTEREST_CAP = 200; // squares emitted (most-opened first); totals cover all
+
+function cellKey1(lat: number, lng: number): string {
+  return Math.floor(lat) + "," + Math.floor(lng);
+}
+
+function summarisePinInterest(rows: any[], now: number, seededByCell: Map<string, number> | null) {
+  const today = utcDayString(now);
+  const from7 = utcDayString(now - 6 * DAY);
+  const from30 = utcDayString(now - 29 * DAY);
+  type C = { lat: number; lng: number; today: number; d7: number; d30: number };
+  const cells = new Map<string, C>();
+  const totals = { today: 0, d7: 0, d30: 0 };
+  let oldest: string | null = null;
+  let newest: string | null = null;
+
+  for (const r of rows) {
+    const day = r && r.day ? String(r.day).slice(0, 10) : "";
+    const lat = Number(r && r.cell_lat);
+    const lng = Number(r && r.cell_lng);
+    const n = Number(r && r.opens) || 0;
+    if (!day || !Number.isFinite(lat) || !Number.isFinite(lng) || n <= 0 || day < from30) continue;
+    if (!oldest || day < oldest) oldest = day;
+    if (!newest || day > newest) newest = day;
+    const k = lat + "," + lng;
+    const c = cells.get(k) || { lat, lng, today: 0, d7: 0, d30: 0 };
+    c.d30 += n; totals.d30 += n;
+    if (day >= from7) { c.d7 += n; totals.d7 += n; }
+    if (day === today) { c.today += n; totals.today += n; }
+    cells.set(k, c);
+  }
+
+  const all = [...cells.entries()].sort((a, b) => b[1].d30 - a[1].d30);
+  let few = 0;
+  const out = all.slice(0, PIN_INTEREST_CAP).map(([k, c]) => {
+    const seeded = seededByCell ? (seededByCell.get(k) || 0) : null;
+    const center = { lat: c.lat + 0.5, lng: c.lng + 0.5 };
+    if (c.d30 < PIN_INTEREST_FEW) {
+      few++;
+      return { cell: k, center, few: true, seeded_pins: seeded };
+    }
+    return {
+      cell: k,
+      center,
+      opens_today: c.today,
+      opens_7d: c.d7,
+      opens_30d: c.d30,
+      seeded_pins: seeded,
+      opens_per_seeded_pin_30d: seeded ? Math.round((c.d30 / seeded) * 1000) / 1000 : null,
+    };
+  });
+
+  return {
+    available: true,
+    scope: "anonymous daily pin-open tallies per 1° square (~70 mi) of the OPENED PIN (pin_interest, #490). Pin data, not user data: no device, user, IP, pin id or coordinate is stored. An opener in Chicago reading about Boston counts for Boston.",
+    windows_utc: { today, from_7d: from7, from_30d: from30 },
+    totals: { opens_today: totals.today, opens_7d: totals.d7, opens_30d: totals.d30 },
+    squares_with_opens_30d: all.length,
+    squares_few: few,
+    few_threshold: PIN_INTEREST_FEW,
+    cells: out,
+    cells_capped: all.length > PIN_INTEREST_CAP,
+    seeded_pins_note: seededByCell
+      ? "seeded_pins = approved, non-merged submissions in the square (gems + seeds). It EXCLUDES the OSM/Wikipedia tile pins the map also serves, so opens_per_seeded_pin reads high where the map leans on tile pins."
+      : "seeded_pins unavailable — the submissions read failed this run.",
+    oldest_day: oldest,
+    newest_day: newest,
+    retention_days: 400,
   };
 }
 
@@ -2240,6 +2337,13 @@ function computeAlerts(report: Record<string, any>, opts: { backlogWarnH: number
       `activity pings could not be read (${act.error || "unknown error"}) — guest/device counts are missing from this digest. If 010_activity_pings.sql hasn't been run, run it; otherwise check the table exists and service_role can SELECT it (#10)`);
   }
 
+  // #490: the pin-interest read failed. INFO, same reasoning as #10's activity.
+  const pi = report.pin_interest || {};
+  if (pi.available === false) {
+    push("info", "pin_interest_read_failed",
+      `pin-open tallies could not be read (${pi.error || "unknown error"}) — the pin_interest section is missing from this digest. If 490_pin_interest.sql hasn't been run, run it; otherwise check the table exists and service_role can SELECT it (#490)`);
+  }
+
   const rr = report.rejected_resubmits || {};
   if ((rr.flagged || 0) > 0) {
     const flaggedList = (Array.isArray(rr.clusters) ? rr.clusters : [])
@@ -2387,6 +2491,8 @@ Deno.serve(async (req: Request) => {
   // #393 — the reports arm needs each gem's served/not-served state, from the SAME
   // submissions pull (one scan). null if that read failed → reports behave as before.
   let liveGem: Map<string, boolean> | null = null;
+  // #490 — seeded (approved, non-merged) pins per 1° square, from the SAME pull.
+  let seededByCell: Map<string, number> | null = null;
   try {
     const subs = await fetchAll(
       supabase,
@@ -2397,6 +2503,14 @@ Deno.serve(async (req: Request) => {
     liveGem = new Map<string, boolean>();
     for (const r of subs) {
       if (r && r.id) liveGem.set(String(r.id), r.status === "approved" && (r.merged_into === null || r.merged_into === undefined));
+    }
+    seededByCell = new Map<string, number>();
+    for (const r of subs) {
+      if (!r || r.status !== "approved" || (r.merged_into !== null && r.merged_into !== undefined)) continue;
+      const la = Number(r.lat), ln = Number(r.lng);
+      if (!Number.isFinite(la) || !Number.isFinite(ln)) continue;
+      const k = cellKey1(la, ln);
+      seededByCell.set(k, (seededByCell.get(k) || 0) + 1);
     }
     // v12: the descriptions / story-gate arm reuses the SAME subs pull (one scan,
     // one home — the #266 pin_audit pattern) and is isolated in its own try so a bug
@@ -2485,6 +2599,34 @@ Deno.serve(async (req: Request) => {
     report.activity = summariseActivity(rows, now, act7);
   } catch (e) {
     report.activity = { available: false, error: (e as Error).message };
+  }
+
+  // #490 — where pins are being opened. Same isolation as #10's activity: a failed
+  // read (SQL not run, or reverted) becomes {available:false} + an INFO alert, never
+  // an `errors` entry, so it can't turn the morning read red. 30 UTC days only; the
+  // 400-day retention is the sweep's job, not the read's.
+  try {
+    const since = utcDayString(now - 29 * DAY);
+    const page = 1000;
+    const cap = 200000;
+    const rows: any[] = [];
+    for (let from = 0; from < cap; from += page) {
+      const { data, error } = await supabase
+        .from("pin_interest")
+        .select("day,cell_lat,cell_lng,opens")
+        .gte("day", since)
+        .order("day", { ascending: true })
+        .order("cell_lat", { ascending: true })
+        .order("cell_lng", { ascending: true })
+        .range(from, from + page - 1);
+      if (error) throw new Error(error.message);
+      if (!data || data.length === 0) break;
+      rows.push(...data);
+      if (data.length < page) break;
+    }
+    report.pin_interest = summarisePinInterest(rows, now, seededByCell);
+  } catch (e) {
+    report.pin_interest = { available: false, error: (e as Error).message };
   }
 
   try {
