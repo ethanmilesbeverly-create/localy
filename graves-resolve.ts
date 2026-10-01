@@ -221,6 +221,25 @@
 //
 //   # commit only the un-loaded rows from the existing file, no crawl:
 //   deno run --allow-net --allow-env --allow-read --allow-write graves-resolve.ts --from-records --commit
+//
+// DUPLICATE LABELS ARE HELD, NOT COMMITTED (#442, 2026-10-01). Two DIFFERENT
+// people (different Wikidata QIDs) can produce the SAME pin label — a namesake
+// (a second "Grave of Edgar Allan Poe", the Maryland Attorney General, 16 km from
+// the writer) or a father and son in one plot ("Grave of Stevenson Archer" ×2).
+// The QID dedup and the #338 skip are keyed on identity, so both pass; on the map
+// they read as a mistake. Every run now groups the rows it would insert by exact
+// label (lowercased, whitespace-collapsed) and prints a DUPLICATE LABELS block;
+// every row in a repeated label is HELD from --commit (the rest commit normally).
+// The rows stay in graves_records.json — decide by hand: delete the wrong one, or
+// keep both by giving one a life-dated label ("… (1871–1961)", the #379 form —
+// a different exact label, so the hold releases it), then --from-records --commit.
+// The hold runs on all three commit paths (single metro, --all, --from-records).
+// Decision (b) on #442: hold and list; no automatic life-dating (a real namesake
+// is rare — 27 of 4,893 live grave labels repeat, ~7 of them true namesakes).
+// The MIRROR case — a new namesake of a grave ALREADY LIVE elsewhere — was always
+// skipped by #384 as "loaded-elsewhere"; it is now listed in its own block
+// ("SAME NAME ALREADY LIVE ELSEWHERE") with the candidate's QID, instead of under
+// "#384 HAND-PLACED GRAVES", which read as if it were a hand placement.
 
 // ---------------------------------------------------------------------------
 // Config (all overridable by env; safe Chicago defaults).
@@ -299,7 +318,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.09.30a (#445 Phase B — the METROS roster grows 24 → 25: + St. Louis; its 40 km box overlaps no other roster metro. Built on 28a.)";
+const BUILD = "graves-resolve 2026.10.01a (#442 — rows sharing a label are listed under DUPLICATE LABELS and held from --commit; a new namesake of a live grave is listed apart from #384 hand placements. Roster unchanged at 25. Built on 30a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -1312,6 +1331,46 @@ function summarize(rows: GraveRow[], coveredPeople: number) {
 }
 
 // ---------------------------------------------------------------------------
+// #442 DUPLICATE LABELS: group the rows about to be inserted by their EXACT
+// label (lowercased, whitespace-collapsed — NOT graveNameCore, so a hand-added
+// "(1871–1961)" life-date makes a label distinct and releases the hold). Every
+// row in a label used more than once is HELD; the rest pass through. Prints the
+// block whenever there is anything to show, on a dry run too, so the summary
+// itself flags it. Never edits graves_records.json — the operator decides.
+// ---------------------------------------------------------------------------
+function exactLabel(name: string): string {
+  return String(name ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+function holdDuplicateLabels(rows: GraveRow[], commit: boolean): GraveRow[] {
+  const groups = new Map<string, GraveRow[]>();
+  for (const r of rows) {
+    const k = exactLabel(r.name);
+    const arr = groups.get(k) ?? [];
+    arr.push(r);
+    groups.set(k, arr);
+  }
+  const dupes = [...groups.values()].filter((g) => g.length > 1);
+  if (!dupes.length) {
+    console.log("\n#442 DUPLICATE LABELS: none — every row carries a distinct label.");
+    return rows;
+  }
+  const held = new Set<GraveRow>(dupes.flat());
+  console.log(`\n⚠ #442 DUPLICATE LABELS — ${held.size} row(s) under ${dupes.length} label(s) are ${commit ? "HELD from this --commit" : "flagged (they would be HELD from --commit)"}:`);
+  for (const g of dupes) {
+    console.log(`  "${g[0].name}" ×${g.length}`);
+    for (let i = 0; i < g.length; i++) {
+      const r = g[i];
+      const m = (r.grave_meta ?? {}) as any;
+      const far = i === 0 ? "" : ` — ${(haversineM(g[0].lat, g[0].lng, r.lat, r.lng) / 1000).toFixed(1)} km from the first`;
+      console.log(`    • ${r.city} (${r.lat}, ${r.lng})${m.qid ? ` [${m.qid}]` : ""}${m.articleTitle ? ` → "${m.articleTitle}"` : ""}${m.burialLabel ? ` at "${m.burialLabel}"` : ""}${far}`);
+    }
+  }
+  console.log("  Decide each by hand in graves_records.json: delete the row that shouldn't be a pin, or keep both by");
+  console.log("  giving one a life-dated label (\"Grave of <Name> (YYYY–YYYY)\", #379). Then run --from-records --commit.");
+  return rows.filter((r) => !held.has(r));
+}
+
+// ---------------------------------------------------------------------------
 // #342 RETIRE AUDIT: an ALREADY-LOADED grave whose P119 burial place is not a
 // cemetery is a MISPLACED live pin (the old ungated tool planted it before the
 // gate existed). This crawl now surfaces those: collect the report entries that
@@ -1332,12 +1391,23 @@ async function writeRetireAudit(strays: any[], entries: any[] = []): Promise<voi
   const handMoved = entries.filter((e) => e && e.outcome === "non-cemetery-burial" && e.disposition === "hand-moved");
   const retired = entries.filter((e) => e && e.outcome === "non-cemetery-burial" && e.disposition === "already-retired");
   const elsewhere = entries.filter((e) => e && e.outcome === "loaded-elsewhere");
-  if (handMoved.length || elsewhere.length) {
-    console.log(`\n#384 HAND-PLACED GRAVES (trusted over Wikidata — not proposed, not re-planted): ${handMoved.length + elsewhere.length}.`);
-    for (const e of [...handMoved, ...elsewhere]) {
+  if (handMoved.length) {
+    console.log(`\n#384 HAND-PLACED GRAVES (trusted over Wikidata — not proposed): ${handMoved.length}.`);
+    for (const e of handMoved) {
       console.log(`  ↷ "${e.loadedName}" at (${e.loadedLat}, ${e.loadedLng}) — Wikidata puts ${e.person} ${(e.loadedDistM / 1000).toFixed(1)} km away${e.burial ? ` at "${e.burial}"` : ""}${e.loadedLive ? "" : " [row not live]"}`);
     }
-    console.log("  (Confirm each is a deliberate hand placement. One you don't recognise is a namesake or a wrong move — check graves_report.json.)");
+    console.log("  (Confirm each is a deliberate hand placement. One you don't recognise is a wrong move — check graves_report.json.)");
+  }
+  // #442 mirror case: a candidate skipped because a row with its name is already
+  // loaded somewhere else. Either a hand-moved grave (#383) or a NAMESAKE — a
+  // different person this tool will never plant. Listed apart from the hand
+  // placements above, with the candidate's QID, so a namesake is recognisable.
+  if (elsewhere.length) {
+    console.log(`\n#442 SAME NAME ALREADY LIVE ELSEWHERE (skipped, not planted): ${elsewhere.length}.`);
+    for (const e of elsewhere) {
+      console.log(`  ↷ ${e.person}${e.qid ? ` [${e.qid}]` : ""} at (${e.lat}, ${e.lng}) — "${e.loadedName}" is already loaded ${(e.loadedDistM / 1000).toFixed(1)} km away at (${e.loadedLat}, ${e.loadedLng})${e.loadedLive ? "" : " [row not live]"}`);
+    }
+    console.log("  (Each is a hand-moved grave or a NAMESAKE. A namesake you want on the map is placed by hand with a life-dated label, as #384 does.)");
   }
   if (retired.length) {
     console.log(`#384: ${retired.length} rejected grave(s) are already RETIRED in submissions — already dispositioned, not proposed: ${retired.map((e) => e.person).join(", ")}.`);
@@ -1443,9 +1513,10 @@ async function runFromRecords(loadedKeys: Set<string>, skipActive: boolean, comm
     console.log("  (submissions-aware skip was OFF for this run, so NO rows were filtered — see the skip status above; a --commit here trusts the file not to overlap the DB.)");
   }
 
+  const toInsert = holdDuplicateLabels(fresh, commit);
   if (commit) {
     console.log("\n--from-records --commit: inserting the un-loaded rows now (no crawl).");
-    await commitToSupabase(fresh);
+    await commitToSupabase(toInsert);
   } else {
     console.log("\nNOTHING was written (no --commit). Re-run with --from-records --commit to insert the rows above.");
   }
@@ -1527,9 +1598,10 @@ async function run() {
     console.log(`MULTI-P119 people collapsed (2+ burial coordinates → one grave kept, #378): ${multiP119} — see graves_report.json (outcome:"multi-p119-collapsed").`);
     console.log("wrote graves_records.json (all metros, load into submissions) and graves_report.json (per-metro blocks, every verdict).");
 
+    const allToInsert = holdDuplicateLabels(allRows, COMMIT);
     if (COMMIT) {
       console.log("\n--commit passed: writing every metro's new grave rows to submissions now.");
-      await commitToSupabase(allRows);
+      await commitToSupabase(allToInsert);
     } else {
       console.log("\nNOTHING was written to the database. Review graves_report.json, then re-run with --all --commit to insert (or load graves_records.json manually).");
     }
@@ -1548,9 +1620,10 @@ async function run() {
   await writeRetireAudit(collectStrays(report), report);
   console.log("wrote graves_records.json (load into submissions) and graves_report.json (every verdict).");
 
+  const toInsert = holdDuplicateLabels(rows, COMMIT);
   if (COMMIT) {
     console.log("\n--commit passed: writing the new grave rows to submissions now.");
-    await commitToSupabase(rows);
+    await commitToSupabase(toInsert);
   } else {
     console.log("\nNOTHING was written to the database. Review graves_report.json, then re-run with --commit to insert (or load graves_records.json manually).");
   }
