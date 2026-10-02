@@ -1529,7 +1529,7 @@
      reads as the label sliding open. Driven by setPillReveal(). */
   .fm-txt{
     overflow:hidden;max-width:0;opacity:0;margin-left:0;
-    font-size:12px;font-weight:700;line-height:1.2;
+    font-size:11px;font-weight:700;line-height:1.2;   /* 12 → 11px (2026.10.02d): with #440 putting more pins in view, names read too busy */
     transition:max-width .16s ease,opacity .16s ease,margin-left .16s ease;
   }
   @media (prefers-reduced-motion: reduce){ .fm-txt{transition:none;} }
@@ -9142,7 +9142,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.02c';
+const APP_VERSION = '2026.10.02d';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -15979,6 +15979,19 @@ function scheduleLabelUpdate(){
    the reveal back where it sat before the swap. If this now crowds, 14.5 is the
    intermediate; the collision pass above still decides which names actually fit. */
 const MIN_LABEL_ZOOM = 14.0;
+/* #440 (2026.10.02d) — LABELS COME LATER, AND FEWER, ON ALL THINGS LOCAL. With the
+   progressive reveal putting up to 50 pins on screen, names unfurling at 14.0 made
+   the map busy. On All Things Local only (the category tabs keep MIN_LABEL_ZOOM and
+   their old rules):
+     - names start a full level later (ATL_LABEL_ZOOM);
+     - at most ATL_LABEL_MAX names are open at once, best-ranked first (atlRank,
+       not distance — the same order the reveal uses), plus the selected pin;
+     - a name may not unfurl across a BETTER-ranked visible pin, not just across
+       another name — the old test only checked names against names, so an open
+       label could sit on top of a more important neighbour. (Blocking it over ANY
+       pin was tried in the sandbox and opened almost no names at street zoom.) */
+const ATL_LABEL_ZOOM = 15.0;
+const ATL_LABEL_MAX  = 12;
 /* #270 — set a pill's label reveal r in [0,1]: 0 = collapsed to the glyph (a
    round pin), 1 = fully unfurled. A partway r clips the name, which reads as the
    label sliding open. The arrow and glyph never move; only the name span animates. */
@@ -16086,7 +16099,9 @@ function updatePinLabels(){
   const size = map.getSize();
   if(!size || !size.x) return;               // map not laid out yet (screen hidden)
   const zoom = map.getZoom();
-  const reveal = Math.max(0, Math.min(1, (zoom - MIN_LABEL_ZOOM) / 1.2));
+  const revealOn = atlRevealActive();                                   // #440 (2026.10.02d)
+  const labelZoom = revealOn ? ATL_LABEL_ZOOM : MIN_LABEL_ZOOM;
+  const reveal = Math.max(0, Math.min(1, (zoom - labelZoom) / 1.2));
   const margin = 60;
   const entries = [];
   const hidden = atlRevealPass(map, size, zoom);   // #440 — markers that lost their slot this frame (empty set when reveal is off)
@@ -16106,19 +16121,23 @@ function updatePinLabels(){
       return;
     }
     // estimated expanded pill box, RECENTRED on the point (padL + glyph + gap + text + padR)
-    const nameW = Math.min(150, 8 + info.name.length * 6.6);
+    const nameW = Math.min(150, 8 + info.name.length * 6.0);   // ~6px a character at the 11px label (was 6.6 at 12px)
     const half = (5 + 14 + 6 + nameW + 13) / 2;
     const box = { l:pt.x - half, r:pt.x + half, t:pt.y - 34, b:pt.y - 2 };
+    const pinBox = { l:pt.x - 14, r:pt.x + 14, t:pt.y - 32, b:pt.y - 4 };   // the collapsed pin itself (#440: names may not cover it)
     const tier = info.selected ? 0 : info.halo ? 1 : info.found ? 3 : 2;
-    entries.push({ pill, txt, box, key: tier*100000 + info.rank, selected:info.selected });
+    const order = revealOn ? info.atlRank : info.rank;
+    entries.push({ pill, txt, box, pinBox, key: tier*1000000 + order, selected:info.selected });
   });
-  entries.sort((a,b)=> a.key - b.key);          // selected, then nearest-rank first — stable during a pan
+  entries.sort((a,b)=> a.key - b.key);          // selected, then rank — stable during a pan
   const placed = [];
   const hit = (x,y)=> x.l < y.r && x.r > y.l && x.t < y.b && x.b > y.t;
+  let opened = 0;
   for(const e of entries){
     if(e.selected){ placed.push(e.box); setPillReveal(e.pill, e.txt, 1); continue; }  // selected always expands, claims first
-    if(placed.some(p=> hit(e.box, p))){ setPillReveal(e.pill, e.txt, 0); }             // would collide -> stay a collapsed pin
-    else { placed.push(e.box); setPillReveal(e.pill, e.txt, reveal); }
+    const overPin = revealOn && entries.some(o => o !== e && o.key < e.key && hit(e.box, o.pinBox));  // #440 — would cover a BETTER-ranked visible pin (a lesser one it may overlap)
+    if(overPin || (revealOn && opened >= ATL_LABEL_MAX) || placed.some(p=> hit(e.box, p))){ setPillReveal(e.pill, e.txt, 0); }  // stay a collapsed pin
+    else { placed.push(e.box); setPillReveal(e.pill, e.txt, reveal); if(reveal > 0) opened++; }
   }
 }
 function refreshTargetsUI(){
