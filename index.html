@@ -1488,8 +1488,14 @@
      in place when you zoom in. The transition lives on .fm-wrap, NEVER on the
      .fm-divicon itself: Leaflet moves that element by transform on every pan frame,
      and a transition there would make pins trail the map. A hidden pin takes no taps. */
-  .fm-divicon .fm-wrap{transform-origin:50% 100%;transition:opacity .2s ease,transform .2s ease;}
-  .fm-divicon.fm-out .fm-wrap{opacity:0;transform:scale(.55);}
+  /* 2026.10.02c — the reveal is a slow, soft "grow out of its point" (a touch of
+     overshoot, ~0.5s, staggered by rank via --fm-delay so a zoom fills in as a
+     ripple rather than all at once); the hide is quicker and has no delay, so a
+     zoom-out thins promptly. */
+  .fm-divicon .fm-wrap{transform-origin:50% 100%;
+    transition:opacity .45s ease-out var(--fm-delay,0ms),transform .55s cubic-bezier(.34,1.45,.64,1) var(--fm-delay,0ms);}
+  .fm-divicon.fm-out .fm-wrap{opacity:0;transform:scale(.3);
+    transition:opacity .18s ease-in,transform .18s ease-in;}
   .fm-divicon.fm-out .fm-pill,.fm-divicon.fm-out .fm-arrow{pointer-events:none;}
   @media (prefers-reduced-motion: reduce){ .fm-divicon .fm-wrap{transition:none;} }
   .fm-shadow{
@@ -9136,7 +9142,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.02b';
+const APP_VERSION = '2026.10.02c';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -16002,15 +16008,51 @@ function setPillReveal(pill, txt, r){
    on the same rAF-throttled zoom/move events as the label pass. Returns the set of
    hidden markers so the label pass skips them. Reveal off (another card, or
    ?atlreveal=0) → every pin shown, as before. */
+/* 2026.10.02c — ANIMATED REVEAL that survives marker rebuilds. refreshTargetsUI
+   rebuilds every marker on each GPS tick and reblend, and a freshly inserted element
+   never transitions — so a pin newly revealed in the same pass as a rebuild used to
+   just appear. _atlPrevShown remembers which pin ids were showing last pass:
+     - a fresh marker that was showing before → shown at once (no re-animation on a
+       GPS tick);
+     - a fresh marker that is newly shown → inserted hidden, then un-hidden on the
+       next frame, so it grows in;
+     - an existing marker → just toggles, and the CSS transition does the rest.
+   Newly revealed pins in one pass get a small staggered delay by rank
+   (ATL_REVEAL_STAGGER_MS each, capped), so a zoom fills in as a ripple. */
+const ATL_REVEAL_STAGGER_MS = 35;
+const ATL_REVEAL_STAGGER_MAX_MS = 350;
+let _atlPrevShown = new Set();
 function atlRevealPass(map, size, zoom){
   const hidden = new Set();
+  const nowShown = new Set();
+  let revealIdx = 0;
   const setShown = (m, el, show) => {
+    const id = m._pinLabel && m._pinLabel.id;
+    if(show && id != null) nowShown.add(id);
     if(m._atlShown === show) return;
+    const fresh = (m._atlShown === undefined);
     m._atlShown = show;
-    el.classList.toggle('fm-out', !show);
+    const wrap = el.querySelector('.fm-wrap');
+    if(!show){
+      if(wrap) wrap.style.setProperty('--fm-delay', '0ms');
+      el.classList.add('fm-out');
+      return;
+    }
+    if(fresh && id != null && _atlPrevShown.has(id)){ el.classList.remove('fm-out'); return; }   // was already on screen before this rebuild — no replay
+    const delay = Math.min(ATL_REVEAL_STAGGER_MAX_MS, revealIdx++ * ATL_REVEAL_STAGGER_MS);
+    if(wrap) wrap.style.setProperty('--fm-delay', delay + 'ms');
+    if(fresh){
+      el.classList.add('fm-out');                                     // paint once hidden…
+      requestAnimationFrame(() => requestAnimationFrame(() => {        // …then grow in (two frames so the hidden state is committed)
+        if(m._atlShown) el.classList.remove('fm-out');
+      }));
+    } else {
+      el.classList.remove('fm-out');
+    }
   };
   if(!atlRevealActive()){
-    state.markersLayer.eachLayer(m => { const el = m.getElement && m.getElement(); if(el && m._atlShown === false) setShown(m, el, true); });
+    state.markersLayer.eachLayer(m => { const el = m.getElement && m.getElement(); if(el && m._atlShown === false){ m._atlShown = true; el.classList.remove('fm-out'); } });
+    _atlPrevShown = new Set();
     return hidden;
   }
   const margin = 40;
@@ -16035,6 +16077,7 @@ function atlRevealPass(map, size, zoom){
     if(ok){ placed.push(box); if(!c.forced) shown++; setShown(c.m, c.el, true); }
     else { hidden.add(c.m); setShown(c.m, c.el, false); }
   }
+  _atlPrevShown = nowShown;
   return hidden;
 }
 function updatePinLabels(){
