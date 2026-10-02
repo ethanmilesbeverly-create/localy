@@ -1767,7 +1767,9 @@ async function _bestArticle(query, matchName, matchHint, strictLoc, pick, lat, l
 // the rung is INERT and the resolver falls back to the #318 literal writeup search.
 // Mirrors review-submission's proven call shape (temperature 0, JSON, 2-try retry).
 // Per-request, never cached (NO CACHE_VERSION bump).
-const AI_MODEL = (Deno.env.get("GEMINI_MODEL") || "").trim() || "gemini-3.1-flash-lite";
+// #496 (2026-10-02): default moved 3.1 → 3.5 to track the GEMINI_MODEL secret
+// (re-pinned to `gemini-3.5-flash-lite` 2026-10-01). Only runs if the secret is unset.
+const AI_MODEL = (Deno.env.get("GEMINI_MODEL") || "").trim() || "gemini-3.5-flash-lite";
 const AI_RECALL_MIN_CONF = 0.5;                    // below this the model isn't sure enough to spend Wikipedia searches
 const AI_RECALL_MAX_NAMES = 3;                     // cap the candidate list (and thus the Wikipedia searches per pin)
 const AI_RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);

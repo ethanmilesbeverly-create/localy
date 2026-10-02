@@ -24,7 +24,9 @@ const cors = {
 // appears nowhere, which is the exact diagnostic dead-end #3(a) was about.
 const MODEL_ENV_RAW = Deno.env.get("GEMINI_MODEL");
 const MODEL_ENV = MODEL_ENV_RAW && MODEL_ENV_RAW.trim() ? MODEL_ENV_RAW.trim() : null;
-const MODEL = MODEL_ENV ?? "gemini-3.1-flash-lite";
+// #496 (2026-10-02): default moved 3.1 → 3.5 to track the secret, which was
+// re-pinned from the `-latest` alias to `gemini-3.5-flash-lite` on 2026-10-01.
+const MODEL = MODEL_ENV ?? "gemini-3.5-flash-lite";
 
 // --- #70(B1): make the fallback observable instead of checkable -------------
 // A correct secret and a correct default produce byte-identical behaviour, so a
@@ -42,7 +44,7 @@ const RETRY_DELAY_MS = 1200;
 // Returned on every response (and the ?models GET) so a deploy can be
 // confirmed from the response itself, not only the dashboard timestamp.
 // Bump on every change to this file.
-const GATE_VERSION = "gate-471-472-v2";
+const GATE_VERSION = "gate-496-v1";
 
 // --- #471: keep the part of a Gemini error that names the cause -------------
 // Before #471 a non-2xx wrote `raw.slice(0, 200)`. Google's error body is JSON
