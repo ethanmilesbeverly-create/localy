@@ -27,6 +27,11 @@
 //   (#490, v24) The `pin_interest` section depends on the `pin_interest` table and
 //   its `pin_interest_add` function from 490_pin_interest.sql (SQL editor). Same
 //   shape: without it `pin_interest` reads {available:false} with an info alert.
+//   (#476, v25) `retry_sweep.cron` depends on the read-only function
+//   `public.review_retry_health()` from 476_retry_health.sql (SQL editor; EXECUTE
+//   service_role only). Same shape: without it `retry_sweep.cron` reads
+//   {available:false} with an info alert. `retry_sweep.rows` needs nothing new —
+//   `submissions.ai_retry_count` (#472) is read with the service key like the rest.
 //   SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are auto-injected by the
 //   platform — do NOT set them by hand. GEMINI_MODEL is a project-wide secret
 //   already set for review-submission; this function only READS it, to let you
@@ -368,7 +373,25 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 //   labels coverage cells, by nearest metro from the square's centre. One deploy
 //   target (this function, --no-verify-jwt), after the #490 SQL. Observability, so
 //   it does NOT move the %.
-const REPORT_VERSION = "app-report-v24";
+// v24 -> v25 (#476, 2026-10-02): new `retry_sweep` section — the #472 retry sweep
+//   made visible. `rows` (from the SAME submissions pull, which now also selects
+//   ai_retry_count + reviewed_at) sorts every pending, un-merged, un-reviewed USER
+//   row the gate failed on into: `retrying` (the sweep will try again — with its
+//   attempt count and when it is next due), `gave_up` (hit the 6-try cap, or aged
+//   past the 14-day window: the sweep is silent on these from then on) and
+//   `not_retried` (a failure the sweep never retries by design — a 400/403/404
+//   config error, parse_error, bad_decision). The rules mirror review-submission's
+//   retryDue() — keep them in step (RETRY_MAX 6, RETRY_WINDOW_DAYS 14, backoff
+//   30 m × 2^n capped at 12 h, transient = 429/5xx, plus network_error and the
+//   never-gated null row after a 10-minute grace). `cron` is the job's own health
+//   from review_retry_health() (476_retry_health.sql): active?, last run, last
+//   success, runs/failures in 24 h, the sweep's last reply. Alerts: WARN
+//   `gate_retry_exhausted` (any row the sweep has stopped or will never try — named),
+//   WARN `gate_retry_cron_unhealthy` (job missing/inactive, last run failed, no
+//   success in 70 min, or a non-200 sweep reply), INFO `gate_retry_in_flight`, INFO
+//   `gate_retry_cron_read_failed` (SQL not run). Names only, never submitted_by.
+//   Observability on an operator surface, so it does NOT move the %.
+const REPORT_VERSION = "app-report-v25";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -1190,6 +1213,97 @@ const PIN_INTEREST_CAP = 200; // squares emitted (most-opened first); totals cov
 
 function cellKey1(lat: number, lng: number): string {
   return Math.floor(lat) + "," + Math.floor(lng);
+}
+
+// #476 — the #472 retry sweep, seen from the rows. MIRRORS review-submission's
+// retrySweep()/retryDue() (one home for the BEHAVIOUR is that function; this is a
+// read of it) — if those constants change there, change them here.
+const SWEEP_RETRY_MAX = 6;
+const SWEEP_WINDOW_DAYS = 14;
+const SWEEP_BASE_MS = 30 * 60 * 1000;
+const SWEEP_CAP_MS = 12 * 60 * 60 * 1000;
+const SWEEP_NEVER_GATED_GRACE_MS = 10 * 60 * 1000;
+const SWEEP_TRANSIENT = new Set([429, 500, 502, 503, 504]);
+
+function summariseRetrySweep(rows: any[], now: number) {
+  const HOURS = (ms: number) => Math.round((ms / 3600000) * 10) / 10;
+  const retrying: any[] = [];
+  const gave_up: any[] = [];
+  const not_retried: any[] = [];
+  const retried_ever_by_status: Record<string, number> = {};
+  let retried_ever = 0;
+  const attempts_hist: Record<string, number> = {};
+
+  for (const r of rows) {
+    if (!r) continue;
+    const isMerged = r.merged_into !== null && r.merged_into !== undefined;
+    const count = Number(r.ai_retry_count || 0);
+    if (count > 0 && !isMerged) {
+      retried_ever++;
+      retried_ever_by_status[r.status || "∅null"] = (retried_ever_by_status[r.status || "∅null"] || 0) + 1;
+      attempts_hist[String(count)] = (attempts_hist[String(count)] || 0) + 1;
+    }
+    // The sweep's universe: pending, un-merged, no operator decision, a USER row.
+    if (isMerged || r.status !== "pending" || (r.reviewed_at !== null && r.reviewed_at !== undefined) || r.source !== "user") continue;
+
+    const st = r.ai_status;
+    const http = r.ai_http_status === null || r.ai_http_status === undefined ? null : Number(r.ai_http_status);
+    const neverGated = (st === null || st === undefined) && (r.ai_decision === null || r.ai_decision === undefined);
+    const transient = (st === "http_error" && http !== null && SWEEP_TRANSIENT.has(http)) || st === "network_error";
+    const failedOther = st !== null && st !== undefined && st !== "ok" && !transient;
+    if (!neverGated && !transient && !failedOther) continue; // gated ok (a real 'review' outcome) — not the sweep's
+
+    const created = r.created_at ? new Date(r.created_at).getTime() : null;
+    const last = r.ai_reviewed_at ? new Date(r.ai_reviewed_at).getTime() : created;
+    const item: Record<string, unknown> = {
+      id: r.id,
+      name: r.name,
+      ai_status: st ?? null,
+      ai_http_status: http,
+      attempts: count,
+      age_hours: created === null ? null : HOURS(now - created),
+      last_attempt_hours_ago: last === null ? null : HOURS(now - last),
+    };
+
+    if (failedOther) {
+      item.why = "not retriable (a config or parse failure — the sweep only retries 429/5xx, network errors and never-gated rows; needs a human)";
+      not_retried.push(item);
+      continue;
+    }
+    if (count >= SWEEP_RETRY_MAX) {
+      item.why = `cap — ${SWEEP_RETRY_MAX} retries spent; the sweep will not try again`;
+      gave_up.push(item);
+      continue;
+    }
+    if (created !== null && now - created > SWEEP_WINDOW_DAYS * 86400000) {
+      item.why = `window — older than ${SWEEP_WINDOW_DAYS} days; the sweep no longer looks at it`;
+      gave_up.push(item);
+      continue;
+    }
+    let dueAt: number | null;
+    if (neverGated) dueAt = created === null ? null : created + SWEEP_NEVER_GATED_GRACE_MS;
+    else dueAt = last === null ? null : last + Math.min(SWEEP_BASE_MS * 2 ** count, SWEEP_CAP_MS);
+    item.kind = neverGated ? "never_gated" : "failed_open";
+    item.next_due_in_hours = dueAt === null ? null : Math.max(0, HOURS(dueAt - now));
+    retrying.push(item);
+  }
+
+  const byAge = (a: any, b: any) => (b.age_hours ?? 0) - (a.age_hours ?? 0);
+  retrying.sort(byAge); gave_up.sort(byAge); not_retried.sort(byAge);
+  return {
+    scope: "pending, un-merged, operator-untouched USER rows the AI gate failed on or never reached — the #472 retry sweep's universe, classified by its own rules (review-submission retryDue). Names only; submitted_by is never read.",
+    rules: { retry_max: SWEEP_RETRY_MAX, window_days: SWEEP_WINDOW_DAYS, backoff: "30 m × 2^attempts, capped at 12 h", transient_http: [...SWEEP_TRANSIENT] },
+    rows: {
+      retrying: retrying.length,
+      gave_up: gave_up.length,
+      not_retried: not_retried.length,
+      retrying_list: retrying.slice(0, 25),
+      gave_up_list: gave_up.slice(0, 25),
+      not_retried_list: not_retried.slice(0, 25),
+    },
+    retried_ever: { rows: retried_ever, by_current_status: retried_ever_by_status, by_attempts: attempts_hist },
+    cron: null as unknown,
+  };
 }
 
 function summarisePinInterest(rows: any[], now: number, seededByCell: Map<string, number> | null) {
@@ -2344,6 +2458,50 @@ function computeAlerts(report: Record<string, any>, opts: { backlogWarnH: number
       `pin-open tallies could not be read (${pi.error || "unknown error"}) — the pin_interest section is missing from this digest. If 490_pin_interest.sql hasn't been run, run it; otherwise check the table exists and service_role can SELECT it (#490)`);
   }
 
+  // #476: the #472 retry sweep. Rows first, then the cron job itself.
+  const rs = report.retry_sweep || null;
+  if (rs && rs.rows) {
+    const stuck = (rs.rows.gave_up || 0) + (rs.rows.not_retried || 0);
+    if (stuck > 0) {
+      const names = [...(rs.rows.gave_up_list || []), ...(rs.rows.not_retried_list || [])]
+        .slice(0, 10).map((x: any) => ({ id: x.id, name: x.name, why: x.why, attempts: x.attempts, age_hours: x.age_hours }));
+      push("warn", "gate_retry_exhausted",
+        `${stuck} pending user submission(s) the retry sweep has stopped trying or will never try — ${rs.rows.gave_up || 0} gave up (cap or 14-day window), ${rs.rows.not_retried || 0} not retriable. Each needs a human decision (pending_review) (#476)`,
+        names);
+    }
+    if ((rs.rows.retrying || 0) > 0) {
+      push("info", "gate_retry_in_flight",
+        `${rs.rows.retrying} pending user submission(s) the retry sweep will try again — see retry_sweep.rows.retrying_list for attempts and next due (#476)`);
+    }
+  }
+  const rc = rs && rs.cron;
+  if (rc && rc.available === false) {
+    push("info", "gate_retry_cron_read_failed",
+      `the retry sweep's cron health could not be read (${rc.error || "unknown error"}) — retry_sweep.cron is missing from this digest. If 476_retry_health.sql hasn't been run, run it (#476)`);
+  } else if (rc && rc.available) {
+    const why: string[] = [];
+    if (rc.job_found === false) why.push("cron job review-retry-sweep does not exist");
+    else {
+      if (rc.job && rc.job.active === false) why.push("cron job is INACTIVE");
+      if (rc.last_run && rc.last_run.status === "failed") why.push(`last run failed: ${rc.last_run.message || "no message"}`);
+      if (rc.minutes_since_last_success === null) why.push("no successful run on record");
+      else if (rc.minutes_since_last_success > 70) why.push(`no successful run for ${rc.minutes_since_last_success} min (it runs every 30)`);
+      if (rc.last_reply && rc.last_reply.status_code !== 200) why.push(`the sweep's last reply was HTTP ${rc.last_reply.status_code}`);
+      // A kick that review-submission refuses (401/403) still counts as a SUCCEEDED
+      // cron run — the job only queues the request — so the reply is the real signal.
+      // pg_net's only caller in this project is the kick, so a non-200 newer than the
+      // last good sweep reply is the sweep failing.
+      const badAt = rc.last_non_200_reply && rc.last_non_200_reply.at ? new Date(rc.last_non_200_reply.at).getTime() : null;
+      const goodAt = rc.last_reply && rc.last_reply.at ? new Date(rc.last_reply.at).getTime() : null;
+      if (badAt !== null && (goodAt === null || badAt > goodAt)) why.push(`the newest pg_net reply is HTTP ${rc.last_non_200_reply.status_code ?? "none"} (${rc.last_non_200_reply.error || "no error text"})`);
+    }
+    if (why.length) {
+      push("warn", "gate_retry_cron_unhealthy",
+        `the #472 retry sweep is not running cleanly — ${why.join("; ")}. A 401/403 reply means the Vault key no longer matches review-submission's service key (472_review_retry.sql section 2) (#476)`,
+        { job: rc.job, last_run: rc.last_run, last_succeeded_at: rc.last_succeeded_at, last_reply: rc.last_reply, last_non_200_reply: rc.last_non_200_reply });
+    }
+  }
+
   const rr = report.rejected_resubmits || {};
   if ((rr.flagged || 0) > 0) {
     const flaggedList = (Array.isArray(rr.clusters) ? rr.clusters : [])
@@ -2497,9 +2655,16 @@ Deno.serve(async (req: Request) => {
     const subs = await fetchAll(
       supabase,
       "submissions",
-      "id,name,name_clean,category,status,source,lat,lng,created_at,ai_decision,ai_status,ai_http_status,ai_model,ai_model_source,ai_confidence,ai_reason,ai_reviewed_at,merged_into,resolved_source,resolved_description",
+      "id,name,name_clean,category,status,source,lat,lng,created_at,ai_decision,ai_status,ai_http_status,ai_model,ai_model_source,ai_confidence,ai_reason,ai_reviewed_at,merged_into,resolved_source,resolved_description,ai_retry_count,reviewed_at",
     );
     report.submissions = summariseSubmissions(subs, now, step, sampleN);
+    // #476: the retry-sweep rows reuse the SAME pull, isolated so a bug here can
+    // never blank the submissions digest.
+    try {
+      report.retry_sweep = summariseRetrySweep(subs, now);
+    } catch (e) {
+      errors.push("retry_sweep: " + (e as Error).message);
+    }
     liveGem = new Map<string, boolean>();
     for (const r of subs) {
       if (r && r.id) liveGem.set(String(r.id), r.status === "approved" && (r.merged_into === null || r.merged_into === undefined));
@@ -2627,6 +2792,24 @@ Deno.serve(async (req: Request) => {
     report.pin_interest = summarisePinInterest(rows, now, seededByCell);
   } catch (e) {
     report.pin_interest = { available: false, error: (e as Error).message };
+  }
+
+  // #476: the sweep's cron health. A failed read (476_retry_health.sql not run, or
+  // reverted) is {available:false} + an INFO alert — the #10/#490 pattern, never red.
+  if (report.retry_sweep) {
+    try {
+      const { data, error } = await supabase.rpc("review_retry_health");
+      if (error) throw new Error(error.message);
+      const c: any = data || {};
+      const lastOk = c.last_succeeded_at ? new Date(c.last_succeeded_at).getTime() : null;
+      (report.retry_sweep as any).cron = {
+        available: true,
+        ...c,
+        minutes_since_last_success: lastOk === null ? null : Math.round((now - lastOk) / 60000),
+      };
+    } catch (e) {
+      (report.retry_sweep as any).cron = { available: false, error: (e as Error).message };
+    }
   }
 
   try {
