@@ -62,9 +62,13 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.09.29d (#429 `new` re-run reads as its own seed; #434 differently named pins go to review; #439 ALREADY CURATED in the dry run; #441 near-empty map read retried then held)";
+const TOOL_VERSION = "seed-resolve 2026.10.02a (#499 Gemini fallback 3.1 → 3.5 to match the live pin; #495 backfill reminder after a story commit; carries #429 #434 #439 #441)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
-const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.1-flash-lite";
+// #499 (2026-10-02): fallback 3.1 → 3.5 so offline mining runs the same model as the
+// live gate and nearby-places (the Supabase secret GEMINI_MODEL, re-pinned in #496).
+// This tool reads YOUR SHELL's GEMINI_MODEL, never Supabase Secrets; a value set there
+// still wins. The startup line prints model= so a run shows which one it used.
+const GEMINI_MODEL = (Deno.env.get("GEMINI_MODEL")?.trim()) || "gemini-3.5-flash-lite";
 
 // Direct-write config for the --commit path (see run()). BOTH must be set for
 // --commit to insert; a plain run never reads them and never writes to the DB.
@@ -1029,7 +1033,7 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[], patches:
       },
       body: JSON.stringify(curated),
     });
-    if (res.ok) console.log(`  curated_descriptions: inserted ${curated.length} story row(s).`);
+    if (res.ok) console.log(`  curated_descriptions: inserted ${curated.length} story row(s). NEXT (#495): in the SQL editor run  select category, count(*) from public.curated_category_backfill(true) group by 1;  — new stories arrive without a category and read History in far search until it runs.`);
     else console.error(`  curated_descriptions insert FAILED: HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 300)} — the pins still show their story; load curated_records.json by hand.`);
   }
   console.log(`\n--commit: INSERTED ${inserted} row(s) into submissions (source='seed:reddit', city='${CITY.name}', status='approved').`);
