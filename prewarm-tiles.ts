@@ -18,7 +18,7 @@
 //
 // MIRRORS (change together or tiles drift):
 //   - TILE_DEG = nearby-places REAL_TILE_DEG (0.05); tile key = round(coord/0.05).
-//   - METROS + enumerateTiles = gate-tiles.ts (same 25 metros, same bbox half-size).
+//   - METROS + enumerateTiles = gate-tiles.ts (same 26 roster rows, same bbox half-size).
 //   The function snaps every request to the tile centre (#27 fetch-anchor), and this
 //   tool posts the exact centre, so a warm lands on the tile the key names.
 //
@@ -65,7 +65,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.09.30b"; // #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.02a"; // #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -83,7 +83,7 @@ const DRY_RUN = env("PREWARM_DRY_RUN") === "1";
 const RETRY_FAILED = Deno.args.includes("--retry-failed");
 const FAILED_FILE = "prewarm_failed.json";
 
-// Same roster as gate-tiles.ts (25 metros since #445, 2026-09-30).
+// Same roster as gate-tiles.ts (26 rows since #482, 2026-10-02).
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
   { name: "New York", lat: 40.7128, lng: -74.0060 },
@@ -114,6 +114,14 @@ const METROS: Metro[] = [
   // #445 Phase B (2026-09-30): the roster grows 24 → 25. Centre is the city centre, like
   // every row above; the 15 km box reaches ~45% into Illinois across the Mississippi.
   { name: "St. Louis", lat: 38.6270, lng: -90.1994 },
+  // #482 (2026-10-02): the roster grows 25 → 26 with New York's FIRST extra box (#451:
+  // big metros get extra rows, never a wider METRO_KM). NOT a city centre — placed by a
+  // 2020-census tract check to cover the most people the New York box leaves out, with
+  // zero tiles shared: +2.54M (Nassau 1.37M, eastern Queens 1.09M). Any centre in
+  // 40.72–40.76 / -73.64–-73.60 gives the same 48 tiles. The name deliberately omits
+  // "New York": PREWARM_METRO is a substring filter and this name becomes
+  // submissions.city for graves, so it must not collide with the core row.
+  { name: "Queens-Nassau", lat: 40.7400, lng: -73.6200 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

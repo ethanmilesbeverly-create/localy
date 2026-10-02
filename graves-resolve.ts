@@ -318,7 +318,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.01a (#442 — rows sharing a label are listed under DUPLICATE LABELS and held from --commit; a new namesake of a live grave is listed apart from #384 hand placements. Roster unchanged at 25. Built on 30a.)";
+const BUILD = "graves-resolve 2026.10.02a (#482 — roster 25 → 26: + Queens-Nassau, New York's first extra box. #442 DUPLICATE LABELS hold unchanged. Built on 10.01a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -363,6 +363,14 @@ const METROS: Metro[] = [
   // #445 Phase B (2026-09-30): the roster grows 24 → 25. Centre is the city centre, like
   // every row above; the 15 km box reaches ~45% into Illinois across the Mississippi.
   { name: "St. Louis", lat: 38.6270, lng: -90.1994 },
+  // #482 (2026-10-02): the roster grows 25 → 26 with New York's FIRST extra box (#451:
+  // big metros get extra rows, never a wider METRO_KM). NOT a city centre — placed by a
+  // 2020-census tract check to cover the most people the New York box leaves out, with
+  // zero tiles shared: +2.54M (Nassau 1.37M, eastern Queens 1.09M). Any centre in
+  // 40.72–40.76 / -73.64–-73.60 gives the same 48 tiles. The name deliberately omits
+  // "New York": PREWARM_METRO is a substring filter and this name becomes
+  // submissions.city for graves, so it must not collide with the core row.
+  { name: "Queens-Nassau", lat: 40.7400, lng: -73.6200 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode

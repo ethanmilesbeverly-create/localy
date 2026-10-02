@@ -238,7 +238,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the launch roster, 25 metros since #445 (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 26 rows since #482 (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -270,6 +270,14 @@ const METROS: Metro[] = [
   // #445 Phase B (2026-09-30): the roster grows 24 → 25. Centre is the city centre, like
   // every row above; the 15 km box reaches ~45% into Illinois across the Mississippi.
   { name: "St. Louis", lat: 38.6270, lng: -90.1994 },
+  // #482 (2026-10-02): the roster grows 25 → 26 with New York's FIRST extra box (#451:
+  // big metros get extra rows, never a wider METRO_KM). NOT a city centre — placed by a
+  // 2020-census tract check to cover the most people the New York box leaves out, with
+  // zero tiles shared: +2.54M (Nassau 1.37M, eastern Queens 1.09M). Any centre in
+  // 40.72–40.76 / -73.64–-73.60 gives the same 48 tiles. The name deliberately omits
+  // "New York": PREWARM_METRO is a substring filter and this name becomes
+  // submissions.city for graves, so it must not collide with the core row.
+  { name: "Queens-Nassau", lat: 40.7400, lng: -73.6200 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -943,7 +951,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-09-30a (#445 Phase B roster 24 → 25: + St. Louis; #381 _isStructureOnlyName guard unchanged)";
+const BUILD_MARKER = "gate-tiles 2026-10-02a (#482 roster 25 → 26: + Queens-Nassau, New York's first extra box; #381 _isStructureOnlyName guard unchanged)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
