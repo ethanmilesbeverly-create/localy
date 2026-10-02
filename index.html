@@ -8744,14 +8744,14 @@ function matchLoadedPins(q, extra){
    rank beside the in-memory ones:
      • a gem → gemPoint with an EMPTY desc (the RPC never sends text; a pick lands
        through arriveAtSpot and the sheet reads the canonical record by id, #469);
-     • a story → a plain point filed as 'history' (2026.09.30e). curated_descriptions
-       stores no category, so the row first read "Spot" and flipped to "History"
-       once the pick loaded the real tile pin (phone QA, Tom Wilson Park). Most
-       curated stories are #57 history markers on Wikipedia pins, which #421 keeps
-       on 'history', so this matches what the pin shows after landing. A story on
-       an OSM park or art pin will read History here and its own category after
-       the tile loads — the minority case; storing the category with the story is
-       the real fix, logged as its own row. A pick lands on the carried point and
+     • a story → a plain point filed under the category the RPC returns
+       (#495, 2026.10.02a): curated_descriptions.category is the category of the
+       tile pin the story attaches to, filled by curated_category_backfill()
+       (495_curated_category.sql), so a story on an OSM park or art pin reads
+       Park / Art here, the same as its sheet after landing. A NULL (a story
+       whose pin no cached tile carried at backfill time, or one committed
+       since) falls back to 'history' — the 2026.09.30e behaviour, right for
+       the #57 history markers that are most stories. A pick lands on the carried point and
        the tile load adopts the real pin by name (#26), or keeps the carried point
        if the tile no longer serves it (#475 (b)).
    Capped by PIN_SEARCH_REMOTE_TIMEOUT_MS so a slow RPC never holds the address
@@ -8781,7 +8781,7 @@ async function searchPinNamesRemote(q, signal){
       out.push(gemPoint({ id:r.id, name:r.name, desc:'', bucket:r.category || null,
                           lat:r.lat, lng:r.lng, status:'approved' }, 'catgem'));
     } else {
-      out.push({ id:'story' + r.id, name:r.name, lat:r.lat, lng:r.lng, category:'history', desc:'' }); // 2026.09.30e — was null ("Spot")
+      out.push({ id:'story' + r.id, name:r.name, lat:r.lat, lng:r.lng, category:r.category || 'history', desc:'' }); // #495 — the story's stored category; null → 'history' (2026.09.30e)
     }
   });
   return out;
@@ -9063,7 +9063,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.01d';
+const APP_VERSION = '2026.10.02a';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
