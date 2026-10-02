@@ -1483,6 +1483,15 @@
      this class never flashes Leaflet's default white box. */
   .leaflet-marker-icon.fm-divicon{pointer-events:none;background:transparent;border:0;}
   .fm-wrap{position:relative;width:200px;height:40px;pointer-events:none;}
+  /* #440 — PROGRESSIVE REVEAL (All Things Local). A pin that loses its slot at this
+     zoom is faded + shrunk toward its own point instead of removed, so it pops back
+     in place when you zoom in. The transition lives on .fm-wrap, NEVER on the
+     .fm-divicon itself: Leaflet moves that element by transform on every pan frame,
+     and a transition there would make pins trail the map. A hidden pin takes no taps. */
+  .fm-divicon .fm-wrap{transform-origin:50% 100%;transition:opacity .2s ease,transform .2s ease;}
+  .fm-divicon.fm-out .fm-wrap{opacity:0;transform:scale(.55);}
+  .fm-divicon.fm-out .fm-pill,.fm-divicon.fm-out .fm-arrow{pointer-events:none;}
+  @media (prefers-reduced-motion: reduce){ .fm-divicon .fm-wrap{transition:none;} }
   .fm-shadow{
     position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);
     width:14px;height:5px;border-radius:50%;
@@ -6414,7 +6423,8 @@ function blendCategory(base, category, targetCount, procFn, gemBucket){
    (#294) still withholds real OSM via nearbyRealPlaces, so that mode simply shows
    the non-grave history gems + up-to-cap graves, exactly as its policy intends. */
 const ATL_HISTORY_GRAVE_CAP = 3;
-function blendHistoryForATL(base, targetCount){
+function blendHistoryForATL(base, targetCount, graveCap){
+  const cap = (typeof graveCap === 'number') ? graveCap : ATL_HISTORY_GRAVE_CAP;  // #440 — the reveal tail asks for every grave (Infinity); the default 25 keep the #376 cap
   const lead = [], graves = [];   // non-grave history leads; seed graves capped behind it, each nearest-first
   const usedNames = new Set();
   const isSeedGrave = p => /^grave of /i.test((p && p.name) || '');
@@ -6429,7 +6439,7 @@ function blendHistoryForATL(base, targetCount){
   humanFirstPass(base, 'history', 'history', targetCount*3).forEach(consider);
   nearbyRealPlaces(base, 'history', targetCount*3).forEach(rp=> consider({...rp, category:'history'}));
   if(SHOW_PROCEDURAL_FILLER){ (generateLocalHistory(base)||[]).forEach(p=> consider({...p, category:(p.category||'history')})); }
-  return lead.concat(graves.slice(0, ATL_HISTORY_GRAVE_CAP)).slice(0, targetCount);
+  return lead.concat(graves.slice(0, cap)).slice(0, targetCount);
 }
 
 /* #435 — RANK ALL THINGS LOCAL BY STORY QUALITY, NOT DISTANCE ALONE.
@@ -6635,7 +6645,70 @@ function buildAllThingsLocal(base){
       pts.push(gemPoint(g, 'dlg'));
     });
   }
-  return pts;
+  if(!ATL_REVEAL) return pts;
+  return atlRevealMembership(base, pts, seen, CATS);
+}
+
+/* #440 — PROGRESSIVE PIN REVEAL, phase 1 (Apple Maps–style). The ask: everything in
+   range is on the map; only a few show at a time; zooming in reveals more, with no
+   "Search this area" tap needed inside the loaded area.
+
+   MEMBERSHIP. The #435 pick above is unchanged and becomes the HEAD of the list —
+   ranks 0..24, so the default frame reads exactly as it did. Then every other
+   candidate in range is appended as the TAIL, best-first by the same atlScore,
+   deduped by name against the head: a deeper pull per category (ATL_REVEAL_CAND),
+   history WITHOUT the #376 grave cap (the cap still shapes the head — it is why
+   "Grave of Edgar Allan Poe" never made Baltimore's 25), and loose gems. Every
+   point carries `atlRank`, its place in that order. Capped at ATL_REVEAL_MAX.
+
+   VISIBILITY is not decided here — this only ranks. updatePinLabels() runs the
+   reveal pass on every zoom/move frame (atlRevealPass): in-view pins, best rank
+   first, up to a per-screen budget, skipping any that would overlap a pin already
+   shown. Zoom in → the view holds fewer head pins → the next ranks fill it.
+
+   ?atlreveal=0 turns the whole thing off (the old 25-pin hunt) for side-by-side QA.
+   Phase 2 (not here): a dot hint for pins that lost their slot, the same reveal on
+   the category tabs, and auto-load on pan (the "Search this area" pill stays). */
+const ATL_REVEAL = !/[?&]atlreveal=0(?:&|$)/.test(location.search);
+const ATL_REVEAL_CAND = 100;   // #440 — per-category depth for the tail (the head pick still uses ATL_CAND 40)
+const ATL_REVEAL_MAX  = 200;   // #440 — hard ceiling on All Things Local markers (phone DOM budget — the phase-1 QA question)
+function atlRevealMembership(base, head, seen, CATS){
+  const tail = [];
+  const consider = p => {
+    if(!p || typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
+    const k = normName(p.name); if(k && seen.has(k)) return; if(k) seen.add(k);
+    tail.push({ p, s: atlScore(p, base) });
+  };
+  try{
+    CATS.forEach(([cat, procFn, bucket]) => {
+      const list = cat === 'history'
+        ? blendHistoryForATL(base, ATL_REVEAL_CAND, Infinity)
+        : blendCategory(base, cat, ATL_REVEAL_CAND, () => (procFn() || []), bucket);
+      (list || []).forEach(consider);
+    });
+    nearbyApprovedGems(base, [], ATL_REVEAL_CAND).forEach(g => consider(gemPoint(g, 'dlg')));
+  }catch(e){
+    console.warn('[#440] reveal tail failed — showing the default 25 only', e);
+  }
+  tail.sort((a, b) => b.s - a.s);
+  const out = head.map((p, i) => ({ ...p, atlRank: i }));
+  for(let i = 0; i < tail.length && out.length < ATL_REVEAL_MAX; i++){
+    out.push({ ...tail[i].p, atlRank: out.length });
+  }
+  return out;
+}
+function atlRevealActive(){
+  return ATL_REVEAL && !!(state.currentHunt && String(state.currentHunt.key || '').startsWith('local_'));
+}
+/* Per-screen budget: 25 at the default frame (the #435 number), a little more once
+   you are down at street level, where the overlap test is what really limits it. */
+const ATL_REVEAL_BUDGET      = 25;
+const ATL_REVEAL_STREET_ZOOM = 15;   // above this zoom the budget grows…
+const ATL_REVEAL_PER_ZOOM    = 10;   // …by this many per level…
+const ATL_REVEAL_BUDGET_MAX  = 50;   // …to this ceiling
+function atlRevealBudget(zoom){
+  const extra = Math.max(0, zoom - ATL_REVEAL_STREET_ZOOM) * ATL_REVEAL_PER_ZOOM;
+  return Math.min(ATL_REVEAL_BUDGET_MAX, Math.round(ATL_REVEAL_BUDGET + extra));
 }
 /* #107 — TWO ARMS, ONE BUCKET, NO SHARED DEDUP.
    blendCategory() dedupes by name, but `usedNames` is LOCAL TO ONE CALL. Any
@@ -9063,7 +9136,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.02a';
+const APP_VERSION = '2026.10.02b';
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -15918,6 +15991,52 @@ function setPillReveal(pill, txt, r){
    stable distance-rank from you (info.rank, not a live centre-distance, so expansion
    doesn't flicker while you pan). The rest stay collapsed pins with the arrow still
    marking their spot. */
+/* #440 — THE REVEAL PASS. Decides which All Things Local pins are shown at this
+   zoom/position. Walks the pins near the screen in priority order — the selected
+   pin, then the "your next pin" halo (both always shown and never counted against
+   the budget), then by atlRank — and shows one only while the per-screen budget
+   lasts AND its collapsed pin box doesn't overlap a pin already shown. Everything
+   else gets .fm-out (faded/shrunk, no taps). Off-screen pins are hidden too, so a
+   pin entering the frame during a pan is decided on the next animation frame.
+   Toggles a class only when a pin's state changes — no marker rebuild, so it runs
+   on the same rAF-throttled zoom/move events as the label pass. Returns the set of
+   hidden markers so the label pass skips them. Reveal off (another card, or
+   ?atlreveal=0) → every pin shown, as before. */
+function atlRevealPass(map, size, zoom){
+  const hidden = new Set();
+  const setShown = (m, el, show) => {
+    if(m._atlShown === show) return;
+    m._atlShown = show;
+    el.classList.toggle('fm-out', !show);
+  };
+  if(!atlRevealActive()){
+    state.markersLayer.eachLayer(m => { const el = m.getElement && m.getElement(); if(el && m._atlShown === false) setShown(m, el, true); });
+    return hidden;
+  }
+  const margin = 40;
+  const cands = [];
+  state.markersLayer.eachLayer(m => {
+    const info = m._pinLabel; if(!info) return;
+    const el = m.getElement && m.getElement(); if(!el) return;
+    const pt = map.latLngToContainerPoint(m.getLatLng());
+    const near = pt.x >= -margin && pt.x <= size.x + margin && pt.y >= -margin && pt.y <= size.y + margin;
+    if(!near){ hidden.add(m); setShown(m, el, false); return; }
+    const forced = !!(info.selected || info.halo);
+    cands.push({ m, el, pt, forced, key: (info.selected ? 0 : info.halo ? 1 : 2) * 1e6 + (info.atlRank || 0) });
+  });
+  cands.sort((a, b) => a.key - b.key);
+  const budget = atlRevealBudget(zoom);
+  const placed = [];
+  const hit = (x, y) => x.l < y.r && x.r > y.l && x.t < y.b && x.b > y.t;
+  let shown = 0;
+  for(const c of cands){
+    const box = { l: c.pt.x - 14, r: c.pt.x + 14, t: c.pt.y - 32, b: c.pt.y - 4 };   // the collapsed pin: ~28px circle sitting on its arrow
+    const ok = c.forced || (shown < budget && !placed.some(p => hit(box, p)));
+    if(ok){ placed.push(box); if(!c.forced) shown++; setShown(c.m, c.el, true); }
+    else { hidden.add(c.m); setShown(c.m, c.el, false); }
+  }
+  return hidden;
+}
 function updatePinLabels(){
   const map = state.leafletMap;
   if(!map || !state.markersLayer) return;
@@ -15927,11 +16046,13 @@ function updatePinLabels(){
   const reveal = Math.max(0, Math.min(1, (zoom - MIN_LABEL_ZOOM) / 1.2));
   const margin = 60;
   const entries = [];
+  const hidden = atlRevealPass(map, size, zoom);   // #440 — markers that lost their slot this frame (empty set when reveal is off)
   state.markersLayer.eachLayer(m=>{
     const info = m._pinLabel;
     if(!info) return;
     const el = m.getElement();
     if(!el) return;
+    if(hidden.has(m)){ const hp = el.querySelector('.fm-pill'); if(hp) setPillReveal(hp, hp.querySelector('.fm-txt'), 0); return; }  // #440 — hidden pins neither unfurl nor claim label space
     const pill = el.querySelector('.fm-pill');
     if(!pill) return;
     const txt = pill.querySelector('.fm-txt');
@@ -16033,7 +16154,8 @@ function refreshTargetsUI(){
        already body-anchored/distance-sorted (#66) — so the label priority is stable
        during a pan (it never recomputes distance on move), which is what stops the
        labels flickering on and off while you drag. */
-    m._pinLabel = { id:t.id, name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx };
+    m._pinLabel = { id:t.id, name:t.name||'', found:!!t.found, selected:isSelected, halo:isNearest, rank:idx,
+                    atlRank: (typeof t.atlRank === 'number') ? t.atlRank : 100000 + idx };   // #440 — reveal priority; a pin with no rank (an injected capture) ranks last
     m.on('click', ()=> openPinSheet(t));
     /* #327 — PREWARM the "what it is" on DISPLAY, not on open. A credited gem's
        description isn't stored (read-time, #23/#54); it resolves live via
