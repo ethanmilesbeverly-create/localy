@@ -1,0 +1,90 @@
+# names-482-queens-nassau.txt — #482 New York's first extra box (Queens-Nassau), pass 1 (story lines, 2026-10-02)
+# Source: Historical Marker Database — Nassau County list, geographic sort page 1 (entries 1–100: Albertson
+# through Floral Park), the Garden City town list (29 entries), and five marker pages reached from search
+# (Lawrence, Lynbrook, Rockville Centre, Merrick). Eastern Queens is NOT in this pass (HMDB Queens County list, a
+# later pass). Skipped on purpose: war memorials and rolls of honor that are lists of names, person-only plaques
+# (Medal of Honor, NCPD patrolman, Alexander T. Stewart), the Eisenhower Park veterans-memorial cluster except one,
+# bare National Register plaques (Mitchel Field), dedication/bicentennial plaques, the Suffolk County line marker,
+# and teasers too short to say what the place is. Sagamore Hill (40.887°N) is outside the box.
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# A name differs from the marker title only where the title isn't a place ("Site Of", "Historic Waterfront"…); each is marked.
+# DRY RUN 1 (2026-10-02, seed-resolve 2026.10.02a): 34 new-seed, 3 story-attached (Lindbergh's Flight → the OSM
+# "Lindbergh’s Flight" pin, Zorn's → OSM "Zorn's Est 1930", Rock Hall → Rock Hall (Lawrence, New York); all three
+# checked), 5 review, 0 held. The 5 reviews are settled below (each carries a `review` comment).
+# DRY RUN 2 (2026-10-02): 36 new-seed, 5 story-attached, 1 review (Grist Mill Museum — fixed below by coordinate).
+# Every coordinate below was checked against the Queens-Nassau tile set (48 tiles, roster 40.7400, -73.6200).
+# RUN ORDER (the #441 lesson): Queens-Nassau is pre-warmed (prewarm-tiles.ts 2026.10.02a — 47 of 48 tiles; the one
+# still owed, 816_-1474, is Great Neck/Little Neck and holds none of these lines). Then the dry run, with
+# SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-482-queens-nassau.txt
+# After the commit: run curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Garden City: the Hempstead Plains camps and airfields ------------------------
+# review after dry run 1: names a larger place, live "Rainbow Monument Park" [wiki] — the obelisk IS that park's
+# monument (the article's coordinate is 20 m from the marker); attach there under the pin's name.
+Rainbow Monument Park | @40.7269628,-73.6209697 | This obelisk marks Camp Albert Mills, where the 42nd Infantry Division gathered in 1917 from National Guard units of 26 states, a mix Major Douglas MacArthur said stretched across the country like a rainbow. | https://www.hmdb.org/m.asp?m=285849
+Site of Camp Black | @40.731028,-73.615391 | From May to September 1898 Camp Black stood here on the Hempstead Plains and mobilized some 14,000 troops for the Spanish-American War in Cuba and Puerto Rico. | https://www.hmdb.org/m.asp?m=179295
+Site of Camp Winfield Scott | @40.73255157,-73.63040559 | In August 1861 the Union Army set up Camp Winfield Scott here as a Civil War training camp, commanded by General Thomas W. Sherman, years before Garden City was laid out. | https://www.hmdb.org/m.asp?m=149783
+Curtiss Engineering Corporation | @40.7284954,-73.62012535 | Glenn Curtiss put up this building in 1917 for his aircraft company, and the NC-4 built here became the first airplane to fly across the Atlantic, in 1919. | https://www.hmdb.org/m.asp?m=285719
+Washington Avenue Airfield | @40.73921028,-73.63265956 | From 1909 to 1912 the land south of Old Country Road and east of Washington Avenue was the Mineola flying field, where Glenn Curtiss flew his biplane, the Golden Flyer. | https://www.hmdb.org/m.asp?m=285710
+Lindbergh's Flight | @40.728024,-73.597628 | On May 20, 1927, Charles Lindbergh took off from Roosevelt Field a quarter mile west of here and landed 33 hours later at Le Bourget Field outside Paris. | https://www.hmdb.org/m.asp?m=175010
+Hanpsted Plaines | @40.7258211,-73.63877395 | The first organized horse race meet in America was run near here in 1665 on the open Hempstead Plains, sponsored by the colonial governor Richard Nicolls. | https://www.hmdb.org/m.asp?m=285636
+L I Motor Parkway Toll Lodge | @40.7253917,-73.63262868 | This small house was one of ten toll lodges on William K. Vanderbilt Jr.'s Long Island Motor Parkway, the private road that ran from Queens to Lake Ronkonkoma from 1908 to 1938. | https://www.hmdb.org/m.asp?m=285318
+# `new` after review, dry run 1: review → "Episcopal Diocese of Long Island" (the diocese, not the school, which is gone).
+Cathedral School of St. Mary | @40.71990372,-73.64092456 | A boarding and day school for girls from kindergarten through 12th grade stood on this block of Cathedral Avenue from 1892 until it closed in 1991; the building came down in 2002. | https://www.hmdb.org/m.asp?m=285317 | new
+
+# --- Bethpage: Grumman, the Motor Parkway and Central Park ------------------------
+Grumman Corp | @40.75146944,-73.50185278 | The Grumman plant here was the birthplace of the Apollo Lunar Modules, which set astronauts down on the Moon six times between July 1969 and December 1972. | https://www.hmdb.org/m.asp?m=199961
+# Renamed: two markers share the title "Grumman 1930-94"; each line names its building.
+Grumman Plant 2 | @40.74501711,-73.49755597 | Grumman dedicated this assembly building on December 7, 1941, the same day Pearl Harbor was attacked, and it went on to turn out TBF Avenger and F6F Hellcat warplanes. | https://www.hmdb.org/m.asp?m=147617
+Grumman Plant 1 and First Airfield | @40.739069,-73.485212 | Grumman opened its first Bethpage airfield and plant here in October 1936, and this is where its F4F-3 Wildcat Navy fighter was born. | https://www.hmdb.org/m.asp?m=200012
+L.I. Motor Pkwy | @40.73212301,-73.48142689 | Ground was broken here on June 6, 1908, for the Long Island Motor Parkway, the first American road built just for cars and the course of the Vanderbilt Cup races. | https://www.hmdb.org/m.asp?m=133529
+Bethpage Hamlet | @40.73856806,-73.47974384 | The community here was Jerusalem Station when the railroad came in 1857, Central Park from 1867, and only took the name Bethpage in 1936. | https://www.hmdb.org/m.asp?m=133542
+First Post Office | @40.73798212,-73.4774465 | The village's first post office opened in this home on January 29, 1857, with Jeremiah Weaver as postmaster. | https://www.hmdb.org/m.asp?m=133480
+Broad Spring | @40.73477412,-73.4610833 | This spring was a fixed point in Samuel Willis's 1732 survey of Bethpage's first highway. | https://www.hmdb.org/m.asp?m=133476
+Central Park Cider Mill | @40.74107481,-73.48146971 | Around 1888 George Benkert ran a cider mill on this spot, pressing apples for the area's farmers. | https://www.hmdb.org/m.asp?m=119129
+Site of The Beau Sejour | @40.73854582,-73.4815042 | The Beau Sejour, a restaurant run by the Wilson family from 1907 to 1975, drew wealthy and famous diners out to Bethpage. | https://www.hmdb.org/m.asp?m=148159
+Kessler Glass | @40.74098611,-73.47959167 | Warren Kessler's workshop here made hand-blown glass lamps and vases from 1938 to 1978, pieces that ended up in the White House and in U.S. embassies around the world. | https://www.hmdb.org/m.asp?m=199963
+Zorn's est 1930 | @40.72622795,-73.47749665 | The Zorn family's poultry farm stood here, and the shop they opened on it in 1940 served Bethpage and the towns around it. | https://www.hmdb.org/m.asp?m=174144
+Bethpage - JFK | @40.75048889,-73.478325 | In 1963 the Bethpage school board named a school here for President John F. Kennedy, the first school in the country to honor him after his assassination. | https://www.hmdb.org/m.asp?m=200011
+
+# --- Farmingdale -----------------------------------------------------------------
+Quaker Meeting House | @40.7394611,-73.45593518 | Bethpage's Quakers built their meeting house here and held their first meetings in it in 1698. | https://www.hmdb.org/m.asp?m=133544
+Powell Home | @40.73318608,-73.4598989 | Thomas Powell built this house in 1700, a few years after buying the Bethpage tract from the Massapequa people in 1695. | https://www.hmdb.org/m.asp?m=250856
+Abigail E. Leonard | @40.733724,-73.434855 | This was the home of Abigail Leonard, a teacher and women's club founder who organized the local committee for women's suffrage in 1917. | https://www.hmdb.org/m.asp?m=132692
+
+# --- The South Shore: East Rockaway, Lynbrook, Rockville Centre, Baldwin, Merrick, Lawrence ---
+# Renamed from "Site Of": the marker is for the mill itself.
+Haviland Grist and Saw Mill Site | @40.64071713,-73.65962327 | Joseph Haviland built the first grist and saw mill here in 1688, and the Davison family ran it last. | https://www.hmdb.org/m.asp?m=164239
+# Renamed from "Site of Oven".
+Public Oven Site | @40.6397206,-73.66026099 | The village's first public oven stood here; after Isaac Bloom bought it in 1760, neighbours had their bread baked for three cents, twice a week. | https://www.hmdb.org/m.asp?m=285989
+Dave Push | @40.63979053,-73.66010924 | Local folklore says the ghost of a boatman whose body was found floating nearby in 1910 haunted the old mill here, until the mill was moved to Memorial Park in 1963. | https://www.hmdb.org/m.asp?m=285969
+# Renamed from "The East Rockaway Grist Mill" (a trail panel) to the museum it describes; review after dry run 1:
+# live OSM pin "Grist Mill Museum" 159 m away is that museum — attach there under the pin's name. Dry run 2: the
+# rename alone stayed in review (159 m is past the big-area attach radius, #425), so this line uses the museum's own
+# OSM coordinate (way 826499784, via Photon) instead of the trail panel's.
+Grist Mill Museum | @40.6463745,-73.6632202 | East Rockaway's restored grist mill has been a museum since 1965, telling the story of life along Mill River and the bay. | https://www.hmdb.org/m.asp?m=286129
+# Renamed from "Historic Waterfront".
+Bristol and Mexico Shipwrecks Marker | @40.63964737,-73.6601473 | In the winter of 1836–37 two emigrant ships from England, the Bristol and the Mexico, wrecked off this shore with poor Irish and English passengers aboard. | https://www.hmdb.org/m.asp?m=285975
+# Renamed from "Before the Revolutionary War".
+Colonial Schoolhouse Site | @40.6462136,-73.6647583 | One of the first schools in the Town of Hempstead stood near here, and before the Battle of Long Island Colonel Richard Hewlett dug in on the spot with a company of Loyalists. | https://www.hmdb.org/m.asp?m=286076
+Monahan's Crossing | @40.65557,-73.67173 | For 29 years John Monahan raised and lowered the railroad crossing gates here, saving seven lives, until the tracks were raised above the street in 1938. | https://www.hmdb.org/m.asp?m=152199
+# Renamed from "South Side": the building is now Village Hall.
+South Side School | @40.65937,-73.64542 | Opened in 1892 as the first public high school on Long Island's South Shore, this building became Rockville Centre's Village Hall in 1924. | https://www.hmdb.org/m.asp?m=114684
+Aviation First | @40.662629,-73.61674 | Brothers Albert and Arthur Heinrich, aged 21 and 23, built and flew the first all-American monoplane on this site in 1910. | https://www.hmdb.org/m.asp?m=140799
+First Church Baldwin United Methodist | @40.65117397,-73.60965856 | This congregation began in 1810 as Bethel Chapel, and its present sanctuary was built in 1871 and dedicated the next year. | https://www.hmdb.org/m.asp?m=133143
+# `new` after review, dry run 1: review → "Camp Meeting Grounds" (the whole grounds; this line is one building on them,
+# and its story says "this building", which would misread on the grounds' pin).
+Campgrounds Minister's House | @40.67905,-73.55417 | Built around 1870 as the house of worship for Merrick's Methodist camp meeting grounds, this building became a private home after 1900 and still shows the campground cottages' ornate woodwork. | https://www.hmdb.org/m.asp?m=288073 | new
+Rock Hall | @40.60907,-73.73398 | Josiah Martin built this colonial manor house in 1757, and the Hewlett family lived in it from 1824 to 1948 before it passed to the Town of Hempstead. | https://www.hmdb.org/m.asp?m=251882
+
+# --- Floral Park, Carle Place, East Meadow ------------------------------------------
+1779 House | @40.72266094,-73.70673992 | Floral Park's oldest house was built by the Baily (Baylis) family, whose homestead here once took in several homes, farm buildings and acres of farmland. | https://www.hmdb.org/m.asp?m=139276
+Fireman's Hall | @40.72405967,-73.70396289 | The Floral Park Fire Department, organized in 1893, built its first firehouse here in 1901, and it also served as the village's first village hall. | https://www.hmdb.org/m.asp?m=289040
+Floral Park School | @40.72685494,-73.70431009 | Floral Park's school was founded here in 1884, opened for classes in 1885, and was later renamed for village founder John Lewis Childs. | https://www.hmdb.org/m.asp?m=139377
+American Legion | @40.72726147,-73.7037361 | Floral Park's American Legion post, organized in 1919, built this hall in 1924, put up by veterans for veterans. | https://www.hmdb.org/m.asp?m=139426
+# review after dry run 1: names "Saint Mary's Chapel (Carle Place, New York)" — the same church (the article: "also known
+# as Saint Mary's Episcopal Church", 30 m from the marker); attach there under the article's title.
+Saint Mary's Chapel (Carle Place, New York) | @40.75099419,-73.60918808 | Built in 1926, this is the oldest church in Carle Place. | https://www.hmdb.org/m.asp?m=239523
+# Renamed from The "Comfort Women" (the quotes are the marker's; the name is what the place is).
+Comfort Women Memorial | @40.733541,-73.576895 | This memorial in Eisenhower Park remembers the more than 200,000 women and girls forced into sexual slavery by Imperial Japan's armed forces from the 1930s to 1945. | https://www.hmdb.org/m.asp?m=106727
