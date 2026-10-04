@@ -292,6 +292,23 @@ const STACK_OFFSET_M = Math.max(0, Number(Deno.env.get("GRAVE_STACK_OFFSET_M") ?
 const MAX_NAMES = Number(Deno.env.get("GRAVE_MAX_NAMES") ?? 20);
 
 const WIKI_RETRIES = Number(Deno.env.get("GRAVE_WIKI_RETRIES") ?? 3); // Wikipedia throttles cloud IPs; retry the intro fetch before falling back to the Wikidata line.
+
+// #504 — EVERY network call carries a deadline. Before this, a connection that
+// stalled (accepted, then never answered) left its `await` unsettled forever:
+// #482's dry run stopped dead after "Grave of Mario Puzo" and never resumed.
+// The retry loops only ever saw a REPLY (429/5xx) — a stall is not a reply.
+// Each fetch now passes AbortSignal.timeout(ms); the signal also covers reading
+// the body, so a reply that stalls mid-stream is cut too. A timeout is treated
+// exactly like the network error it is: the existing retry/backoff runs, and the
+// existing fallback (or fail-closed) path takes over when the retries run out.
+// Override any of these with the env var shown; values are milliseconds.
+const WIKI_TIMEOUT_MS = Number(Deno.env.get("GRAVE_WIKI_TIMEOUT_MS") ?? 20000);     // one Wikipedia intro (normally < 1 s)
+const SPARQL_TIMEOUT_MS = Number(Deno.env.get("GRAVE_SPARQL_TIMEOUT_MS") ?? 90000); // one Wikidata SPARQL page / gate batch (WDQS's own limit is 60 s)
+const MAP_TIMEOUT_MS = Number(Deno.env.get("GRAVE_MAP_TIMEOUT_MS") ?? 180000);      // nearby-places (a cold tile can build for minutes; matches the function's limit)
+const DB_TIMEOUT_MS = Number(Deno.env.get("GRAVE_DB_TIMEOUT_MS") ?? 60000);         // one Supabase REST read page
+const COMMIT_TIMEOUT_MS = Number(Deno.env.get("GRAVE_COMMIT_TIMEOUT_MS") ?? 120000); // one 200-row insert batch
+const isTimeout = (e: unknown) => (e as any)?.name === "TimeoutError" || (e as any)?.name === "AbortError";
+const timeoutStats = { wiki: 0, sparql: 0, map: 0 };
 // The Wikidata SPARQL response is fetched in PAGES (LIMIT/OFFSET). A single
 // full response for a big metro exceeds a ~256 KB cap on the Codespace egress
 // proxy and truncates mid-JSON at a fixed byte offset (no retry can fix a
@@ -318,7 +335,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.02a (#482 — roster 25 → 26: + Queens-Nassau, New York's first extra box. #442 DUPLICATE LABELS hold unchanged. Built on 10.01a.)";
+const BUILD = "graves-resolve 2026.10.04a (#504 — every fetch has a timeout: a stalled Wikipedia/Wikidata/REST connection is retried or falls back instead of hanging the run. Roster unchanged (26). Built on 10.02a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -666,6 +683,7 @@ async function graveBurialQids(burialQids: string[]): Promise<{ ok: boolean; gra
     for (let attempt = 0; attempt <= WIKI_RETRIES; attempt++) {
       try {
         const r = await fetch(endpoint, {
+          signal: AbortSignal.timeout(SPARQL_TIMEOUT_MS), // #504
           headers: {
             Accept: "application/sparql-results+json",
             "User-Agent": "nahgoo-graves/1.0 (grave-place gate; contact: privacy@nahgoo.com)",
@@ -682,7 +700,11 @@ async function graveBurialQids(burialQids: string[]): Promise<{ ok: boolean; gra
         }
         got = true;
         break;
-      } catch {
+      } catch (e) {
+        if (isTimeout(e)) {
+          timeoutStats.sparql++;
+          console.log(`  (grave-place gate batch attempt ${attempt + 1} timed out after ${SPARQL_TIMEOUT_MS / 1000} s — retrying)`);
+        }
         await sleep(1500 * (attempt + 1));
       }
     }
@@ -731,6 +753,7 @@ SELECT ?person ?personLabel ?personDescription ?sitelinks ?burial ?burialLabel ?
     for (let attempt = 0; attempt <= WIKI_RETRIES; attempt++) {
       try {
         const r = await fetch(endpoint, {
+          signal: AbortSignal.timeout(SPARQL_TIMEOUT_MS), // #504
           headers: {
             Accept: "application/sparql-results+json",
             "User-Agent": "nahgoo-graves/1.0 (notable-grave seed pipeline; contact: privacy@nahgoo.com)",
@@ -751,7 +774,8 @@ SELECT ?person ?personLabel ?personDescription ?sitelinks ?burial ?burialLabel ?
         const json = JSON.parse(body);
         return json?.results?.bindings ?? [];
       } catch (e) {
-        lastErr = String(e);
+        if (isTimeout(e)) timeoutStats.sparql++;
+        lastErr = isTimeout(e) ? `timed out after ${SPARQL_TIMEOUT_MS / 1000} s` : String(e); // #504
         console.log(`  (page offset ${offset} attempt ${attempt + 1} failed: ${lastErr} — retrying)`);
         await sleep(2000 * (attempt + 1));
       }
@@ -895,7 +919,9 @@ SELECT ?person ?personLabel ?personDescription ?sitelinks ?burial ?burialLabel ?
 
 // ---------------------------------------------------------------------------
 // 2) Wikipedia intro for a grave pin (identity via the sitelink, #163 — not
-//    coordinate-gated). Blank if the fetch fails.
+//    coordinate-gated). Blank if the fetch fails. #504: each attempt has a
+//    WIKI_TIMEOUT_MS deadline; a stalled attempt counts as a failed one, so
+//    the retries run and then the caller's Wikidata one-liner takes over.
 // ---------------------------------------------------------------------------
 async function wikiIntroFor(title: string): Promise<string> {
   const ex =
@@ -907,7 +933,10 @@ async function wikiIntroFor(title: string): Promise<string> {
   // the caller then falls back to the Wikidata one-line description.
   for (let attempt = 0; attempt <= WIKI_RETRIES; attempt++) {
     try {
-      const er = await fetch(ex, { headers: { "User-Agent": "nahgoo-graves/1.0 (contact: privacy@nahgoo.com)" } });
+      const er = await fetch(ex, {
+        signal: AbortSignal.timeout(WIKI_TIMEOUT_MS), // #504 — covers the body read below too
+        headers: { "User-Agent": "nahgoo-graves/1.0 (contact: privacy@nahgoo.com)" },
+      });
       if (er.status === 429 || er.status >= 500) {
         await sleep(1200 * (attempt + 1));
         continue;
@@ -917,7 +946,11 @@ async function wikiIntroFor(title: string): Promise<string> {
       const pages = ed?.query?.pages ?? {};
       const first: any = Object.values(pages)[0] ?? {};
       return String(first.extract ?? "").trim();
-    } catch {
+    } catch (e) {
+      if (isTimeout(e)) {
+        timeoutStats.wiki++;
+        console.log(`  (intro for "${title}" attempt ${attempt + 1} timed out after ${WIKI_TIMEOUT_MS / 1000} s — ${attempt < WIKI_RETRIES ? "retrying" : "falling back to the Wikidata line"})`);
+      }
       await sleep(1000 * (attempt + 1));
     }
   }
@@ -954,6 +987,7 @@ async function mapNear(lat: number, lng: number): Promise<Existing[]> {
   if (!NEARBY_PLACES_URL) return [];
   try {
     const r = await fetch(NEARBY_PLACES_URL, {
+      signal: AbortSignal.timeout(MAP_TIMEOUT_MS), // #504
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -968,7 +1002,11 @@ async function mapNear(lat: number, lng: number): Promise<Existing[]> {
       .filter((p) => typeof p?.lat === "number" && typeof p?.lng === "number")
       .map((p) => ({ name: String(p.name ?? ""), lat: p.lat, lng: p.lng, category: p.category, source: p.source }))
       .filter((p) => p.name && haversineM(lat, lng, p.lat, p.lng) <= MATCH_RADIUS_M);
-  } catch {
+  } catch (e) {
+    if (isTimeout(e)) {
+      timeoutStats.map++;
+      console.log(`  (nearby-places at ${lat.toFixed(4)}, ${lng.toFixed(4)} timed out after ${MAP_TIMEOUT_MS / 1000} s — map-parity check skipped for this pin)`);
+    }
     return [];
   }
 }
@@ -991,13 +1029,19 @@ async function fetchLoadedKeys(): Promise<Set<string>> {
     const url =
       `${SUPABASE_URL}/rest/v1/submissions?source=eq.${encodeURIComponent(SOURCE_TAG)}` +
       `&select=name,lat,lng,status,merged_into&order=id&limit=${PAGE}&offset=${offset}`;
-    const res = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
-        Accept: "application/json",
-      },
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        signal: AbortSignal.timeout(DB_TIMEOUT_MS), // #504 — the body read below too; a throw here fails the caller closed
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+          Accept: "application/json",
+        },
+      });
+    } catch (e) {
+      throw new Error(isTimeout(e) ? `submissions read timed out after ${DB_TIMEOUT_MS / 1000} s at offset ${offset}` : `submissions read failed: ${e}`);
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       throw new Error(`submissions read HTTP ${res.status} ${body.slice(0, 200)}`);
@@ -1071,16 +1115,29 @@ async function commitToSupabase(rows: GraveRow[]): Promise<void> {
   let inserted = 0;
   for (let i = 0; i < payload.length; i += CHUNK) {
     const batch = payload.slice(i, i + CHUNK);
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(batch),
-    });
+    // #504 — a batch that stalls is cut after COMMIT_TIMEOUT_MS. A timed-out
+    // insert is AMBIGUOUS (the server may have written it before the reply was
+    // lost), so it stops the run with the same do-not-blindly-re-run warning as
+    // an HTTP failure, naming the batch whose outcome is unknown.
+    let res: Response;
+    try {
+      res = await fetch(endpoint, {
+        signal: AbortSignal.timeout(COMMIT_TIMEOUT_MS),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(batch),
+      });
+    } catch (e) {
+      const why = isTimeout(e) ? `timed out after ${COMMIT_TIMEOUT_MS / 1000} s` : String(e);
+      console.error(`\n--commit STOPPED on rows ${i}-${i + batch.length - 1}: ${why}. That batch's outcome is UNKNOWN — it may or may not have been written.`);
+      console.error(`Inserted ${inserted} row(s) before it. graves_records.json is unchanged; do NOT blindly re-run --commit (it double-inserts). Read the REST count first to see whether that batch landed.`);
+      Deno.exit(1);
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.error(`\n--commit FAILED on rows ${i}-${i + batch.length - 1}: HTTP ${res.status} ${body.slice(0, 300)}`);
@@ -1336,6 +1393,10 @@ function summarize(rows: GraveRow[], coveredPeople: number) {
   const wikiDesc = rows.filter((r) => (r.grave_meta as any).descSrc === "wiki").length;
   console.log(`GRAVE PINS emitted: ${rows.length} (${distinct} distinct-plot + ${cemeteryPins} cemetery top-N [TOP_N=${TOP_N}, ring ${STACK_OFFSET_M} m]). Descriptions: ${wikiDesc} Wikipedia intro, ${rows.length - wikiDesc} Wikidata line.`);
   console.log(`COVERED BY CEMETERY (not emitted, beyond the top ${TOP_N} at each): ${coveredPeople} more notable people — see graves_report.json (outcome:"covered-by-cemetery").`);
+  // #504 — how often a deadline fired. 0/0/0 is the normal line; a non-zero wiki
+  // count means those pins fell back to (or retried into) a description, not that
+  // the run hung.
+  console.log(`TIMEOUTS (#504): Wikipedia intro ${timeoutStats.wiki} · Wikidata SPARQL ${timeoutStats.sparql} · nearby-places ${timeoutStats.map} (limits ${WIKI_TIMEOUT_MS / 1000} s / ${SPARQL_TIMEOUT_MS / 1000} s / ${MAP_TIMEOUT_MS / 1000} s).`);
 }
 
 // ---------------------------------------------------------------------------
