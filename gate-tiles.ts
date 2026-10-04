@@ -165,6 +165,21 @@ const PACE_MS = Number(Deno.env.get("GATE_PACE_MS") ?? 500);     // gap between 
 // upstream rate-limit; see the retry in gateTile. Set 0 to disable retries entirely.
 const RETRY_MS = Number(Deno.env.get("GATE_RETRY_MS") ?? 1500);
 const WIKI_TIMEOUT_MS = Number(Deno.env.get("GATE_WIKI_TIMEOUT_MS") ?? 12000);
+// #506 — every OTHER network call now carries a deadline too (Wikipedia already did,
+// via wikiFetchTA). A connection that is accepted and then never answers used to
+// leave its `await` unsettled forever — the #504 hang, which graves-resolve hit in
+// #482. AbortSignal.timeout(ms) cuts the wait AND the body read; a timeout lands on
+// the path each call already had for a network error (null / false / "error"), so a
+// stalled read is a no-row skip, a stalled write is an uncommitted tile (every write
+// here is an idempotent upsert or delete, so the re-run that picks it up is safe), and
+// a stalled recall is a HOLD, never a drop. Values are milliseconds.
+const FN_TIMEOUT_MS = Number(Deno.env.get("GATE_FN_TIMEOUT_MS") ?? 180000); // nearby-places (a cold tile can build for minutes; matches the function's limit)
+const DB_TIMEOUT_MS = Number(Deno.env.get("GATE_DB_TIMEOUT_MS") ?? 30000);  // one shared_kv read / write / delete
+const timeoutStats = { wiki: 0, fn: 0, db: 0 };
+function noteTimeout(e: unknown, kind: "wiki" | "fn" | "db"): void {
+  const n = (e as any)?.name;
+  if (n === "TimeoutError" || n === "AbortError") timeoutStats[kind]++;
+}
 const NAME_MIN = Number(Deno.env.get("GATE_NAME_MIN") ?? 0.5);    // title must cover ≥ half the name's distinctive tokens (#54 floor)
 // #356 — the grave-identity rung's name floor. HIGHER than NAME_MIN because this
 // rung accepts an article WITHOUT the coordinate gate (identity, #163), so the
@@ -421,6 +436,7 @@ async function wikiFetchTA(url: string): Promise<{ throttled: boolean; json: any
       if (!res.ok) return { throttled: false, json: null };  // clean non-throttle error = real miss
       return { throttled: false, json: await res.json().catch(() => null) };
     } catch (_e) {
+      if (ctrl.signal.aborted) timeoutStats.wiki++;          // #506 — counted for the summary line
       continue;                                              // network/timeout/abort → retry
     } finally { clearTimeout(timer); }
   }
@@ -587,13 +603,15 @@ function graveBankKey(name: string): string {
 async function readGraveBank(name: string): Promise<{ desc: string; title: string } | null> {
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?key=eq.${encodeURIComponent(graveBankKey(name))}&select=value`;
-    const res = await fetch(url, { headers: { apikey: SRK, Authorization: `Bearer ${SRK}`, Accept: "application/json" } });
+    const sig = AbortSignal.timeout(DB_TIMEOUT_MS);     // #506
+    const res = await fetch(url, { signal: sig, headers: { apikey: SRK, Authorization: `Bearer ${SRK}`, Accept: "application/json" } });
     if (!res.ok) return null;
     const rows = await res.json().catch(() => null);
+    if (sig.aborted) { timeoutStats.db++; return null; }
     if (!Array.isArray(rows) || !rows.length) return null;
     const v = JSON.parse(rows[0].value);
     return (v && v.desc) ? { desc: String(v.desc), title: String(v.title || "") } : null;
-  } catch (_e) { return null; }
+  } catch (e) { noteTimeout(e, "db"); return null; }
 }
 let _gbWarn = 0;
 async function writeGraveBank(name: string, hit: { desc: string; title: string }): Promise<void> {
@@ -602,12 +620,13 @@ async function writeGraveBank(name: string, hit: { desc: string; title: string }
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?on_conflict=key`;
     const res = await fetch(url, {
+      signal: AbortSignal.timeout(DB_TIMEOUT_MS),          // #506 — an upsert: a timed-out write is safe to repeat
       method: "POST",
       headers: { apikey: SRK, Authorization: `Bearer ${SRK}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
       body: JSON.stringify({ key: graveBankKey(name), value: JSON.stringify({ title: hit.title, desc: hit.desc, ts: Date.now() }), updated_at: new Date().toISOString() }),
     });
     if (!res.ok && _gbWarn++ < 5) console.error(`[gate-tiles] gravebank WRITE failed HTTP ${res.status} (needs service role) — resolves won't persist across runs.`);
-  } catch (_e) { /* best-effort — a failed bank write just means a re-resolve next run */ }
+  } catch (e) { noteTimeout(e, "db"); /* best-effort — a failed bank write just means a re-resolve next run */ }
 }
 // Search variants for a noisy grave name: the core name, the parenthetical alias
 // ("Amos Blakemore (Junior Wells)" → "Junior Wells"), and the de-noised form
@@ -786,17 +805,20 @@ async function resolveViaFunction(name: string, lat: number, lng: number, artist
   try {
     const payload: Record<string, unknown> = { action: "resolveWiki", name, lat, lng };
     if (artist) payload.artist = artist;                  // #355 — omit when empty so non-art pins are byte-identical to before
+    const sig = AbortSignal.timeout(FN_TIMEOUT_MS);       // #506
     const res = await fetch(NEARBY_URL, {
+      signal: sig,
       method: "POST",
       headers: { apikey: NKEY, Authorization: `Bearer ${NKEY}`, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     if (!res.ok) return "error";                          // transient (429/5xx) — NOT a clean miss
     const j = await res.json().catch(() => null);
+    if (sig.aborted) { timeoutStats.fn++; return "error"; } // #506 — a stalled body is transient too
     if (j === null) return "error";                       // malformed body — treat as transient, not absence
     const d = j && j.place && j.place.desc ? String(j.place.desc).trim() : "";
     return d ? { desc: d } : null;                        // hit, or a genuine 200+no-place miss
-  } catch (_e) { return "error"; }                        // network/throw — transient, never a drop
+  } catch (e) { noteTimeout(e, "fn"); return "error"; }  // network/throw/timeout — transient, never a drop
 }
 
 // ---- shared_kv REST ----
@@ -808,34 +830,45 @@ let _readWarn = 0;
 async function kvRead(key: string): Promise<{ ts: number; places: any[] } | null> {
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?key=eq.${encodeURIComponent(key)}&select=value`;
-    const res = await fetch(url, { headers: { apikey: NKEY, Authorization: `Bearer ${NKEY}` } });
+    const sig = AbortSignal.timeout(DB_TIMEOUT_MS);       // #506
+    const res = await fetch(url, { signal: sig, headers: { apikey: NKEY, Authorization: `Bearer ${NKEY}` } });
     if (!res.ok) {
       if (_readWarn++ < 5) console.error(`[gate-tiles] shared_kv READ failed HTTP ${res.status} for ${key} — check NEARBY_PLACES_KEY / SUPABASE_URL.`);
       return null;
     }
     const rows = await res.json().catch(() => []);
+    if (sig.aborted) {                                    // #506 — a stalled body is NOT "no row"; surfaced like a failed read
+      timeoutStats.db++;
+      if (_readWarn++ < 5) console.error(`[gate-tiles] shared_kv READ timed out after ${DB_TIMEOUT_MS / 1000} s for ${key}.`);
+      return null;
+    }
     if (!Array.isArray(rows) || !rows.length || !rows[0]?.value) return null; // genuinely no row
     const obj = JSON.parse(rows[0].value);
     if (!obj || !Array.isArray(obj.places)) return null;
     return obj;
-  } catch (_e) { return null; }
+  } catch (e) {
+    noteTimeout(e, "db");
+    if ((e as any)?.name === "TimeoutError" && _readWarn++ < 5) console.error(`[gate-tiles] shared_kv READ timed out after ${DB_TIMEOUT_MS / 1000} s for ${key}.`);
+    return null;
+  }
 }
 // One-time preflight: prove shared_kv is readable at all, so a bad key/URL ABORTS the
 // run up front instead of silently "skipping" every tile (what v1 did).
 async function kvReadable(ver: string): Promise<{ ok: boolean; status: number; sample: number }> {
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?key=like.places:${ver}:*&select=key&limit=1`;
-    const res = await fetch(url, { headers: { apikey: NKEY, Authorization: `Bearer ${NKEY}` } });
+    const res = await fetch(url, { signal: AbortSignal.timeout(DB_TIMEOUT_MS), headers: { apikey: NKEY, Authorization: `Bearer ${NKEY}` } }); // #506 — a stall fails the preflight loudly
     if (!res.ok) return { ok: false, status: res.status, sample: 0 };
     const rows = await res.json().catch(() => []);
     return { ok: true, status: 200, sample: Array.isArray(rows) ? rows.length : 0 };
-  } catch (_e) { return { ok: false, status: 0, sample: 0 }; }
+  } catch (e) { noteTimeout(e, "db"); return { ok: false, status: 0, sample: 0 }; }
 }
 let _writeWarn = 0;
 async function kvWrite(key: string, obj: { ts: number; places: any[] }): Promise<boolean> {
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?on_conflict=key`;
     const res = await fetch(url, {
+      signal: AbortSignal.timeout(DB_TIMEOUT_MS),          // #506 — an upsert: a timed-out write leaves the tile uncommitted, and a re-run is safe
       method: "POST",
       headers: {
         apikey: SRK, Authorization: `Bearer ${SRK}`, "Content-Type": "application/json",
@@ -845,7 +878,11 @@ async function kvWrite(key: string, obj: { ts: number; places: any[] }): Promise
     });
     if (!res.ok && _writeWarn++ < 5) console.error(`[gate-tiles] shared_kv WRITE failed HTTP ${res.status} for ${key} — --commit needs a valid SUPABASE_SERVICE_ROLE_KEY (writes need service role).`);
     return res.ok;
-  } catch (_e) { return false; }
+  } catch (e) {
+    noteTimeout(e, "db");
+    if ((e as any)?.name === "TimeoutError" && _writeWarn++ < 5) console.error(`[gate-tiles] shared_kv WRITE timed out after ${DB_TIMEOUT_MS / 1000} s for ${key} — left uncommitted; it may or may not have landed (an upsert, so a re-run is safe).`);
+    return false;
+  }
 }
 // #356 --rewarm: delete a tile's cache row (service role) so the function rebuilds
 // it ungated on the next warm. Only ever called under --rewarm.
@@ -853,23 +890,38 @@ let _delWarn = 0;
 async function kvDelete(key: string): Promise<boolean> {
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?key=eq.${encodeURIComponent(key)}`;
-    const res = await fetch(url, { method: "DELETE", headers: { apikey: SRK, Authorization: `Bearer ${SRK}` } });
+    const res = await fetch(url, { signal: AbortSignal.timeout(DB_TIMEOUT_MS), method: "DELETE", headers: { apikey: SRK, Authorization: `Bearer ${SRK}` } }); // #506
     if (!res.ok && _delWarn++ < 5) console.error(`[gate-tiles] shared_kv DELETE failed HTTP ${res.status} for ${key} — --rewarm needs a valid SUPABASE_SERVICE_ROLE_KEY.`);
     return res.ok;
-  } catch (_e) { return false; }
+  } catch (e) { noteTimeout(e, "db"); return false; }
+}
+
+// #506 — one summary line, printed at the end of both a tile sweep and --prime-graves.
+// 0 · 0 · 0 is normal. A non-zero shared_kv count means some no-row skips or
+// uncommitted tiles were timeouts, not real absences — re-run with --resume.
+function timeoutLine(): string {
+  return `TIMEOUTS (#506): Wikipedia ${timeoutStats.wiki} · nearby-places ${timeoutStats.fn} · shared_kv ${timeoutStats.db} (limits ${WIKI_TIMEOUT_MS / 1000} s / ${FN_TIMEOUT_MS / 1000} s / ${DB_TIMEOUT_MS / 1000} s).`;
 }
 
 // ---- warm a tile via the function (build + cache it), returns its cacheVersion ----
 async function warmTile(lat: number, lng: number): Promise<any> {
   try {
+    const sig = AbortSignal.timeout(FN_TIMEOUT_MS);       // #506
     const res = await fetch(NEARBY_URL, {
+      signal: sig,
       method: "POST",
       headers: { apikey: NKEY, Authorization: `Bearer ${NKEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ lat, lng }),
     });
     if (!res.ok) return null;
-    return await res.json().catch(() => null);
-  } catch (_e) { return null; }
+    const j = await res.json().catch(() => null);
+    if (sig.aborted) { timeoutStats.fn++; return null; }
+    return j;
+  } catch (e) {
+    noteTimeout(e, "fn");
+    if ((e as any)?.name === "TimeoutError") console.error(`[gate-tiles] nearby-places warm timed out after ${FN_TIMEOUT_MS / 1000} s at ${lat.toFixed(3)},${lng.toFixed(3)} — the re-read decides (no-row skip if it never built).`);
+    return null;
+  }
 }
 
 // ---- gate one tile's places ----
@@ -951,7 +1003,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-02a (#482 roster 25 → 26: + Queens-Nassau, New York's first extra box; #381 _isStructureOnlyName guard unchanged)";
+const BUILD_MARKER = "gate-tiles 2026-10-04a (#506 every fetch has a timeout — nearby-places and shared_kv joined Wikipedia; roster unchanged (26); #381 _isStructureOnlyName guard unchanged)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
@@ -1048,6 +1100,7 @@ async function primeGraves(): Promise<void> {
     console.log("  (Oak Woods ≈ 41.77,-87.60 falls in a Chicago metro rewarm. The bank read is deterministic — no per-tile rate-limit fight.)");
   }
   if (held) console.log(`${held} name(s) still throttled — re-run the SAME --prime-graves command later; already-banked names skip instantly.`);
+  console.log(timeoutLine());
 }
 
 async function main() {
@@ -1242,6 +1295,7 @@ async function main() {
   console.log(`\nrecords → ${RECORDS_FILE}   held → ${HELD_FILE}   report → ${REPORT_FILE}`);
   if (!COMMIT) console.log("DRY RUN: eyeball the dropped lists, then commit them with `--from-records --commit`.");
   if (tThrottled) console.log(`${tThrottled} tile(s) THROTTLED and left uncommitted — re-run: deno run … gate-tiles.ts --held --commit (when Wikipedia is healthy).`);
+  console.log(timeoutLine());
 }
 
 if (import.meta.main) main();

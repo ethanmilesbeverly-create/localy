@@ -62,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.10.02a (#499 Gemini fallback 3.1 → 3.5 to match the live pin; #495 backfill reminder after a story commit; carries #429 #434 #439 #441)";
+const TOOL_VERSION = "seed-resolve 2026.10.04a (#506 every fetch has a timeout — a stalled connection holds or retries instead of hanging the run; carries #499 #495 #429 #434 #439 #441)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 // #499 (2026-10-02): fallback 3.1 → 3.5 so offline mining runs the same model as the
 // live gate and nearby-places (the Supabase secret GEMINI_MODEL, re-pinned in #496).
@@ -200,6 +200,35 @@ async function sleep(ms: number) {
 }
 
 // ---------------------------------------------------------------------------
+// #506 — EVERY network call carries a deadline. Before this, none did: a
+// connection that is accepted and then never answers left its `await` unsettled
+// forever (the #504 hang graves-resolve hit in #482). A retry ladder that reacts
+// to a REPLY does nothing for a stall — a stall is not a reply. Each fetch now
+// passes AbortSignal.timeout(ms), which also cuts a reply that stalls mid-body.
+// A timeout lands on the path the call already had for a network error: a
+// Wikipedia check retries on the #426 ladder and then HOLDS (#420), the live-map
+// and submissions arms HOLD (#264), Gemini retries once and then HOLDS, a geocode
+// reads as not found. WRITES are different: a timed-out write may have landed, so
+// it is never retried — the insert stops the run (outcome unknown), the story
+// attach and the curated insert report it. Values are milliseconds.
+// ---------------------------------------------------------------------------
+const WIKI_TIMEOUT_MS = Number(Deno.env.get("SEED_WIKI_TIMEOUT_MS") ?? 20000);     // one Wikipedia call (normally < 1 s)
+const GEO_TIMEOUT_MS = Number(Deno.env.get("SEED_GEO_TIMEOUT_MS") ?? 20000);       // one Photon geocode
+const MAP_TIMEOUT_MS = Number(Deno.env.get("SEED_MAP_TIMEOUT_MS") ?? 180000);      // nearby-places (a cold tile can build for minutes; matches the function's limit)
+const GEMINI_TIMEOUT_MS = Number(Deno.env.get("SEED_GEMINI_TIMEOUT_MS") ?? 60000); // one Gemini judgement
+const DB_TIMEOUT_MS = Number(Deno.env.get("SEED_DB_TIMEOUT_MS") ?? 30000);         // one Supabase REST read / PATCH
+const COMMIT_TIMEOUT_MS = Number(Deno.env.get("SEED_COMMIT_TIMEOUT_MS") ?? 120000); // one 200-row insert batch / the curated insert
+const timeoutStats = { wiki: 0, geo: 0, map: 0, gemini: 0, db: 0 };
+type TimeoutKind = keyof typeof timeoutStats;
+function isTimeout(e: unknown): boolean {
+  const n = (e as any)?.name;
+  return n === "TimeoutError" || n === "AbortError";
+}
+function noteTimeout(e: unknown, kind: TimeoutKind): void {
+  if (isTimeout(e)) timeoutStats[kind]++;
+}
+
+// ---------------------------------------------------------------------------
 // #426 — EVERY Wikipedia call goes through wikiJson(). Two fixes in one place:
 //  (1) IDENTITY. Wikimedia's 2026 API limits are keyed on who is calling: a
 //      request with a compliant User-Agent (tool name + a real contact URL)
@@ -224,10 +253,12 @@ async function wikiJson(url: string): Promise<any | null> {
   const tries = WIKI_BACKOFF_MS.length + 1;
   for (let i = 0; i < tries; i++) {
     let wait = WIKI_BACKOFF_MS[i] ?? 0;
+    const sig = AbortSignal.timeout(WIKI_TIMEOUT_MS); // #506 — covers the body read too
     try {
-      const r = await fetch(url, { headers: { "User-Agent": WIKI_UA } });
+      const r = await fetch(url, { signal: sig, headers: { "User-Agent": WIKI_UA } });
       if (r.ok) {
         const d = await r.json().catch(() => null);
+        if (sig.aborted) timeoutStats.wiki++;          // a stalled body reads as "unreadable" below → retried
         if (d && !d.error) return d;
         const code = String(d?.error?.code ?? "unreadable");
         // Only throttle-type errors are worth waiting for; a bad request is final.
@@ -238,7 +269,7 @@ async function wikiJson(url: string): Promise<any | null> {
         const ra = Number(r.headers.get("retry-after"));
         if (Number.isFinite(ra) && ra > 0) wait = Math.min(30000, ra * 1000);
       }
-    } catch { /* network error — retry below */ }
+    } catch (e) { noteTimeout(e, "wiki"); /* network error or #506 timeout — retry below */ }
     if (i < tries - 1) { wikiStats.retries++; await sleep(wait); }
   }
   wikiStats.failed++;
@@ -392,7 +423,7 @@ async function geocode(
     "&q=" +
     encodeURIComponent(name);
   try {
-    const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    const r = await fetch(url, { signal: AbortSignal.timeout(GEO_TIMEOUT_MS), headers: { "User-Agent": "nahgoo-seed/1.0" } }); // #506
     if (!r.ok) return null;
     const data = await r.json();
     const feats: any[] = Array.isArray(data?.features) ? data.features : [];
@@ -413,7 +444,9 @@ async function geocode(
     }
     if (!best) return null;
     return { ...best, nameMatch: labelMatchesName(name, best.label) };
-  } catch {
+  } catch (e) {
+    noteTimeout(e, "geo");
+    if (isTimeout(e)) console.log(`  (geocode for "${name}" timed out after ${GEO_TIMEOUT_MS / 1000} s — it will read "could not geocode"; re-run this line)`);
     return null;
   }
 }
@@ -460,7 +493,7 @@ async function geocodeAddress(
   const url = "https://photon.komoot.io/api/?limit=8&lat=" + CITY.lat + "&lon=" + CITY.lng +
     "&bbox=" + bbox + "&q=" + encodeURIComponent(address);
   try {
-    const r = await fetch(url, { headers: { "User-Agent": "nahgoo-seed/1.0" } });
+    const r = await fetch(url, { signal: AbortSignal.timeout(GEO_TIMEOUT_MS), headers: { "User-Agent": "nahgoo-seed/1.0" } }); // #506
     if (!r.ok) return null;
     const data = await r.json();
     const feats: any[] = Array.isArray(data?.features) ? data.features : [];
@@ -482,7 +515,9 @@ async function geocodeAddress(
     }
     // Nothing matched exactly: report what Photon offered, as a mismatch (drop).
     return first ? { ...first, nameMatch: false } : null;
-  } catch {
+  } catch (e) {
+    noteTimeout(e, "geo");
+    if (isTimeout(e)) console.log(`  (address geocode for "${address}" timed out after ${GEO_TIMEOUT_MS / 1000} s — it will read "could not geocode"; re-run this line)`);
     return null;
   }
 }
@@ -673,6 +708,7 @@ async function wikiNear(lat: number, lng: number): Promise<Existing[] | null> {
 async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
   try {
     const r = await fetch(NEARBY_PLACES_URL, {
+      signal: AbortSignal.timeout(MAP_TIMEOUT_MS), // #506 — a stall is a HOLD (null), like any failed read
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + NEARBY_PLACES_KEY },
       body: JSON.stringify({ lat, lng }),
@@ -685,7 +721,8 @@ async function mapNear(lat: number, lng: number): Promise<Existing[] | null> {
       // Tagged "map:<source>" so a live Wikipedia PIN ("map:wiki") is never confused
       // with a bare Wikipedia geosearch hit ("wiki" = an article, not a pin) — #419.
       .map((p) => ({ name: String(p.name), lat: p.lat, lng: p.lng, category: p.category, source: "map:" + (p.source ?? "?") }));
-  } catch {
+  } catch (e) {
+    noteTimeout(e, "map");
     return null;
   }
 }
@@ -702,11 +739,12 @@ async function submissionsNear(lat: number, lng: number): Promise<Existing[] | n
     `&lat=gte.${(lat - dLat).toFixed(6)}&lat=lte.${(lat + dLat).toFixed(6)}` +
     `&lng=gte.${(lng - dLng).toFixed(6)}&lng=lte.${(lng + dLng).toFixed(6)}`;
   try {
-    const r = await fetch(url, { headers: { apikey: PUBLIC_KEY, Authorization: "Bearer " + PUBLIC_KEY } });
+    const r = await fetch(url, { signal: AbortSignal.timeout(DB_TIMEOUT_MS), headers: { apikey: PUBLIC_KEY, Authorization: "Bearer " + PUBLIC_KEY } }); // #506
     if (!r.ok) return null;
     const rows: any[] = await r.json();
     return rows.map((x) => ({ name: String(x.name), lat: x.lat, lng: x.lng, category: x.category, source: "submission", seed: x.submitted_by == null }));
-  } catch {
+  } catch (e) {
+    noteTimeout(e, "db");
     return null;
   }
 }
@@ -803,6 +841,7 @@ async function resolve(candidate: string, wikiTitle: string | null, existing: Ex
       const g = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
         {
+          signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS), // #506 — covers g.text() below too
           method: "POST",
           headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
           body: JSON.stringify({
@@ -851,6 +890,7 @@ async function resolve(candidate: string, wikiTitle: string | null, existing: Ex
         why: String(parsed.why ?? "").slice(0, 240),
       };
     } catch (err) {
+      noteTimeout(err, "gemini");                // #506 — a stalled judgement retries once, then HOLDS
       if (attempt === 1) { await sleep(1200); continue; }
       // Transport/parse failure = machine never judged = HOLD (re-run), not a
       // verdict. See the non-ok branch above (#264).
@@ -910,11 +950,12 @@ async function curatedAlready(name: string, lat: number, lng: number): Promise<b
   try {
     const nc = name.toLowerCase().replace(/[^a-z0-9]/g, "");
     const r = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions?select=lat,lng&name_clean=eq." + encodeURIComponent(nc),
-      { headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY } });
+      { signal: AbortSignal.timeout(DB_TIMEOUT_MS), headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY } }); // #506
     if (!r.ok) return null;
     const have: any[] = await r.json();
     return have.some((h) => haversineM(lat, lng, Number(h.lat), Number(h.lng)) <= 50);
-  } catch {
+  } catch (e) {
+    noteTimeout(e, "db");
     return null;
   }
 }
@@ -924,12 +965,13 @@ async function seedStoryNow(pt: SeedPatch): Promise<string | null | undefined> {
   try {
     const q = `?select=resolved_description,resolved_source&name=eq.${encodeURIComponent(pt.name)}&lat=eq.${pt.lat}&lng=eq.${pt.lng}&submitted_by=is.null&status=eq.approved`;
     const r = await fetch(SUPABASE_URL + "/rest/v1/submissions" + q,
-      { headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY } });
+      { signal: AbortSignal.timeout(DB_TIMEOUT_MS), headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY } }); // #506
     if (!r.ok) return undefined;
     const rows: any[] = await r.json();
     const cur = rows.find((x) => x.resolved_source === "curated" && x.resolved_description);
     return cur ? String(cur.resolved_description) : null;
-  } catch {
+  } catch (e) {
+    noteTimeout(e, "db");
     return undefined;
   }
 }
@@ -969,16 +1011,28 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[], patches:
   let inserted = 0;
   for (let i = 0; i < payload.length; i += CHUNK) {
     const batch = payload.slice(i, i + CHUNK);
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(batch),
-    });
+    // #506 — a batch that stalls is cut after COMMIT_TIMEOUT_MS. A timed-out insert is
+    // AMBIGUOUS (it may have landed before the reply was lost), so it is never retried:
+    // the run stops, naming the batch whose outcome is unknown.
+    let res: Response;
+    try {
+      res = await fetch(endpoint, {
+        signal: AbortSignal.timeout(COMMIT_TIMEOUT_MS),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(batch),
+      });
+    } catch (e) {
+      const why = isTimeout(e) ? `timed out after ${COMMIT_TIMEOUT_MS / 1000} s` : String(e);
+      console.error(`\n--commit STOPPED on rows ${i}-${i + batch.length - 1}: ${why}. That batch's outcome is UNKNOWN — it may or may not have been written.`);
+      console.error(`Inserted ${inserted} row(s) before it. seed_records.json is unchanged; do NOT blindly re-run --commit (it would double-insert). Read the REST count first to see whether that batch landed. No story rows were attached or banked.`);
+      Deno.exit(1);
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.error(
@@ -1000,13 +1054,13 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[], patches:
   for (const c of curated) {
     try {
       const nc = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const r = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions?select=lat,lng&name_clean=eq." + encodeURIComponent(nc), { headers: svc });
+      const r = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions?select=lat,lng&name_clean=eq." + encodeURIComponent(nc), { signal: AbortSignal.timeout(DB_TIMEOUT_MS), headers: svc }); // #506
       const have: any[] = r.ok ? await r.json() : [];
       if (have.some((h) => haversineM(c.lat, c.lng, Number(h.lat), Number(h.lng)) <= 50)) {
         console.log(`  curated row already exists for "${c.name}" — skipped`);
         continue;
       }
-    } catch { /* on a read failure, insert anyway: a duplicate row is harmless, a missing one is not */ }
+    } catch (e) { noteTimeout(e, "db"); /* on a read failure (or #506 timeout), insert anyway: a duplicate row is harmless, a missing one is not */ }
     fresh.push(c);
   }
   curated = fresh;
@@ -1014,26 +1068,44 @@ async function commitToSupabase(rows: SeedRow[], curated: CuratedRow[], patches:
   // story as its persisted description. A user's own gem is never touched.
   for (const pt of patches) {
     const q = `?name=eq.${encodeURIComponent(pt.name)}&lat=eq.${pt.lat}&lng=eq.${pt.lng}&submitted_by=is.null&status=eq.approved`;
-    const r = await fetch(SUPABASE_URL + "/rest/v1/submissions" + q, {
-      method: "PATCH",
-      headers: { ...svc, "Content-Type": "application/json", Prefer: "return=representation" },
-      body: JSON.stringify({ resolved_description: pt.story, resolved_source: "curated" }),
-    });
+    // #506 — a stalled attach is reported and the commit carries on (the PATCH sets the
+    // same two fields every time, so attaching again later is harmless).
+    let r: Response;
+    try {
+      r = await fetch(SUPABASE_URL + "/rest/v1/submissions" + q, {
+        signal: AbortSignal.timeout(DB_TIMEOUT_MS),
+        method: "PATCH",
+        headers: { ...svc, "Content-Type": "application/json", Prefer: "return=representation" },
+        body: JSON.stringify({ resolved_description: pt.story, resolved_source: "curated" }),
+      });
+    } catch (e) {
+      noteTimeout(e, "db");
+      console.log(`  attach to seed "${pt.name}" ${isTimeout(e) ? `TIMED OUT after ${DB_TIMEOUT_MS / 1000} s — outcome unknown; check the seed's resolved_source` : `FAILED: ${e}`}`);
+      continue;
+    }
     const n = r.ok ? ((await r.json().catch(() => [])) as any[]).length : 0;
     console.log(r.ok ? `  story attached to existing seed "${pt.name}" (${n} row)` : `  attach to seed "${pt.name}" FAILED: HTTP ${r.status}`);
   }
   if (curated.length) {
-    const res = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(curated),
-    });
-    if (res.ok) console.log(`  curated_descriptions: inserted ${curated.length} story row(s). NEXT (#495): in the SQL editor run  select category, count(*) from public.curated_category_backfill(true) group by 1;  — new stories arrive without a category and read History in far search until it runs.`);
+    // #506 — a stalled story insert is reported, never retried (it may have landed).
+    let res: Response | null = null;
+    try {
+      res = await fetch(SUPABASE_URL + "/rest/v1/curated_descriptions", {
+        signal: AbortSignal.timeout(COMMIT_TIMEOUT_MS),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(curated),
+      });
+    } catch (e) {
+      console.error(`  curated_descriptions insert ${isTimeout(e) ? `TIMED OUT after ${COMMIT_TIMEOUT_MS / 1000} s — outcome UNKNOWN` : `FAILED: ${e}`}. The pins still show their story. Before loading curated_records.json by hand, count the rows for these names — they may already be there.`);
+    }
+    if (!res) { /* reported above */ }
+    else if (res.ok) console.log(`  curated_descriptions: inserted ${curated.length} story row(s). NEXT (#495): in the SQL editor run  select category, count(*) from public.curated_category_backfill(true) group by 1;  — new stories arrive without a category and read History in far search until it runs.`);
     else console.error(`  curated_descriptions insert FAILED: HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 300)} — the pins still show their story; load curated_records.json by hand.`);
   }
   console.log(`\n--commit: INSERTED ${inserted} row(s) into submissions (source='seed:reddit', city='${CITY.name}', status='approved').`);
@@ -1445,6 +1517,9 @@ async function run() {
   // #426 — did the identified User-Agent + back-off hold? failed > 0 means some
   // places were HELD on Wikipedia; retries alone are fine.
   console.log(`Wikipedia calls: ${wikiStats.calls} · retried ${wikiStats.retries} · failed ${wikiStats.failed}`);
+  // #506 — how often a deadline fired. 0s are normal; a non-zero count means those
+  // places were retried or HELD (see HELD below), not that the run hung.
+  console.log(`TIMEOUTS (#506): Wikipedia ${timeoutStats.wiki} · geocode ${timeoutStats.geo} · nearby-places ${timeoutStats.map} · Gemini ${timeoutStats.gemini} · Supabase reads ${timeoutStats.db} (limits ${WIKI_TIMEOUT_MS / 1000} / ${GEO_TIMEOUT_MS / 1000} / ${MAP_TIMEOUT_MS / 1000} / ${GEMINI_TIMEOUT_MS / 1000} / ${DB_TIMEOUT_MS / 1000} s).`);
   console.log("wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).");
   if (heldNames.length) {
     console.log(`HELD (never judged — re-run these): ${heldNames.length} → wrote seed_held.txt. Re-run: seed-resolve.ts seed_held.txt with a working key. These are NOT reviews (#264).`);
