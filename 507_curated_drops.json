@@ -1,0 +1,223 @@
+{
+  "build": "507_curated_drop_check 2026.10.04a (#507 — read-only; gate drops × curated_descriptions × live serve)",
+  "files": [
+    "/Users/ethanbeverly/roaminator-497/atlanta.records.json",
+    "/Users/ethanbeverly/roaminator-497/baltimore.records.json",
+    "/Users/ethanbeverly/roaminator-497/boston.records.json",
+    "/Users/ethanbeverly/roaminator-497/denver.records.json",
+    "/Users/ethanbeverly/roaminator-497/detroit.records.json",
+    "/Users/ethanbeverly/roaminator-497/houston.records.json",
+    "/Users/ethanbeverly/roaminator-497/los-angeles.records.json",
+    "/Users/ethanbeverly/roaminator-497/nashville.records.json",
+    "/Users/ethanbeverly/roaminator-497/new-orleans.records.json",
+    "/Users/ethanbeverly/roaminator-497/new-york.records.json",
+    "/Users/ethanbeverly/roaminator-497/philadelphia.records.json",
+    "/Users/ethanbeverly/roaminator-497/phoenix.records.json",
+    "/Users/ethanbeverly/roaminator-497/portland.records.json",
+    "/Users/ethanbeverly/roaminator-497/san-diego.records.json",
+    "/Users/ethanbeverly/roaminator-497/seattle.records.json",
+    "/Users/ethanbeverly/roaminator-497/st-paul.records.json",
+    "/Users/ethanbeverly/roaminator-497/washington-d-c.records.json",
+    "gate_tiles_records.json"
+  ],
+  "recCount": 816,
+  "dropCount": 10209,
+  "curatedRows": 759,
+  "hits": [
+    {
+      "status": "LOST",
+      "name": "McPherson Monument",
+      "category": "history",
+      "tile": "675_-1687",
+      "metro": "Atlanta",
+      "committedFlag": null,
+      "curatedName": "McPherson Monument",
+      "curatedLat": 33.744127,
+      "curatedLng": -84.341308,
+      "distKm": 1.04,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/atlanta.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "McPherson Monument",
+      "category": "history",
+      "tile": "675_-1686",
+      "metro": "Atlanta",
+      "committedFlag": null,
+      "curatedName": "McPherson Monument",
+      "curatedLat": 33.744127,
+      "curatedLng": -84.341308,
+      "distKm": 3.87,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/atlanta.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "ICA Watershed",
+      "category": "history",
+      "tile": "847_-1420",
+      "metro": "Boston",
+      "committedFlag": null,
+      "curatedName": "ICA Watershed",
+      "curatedLat": 42.3639428,
+      "curatedLng": -71.0342966,
+      "distKm": 3.22,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/boston.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "\"Constitution\" Bend",
+      "category": "history",
+      "tile": "595_-1906",
+      "metro": "Houston",
+      "committedFlag": null,
+      "curatedName": "Constitution Bend",
+      "curatedLat": 29.74855804,
+      "curatedLng": -95.29223624,
+      "distKm": 0.77,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/houston.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "\"Constitution\" Bend",
+      "category": "history",
+      "tile": "595_-1905",
+      "metro": "Houston",
+      "committedFlag": null,
+      "curatedName": "Constitution Bend",
+      "curatedLat": 29.74855804,
+      "curatedLng": -95.29223624,
+      "distKm": 4.08,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/houston.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "1840 Houston City Cemetery",
+      "category": "history",
+      "tile": "596_-1907",
+      "metro": "Houston",
+      "committedFlag": null,
+      "curatedName": "1840 Houston City Cemetery",
+      "curatedLat": 29.76848697,
+      "curatedLng": -95.36793221,
+      "distKm": 3.91,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/houston.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Site of Confederate Prison Compound",
+      "category": "history",
+      "tile": "596_-1907",
+      "metro": "Houston",
+      "committedFlag": null,
+      "curatedName": "Site of Confederate Prison Compound",
+      "curatedLat": 29.76670858,
+      "curatedLng": -95.35967433,
+      "distKm": 3.82,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/houston.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Smither Park",
+      "category": "park",
+      "tile": "594_-1906",
+      "metro": "Houston",
+      "committedFlag": null,
+      "curatedName": "Smither Park",
+      "curatedLat": 29.7290978,
+      "curatedLng": -95.3357653,
+      "distKm": 4.73,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/houston.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Eastlake Park",
+      "category": "park",
+      "tile": "669_-2241",
+      "metro": "Phoenix",
+      "committedFlag": null,
+      "curatedName": "Eastlake Park",
+      "curatedLat": 33.44694722,
+      "curatedLng": -112.04857778,
+      "distKm": 0.36,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/phoenix.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Camp Long",
+      "category": "park",
+      "tile": "951_-2448",
+      "metro": "Seattle",
+      "committedFlag": null,
+      "curatedName": "Camp Long",
+      "curatedLat": 47.5579668,
+      "curatedLng": -122.373605,
+      "distKm": 2.17,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/seattle.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Camp Long",
+      "category": "park",
+      "tile": "951_-2447",
+      "metro": "Seattle",
+      "committedFlag": null,
+      "curatedName": "Camp Long",
+      "curatedLat": 47.5579668,
+      "curatedLng": -122.373605,
+      "distKm": 1.98,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/seattle.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Klondike Gold Rush National Historical Park",
+      "category": "history",
+      "tile": "952_-2447",
+      "metro": "Seattle",
+      "committedFlag": null,
+      "curatedName": "Klondike Gold Rush National Historical Park",
+      "curatedLat": 47.5994,
+      "curatedLng": -122.3319,
+      "distKm": 1.36,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/seattle.records.json"
+      ]
+    },
+    {
+      "status": "LOST",
+      "name": "Klondike Gold Rush National Historical Park",
+      "category": "history",
+      "tile": "952_-2446",
+      "metro": "Seattle",
+      "committedFlag": null,
+      "curatedName": "Klondike Gold Rush National Historical Park",
+      "curatedLat": 47.5994,
+      "curatedLng": -122.3319,
+      "distKm": 2.39,
+      "files": [
+        "/Users/ethanbeverly/roaminator-497/seattle.records.json"
+      ]
+    }
+  ]
+}

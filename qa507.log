@@ -1,0 +1,23 @@
+507_curated_drop_check 2026.10.04a (#507 — read-only; gate drops × curated_descriptions × live serve)
+Read 18 file(s): 816 tile record(s) (0 marked committed, 816 not marked — a dry-run file carries no flag), 10209 dropped pin(s), 9491 distinct by tile+name.
+curated_descriptions: 759 row(s), 757 distinct names.
+
+Dropped pins with a curated story: 13 — LOST 13 · ON MAP 0 · UNKNOWN 0
+  LOST    Atlanta          675_-1687   McPherson Monument  [history, 1.04 km from tile centre]
+  LOST    Atlanta          675_-1686   McPherson Monument  [history, 3.87 km from tile centre]
+  LOST    Boston           847_-1420   ICA Watershed  [history, 3.22 km from tile centre]
+  LOST    Houston          595_-1906   "Constitution" Bend  (curated: "Constitution Bend")  [history, 0.77 km from tile centre]
+  LOST    Houston          595_-1905   "Constitution" Bend  (curated: "Constitution Bend")  [history, 4.08 km from tile centre]
+  LOST    Houston          596_-1907   1840 Houston City Cemetery  [history, 3.91 km from tile centre]
+  LOST    Houston          596_-1907   Site of Confederate Prison Compound  [history, 3.82 km from tile centre]
+  LOST    Houston          594_-1906   Smither Park  [park, 4.73 km from tile centre]
+  LOST    Phoenix          669_-2241   Eastlake Park  [park, 0.36 km from tile centre]
+  LOST    Seattle          951_-2448   Camp Long  [park, 2.17 km from tile centre]
+  LOST    Seattle          951_-2447   Camp Long  [park, 1.98 km from tile centre]
+  LOST    Seattle          952_-2447   Klondike Gold Rush National Historical Park  [history, 1.36 km from tile centre]
+  LOST    Seattle          952_-2446   Klondike Gold Rush National Historical Park  [history, 2.39 km from tile centre]
+
+Tiles holding a LOST curated pin: 12 → 594_-1906 595_-1905 595_-1906 596_-1907 669_-2241 675_-1686 675_-1687 847_-1420 951_-2447 951_-2448 952_-2446 952_-2447
+Nothing has been changed. The restore (delete those tile rows so the live path rebuilds them, then warm each one) is the next step, delivered separately once these are reviewed.
+
+wrote 507_curated_drops.json. NOTHING was written to the database.
