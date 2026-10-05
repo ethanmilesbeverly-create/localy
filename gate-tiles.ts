@@ -95,7 +95,34 @@
 // reaches it. Run during low traffic: a concurrent user rebuild can re-ungate a tile
 // mid-run (rare; the next sweep re-gates it).
 //
-// RUN (dry-run → eyeball → commit), Codespace, Deno:
+// ===========================================================================
+// #509 (2026-10-04) — THE TILE COMMIT IS RETIRED. Writing gate results into tile
+// rows (`--commit`, `--from-records --commit`, `--held --commit`, `--rewarm
+// --commit`) now refuses to run. #507/#509 measured why: the gate's rescue match
+// is the LOOSE #316 floor: of a random 53 live Wikipedia stories that fail the serve
+// path's strict match, 22 were the wrong article (Clybourn Park → the Clybourn
+// Corridor shopping district, Locust Valley Library → the LIRR station) and 14 the
+// containing or neighbouring thing. And it judges the STORED row, so it cannot see the
+// curated / grave-bank / gem stories the serve path adds. The serve path now does
+// the gate's job on every request with the STRICT match: #367 hides storyless OSM
+// pins, the #357 bank heal restores strict matches, #362 curated and #363 grave
+// stories apply. Dry runs still work (they measure), and --prime-graves --commit
+// still writes the GRAVE BANK (never a tile).
+//
+// --rebuild (#509): the replacement for re-gating. For each target tile: delete
+// its cache row, warm it so the LIVE build rebuilds it (strict rules), retry the
+// warm until the new row is actually written (Overpass flakes, #498), and record
+// the outcome. No gating, no Wikipedia calls from this tool. Needs the service key
+// (the delete). Use --resume on long runs: finished tiles are skipped on restart
+// and failed ones are retried. GATE_METRO=<text> limits --all to metros whose
+// name contains it (e.g. GATE_METRO="Washington").
+//   GATE_METRO="Washington" deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --all --rebuild --resume
+//   deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --all --rebuild --resume
+// Writes gate_rebuild_records.json (every tile) and gate_rebuild_progress.json.
+// ===========================================================================
+//
+// RUN (dry-run → eyeball → commit), Codespace, Deno — the commit lines below are
+// RETIRED by #509 (kept for the record):
 //   export SUPABASE_URL=…  SUPABASE_SERVICE_ROLE_KEY=…  NEARBY_PLACES_KEY=<anon key>
 //   deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts            # single metro dry-run (SEED_CITY_* or default Chicago)
 //   deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --all      # all metros dry-run
@@ -211,6 +238,15 @@ const RESUME = Deno.args.includes("--resume");
 // this tool re-reads + gates. A rebuild is a mutation (the tile serves ungated /
 // over-shows until the gated write lands — the SAFE direction, never a false hide).
 const REWARM = Deno.args.includes("--rewarm");
+// #509 --rebuild: delete + live rebuild with retries, no gating (see the header).
+const REBUILD = Deno.args.includes("--rebuild");
+const REBUILD_TRIES = Number(Deno.env.get("GATE_REBUILD_TRIES") ?? 4);          // warm attempts per tile until the new row lands
+const REBUILD_RETRY_MS = Number(Deno.env.get("GATE_REBUILD_RETRY_MS") ?? 20000); // wait between attempts (Overpass flakes recover in seconds)
+const REBUILD_PACE_MS = Number(Deno.env.get("GATE_REBUILD_PACE_MS") ?? 1500);   // gap between tiles — kind to public Overpass
+const REBUILD_RECORDS_FILE = "gate_rebuild_records.json";
+const REBUILD_PROGRESS_FILE = "gate_rebuild_progress.json";
+// #509 GATE_METRO: with --all, keep only metros whose name contains this text.
+const METRO_FILTER = (Deno.env.get("GATE_METRO") ?? "").trim().toLowerCase();
 // #363 --prime-graves: resolve a SHORT supplied list of grave-class person names ONCE,
 // paced, out of band, and write each confident hit into the monotonic gravebank — so a
 // later --rewarm bakes them onto their real OSM plots deterministically (no per-tile
@@ -1003,7 +1039,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-04a (#506 every fetch has a timeout — nearby-places and shared_kv joined Wikipedia; roster unchanged (26); #381 _isStructureOnlyName guard unchanged)";
+const BUILD_MARKER = "gate-tiles 2026-10-04b (#509 tile --commit RETIRED; new --rebuild = delete + live rebuild with retries, no gating; GATE_METRO filter; carries #506 timeouts; roster unchanged (26))";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
@@ -1103,9 +1139,86 @@ async function primeGraves(): Promise<void> {
   console.log(timeoutLine());
 }
 
+// ---- #509 --rebuild: delete + live rebuild, verified, with retries ----
+type RebuildRec = {
+  tile: string; metro: string; lat: number; lng: number;
+  status: "rebuilt" | "failed" | "delete-failed";
+  tries: number; oldPlaces: number | null; oldStoriedOsm: number | null; newPlaces: number | null; newStoriedOsm: number | null; at: string;
+};
+const storiedOsm = (places: any[]) => places.filter((p) => p && p.source === "osm" && typeof p.desc === "string" && p.desc.length > 60).length;
+async function rebuildTiles(tiles: TileRef[], VER: string): Promise<void> {
+  const progress: Record<string, RebuildRec> = {};
+  if (RESUME) {
+    try {
+      for (const r of JSON.parse(await Deno.readTextFile(REBUILD_PROGRESS_FILE)) as RebuildRec[]) progress[r.tile] = r;
+      const done = Object.values(progress).filter((r) => r.status === "rebuilt").length;
+      console.log(`[gate-tiles] --rebuild --resume: ${Object.keys(progress).length} tile(s) in checkpoint (${done} rebuilt — skipped; the rest retry).`);
+    } catch (_e) { console.log(`[gate-tiles] --rebuild --resume: no ${REBUILD_PROGRESS_FILE} yet — starting fresh.`); }
+  }
+  const flush = async () => { try { await Deno.writeTextFile(REBUILD_PROGRESS_FILE, JSON.stringify(Object.values(progress), null, 2)); } catch (_e) { /* best-effort */ } };
+  const todo = tiles.filter((t) => progress[t.tile]?.status !== "rebuilt");
+  const estMin = Math.round((todo.length * (30000 + REBUILD_PACE_MS)) / 60000);
+  console.log(`[gate-tiles] --rebuild: ${todo.length} of ${tiles.length} tile(s) to rebuild (≈${estMin} min at ~30 s a tile). Each: delete → live rebuild → verify the new row (up to ${REBUILD_TRIES} tries, ${REBUILD_RETRY_MS / 1000} s apart). No gating, nothing baked.`);
+  let n = 0, ok = 0, fail = 0, delFail = 0;
+  for (const t of todo) {
+    n++;
+    const key = `places:${VER}:${t.tile}`;
+    const old = await kvRead(key);
+    const rec: RebuildRec = {
+      tile: t.tile, metro: t.metro, lat: t.lat, lng: t.lng, status: "failed", tries: 0,
+      oldPlaces: old ? old.places.length : null, oldStoriedOsm: old ? storiedOsm(old.places) : null,
+      newPlaces: null, newStoriedOsm: null, at: new Date().toISOString(),
+    };
+    const startedAt = Date.now();
+    if (!(await kvDelete(key))) {
+      rec.status = "delete-failed"; delFail++;
+    } else {
+      for (let i = 0; i < REBUILD_TRIES; i++) {
+        rec.tries = i + 1;
+        await warmTile(t.lat, t.lng);
+        const row = await kvRead(key);
+        // A real rebuild writes a NEW row: its ts is after the delete. (An old row
+        // read back means the delete didn't take; no row means the build failed.)
+        if (row && typeof row.ts === "number" && row.ts >= startedAt - 5000) {
+          rec.status = "rebuilt"; rec.newPlaces = row.places.length; rec.newStoriedOsm = storiedOsm(row.places);
+          break;
+        }
+        if (i < REBUILD_TRIES - 1) await sleep(REBUILD_RETRY_MS);
+      }
+      if (rec.status === "rebuilt") ok++; else fail++;
+    }
+    progress[t.tile] = rec;
+    await flush();
+    const tag = rec.status === "rebuilt"
+      ? `rebuilt (try ${rec.tries}) places ${rec.oldPlaces ?? "—"} → ${rec.newPlaces} · storied OSM ${rec.oldStoriedOsm ?? "—"} → ${rec.newStoriedOsm}`
+      : rec.status === "delete-failed" ? "DELETE FAILED — old row left in place" : `FAILED after ${rec.tries} tries — no row now; the next visitor builds it cold (re-run with --resume to retry)`;
+    console.log(`[gate-tiles] ${n}/${todo.length} ${t.metro} tile=${t.tile} ${tag}`);
+    await sleep(REBUILD_PACE_MS);
+  }
+  const all = Object.values(progress).filter((r) => tiles.some((t) => t.tile === r.tile));
+  await Deno.writeTextFile(REBUILD_RECORDS_FILE, JSON.stringify(all, null, 2));
+  const sum = (f: (r: RebuildRec) => number | null) => all.reduce((a, r) => a + (r.status === "rebuilt" ? (f(r) ?? 0) : 0), 0);
+  console.log("\n=== gate-tiles --rebuild summary ===");
+  console.log(`this run: ${ok} rebuilt · ${fail} failed · ${delFail} delete-failed (of ${todo.length})`);
+  console.log(`all target tiles: ${all.filter((r) => r.status === "rebuilt").length}/${tiles.length} rebuilt · storied OSM pins on rebuilt tiles ${sum((r) => r.oldStoriedOsm)} → ${sum((r) => r.newStoriedOsm)} (stored rows; the serve path hides storyless pins and heals strict matches on top)`);
+  const failed = all.filter((r) => r.status !== "rebuilt");
+  if (failed.length) console.log(`${failed.length} tile(s) not rebuilt: ${failed.map((r) => r.tile).join(" ")} — re-run the SAME command with --resume to retry only these.`);
+  console.log(`wrote ${REBUILD_RECORDS_FILE}.`);
+  console.log(timeoutLine());
+}
+
 async function main() {
   console.log(`[gate-tiles] build ${BUILD_MARKER} — carries #356 grave-identity rung + MONOTONIC GRAVE BANK (#357-style deterministic reuse) + multi-query recall + title⊆name nickname match + --rewarm. #363 adds --prime-graves: resolve a supplied grave list ONCE, paced, out of band, and bank each confident hit so a later --rewarm bakes it onto the real OSM plot without the per-tile rate-limit fight.`);
   if (REWARM) console.log("[gate-tiles] --rewarm ON: each target tile will be DELETED and rebuilt UNGATED before gating (a mutation — tiles over-show until the gated write lands). The gated write still needs --commit (or a follow-up --from-records --commit).");
+  // #509 — the TILE commit is retired. Only --prime-graves may write (the grave bank).
+  if (COMMIT && !PRIME_GRAVES) {
+    console.error("FATAL (#509): writing gate results into tile rows is RETIRED — its loose name match bakes the wrong article (about 4 in 10 of the non-strict stories sampled live), and it can't see curated / grave-bank / gem stories. The serve path does this job now. To clear stale or wrongly-baked tiles, use --rebuild (delete + live rebuild). Nothing was changed.");
+    Deno.exit(1);
+  }
+  if (REBUILD && (FROM_RECORDS || HELD_ONLY || REWARM)) {
+    console.error("FATAL (#509): --rebuild runs on its own — drop --from-records / --held / --rewarm. Nothing was changed.");
+    Deno.exit(1);
+  }
   if (RESUME && COMMIT && !FROM_RECORDS) {
     console.error("FATAL: `--resume --commit` writes nothing — the checkpoint skips finished tiles, so it commits zero rows yet would print success. To COMMIT the results you just dry-ran, use `--from-records --commit` (writes the exact reviewed rows WITH baked descriptions, no re-crawl). To re-crawl and commit fresh, use `--commit` WITHOUT --resume.");
     Deno.exit(1);
@@ -1120,6 +1233,7 @@ async function main() {
   if (!NKEY) { console.error("FATAL: NEARBY_PLACES_KEY (the function anon key) required — reads + warming use it."); Deno.exit(1); }
   // Reads use the anon key; only WRITES (--commit) need the service-role key.
   if (COMMIT && !SRK) { console.error("FATAL: --commit needs SUPABASE_SERVICE_ROLE_KEY (writes to shared_kv need service role)."); Deno.exit(1); }
+  if ((REBUILD || REWARM) && !SRK) { console.error("FATAL: --rebuild / --rewarm need SUPABASE_SERVICE_ROLE_KEY (deleting a tile row needs service role). Nothing was changed."); Deno.exit(1); }
 
   // Sync the cache-key version to whatever the function currently serves — read it
   // from a live build so the tool can never write to the wrong version's key.
@@ -1148,11 +1262,15 @@ async function main() {
     console.log(`[gate-tiles] ${HELD_ONLY ? "--held" : "--from-records"}: ${tiles.length} tiles from ${file}`);
   } else {
     const metros = ALL_METROS
-      ? METROS
+      ? (METRO_FILTER ? METROS.filter((m) => m.name.toLowerCase().includes(METRO_FILTER)) : METROS)
       : [{ name: Deno.env.get("SEED_CITY_NAME")?.trim() || "Chicago", lat: Number(Deno.env.get("SEED_CITY_LAT") ?? 41.8781), lng: Number(Deno.env.get("SEED_CITY_LNG") ?? -87.6298) }];
+    if (!metros.length) { console.error(`FATAL: GATE_METRO="${METRO_FILTER}" matches no roster metro. Nothing was changed.`); Deno.exit(1); }
+    if (ALL_METROS && METRO_FILTER) console.log(`[gate-tiles] GATE_METRO="${METRO_FILTER}" → ${metros.map((m) => m.name).join(", ")}`);
     tiles = enumerateTiles(metros);
     console.log(`[gate-tiles] ${metros.length} metro(s) → ${tiles.length} unique tiles (metroKm=${METRO_KM}, tileDeg=${TILE_DEG})`);
   }
+
+  if (REBUILD) { await rebuildTiles(tiles, VER); return; }
 
   const records: TileRecord[] = [];
   const held: TileRecord[] = [];
