@@ -1,5 +1,8 @@
 -- 488_rls_audit_sweep.sql — #488: the RLS audit sweep, rewritten.
--- SWEEP_VERSION: 488-sweep-v1
+-- SWEEP_VERSION: 488-sweep-v2
+--   v2 (2026-10-05, #513): the TRUNCATE KNOWN row became a real check — every
+--   browser write grant on every table and sequence against the #513 keep-list
+--   (grant (6)), plus self-test T6 that proves it can see a stray grant.
 --
 -- WHAT IT IS. The read-only, roll-everything-back re-check of the database's
 -- security: who can read what, who can write what, and whether the guard
@@ -18,7 +21,7 @@
 -- it creates are TEMP (gone with the session). NO PII IN THE OUTPUT: counts and
 -- error text only; any id in an error message prints as <id>.
 -- The SELF-TEST section briefly drops a guard trigger, switches RLS off on one
--- table, adds one open policy and one grant — each inside its own
+-- table, adds one open policy and three grants — each inside its own
 -- sub-transaction, undone before the next — to prove the checks above would
 -- catch it. Each holds a lock on that one table for milliseconds.
 --
@@ -293,16 +296,60 @@ begin
     return next;
   end loop;
 
-  -- (6) TRUNCATE ignores RLS, but PostgREST has no truncate, so a browser key
-  --     cannot reach it (#512). Counted so a change is visible, not a finding.
-  select count(*) into v_n
-  from pg_class c join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and c.relkind in ('r','p')
-    and (has_table_privilege('anon', c.oid, 'TRUNCATE') or has_table_privilege('authenticated', c.oid, 'TRUNCATE'));
-  item := 'truncate grants (browser roles)';
-  detail := v_n || ' tables — Supabase''s default grant; not reachable through the API';
-  verdict := 'KNOWN (#512: left for a deliberate cleanup, not an exposure)';
-  return next;
+  -- (6) Browser WRITE grants must be exactly what the app writes (#513). RLS
+  --     denies every other write today; the grant is the second lock, so one
+  --     mistaken policy or one table with RLS off is not enough. Supabase hands
+  --     every NEW table the full default set, so a new table shows up here until
+  --     its grants are trimmed (or its writes added to this list on purpose).
+  --     activity_pings' two-column INSERT is checked in (3); SELECT is the
+  --     policies' and the allowlists' job, not this check's.
+  for r in
+    with keep(t, ro, pr) as (values
+      ('shared_kv','authenticated','INSERT'), ('shared_kv','authenticated','UPDATE'),
+      ('user_state','authenticated','INSERT'), ('user_state','authenticated','UPDATE'),
+      ('profiles','authenticated','INSERT'), ('profiles','authenticated','UPDATE'),
+      ('submissions','authenticated','INSERT'),
+      ('guides','authenticated','INSERT'), ('guides','authenticated','UPDATE'), ('guides','authenticated','DELETE'),
+      ('guide_stops','authenticated','INSERT'), ('guide_stops','authenticated','UPDATE'), ('guide_stops','authenticated','DELETE')),
+    privs(pr) as (select unnest(array['INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']
+                  || case when current_setting('server_version_num')::int >= 170000
+                          then array['MAINTAIN'] else array[]::text[] end)),
+    rels as (
+      select c.oid, c.relname, c.relkind
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relkind in ('r', 'p', 'S')
+        and not exists (select 1 from pg_depend d
+                        where d.classid = 'pg_class'::regclass and d.objid = c.oid and d.deptype = 'e')),
+    held as (
+      select x.relname, ro.ro, pr.pr
+      from rels x cross join (values ('anon'), ('authenticated')) ro(ro) cross join privs pr
+      where x.relkind <> 'S' and has_table_privilege(ro.ro, x.oid, pr.pr)
+      union all
+      select x.relname, ro.ro, sp.pr
+      from rels x cross join (values ('anon'), ('authenticated')) ro(ro)
+      cross join (values ('USAGE'), ('SELECT'), ('UPDATE')) sp(pr)
+      where x.relkind = 'S' and has_sequence_privilege(ro.ro, x.oid, sp.pr))
+    select x.relname,
+           (select string_agg(h.ro || ' ' || h.pr, ', ' order by h.ro, h.pr) from held h
+             where h.relname = x.relname and (h.relname, h.ro, h.pr) not in (select * from keep)) as extra,
+           (select string_agg(k.ro || ' ' || k.pr, ', ' order by k.ro, k.pr) from keep k
+             where k.t = x.relname and (k.t, k.ro, k.pr) not in (select relname, ro, pr from held)) as missing,
+           (select string_agg(h.ro || ' ' || h.pr, ', ' order by h.ro, h.pr) from held h
+             where h.relname = x.relname and (h.relname, h.ro, h.pr) in (select * from keep)) as kept
+    from rels x
+    order by x.relname
+  loop
+    item := 'write grants: ' || r.relname;
+    detail := case
+      when r.extra is not null then 'beyond the #513 keep-list: ' || r.extra
+      when r.missing is not null then 'keep-list grant missing: ' || r.missing
+      else coalesce(r.kept, 'none') end;
+    verdict := case
+      when r.extra is not null then 'DRIFT (a browser write the app never makes — revoke it, or add it to the keep-list on purpose)'
+      when r.missing is not null then 'BROKEN (an app write would be refused)'
+      else 'OK' end;
+    return next;
+  end loop;
 end $$;
 
 -- Guard triggers: the column rules RLS cannot express (handoff §5). Each must
@@ -777,7 +824,10 @@ begin
             'select exists (select 1 from pg_temp.c488_grants() where item = ''no browser access: capture_log'' and verdict = ''HOLE'')'),
       (905, 'T5 widen the profiles column allowlist (#512)',
             'grant select (created_at) on public.profiles to anon',
-            'select exists (select 1 from pg_temp.c488_grants() where item = ''select columns: profiles → anon'' and verdict = ''HOLE'')')
+            'select exists (select 1 from pg_temp.c488_grants() where item = ''select columns: profiles → anon'' and verdict = ''HOLE'')'),
+      (906, 'T6 hand the browser an unused write (#513)',
+            'grant truncate on public.reports to anon',
+            'select exists (select 1 from pg_temp.c488_grants() where item = ''write grants: reports'' and verdict like ''DRIFT%'')')
     ) v(ord, name, break_sql, see_sql)
   loop
     v_hit := null; v_err := null;
@@ -803,7 +853,7 @@ end $$;
 -- is never a pass.
 -- =====================================================================
 insert into sweep_488
-select 0, 'summary', '488-sweep-v1',
+select 0, 'summary', '488-sweep-v2',
        (select count(*) from sweep_488 where section in ('rls','policy','grant','trigger')) || ' catalog checks · '
        || (select count(*) from sweep_488 where section in ('read','profiles','app','write','self-test')) || ' of '
        || (select planned from sweep_488_plan) || ' probes reported · '
