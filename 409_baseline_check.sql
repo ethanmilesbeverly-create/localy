@@ -14,6 +14,8 @@
 -- trigger 10, rls 17, policy 33, grant 22, column grant 19, function grant 27,
 -- cron 4). Built from the export's CSV download; the 09-24 fingerprints were
 -- recomputed by the same method first and all 13 reproduced.
+-- 2026-10-05 (#514): `grant` re-fingerprinted for #513's trim of the browser
+-- roles' write grants; the other 12 fingerprints are unchanged.
 -- 2026-09-24: the first run showed profiles_display_name_chars holds a
 -- single backslash; the Markdown copy had doubled it. The baseline was
 -- corrected, so every section now has exactly one fingerprint.
@@ -219,7 +221,7 @@ left join (values
     ('trigger', '0d4924084d3c80a9fbdfa9b309214a10', null),
     ('rls', 'f1b5e121ef2078c8a771f25e663367ca', null),
     ('policy', 'e30ec8b7f9e64ff6d4e5134019e3879d', null),
-    ('grant', 'c7cd3b0eb3a420fb38f9f373234bbbb0', null),
+    ('grant', '77c0a2aa9b7a95be180dee18a5e99d0d', null),
     ('column grant', '0cbe33c195e5c6870f7c6830f45df5c8', null),
     ('function grant', '6abeea840edad26b7e0180db09f01446', null),
     ('cron', 'e4451f3aa79277bd355e2c97c38aedec', null)

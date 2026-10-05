@@ -1,56 +1,5 @@
--- 409_schema_baseline.sql — #409(b): the live Nahgoo database schema as of
--- 2026-10-05, exported from the live DB by 409_schema_export.sql (256 objects).
---
--- REFRESHED AGAIN 2026-10-05 (#514): the `grant` section now records #513's
--- trim of the browser roles' write grants (513_revoke_browser_grants.sql). Only
--- that section changed; the other 12 are byte-identical to the #413 export.
--- The live export this time arrived as a pasted grid, not a CSV, so the grant
--- section was rebuilt from the #413 CSV text with #513's exact changes applied,
--- and 409_baseline_check.sql's live fingerprint is the proof it is byte-exact.
---
--- REFRESHED 2026-10-05 (#413). The 2026-09-24 copy (216 objects) predated
--- #10 (activity_pings), #141's report_reason_meta / reports additions, #411
--- (guides owner lockdown), #472 (review retry sweep), #475 (search_pin_names),
--- #476 (review_retry_health), #477 (submission insert guard), #490
--- (pin_interest), #495 (curated category) and #512 (profiles read
--- allowlist). Exported from the live DB as CSV, not retyped; no section was
--- edited by hand. The numbered files for those rows are now history — this
--- file is the record. Not in any baseline: the Vault secret
--- review_retry_service_key (#472) — recreate it by hand on a restore.
---
--- WHAT THIS IS. The single repo record of every table, constraint, index,
--- function, view, trigger, RLS switch, policy, grant and cron job in the live
--- database. It replaces the ~35 numbered migrations (006…394) and profiles.sql
--- (#169) that were never committed: for a live DB object, the live DB is the
--- source (handoff §3), so this was exported, not reconstructed. Includes #410's
--- fix (submission_cleanup_review: security_invoker, no anon/authenticated
--- grants), which ran before the export.
---
--- VERIFIED BYTE-EXACT by 409_baseline_check.sql: it re-exports the live DB and
--- compares a per-section md5 against this file's sections (13 rows, all true).
---
--- WHAT IT IS NOT.
---   * Not a migration to run on the live DB. Everything in it already exists
---     there; running it would error on the first create table.
---   * Not a guaranteed one-shot rebuild. It assumes a Supabase project: the
---     auth / storage / extensions / vault schemas, the anon / authenticated /
---     service_role roles, pg_cron, pg_net, and Postgres 17 (the MAINTAIN
---     privilege in the grants). Unqualified names (submissions, auth.users
---     references) assume search_path = public, extensions — set below.
---   * Not data. Rows, one-shot data migrations (405_graves_cleanup.sql is a
---     record of one) and Edge Functions (<function>-index.<ext>) live elsewhere.
---
--- HOW TO USE IT. Read it to see what the database holds; copy the exact
--- current definition from it before changing a function, policy or grant
--- (handoff §5: extend from the live object); regenerate it with
--- 409_schema_export.sql + a new check whenever the schema has moved enough
--- that this copy misleads. Sections run in dependency order: extensions,
--- tables, keys, foreign keys, indexes, functions, checks (some call
--- functions), views, triggers, RLS, policies, grants, cron.
-
-set search_path = public, extensions;
-
--- [extension] pg_cron
+objects,kb,sections,dump
+256,75,"extension 7, table 17, constraint 54, index 15, function 27, view 4, trigger 10, rls 17, policy 33, grant 22, column grant 19, function grant 27, cron 4","-- [extension] pg_cron
 create extension if not exists pg_cron;
 
 -- [extension] pg_net
@@ -69,7 +18,7 @@ create extension if not exists supabase_vault with schema vault;
 create extension if not exists unaccent with schema extensions;
 
 -- [extension] uuid-ossp
-create extension if not exists "uuid-ossp" with schema extensions;
+create extension if not exists ""uuid-ossp"" with schema extensions;
 
 -- [table] submissions
 create table public.submissions (
@@ -251,7 +200,7 @@ create table public.guide_stops (
   descr text default ''::text not null,
   category text,
   added_by uuid,
-  "position" integer default 0 not null,
+  ""position"" integer default 0 not null,
   data jsonb default '{}'::jsonb not null,
   created_at timestamp with time zone default now() not null
 );
@@ -792,7 +741,7 @@ begin
          status      = v_keep.status
    where id = p_dup;
 
-  raise notice 'merge_submissions: folded % ("%") into % ("%"). note: %',
+  raise notice 'merge_submissions: folded % (""%"") into % (""%""). note: %',
     p_dup, coalesce(v_dup.name, '?'), p_keep, coalesce(v_keep.name, '?'),
     coalesce(p_note, '(none)');
 end;
@@ -1269,11 +1218,11 @@ begin
   where jobid = j.jobid and start_time > now() - interval '24 hours';
 
   -- The sweep's own reply: review-submission's retry_failed answer always carries
-  -- "looked_at". (pg_net does not keep the request URL with the response.)
+  -- ""looked_at"". (pg_net does not keep the request URL with the response.)
   select id, status_code, error_msg, created, left(content::text, 2000) as body
     into rep
   from net._http_response
-  where content::text like '%"looked_at"%'
+  where content::text like '%""looked_at""%'
   order by created desc
   limit 1;
   have_rep := found;
@@ -1653,7 +1602,7 @@ create policy activity_pings_insert on public.activity_pings as permissive for i
   with check (true);
 
 -- [policy] public.gem_seconds.read own vouches and vouches on my pins
-create policy "read own vouches and vouches on my pins" on public.gem_seconds as permissive for select to authenticated
+create policy ""read own vouches and vouches on my pins"" on public.gem_seconds as permissive for select to authenticated
   using (((user_id = auth.uid()) OR (submission_id IN ( SELECT s.id
    FROM submissions s
   WHERE (s.submitted_by = auth.uid())))));
@@ -1697,46 +1646,46 @@ create policy guides_update on public.guides as permissive for update to authent
   with check ((owner = auth.uid()));
 
 -- [policy] public.hunt_points.owner writes hunt points
-create policy "owner writes hunt points" on public.hunt_points as permissive for all to public
+create policy ""owner writes hunt points"" on public.hunt_points as permissive for all to public
   using ((EXISTS ( SELECT 1
    FROM hunts
   WHERE ((hunts.id = hunt_points.hunt_id) AND (hunts.created_by = auth.uid())))));
 
 -- [policy] public.hunt_points.read all hunt points
-create policy "read all hunt points" on public.hunt_points as permissive for select to public
+create policy ""read all hunt points"" on public.hunt_points as permissive for select to public
   using (true);
 
 -- [policy] public.hunts.delete own hunts
-create policy "delete own hunts" on public.hunts as permissive for delete to public
+create policy ""delete own hunts"" on public.hunts as permissive for delete to public
   using ((auth.uid() = created_by));
 
 -- [policy] public.hunts.insert own hunts
-create policy "insert own hunts" on public.hunts as permissive for insert to public
+create policy ""insert own hunts"" on public.hunts as permissive for insert to public
   with check ((auth.uid() = created_by));
 
 -- [policy] public.hunts.read all hunts
-create policy "read all hunts" on public.hunts as permissive for select to public
+create policy ""read all hunts"" on public.hunts as permissive for select to public
   using (true);
 
 -- [policy] public.hunts.update own hunts
-create policy "update own hunts" on public.hunts as permissive for update to public
+create policy ""update own hunts"" on public.hunts as permissive for update to public
   using ((auth.uid() = created_by));
 
 -- [policy] public.profiles.profiles insert
-create policy "profiles insert" on public.profiles as permissive for insert to public
+create policy ""profiles insert"" on public.profiles as permissive for insert to public
   with check ((user_id = auth.uid()));
 
 -- [policy] public.profiles.profiles read
-create policy "profiles read" on public.profiles as permissive for select to public
+create policy ""profiles read"" on public.profiles as permissive for select to public
   using (((user_id = auth.uid()) OR ((status = 'ok'::text) AND (display_name IS NOT NULL))));
 
 -- [policy] public.profiles.profiles update
-create policy "profiles update" on public.profiles as permissive for update to public
+create policy ""profiles update"" on public.profiles as permissive for update to public
   using ((user_id = auth.uid()))
   with check ((user_id = auth.uid()));
 
 -- [policy] public.progress.manage own progress
-create policy "manage own progress" on public.progress as permissive for all to public
+create policy ""manage own progress"" on public.progress as permissive for all to public
   using ((auth.uid() = user_id))
   with check ((auth.uid() = user_id));
 
@@ -1754,47 +1703,47 @@ create policy shared_kv_public_read on public.shared_kv as permissive for select
   using (true);
 
 -- [policy] public.submissions.insert own submissions
-create policy "insert own submissions" on public.submissions as permissive for insert to public
+create policy ""insert own submissions"" on public.submissions as permissive for insert to public
   with check ((auth.uid() = submitted_by));
 
 -- [policy] public.submissions.read approved submissions
-create policy "read approved submissions" on public.submissions as permissive for select to public
+create policy ""read approved submissions"" on public.submissions as permissive for select to public
   using ((status = 'approved'::text));
 
 -- [policy] public.submissions.read own submissions
-create policy "read own submissions" on public.submissions as permissive for select to public
+create policy ""read own submissions"" on public.submissions as permissive for select to public
   using ((auth.uid() = submitted_by));
 
 -- [policy] public.user_state.own state delete
-create policy "own state delete" on public.user_state as permissive for delete to public
+create policy ""own state delete"" on public.user_state as permissive for delete to public
   using ((auth.uid() = user_id));
 
 -- [policy] public.user_state.own state insert
-create policy "own state insert" on public.user_state as permissive for insert to public
+create policy ""own state insert"" on public.user_state as permissive for insert to public
   with check ((auth.uid() = user_id));
 
 -- [policy] public.user_state.own state select
-create policy "own state select" on public.user_state as permissive for select to public
+create policy ""own state select"" on public.user_state as permissive for select to public
   using ((auth.uid() = user_id));
 
 -- [policy] public.user_state.own state update
-create policy "own state update" on public.user_state as permissive for update to public
+create policy ""own state update"" on public.user_state as permissive for update to public
   using ((auth.uid() = user_id));
 
 -- [policy] storage.objects.capture-photos owner delete
-create policy "capture-photos owner delete" on storage.objects as permissive for delete to authenticated
+create policy ""capture-photos owner delete"" on storage.objects as permissive for delete to authenticated
   using (((bucket_id = 'capture-photos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)));
 
 -- [policy] storage.objects.capture-photos owner insert
-create policy "capture-photos owner insert" on storage.objects as permissive for insert to authenticated
+create policy ""capture-photos owner insert"" on storage.objects as permissive for insert to authenticated
   with check (((bucket_id = 'capture-photos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)));
 
 -- [policy] storage.objects.capture-photos owner read
-create policy "capture-photos owner read" on storage.objects as permissive for select to authenticated
+create policy ""capture-photos owner read"" on storage.objects as permissive for select to authenticated
   using (((bucket_id = 'capture-photos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)));
 
 -- [policy] storage.objects.capture-photos owner update
-create policy "capture-photos owner update" on storage.objects as permissive for update to authenticated
+create policy ""capture-photos owner update"" on storage.objects as permissive for update to authenticated
   using (((bucket_id = 'capture-photos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)))
   with check (((bucket_id = 'capture-photos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)));
 
@@ -2161,4 +2110,4 @@ select cron.schedule('review-retry-sweep', '7,37 * * * *', 'select public.review
 select cron.schedule('pin-interest-sweep', '29 4 * * *', '
   delete from public.pin_interest
   where day < ((now() at time zone ''utc'')::date - 400);
-  ');
+  ');"
