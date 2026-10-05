@@ -1,0 +1,61 @@
+[gate-tiles] build gate-tiles 2026-10-04b (#509 tile --commit RETIRED; new --rebuild = delete + live rebuild with retries, no gating; GATE_METRO filter; carries #506 timeouts; roster unchanged (26)) — carries #356 grave-identity rung + MONOTONIC GRAVE BANK (#357-style deterministic reuse) + multi-query recall + title⊆name nickname match + --rewarm. #363 adds --prime-graves: resolve a supplied grave list ONCE, paced, out of band, and bank each confident hit so a later --rewarm bakes it onto the real OSM plot without the per-tile rate-limit fight.
+[gate-tiles] function cacheVersion=v34  commit=false  gen=false  metros=ALL  reads=anon writes=service-role
+[gate-tiles] GATE_METRO="washington" → Washington, D.C.
+[gate-tiles] 1 metro(s) → 42 unique tiles (metroKm=15, tileDeg=0.05)
+[gate-tiles] --rebuild --resume: no gate_rebuild_progress.json yet — starting fresh.
+[gate-tiles] --rebuild: 42 of 42 tile(s) to rebuild (≈22 min at ~30 s a tile). Each: delete → live rebuild → verify the new row (up to 4 tries, 20 s apart). No gating, nothing baked.
+[gate-tiles] 1/42 Washington, D.C. tile=775_-1544 rebuilt (try 1) places 17 → 47 · storied OSM 1 → 0
+[gate-tiles] 2/42 Washington, D.C. tile=775_-1543 rebuilt (try 3) places 20 → 55 · storied OSM 5 → 0
+[gate-tiles] 3/42 Washington, D.C. tile=775_-1542 rebuilt (try 2) places 27 → 50 · storied OSM 15 → 3
+[gate-tiles] 4/42 Washington, D.C. tile=775_-1541 rebuilt (try 1) places 29 → 39 · storied OSM 16 → 7
+[gate-tiles] 5/42 Washington, D.C. tile=775_-1540 rebuilt (try 1) places 25 → 27 · storied OSM 9 → 7
+[gate-tiles] build gate-tiles 2026-10-04b (#509 tile --commit RETIRED; new --rebuild = delete + live rebuild with retries, no gating; GATE_METRO filter; carries #506 timeouts; roster unchanged (26)) — carries #356 grave-identity rung + MONOTONIC GRAVE BANK (#357-style deterministic reuse) + multi-query recall + title⊆name nickname match + --rewarm. #363 adds --prime-graves: resolve a supplied grave list ONCE, paced, out of band, and bank each confident hit so a later --rewarm bakes it onto the real OSM plot without the per-tile rate-limit fight.
+[gate-tiles] function cacheVersion=v34  commit=false  gen=false  metros=ALL  reads=anon writes=service-role
+[gate-tiles] GATE_METRO="washington" → Washington, D.C.
+[gate-tiles] 1 metro(s) → 42 unique tiles (metroKm=15, tileDeg=0.05)
+[gate-tiles] --rebuild --resume: 5 tile(s) in checkpoint (5 rebuilt — skipped; the rest retry).
+[gate-tiles] --rebuild: 37 of 42 tile(s) to rebuild (≈19 min at ~30 s a tile). Each: delete → live rebuild → verify the new row (up to 4 tries, 20 s apart). No gating, nothing baked.
+[gate-tiles] 1/37 Washington, D.C. tile=775_-1539 rebuilt (try 1) places — → 13 · storied OSM — → 1
+[gate-tiles] 2/37 Washington, D.C. tile=775_-1538 rebuilt (try 1) places 9 → 10 · storied OSM 1 → 1
+[gate-tiles] 3/37 Washington, D.C. tile=776_-1544 rebuilt (try 3) places 19 → 56 · storied OSM 3 → 0
+[gate-tiles] 4/37 Washington, D.C. tile=776_-1543 rebuilt (try 1) places 14 → 57 · storied OSM 2 → 0
+[gate-tiles] 5/37 Washington, D.C. tile=776_-1542 rebuilt (try 2) places 32 → 73 · storied OSM 14 → 9
+[gate-tiles] 6/37 Washington, D.C. tile=776_-1541 rebuilt (try 2) places 38 → 72 · storied OSM 18 → 12
+[gate-tiles] 7/37 Washington, D.C. tile=776_-1540 rebuilt (try 1) places 37 → 62 · storied OSM 23 → 12
+[gate-tiles] 8/37 Washington, D.C. tile=776_-1539 rebuilt (try 2) places 16 → 21 · storied OSM 3 → 2
+[gate-tiles] 9/37 Washington, D.C. tile=776_-1538 rebuilt (try 1) places 15 → 20 · storied OSM 2 → 2
+[gate-tiles] 10/37 Washington, D.C. tile=777_-1544 rebuilt (try 1) places 19 → 61 · storied OSM 6 → 0
+[gate-tiles] 11/37 Washington, D.C. tile=777_-1543 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 12/37 Washington, D.C. tile=777_-1542 rebuilt (try 4) places 51 → 98 · storied OSM 34 → 23
+[gate-tiles] 13/37 Washington, D.C. tile=777_-1541 rebuilt (try 4) places 50 → 81 · storied OSM 37 → 31
+[gate-tiles] 14/37 Washington, D.C. tile=777_-1540 rebuilt (try 2) places 46 → 84 · storied OSM 31 → 25
+[gate-tiles] 15/37 Washington, D.C. tile=777_-1539 rebuilt (try 2) places 39 → 82 · storied OSM 23 → 9
+[gate-tiles] 16/37 Washington, D.C. tile=777_-1538 rebuilt (try 2) places 14 → 40 · storied OSM 6 → 1
+[gate-tiles] 17/37 Washington, D.C. tile=778_-1544 rebuilt (try 1) places 18 → 62 · storied OSM 8 → 2
+[gate-tiles] 18/37 Washington, D.C. tile=778_-1543 rebuilt (try 1) places 39 → 75 · storied OSM 23 → 4
+[gate-tiles] 19/37 Washington, D.C. tile=778_-1542 rebuilt (try 1) places 53 → 93 · storied OSM 34 → 31
+[gate-tiles] 20/37 Washington, D.C. tile=778_-1541 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 21/37 Washington, D.C. tile=778_-1540 rebuilt (try 2) places 63 → 104 · storied OSM 46 → 48
+[gate-tiles] 22/37 Washington, D.C. tile=778_-1539 rebuilt (try 2) places 40 → 89 · storied OSM 25 → 19
+[gate-tiles] 23/37 Washington, D.C. tile=778_-1538 rebuilt (try 1) places 20 → 40 · storied OSM 12 → 7
+[gate-tiles] 24/37 Washington, D.C. tile=779_-1544 rebuilt (try 2) places 31 → 59 · storied OSM 10 → 3
+[gate-tiles] 25/37 Washington, D.C. tile=779_-1543 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 26/37 Washington, D.C. tile=779_-1542 rebuilt (try 4) places 51 → 88 · storied OSM 33 → 21
+[gate-tiles] 27/37 Washington, D.C. tile=779_-1541 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 28/37 Washington, D.C. tile=779_-1540 rebuilt (try 3) places 44 → 76 · storied OSM 28 → 24
+[gate-tiles] 29/37 Washington, D.C. tile=779_-1539 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 30/37 Washington, D.C. tile=779_-1538 rebuilt (try 1) places 24 → 56 · storied OSM 11 → 8
+[gate-tiles] 31/37 Washington, D.C. tile=780_-1544 rebuilt (try 1) places 29 → 59 · storied OSM 8 → 2
+[gate-tiles] 32/37 Washington, D.C. tile=780_-1543 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 33/37 Washington, D.C. tile=780_-1542 FAILED after 4 tries — no row now; the next visitor builds it cold (re-run with --resume to retry)
+[gate-tiles] 34/37 Washington, D.C. tile=780_-1541 rebuilt (try 1) places 32 → 62 · storied OSM 18 → 9
+[gate-tiles] 35/37 Washington, D.C. tile=780_-1540 rebuilt (try 1) places 26 → 64 · storied OSM 18 → 3
+[gate-tiles] 36/37 Washington, D.C. tile=780_-1539 rebuilt (try 2) places 33 → 67 · storied OSM 12 → 2
+[gate-tiles] 37/37 Washington, D.C. tile=780_-1538 rebuilt (try 2) places 29 → 63 · storied OSM 11 → 4
+
+=== gate-tiles --rebuild summary ===
+this run: 30 rebuilt · 7 failed · 0 delete-failed (of 37)
+all target tiles: 35/42 rebuilt · storied OSM pins on rebuilt tiles 546 → 332 (stored rows; the serve path hides storyless pins and heals strict matches on top)
+7 tile(s) not rebuilt: 777_-1543 778_-1541 779_-1543 779_-1541 779_-1539 780_-1543 780_-1542 — re-run the SAME command with --resume to retry only these.
+wrote gate_rebuild_records.json.
+TIMEOUTS (#506): Wikipedia 0 · nearby-places 0 · shared_kv 0 (limits 12 s / 180 s / 30 s).
