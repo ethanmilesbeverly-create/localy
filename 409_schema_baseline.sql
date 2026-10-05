@@ -1,5 +1,15 @@
 -- 409_schema_baseline.sql — #409(b): the live Nahgoo database schema as of
--- 2026-09-24, exported from the live DB by 409_schema_export.sql (216 objects).
+-- 2026-10-05, exported from the live DB by 409_schema_export.sql (256 objects).
+--
+-- REFRESHED 2026-10-05 (#413). The 2026-09-24 copy (216 objects) predated
+-- #10 (activity_pings), #141's report_reason_meta / reports additions, #411
+-- (guides owner lockdown), #472 (review retry sweep), #475 (search_pin_names),
+-- #476 (review_retry_health), #477 (submission insert guard), #490
+-- (pin_interest), #495 (curated category) and #512 (profiles read
+-- allowlist). Exported from the live DB as CSV, not retyped; no section was
+-- edited by hand. The numbered files for those rows are now history — this
+-- file is the record. Not in any baseline: the Vault secret
+-- review_retry_service_key (#472) — recreate it by hand on a restore.
 --
 -- WHAT THIS IS. The single repo record of every table, constraint, index,
 -- function, view, trigger, RLS switch, policy, grant and cron job in the live
@@ -82,7 +92,8 @@ create table public.submissions (
   description_clean text,
   merged_into uuid,
   resolved_description text,
-  resolved_source text
+  resolved_source text,
+  ai_retry_count integer default 0 not null
 );
 
 -- [table] hunts
@@ -166,7 +177,8 @@ create table public.gem_seconds (
 create table public.report_reason_meta (
   reason text not null,
   suppresses boolean not null,
-  threshold integer
+  threshold integer,
+  ai_acts boolean default false not null
 );
 
 -- [table] profiles
@@ -248,7 +260,25 @@ create table public.curated_descriptions (
   source_url text,
   note text,
   created_at timestamp with time zone default now() not null,
-  updated_at timestamp with time zone default now() not null
+  updated_at timestamp with time zone default now() not null,
+  category text
+);
+
+-- [table] activity_pings
+create table public.activity_pings (
+  device_id uuid not null,
+  day date default ((now() AT TIME ZONE 'utc'::text))::date not null,
+  event text not null,
+  signed_in boolean default (auth.uid() IS NOT NULL) not null,
+  created_at timestamp with time zone default now() not null
+);
+
+-- [table] pin_interest
+create table public.pin_interest (
+  day date not null,
+  cell_lat smallint not null,
+  cell_lng smallint not null,
+  opens integer default 0 not null
 );
 
 -- [constraint] submissions.submissions_pkey
@@ -314,6 +344,12 @@ alter table public.guide_stops add constraint guide_stops_guide_id_stop_id_key U
 -- [constraint] curated_descriptions.curated_descriptions_pkey
 alter table public.curated_descriptions add constraint curated_descriptions_pkey PRIMARY KEY (id);
 
+-- [constraint] activity_pings.activity_pings_pkey
+alter table public.activity_pings add constraint activity_pings_pkey PRIMARY KEY (device_id, day, event);
+
+-- [constraint] pin_interest.pin_interest_pkey
+alter table public.pin_interest add constraint pin_interest_pkey PRIMARY KEY (day, cell_lat, cell_lng);
+
 -- [constraint] submissions.submissions_submitted_by_fkey
 alter table public.submissions add constraint submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES auth.users(id);
 
@@ -365,6 +401,9 @@ alter table public.guide_stops add constraint guide_stops_guide_id_fkey FOREIGN 
 -- [constraint] guide_stops.guide_stops_added_by_fkey
 alter table public.guide_stops add constraint guide_stops_added_by_fkey FOREIGN KEY (added_by) REFERENCES auth.users(id) ON DELETE SET NULL;
 
+-- [constraint] reports.reports_reason_fkey
+alter table public.reports add constraint reports_reason_fkey FOREIGN KEY (reason) REFERENCES report_reason_meta(reason);
+
 -- [index] submissions_status_created_idx
 CREATE INDEX submissions_status_created_idx ON public.submissions USING btree (status, created_at DESC);
 
@@ -400,6 +439,15 @@ CREATE INDEX guides_owner_idx ON public.guides USING btree (owner);
 
 -- [index] curated_descriptions_name_clean_idx
 CREATE INDEX curated_descriptions_name_clean_idx ON public.curated_descriptions USING btree (name_clean);
+
+-- [index] activity_pings_day_idx
+CREATE INDEX activity_pings_day_idx ON public.activity_pings USING btree (day);
+
+-- [index] submissions_approved_geo_idx
+CREATE INDEX submissions_approved_geo_idx ON public.submissions USING btree (lat, lng) WHERE ((status = 'approved'::text) AND (merged_into IS NULL));
+
+-- [index] pin_interest_day_idx
+CREATE INDEX pin_interest_day_idx ON public.pin_interest USING btree (day);
 
 -- [function] public.approve_submission(p_id uuid, p_note text)
 CREATE OR REPLACE FUNCTION public.approve_submission(p_id uuid, p_note text DEFAULT NULL::text)
@@ -1034,6 +1082,321 @@ end;
 $function$
 ;
 
+-- [function] public.search_pin_names(q text, at_lat double precision, at_lng double precision, max_rows integer, include_hidden boolean)
+CREATE OR REPLACE FUNCTION public.search_pin_names(q text, at_lat double precision DEFAULT NULL::double precision, at_lng double precision DEFAULT NULL::double precision, max_rows integer DEFAULT 10, include_hidden boolean DEFAULT false)
+ RETURNS TABLE(kind text, id text, name text, lat double precision, lng double precision, category text)
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+with params as (
+ select regexp_replace(lower(left(coalesce(q,''),100)),'[^a-z0-9]','','g') as nq,
+ ' ' || btrim(regexp_replace(lower(left(coalesce(q,''),100)),'[^a-z0-9]+',' ','g')) as wq,
+ least(greatest(coalesce(max_rows,10),1),20) as cap),
+gem as (
+ select 'gem'::text as kind, s.id::text as id, coalesce(nullif(btrim(s.name_clean),''),s.name) as name, s.lat, s.lng, s.category
+ from public.submissions s, params p
+ where length(p.nq) >= 2 and s.status = 'approved' and s.merged_into is null
+ and (include_hidden or s.resolved_source is distinct from 'none')
+ and position(p.nq in regexp_replace(lower(coalesce(nullif(btrim(s.name_clean),''),s.name)),'[^a-z0-9]','','g')) > 0),
+story as (
+ select 'story'::text as kind, c.id::text as id, c.name, c.lat, c.lng, c.category
+ from public.curated_descriptions c, params p
+ where length(p.nq) >= 2 and position(p.nq in c.name_clean) > 0
+ and not exists (select 1 from public.submissions s where s.status = 'approved' and s.merged_into is null
+  and s.lat between c.lat - 0.001 and c.lat + 0.001 and s.lng between c.lng - 0.0015 and c.lng + 0.0015
+  and regexp_replace(lower(coalesce(nullif(btrim(s.name_clean),''),s.name)),'[^a-z0-9]','','g') = c.name_clean)),
+hits as (
+ select h.*, regexp_replace(lower(h.name),'[^a-z0-9]','','g') as nn,
+ ' ' || regexp_replace(lower(h.name),'[^a-z0-9]+',' ','g') as wn,
+ case when at_lat is null or at_lng is null then null
+ else 6371000 * sqrt(power(radians(h.lat - at_lat),2) + power(cos(radians((h.lat + at_lat)/2)) * radians(h.lng - at_lng),2)) end as dist
+ from (select * from gem union all select * from story) h)
+select x.kind, x.id, x.name, x.lat, x.lng, x.category
+from hits x, params p
+order by (x.dist is not null and x.dist <= 80467) desc,
+ case when x.dist is not null and x.dist <= 80467 then x.dist end asc nulls last,
+ case when x.nn = p.nq then 0 when left(x.nn,length(p.nq)) = p.nq then 1 when position(p.wq in x.wn) > 0 then 2 else 3 end asc,
+ x.dist asc nulls last, x.name asc
+limit (select cap from params)
+$function$
+;
+
+-- [function] public.review_retry_kick()
+CREATE OR REPLACE FUNCTION public.review_retry_kick()
+ RETURNS bigint
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare k text; rid bigint;
+begin
+  select decrypted_secret into k from vault.decrypted_secrets where name = 'review_retry_service_key';
+  if k is null or k = '' then raise exception '#472: vault secret review_retry_service_key is missing'; end if;
+  select net.http_post(
+    url := 'https://siacjgpqzaylsfefihyr.supabase.co/functions/v1/review-submission',
+    body := jsonb_build_object('action', 'retry_failed'),
+    headers := jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer ' || k),
+    timeout_milliseconds := 120000
+  ) into rid;
+  return rid;
+end $function$
+;
+
+-- [function] public.guard_submission_insert()
+CREATE OR REPLACE FUNCTION public.guard_submission_insert()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
+begin
+  if current_user in ('anon', 'authenticated')
+     or coalesce(auth.role(), '') in ('anon', 'authenticated') then
+    new.status               := 'pending';
+    new.source               := 'user';
+    new.created_at           := now();
+    new.ai_retry_count       := 0;
+    new.category             := null;
+    new.city                 := null;
+    new.ai_decision          := null;
+    new.ai_reason            := null;
+    new.ai_status            := null;
+    new.ai_http_status       := null;
+    new.ai_model             := null;
+    new.ai_confidence        := null;
+    new.ai_reviewed_at       := null;
+    new.ai_model_source      := null;
+    new.reviewed_by          := null;
+    new.reviewed_at          := null;
+    new.review_note          := null;
+    new.name_clean           := null;
+    new.description_clean    := null;
+    new.merged_into          := null;
+    new.resolved_description := null;
+    new.resolved_source      := null;
+  end if;
+  return new;
+end;
+$function$
+;
+
+-- [function] public.pin_interest_add(cell_lat integer, cell_lng integer)
+CREATE OR REPLACE FUNCTION public.pin_interest_add(cell_lat integer, cell_lng integer)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+begin
+  if cell_lat is null or cell_lng is null
+     or cell_lat not between 18 and 71
+     or cell_lng not between -180 and -66 then
+    raise exception 'pin_interest_add: square (%, %) is outside the US box', cell_lat, cell_lng
+      using errcode = '22023';
+  end if;
+
+  -- Parameters are qualified with the function name and the conflict target is
+  -- named by constraint: the parameter names match the column names (they are
+  -- the JSON keys the app sends to /rpc/pin_interest_add), and an unqualified
+  -- reference is ambiguous in PL/pgSQL (caught in the local rehearsal).
+  insert into public.pin_interest as p (day, cell_lat, cell_lng, opens)
+  values ((now() at time zone 'utc')::date,
+          pin_interest_add.cell_lat, pin_interest_add.cell_lng, 1)
+  on conflict on constraint pin_interest_pkey
+  do update set opens = least(p.opens + 1, 1000000);
+end;
+$function$
+;
+
+-- [function] public.review_retry_health()
+CREATE OR REPLACE FUNCTION public.review_retry_health()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare
+  j          record;
+  last_run   record;
+  last_ok    record;
+  runs_24h   int := 0;
+  fails_24h  int := 0;
+  rep        record;
+  bad        record;
+  rep_body   jsonb;
+  have_run   boolean;
+  have_ok    boolean;
+  have_rep   boolean;
+  have_bad   boolean;
+  out        jsonb;
+begin
+  select jobid, jobname, schedule, active
+    into j
+  from cron.job
+  where jobname = 'review-retry-sweep'
+  limit 1;
+
+  if not found then
+    return jsonb_build_object('version', '476-retry-health-v1', 'job_found', false);
+  end if;
+
+  select status, return_message, start_time, end_time
+    into last_run
+  from cron.job_run_details
+  where jobid = j.jobid
+  order by start_time desc nulls last
+  limit 1;
+  have_run := found;
+
+  select start_time, end_time
+    into last_ok
+  from cron.job_run_details
+  where jobid = j.jobid and status = 'succeeded'
+  order by start_time desc nulls last
+  limit 1;
+  have_ok := found;
+
+  select count(*), count(*) filter (where status = 'failed')
+    into runs_24h, fails_24h
+  from cron.job_run_details
+  where jobid = j.jobid and start_time > now() - interval '24 hours';
+
+  -- The sweep's own reply: review-submission's retry_failed answer always carries
+  -- "looked_at". (pg_net does not keep the request URL with the response.)
+  select id, status_code, error_msg, created, left(content::text, 2000) as body
+    into rep
+  from net._http_response
+  where content::text like '%"looked_at"%'
+  order by created desc
+  limit 1;
+  have_rep := found;
+
+  if have_rep then
+    begin
+      rep_body := rep.body::jsonb;
+    exception when others then
+      rep_body := null;   -- truncated or not JSON: report the status only
+    end;
+  end if;
+
+  -- Newest non-200 reply in the retention window (any caller): a 401/403 here is
+  -- the Vault key no longer matching the function's service key (#472 section 2).
+  select id, status_code, error_msg, created, left(coalesce(content::text, ''), 300) as body
+    into bad
+  from net._http_response
+  where status_code is distinct from 200
+  order by created desc
+  limit 1;
+  have_bad := found;
+
+  out := jsonb_build_object(
+    'version',   '476-retry-health-v1',
+    'job_found', true,
+    'job', jsonb_build_object('jobid', j.jobid, 'schedule', j.schedule, 'active', j.active),
+    'last_run', case when not have_run then null else jsonb_build_object(
+        'status', last_run.status,
+        'started_at', last_run.start_time,
+        'ended_at', last_run.end_time,
+        'message', left(coalesce(last_run.return_message, ''), 300)) end,
+    'last_succeeded_at', case when have_ok then last_ok.start_time end,
+    'runs_24h', runs_24h,
+    'failed_runs_24h', fails_24h,
+    'last_reply', case when not have_rep then null else jsonb_build_object(
+        'status_code', rep.status_code,
+        'error', rep.error_msg,
+        'at', rep.created,
+        'looked_at', rep_body -> 'looked_at',
+        'due', rep_body -> 'due',
+        'retried', rep_body -> 'retried',
+        'stopped_early', rep_body -> 'stopped_early',
+        'gate_version', rep_body -> 'gate_version') end,
+    'last_non_200_reply', case when not have_bad then null else jsonb_build_object(
+        'status_code', bad.status_code,
+        'error', bad.error_msg,
+        'at', bad.created,
+        'body', bad.body) end
+  );
+  return out;
+end
+$function$
+;
+
+-- [function] public.curated_category_backfill(do_write boolean)
+CREATE OR REPLACE FUNCTION public.curated_category_backfill(do_write boolean DEFAULT false)
+ RETURNS TABLE(id uuid, name text, category text, dist_m integer, tile text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+declare
+  ver int;
+begin
+  -- The live tile-cache version: the highest places:vN: prefix in use (the same
+  -- read the tilecache-sweep cron makes).
+  select max((substring(k.key from '^places:v([0-9]+):'))::int)
+    into ver
+  from public.shared_kv k
+  where k.key ~ '^places:v[0-9]+:';
+  if ver is null then return; end if;
+
+  create temporary table if not exists _cc_match (
+    id uuid, name text, category text, dist_m integer, tile text
+  ) on commit drop;
+  truncate _cc_match;
+
+  insert into _cc_match
+  with c as (
+    select d.id, d.name, d.name_clean, d.lat, d.lng,
+           round(d.lat / 0.05)::int as ty,          -- nearby-places tileKey: round(coord / 0.05)
+           round(d.lng / 0.05)::int as tx
+    from public.curated_descriptions d
+    where d.category is null
+  ),
+  keys as (
+    select distinct 'places:v' || ver || ':' || (c.ty + dy) || '_' || (c.tx + dx) as key
+    from c, generate_series(-1, 1) dy, generate_series(-1, 1) dx
+  ),
+  pins as (
+    select substring(k.key from ':([^:]+)$')            as tile,
+           p ->> 'name'                                  as pname,
+           (p ->> 'lat')::double precision               as plat,
+           (p ->> 'lng')::double precision               as plng,
+           p ->> 'category'                              as pcat
+    from public.shared_kv k
+    join keys using (key)
+    cross join lateral jsonb_array_elements(
+      case when jsonb_typeof(k.value::jsonb -> 'places') = 'array'
+           then k.value::jsonb -> 'places' else '[]'::jsonb end) p
+    where k.value like '{%'
+      and p ->> 'source' in ('osm', 'wiki')
+      and p ->> 'category' in ('history', 'park', 'trail', 'art')
+      and p ->> 'lat' is not null and p ->> 'lng' is not null
+  ),
+  cand as (
+    select c.id, c.name, pn.pcat, pn.tile,
+           6371000 * sqrt(
+             power(radians(pn.plat - c.lat), 2) +
+             power(cos(radians((pn.plat + c.lat) / 2)) * radians(pn.plng - c.lng), 2)) as dist
+    from c
+    join pins pn on regexp_replace(lower(pn.pname), '[^a-z0-9]', '', 'g') = c.name_clean
+  )
+  select distinct on (cand.id) cand.id, cand.name, cand.pcat, round(cand.dist)::int, cand.tile
+  from cand
+  where cand.dist <= 2000                             -- nearby-places CURATED_MATCH_M
+  order by cand.id, cand.dist;
+
+  if do_write then
+    update public.curated_descriptions d
+       set category = m.category
+      from _cc_match m
+     where d.id = m.id and d.category is null;
+  end if;
+
+  return query select m.id, m.name, m.category, m.dist_m, m.tile from _cc_match m order by m.category, m.name;
+end
+$function$
+;
+
 -- [constraint] submissions.submissions_ai_status_check
 alter table public.submissions add constraint submissions_ai_status_check CHECK (((ai_status IS NULL) OR (ai_status = ANY (ARRAY['ok'::text, 'http_error'::text, 'parse_error'::text, 'bad_decision'::text, 'network_error'::text]))));
 
@@ -1054,6 +1417,24 @@ alter table public.profiles add constraint profiles_display_name_reserved CHECK 
 
 -- [constraint] profiles.profiles_display_name_reserved_folded
 alter table public.profiles add constraint profiles_display_name_reserved_folded CHECK (((display_name IS NULL) OR (NOT display_name_is_reserved_folded(display_name))));
+
+-- [constraint] report_reason_meta.report_reason_meta_crowd_min_ck
+alter table public.report_reason_meta add constraint report_reason_meta_crowd_min_ck CHECK (((NOT suppresses) OR (threshold >= 2)));
+
+-- [constraint] report_reason_meta.report_reason_meta_never_automated_ck
+alter table public.report_reason_meta add constraint report_reason_meta_never_automated_ck CHECK (((reason <> ALL (ARRAY['unsafe'::text, 'moved'::text])) OR ((NOT suppresses) AND (NOT ai_acts))));
+
+-- [constraint] report_reason_meta.report_reason_meta_ai_acts_ck
+alter table public.report_reason_meta add constraint report_reason_meta_ai_acts_ck CHECK (((NOT ai_acts) OR (suppresses AND (reason <> ALL (ARRAY['gone'::text, 'chain'::text, 'moved'::text, 'wrong_location'::text, 'wrong_info'::text, 'private'::text, 'unsafe'::text])))));
+
+-- [constraint] activity_pings.activity_pings_event_check
+alter table public.activity_pings add constraint activity_pings_event_check CHECK ((event = ANY (ARRAY['app_open'::text, 'map_move'::text, 'pin_open'::text, 'guide_open'::text, 'capture_tap'::text, 'signin_prompt'::text, 'signed_in'::text])));
+
+-- [constraint] pin_interest.pin_interest_us_box
+alter table public.pin_interest add constraint pin_interest_us_box CHECK ((((cell_lat >= 18) AND (cell_lat <= 71)) AND ((cell_lng >= '-180'::integer) AND (cell_lng <= '-66'::integer))));
+
+-- [constraint] pin_interest.pin_interest_opens_range
+alter table public.pin_interest add constraint pin_interest_opens_range CHECK (((opens >= 0) AND (opens <= 1000000)));
 
 -- [view] pending_review
 create or replace view public.pending_review as
@@ -1206,6 +1587,9 @@ CREATE TRIGGER submissions_merge_carry_credit AFTER INSERT OR UPDATE OF merged_i
 -- [trigger] public.submissions.submissions_promote_seed_description
 CREATE TRIGGER submissions_promote_seed_description BEFORE INSERT ON submissions FOR EACH ROW EXECUTE FUNCTION promote_seed_description();
 
+-- [trigger] public.submissions.guard_submission_insert
+CREATE TRIGGER guard_submission_insert BEFORE INSERT ON submissions FOR EACH ROW EXECUTE FUNCTION guard_submission_insert();
+
 -- [rls] submissions
 alter table public.submissions enable row level security;
 
@@ -1251,6 +1635,16 @@ alter table public.guide_stops enable row level security;
 -- [rls] curated_descriptions
 alter table public.curated_descriptions enable row level security;
 
+-- [rls] activity_pings
+alter table public.activity_pings enable row level security;
+
+-- [rls] pin_interest
+alter table public.pin_interest enable row level security;
+
+-- [policy] public.activity_pings.activity_pings_insert
+create policy activity_pings_insert on public.activity_pings as permissive for insert to anon, authenticated
+  with check (true);
+
 -- [policy] public.gem_seconds.read own vouches and vouches on my pins
 create policy "read own vouches and vouches on my pins" on public.gem_seconds as permissive for select to authenticated
   using (((user_id = auth.uid()) OR (submission_id IN ( SELECT s.id
@@ -1258,29 +1652,32 @@ create policy "read own vouches and vouches on my pins" on public.gem_seconds as
   WHERE (s.submitted_by = auth.uid())))));
 
 -- [policy] public.guide_stops.guide_stops_delete
-create policy guide_stops_delete on public.guide_stops as permissive for delete to public
+create policy guide_stops_delete on public.guide_stops as permissive for delete to authenticated
   using ((EXISTS ( SELECT 1
    FROM guides g
-  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR (g.owner IS NULL) OR ((g.editable = true) AND (guide_stops.added_by = auth.uid())))))));
+  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR ((g.editable = true) AND (guide_stops.added_by = auth.uid())))))));
 
 -- [policy] public.guide_stops.guide_stops_insert
-create policy guide_stops_insert on public.guide_stops as permissive for insert to public
+create policy guide_stops_insert on public.guide_stops as permissive for insert to authenticated
   with check ((EXISTS ( SELECT 1
    FROM guides g
-  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR (g.owner IS NULL) OR (g.editable = true))))));
+  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR ((g.editable = true) AND (NOT g.withdrawn) AND (guide_stops.added_by = auth.uid())))))));
 
 -- [policy] public.guide_stops.guide_stops_select
 create policy guide_stops_select on public.guide_stops as permissive for select to public
   using (true);
 
 -- [policy] public.guide_stops.guide_stops_update
-create policy guide_stops_update on public.guide_stops as permissive for update to public
+create policy guide_stops_update on public.guide_stops as permissive for update to authenticated
   using ((EXISTS ( SELECT 1
    FROM guides g
-  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR (g.owner IS NULL) OR (g.editable = true))))));
+  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR ((g.editable = true) AND (NOT g.withdrawn) AND (guide_stops.added_by = auth.uid())))))))
+  with check ((EXISTS ( SELECT 1
+   FROM guides g
+  WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR ((g.editable = true) AND (NOT g.withdrawn) AND (guide_stops.added_by = auth.uid())))))));
 
 -- [policy] public.guides.guides_insert
-create policy guides_insert on public.guides as permissive for insert to public
+create policy guides_insert on public.guides as permissive for insert to authenticated
   with check ((owner = auth.uid()));
 
 -- [policy] public.guides.guides_select
@@ -1288,8 +1685,9 @@ create policy guides_select on public.guides as permissive for select to public
   using (true);
 
 -- [policy] public.guides.guides_update
-create policy guides_update on public.guides as permissive for update to public
-  using (((owner = auth.uid()) OR (owner IS NULL) OR (editable = true)));
+create policy guides_update on public.guides as permissive for update to authenticated
+  using ((owner = auth.uid()))
+  with check ((owner = auth.uid()));
 
 -- [policy] public.hunt_points.owner writes hunt points
 create policy "owner writes hunt points" on public.hunt_points as permissive for all to public
@@ -1323,7 +1721,7 @@ create policy "profiles insert" on public.profiles as permissive for insert to p
 
 -- [policy] public.profiles.profiles read
 create policy "profiles read" on public.profiles as permissive for select to public
-  using (true);
+  using (((user_id = auth.uid()) OR ((status = 'ok'::text) AND (display_name IS NOT NULL))));
 
 -- [policy] public.profiles.profiles update
 create policy "profiles update" on public.profiles as permissive for update to public
@@ -1463,8 +1861,8 @@ grant delete, insert, maintain, references, select, trigger, truncate, update on
 
 -- [grant] profiles
 revoke all on table public.profiles from public, anon, authenticated, service_role;
-grant delete, insert, maintain, references, select, trigger, truncate, update on table public.profiles to anon;
-grant delete, insert, maintain, references, select, trigger, truncate, update on table public.profiles to authenticated;
+grant delete, insert, maintain, references, trigger, truncate, update on table public.profiles to anon;
+grant delete, insert, maintain, references, trigger, truncate, update on table public.profiles to authenticated;
 grant delete, insert, maintain, references, select, trigger, truncate, update on table public.profiles to service_role;
 
 -- [grant] capture_log_id_seq
@@ -1483,14 +1881,14 @@ grant delete, insert, maintain, references, select, trigger, truncate, update on
 
 -- [grant] guides
 revoke all on table public.guides from public, anon, authenticated, service_role;
-grant delete, insert, maintain, references, select, trigger, truncate, update on table public.guides to anon;
-grant delete, insert, maintain, references, select, trigger, truncate, update on table public.guides to authenticated;
+grant select on table public.guides to anon;
+grant delete, insert, select, update on table public.guides to authenticated;
 grant delete, insert, maintain, references, select, trigger, truncate, update on table public.guides to service_role;
 
 -- [grant] guide_stops
 revoke all on table public.guide_stops from public, anon, authenticated, service_role;
-grant delete, insert, maintain, references, select, trigger, truncate, update on table public.guide_stops to anon;
-grant delete, insert, maintain, references, select, trigger, truncate, update on table public.guide_stops to authenticated;
+grant select on table public.guide_stops to anon;
+grant delete, insert, select, update on table public.guide_stops to authenticated;
 grant delete, insert, maintain, references, select, trigger, truncate, update on table public.guide_stops to service_role;
 
 -- [grant] curated_descriptions
@@ -1498,6 +1896,14 @@ revoke all on table public.curated_descriptions from public, anon, authenticated
 grant delete, insert, maintain, references, select, trigger, truncate, update on table public.curated_descriptions to anon;
 grant delete, insert, maintain, references, select, trigger, truncate, update on table public.curated_descriptions to authenticated;
 grant delete, insert, maintain, references, select, trigger, truncate, update on table public.curated_descriptions to service_role;
+
+-- [grant] activity_pings
+revoke all on table public.activity_pings from public, anon, authenticated, service_role;
+grant delete, insert, maintain, references, select, trigger, truncate, update on table public.activity_pings to service_role;
+
+-- [grant] pin_interest
+revoke all on table public.pin_interest from public, anon, authenticated, service_role;
+grant delete, insert, maintain, references, select, trigger, truncate, update on table public.pin_interest to service_role;
 
 -- [column grant] submissions.category
 grant select (category) on table public.submissions to anon;
@@ -1554,6 +1960,26 @@ grant select (status) on table public.submissions to authenticated;
 -- [column grant] submissions.submitted_by
 grant select (submitted_by) on table public.submissions to anon;
 grant select (submitted_by) on table public.submissions to authenticated;
+
+-- [column grant] profiles.display_name
+grant select (display_name) on table public.profiles to anon;
+grant select (display_name) on table public.profiles to authenticated;
+
+-- [column grant] profiles.status
+grant select (status) on table public.profiles to anon;
+grant select (status) on table public.profiles to authenticated;
+
+-- [column grant] profiles.user_id
+grant select (user_id) on table public.profiles to anon;
+grant select (user_id) on table public.profiles to authenticated;
+
+-- [column grant] activity_pings.device_id
+grant insert (device_id) on table public.activity_pings to anon;
+grant insert (device_id) on table public.activity_pings to authenticated;
+
+-- [column grant] activity_pings.event
+grant insert (event) on table public.activity_pings to anon;
+grant insert (event) on table public.activity_pings to authenticated;
 
 -- [function grant] public.approve_submission(p_id uuid, p_note text)
 revoke all on function public.approve_submission(p_id uuid, p_note text) from public, anon, authenticated, service_role;
@@ -1665,6 +2091,33 @@ grant execute on function public.merge_carry_credit() to service_role;
 revoke all on function public.promote_seed_description() from public, anon, authenticated, service_role;
 grant execute on function public.promote_seed_description() to service_role;
 
+-- [function grant] public.search_pin_names(q text, at_lat double precision, at_lng double precision, max_rows integer, include_hidden boolean)
+revoke all on function public.search_pin_names(q text, at_lat double precision, at_lng double precision, max_rows integer, include_hidden boolean) from public, anon, authenticated, service_role;
+grant execute on function public.search_pin_names(q text, at_lat double precision, at_lng double precision, max_rows integer, include_hidden boolean) to anon;
+grant execute on function public.search_pin_names(q text, at_lat double precision, at_lng double precision, max_rows integer, include_hidden boolean) to authenticated;
+grant execute on function public.search_pin_names(q text, at_lat double precision, at_lng double precision, max_rows integer, include_hidden boolean) to service_role;
+
+-- [function grant] public.review_retry_kick()
+revoke all on function public.review_retry_kick() from public, anon, authenticated, service_role;
+
+-- [function grant] public.guard_submission_insert()
+revoke all on function public.guard_submission_insert() from public, anon, authenticated, service_role;
+grant execute on function public.guard_submission_insert() to service_role;
+
+-- [function grant] public.pin_interest_add(cell_lat integer, cell_lng integer)
+revoke all on function public.pin_interest_add(cell_lat integer, cell_lng integer) from public, anon, authenticated, service_role;
+grant execute on function public.pin_interest_add(cell_lat integer, cell_lng integer) to anon;
+grant execute on function public.pin_interest_add(cell_lat integer, cell_lng integer) to authenticated;
+grant execute on function public.pin_interest_add(cell_lat integer, cell_lng integer) to service_role;
+
+-- [function grant] public.review_retry_health()
+revoke all on function public.review_retry_health() from public, anon, authenticated, service_role;
+grant execute on function public.review_retry_health() to service_role;
+
+-- [function grant] public.curated_category_backfill(do_write boolean)
+revoke all on function public.curated_category_backfill(do_write boolean) from public, anon, authenticated, service_role;
+grant execute on function public.curated_category_backfill(do_write boolean) to service_role;
+
 -- [cron] tilecache-sweep
 select cron.schedule('tilecache-sweep', '17 4 * * 0', '
   with cur as (
@@ -1690,4 +2143,19 @@ select cron.schedule('tilecache-sweep', '17 4 * * 0', '
       -- (c) #136: unversioned places:<tile> fossils, by shape
       (s.key !~ ''^places:v[0-9]+:'')
     );
+  ');
+
+-- [cron] activity-pings-sweep
+select cron.schedule('activity-pings-sweep', '23 4 * * *', '
+  delete from public.activity_pings
+  where day < ((now() at time zone ''utc'')::date - 90);
+  ');
+
+-- [cron] review-retry-sweep
+select cron.schedule('review-retry-sweep', '7,37 * * * *', 'select public.review_retry_kick();');
+
+-- [cron] pin-interest-sweep
+select cron.schedule('pin-interest-sweep', '29 4 * * *', '
+  delete from public.pin_interest
+  where day < ((now() at time zone ''utc'')::date - 400);
   ');

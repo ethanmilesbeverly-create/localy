@@ -8,7 +8,12 @@
 --
 -- Expect 13 rows, every one match = true. A false row names the section
 -- whose live definition differs from the baseline (a copy error, or the
--- schema changed since 2026-09-24): re-export and rebuild that section.
+-- schema changed since 2026-10-05): re-export and rebuild that section.
+-- 2026-10-05 (#413): fingerprints refreshed with the baseline (256 objects:
+-- extension 7, table 17, constraint 54, index 15, function 27, view 4,
+-- trigger 10, rls 17, policy 33, grant 22, column grant 19, function grant 27,
+-- cron 4). Built from the export's CSV download; the 09-24 fingerprints were
+-- recomputed by the same method first and all 13 reproduced.
 -- 2026-09-24: the first run showed profiles_display_name_chars holds a
 -- single backslash; the Markdown copy had doubled it. The baseline was
 -- corrected, so every section now has exactly one fingerprint.
@@ -206,18 +211,18 @@ select o.section,
 from out o
 left join (values
     ('extension', '9f870ff431a120eef4a20e780e0aaefa', null),
-    ('table', '741b1ea48d0199d6e474b3f222c181f6', null),
-    ('constraint', '8bab8c6d7480d0c8930ed73ee86e4a89', null),
-    ('index', 'cee42a3e85aa1b69f82e3be689c5b4e4', null),
-    ('function', 'd0a2a37ad02371efa2d561426a894760', null),
+    ('table', '004ccb6fc86b494a77ac5f583a036d44', null),
+    ('constraint', 'f428253b4e5335136056c12646a7b6f7', null),
+    ('index', '424c07e995781e79edc67fab3f01f13f', null),
+    ('function', '2e2d07b9db4713adbdd27f55ceaafe6d', null),
     ('view', 'b785af16d67fa721c0aa880401befd53', null),
-    ('trigger', '85c01f3c2c3aa525facce3b154d8181a', null),
-    ('rls', '031ac6041bce40dcdefd2e6481d1092b', null),
-    ('policy', '791b9facd657f9c2c381d7031cdc6af6', null),
-    ('grant', 'e8a6de9e21951ffda347dbfa5311f279', null),
-    ('column grant', 'e0ba435d0021e42a3f2fe4305dbdbfc0', null),
-    ('function grant', 'eb04a515b3d3a4402667574ce379466c', null),
-    ('cron', '3d9101ca98bbbc9f70ab7e08a7c338fb', null)
+    ('trigger', '0d4924084d3c80a9fbdfa9b309214a10', null),
+    ('rls', 'f1b5e121ef2078c8a771f25e663367ca', null),
+    ('policy', 'e30ec8b7f9e64ff6d4e5134019e3879d', null),
+    ('grant', 'c7cd3b0eb3a420fb38f9f373234bbbb0', null),
+    ('column grant', '0cbe33c195e5c6870f7c6830f45df5c8', null),
+    ('function grant', '6abeea840edad26b7e0180db09f01446', null),
+    ('cron', 'e4451f3aa79277bd355e2c97c38aedec', null)
   ) as e(section, expected, alt) on e.section = o.section
 group by o.section, e.expected, e.alt
 order by min(o.ord);
