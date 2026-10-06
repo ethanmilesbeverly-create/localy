@@ -240,6 +240,60 @@
 // skipped by #384 as "loaded-elsewhere"; it is now listed in its own block
 // ("SAME NAME ALREADY LIVE ELSEWHERE") with the candidate's QID, instead of under
 // "#384 HAND-PLACED GRAVES", which read as if it were a hand placement.
+//
+// RESTING-PLACE CHECK (#492, 2026-10-06). #342's gate asks whether P119 is a
+// cemetery; it never asked whether it is THIS person's cemetery. The #492 spike
+// found 20 wrong live pins of ~1,670 it could check: same-named cemeteries (Whitney
+// Houston in Fairview, Bergen Co. instead of Fairview Cemetery, Westfield), the
+// pin marking a FORMER grave after a reinterment (Jabotinsky, Gary Cooper), and a
+// few bad cemetery coordinates (three Sparkman-Hillcrest graves 31 km off). Now,
+// for each person a metro would plant (each coordinate's top N), the tool reads
+// the person's OWN English Wikipedia article — by the QID's sitelink, so a
+// namesake can't stand in — plus two bounded Wikidata reads (the US state of each
+// burial place; P119 statements carrying an end time), and calls the grave
+// DISPUTED when any of these hold:
+//   * the infobox's resting-place coordinate, or the cemetery article it links,
+//     is more than GRAVE_PLACE_AGREE_KM (15) from P119 and no linked cemetery is
+//     within it (a linked TOWN counts only past GRAVE_PLACE_TOWN_KM, 150);
+//   * the infobox names US state(s), or (if it names none) the burial sentences
+//     do, and none is the state Wikidata puts the cemetery in — only in a
+//     LOCATION position (", Ohio" / "in Ohio"), and only from the clause after the
+//     burial verb, so a death place or "New York Bay Cemetery" never counts;
+//   * Wikidata marks this burial ended, or the infobox lists a later "…–present"
+//     burial far from P119.
+// A DISPUTED grave is never planted (listed under "RESTING PLACE DISPUTED — NOT
+// PLANTED"); an already-loaded LIVE pin at that spot joins the retire audit
+// (graves_audit.json) with the reasons; a row of the same name elsewhere is a hand
+// placement and is trusted (#384). Ranks are untouched, so every other pin keeps
+// its ring position and #338 skip key. If the article is the thing that's wrong,
+// add the person's QID to GRAVE_PLACE_OK_QIDS (in this file — no config outside it).
+// Degrades, never blocks: an unreadable article is "unchecked" and planted as
+// before, counted in the summary — except a reinterment Wikidata itself records,
+// which needs no article. OFF with GRAVE_PLACE_CHECK=0.
+// Measured offline on the spike's data (4,775 live pins with a readable article):
+// 2,345 agree, 2,389 no evidence, 38 disputed — 19 of the 20 known-wrong, ~6 more
+// wrong pins the spike missed, and the rest border/state artefacts of the offline
+// stand-in that Wikidata's own state data resolves, plus the 3 released below.
+// Known miss: a cemetery named with no location and no link (Aiyana Stanley-Jones,
+// "Trinity Cemetery") gives nothing to compare.
+// 06b (2026-10-06, from the first live --all audit — 39 disputed, ~11 of them the
+// check's own false positives). Four fixes, each tested on the live 39 + controls:
+// a link to a STATE or COUNTRY article is not a town (its coordinate is the
+// region's centre — Teri Garr, Michael Clarke Duncan, Francis Hopkinson); "in
+// Washington" is the capital, only "<town>, Washington" is the state (George
+// McGovern); dated infobox segments also read "(1869–1870)" / "(since 1870)" and a
+// FORMER segment's link is never measured (George Peabody); and a burial sentence
+// whose subject is a same-surname RELATIVE ("J.C. Miles…", "James G. Hartzell…") is
+// skipped, sentences no longer split after an initial or "St."/"No.", and only the
+// first two burial sentences feed the state test (John Mullan's daughter in Colma).
+// Two releases added (Mary Phagan, Mike Todd). The spike harness still catches 19
+// of the 20 known-wrong pins (Jabotinsky's comes from Wikidata's end time, live).
+// AUDITING THE LIVE MAP: a plain dry run (`--all`, no --commit) runs the check on
+// every grave the roster would plant, so already-loaded pins that are disputed
+// land in graves_audit.json — that is the audit of the ~3,300 pins the spike could
+// not measure from the sandbox. IT NEEDS SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
+// in the shell: without them the submissions-aware skip is off, every grave reads
+// "NOT PLANTED" (the run can't see which are live), and the audit comes back empty.
 
 // ---------------------------------------------------------------------------
 // Config (all overridable by env; safe Chicago defaults).
@@ -335,7 +389,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.04a (#504 — every fetch has a timeout: a stalled Wikipedia/Wikidata/REST connection is retried or falls back instead of hanging the run. Roster unchanged (26). Built on 10.02a.)";
+const BUILD = "graves-resolve 2026.10.06c (#492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Roster unchanged (26). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -918,6 +972,505 @@ SELECT ?person ?personLabel ?personDescription ?sitelinks ?burial ?burialLabel ?
 }
 
 // ---------------------------------------------------------------------------
+// 1b) #492 RESTING-PLACE CHECK. #342's gate asks whether P119 is a cemetery;
+// this asks whether it is THIS PERSON's cemetery. It compares the P119 point the
+// tool would plant with the person's OWN English Wikipedia article (read by the
+// QID's sitelink, so a namesake can never stand in): the infobox resting-place
+// coordinate or the coordinate of the cemetery it links, the US state the
+// infobox / burial sentences name vs the state Wikidata puts the cemetery in,
+// and a reinterment — a P119 statement with an end time, or an infobox listing a
+// later "…–present" burial. Any disagreement = DISPUTED: proposed, never
+// silently dropped (#266). Pure helpers first, then the network reads.
+// ---------------------------------------------------------------------------
+const PLACE_AGREE_KM = Number(Deno.env.get("GRAVE_PLACE_AGREE_KM") ?? 15);   // a named cemetery this far from P119 = disputed
+const PLACE_TOWN_KM = Number(Deno.env.get("GRAVE_PLACE_TOWN_KM") ?? 150);    // a named TOWN (no cemetery link) this far = disputed
+
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+  "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
+  "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming", "District of Columbia",
+];
+// Longest first so "West Virginia" is consumed before "Virginia", "New York" before "York".
+const STATES_BY_LEN = [...US_STATES].sort((a, b) => b.length - a.length);
+
+// A cemetery-like link target (the article for the burial ground itself).
+const PLACE_CEM_RE = /\b(cemeter|memorial park|memorial gardens|churchyard|mausoleum|burying|burial|graveyard|necropolis|crypt|cathedral|church|basilica|abbey|chapel|mission|columbarium|meeting house|synagogue|temple)/i;
+
+function stripWikitextNoise(t: string): string {
+  return t
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<ref[^>]*\/>/gi, "")
+    .replace(/<ref[^>]*>[\s\S]*?<\/ref>/gi, "");
+}
+
+// One infobox field's value. The value runs to the next "|field =" line or the
+// infobox's closing braces; an EMPTY field returns "" (it must not swallow the
+// next line — the spike's parser did, and read "education = …" as a burial).
+function infoboxField(t: string, names: string[]): string {
+  for (const n of names) {
+    const re = new RegExp(`\\|\\s*${n.replace(/ /g, "[ _]")}\\s*=[ \\t]*([^\\n]*(?:\\n(?![ \\t]*\\||[ \\t]*\\}\\})[^\\n]*)*)`, "i");
+    const m = re.exec(t);
+    if (m) {
+      const v = m[1].trim();
+      if (v) return v;
+    }
+  }
+  return "";
+}
+
+// [[Target|text]] targets (files/categories excluded), in order.
+function wikiLinks(s: string): string[] {
+  const out: string[] = [];
+  for (const m of s.matchAll(/\[\[([^\]]+)\]\]/g)) {
+    const target = m[1].split("|")[0].split("#")[0].trim();
+    if (target && !/^(file|image|category):/i.test(target)) out.push(target);
+  }
+  return out;
+}
+
+// Plain text of a wikitext snippet (link text kept, markup dropped).
+function plainText(s: string): string {
+  return s
+    .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/g, "$1")
+    .replace(/\[\[([^\]]*)\]\]/g, "$1")
+    .replace(/\{\{[^{}]*\}\}/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/'''?/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// {{coord|…}} → [lat, lng]. Decimal ({{coord|41.95|-70.66}}) or D/M/S with
+// N/S and E/W tokens. Named params (x=y) and region/type tokens (a:b) ignored.
+function parseCoord(s: string): [number, number] | null {
+  const m = /\{\{\s*coord\s*\|([^{}]*)\}\}/i.exec(s);
+  if (!m) return null;
+  const toks = m[1].split("|").map((x) => x.trim()).filter((x) => x && !x.includes("=") && !x.includes(":"));
+  const ns = toks.findIndex((x) => /^[NS]$/i.test(x));
+  const ew = toks.findIndex((x) => /^[EW]$/i.test(x));
+  const dms = (parts: string[]) => parts.reduce((acc, v, i) => acc + Number(v) / 60 ** i, 0);
+  let lat: number, lng: number;
+  if (ns > 0 && ew > ns + 1) {
+    lat = dms(toks.slice(0, ns)) * (/^S$/i.test(toks[ns]) ? -1 : 1);
+    lng = dms(toks.slice(ns + 1, ew)) * (/^W$/i.test(toks[ew]) ? -1 : 1);
+  } else if (toks.length >= 2 && /^-?\d+(\.\d+)?$/.test(toks[0]) && /^-?\d+(\.\d+)?$/.test(toks[1])) {
+    lat = Number(toks[0]);
+    lng = Number(toks[1]);
+  } else {
+    return null;
+  }
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return [lat, lng];
+}
+
+function statesNamed(text: string): Set<string> {
+  let s = " " + text + " ";
+  const found = new Set<string>();
+  if (/\bWashington,?\s*D\.?\s*C\.?/.test(s)) {
+    found.add("District of Columbia");
+    s = s.replace(/\bWashington,?\s*D\.?\s*C\.?/g, " ");
+  }
+  // "…Cemetery in Washington." is the capital (George McGovern, Rock Creek);
+  // only "<town>, Washington" is the state (Anacortes, Washington).
+  if (/\bin\s+Washington(?=\s*(?:[,.;)]|$))/.test(s)) {
+    found.add("District of Columbia");
+    s = s.replace(/\bin\s+Washington(?=\s*(?:[,.;)]|$))/g, " ");
+  }
+  // A state counts only in a LOCATION position — after ", " or " in " (or at the
+  // start of an infobox value) and followed by punctuation, the end, or "U.S." —
+  // so "New York Bay Cemetery", "Wyoming Cemetery" and "Virginia Avenue" are not
+  // states, and "Washington" the person or city never is.
+  for (const st of STATES_BY_LEN) {
+    const re = new RegExp(`(^|,\\s*|\\bin\\s+)${st}(?=\\s*(?:[,.;)]|$|U\\.?S\\.?|\\(|\\s—))`, "g");
+    if (re.test(s)) {
+      found.add(st);
+      s = s.replace(re, "$1 ");
+    }
+  }
+  return found;
+}
+
+type PlaceEvidence = {
+  restingText: string;          // the infobox resting place, plain text
+  restingCoord: [number, number] | null;
+  restingLinks: string[];       // link targets, in order
+  burialSentences: string[];    // body sentences that say where THIS person is buried
+  laterLinks: string[];         // links in the infobox's CURRENT dated segment ("…–present", "since …")
+  formerLinks: string[];        // links in its earlier dated segments ("(1869–1870)") — a former grave
+};
+
+// The links inside an infobox resting_place segment marked "YYYY–present"
+// (or the last of several dated segments). Empty when the field isn't dated.
+function burialSegments(rp: string): { current: string[]; former: string[] } {
+  const segs = rp.split(/\n\s*\*|<br\s*\/?>|\{\{\s*(?:plain ?list|ubl)\s*\|/i).map((x) => x.trim()).filter(Boolean);
+  const CURRENT = /\b\d{4}\s*[–-]\s*present\b|\bsince\s+\d{4}\b/i;
+  const DATED = /\b\d{4}\s*[–-]\s*(\d{4}|present)\b|\bsince\s+\d{4}\b/i;
+  const dated = segs.filter((x) => DATED.test(x));
+  if (dated.length < 2) return { current: [], former: [] };
+  const cur = dated.find((x) => CURRENT.test(x)) ?? dated[dated.length - 1];
+  return { current: wikiLinks(cur), former: dated.filter((x) => x !== cur).flatMap(wikiLinks) };
+}
+
+// Everything the verdict needs from one article. `surname` narrows the body
+// sentences to ones about this person.
+function placeEvidence(wikitext: string, surname: string, givenNames: string[] = []): PlaceEvidence {
+  const t = stripWikitextNoise(wikitext);
+  const rp = infoboxField(t, ["resting_place", "restingplace", "resting place", "burial_place", "place_of_burial", "burial place"]);
+  const rpc = infoboxField(t, ["resting_place_coordinates", "restingplacecoordinates", "burial_coordinates"]);
+  const body = t.replace(/\[\[Category:[^\]]*\]\]/gi, "");
+  // Split into sentences — but not after an initial ("J.C. Miles") or a common
+  // abbreviation ("St. Mary's", "Saint Louis No. 3"), which would cut the place off.
+  const sentences = body.split(/(?<=[.!?])(?<!\b[A-Z]\.)(?<!\b(?:St|Mt|Ft|Jr|Sr|Dr|No|Co|Gen|Rev|Col|Capt|Lt|Sgt|Gov|Sen|Rep|Hon)\.)\s+|\n+/);
+  const who = surname ? `\\b(he|she|they|his|her|${surname})\\b` : "\\b(he|she|they|his|her)\\b";
+  const VERB = "(?:re-?)?(?:buried|interred|entombed)|laid to rest|remains were (?:later )?(?:moved|transferred|relocated)";
+  const re = new RegExp(`${who}[^.]{0,80}\\b(${VERB})\\b|\\b(?:re-?)?(?:buried|interred|entombed) (at|in)\\b`, "i");
+  // Keep only the clause AFTER the burial verb ("…died in Ohio and was buried in
+  // Nashville" → "in Nashville"), so a death place never reads as the burial.
+  // A sentence whose SUBJECT is the surname after a DIFFERENT capitalised given
+  // name or initial ("J.C. Miles died … and was buried in …", "James G. Hartzell …
+  // was buried in …") is about a relative, not this person. Only the part BEFORE
+  // the burial verb is looked at, so "moved to Fort Bliss" is never a relative.
+  const verbRe = new RegExp(`\\b(${VERB})\\b`, "i");
+  const TITLES = new Set(["mr", "mrs", "ms", "dr", "general", "gen", "senator", "sen", "president", "governor", "gov", "judge", "justice", "captain", "capt", "colonel", "col", "major", "lieutenant", "lt", "sergeant", "sgt", "admiral", "commodore", "reverend", "rev", "father", "bishop", "cardinal", "rabbi", "sir", "lady", "lord", "saint", "st", "king", "queen", "prince", "princess", "chief", "professor", "prof", "representative", "rep", "congressman", "mayor"]);
+  const given = new Set(givenNames.map((g) => g.toLowerCase()));
+  const aboutRelative = (sentence: string): boolean => {
+    if (!surname) return false;
+    const plain = plainText(sentence);
+    const v = verbRe.exec(plain);
+    if (!v) return false;
+    const head = plain.slice(0, v.index);
+    const at = head.toLowerCase().lastIndexOf(surname);
+    if (at <= 0) return false;
+    const before = head.slice(0, at).trimEnd().split(/\s+/);
+    const prev = before[before.length - 1] ?? "";
+    if (!/^[A-Z][\p{L}.'’-]*$/u.test(prev)) return false;          // "that Foreman" — not a name
+    const key = prev.toLowerCase().replace(/[^\p{L}]/gu, "");
+    if (given.has(key) || TITLES.has(key)) return false;            // the person themself, or a title
+    // An initial ("G.") — look one further back for the given name ("James G.").
+    if (/^[A-Z]\.$/.test(prev)) {
+      const prev2 = (before[before.length - 2] ?? "").toLowerCase().replace(/[^\p{L}]/gu, "");
+      if (given.has(prev2)) return false;
+    }
+    return true;
+  };
+  const burialSentences = sentences
+    .filter((x) => re.test(x) && !/^\s*[|*{]/.test(x))
+    .filter((x) => !aboutRelative(x))
+    .map((x) => {
+      const p = plainText(x);
+      const m = new RegExp(`\\b(${VERB})\\b`, "i").exec(p);
+      return m ? p.slice(m.index) : p;
+    })
+    .slice(0, 6);
+  return {
+    restingText: plainText(rp),
+    restingCoord: parseCoord(rpc) ?? parseCoord(rp),
+    restingLinks: wikiLinks(rp),
+    burialSentences,
+    // A LATER burial listed in the infobox ("1940–1964: X · 1964–present: Y").
+    // Body-text reinterment wording was tried and dropped: it mostly describes a
+    // reburial INTO the cemetery Wikidata already names.
+    laterLinks: burialSegments(rp).current,
+    formerLinks: burialSegments(rp).former,
+  };
+}
+
+type PlaceVerdict = {
+  status: "agree" | "disputed" | "no-evidence" | "unchecked";
+  reasons: string[];   // why disputed (empty otherwise)
+  says: string;        // what the article says, one line, for the report
+};
+
+// A link to a US state or a country article (its coordinate is the region's
+// centre, hundreds of km from any cemetery in it).
+const REGION_TITLES = new Set([...US_STATES, "United States", "U.S.", "USA", "England", "Scotland", "Ireland", "Wales", "United Kingdom", "Canada", "Mexico", "France", "Germany", "Italy", "Israel", "Poland"]);
+function isRegionTitle(t: string): boolean {
+  return REGION_TITLES.has(t.replace(/\s*\(U\.?S\.? state\)$/i, "").replace(/_/g, " ").trim());
+}
+
+function kmBetween(a: [number, number], b: [number, number]): number {
+  const R = 6371, toR = Math.PI / 180;
+  const dLat = (b[0] - a[0]) * toR, dLng = (b[1] - a[1]) * toR;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * toR) * Math.cos(b[0] * toR) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+// The verdict. `linkCoord` resolves a link target to its article coordinate
+// (null if it has none). `burialState` is the US state Wikidata puts the P119
+// place in (null if unknown); `ended` = Wikidata's P119 statement for this
+// burial carries an end time (a reinterment, recorded).
+function placeVerdict(
+  at: [number, number],
+  burialState: string | null,
+  ended: boolean,
+  ev: PlaceEvidence | null,
+  linkCoord: (title: string) => [number, number] | null,
+): PlaceVerdict {
+  if (!ev) {
+    // No readable article — but a reinterment Wikidata itself records needs none.
+    return ended
+      ? { status: "disputed", reasons: ["Wikidata marks this burial as ended (a reinterment)"], says: "" }
+      : { status: "unchecked", reasons: [], says: "" };
+  }
+  const reasons: string[] = [];
+  const says = [ev.restingText, ev.burialSentences[0] ?? ""].filter(Boolean).join(" ‖ ").slice(0, 220);
+
+  // 1) Distance: the infobox coordinate, or the cemetery articles the infobox links.
+  //    A later-burial link (step 3) is judged there, not here.
+  let anyCemNear = false;
+  const far: string[] = [];
+  if (ev.restingCoord) {
+    const d = kmBetween(at, ev.restingCoord);
+    if (d <= PLACE_AGREE_KM) anyCemNear = true;
+    else far.push(`infobox coordinate ${Math.round(d)} km away`);
+  }
+  let townFar: string | null = null;
+  let townNear = false;
+  for (const l of ev.restingLinks) {
+    if (ev.laterLinks.includes(l) || ev.formerLinks.includes(l)) continue;
+    const c = linkCoord(l);
+    if (!c) continue;
+    const d = kmBetween(at, c);
+    if (PLACE_CEM_RE.test(l)) {
+      if (d <= PLACE_AGREE_KM) anyCemNear = true;
+      else far.push(`"${l}" ${Math.round(d)} km away`);
+    } else if (isRegionTitle(l)) {
+      continue; // a state or country article's coordinate is its centre — no evidence (Teri Garr: "California")
+    } else if (d > PLACE_TOWN_KM) {
+      townFar = townFar ?? `"${l}" ${Math.round(d)} km away`;
+    } else {
+      townNear = true;
+    }
+  }
+  if (!anyCemNear && far.length) reasons.push(`resting place ${far[0]}`);
+  if (!anyCemNear && !far.length && townFar && !townNear) reasons.push(`resting town ${townFar}`);
+
+  // 2) State: the infobox text first; body sentences only when the infobox names none.
+  if (burialState && !anyCemNear) {
+    let named = statesNamed(ev.restingText);
+    let where = "infobox";
+    if (!named.size) {
+      // The person's own burial is almost always the first or second burial
+      // sentence; later ones are family in "Personal life" (John Mullan's daughter
+      // in Colma, California) — so only the first two count.
+      named = new Set(ev.burialSentences.slice(0, 2).flatMap((s) => [...statesNamed(s)]));
+      where = "article";
+    }
+    if (named.size && !named.has(burialState)) {
+      reasons.push(`${where} names ${[...named].join("/")}, Wikidata's cemetery is in ${burialState}`);
+    }
+  }
+
+  // 3) Reinterment: recorded in Wikidata, or mentioned in the article with no
+  //    named cemetery agreeing (a reburial INTO this cemetery is fine).
+  if (ended) {
+    reasons.push("Wikidata marks this burial as ended (a reinterment)");
+  } else if (ev.laterLinks.length) {
+    const near = (l: string) => { const c = linkCoord(l); return !!c && kmBetween(at, c) <= PLACE_AGREE_KM; };
+    const later = ev.laterLinks.find((l) => linkCoord(l) && !near(l));
+    if (later && !ev.laterLinks.some(near)) reasons.push(`the infobox lists a later burial at "${later}"`);
+  }
+
+  if (reasons.length) return { status: "disputed", reasons, says };
+  const hasEvidence = !!(ev.restingCoord || ev.restingLinks.length || ev.restingText || ev.burialSentences.length);
+  return { status: hasEvidence ? "agree" : "no-evidence", reasons: [], says };
+}
+
+// #492 OPERATOR RELEASE LIST — person QIDs the resting-place check disputes but
+// a human has confirmed are pinned RIGHT (the Wikipedia article is wrong or out
+// of date). Keyed on the PERSON's QID, never a word. Add one only after checking
+// the person's burial yourself; the audit prints the [Q…] to copy.
+const GRAVE_PLACE_OK_QIDS: Record<string, string> = {
+  Q14739852: "Clarence Chesterfield Howerton — infobox coordinate is Vancouver's Mountain View; the article's own text and source say Mountainview, Oregon City",
+  Q11637: "Judy Garland — the article's first burial sentence is Ferncliff (NY); she was re-interred at Hollywood Forever in 2017",
+  Q1571195: "John Adams Hyman — the article says Columbian Harmony (D.C.); that cemetery moved to National Harmony Memorial Park, Landover MD, where he is pinned",
+  // From the first live audit (2026-10-06, --all dry run):
+  Q16688540: "Mary Phagan — the article's infobox gives Leo Frank's resting place (New Mount Carmel, NY); she is buried at Marietta City Cemetery, where she is pinned",
+  Q240566: "Mike Todd — Wikidata ends the Waldheim burial because his body was stolen (1977) and reburied in a secret location; the marked grave is still at Beth Aaron / Jewish Waldheim",
+  // From the second live audit (2026-10-06, --all dry run with the skip on):
+  Q444947: "Richard Montgomery — reinterred AT St. Paul's Chapel, Manhattan, in 1818 (where he is pinned); the infobox's first line is his 1776 Quebec burial",
+  Q270893: "Shirley Horn — buried at Fort Lincoln Cemetery, Brentwood MD (where she is pinned); \"near Washington, D.C.\" tripped the state test",
+  Q22018805: "Lucien Lee Kinsolving — buried at Virginia Theological Seminary (where he is pinned); the second burial sentence is his wife's, in New Jersey",
+};
+const PLACE_CHECK = Deno.env.get("GRAVE_PLACE_CHECK") !== "0";
+const placeStats = { checked: 0, agree: 0, noEvidence: 0, disputed: 0, released: 0, unchecked: 0 };
+
+// Batched English Wikipedia read: titles → wikitext (null = no such article or
+// the batch failed). Follows the API's normalisation and redirects so the map is
+// keyed by the title we ASKED for. ok:false when any batch failed outright.
+async function wikiTexts(titles: string[]): Promise<{ ok: boolean; text: Map<string, string | null> }> {
+  const text = new Map<string, string | null>();
+  const uniq = [...new Set(titles.filter(Boolean))];
+  let ok = true;
+  for (let i = 0; i < uniq.length; i += 50) {
+    const batch = uniq.slice(i, i + 50);
+    const url = "https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1" +
+      "&prop=revisions&rvprop=content&rvslots=main&titles=" + encodeURIComponent(batch.join("|"));
+    const json = await wikiGetJson(url, "article text");
+    if (!json) { ok = false; for (const t of batch) text.set(t, null); continue; }
+    const norm = new Map<string, string>((json?.query?.normalized ?? []).map((n: any) => [n.from, n.to]));
+    const redir = new Map<string, string>((json?.query?.redirects ?? []).map((n: any) => [n.from, n.to]));
+    const pages = new Map<string, any>((json?.query?.pages ?? []).map((p: any) => [p.title, p]));
+    for (const t of batch) {
+      const n = norm.get(t) ?? t;
+      const p = pages.get(redir.get(n) ?? n);
+      const c = p?.revisions?.[0]?.slots?.main?.content;
+      text.set(t, typeof c === "string" ? c : null);
+    }
+    await sleep(300);
+  }
+  return { ok, text };
+}
+
+// Batched article coordinates: titles → [lat, lng] (null = none / not found).
+async function wikiCoords(titles: string[]): Promise<Map<string, [number, number] | null>> {
+  const out = new Map<string, [number, number] | null>();
+  const uniq = [...new Set(titles.filter(Boolean))];
+  for (let i = 0; i < uniq.length; i += 50) {
+    const batch = uniq.slice(i, i + 50);
+    const url = "https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1" +
+      "&prop=coordinates&coprimary=primary&titles=" + encodeURIComponent(batch.join("|"));
+    const json = await wikiGetJson(url, "link coordinates");
+    const norm = new Map<string, string>((json?.query?.normalized ?? []).map((n: any) => [n.from, n.to]));
+    const redir = new Map<string, string>((json?.query?.redirects ?? []).map((n: any) => [n.from, n.to]));
+    const pages = new Map<string, any>((json?.query?.pages ?? []).map((p: any) => [p.title, p]));
+    for (const t of batch) {
+      const n = norm.get(t) ?? t;
+      const c = pages.get(redir.get(n) ?? n)?.coordinates?.[0];
+      out.set(t, c && Number.isFinite(c.lat) && Number.isFinite(c.lon) ? [c.lat, c.lon] : null);
+    }
+    await sleep(300);
+  }
+  return out;
+}
+
+// One Wikipedia API GET with the #504 timeout and the tool's retry/backoff.
+// null after WIKI_RETRIES failed attempts (the caller degrades, never hangs).
+async function wikiGetJson(url: string, what: string): Promise<any | null> {
+  for (let attempt = 0; attempt <= WIKI_RETRIES; attempt++) {
+    try {
+      const r = await fetch(url, {
+        signal: AbortSignal.timeout(WIKI_TIMEOUT_MS),
+        headers: { "User-Agent": "nahgoo-graves/1.0 (resting-place check; contact: privacy@nahgoo.com)" },
+      });
+      if (r.status === 429 || r.status >= 500) { await sleep(1200 * (attempt + 1)); continue; }
+      if (!r.ok) return null;
+      return JSON.parse(await r.text());
+    } catch (e) {
+      if (isTimeout(e)) {
+        timeoutStats.wiki++;
+        console.log(`  (${what} batch attempt ${attempt + 1} timed out after ${WIKI_TIMEOUT_MS / 1000} s — retrying)`);
+      }
+      await sleep(1000 * (attempt + 1));
+    }
+  }
+  return null;
+}
+
+// One Wikidata SPARQL read with the #504 timeout; null after the retries.
+async function sparqlBindings(sparql: string, what: string): Promise<any[] | null> {
+  const endpoint = "https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(sparql);
+  for (let attempt = 0; attempt <= WIKI_RETRIES; attempt++) {
+    try {
+      const r = await fetch(endpoint, {
+        signal: AbortSignal.timeout(SPARQL_TIMEOUT_MS),
+        headers: { Accept: "application/sparql-results+json", "User-Agent": "nahgoo-graves/1.0 (resting-place check; contact: privacy@nahgoo.com)" },
+      });
+      if (r.status === 429 || r.status >= 500 || !r.ok) { await sleep(1500 * (attempt + 1)); continue; }
+      return JSON.parse(await r.text())?.results?.bindings ?? [];
+    } catch (e) {
+      if (isTimeout(e)) {
+        timeoutStats.sparql++;
+        console.log(`  (${what} attempt ${attempt + 1} timed out after ${SPARQL_TIMEOUT_MS / 1000} s — retrying)`);
+      }
+      await sleep(1500 * (attempt + 1));
+    }
+  }
+  return null;
+}
+
+// The US state each burial place sits in (P131 chain → a US state, or D.C.),
+// and which person→burial statements carry an END TIME (a recorded reinterment).
+// Both are bounded VALUES queries over QIDs we already hold — never a property
+// path across the geo box (#342's WDQS-timeout rule). Missing data = unknown.
+async function burialStatesAndEnds(people: Person[]): Promise<{ state: Map<string, string>; ended: Set<string> }> {
+  const state = new Map<string, string>();
+  const ended = new Set<string>();
+  const burials = [...new Set(people.map((p) => p.burialQid).filter((q) => /^Q\d+$/.test(q)))];
+  for (let i = 0; i < burials.length; i += 150) {
+    const values = burials.slice(i, i + 150).map((q) => `wd:${q}`).join(" ");
+    const b = await sparqlBindings(
+      `SELECT ?b ?sLabel WHERE { VALUES ?b { ${values} } ?b wdt:P131* ?s . ` +
+      `{ ?s wdt:P31 wd:Q35657 } UNION { VALUES ?s { wd:Q61 } } ` +
+      `SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }`,
+      "burial-state read",
+    );
+    for (const x of b ?? []) {
+      const q = String(x?.b?.value ?? "").split("/").pop() ?? "";
+      let s = String(x?.sLabel?.value ?? "");
+      if (/^Washington,? D\.?C\.?$/i.test(s)) s = "District of Columbia";
+      if (q && s && !state.has(q)) state.set(q, s);
+    }
+    await sleep(300);
+  }
+  const persons = [...new Set(people.map((p) => p.qid))];
+  for (let i = 0; i < persons.length; i += 150) {
+    const values = persons.slice(i, i + 150).map((q) => `wd:${q}`).join(" ");
+    const b = await sparqlBindings(
+      `SELECT ?p ?b WHERE { VALUES ?p { ${values} } ?p p:P119 ?st . ?st ps:P119 ?b ; pq:P582 ?end . }`,
+      "burial end-time read",
+    );
+    for (const x of b ?? []) {
+      const p = String(x?.p?.value ?? "").split("/").pop() ?? "";
+      const q = String(x?.b?.value ?? "").split("/").pop() ?? "";
+      if (p && q) ended.add(`${p}|${q}`);
+    }
+    await sleep(300);
+  }
+  return { state, ended };
+}
+
+// THE CHECK, for the people this metro would plant. Returns a verdict per QID.
+// Degrades, never blocks: an article that can't be read is "unchecked" (planted
+// as before) and the run says how many.
+async function placeCheck(people: Person[]): Promise<Map<string, PlaceVerdict>> {
+  const verdicts = new Map<string, PlaceVerdict>();
+  if (!PLACE_CHECK || !people.length) return verdicts;
+  const [{ ok, text }, wd] = await Promise.all([
+    wikiTexts(people.map((p) => p.articleTitle)),
+    burialStatesAndEnds(people),
+  ]);
+  const evidence = new Map<string, PlaceEvidence | null>();
+  const links = new Set<string>();
+  for (const p of people) {
+    const t = text.get(p.articleTitle);
+    const given = p.person.split(/[\s,]+/).slice(0, -1).map((x) => x.toLowerCase().replace(/[^\p{L}]/gu, "")).filter((x) => x.length >= 2);
+    const ev = t && !/^#REDIRECT/i.test(t) ? placeEvidence(t, personSurname(p.person), given) : null;
+    evidence.set(p.qid, ev);
+    for (const l of ev?.restingLinks ?? []) links.add(l);
+  }
+  const coords = await wikiCoords([...links]);
+  for (const p of people) {
+    const v = placeVerdict([p.lat, p.lng], wd.state.get(p.burialQid) ?? null, wd.ended.has(`${p.qid}|${p.burialQid}`),
+      evidence.get(p.qid) ?? null, (l) => coords.get(l) ?? null);
+    verdicts.set(p.qid, v);
+    placeStats.checked++;
+    if (v.status === "agree") placeStats.agree++;
+    else if (v.status === "no-evidence") placeStats.noEvidence++;
+    else if (v.status === "unchecked") placeStats.unchecked++;
+    else if (Object.hasOwn(GRAVE_PLACE_OK_QIDS, p.qid)) placeStats.released++;
+    else placeStats.disputed++;
+  }
+  const n = (s: PlaceVerdict["status"]) => [...verdicts.values()].filter((v) => v.status === s).length;
+  const released = people.filter((p) => verdicts.get(p.qid)?.status === "disputed" && Object.hasOwn(GRAVE_PLACE_OK_QIDS, p.qid)).length;
+  console.log(`  #492 resting-place check: ${people.length} checked — ${n("agree")} agree, ${n("no-evidence")} no evidence, ${n("disputed") - released} disputed${released ? `, ${released} released by hand` : ""}${n("unchecked") ? `, ${n("unchecked")} UNCHECKED (article unreadable)` : ""}${ok ? "" : " — some Wikipedia batches failed"}.`);
+  return verdicts;
+}
+
+// ---------------------------------------------------------------------------
 // 2) Wikipedia intro for a grave pin (identity via the sitelink, #163 — not
 //    coordinate-gated). Blank if the fetch fails. #504: each attempt has a
 //    WIKI_TIMEOUT_MS deadline; a stalled attempt counts as a failed one, so
@@ -1250,6 +1803,19 @@ async function runMetro(metro: Metro, seenQids: Set<string>, loadedKeys: Set<str
   const rows: GraveRow[] = [];
   let coveredPeople = 0;
 
+  // #492: check only the people this metro would actually plant — each in-metro
+  // coordinate's top N (the same selection the loop below makes), minus anyone
+  // another metro already emitted. Ranks are unchanged by a verdict, so every
+  // other pin keeps its ring position (and its #338 skip key).
+  const toCheck: Person[] = [];
+  for (const [, members] of byCoord) {
+    if (haversineM(metro.lat, metro.lng, members[0].lat, members[0].lng) / 1000 > GRAVE_METRO_KM * 1.5) continue;
+    for (const p of [...members].sort((a, b) => b.sitelinks - a.sitelinks).slice(0, TOP_N)) {
+      if (!seenQids.has(p.qid)) toCheck.push(p);
+    }
+  }
+  const verdicts = await placeCheck(toCheck);
+
   for (const [, members] of byCoord) {
     const { lat, lng } = members[0];
     const distKm = haversineM(metro.lat, metro.lng, lat, lng) / 1000;
@@ -1298,6 +1864,32 @@ async function runMetro(metro: Metro, seenQids: Set<string>, loadedKeys: Set<str
       if (seenQids.has(p.qid)) {
         report.push({ qid: p.qid, person: p.person, lat: at.lat, lng: at.lng, outcome: "cross-metro-dup" });
         console.log(`  ~ ${p.person} — already emitted for an earlier metro (skipped)`);
+        continue;
+      }
+
+      // #492 RESTING-PLACE CHECK: Wikidata's cemetery disagrees with the person's
+      // own article. Never planted; an already-loaded LIVE pin here goes to the
+      // retire audit; a row of this name elsewhere was hand-placed (trusted, #384).
+      // A person on GRAVE_PLACE_OK_QIDS was confirmed by hand and goes on as before.
+      const verdict = verdicts.get(p.qid);
+      if (verdict?.status === "disputed" && !Object.hasOwn(GRAVE_PLACE_OK_QIDS, p.qid)) {
+        const nm = nearestLoadedByName(candName, at.lat, at.lng);
+        let alreadyLoaded = false;
+        let disposition: string | undefined;
+        if (nm && nm.distM <= MATCH_RADIUS_M) {
+          if (nm.row.live) alreadyLoaded = true;
+          else disposition = "already-retired";
+        } else if (nm) {
+          disposition = "hand-moved";
+        }
+        report.push({
+          qid: p.qid, person: p.person, lat: at.lat, lng: at.lng, burial: p.burialLabel || "(unnamed)", burialQid: p.burialQid,
+          outcome: "place-disputed", reasons: verdict.reasons, articleSays: verdict.says, alreadyLoaded,
+          ...(nm ? { loadedName: nm.row.name, loadedLat: nm.row.lat, loadedLng: nm.row.lng, loadedDistM: Math.round(nm.distM), loadedLive: nm.row.live } : {}),
+          ...(disposition ? { disposition } : {}),
+        });
+        console.log(`  ⚑ ${p.person} — resting place disputed (${verdict.reasons.join("; ")})${alreadyLoaded ? " — LIVE pin, see the audit" : disposition === "hand-moved" ? " — a row of this name is placed elsewhere (trusted)" : disposition === "already-retired" ? " — already retired" : " — NOT planted"}`);
+        seenQids.add(p.qid);
         continue;
       }
 
@@ -1396,6 +1988,11 @@ function summarize(rows: GraveRow[], coveredPeople: number) {
   // #504 — how often a deadline fired. 0/0/0 is the normal line; a non-zero wiki
   // count means those pins fell back to (or retried into) a description, not that
   // the run hung.
+  if (PLACE_CHECK) {
+    console.log(`RESTING-PLACE CHECK (#492): ${placeStats.checked} checked — ${placeStats.agree} agree, ${placeStats.noEvidence} no evidence (planted as before), ${placeStats.disputed} disputed (not planted / audited), ${placeStats.released} released by GRAVE_PLACE_OK_QIDS${placeStats.unchecked ? `, ${placeStats.unchecked} UNCHECKED — the article could not be read, planted as before` : ""}.`);
+  } else {
+    console.log("RESTING-PLACE CHECK (#492): OFF (GRAVE_PLACE_CHECK=0).");
+  }
   console.log(`TIMEOUTS (#504): Wikipedia intro ${timeoutStats.wiki} · Wikidata SPARQL ${timeoutStats.sparql} · nearby-places ${timeoutStats.map} (limits ${WIKI_TIMEOUT_MS / 1000} s / ${SPARQL_TIMEOUT_MS / 1000} s / ${MAP_TIMEOUT_MS / 1000} s).`);
 }
 
@@ -1450,15 +2047,26 @@ function holdDuplicateLabels(rows: GraveRow[], commit: boolean): GraveRow[] {
 // 'Grave of' wording" note), so each is dispositioned by hand.
 // ---------------------------------------------------------------------------
 function collectStrays(entries: any[]): any[] {
-  return entries.filter((e) => e && e.outcome === "non-cemetery-burial" && e.alreadyLoaded);
+  return entries.filter((e) => e && (e.outcome === "non-cemetery-burial" || e.outcome === "place-disputed") && e.alreadyLoaded);
 }
 function sqlStr(s: string): string {
   return "'" + String(s).replace(/'/g, "''") + "'";
 }
 async function writeRetireAudit(strays: any[], entries: any[] = []): Promise<void> {
   // #384: what the audit deliberately did NOT propose, so the eyeball sees it.
-  const handMoved = entries.filter((e) => e && e.outcome === "non-cemetery-burial" && e.disposition === "hand-moved");
-  const retired = entries.filter((e) => e && e.outcome === "non-cemetery-burial" && e.disposition === "already-retired");
+  const handMoved = entries.filter((e) => e && (e.outcome === "non-cemetery-burial" || e.outcome === "place-disputed") && e.disposition === "hand-moved");
+  const retired = entries.filter((e) => e && (e.outcome === "non-cemetery-burial" || e.outcome === "place-disputed") && e.disposition === "already-retired");
+  // #492: disputed graves that were NOT planted (no row anywhere) — held for a human.
+  const held = entries.filter((e) => e && e.outcome === "place-disputed" && !e.alreadyLoaded && !e.disposition);
+  if (held.length) {
+    console.log(`\n#492 RESTING PLACE DISPUTED — NOT PLANTED: ${held.length} (Wikidata's cemetery disagrees with the person's own article).`);
+    for (const e of held) {
+      console.log(`  ⚑ ${e.person} [${e.qid}] — Wikidata: "${e.burial}" (${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}). ${e.reasons.join("; ")}.`);
+      if (e.articleSays) console.log(`      article: ${e.articleSays}`);
+    }
+    console.log("  If the article is wrong and the pin would be right, add the person's [Q…] to GRAVE_PLACE_OK_QIDS (with why) and re-run.");
+    console.log("  If the person's true cemetery is inside a roster metro, place them there by hand (#384) instead.");
+  }
   const elsewhere = entries.filter((e) => e && e.outcome === "loaded-elsewhere");
   if (handMoved.length) {
     console.log(`\n#384 HAND-PLACED GRAVES (trusted over Wikidata — not proposed): ${handMoved.length}.`);
@@ -1488,7 +2096,8 @@ async function writeRetireAudit(strays: any[], entries: any[] = []): Promise<voi
     console.log("\n#342 grave-place audit: 0 LIVE misplaced graves — nothing to retire. Wrote an empty graves_audit.json.");
     return;
   }
-  console.log(`\n⚠ #342 GRAVE-PLACE AUDIT — ${strays.length} LIVE grave(s) whose P119 burial place is NOT a cemetery (misplaced). Wrote graves_audit.json.`);
+  const disputedLive = strays.filter((s) => s.outcome === "place-disputed").length;
+  console.log(`\n⚠ #342/#492 GRAVE-PLACE AUDIT — ${strays.length} LIVE grave(s) to disposition: ${strays.length - disputedLive} whose P119 burial place is NOT a cemetery (#342), ${disputedLive} whose resting place is DISPUTED by the person's own article (#492). Wrote graves_audit.json.`);
   console.log("These are LIVE pins. Nothing was written — disposition each BY HAND (a scattered-ashes site may want a RELABEL, not a delete):");
   for (const s of strays) {
     // #384: key the proposed retire on the LOADED row (its own name and
@@ -1498,6 +2107,10 @@ async function writeRetireAudit(strays: any[], entries: any[] = []): Promise<voi
     const lng = Number(s.loadedLng ?? s.lng).toFixed(COORD_DECIMALS);
     const ring = s.loadedDistM ? ` — a ring pin ${s.loadedDistM} m off Wikidata's point` : "";
     console.log(`  • "${nm}" on "${s.burial}"${s.burialQid ? ` [${s.burialQid}]` : ""} (${s.loadedLat ?? s.lat}, ${s.loadedLng ?? s.lng})${ring}`);
+    if (s.outcome === "place-disputed") {
+      console.log(`      #492 resting place disputed [person ${s.qid}]: ${s.reasons.join("; ")}.${s.articleSays ? ` Article: ${s.articleSays}` : ""}`);
+      console.log(`      → move it onto the true cemetery's grave cluster if that is in a roster metro, retire it if not, or add [${s.qid}] to GRAVE_PLACE_OK_QIDS if the pin is right.`);
+    }
     console.log(`      retire (reversible): update submissions set status='rejected' where source='${SOURCE_TAG}' and name=${sqlStr(nm)} and round(lat::numeric,${COORD_DECIMALS})=${lat} and round(lng::numeric,${COORD_DECIMALS})=${lng};`);
   }
   console.log("  (#406: a stray that IS a real burial on an estate's grounds → add its [Q…] to GRAVE_KEEP_BURIAL_QIDS and re-run, rather than retire it.)");
@@ -1602,7 +2215,7 @@ async function run() {
   const FROM_RECORDS = Deno.args.includes("--from-records");
   console.log(BUILD);
   console.log(`Mode: ${FROM_RECORDS ? "FROM RECORDS (no crawl)" : ALL_METROS ? `ALL METROS (${METROS.length} launch cities)` : `single metro — ${ENV_METRO.name}`}. Source tag: ${SOURCE_TAG}.`);
-  console.log(`Require-wiki: ON. Grave-place gate (#342): ${REQUIRE_CEMETERY ? "ON — burial place must be a cemetery" : "OFF (GRAVE_REQUIRE_CEMETERY=0)"}. Top ${TOP_N} per cemetery coordinate (most famous first; ranks 2..N on the ${STACK_OFFSET_M} m anti-stack ring; require a description). Dedup: ${NEARBY_PLACES_URL ? "nearby-places" : "OFF"}.${ALL_METROS && !FROM_RECORDS ? " Cross-metro QID dedup: ON." : ""}`);
+  console.log(`Require-wiki: ON. Grave-place gate (#342): ${REQUIRE_CEMETERY ? "ON — burial place must be a cemetery" : "OFF (GRAVE_REQUIRE_CEMETERY=0)"}. Resting-place check (#492): ${PLACE_CHECK ? `ON — ${Object.keys(GRAVE_PLACE_OK_QIDS).length} released by hand` : "OFF (GRAVE_PLACE_CHECK=0)"}. Top ${TOP_N} per cemetery coordinate (most famous first; ranks 2..N on the ${STACK_OFFSET_M} m anti-stack ring; require a description). Dedup: ${NEARBY_PLACES_URL ? "nearby-places" : "OFF"}.${ALL_METROS && !FROM_RECORDS ? " Cross-metro QID dedup: ON." : ""}`);
 
   // Build the already-loaded key set for the submissions-aware skip (#338).
   // FAIL-CLOSED on --commit: if the DB can't be read we do NOT write, because a
