@@ -391,7 +391,23 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 //   success in 70 min, or a non-200 sweep reply), INFO `gate_retry_in_flight`, INFO
 //   `gate_retry_cron_read_failed` (SQL not run). Names only, never submitted_by.
 //   Observability on an operator surface, so it does NOT move the %.
-const REPORT_VERSION = "app-report-v25";
+// v25 -> v26 (#516, 2026-10-06): `submissions.ai_gate.reasons` gains
+//   `decided_without_status` ({count, by_decision, sample}) and `reconciliation`
+//   (decided_total = decided_with_status + decided_without_status, plus
+//   status_without_decision). WHY: the morning report saw 34 rows with an
+//   ai_decision but 31 with an ai_status while coverage_rate read 1.00 — three
+//   `approve` rows were counted nowhere. The denominator does NOT change: `reviewed`
+//   stays keyed on ai_status, the gate-only column (#115/v18 — counting by
+//   ai_decision instead would be safe only if no non-gate path ever writes it, and
+//   these three rows say one did). Instead the outside rows are counted BESIDE the
+//   denominator and named, with the columns that tell their writer apart (model,
+//   confidence, http status, merged_into, timestamps, reason). NEW INFO alert
+//   `ai_decision_without_status` names their ids. Same submissions pull, no new
+//   column (all were already selected). Privacy (item 5) holds: public place name
+//   only, no submitted_by / lat / lng. One deploy target (this function,
+//   --no-verify-jwt); no index.html/APP_VERSION, no CACHE_VERSION/SQL/RLS/env.
+//   Observability, so it does NOT move the %.
+const REPORT_VERSION = "app-report-v26";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -587,6 +603,19 @@ function summariseSubmissions(rows: any[], now: number, step: number, sampleN: n
   let reason_blank = 0; // ...with a blank/absent reason — should be ~0 (the writer guards it)
   const reason_present_by_decision: Record<string, number> = {};
   const reason_blank_by_decision: Record<string, number> = {};
+  // #516 (v26): the rows the coverage count above cannot see. A row with an
+  // ai_decision but NO ai_status was decided by something other than today's gate
+  // (an older gate build, a manual edit, a tool) — so it is correctly OUTSIDE the
+  // `reviewed` denominator (#115: ai_status is the gate-only signal), but until v26
+  // it was counted nowhere, and coverage_rate read 1.00 beside 34 decisions / 31
+  // statuses. Counted and named here, BESIDE the denominator, never inside it.
+  // The reverse (a status with no decision) is tallied too, so the two columns
+  // reconcile in one line: decided = decided_with_status + decided_without_status.
+  let decided_total = 0;
+  let decided_with_status = 0;
+  const decided_without_status_rows: any[] = [];
+  const decided_without_status_by_decision: Record<string, number> = {};
+  let status_without_decision = 0;
 
   const windows = { last_24h: 0, last_7d: 0, last_30d: 0, all_time: rows.length };
   let cleaned_count = 0;
@@ -645,6 +674,21 @@ function summariseSubmissions(rows: any[], now: number, step: number, sampleN: n
         reason_blank++;
         inc(reason_blank_by_decision, dkey);
       }
+    }
+
+    // #516: reconcile ai_decision against ai_status (see the counters above).
+    const hasDecision = r.ai_decision !== null && r.ai_decision !== undefined && r.ai_decision !== "";
+    const hasStatus = r.ai_status !== null && r.ai_status !== undefined;
+    if (hasDecision) {
+      decided_total++;
+      if (hasStatus) {
+        decided_with_status++;
+      } else {
+        decided_without_status_rows.push(r);
+        inc(decided_without_status_by_decision, r.ai_decision);
+      }
+    } else if (hasStatus) {
+      status_without_decision++;
     }
 
     const created = ms(r.created_at);
@@ -752,6 +796,33 @@ function summariseSubmissions(rows: any[], now: number, step: number, sampleN: n
       ai_reviewed_at: r.ai_reviewed_at,
     }));
 
+  // #516: every decided-without-status row, oldest first (the set is small and
+  // static — it is a record of how they got there, not a feed). Carries the columns
+  // that tell the writing path apart: an older gate leaves a model / confidence /
+  // http status; a manual edit leaves none of them; a merge leaves merged_into.
+  // Public place name only, never submitted_by / lat / lng (item 5), same as the
+  // reason sample above.
+  const decided_without_status_sample = [...decided_without_status_rows]
+    .sort((a, b) => (ms(a.created_at) || 0) - (ms(b.created_at) || 0))
+    .slice(0, Math.max(sampleN, 10))
+    .map((r) => ({
+      id: r.id,
+      name: r.name_clean || r.name,
+      category: r.category,
+      status: r.status,
+      source: r.source,
+      merged_into: r.merged_into ?? null,
+      ai_decision: r.ai_decision,
+      ai_model: r.ai_model ?? null,
+      ai_model_source: r.ai_model_source ?? null,
+      ai_confidence: r.ai_confidence ?? null,
+      ai_http_status: r.ai_http_status ?? null,
+      ai_reason: r.ai_reason ?? null,
+      ai_reviewed_at: r.ai_reviewed_at ?? null,
+      reviewed_at: r.reviewed_at ?? null,
+      created_at: r.created_at,
+    }));
+
   return {
     total: rows.length, // all arrivals (distinct places + merged duplicates)
     by_status, // #138: merged dupes are a "merged" bucket here, NOT "approved"
@@ -819,6 +890,22 @@ function summariseSubmissions(rows: any[], now: number, step: number, sampleN: n
         present_by_decision: reason_present_by_decision,
         blank_by_decision: reason_blank_by_decision,
         sample: reason_sample,
+        // #516 (v26): rows with an ai_decision that the gate did not write (no
+        // ai_status). OUTSIDE `reviewed` by design — the denominator stays the gate
+        // set (#115) — but counted and named here so coverage_rate can't read 1.00
+        // over decisions it never saw. `reconciliation` must balance:
+        // decided_total == decided_with_status + decided_without_status.count.
+        decided_without_status: {
+          count: decided_without_status_rows.length,
+          by_decision: decided_without_status_by_decision,
+          sample: decided_without_status_sample,
+        },
+        reconciliation: {
+          decided_total,
+          decided_with_status,
+          decided_without_status: decided_without_status_rows.length,
+          status_without_decision, // a gate row with no decision (e.g. a fail-open) — not an anomaly by itself
+        },
       },
     },
     coverage: {
@@ -2323,6 +2410,17 @@ function computeAlerts(report: Record<string, any>, opts: { backlogWarnH: number
     push("info", "ai_reason_blank",
       `${reasons.blank_reviewed} reviewed submission(s) carry no AI verdict text (ai_reason blank) — the writer guards against this, so check the gate isn't dropping it`,
       { reviewed: reasons.reviewed, with_reason: reasons.with_reason, by_decision: reasons.blank_by_decision });
+  }
+  // #516: decisions the gate did not write. Info, not warn: the known rows are
+  // historical and every one is named in the section, so this is an eyeball — but
+  // a NEW one appearing means some path is writing ai_decision without the gate,
+  // which is exactly what would make a count-by-decision fix re-open #115.
+  const dws = reasons.decided_without_status || {};
+  if ((dws.count || 0) > 0) {
+    const ids = Array.isArray(dws.sample) ? dws.sample.map((x: any) => x.id) : [];
+    push("info", "ai_decision_without_status",
+      `${dws.count} submission(s) carry an AI decision but no ai_status — written by something other than the gate, so they sit outside reason coverage; see submissions.ai_gate.reasons.decided_without_status`,
+      { by_decision: dws.by_decision, ids });
   }
 
   // Human-review backlog. info by default; warn once the oldest crosses the tunable.
