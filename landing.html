@@ -113,7 +113,7 @@
    copied: the main script below calls these same two globals.
    One definition, moved earlier — not a second copy that drifts.
    ============================================================ */
-const LANDING_VERSION = '2026.09.23a';
+const LANDING_VERSION = '2026.10.06a'; // #517 — guide lookup via get_guide()
 console.log('%c[landing] ' + LANDING_VERSION, 'font-weight:700');
 
 /* Coarse pointer OR narrow viewport. Deliberately generous: a false
@@ -501,32 +501,36 @@ class LookupError extends Error{
 }
 
 async function lookupHunt(code){
-  const key = 'hunt-code:' + code;
-  const url = SUPABASE_URL + '/rest/v1/shared_kv?select=value&key=eq.'
-            + encodeURIComponent(key);
+  /* #517 — a guide is opened by its EXACT code through the get_guide() function;
+     the shared_kv table no longer shows guide rows to the public key (before, the
+     same key could list every guide). The function returns the guide's stored
+     JSON text, or null for an unknown or malformed code. */
+  const url = SUPABASE_URL + '/rest/v1/rpc/get_guide';
   let res;
   try{
     res = await fetch(url, {
-      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:'Bearer ' + SUPABASE_ANON_KEY }
+      method:'POST',
+      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:'Bearer ' + SUPABASE_ANON_KEY,
+                'Content-Type':'application/json' },
+      body: JSON.stringify({ p_code: String(code || '').toUpperCase() })
     });
   }catch(e){
     throw new LookupError('network');
   }
-  /* 401/403 means the shared_kv row exists but anonymous reads are not
-     permitted. That is a Supabase policy problem, not a bad code, and
+  /* 401/403 means the function exists but the public key may not call it. That is a Supabase policy problem, not a bad code, and
      conflating the two would send you hunting for a typo that is not
      there. See the deploy notes. */
   if(res.status === 401 || res.status === 403) throw new LookupError('forbidden', res.status);
   if(!res.ok) throw new LookupError('http', res.status);
 
-  let rows;
-  try{ rows = await res.json(); }
+  let value;
+  try{ value = await res.json(); }
   catch(e){ throw new LookupError('http', res.status); }
 
-  if(!Array.isArray(rows) || rows.length === 0) throw new LookupError('notfound');
+  if(typeof value !== 'string' || !value) throw new LookupError('notfound');
 
   let data;
-  try{ data = JSON.parse(rows[0].value); }
+  try{ data = JSON.parse(value); }
   catch(e){ throw new LookupError('corrupt'); }
 
   if(!data || typeof data !== 'object') throw new LookupError('corrupt');

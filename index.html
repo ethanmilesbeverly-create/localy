@@ -3855,9 +3855,27 @@ const memStorage = {
    The app JSON.stringifies before set and JSON.parses after get,
    so value is always a plain string here.
    ========================================================= */
+/* #517 — A SHARED GUIDE IS OPENED BY ITS CODE, NEVER LISTED. `hunt-code:<CODE>`
+   keys no longer touch the shared_kv table from the browser: reads go through the
+   get_guide(code) function and writes through save_guide(code, value)
+   (517_guide_read_lockdown.sql), because the table's public read policy now hides
+   guide rows — before, anyone with the public key could list every guide's name
+   and stop coordinates. save_guide enforces the same rules the table's
+   insert/update policies did (owner, ownerless legacy row, or editable #202).
+   It has to carry the WRITE too: the old upsert (INSERT … ON CONFLICT) is refused
+   by Postgres once the existing row is hidden from the writer's read. Every other
+   shared key is untouched. Same return shapes and the same throw-on-error as the
+   table path, so no caller changes. */
+const GUIDE_KEY_RE = /^hunt-code:([A-Za-z0-9]{6})$/;
 const supabaseStorage = {
   async get(key, shared){
     if(shared){
+      const gm = GUIDE_KEY_RE.exec(String(key));
+      if(gm){
+        const { data, error } = await sb.rpc('get_guide', { p_code: gm[1].toUpperCase() });
+        if(error) throw error;
+        return (typeof data === 'string') ? { value: data } : null;
+      }
       const { data, error } = await sb
         .from('shared_kv').select('value').eq('key', key).maybeSingle();
       if(error) throw error;
@@ -3872,6 +3890,12 @@ const supabaseStorage = {
   },
   async set(key, value, shared){
     if(shared){
+      const gm = GUIDE_KEY_RE.exec(String(key));
+      if(gm){
+        const { error } = await sb.rpc('save_guide', { p_code: gm[1].toUpperCase(), p_value: value });
+        if(error) throw error;
+        return;
+      }
       const { error } = await sb
         .from('shared_kv')
         .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
@@ -9142,7 +9166,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.02d';
+const APP_VERSION = '2026.10.06a'; // #517 — guides opened by code via get_guide / saved via save_guide
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.
@@ -13573,9 +13597,10 @@ function shareHunt(id){
    Share ANY pin (a gem OR a real OSM/Wikipedia place) as a link. The pin's own
    data is base64url-encoded INTO the URL, so the recipient reconstructs it with
    NO database read — which is exactly what lets a real place (no id to fetch,
-   unlike a gem) be shared, and dodges #133 (anon SELECT on shared_kv is limited
-   to `hunt-code:%`, so any new-key fetch would read empty for a signed-out
-   visitor). The param is `spot`: NOT `code` (PKCE claims it — #2/#85) and NOT
+   unlike a gem) be shared, and needs no new shared_kv key (a guide is the only
+   shared object a visitor opens, and since #517 only by its exact code through
+   get_guide — the old note here said #133 limited anon reads to `hunt-code:%`; the
+   live policy was in fact read-everything until #517). The param is `spot`: NOT `code` (PKCE claims it — #2/#85) and NOT
    `guide` (#85). It targets index.html directly (AUTH_REDIRECT_BASE) — a spot
    needs no landing.html guide-lookup preview, and on a web app "open the app" is
    "open the page". #50 METER: every spot link is another Pages URL a repo
