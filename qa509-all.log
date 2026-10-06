@@ -714,3 +714,7 @@ FATAL: SUPABASE_URL required.
 [gate-tiles] 290/711 New Orleans tile=601_-1801 rebuilt (try 1) places 28 → 30 · storied OSM 3 → 1
 [gate-tiles] 291/711 New Orleans tile=601_-1800 rebuilt (try 1) places 21 → 23 · storied OSM 0 → 0
 [gate-tiles] 292/711 New Orleans tile=601_-1799 rebuilt (try 1) places 15 → 20 · storied OSM 2 → 2
+[gate-tiles] 293/711 Miami tile=513_-1607 rebuilt (try 4) places 12 → 20 · storied OSM 0 → 0
+[gate-tiles] 294/711 Miami tile=513_-1606 rebuilt (try 3) places 35 → 35 · storied OSM 1 → 1
+[gate-tiles] 295/711 Miami tile=513_-1605 rebuilt (try 1) places 13 → 13 · storied OSM 1 → 1
+[gate-tiles] 296/711 Miami tile=513_-1604 rebuilt (try 2) places 7 → 7 · storied OSM 1 → 1

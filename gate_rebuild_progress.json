@@ -9358,5 +9358,57 @@
     "newPlaces": 20,
     "newStoriedOsm": 2,
     "at": "2026-10-06T18:22:23.787Z"
+  },
+  {
+    "tile": "513_-1607",
+    "metro": "Miami",
+    "lat": 25.650000000000002,
+    "lng": -80.35000000000001,
+    "status": "rebuilt",
+    "tries": 4,
+    "oldPlaces": 12,
+    "oldStoriedOsm": 0,
+    "newPlaces": 20,
+    "newStoriedOsm": 0,
+    "at": "2026-10-06T18:22:45.514Z"
+  },
+  {
+    "tile": "513_-1606",
+    "metro": "Miami",
+    "lat": 25.650000000000002,
+    "lng": -80.30000000000001,
+    "status": "rebuilt",
+    "tries": 3,
+    "oldPlaces": 35,
+    "oldStoriedOsm": 1,
+    "newPlaces": 35,
+    "newStoriedOsm": 1,
+    "at": "2026-10-06T18:26:49.530Z"
+  },
+  {
+    "tile": "513_-1605",
+    "metro": "Miami",
+    "lat": 25.650000000000002,
+    "lng": -80.25,
+    "status": "rebuilt",
+    "tries": 1,
+    "oldPlaces": 13,
+    "oldStoriedOsm": 1,
+    "newPlaces": 13,
+    "newStoriedOsm": 1,
+    "at": "2026-10-06T18:29:10.288Z"
+  },
+  {
+    "tile": "513_-1604",
+    "metro": "Miami",
+    "lat": 25.650000000000002,
+    "lng": -80.2,
+    "status": "rebuilt",
+    "tries": 2,
+    "oldPlaces": 7,
+    "oldStoriedOsm": 1,
+    "newPlaces": 7,
+    "newStoriedOsm": 1,
+    "at": "2026-10-06T18:29:36.006Z"
   }
 ]
