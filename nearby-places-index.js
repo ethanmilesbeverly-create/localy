@@ -837,6 +837,55 @@ const OSM_RESOLVE_MAX = 12; // #367 — per-COLD-BUILD ceiling on by-name storyl
 // never touched, so the bridge upgrades filler without ever downgrading real text.
 function descIsThin(s) { return !s || String(s).trim().length <= 60; }
 
+// #510 — WIKIDATA FILLER. A Wikidata item DESCRIPTION ("park in Cook County,
+// Illinois, United States of America; geonames ID = 4888777") is a category
+// label, not a story, but at 61–100 chars it clears descIsThin's length test and
+// served as a park's story. It reaches a pin two ways: an OSM `description` tag
+// copied from Wikidata (the geonames/GNIS suffix is the import's fingerprint),
+// and _wikidataResolve's rung (b), which accepts the terse Wikidata description
+// when no article passes the gate. Sized 2026-10-07 on every stored v34 row:
+// 493 OSM pins on 221 tiles, longest 100 chars, ~95% "park in …".
+// THE SHAPE: lowercase start (Wikidata descriptions are lowercase; a human
+// sentence or an inscription is not), a short kind phrase, " in "/" of ", a
+// comma-separated place chain ENDING in "United States" / "United States of
+// America", optionally "; geonames ID = N" or "(GNIS ID = N)"; no sentence verb;
+// ≤WIKIDATA_FILLER_MAX chars. The cap keeps the one informative line of this
+// shape ("museum located on the grounds of the world's oldest continuously
+// operating airport in College Park, Maryland, United States", 123 chars).
+// SERVE-TIME ONLY: it widens what hideStorylessOsm hides (and what the warm heal
+// and the would-remove observe arm treat as storyless) — the cached row is not
+// rewritten and the build path's no-downgrade rule is untouched, so this needs
+// NO CACHE_VERSION bump and is reverted by deleting the call sites (#367 rule).
+// It is deliberately NOT folded into descIsThin: that would let the COLD build
+// spend its OSM_RESOLVE_MAX budget re-resolving pins whose bank entry is this
+// same Wikidata line.
+const WIKIDATA_FILLER_MAX = 110;
+const WIKIDATA_FILLER_RE = /^[a-z][a-z'\u2019 -]{1,40}?\s(?:in|of)\s[^.;:!?"\u201C\u201D]*,\s*United States(?: of America)?(?:\s*[;(]\s*(?:geonames|GNIS) ID\s*=\s*\d+\s*\)?)?\.?$/;
+const WIKIDATA_FILLER_VERB_RE = /\b(?:is|was|are|were|has|had|built|named|erected|dedicated|founded|opened)\b/i;
+function descIsWikidataFiller(s) {
+  const d = String(s || "").trim();
+  if (d.length <= 60 || d.length > WIKIDATA_FILLER_MAX) return false; // ≤60 is already thin
+  return WIKIDATA_FILLER_RE.test(d) && !WIKIDATA_FILLER_VERB_RE.test(d);
+}
+
+// #511 — GRAVE FILLER. The tile build's generic line for a grave-class pin with
+// no bio ("A local landmark (tomb).", "A local memorial (grave).") — exactly the
+// osmDesc history-subtype template. Grave-class pins are exempt from the #367
+// hide (kept-until-primed), so after #509 retired the offline gate (which used
+// to drop them) every rebuilt tile served them: checked live 2026-10-07, 88 of
+// 88 such pins in 56 tiles served the filler — mostly structures (mausoleums,
+// columbaria, "Cremation Garden Section 2"), a few notable people (Walter Reed,
+// George C. Marshall, Houdini, Grant's Tomb). The exemption narrows to "kept
+// while it has ANY real line": a grave on the GENERIC template now hides like
+// any storyless pin. A short real line (an inscription — Lemmy's "BORN TO LOSE,
+// LIVED TO WIN" — or a short own tag) stays kept-until-primed. PRIMING STILL
+// UN-HIDES: bakeGravesFromBank runs before the hide on every path and replaces
+// a thin line with a banked bio (>60), so `gate-tiles --prime-graves --commit`
+// for a name brings its pin back on the next serve with no deploy.
+const GRAVE_FILLER_RE = /^A local (?:landmark|memorial) \((?:tomb|grave|gravestone|memorial)\)\.$/i;
+function descIsGraveFiller(s) { return GRAVE_FILLER_RE.test(String(s || "").trim()); }
+const STORY_GATE_VERSION = "511-osm-story-gate-v2"; // #510/#511 deploy-confirm (was the literal "367-osm-story-gate-v1")
+
 function parseOverpass(json, origin) {
   const out = [];
   let chainsDropped = 0;
@@ -2928,7 +2977,7 @@ const _osmBankMemo = new Map(); // resolveBankKey -> { name, desc }; HITS ONLY (
 async function healThinOsmFromBank(places) {
   try {
     const targets = (places || []).filter(
-      (p) => _isStorylessOsm(p) && !_isGraveClassPin(p) && FACTS_DESC_CATS.has(p.category) && p.name,
+      (p) => _isServeStorylessOsm(p) && !_isGraveClassPin(p) && FACTS_DESC_CATS.has(p.category) && p.name, // #510 — a Wikidata-filler pin heals too (longer strict-match bank hit only)
     );
     if (!targets.length) return 0;
     const keyOf = new Map();
@@ -3550,6 +3599,15 @@ function wouldRemoveKey(tile) { return "wouldremove:" + WOULDREMOVE_VERSION + ":
 function _isStorylessOsm(p) {
   return !!p && p.source === "osm" && descIsThin(p.desc);
 }
+// #510 — the SERVE-side storyless test: thin, OR a Wikidata description line
+// (descIsWikidataFiller). Used by the hide, the warm bank heal, and the
+// would-remove observe arm, so anything the hide takes off the map is still in
+// the rescue queue (#367's "rescue-in-parallel, never blind"). The cold build's
+// resolveThinOsmByName keeps the narrower _isStorylessOsm (budget — see the
+// descIsWikidataFiller note).
+function _isServeStorylessOsm(p) {
+  return !!p && p.source === "osm" && (descIsThin(p.desc) || descIsWikidataFiller(p.desc));
+}
 // Record — never MUTATE — the tile's storyless-OSM set into its own shared_kv
 // namespace (outside the #126 `places:%` sweep, like gravebank:/resolve:). One
 // upsert per COLD build (the warm fast path serves an already-recorded tile, so
@@ -3559,7 +3617,7 @@ function _isStorylessOsm(p) {
 // CACHE_VERSION bump (the #357 own-namespace precedent).
 async function recordWouldRemove(places, tile) {
   try {
-    const storyless = (places || []).filter(_isStorylessOsm);
+    const storyless = (places || []).filter(_isServeStorylessOsm); // #510 — includes Wikidata-filler lines the hide now takes off
     const by_category = {};
     const items = [];
     for (const p of storyless) {
@@ -3635,7 +3693,7 @@ async function placesPopularity(name, lat, lng, stats) {
 // has no APP_VERSION — the #345/#365 resolveVersion precedent).
 async function readWouldRemove(rank) {
   const out = {
-    wouldRemoveVersion: "367-would-remove-observe-v4",
+    wouldRemoveVersion: "510-would-remove-observe-v5", // #510 — the recorder counts Wikidata-filler lines as storyless (fills in as tiles cold-build)
     version: WOULDREMOVE_VERSION, tiles: 0, total: 0, by_category: {},
     ranked: 0, queue: [], errors: [],
     key_present: !!GOOGLE_PLACES_KEY,   // is GOOGLE_PLACES_KEY configured on this function
@@ -4175,20 +4233,39 @@ function applyBlocklist(places, bl, sup) {
 //     one then falls to this hide like any other lore pin, and a non-storyless
 //     one (e.g. a wrong-attached columbarium court) survives as a plain History
 //     pin instead of a grave. A person-named grave is never demoted, so it keeps
-//     the exemption.
+//     the exemption. NARROWED BY #511 (2026-10-07): the exemption no longer
+//     covers the GENERIC filler template ("A local landmark (tomb).") — see the
+//     #510/#511 note directly above hideStorylessOsm.
 //
 // ESCAPE HATCH — showHidden (body.showhidden, or ?showhidden=1 on the URL for a
 // curl/dashboard eyeball) disables the hide and serves everything, so the
 // operator can see exactly what came off the map (the server sibling of #344's
 // client ?showhidden=1). The `hidden` count is reported either way.
+//
+// #510/#511 (2026-10-07, STORY_GATE_VERSION 511-osm-story-gate-v2) — two
+// widenings, both serve-time and reversible like the rest of this filter:
+//   - #510: "storyless" also covers a Wikidata description line
+//     (_isServeStorylessOsm / descIsWikidataFiller).
+//   - #511: the grave exemption no longer covers a grave-class pin whose line
+//     is the GENERIC template (descIsGraveFiller). A grave with any real line,
+//     however short (an inscription), stays kept-until-primed; a primed bio
+//     un-hides it on the next serve because the bake runs first.
+// `wikidata` and `graveFiller` count the two new rules (both are inside
+// `hidden`), so a deploy can be confirmed on the envelope by non-zero counts.
 function hideStorylessOsm(places, showHidden) {
-  if (showHidden) return { places: places || [], hidden: 0 };
-  let hidden = 0;
+  if (showHidden) return { places: places || [], hidden: 0, wikidata: 0, graveFiller: 0 };
+  let hidden = 0, wikidata = 0, graveFiller = 0;
   const kept = (places || []).filter((p) => {
-    if (_isStorylessOsm(p) && !_isGraveClassPin(p)) { hidden++; return false; }
+    if (!p || p.source !== "osm") return true;
+    if (_isGraveClassPin(p)) {
+      if (descIsGraveFiller(p.desc)) { hidden++; graveFiller++; return false; }
+      return true; // kept-until-primed (a real line, however short)
+    }
+    if (_isStorylessOsm(p)) { hidden++; return false; }
+    if (descIsWikidataFiller(p.desc)) { hidden++; wikidata++; return false; }
     return true;
   });
-  return { places: kept, hidden };
+  return { places: kept, hidden, wikidata, graveFiller };
 }
 
 // --- #25: REPORT INTAKE -----------------------------------------------------
@@ -4727,7 +4804,7 @@ function cachedEnvelope(tile, cached, s) {
     overpassStatus: null, overpassError: null,
     blocked: s.f.blocked, blocklistFailed: false,
     suppressed: s.f.suppressed, suppressionFailed: false,
-    storyHidden: s.g.hidden, storyGateVersion: "367-osm-story-gate-v1",
+    storyHidden: s.g.hidden, storyGateVersion: STORY_GATE_VERSION, storyHiddenWikidata: s.g.wikidata, storyHiddenGraveFiller: s.g.graveFiller, // #510/#511 — of storyHidden, how many by each new rule
     osmCurated: s.cur.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
     graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: s.graveStruct.demoted, graveStoryStripped: s.graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
     qidVersion: "164-wikidata-qid-v1", // #164 deploy-confirm (the Q-id bake runs at tile BUILD; a warm tile gains it on its next rebuild)
@@ -5014,7 +5091,7 @@ Deno.serve(async (req) => {
       return json({
         tile, places: gated.places, cached: false, ts: Date.now(),
         cacheVersion: CACHE_VERSION,
-        storyHidden: gated.hidden, storyGateVersion: "367-osm-story-gate-v1",
+        storyHidden: gated.hidden, storyGateVersion: STORY_GATE_VERSION, storyHiddenWikidata: gated.wikidata, storyHiddenGraveFiller: gated.graveFiller, // #510/#511
         osmCurated: curC.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
         graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: graveStruct.demoted, graveStoryStripped: graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
         overpassStatus: osm.status, overpassError: osm.error,

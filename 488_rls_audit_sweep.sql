@@ -1,5 +1,20 @@
 -- 488_rls_audit_sweep.sql — #488: the RLS audit sweep, rewritten.
--- SWEEP_VERSION: 488-sweep-v2
+-- SWEEP_VERSION: 488-sweep-v4
+--   v4 (2026-10-06, #517b): the relational guide copies (`guides`,
+--   `guide_stops`) are no longer public by design — #277's backfill put every
+--   guide there and their `using (true)` reads listed them all. Reads are now
+--   owner-only (517b_guides_relational_read.sql); both tables leave the
+--   public_read list (so a `using (true)` read there is a HOLE again), and W13 /
+--   W14 check that a signed-out reader lists none. #277 Pass 2 reads BY CODE
+--   through a definer function (the get_guide pattern), never a public SELECT.
+--   v3 (2026-10-06, #517): guides are opened by their exact code and never
+--   listed. shared_kv's public read now hides `hunt-code:%` rows, and the browser
+--   reaches a guide only through two SECURITY DEFINER functions — get_guide
+--   (anon + signed-in) and save_guide (signed-in) — added to grant (5)'s list
+--   (six → eight). P10 now saves through save_guide (a direct upsert is refused
+--   once the row is hidden — that is the point); P14 opens a guide by code; W11
+--   (signed out lists guides), W12 (signed out calls save_guide) and W43 (a
+--   stranger saves over an owned guide through save_guide) are the new must-nots.
 --   v2 (2026-10-05, #513): the TRUNCATE KNOWN row became a real check — every
 --   browser write grant on every table and sequence against the #513 keep-list
 --   (grant (6)), plus self-test T6 that proves it can see a stray grant.
@@ -119,9 +134,11 @@ returns table (item text, detail text, verdict text) language sql as $$
     ('storage.objects.capture-photos owner read'),
     ('storage.objects.capture-photos owner update')
   ),
-  -- tables whose rows are public by design (guides and hunts are shared by
-  -- code; shared_kv holds the public tile cache and guide blobs)
-  public_read(t) as (values ('shared_kv'), ('guides'), ('guide_stops'), ('hunts'), ('hunt_points')),
+  -- tables whose rows are public by design (shared_kv holds the public tile
+  -- cache — its guide rows are hidden since #517; hunts/hunt_points are empty
+  -- and unused). guides/guide_stops left this list in v4 (#517b): a guide is
+  -- opened by its exact code through a definer function, never listed.
+  public_read(t) as (values ('shared_kv'), ('hunts'), ('hunt_points')),
   live as (
     select p.schemaname || '.' || p.tablename || '.' || p.policyname as k,
            p.tablename, p.policyname, p.cmd, p.permissive,
@@ -262,8 +279,9 @@ begin
     return next;
   end loop;
 
-  -- (5) SECURITY DEFINER functions run with the owner's rights. Only these six
+  -- (5) SECURITY DEFINER functions run with the owner's rights. Only these eight
   --     are meant to be callable from the browser; every other one must not be.
+  --     (#517 added get_guide / save_guide: a guide is opened by exact code only.)
   for r in
     with allow(f, roles) as (values
       ('gem_seconds_counts',         array['anon','authenticated']),
@@ -271,7 +289,9 @@ begin
       ('pin_interest_add',           array['anon','authenticated']),
       ('leaderboard_top',            array['authenticated']),
       ('leaderboard_me',             array['authenticated']),
-      ('set_leaderboard_visibility', array['authenticated']))
+      ('set_leaderboard_visibility', array['authenticated']),
+      ('get_guide',                  array['anon','authenticated']),
+      ('save_guide',                 array['authenticated']))
     select p.oid, p.proname,
            format('%s(%s)', p.proname, pg_get_function_identity_arguments(p.oid)) as sig,
            a.roles,
@@ -516,6 +536,7 @@ declare
   v_ids      uuid[];
   v_h        bigint;
   v_kv_key   text; v_kv_owner uuid;     -- an owned, non-editable hunt-code blob
+  v_any_code text;                      -- any guide code, for P14 (#517)
   v_guide    uuid; v_guide_owner uuid;  -- an owned relational guide
   v_frozen   uuid;                      -- an unowned (frozen, #411) guide
   v_reason   text;
@@ -543,6 +564,8 @@ begin
   where key ~ '^hunt-code:' and owner is not null and owner is distinct from v_stranger
     and value like '{%' and coalesce((value::jsonb ->> 'editable')::boolean, false) = false
   order by key limit 1;
+  select substr(key, 11) into v_any_code
+  from public.shared_kv where key ~ '^hunt-code:[A-HJ-NP-Z2-9]{6}$' order by key limit 1;
   select id, owner into v_guide, v_guide_owner
   from public.guides where owner is not null and owner is distinct from v_stranger order by code limit 1;
   select id into v_frozen from public.guides where owner is null and not editable order by code limit 1;
@@ -623,7 +646,7 @@ begin
     'count', 'runs', 'BROKEN');
   perform pg_temp.p488(702, 'app', 'P02 signed out: shared_kv get (tile cache, blocklist)', 'anon', null,
     'select count(*) from (select value from public.shared_kv where key = ''places:blocklist'') q', 'count', 'runs', 'BROKEN');
-  perform pg_temp.p488(703, 'app', 'P03 signed out: guides + stops by code', 'anon', null,
+  perform pg_temp.p488(703, 'app', 'P03 signed out: guides + stops query runs (reads none since #517b)', 'anon', null,
     'select count(*) from public.guides g left join public.guide_stops s on s.guide_id = g.id', 'count', 'runs', 'BROKEN');
   perform pg_temp.p488(704, 'app', 'P04 signed out: search_pin_names', 'anon', null,
     'select count(*) from public.search_pin_names(''park'', 41.88, -87.63, 5, false)', 'count', 'runs', 'BROKEN');
@@ -643,9 +666,8 @@ begin
       format('insert into public.user_state (user_id, key, value, updated_at) values (%L, ''sweep:488'', ''x'', now())
               on conflict (user_id, key) do update set value = excluded.value, updated_at = excluded.updated_at', v_stranger),
       'run', 'runs', 'BROKEN');
-    perform pg_temp.p488(710, 'app', 'P10 signed in: save a new guide blob', 'authenticated', v_stranger,
-      'insert into public.shared_kv (key, value, updated_at) values (''hunt-code:ZZQXW2'', ''{"name":"sweep"}'', now())
-       on conflict (key) do update set value = excluded.value, updated_at = excluded.updated_at',
+    perform pg_temp.p488(710, 'app', 'P10 signed in: save a new guide (save_guide, #517)', 'authenticated', v_stranger,
+      'select public.save_guide(''ZZQXW2'', ''{"name":"sweep"}'')',
       'run', 'runs', 'BROKEN');
     perform pg_temp.p488(711, 'app', 'P11 signed in: submit a gem (lands pending)', 'authenticated', v_stranger,
       format('insert into public.submissions (id, name, description, lat, lng, submitted_by, source, status)
@@ -656,6 +678,13 @@ begin
       'select (select count(*) from public.leaderboard_top()) + (select count(*) from public.leaderboard_me())', 'count', 'runs', 'BROKEN');
     perform pg_temp.p488(713, 'app', 'P13 signed in: set_leaderboard_visibility', 'authenticated', v_stranger,
       'select public.set_leaderboard_visibility(false)', 'run', 'runs', 'BROKEN');
+  end if;
+  if v_any_code is null then
+    perform pg_temp.s488(714, 'app', 'P14 signed out: open a guide by its code (get_guide, #517)', 'no guide exists');
+  else
+    perform pg_temp.p488(714, 'app', 'P14 signed out: open a guide by its code (get_guide, #517)', 'anon', null,
+      format('select count(*) from (select public.get_guide(%L) as v) q where v is not null', v_any_code),
+      'count', '=1', 'BROKEN');
   end if;
 
   -- ---------------- WRITE: hostile writes must fail or change nothing ------
@@ -684,6 +713,14 @@ begin
     'select public.review_retry_kick()', 'run', 'refused', 'HOLE');
   perform pg_temp.p488(810, 'write', 'W10 signed out: upload a photo', 'anon', null,
     'insert into storage.objects (bucket_id, name) values (''capture-photos'', ''sweep/488.jpg'')', 'run', 'refused', 'HOLE');
+  perform pg_temp.p488(811, 'write', 'W11 signed out: list every guide (#517)', 'anon', null,
+    'select count(*) from public.shared_kv where key like ''hunt-code:%''', 'count', 'none', 'HOLE');
+  perform pg_temp.p488(812, 'write', 'W12 signed out: call save_guide (#517)', 'anon', null,
+    'select public.save_guide(''ZZQXW3'', ''{"name":"sweep"}'')', 'run', 'refused', 'HOLE');
+  perform pg_temp.p488(813, 'write', 'W13 signed out: list the relational guides (#517b)', 'anon', null,
+    'select count(*) from public.guides', 'count', 'none', 'HOLE');
+  perform pg_temp.p488(814, 'write', 'W14 signed out: list the relational guide stops (#517b)', 'anon', null,
+    'select count(*) from public.guide_stops', 'count', 'none', 'HOLE');
 
   if v_stranger is null or v_victim is null then
     perform pg_temp.s488(820, 'write', 'W20–W39 signed-in stranger', 'fewer than two accounts exist');
@@ -753,6 +790,12 @@ begin
     else
       perform pg_temp.p488(840, 'write', 'W40 stranger: edit an owned guide blob', 'authenticated', v_stranger,
         format('update public.shared_kv set value = ''{}'' where key = %L', v_kv_key), 'dml', 'none', 'HOLE');
+    end if;
+    if v_kv_key is null then
+      perform pg_temp.s488(843, 'write', 'W43 stranger: save over an owned guide via save_guide (#517)', 'no owned, non-editable hunt-code blob');
+    else
+      perform pg_temp.p488(843, 'write', 'W43 stranger: save over an owned guide via save_guide (#517)', 'authenticated', v_stranger,
+        format('select public.save_guide(%L, ''{"name":"sweep"}'')', substr(v_kv_key, 11)), 'run', 'refused', 'HOLE');
     end if;
     if v_guide is null then
       perform pg_temp.s488(841, 'write', 'W41 stranger: rename an owned guide', 'no owned relational guide');
@@ -853,7 +896,7 @@ end $$;
 -- is never a pass.
 -- =====================================================================
 insert into sweep_488
-select 0, 'summary', '488-sweep-v2',
+select 0, 'summary', '488-sweep-v4',
        (select count(*) from sweep_488 where section in ('rls','policy','grant','trigger')) || ' catalog checks · '
        || (select count(*) from sweep_488 where section in ('read','profiles','app','write','self-test')) || ' of '
        || (select planned from sweep_488_plan) || ' probes reported · '
