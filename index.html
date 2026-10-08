@@ -6405,7 +6405,8 @@ function humanFirstPass(base, category, gemBucket, limit){
 function blendCategory(base, category, targetCount, procFn, gemBucket){
   const out = [];
   const usedNames = new Set();
-  const push = p => { const k=normName(p.name); if(k && usedNames.has(k)) return; if(k) usedNames.add(k); out.push(p); };
+  const twins = graveTwinGuard();   // #520
+  const push = p => { const k=normName(p.name); if(k && usedNames.has(k)) return; if(twins.dup(p)) return; if(k) usedNames.add(k); twins.add(p); out.push(p); };
 
   // 1) real user submissions for this category + map places with a sourced
   //    story (#421), nearest first
@@ -6458,8 +6459,9 @@ function blendHistoryForATL(base, targetCount, graveCap){
   const lead = [], graves = [];   // non-grave history leads; seed graves capped behind it, each nearest-first
   const usedNames = new Set();
   const isSeedGrave = p => /^grave of /i.test((p && p.name) || '');
+  const twins = graveTwinGuard();   // #520
   const consider = p => {
-    const k = normName(p.name); if(k && usedNames.has(k)) return; if(k) usedNames.add(k);
+    const k = normName(p.name); if(k && usedNames.has(k)) return; if(twins.dup(p)) return; if(k) usedNames.add(k); twins.add(p);
     (isSeedGrave(p) ? graves : lead).push(p);
   };
   // blendCategory precedence — gems (incl. seed graves) first, then real OSM
@@ -6784,6 +6786,7 @@ function atlRevealBudget(zoom){
 function dedupePoints(points){
   const seenIds = new Set();
   const seenNames = new Set();
+  const twins = graveTwinGuard();   // #520 — across the seam of two concatenated blends too
   const out = [];
   (points||[]).forEach(p=>{
     if(!p) return;
@@ -6796,6 +6799,8 @@ function dedupePoints(points){
       if(seenNames.has(k)) return;
       seenNames.add(k);
     }
+    if(twins.dup(p)) return;
+    twins.add(p);
     out.push(p);
   });
   return out;
@@ -6818,6 +6823,37 @@ function historyKindFacet(p){
   if(ty === 'grave' || ty === 'memorial' || /^grave of /i.test(nm)) return 'graves';
   if(ty === 'museum') return 'museums';
   return 'lore';
+}
+/* #520 — ONE PERSON, ONE GRAVE PIN. A seed grave gem is named "Grave of X" and sits
+   on graves-resolve's #372 50 m ring around the cemetery's cluster point (by design —
+   #492's move-onto-the-ring recipe), while OSM's own per-person node for the same
+   grave is named plain "X" and sits on the real plot. Every blend dedupes by
+   normName, which can't see that "graveofludwigmiesvanderohe" and
+   "ludwigmiesvanderohe" are one person — so Graceland listed Mies twice, 0.4 mi
+   apart. This collapses them: two GRAVES-facet points whose names agree once a
+   leading "Grave of"/"Tomb of" (or a trailing "'s grave/tomb") is dropped, within
+   GRAVE_TWIN_M of each other, are the same grave. The FIRST one wins, and every
+   blend reaches gems before plain OSM, so the gem — which carries the curated
+   story — survives and the OSM pin yields. Scoped to the graves facet (graves +
+   memorials) and a same-cemetery distance so a statue or a monument that merely
+   shares the person's name elsewhere in town is never folded away. */
+const GRAVE_TWIN_M = 1500;   // wider than a big cemetery's ring-point-to-plot spread (Graceland ~600 m); far below cross-town
+function graveTwinKey(p){
+  if(!p || typeof p.lat !== 'number' || typeof p.lng !== 'number') return null;
+  if(historyKindFacet(p) !== 'graves') return null;
+  const bare = String(p.name || '')
+    .replace(/^\s*(?:the\s+)?(?:grave|tomb|burial\s+site)\s+of\s+/i, '')
+    .replace(/[\u2019']s\s+(?:grave|tomb)\s*$/i, '')
+    .replace(/\s*\((?:grave|tomb)\)\s*$/i, '');
+  const k = normName(bare);
+  return k.length >= 6 ? k : null;
+}
+function graveTwinGuard(){
+  const kept = [];
+  return {
+    dup(p){ const k = graveTwinKey(p); return !!k && kept.some(s => s.k === k && haversine(s.lat, s.lng, p.lat, p.lng) < GRAVE_TWIN_M); },
+    add(p){ const k = graveTwinKey(p); if(k) kept.push({ k, lat:p.lat, lng:p.lng }); }
+  };
 }
 /* #80 Build 3 — FACET-AWARE PIN RENDER. A history-family pin carries ONE
    category ('history'), so colour/label/glyph keyed on t.category alone paint
@@ -6882,7 +6918,8 @@ function kindGlyphSVG(kind, ink){
 function blendHistoryFacet(base, facet, targetCount){
   const out = [];
   const used = new Set();
-  const push = p => { const k=normName(p.name); if(k && used.has(k)) return; if(k) used.add(k); out.push(p); };
+  const twins = graveTwinGuard();   // #520
+  const push = p => { const k=normName(p.name); if(k && used.has(k)) return; if(twins.dup(p)) return; if(k) used.add(k); twins.add(p); out.push(p); };
   // 1) history gems (user submissions + the #310 seed graves), facet-filtered on the raw gem (which carries .name)
   //    #421 — merged nearest-first with story-bearing map places of the same facet
   const _gemRows = [];
@@ -9166,7 +9203,7 @@ function navTo(id){
    The suffix letter is the deploy within the day, not the feature. If two
    files leave in one day, they get two letters, even if one is a one-line
    revert. */
-const APP_VERSION = '2026.10.06a'; // #517 — guides opened by code via get_guide / saved via save_guide
+const APP_VERSION = '2026.10.08a'; // #520 — an OSM grave pin yields to the same person's "Grave of X" gem in the same cemetery
 
 /* #81 — THE DATA CONTROL IS BUILT, TESTED, AND DELIBERATELY NOT SHOWN.
    Flip to true only when "Delete my account" ships beside it.

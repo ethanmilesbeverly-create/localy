@@ -157,9 +157,16 @@
 //   with a long, growing breather.
 //   deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --prime-graves            # DRY: resolve + report, writes NOTHING to the bank
 //   deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --prime-graves --commit   # write every confident hit into gravebank:<VER>:*
-//   # then bake onto the real plots (deterministic, no rate-limit fight):
-//   SEED_CITY_NAME=Chicago SEED_CITY_LAT=41.8781 SEED_CITY_LNG=-87.6298 GATE_METRO_KM=15 \
-//     deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --rewarm --commit
+//   # #522 (2026-10-08): no follow-up step — since #363 the serve path bakes a banked bio
+//   # onto its pin on the next serve, and the old `--rewarm --commit` follow-up is retired
+//   # (#509; it deletes tiles). The run itself now: (1) PRE-FLIGHTS the key — a read of the
+//   # bank's row count must return 200 with a non-zero count, or it exits before resolving
+//   # anything (dry runs too); (2) counts `banked` only on a 2xx write and STOPS on the first
+//   # failed one (exit 2); (3) prints each bio's first ~100 chars, so READ THE DATES — a
+//   # same-title namesake passes the guards (#521, Paul Cornell); (4) refuses the handoff's
+//   # known-namesake labels (KNOWN_NAMESAKE_LABELS) — bank those by one-row SQL upsert;
+//   # (5) re-counts the bank after a commit and prints VERIFIED only if it climbed by exactly
+//   # `banked` (exit 2 on a mismatch).
 //
 // VERIFY (REST): the committed rows are ordinary cache rows —
 //   curl "$SUPABASE_URL/rest/v1/shared_kv?key=eq.places:<VER>:<tile>&select=value" -H "apikey: $SRK" -H "Authorization: Bearer $SRK"
@@ -650,9 +657,14 @@ async function readGraveBank(name: string): Promise<{ desc: string; title: strin
   } catch (e) { noteTimeout(e, "db"); return null; }
 }
 let _gbWarn = 0;
-async function writeGraveBank(name: string, hit: { desc: string; title: string }): Promise<void> {
+// #522 — returns whether the row was actually written: { ok:true } only on a 2xx upsert;
+// { ok:false, status } on any other HTTP status, a timeout or a network error; a dry
+// prime returns { ok:true, dry:true } without writing. --prime-graves counts a name as
+// `banked` ONLY on ok && !dry, and stops the run on the first failed write (#364/#521:
+// a 401ing key used to print `banked: N` while writing nothing).
+async function writeGraveBank(name: string, hit: { desc: string; title: string }): Promise<{ ok: boolean; dry?: boolean; status?: number | string }> {
   // #363 dry prime: resolve + report, but never touch the bank (add --commit to persist).
-  if (BANK_DRY) { console.log(`    [prime] DRY — would bank ${graveBankKey(name)} → "${hit.title}"`); return; }
+  if (BANK_DRY) { console.log(`    [prime] DRY — would bank ${graveBankKey(name)} → "${hit.title}" — ${bioExcerpt(hit.desc)}`); return { ok: true, dry: true }; }
   try {
     const url = `${SUPABASE_URL}/rest/v1/shared_kv?on_conflict=key`;
     const res = await fetch(url, {
@@ -662,7 +674,59 @@ async function writeGraveBank(name: string, hit: { desc: string; title: string }
       body: JSON.stringify({ key: graveBankKey(name), value: JSON.stringify({ title: hit.title, desc: hit.desc, ts: Date.now() }), updated_at: new Date().toISOString() }),
     });
     if (!res.ok && _gbWarn++ < 5) console.error(`[gate-tiles] gravebank WRITE failed HTTP ${res.status} (needs service role) — resolves won't persist across runs.`);
-  } catch (e) { noteTimeout(e, "db"); /* best-effort — a failed bank write just means a re-resolve next run */ }
+    return res.ok ? { ok: true } : { ok: false, status: res.status };
+  } catch (e) { noteTimeout(e, "db"); return { ok: false, status: String((e as Error)?.name || e) }; /* the tile pass treats this as best-effort; --prime-graves stops on it */ }
+}
+// #522 — the first ~100 characters of a bio, one line, so a dry run shows the DATES next
+// to the title (a same-TITLE namesake — #521's Paul Cornell, the British writer — passes
+// a title-only eyeball; "(born 1961)" against an 1800s plot does not).
+function bioExcerpt(desc: string, n = 100): string {
+  const one = String(desc || "").replace(/\s+/g, " ").trim();
+  return one.length > n ? one.slice(0, n).trimEnd() + "…" : one;
+}
+// #522 — labels the guards are KNOWN to resolve to a namesake (handoff §5, the #363
+// bullet: proven live). --prime-graves refuses to live-resolve these; if one is already
+// banked it is reported as banked (the bank was fixed by hand), otherwise the route is a
+// one-row SQL upsert from the right article (the 521_paul_cornell_bank_fix.sql shape).
+// Compared after coreName+fold, the same way the bank key is built.
+const KNOWN_NAMESAKE_LABELS = ["Big Bill Thompson", "Paul Cornell"];
+function isKnownNamesake(name: string): boolean {
+  const k = graveBankKey(name);
+  return KNOWN_NAMESAKE_LABELS.some((l) => graveBankKey(l) === k);
+}
+// #522 — what a Supabase key's shape says it is: "service_role" (sb_secret_… or a JWT with
+// role service_role), "publishable" (sb_publishable_…), the JWT's role claim otherwise
+// (e.g. "anon"), or "unknown". Never sent anywhere; only used to refuse a --commit early.
+function keyRole(k: string): string {
+  const key = String(k || "").trim();
+  if (key.startsWith("sb_secret_")) return "service_role";
+  if (key.startsWith("sb_publishable_")) return "publishable";
+  const parts = key.split(".");
+  if (parts.length === 3) {
+    try {
+      const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(parts[1].length / 4) * 4, "=");
+      const role = JSON.parse(atob(b64))?.role;
+      if (typeof role === "string" && role) return role;
+    } catch (_e) { /* not a JWT */ }
+  }
+  return "unknown";
+}
+// #522 — count gravebank:<VER>:* rows with the key in hand (HEAD + count=exact). Returns
+// { status, count } — status is the HTTP status (or an error name), count is null unless
+// the read returned 200 with a parsable Content-Range. Key-only: never reads a value.
+async function countGraveBank(): Promise<{ status: number | string; count: number | null }> {
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/shared_kv?select=key&key=like.${encodeURIComponent("gravebank:" + GRAVEBANK_VERSION + ":")}*&limit=1`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(DB_TIMEOUT_MS),
+      headers: { apikey: SRK, Authorization: `Bearer ${SRK}`, Accept: "application/json", Prefer: "count=exact" },
+    });
+    await res.body?.cancel();
+    const cr = res.headers.get("content-range") || "";
+    const m = cr.match(/\/(\d+)$/);
+    const okStatus = res.status === 200 || res.status === 206;
+    return { status: res.status, count: okStatus && m ? Number(m[1]) : null };
+  } catch (e) { return { status: String((e as Error)?.name || e), count: null }; }
 }
 // Search variants for a noisy grave name: the core name, the parenthetical alias
 // ("Amos Blakemore (Junior Wells)" → "Junior Wells"), and the de-noised form
@@ -782,7 +846,8 @@ function _isStructureOnlyName(name: string): boolean {
 // every later run reuses it. {desc,title} on a hit, null on a clean miss across all
 // variants, "throttled" if any variant exhausts (the caller KEEPS the pin, never
 // drops it).
-async function resolveGraveIdentity(name: string, bankOnly = false): Promise<{ desc: string; title: string } | null | "throttled"> {
+// #522 writeBank=false: --prime-graves writes the bank ITSELF so it can check the write.
+async function resolveGraveIdentity(name: string, bankOnly = false, writeBank = true): Promise<{ desc: string; title: string } | null | "throttled"> {
   if (_isStructureOnlyName(name)) return null;                // #381 guard (0): a numbered structure ("Court No. 5") can only wrong-attach — refuse before the bank read/search/bank-write (the #375 nearby-places guard, ported offline)
   if (personTokens(name).length < 2) return null;             // guard (1): not a full name → don't relax the gate
   const banked = await readGraveBank(name);
@@ -798,7 +863,7 @@ async function resolveGraveIdentity(name: string, bankOnly = false): Promise<{ d
   for (const q of graveSearchQueries(name)) {
     const r = await graveSearchOnce(name, q);
     if (r === "throttled") { sawThrottle = true; continue; }  // try the next variant; hold only if ALL throttle/miss
-    if (r) { await writeGraveBank(name, r); return r; }
+    if (r) { if (writeBank) await writeGraveBank(name, r); return r; }
   }
   return sawThrottle ? "throttled" : null;                    // throttled → HOLD (keep pin); clean miss → drop
 }
@@ -1039,7 +1104,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-04b (#509 tile --commit RETIRED; new --rebuild = delete + live rebuild with retries, no gating; GATE_METRO filter; carries #506 timeouts; roster unchanged (26))";
+const BUILD_MARKER = "gate-tiles 2026-10-08a (#522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts; roster unchanged (26))";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
@@ -1064,18 +1129,42 @@ async function loadPrimeNames(): Promise<string[]> {
 // confident hit (monotonic). Reuses resolveGraveIdentity untouched (one home for the
 // three guards + the bank), so priming can never wrong-attach; a name whose common label
 // doesn't token-match its article MISSES (reported, so you can re-prime it). Touches only
-// gravebank:*, never a tile. A later `--rewarm --commit` bakes the banked bios onto the
-// real OSM plots deterministically. Needs SUPABASE_URL + SRK (+ Wikipedia); the function
+// gravebank:*, never a tile. The serve path bakes the banked bios onto the real OSM
+// plots on the next serve (#363; the old `--rewarm --commit` follow-up is retired, #509/#522). Needs SUPABASE_URL + SRK (+ Wikipedia); the function
 // need not be reachable.
 async function primeGraves(): Promise<void> {
   if (!SRK) { console.error("FATAL: --prime-graves needs SUPABASE_SERVICE_ROLE_KEY (the gravebank read+write is service-role). Nothing was changed."); Deno.exit(1); }
+
+  // #522 PRE-FLIGHT — before resolving anything, read the bank's row count with the key.
+  // A wrong/placeholder key 401s; an anon key reads 200 but sees 0 rows (gravebank:* is
+  // not public). Either way the run would bank nothing, so refuse up front — DRY runs too,
+  // since they read the bank (a bad key makes every "already-banked" look like a miss).
+  const pre0 = await countGraveBank();
+  if (pre0.count === null || pre0.count < 1) {
+    console.error(`FATAL: pre-flight read of gravebank:${GRAVEBANK_VERSION}:* returned HTTP ${pre0.status}${pre0.count === null ? "" : `, ${pre0.count} row(s)`} — the key in SUPABASE_SERVICE_ROLE_KEY is not the service-role key (or SUPABASE_URL is wrong). The bank is never empty, so a good key reads 200 with a count. Nothing was resolved or changed.`);
+    Deno.exit(1);
+  }
+  // The bank is publicly READABLE (the anon/publishable key reads the same count), so a
+  // read alone can't prove the key can WRITE. For --commit, also refuse a key whose shape
+  // says it is not service-role: a publishable key, or a JWT whose role claim isn't
+  // service_role. (An unrecognised shape passes here; a failed first write still stops it.)
+  if (!BANK_DRY) {
+    const role = keyRole(SRK);
+    if (role !== "service_role" && role !== "unknown") {
+      console.error(`FATAL: --commit needs the SERVICE-ROLE key, but SUPABASE_SERVICE_ROLE_KEY looks like a ${role} key (it can read the bank but every write would fail). Nothing was resolved or changed.`);
+      Deno.exit(1);
+    }
+  }
+  console.log(`[gate-tiles] pre-flight OK: HTTP ${pre0.status}, gravebank:${GRAVEBANK_VERSION}:* = ${pre0.count} row(s)${BANK_DRY ? "" : `, key shape: ${keyRole(SRK)}`}.`);
+
   const names = await loadPrimeNames();
   console.log(`[gate-tiles] --prime-graves: ${names.length} name(s), pace=${PRIME_PACE_MS}ms, throttle-retries=${PRIME_MAX_THROTTLE_RETRY}, ${BANK_DRY ? "DRY (no bank write — add --commit to persist)" : `COMMIT (writing gravebank:${GRAVEBANK_VERSION}:*)`}.`);
-  console.log("[gate-tiles] each name → resolveGraveIdentity: bank-first, then guarded multi-query recall (the SAME three #356 guards as the tile pass). A namesake can't wrong-attach; a label that doesn't token-match its article MISSES — re-prime it with the article-matching label.");
+  console.log("[gate-tiles] each name → resolveGraveIdentity: bank-first, then guarded multi-query recall (the SAME three #356 guards as the tile pass). A label that doesn't token-match its article MISSES — re-prime it with the article-matching label. READ THE DATES on every line: a same-title namesake passes the guards (#521).");
 
-  type Out = { name: string; key: string; outcome: string; title?: string; chars?: number };
+  type Out = { name: string; key: string; outcome: string; title?: string; chars?: number; excerpt?: string; status?: number | string };
   const out: Out[] = [];
-  let banked = 0, already = 0, missed = 0, held = 0;
+  let banked = 0, already = 0, missed = 0, held = 0, refused = 0;
+  let writeFailed: { name: string; status?: number | string } | null = null;
 
   for (let i = 0; i < names.length; i++) {
     const name = names[i];
@@ -1084,10 +1173,18 @@ async function primeGraves(): Promise<void> {
     // Already banked? Skip instantly — the bank is monotonic, so a re-run is idempotent.
     const pre = await readGraveBank(name);
     if (pre) {
-      out.push({ name, key, outcome: "already-banked", title: pre.title, chars: pre.desc.length });
+      out.push({ name, key, outcome: "already-banked", title: pre.title, chars: pre.desc.length, excerpt: bioExcerpt(pre.desc) });
       already++;
-      console.log(`  ⤿ ${name} — already banked as "${pre.title}" (skip)`);
+      console.log(`  ⤿ ${name} — already banked as "${pre.title}" (skip) — ${bioExcerpt(pre.desc)}`);
       if (i < names.length - 1) await sleep(PRIME_PACE_MS);
+      continue;
+    }
+
+    // #522 — a label the guards are known to send to a namesake is never live-resolved.
+    if (isKnownNamesake(name)) {
+      out.push({ name, key, outcome: "refused-known-namesake" });
+      refused++;
+      console.log(`  ⊘ ${name} — REFUSED: a known namesake label (handoff §5, #363). Bank it with a one-row SQL upsert from the right article (see 521_paul_cornell_bank_fix.sql).`);
       continue;
     }
 
@@ -1095,7 +1192,7 @@ async function primeGraves(): Promise<void> {
     // priming's job is to out-wait the identity-keyed rate limit the tile warmer loses to.
     let r: { desc: string; title: string } | null | "throttled" = null;
     for (let attempt = 0; attempt <= PRIME_MAX_THROTTLE_RETRY; attempt++) {
-      r = await resolveGraveIdentity(name);      // bank-read-first; on a hit it writes the bank (unless BANK_DRY)
+      r = await resolveGraveIdentity(name, false, false);   // #522: resolve only — the write happens below, checked
       if (r !== "throttled") break;
       if (attempt < PRIME_MAX_THROTTLE_RETRY) {
         const wait = PRIME_THROTTLE_WAITS[Math.min(attempt, PRIME_THROTTLE_WAITS.length - 1)];
@@ -1109,9 +1206,22 @@ async function primeGraves(): Promise<void> {
       held++;
       console.log(`  ~ ${name} — still throttled after ${PRIME_MAX_THROTTLE_RETRY} retries (NOT banked; re-run --prime-graves later)`);
     } else if (r) {
-      out.push({ name, key, outcome: BANK_DRY ? "resolved-dry" : "banked", title: r.title, chars: r.desc.length });
-      banked++;
-      console.log(`  ${BANK_DRY ? "○" : "+"} ${name} → "${r.title}" (${r.desc.length} chars)${BANK_DRY ? " [DRY — would bank]" : " banked"}`);
+      const w = await writeGraveBank(name, r);
+      const ex = bioExcerpt(r.desc);
+      if (w.dry) {
+        out.push({ name, key, outcome: "resolved-dry", title: r.title, chars: r.desc.length, excerpt: ex });
+        banked++;
+        console.log(`  ○ ${name} → "${r.title}" (${r.desc.length} chars) [DRY — would bank]\n      ${ex}`);
+      } else if (w.ok) {
+        out.push({ name, key, outcome: "banked", title: r.title, chars: r.desc.length, excerpt: ex });
+        banked++;
+        console.log(`  + ${name} → "${r.title}" (${r.desc.length} chars) banked\n      ${ex}`);
+      } else {
+        out.push({ name, key, outcome: "write-failed", title: r.title, chars: r.desc.length, excerpt: ex, status: w.status });
+        writeFailed = { name, status: w.status };
+        console.error(`  ✗✗ ${name} → "${r.title}" — bank WRITE FAILED (HTTP ${w.status}). STOPPING: the remaining ${names.length - i - 1} name(s) were not attempted.`);
+        break;
+      }
     } else {
       out.push({ name, key, outcome: "clean-miss" });
       missed++;
@@ -1121,22 +1231,27 @@ async function primeGraves(): Promise<void> {
     if (i < names.length - 1) await sleep(PRIME_PACE_MS);
   }
 
-  const report = { build: BUILD_MARKER, mode: BANK_DRY ? "dry" : "commit", gravebankVersion: GRAVEBANK_VERSION, names: names.length, banked, already, missed, held, results: out };
+  // #522 — the proof a commit landed: the bank's row count must climb by exactly `banked`.
+  const post = BANK_DRY ? null : await countGraveBank();
+  const climb = post && post.count !== null ? post.count - (pre0.count as number) : null;
+  const verified = BANK_DRY ? null : (climb === banked);
+
+  const report = { build: BUILD_MARKER, mode: BANK_DRY ? "dry" : "commit", gravebankVersion: GRAVEBANK_VERSION, names: names.length, banked, already, missed, held, refused, writeFailed, bankRowsBefore: pre0.count, bankRowsAfter: post ? post.count : null, bankClimb: climb, verified, results: out };
   await Deno.writeTextFile(PRIME_FILE_OUT, JSON.stringify(report, null, 2));
 
   console.log(`\n=== prime summary ===${BANK_DRY ? " (DRY — nothing written to the bank)" : ""}`);
-  console.log(JSON.stringify({ names: names.length, banked, already, missed, held }, null, 2));
+  console.log(JSON.stringify({ names: names.length, banked, already, missed, held, refused, writeFailed: writeFailed ? writeFailed.name : null }, null, 2));
   console.log(`report → ${PRIME_FILE_OUT}`);
   if (BANK_DRY) {
-    console.log(`DRY RUN: re-run with --commit to write the ${banked} resolved line(s) into gravebank:${GRAVEBANK_VERSION}:*.`);
+    console.log(`DRY RUN: read every line's DATES against the grave before committing. Re-run with --commit to write the ${banked} resolved line(s) into gravebank:${GRAVEBANK_VERSION}:*.`);
   } else {
-    console.log("\nNEXT: bake the banked bios onto the real OSM plots — re-warm the target metro so the grave rung reads the bank:");
-    console.log("  SEED_CITY_NAME=Chicago SEED_CITY_LAT=41.8781 SEED_CITY_LNG=-87.6298 GATE_METRO_KM=15 \\");
-    console.log("    deno run --allow-net --allow-env --allow-read --allow-write gate-tiles.ts --rewarm --commit");
-    console.log("  (Oak Woods ≈ 41.77,-87.60 falls in a Chicago metro rewarm. The bank read is deterministic — no per-tile rate-limit fight.)");
+    console.log(`BANK CHECK: gravebank:${GRAVEBANK_VERSION}:* ${pre0.count} → ${post && post.count !== null ? post.count : `unreadable (HTTP ${post ? post.status : "?"})`} (climb ${climb === null ? "?" : climb}, banked ${banked}) — ${verified ? "VERIFIED" : "MISMATCH: do not trust this run; check the key and the rows in the SQL editor"}.`);
+    if (verified && banked) console.log("No further step: since #363 the serve path bakes a banked bio onto its pin on the next serve. (Do NOT --rewarm: #509 retired it — it deletes tiles.)");
   }
+  if (refused) console.log(`${refused} known-namesake label(s) refused — bank those by SQL upsert from the right article.`);
   if (held) console.log(`${held} name(s) still throttled — re-run the SAME --prime-graves command later; already-banked names skip instantly.`);
   console.log(timeoutLine());
+  if (writeFailed || verified === false) Deno.exit(2);
 }
 
 // ---- #509 --rebuild: delete + live rebuild, verified, with retries ----
@@ -1208,7 +1323,7 @@ async function rebuildTiles(tiles: TileRef[], VER: string): Promise<void> {
 }
 
 async function main() {
-  console.log(`[gate-tiles] build ${BUILD_MARKER} — carries #356 grave-identity rung + MONOTONIC GRAVE BANK (#357-style deterministic reuse) + multi-query recall + title⊆name nickname match + --rewarm. #363 adds --prime-graves: resolve a supplied grave list ONCE, paced, out of band, and bank each confident hit so a later --rewarm bakes it onto the real OSM plot without the per-tile rate-limit fight.`);
+  console.log(`[gate-tiles] build ${BUILD_MARKER} — carries #356 grave-identity rung + MONOTONIC GRAVE BANK (#357-style deterministic reuse) + multi-query recall + title⊆name nickname match + --rewarm. #363 adds --prime-graves: resolve a supplied grave list ONCE, paced, out of band, and bank each confident hit; the serve path bakes it onto the real OSM plot on the next serve (#522: key pre-flight, verified writes, dated excerpts).`);
   if (REWARM) console.log("[gate-tiles] --rewarm ON: each target tile will be DELETED and rebuilt UNGATED before gating (a mutation — tiles over-show until the gated write lands). The gated write still needs --commit (or a follow-up --from-records --commit).");
   // #509 — the TILE commit is retired. Only --prime-graves may write (the grave bank).
   if (COMMIT && !PRIME_GRAVES) {
