@@ -142,12 +142,62 @@ const TRAIL_GEOM = true;
 // meta-free query before giving up. The cost of the experiment is therefore one
 // extra round trip in the failure case, not an app-wide blank map.
 const OSM_META = true;
+// #498 (2026-10-20) — WHY COLD TILES KEPT FAILING, AND WHAT CHANGED.
+// (1) The "406 from overpass-api.de" #487/#509 read as load-shedding was NOT load:
+//     since April 2026 overpass-api.de's nginx front end refuses any request with
+//     no User-Agent or a generic one (Deno's default "Deno/x.y" counts), before the
+//     query runs. fetchOverpassOne now sends the same identifying WIKI_UA the
+//     Wikipedia calls already send (Overpass's usage policy asks for one; never
+//     impersonate a browser). That alone turns the main instance from "refuses
+//     every request" back into a working mirror.
+// (2) The mirror list raced four names but only THREE servers: overpass.kumi.systems
+//     is a CNAME of overpass.private.coffee, which mostly 500s or hangs in Sept–Oct
+//     2026 reports. overpass-api.de is round-robin DNS over two real instances,
+//     z. and lz4. — naming them separately gives the main service two independent
+//     tries per tile. Still four parallel requests per cold tile (no extra load on
+//     anyone), now four distinct servers. (v3: three — private.coffee dropped.) NOT added: regional-extract instances
+//     (overpass.osm.ch, .jp, …) — they answer 200 with ZERO elements outside their
+//     area, and a clean-empty 200 would win this race and be cached as a #399
+//     healthy-empty tile. Any mirror added later must be FULL-PLANET for that reason.
+// (3) fetchOverpass now reports EVERY mirror's failure (host: reason), not just
+//     whichever failed last, so the next failure says which server did what.
+// OVERPASS_VERSION is echoed on every tile response as `overpassVersion`;
+// prewarm-tiles prints it on its "function reported:" line (deploy-confirm).
+// v2 (same day, after v1's live QA still read 406 from both overpass-api.de
+// instances on 4 of 6 cold tiles WITH the User-Agent): instrumentation only — a
+// non-2xx now carries the first ~90 chars of the server's own error page, and a
+// built tile reports WHICH mirror answered (`overpassMirror`), so the next read
+// says whether the 406 is the UA rule, a rate limit, or something else, and
+// whether overpass-api.de is answering at all. No fetch behaviour changed.
+// v3 (same day, after the operator's Mac curl): the SAME request with the SAME
+// headers gets 200 from a home IP and 406 from this function, so overpass-api.de's
+// 406 is a block on Supabase's egress IPs, NOT a header problem — v1's UA theory
+// was wrong as the fix (the UA stays: the usage policy asks for one). Every tile
+// built on 2026-10-20 came from maps.mail.ru, which fails with intermittent 504s.
+// v3 hardens the chain around that: (a) a 504 from maps.mail.ru gets ONE solo
+// retry; (b) the meta-free retry (#104) runs only when a mirror actually REJECTED
+// the query (HTTP 400 or an Overpass remark) — after 406s and timeouts it was a
+// second 25 s round that could not help, doubling every failure to ~50 s;
+// (c) overpass.private.coffee is dropped (see the endpoint list).
+const OVERPASS_VERSION = "498-overpass-ua-v3";
+// v3 GRAVESTONE — overpass.private.coffee (and its alias overpass.kumi.systems)
+// is DROPPED: it never answered in any 2026-10-20 test (timeout every time) and
+// outside reports have it hanging or 500-ing since September 2026. Re-check
+// before re-adding. z./lz4.overpass-api.de STAY although they 406 this function
+// today: they refuse in under a second (they never hold the race open), and if
+// the IP block lifts they recover on their own with no deploy.
 const OVERPASS_ENDPOINTS = [
-  "https://overpass-api.de/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
-  "https://overpass.private.coffee/api/interpreter",
+  "https://z.overpass-api.de/api/interpreter",
+  "https://lz4.overpass-api.de/api/interpreter",
   "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
+// v3 — the one mirror that answers this function today; a 504 from it earns
+// one solo retry (its gateway timeouts are intermittent — #509's rebuilds saw
+// tiles land on a later try).
+const OVERPASS_RETRY_HOST = "maps.mail.ru";
+function overpassHost(url) {
+  try { return new URL(url).host; } catch (_) { return String(url); }
+}
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -1018,17 +1068,35 @@ async function fetchOverpassOne(url, q, origin) {
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      // #498 — the identifying User-Agent is what stops overpass-api.de's 406.
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json",
+        "User-Agent": WIKI_UA,
+      },
       body: "data=" + encodeURIComponent(q),
       signal: ctrl.signal,
     });
-    if (!res.ok) throw new Error("HTTP " + res.status + " from " + url);
+    if (!res.ok) {
+      // #498 v2 — keep the server's own words (nginx/Overpass error pages are
+      // short HTML); tags stripped, whitespace collapsed, capped.
+      let snip = "";
+      try {
+        snip = (await res.text()).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 90);
+      } catch (_) { /* body unreadable — status alone */ }
+      const err = new Error("HTTP " + res.status + (snip ? ' "' + snip + '"' : ""));
+      err.status = res.status; // #498 v3 — the retry rules read it
+      throw err;
+    }
     const json = await res.json();
     if (json && json.remark && (!json.elements || !json.elements.length)) {
-      throw new Error("Overpass remark: " + json.remark);
+      const err = new Error("remark: " + String(json.remark).slice(0, 80));
+      err.remark = true; // #498 v3 — a query the server rejected → meta-free retry may help
+      throw err;
     }
     const parsed = parseOverpass(json, origin);
     return {
+      mirror: overpassHost(url), // #498 v2 — which server answered
       status: res.status, places: parsed.places,
       chainsDropped: parsed.chainsDropped, trailsDropped: parsed.trailsDropped,
       closedDropped: parsed.closedDropped, closedBy: parsed.closedBy,
@@ -1044,36 +1112,65 @@ async function fetchOverpass(lat, lng) {
   // zero and the map looks like the area is empty rather than like the new flag
   // is bad. Retrying without meta converts that from an app-wide outage into a
   // silently-degraded field.
+  const ok = (result, withMeta, mirror) => ({
+    places: result.places, status: result.status, error: null, mirror: mirror || result.mirror || null,
+    chainsDropped: result.chainsDropped || 0, trailsDropped: result.trailsDropped || 0,
+    closedDropped: result.closedDropped || 0, closedBy: result.closedBy || {},
+    metaSeen: result.metaSeen || 0, metaAsked: !!withMeta,
+    wikidataOnly: result.wikidataOnly || 0,
+  });
+  const fail = (errs, withMeta, rejected) => ({
+    places: [], status: null,
+    error: errs.length ? "all mirrors failed — " + errs.join("; ") : "all mirrors failed",
+    rejected: !!rejected, // #498 v3 — some mirror rejected the QUERY (400 / remark)
+    chainsDropped: 0, trailsDropped: 0, closedDropped: 0, closedBy: {}, metaSeen: 0, metaAsked: !!withMeta, wikidataOnly: 0,
+  });
+  const describe = (e) => (e && e.name === "AbortError")
+    ? "timeout " + Math.round(OVERPASS_TIMEOUT_MS / 1000) + "s"
+    : ((e && e.message) || String(e)).slice(0, 130);
+
   const attempt = async (withMeta) => {
     const q = buildOverpassQuery(lat, lng, withMeta);
-    let lastErr = "";
+    // #498 — one entry per mirror that failed, in the order they failed, so the
+    // error names every server's reason (it used to keep only the last one).
+    const errs = [];
+    let rejected = false;
+    let retryUrl = null; // #498 v3 — set when OVERPASS_RETRY_HOST answered 504
     try {
       const result = await Promise.any(
         OVERPASS_ENDPOINTS.map((url) =>
           fetchOverpassOne(url, q, { lat, lng }).catch((e) => {
-            lastErr = (e && e.message) || String(e);
+            errs.push(overpassHost(url) + ": " + describe(e));
+            if (e && (e.status === 400 || e.remark)) rejected = true;
+            if (e && e.status === 504 && overpassHost(url) === OVERPASS_RETRY_HOST) retryUrl = url;
             throw e;
           })
         ),
       );
-      return {
-        places: result.places, status: result.status, error: null,
-        chainsDropped: result.chainsDropped || 0, trailsDropped: result.trailsDropped || 0,
-        closedDropped: result.closedDropped || 0, closedBy: result.closedBy || {},
-        metaSeen: result.metaSeen || 0, metaAsked: !!withMeta,
-        wikidataOnly: result.wikidataOnly || 0,
-      };
+      return ok(result, withMeta);
     } catch (_agg) {
-      return { places: [], status: null, error: lastErr || "all mirrors failed", chainsDropped: 0, trailsDropped: 0, closedDropped: 0, closedBy: {}, metaSeen: 0, metaAsked: !!withMeta, wikidataOnly: 0 };
+      if (retryUrl) {
+        // #498 v3 — the one solo retry. Worst case adds one OVERPASS_TIMEOUT_MS,
+        // the same wall the meta-free round used to add on every failure.
+        try {
+          const result = await fetchOverpassOne(retryUrl, q, { lat, lng });
+          return ok(result, withMeta, overpassHost(retryUrl) + " (retry)");
+        } catch (e) {
+          errs.push(overpassHost(retryUrl) + " retry: " + describe(e));
+          if (e && (e.status === 400 || e.remark)) rejected = true;
+        }
+      }
+      return fail(errs, withMeta, rejected);
     }
   };
 
   const first = await attempt(OSM_META);
   if (!first.error || !OSM_META) return first;
-  // Every mirror refused the meta query. Could be Overpass load rather than the
-  // modifier — the retry does not care which, it just makes sure a bad flag
-  // cannot be the thing that empties the map. Flagged so the response says a
-  // retry happened instead of quietly looking like a normal pass.
+  // #498 v3 — retry without meta ONLY when a mirror rejected the query itself
+  // (HTTP 400 or an Overpass remark): that is the bad-modifier case #104 guards.
+  // After 406s, 504s and timeouts the query was never judged, so a second round
+  // could not help and only doubled the failure to ~50 s.
+  if (!first.rejected) return first;
   const second = await attempt(false);
   return { ...second, metaRetried: true, metaError: first.error };
 }
@@ -4801,7 +4898,7 @@ function cachedEnvelope(tile, cached, s) {
   return {
     tile, places: s.g.places, cached: true, ts: cached.ts,
     cacheVersion: CACHE_VERSION,
-    overpassStatus: null, overpassError: null,
+    overpassStatus: null, overpassError: null, overpassVersion: OVERPASS_VERSION, // #498 deploy-confirm
     blocked: s.f.blocked, blocklistFailed: false,
     suppressed: s.f.suppressed, suppressionFailed: false,
     storyHidden: s.g.hidden, storyGateVersion: STORY_GATE_VERSION, storyHiddenWikidata: s.g.wikidata, storyHiddenGraveFiller: s.g.graveFiller, // #510/#511 — of storyHidden, how many by each new rule
@@ -5094,7 +5191,7 @@ Deno.serve(async (req) => {
         storyHidden: gated.hidden, storyGateVersion: STORY_GATE_VERSION, storyHiddenWikidata: gated.wikidata, storyHiddenGraveFiller: gated.graveFiller, // #510/#511
         osmCurated: curC.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
         graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: graveStruct.demoted, graveStoryStripped: graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
-        overpassStatus: osm.status, overpassError: osm.error,
+        overpassStatus: osm.status, overpassError: osm.error, overpassVersion: OVERPASS_VERSION, overpassMirror: osm.mirror || null, // #498 deploy-confirm + which mirror answered
         chainsDropped: osm.chainsDropped, trailsDropped: osm.trailsDropped,
         closedDropped: osm.closedDropped, closedBy: osm.closedBy,
         wikiDropped: wiki.wikiDropped || 0, wikiNoExtract: wiki.wikiNoExtract || 0,
@@ -5147,7 +5244,7 @@ Deno.serve(async (req) => {
       cacheWritten, osmEmpty, emptyTileVersion: EMPTY_TILE_VERSION, // #399 — a healthy-empty tile is now cached (3-day row)
       osmCount: osm.places.length, wikiCount: wiki.places.length,
       wikiError: wiki.error || null, wikiFailVersion: WIKI_FAIL_VERSION, // #486
-      overpassStatus: osm.status, overpassError: osm.error,
+      overpassStatus: osm.status, overpassError: osm.error, overpassVersion: OVERPASS_VERSION, overpassMirror: osm.mirror || null, // #498 deploy-confirm + which mirror answered
       closedDropped: osm.closedDropped, closedBy: osm.closedBy,
       blocked: shown.blocked, blocklistFailed: !!bl.failed,
       suppressed: shown.suppressed, suppressionFailed: !!sup.failed,

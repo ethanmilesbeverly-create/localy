@@ -65,7 +65,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.02a"; // #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.20b"; // 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -156,7 +156,7 @@ function enumerateTiles(metros: Metro[]): TileRef[] {
   return out;
 }
 
-type Result = { t: TileRef; outcome: Outcome; ms: number; detail: string; cacheVersion?: string; swrVersion?: string; emptyTileVersion?: string; wikiFailVersion?: string };
+type Result = { t: TileRef; outcome: Outcome; ms: number; detail: string; cacheVersion?: string; swrVersion?: string; emptyTileVersion?: string; wikiFailVersion?: string; overpassVersion?: string; overpassMirror?: string };
 
 async function warmTile(t: TileRef): Promise<Result> {
   const started = Date.now();
@@ -178,14 +178,14 @@ async function warmTile(t: TileRef): Promise<Result> {
     if (!j) return { t, outcome: "failed", ms, detail: "unparseable response" };
     if (j.error) return { t, outcome: "failed", ms, detail: `function error: ${String(j.error).slice(0, 120)}` };
     const n = Array.isArray(j.places) ? j.places.length : 0;
-    const base = { t, ms, cacheVersion: j.cacheVersion, swrVersion: j.swrVersion, emptyTileVersion: j.emptyTileVersion, wikiFailVersion: j.wikiFailVersion };
+    const base = { t, ms, cacheVersion: j.cacheVersion, swrVersion: j.swrVersion, emptyTileVersion: j.emptyTileVersion, wikiFailVersion: j.wikiFailVersion, overpassVersion: j.overpassVersion, overpassMirror: j.overpassMirror };
     const emptyTag = j.osmEmpty === true ? ", healthy-empty 3-day row" : "";
     if (j.cached === true && j.stale) {
       return { ...base, outcome: "stale", detail: `${n} pins${emptyTag}, refresh=${j.refresh ?? j.refreshing ?? "?"}` };
     }
     if (j.cached === true) return { ...base, outcome: "warm", detail: `${n} pins${emptyTag}` };
-    if (j.cacheWritten === true) return { ...base, outcome: "built", detail: `${n} pins shown, osm=${j.osmCount ?? "?"}${emptyTag}` };
-    if (j.overpassError) return { ...base, outcome: "failed", detail: `overpass: ${String(j.overpassError).slice(0, 100)}` };
+    if (j.cacheWritten === true) return { ...base, outcome: "built", detail: `${n} pins shown, osm=${j.osmCount ?? "?"}${emptyTag}${j.overpassMirror ? ", via " + j.overpassMirror : ""}` };
+    if (j.overpassError) return { ...base, outcome: "failed", detail: `overpass: ${String(j.overpassError).slice(0, 240)}` };
     // #486 — the function built the tile but refused to cache it because the
     // Wikipedia geosearch failed (before #486 it cached the OSM-only tile as built).
     if (j.wikiError) return { ...base, outcome: "failed", detail: `wikipedia: ${String(j.wikiError).slice(0, 100)} (built, not cached)` };
@@ -265,7 +265,7 @@ async function main() {
       const r = await warmTile(tiles[i]);
       counts[r.outcome]++;
       done++;
-      if (r.cacheVersion) versions.add(`${r.cacheVersion}${r.swrVersion ? " / " + r.swrVersion : ""}${r.emptyTileVersion ? " / " + r.emptyTileVersion : ""}${r.wikiFailVersion ? " / " + r.wikiFailVersion : ""}`);
+      if (r.cacheVersion) versions.add(`${r.cacheVersion}${r.swrVersion ? " / " + r.swrVersion : ""}${r.emptyTileVersion ? " / " + r.emptyTileVersion : ""}${r.wikiFailVersion ? " / " + r.wikiFailVersion : ""}${r.overpassVersion ? " / " + r.overpassVersion : ""}`);
       if (r.outcome === "failed") {
         failed.push(r.t);
         if (failNotes.length < 25) failNotes.push(`${r.t.metro} ${r.t.tile}: ${r.detail}`);
