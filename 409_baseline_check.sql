@@ -8,7 +8,13 @@
 --
 -- Expect 13 rows, every one match = true. A false row names the section
 -- whose live definition differs from the baseline (a copy error, or the
--- schema changed since 2026-10-05): re-export and rebuild that section.
+-- schema changed since 2026-10-20): re-export and rebuild that section.
+-- 2026-10-20 (#518): `function`, `policy` and `function grant` re-fingerprinted
+-- for #517's guide lockdown (260 objects: function 29, function grant 29; the
+-- other 11 counts unchanged). Built from the export's CSV download; all 13
+-- 10-05 fingerprints were first recomputed from the old baseline by the same
+-- method and reproduced, and the 10 unmoved sections' fingerprints
+-- reproduced from the new export unchanged.
 -- 2026-10-05 (#413): fingerprints refreshed with the baseline (256 objects:
 -- extension 7, table 17, constraint 54, index 15, function 27, view 4,
 -- trigger 10, rls 17, policy 33, grant 22, column grant 19, function grant 27,
@@ -216,14 +222,14 @@ left join (values
     ('table', '004ccb6fc86b494a77ac5f583a036d44', null),
     ('constraint', 'f428253b4e5335136056c12646a7b6f7', null),
     ('index', '424c07e995781e79edc67fab3f01f13f', null),
-    ('function', '2e2d07b9db4713adbdd27f55ceaafe6d', null),
+    ('function', '231220d27df070926b2d8f2bc6e5e756', null),
     ('view', 'b785af16d67fa721c0aa880401befd53', null),
     ('trigger', '0d4924084d3c80a9fbdfa9b309214a10', null),
     ('rls', 'f1b5e121ef2078c8a771f25e663367ca', null),
-    ('policy', 'e30ec8b7f9e64ff6d4e5134019e3879d', null),
+    ('policy', 'c3acdfc2934eb70e95ad7fd46dee16db', null),
     ('grant', '77c0a2aa9b7a95be180dee18a5e99d0d', null),
     ('column grant', '0cbe33c195e5c6870f7c6830f45df5c8', null),
-    ('function grant', '6abeea840edad26b7e0180db09f01446', null),
+    ('function grant', '3b29138225189c86794a874882103bff', null),
     ('cron', 'e4451f3aa79277bd355e2c97c38aedec', null)
   ) as e(section, expected, alt) on e.section = o.section
 group by o.section, e.expected, e.alt

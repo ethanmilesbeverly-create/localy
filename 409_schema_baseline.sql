@@ -1,5 +1,24 @@
 -- 409_schema_baseline.sql — #409(b): the live Nahgoo database schema as of
--- 2026-10-05, exported from the live DB by 409_schema_export.sql (256 objects).
+-- 2026-10-20, exported from the live DB by 409_schema_export.sql (260 objects).
+--
+-- REFRESHED 2026-10-20 (#518): records #517's guide lockdown. Three sections
+-- moved — `function` (+ get_guide, save_guide), `policy` (guides_select and
+-- guide_stops_select owner-only and to authenticated; shared_kv_public_read
+-- hides hunt-code:% rows) and `function grant` (+ the two functions' execute
+-- grants). The other 10 sections are byte-identical to the 2026-10-05 copy —
+-- their fingerprints reproduced from the new export, which is how the CSV was
+-- proven byte-exact. Exported as a CSV download and copied in unedited.
+-- Before this refresh a restore from the baseline re-opened guide listing to
+-- signed-out readers and dropped the two functions the app opens guides with.
+-- Proven on a local restore (Postgres 17 + Supabase-shaped stubs) with
+-- 488_rls_audit_sweep.sql v4: this copy reads 0 HOLE / 0 BROKEN (96/96
+-- probes); the 10-05 copy read 5 HOLE + 2 BROKEN.
+--
+-- NOT RECORDED HERE — OBJECT COMMENTS (#527). 409_schema_export.sql does not
+-- export `comment on`, so the deploy stamps the RLS sweep reads are missing
+-- from every restore and it reports two DRIFT rows. After a restore, run:
+--   comment on function public.guard_submission_insert() is '477-insert-guard-v1';
+--   comment on policy "profiles read" on public.profiles is '512-profiles-read-v1';
 --
 -- REFRESHED AGAIN 2026-10-05 (#514): the `grant` section now records #513's
 -- trim of the browser roles' write grants (513_revoke_browser_grants.sql). Only
@@ -1404,6 +1423,87 @@ end
 $function$
 ;
 
+-- [function] public.get_guide(p_code text)
+CREATE OR REPLACE FUNCTION public.get_guide(p_code text)
+ RETURNS text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select s.value
+    from public.shared_kv s
+   where upper(btrim(coalesce(p_code, ''))) ~ '^[A-HJ-NP-Z2-9]{6}$'
+     and s.key = 'hunt-code:' || upper(btrim(p_code));
+$function$
+;
+
+-- [function] public.save_guide(p_code text, p_value text)
+CREATE OR REPLACE FUNCTION public.save_guide(p_code text, p_value text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_uid   uuid := auth.uid();
+  v_code  text := upper(btrim(coalesce(p_code, '')));
+  v_key   text;
+  v_owner uuid;
+  v_old   text;
+  v_found boolean;
+  v_old_editable boolean;
+  v_new_editable boolean;
+begin
+  if v_uid is null then
+    raise exception 'save_guide: sign in to save a guide' using errcode = '42501';
+  end if;
+  if v_code !~ '^[A-HJ-NP-Z2-9]{6}$' then
+    raise exception 'save_guide: malformed guide code' using errcode = '22023';
+  end if;
+  v_key := 'hunt-code:' || v_code;
+
+  begin
+    v_new_editable := coalesce((p_value::jsonb ->> 'editable')::boolean, false);
+  exception when others then
+    v_new_editable := false;
+  end;
+
+  select owner, value, true into v_owner, v_old, v_found
+    from public.shared_kv where key = v_key
+    for update;
+
+  if not coalesce(v_found, false) then
+    begin
+      insert into public.shared_kv (key, value, updated_at, owner)
+      values (v_key, p_value, now(), v_uid);
+      return;
+    exception when unique_violation then
+      select owner, value into v_owner, v_old
+        from public.shared_kv where key = v_key
+        for update;
+    end;
+  end if;
+
+  begin
+    v_old_editable := coalesce((v_old::jsonb ->> 'editable')::boolean, false);
+  exception when others then
+    v_old_editable := false;
+  end;
+
+  if not (v_owner = v_uid or v_owner is null or v_old_editable) then
+    raise exception 'save_guide: not allowed to change this guide' using errcode = '42501';
+  end if;
+  if not (v_owner = v_uid or v_owner is null or v_new_editable) then
+    raise exception 'save_guide: not allowed to change this guide' using errcode = '42501';
+  end if;
+
+  update public.shared_kv
+     set value = p_value, updated_at = now()
+   where key = v_key;
+end;
+$function$
+;
+
 -- [constraint] submissions.submissions_ai_status_check
 alter table public.submissions add constraint submissions_ai_status_check CHECK (((ai_status IS NULL) OR (ai_status = ANY (ARRAY['ok'::text, 'http_error'::text, 'parse_error'::text, 'bad_decision'::text, 'network_error'::text]))));
 
@@ -1671,8 +1771,10 @@ create policy guide_stops_insert on public.guide_stops as permissive for insert 
   WHERE ((g.id = guide_stops.guide_id) AND ((g.owner = auth.uid()) OR ((g.editable = true) AND (NOT g.withdrawn) AND (guide_stops.added_by = auth.uid())))))));
 
 -- [policy] public.guide_stops.guide_stops_select
-create policy guide_stops_select on public.guide_stops as permissive for select to public
-  using (true);
+create policy guide_stops_select on public.guide_stops as permissive for select to authenticated
+  using ((EXISTS ( SELECT 1
+   FROM guides g
+  WHERE ((g.id = guide_stops.guide_id) AND (g.owner = auth.uid())))));
 
 -- [policy] public.guide_stops.guide_stops_update
 create policy guide_stops_update on public.guide_stops as permissive for update to authenticated
@@ -1688,8 +1790,8 @@ create policy guides_insert on public.guides as permissive for insert to authent
   with check ((owner = auth.uid()));
 
 -- [policy] public.guides.guides_select
-create policy guides_select on public.guides as permissive for select to public
-  using (true);
+create policy guides_select on public.guides as permissive for select to authenticated
+  using ((owner = auth.uid()));
 
 -- [policy] public.guides.guides_update
 create policy guides_update on public.guides as permissive for update to authenticated
@@ -1751,7 +1853,7 @@ create policy shared_kv_guide_update on public.shared_kv as permissive for updat
 
 -- [policy] public.shared_kv.shared_kv_public_read
 create policy shared_kv_public_read on public.shared_kv as permissive for select to public
-  using (true);
+  using ((key !~~ 'hunt-code:%'::text));
 
 -- [policy] public.submissions.insert own submissions
 create policy "insert own submissions" on public.submissions as permissive for insert to public
@@ -2120,6 +2222,17 @@ grant execute on function public.review_retry_health() to service_role;
 -- [function grant] public.curated_category_backfill(do_write boolean)
 revoke all on function public.curated_category_backfill(do_write boolean) from public, anon, authenticated, service_role;
 grant execute on function public.curated_category_backfill(do_write boolean) to service_role;
+
+-- [function grant] public.get_guide(p_code text)
+revoke all on function public.get_guide(p_code text) from public, anon, authenticated, service_role;
+grant execute on function public.get_guide(p_code text) to anon;
+grant execute on function public.get_guide(p_code text) to authenticated;
+grant execute on function public.get_guide(p_code text) to service_role;
+
+-- [function grant] public.save_guide(p_code text, p_value text)
+revoke all on function public.save_guide(p_code text, p_value text) from public, anon, authenticated, service_role;
+grant execute on function public.save_guide(p_code text, p_value text) to authenticated;
+grant execute on function public.save_guide(p_code text, p_value text) to service_role;
 
 -- [cron] tilecache-sweep
 select cron.schedule('tilecache-sweep', '17 4 * * 0', '
