@@ -1,0 +1,22 @@
+# names-483-orange-county-warmed.txt — #483 Orange County pass 1, the 9 story lines from names-483-orange-county-cold.txt
+# whose tiles WARMED on 2026-10-21 (split out by tile warmth, handoff §6 Queens-Nassau (g)). Same source, rules and
+# format as names-483-orange-county.txt.
+# Warmed by the fifth pre-warm pass (--retry-failed, concurrency 1, 3 s pace): 677_-2359 downtown Anaheim + Fullerton,
+# 673_-2359 Costa Mesa, 673_-2355 Irvine (Lion Country Safari); and by the gate dry run's live warm: 678_-2359 La Habra.
+# Each tile's places:v34 row was confirmed by a public-key read the same day. Every line here sits in a warm tile.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Orange County" SEED_CITY_LAT=33.7900 SEED_CITY_LNG=-117.8900 deno run -A seed-resolve.ts names-483-orange-county-warmed.txt
+# No sandbox pre-check was run for this file (the sandbox's live-map call failed), so the Mac dry run is the first read:
+# eyeball every review, every ↳ article-name seed and the staged-row count (§6 (u)) before --commit.
+# After the commit: run curated_category_backfill(true) in the SQL editor (#495).
+
+Mother Colony House | @33.83625,-117.92813333 | Built in 1857 as Anaheim's first house, this cottage later sheltered Polish novelist Henryk Sienkiewicz, a future Nobel laureate, who stayed here with actress Helena Modjeska in 1876. | https://www.hmdb.org/m.asp?m=281322
+Site of San Pedro Gate | @33.83241667,-117.92753333 | Early Anaheim was ringed by a living fence of willows to keep out roaming cattle, and this was the gate travelers used for the road to San Pedro and Los Angeles. | https://www.hmdb.org/m.asp?m=49990
+Loara School Bell | @33.829129,-117.937387 | This bell recalls Fairview, the farming settlement Benjamin Kellogg helped start nearby in 1869, and the school he gave land for in 1870 at what is now Ball Road and Euclid. | https://www.hmdb.org/m.asp?m=59762
+Amerige Brothers Realty Office | @33.87006667,-117.92978333 | Massachusetts merchants Edward and George Amerige bought 430 acres during the 1886–88 land boom to start Fullerton, and this little office was the town's first building. | https://www.hmdb.org/m.asp?m=189663
+Amerige Park | @33.87013333,-117.92968333 | Fullerton's first real high school opened on this ground in 1908 and burned down on November 18, 1910, after which the school was moved elsewhere. | https://www.hmdb.org/m.asp?m=192593
+West Coyote Field | @33.916829,-117.96738 | This corner sits on the northern edge of the West Coyote oil field, worked from 1903 and one of the Los Angeles Basin's largest, which gave up about 250 million barrels. | https://www.hmdb.org/m.asp?m=58909
+First Krispy Kreme in California | @33.9178528,-117.96573134 | California's first Krispy Kreme opened on this site on January 4, 1999. | https://www.hmdb.org/m.asp?m=246620
+# name: the marker title is "The Diego Sepulveda Adobe"
+Diego Sepulveda Adobe | @33.67316,-117.937201 | Built around 1820 as an outpost of Mission San Juan Capistrano, this adobe sheltered the herdsmen who tended the mission's cattle. | https://www.hmdb.org/m.asp?m=79043
+Lion Country Safari Site | @33.64347312,-117.75215265 | From 1970 to 1984 visitors drove through an African-style wild animal park here, the first of its kind in Southern California. | https://www.hmdb.org/m.asp?m=148301

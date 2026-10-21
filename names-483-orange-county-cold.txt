@@ -1,25 +1,18 @@
-# names-483-orange-county-cold.txt — #483 Orange County pass 1, the 13 story lines whose tiles were still cold
-# after three pre-warm retry passes (2026-10-21). Same source, rules and format as names-483-orange-county.txt.
+# names-483-orange-county-cold.txt — #483 Orange County pass 1, the story lines whose tiles are STILL cold.
+# 13 lines at first (2026-10-21); 9 moved to names-483-orange-county-warmed.txt the same day when their tiles warmed,
+# leaving these 4. Same source, rules and format as names-483-orange-county.txt.
 # RUN ORDER (#441): warm these tiles first, then dry-run this file:
-#   caffeinate -i env PREWARM_METRO="Orange County" PREWARM_CONCURRENCY=1 PREWARM_PACE_MS=3000 deno run -A prewarm-tiles.ts --retry-failed
+#   caffeinate -i env PREWARM_CONCURRENCY=1 PREWARM_PACE_MS=3000 deno run -A prewarm-tiles.ts --retry-failed
+#   (with prewarm_failed.json holding the 5 Orange County holdouts — cp prewarm_failed_orange_county.json prewarm_failed.json)
 #   SEED_CITY_NAME="Orange County" SEED_CITY_LAT=33.7900 SEED_CITY_LNG=-117.8900 deno run -A seed-resolve.ts names-483-orange-county-cold.txt
+# Five pre-warm passes and the gate dry run's live warm have failed on these tiles (overpass-api.de 406, maps.mail.ru
+# 504 / 25 s timeout) — that is #525's ground; do not keep retrying by hand.
 # A line whose tile is STILL cold at run time: its duplicate check sees submissions and Wikipedia but not the map's
 # OSM half, so a new-seed verdict there gets a manual look before commit (handoff §6 Queens-Nassau (e)).
-# Tiles: 677_-2359 downtown Anaheim + Fullerton · 677_-2360 Buena Park · 678_-2359 La Habra · 676_-2361 Los Alamitos
-#        673_-2359 Costa Mesa · 675_-2356 Irvine Ranch Historic Park · 673_-2355 Irvine (Lion Country Safari)
+# Tiles: 677_-2360 Buena Park · 676_-2361 Los Alamitos · 675_-2356 Irvine Ranch Historic Park (Tustin)
 
-Mother Colony House | @33.83625,-117.92813333 | Built in 1857 as Anaheim's first house, this cottage later sheltered Polish novelist Henryk Sienkiewicz, a future Nobel laureate, who stayed here with actress Helena Modjeska in 1876. | https://www.hmdb.org/m.asp?m=281322
-Site of San Pedro Gate | @33.83241667,-117.92753333 | Early Anaheim was ringed by a living fence of willows to keep out roaming cattle, and this was the gate travelers used for the road to San Pedro and Los Angeles. | https://www.hmdb.org/m.asp?m=49990
-Loara School Bell | @33.829129,-117.937387 | This bell recalls Fairview, the farming settlement Benjamin Kellogg helped start nearby in 1869, and the school he gave land for in 1870 at what is now Ball Road and Euclid. | https://www.hmdb.org/m.asp?m=59762
 Site of Lily Creamery | @33.86503333,-117.99778333 | Buena Park's first industry stood here: opened in 1889, it was California's first evaporated-milk cannery, owned by the Bixby family from 1896 until it closed in 1907. | https://www.hmdb.org/m.asp?m=49986
 Buena Park Woman's Clubhouse | @33.86296667,-117.9984 | The woman's club that built this Spanish Revival clubhouse in 1931 had helped bring the town its first electric street lights, a volunteer fire department and a library district. | https://www.hmdb.org/m.asp?m=50036
-Amerige Brothers Realty Office | @33.87006667,-117.92978333 | Massachusetts merchants Edward and George Amerige bought 430 acres during the 1886–88 land boom to start Fullerton, and this little office was the town's first building. | https://www.hmdb.org/m.asp?m=189663
-Amerige Park | @33.87013333,-117.92968333 | Fullerton's first real high school opened on this ground in 1908 and burned down on November 18, 1910, after which the school was moved elsewhere. | https://www.hmdb.org/m.asp?m=192593
-West Coyote Field | @33.916829,-117.96738 | This corner sits on the northern edge of the West Coyote oil field, worked from 1903 and one of the Los Angeles Basin's largest, which gave up about 250 million barrels. | https://www.hmdb.org/m.asp?m=58909
-First Krispy Kreme in California | @33.9178528,-117.96573134 | California's first Krispy Kreme opened on this site on January 4, 1999. | https://www.hmdb.org/m.asp?m=246620
 # name: the marker title is "Los Alamitos Sugar Company and Town's Founding"
 Los Alamitos Sugar Company Site | @33.808684,-118.068989 | Orange County's first sugar beet factory was built here in 1897 on Bixby Land Company land, and the jobs it brought created the town of Los Alamitos. | https://www.hmdb.org/m.asp?m=50041
-# name: the marker title is "The Diego Sepulveda Adobe"
-Diego Sepulveda Adobe | @33.67316,-117.937201 | Built around 1820 as an outpost of Mission San Juan Capistrano, this adobe sheltered the herdsmen who tended the mission's cattle. | https://www.hmdb.org/m.asp?m=79043
 Katie Wheeler Library | @33.73049728,-117.78527746 | The library recreates the outside of the Irvine family's ranch house, first built on this spot in 1876 by ranch manager C. E. French. | https://www.hmdb.org/m.asp?m=205835
-Lion Country Safari Site | @33.64347312,-117.75215265 | From 1970 to 1984 visitors drove through an African-style wild animal park here, the first of its kind in Southern California. | https://www.hmdb.org/m.asp?m=148301
