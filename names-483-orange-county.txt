@@ -1,0 +1,109 @@
+# names-483-orange-county.txt — #483 Los Angeles' first extra box (Orange County), pass 1 (story lines, 2026-10-21)
+# Source: Historical Marker Database — Orange County, California county list in geographic sort, pages 1–3
+# (Aliso Viejo through Mission Viejo), plus the City of Orange town list (28 entries). Santa Ana, Garden Grove,
+# Tustin, Westminster, Stanton, Seal Beach, Placentia and Villa Park are NOT in this pass (county list pages 4+,
+# a later pass). Skipped on purpose: war and police memorials, person-only plaques (Eisenhower, Gene Autry,
+# Duke Kahanamoku, Ted Bartlett), bare National Register / Mills Act / local-landmark plaques that only say
+# "built 19xx", the Costa Mesa storefront plaques (name + year only), markers inside the Disneyland and Knott's
+# ticket gates, homes still lived in (Callens, The Bluff, Ishii, Hoffman), the Anza campsite (its dates
+# contradict themselves), the Standard Market (two markers disagree on 1926 vs 1931), Barton Mound and the
+# Fremont camp (excerpts stop before the claim), and everything outside the box: Dana Point, Laguna, Mission
+# Viejo, Lake Forest, Corona del Mar, northern La Habra and the Olinda Oil Museum (tile row 679).
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# A name differs from the marker title only where the title isn't a place; each such line is marked.
+# Every coordinate below was checked against the Orange County tile set (42 tiles, roster 33.7900, -117.8900).
+# RUN ORDER (the #441 lesson): Orange County is pre-warmed (prewarm-tiles.ts 2026.10.20c — 34 of 42 tiles; the
+# 8 still owed are 673_-2359, 673_-2355, 674_-2361, 675_-2356, 676_-2361, 677_-2360, 677_-2359, 678_-2359).
+# The 13 lines that sit in those tiles are in names-483-orange-county-cold.txt, to run after a retry warms them;
+# every line in THIS file sits in a warm tile.
+# Then the dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Orange County" SEED_CITY_LAT=33.7900 SEED_CITY_LNG=-117.8900 deno run -A seed-resolve.ts names-483-orange-county.txt
+# DRY RUN 1 (2026-10-21): 33 new-seed, 1 story-attached (Old Town Irvine), 8 review, 0 held;
+# Wikipedia failed 0. The 8 reviews are settled below (each carries a `review` comment; one line is CUT).
+# DRY RUN 2 expected: 37 new-seed, 4 story-attached, 0 review (41 lines).
+# After the commit: run curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Orange: Old Towne and the Santa Ana River --------------------------------------
+Orange's First Public Schoolhouse | @33.79273333,-117.8535 | The town's first public schoolhouse opened here in June 1872 for 70 pupils, on land A. B. Chapman deeded to the school trustees for one dollar on condition it only ever be used for a public school. | https://www.hmdb.org/m.asp?m=309538
+# name: the marker title is "Site of First Building"
+# review after dry run 1: matched "Old Towne, Orange Historic District" — that is the whole district; this is one
+# spot on the plaza, so it seeds as its own pin.
+Site of Orange's First Building | @33.78765115,-117.85354084 | In 1871 Captain William T. Glassell offered the first town and farm lots of Andrew Glassell and Alfred Chapman's tract from this spot, where he kept two seedling orange trees growing. | https://www.hmdb.org/m.asp?m=241275 | new
+Orange's First Bank | @33.788,-117.8526 | The Bank of Orange, the city's first bank, was organized in 1886 and stood on this corner of the plaza before renaming itself the National Bank of Orange a year later. | https://www.hmdb.org/m.asp?m=189681
+Orange Street Cars | @33.78800256,-117.85551894 | The parking structure here stands on the site of Orange's Pacific Electric passenger and freight depot, and the town's first motorized streetcar was nicknamed the Peanut Roaster for its shrill whistle. | https://www.hmdb.org/m.asp?m=194724
+Great Western Cordage | @33.79161797,-117.85765996 | This Chapman University building went up in 1923 as the Great Western Cordage works of O. B. Eller and John Knight, and the university restored it in 2009. | https://www.hmdb.org/m.asp?m=261009
+Octagon House | @33.81065137,-117.82454976 | Joel B. Parker's family finished an eight-sided house on this site in 1876, on acreage bought from the Leandro Serrano allotment, facing the road that is now Katella Avenue. | https://www.hmdb.org/m.asp?m=241271
+First Site of the Olive Mill | @33.83747963,-117.83830548 | Thomas Dillin and his sons opened a three-story flour and feed mill here on November 1, 1882, driven by a turbine that Santa Ana River irrigation water turned on its way down to the valley. | https://www.hmdb.org/m.asp?m=230936
+# review after dry run 1: near-named article "Olive, California" — that is the community around it; this is the
+# state-landmark site on the riverbank, a different place.
+Old Santa Ana | @33.83666667,-117.8463 | The Portolá expedition camped on this bank of the Santa Ana River in 1769, and El Camino Real later forded the river close by. | https://www.hmdb.org/m.asp?m=50302 | new
+Grijalva Adobe Site | @33.80598333,-117.80118333 | Juan Pablo Grijalva, a Spanish soldier who came north with the Anza expedition in 1776, built one of the very first adobes in today's Orange County on this hill. | https://www.hmdb.org/m.asp?m=50040
+Submerged Dam | @33.81958333,-117.77141667 | First built of clay in 1879 and rebuilt in rock and concrete in 1892, this buried dam reached down to bedrock and forced the river's ground water up to the surface for irrigation. | https://www.hmdb.org/m.asp?m=50028
+
+# --- Anaheim: the Mother Colony ------------------------------------------------------
+# review after dry run 1: same-named live pin "Anaheim Cemetery" [map:wiki] 130 m away — the same place; placed at
+# the article's coordinate (33.84218, -117.89915) so the story attaches.
+Anaheim Cemetery | @33.84218,-117.89915 | German colonists founded this in 1866 as Orange County's first public cemetery, and its Community Mausoleum, built in 1914, was the county's first. | https://www.hmdb.org/m.asp?m=58908
+# name: the marker title is "Dawn Redwood"
+Dawn Redwood Grove | @33.8413382,-117.8980355 | These dawn redwoods, a species once thought extinct until living trees were found, were planted as a memorial to the people of Chinese heritage buried in Anaheim Cemetery. | https://www.hmdb.org/m.asp?m=197717
+Boysen Cactus Garden | @33.83836097,-117.92004946 | This cactus garden was laid out by Rudy Boysen, Anaheim's parks superintendent from 1928 to 1949 and the man who bred the boysenberry. | https://www.hmdb.org/m.asp?m=193789
+# name: the marker title is "Helena Modjeska"
+Helena Modjeska Statue | @33.83905,-117.91758333 | Dedicated on September 15, 1935, this statue of the actress was paid for partly by state relief funds and is the oldest public art project of its kind in Orange County. | https://www.hmdb.org/m.asp?m=51967
+# review after dry run 1: matched live pin "MUZEO" — the museum now occupies the 1908 library building; renamed so
+# the story attaches to that pin (rule (k)).
+# name: the marker title is "Old Anaheim Library"
+MUZEO | @33.83363649,-117.91353185 | Anaheim's first building made just for a library went up here in 1908 with a $10,000 grant from Andrew Carnegie, on a site bought by public subscription. | https://www.hmdb.org/m.asp?m=314294
+# name: the marker title is "Kate and Ella 1895"
+Kate and Ella Katella Ranch | @33.804558,-117.911347 | Katella Avenue began as the wagon track to the Rea family's Katella Ranch, which they named by joining the names of their daughters Kate and Ella. | https://www.hmdb.org/m.asp?m=123516
+# name: the marker title is "This Boulder"
+Site of an 1867 Schoolhouse | @33.8519,-117.79178333 | A boulder here marks one of the first public schools in the county, built in 1867, where Jennie Swift was the first teacher. | https://www.hmdb.org/m.asp?m=189683
+Peralta Adobe | @33.85708333,-117.77091667 | Ramon Peralta built this adobe in 1871; his grandfather Juan Pablo Peralta shared Rancho Santiago de Santa Ana, the only Spanish land grant in Orange County, with José Antonio Yorba. | https://www.hmdb.org/m.asp?m=50017
+
+# --- Buena Park, Fullerton, Brea, La Habra ------------------------------------------
+Leo Fender Factory | @33.86957067,-117.92196224 | From 1945 to 1952 Leo Fender's factory on this site turned out his electric instruments in mass production. | https://www.hmdb.org/m.asp?m=217849
+Fullerton College | @33.87493333,-117.91836667 | Its first classes met on September 25, 1913, with 28 students, making it the oldest community college in California still operating. | https://www.hmdb.org/m.asp?m=50001
+# review after dry run 1: near-named article "California State University, Fullerton" — the campus grew up around
+# the site; the orchard marker is one spot, so it seeds as its own pin.
+# name: the marker title is "The First Valencia Orchard in California"
+First Valencia Orchard in California | @33.88029097,-117.88482664 | R. H. Gilman planted California's first Valencia orange orchard here in 1880, on Placentia Fruit Company land. | https://www.hmdb.org/m.asp?m=254135 | new
+Brea Plunge | @33.9144344,-117.90242824 | Built in 1929, the Plunge is the oldest municipal pool in Orange County that has kept operating. | https://www.hmdb.org/m.asp?m=199733
+# review after dry run 1: same-named live pin "Brea City Hall and Park" [map:wiki] 119 m away — the same park;
+# renamed and placed at the article's coordinate (33.91416667, -117.90138889) so the story attaches.
+# name: the marker title is "Richard Nixon in City Hall Park"
+Brea City Hall and Park | @33.91416667,-117.90138889 | On October 20, 1952, vice-presidential candidate Richard Nixon gave a ten-minute speech in this park to about 1,600 supporters. | https://www.hmdb.org/m.asp?m=199730
+# name: the marker title is "The Humming Bird"
+Humming Bird Airplane Site | @33.92077941,-117.89785945 | About 50 feet south of here in February 1928, Austrian immigrant Fred Thaheld built the Humming Bird, the first full-cantilever low-wing monoplane made in the United States. | https://www.hmdb.org/m.asp?m=199559
+Olinda | @33.92126667,-117.8302 | In 1899 the Olinda oil field became the first place in California to drill with the hole kept full of water, a technique that changed how oil was produced. | https://www.hmdb.org/m.asp?m=50337
+
+# --- Los Alamitos, Fountain Valley, Huntington Beach --------------------------------
+Fountain Valley Drive-In | @33.701505,-117.954549 | Opened on July 12, 1967 and torn down in 1984, the drive-in here was billed as the nation's largest and had the only fountains in town. | https://www.hmdb.org/m.asp?m=59759
+# name: the marker title is "Helicopter Landing Pad"
+Mile Square Helicopter Landing Pad | @33.726236,-117.948256 | The Navy bought this land in 1943, and from 1952 through the Vietnam era Marine helicopter pilots practiced takeoffs and landings here. | https://www.hmdb.org/m.asp?m=59761
+Colonia Juarez | @33.714857,-117.945957 | Laid out in 1923 with six streets of 50-by-300-foot lots, Colonia Juárez grew into a complete community with its own stores and churches; its Holy Family Mission still stands. | https://www.hmdb.org/m.asp?m=59056
+Rancho Lucero | @33.716643,-117.928611 | When Frank and Dolores Lucero bought 40 acres at this corner in 1944, Dolores refused to leave her house, so it was moved here from Seal Beach with her and some of the children inside. | https://www.hmdb.org/m.asp?m=59554
+# name: the marker title is "Original Circus Site / First Post Office / Country Stores"
+Original Circus Site | @33.701552,-117.962508 | Each year the Escalante Circus pitched its tent here, and its parade set off from this corner on a loop through the farm roads. | https://www.hmdb.org/m.asp?m=59053
+Talbert Drainage District | @33.701827,-117.962764 | Landowners hired Sam Talbert to drain the marshland called Gospel Swamp, and he did it with a river levee and huge ditches along the roads running to the ocean. | https://www.hmdb.org/m.asp?m=59489
+# name: the marker title is "Buddhist Church"
+First Buddhist Church in Orange County Site | @33.699454,-117.962836 | Orange County's first Buddhist church was built here in 1935, then moved to Stanton in 1954 and to Anaheim in 1965. | https://www.hmdb.org/m.asp?m=146156
+# name: the marker title is "Lloyd Wright's Tower"
+Lloyd Wright Tower Site | @33.71599555,-118.02455228 | A 94-foot sign tower by architect Lloyd Wright was meant to rise on this spot, but residents voted it down. | https://www.hmdb.org/m.asp?m=207168
+# name: the marker title is "P-38 Memorial"
+P-38 Crash Memorial | @33.64625075,-117.98733804 | On June 27, 1943, a P-38 fighter on a training flight crashed onto this beach, killing four children and injuring dozens of other people. | https://www.hmdb.org/m.asp?m=215822
+Scout Cabin | @33.668447,-117.99858 | The Lions Club, the carpenters' union and Edison built this rustic cabin in 1924 for Huntington Beach scouting, and Troop 1 has used it ever since. | https://www.hmdb.org/m.asp?m=59874
+The Queen's Rose Garden | @33.67747778,-118.00031389 | Since 1963 a new rose has been planted here for each Miss Huntington Beach, a title first given on July 4, 1910. | https://www.hmdb.org/m.asp?m=228029
+# CUT after dry run 1: "World's Largest Surfboard" (m=301497) matched live pin "International Surfing Museum" —
+# the marker stands at the museum (the article's coordinate is the marker's to 10 m), but the marker text is about
+# the 2015 ride, not the museum, so it would replace the museum's own description. Left out of this pass.
+
+# --- Costa Mesa and Irvine ----------------------------------------------------------
+California Scenario | @33.68916667,-117.88224722 | Isamu Noguchi designed this 1.6-acre sculpture garden between two office towers on what had been the family's lima bean farm, as an abstract picture of California's landscapes. | https://www.hmdb.org/m.asp?m=308074
+# name: the marker title is "In Memory of Jim Olson"
+Irvine Ranch Windmill | @33.664979,-117.837091 | This is one of about 1,200 water-pumping windmills that once watered the Irvine Ranch before modern water systems arrived. | https://www.hmdb.org/m.asp?m=52247
+# name: the marker title is "Irvine Valencia Growers"
+Irvine Valencia Growers Packing House Site | @33.70444444,-117.75305556 | A 1929 packing house here cleaned and labeled the Irvine Ranch's prize oranges before they were shipped around the world. | https://www.hmdb.org/m.asp?m=263266
+Old Town Irvine | @33.67538333,-117.7578 | James Irvine II picked this high ground as the ranch's shipping point when the Santa Fe railroad arrived in 1887, and its 1895 bean shed still stands. | https://www.hmdb.org/m.asp?m=50339
+# review after dry run 1: matched live pin "Old Town Irvine" (which takes its own story above) — the silo is one
+# building inside it, a different place (rule (k)).
+# name: the marker title is "Bulk Storage Silo Warehouse 1949"
+Irvine Bean and Grain Silo | @33.67552278,-117.75880714 | These 1949 silos stored the ranch's beans and barley; during World War II the Irvine Ranch was the world's largest lima bean grower. | https://www.hmdb.org/m.asp?m=185442 | new

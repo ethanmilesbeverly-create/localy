@@ -389,7 +389,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.06c (#492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Roster unchanged (26). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.20a (#483 — roster 26 → 27, + Orange County, Los Angeles' first extra box; code unchanged. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -442,6 +442,15 @@ const METROS: Metro[] = [
   // "New York": PREWARM_METRO is a substring filter and this name becomes
   // submissions.city for graves, so it must not collide with the core row.
   { name: "Queens-Nassau", lat: 40.7400, lng: -73.6200 },
+  // #483 (2026-10-20): the roster grows 26 → 27 with Los Angeles' FIRST extra box, placed
+  // by the same 2020-census tract check as Queens-Nassau, south (Riverside, #452, owns the
+  // east): +2.56M people the LA box leaves out (Orange County 2.40M — Anaheim, Santa Ana,
+  // Garden Grove, Fullerton, Orange, Costa Mesa, Huntington Beach — plus 154k in LA
+  // County's south-east edge), zero tiles shared with LA or San Diego, none in Riverside
+  // or San Bernardino County. Any centre in 33.77–33.81 / -117.91–-117.87 gives the same
+  // 42 tiles. The best San Fernando Valley centre measured +1.52M. The name omits "Los
+  // Angeles" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Orange County", lat: 33.7900, lng: -117.8900 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode

@@ -18,7 +18,7 @@
 //
 // MIRRORS (change together or tiles drift):
 //   - TILE_DEG = nearby-places REAL_TILE_DEG (0.05); tile key = round(coord/0.05).
-//   - METROS + enumerateTiles = gate-tiles.ts (same 26 roster rows, same bbox half-size).
+//   - METROS + enumerateTiles = gate-tiles.ts (same 27 roster rows, same bbox half-size).
 //   The function snaps every request to the tile centre (#27 fetch-anchor), and this
 //   tool posts the exact centre, so a warm lands on the tile the key names.
 //
@@ -65,7 +65,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.20b"; // 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.20c"; // 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -122,6 +122,15 @@ const METROS: Metro[] = [
   // "New York": PREWARM_METRO is a substring filter and this name becomes
   // submissions.city for graves, so it must not collide with the core row.
   { name: "Queens-Nassau", lat: 40.7400, lng: -73.6200 },
+  // #483 (2026-10-20): the roster grows 26 → 27 with Los Angeles' FIRST extra box, placed
+  // by the same 2020-census tract check as Queens-Nassau, south (Riverside, #452, owns the
+  // east): +2.56M people the LA box leaves out (Orange County 2.40M — Anaheim, Santa Ana,
+  // Garden Grove, Fullerton, Orange, Costa Mesa, Huntington Beach — plus 154k in LA
+  // County's south-east edge), zero tiles shared with LA or San Diego, none in Riverside
+  // or San Bernardino County. Any centre in 33.77–33.81 / -117.91–-117.87 gives the same
+  // 42 tiles. The best San Fernando Valley centre measured +1.52M. The name omits "Los
+  // Angeles" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Orange County", lat: 33.7900, lng: -117.8900 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

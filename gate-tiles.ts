@@ -296,7 +296,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the launch roster, 26 rows since #482 (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 27 rows since #483 (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -336,6 +336,15 @@ const METROS: Metro[] = [
   // "New York": PREWARM_METRO is a substring filter and this name becomes
   // submissions.city for graves, so it must not collide with the core row.
   { name: "Queens-Nassau", lat: 40.7400, lng: -73.6200 },
+  // #483 (2026-10-20): the roster grows 26 → 27 with Los Angeles' FIRST extra box, placed
+  // by the same 2020-census tract check as Queens-Nassau, south (Riverside, #452, owns the
+  // east): +2.56M people the LA box leaves out (Orange County 2.40M — Anaheim, Santa Ana,
+  // Garden Grove, Fullerton, Orange, Costa Mesa, Huntington Beach — plus 154k in LA
+  // County's south-east edge), zero tiles shared with LA or San Diego, none in Riverside
+  // or San Bernardino County. Any centre in 33.77–33.81 / -117.91–-117.87 gives the same
+  // 42 tiles. The best San Fernando Valley centre measured +1.52M. The name omits "Los
+  // Angeles" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Orange County", lat: 33.7900, lng: -117.8900 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -1104,7 +1113,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-08a (#522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts; roster unchanged (26))";
+const BUILD_MARKER = "gate-tiles 2026-10-20a (#483 roster 26 → 27, + Orange County, LA's first extra box; code unchanged. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
