@@ -1,0 +1,43 @@
+# names-519-chicago.txt — #519 shape (a), Chicago: right stories #509's rebuild hid, fed back as sourced story lines
+# (the #502 rescue-line route — never back through the gate, never a looser serve match).
+# Source: the 2026-10-20 measurement's 23 hand-judged RIGHT places, re-read 2026-10-21 against the 48 Chicago roster
+# tiles' places:v34 rows (public key). Every line is named EXACTLY as its hidden OSM pin and placed at that pin's
+# coordinate, so it attaches (§6 (h)) — no line should seed a new pin.
+#
+# CUT — 11 of the 23 still serve their story through a live Wikipedia pin of the SAME article 0–133 m away
+# (normName never folds "Chevron" into "Chevron (sculpture)", so un-hiding the OSM twin would put two pins on one spot):
+#   Spiral Galaxy · Chevron · Johann Wolfgang von Goethe Monument · General Philip Henry Sheridan Monument ·
+#   Emanuel Swedenborg Monument · Stephen A. Douglas (plaque) + Stephen A. Douglas Monument Park (→ "Stephen A. Douglas
+#   Tomb", 32 m) · Eckersall Park (→ "Eckersall Park and Stadium", 108 m) · Palmisano (Henry) Park (→ "Palmisano Park",
+#   38 m) · Old Treaty Elm Historic Marker (→ "Old Treaty Elm", 22 m) · Promontory Point Marker (→ "Promontory Point
+#   (Chicago)", 133 m, and the gem "Promontory Point", 214 m).
+# No gem and no Wikipedia pin within 300 m of any line below (checked 2026-10-21).
+#
+# LAKEFRONT TRAIL: 42 hidden OSM segments, all named "Lakefront Trail", 41.774 → 41.987 N. A curated row reaches every
+# same-name pin within 2 km (CURATED_MATCH_M), so six lines spaced along the trail cover all 42 (farthest segment 1.7 km from its row); each attaches to the
+# segment(s) within 90 m of its point. Same story on all six.
+#
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439 needs the service key):
+#   SEED_CITY_NAME=Chicago SEED_CITY_LAT=41.8781 SEED_CITY_LNG=-87.6298 deno run -A seed-resolve.ts names-519-chicago.txt
+# Expect: 17 lines → 0 new-seed, 17 story-attached, 0 review, 0 held; staged curated rows 18 (one per attached pin:
+# the Montrose trail line catches 2 segments, every other line 1); 0 "! ALREADY CURATED". Any new-seed is a stop (§6 (v)).
+# After the commit: curated_category_backfill(true) in the SQL editor (#495).
+
+Dialogo | @41.789051,-87.598162 | Virginio Ferrari's 1971 abstract sculpture outside Pick Hall is known for its midday shadow, which looks like a hammer and sickle and draws onlookers every year, though the artist says he never meant it to. | https://en.wikipedia.org/wiki/Dialogo_(sculpture)
+Torch Song | @41.786842,-87.585355 | Alison Saar's bronze in the Obama Presidential Center's Women's Garden recasts the Statue of Liberty as a woman raising a gilded flame, with a nod to Chicago's blues tradition. | https://en.wikipedia.org/wiki/Torch_Song_(sculpture)
+Gráinne | @41.879453,-87.643794 | A gift from Galway, Ireland, Maurice Harron's statue was dedicated here in 2007 by the mayors of both cities to mark Chicago's long ties with Ireland. | https://en.wikipedia.org/wiki/Grainne_(sculpture)
+Olmec Head | @41.867151,-87.615721 | This 7-foot head beside the Field Museum's north entrance copies one of the colossal Olmec heads found at San Lorenzo, and was given to Chicago by the Mexican state of Veracruz in 2003. | https://en.wikipedia.org/wiki/Olmec_Head,_Number_8
+William Shakespeare Monument | @41.923824,-87.636214 | William Ordway Partridge's bronze of Shakespeare holding a book was made in 1893 and has stood in Lincoln Park since 1894. | https://en.wikipedia.org/wiki/Statue_of_William_Shakespeare_(Chicago)
+Tomáš Garrigue Masaryk Memorial | @41.786945,-87.590154 | Albin Polasek's monument to Czechoslovakia's founding president shows a Blaník knight on horseback; made in 1949, it was raised on the Midway in 1955. | https://en.wikipedia.org/wiki/Thomas_Garrigue_Masaryk_Monument
+Camp Douglas | @41.835156,-87.617657 | Near here stood Camp Douglas, a Union training ground that became one of the North's largest Civil War prison camps for Confederates; more than 4,000 of its dead were later moved to a mass grave at Oak Woods Cemetery. | https://en.wikipedia.org/wiki/Camp_Douglas_(Chicago)
+Gold Star Families Memorial | @41.862440,-87.614104 | Dedicated in 2006 just east of Soldier Field, this memorial honors 585 Chicago police officers who died in the line of duty and is tended by the department's honor guard. | https://en.wikipedia.org/wiki/Gold_Star_Families_Memorial_and_Park
+Jane M. Byrne Plaza | @41.8971705,-87.624553 | The green beside the Water Tower was called Water Tower Park until 2014, when it was renamed for Jane Byrne, Chicago's first woman mayor. | https://en.wikipedia.org/wiki/Jane_Byrne_Park
+Skating Ribbon | @41.883750,-87.618767 | Opened in December 2014, this quarter-mile ribbon of ice climbs and dips as it loops through Maggie Daley Park, holds up to 700 skaters, and turns into a walking and roller path in summer. | https://en.wikipedia.org/wiki/Maggie_Daley_Skating_Ribbon
+SkyDeck Chicago Willis Tower | @41.878505,-87.635887 | The 103rd-floor deck of the former Sears Tower, the world's tallest building when it opened in 1973, has taken visitors since June 1974 and is the highest observation deck in the United States. | https://en.wikipedia.org/wiki/Willis_Tower
+# Lakefront Trail — six points, south to north (Jackson Park · Museum Campus · Grant Park · Lincoln Park · Montrose · Hollywood)
+Lakefront Trail | @41.787885,-87.577649 | This path runs about 18.5 miles along Lake Michigan through Jackson, Burnham, Grant and Lincoln parks, and on busy summer days some 70,000 people walk, run or ride it. | https://en.wikipedia.org/wiki/Chicago_Lakefront_Trail
+Lakefront Trail | @41.860188,-87.612587 | This path runs about 18.5 miles along Lake Michigan through Jackson, Burnham, Grant and Lincoln parks, and on busy summer days some 70,000 people walk, run or ride it. | https://en.wikipedia.org/wiki/Chicago_Lakefront_Trail
+Lakefront Trail | @41.883801,-87.612816 | This path runs about 18.5 miles along Lake Michigan through Jackson, Burnham, Grant and Lincoln parks, and on busy summer days some 70,000 people walk, run or ride it. | https://en.wikipedia.org/wiki/Chicago_Lakefront_Trail
+Lakefront Trail | @41.934018,-87.631726 | This path runs about 18.5 miles along Lake Michigan through Jackson, Burnham, Grant and Lincoln parks, and on busy summer days some 70,000 people walk, run or ride it. | https://en.wikipedia.org/wiki/Chicago_Lakefront_Trail
+Lakefront Trail | @41.962740,-87.643995 | This path runs about 18.5 miles along Lake Michigan through Jackson, Burnham, Grant and Lincoln parks, and on busy summer days some 70,000 people walk, run or ride it. | https://en.wikipedia.org/wiki/Chicago_Lakefront_Trail
+Lakefront Trail | @41.987403,-87.654386 | This path runs about 18.5 miles along Lake Michigan through Jackson, Burnham, Grant and Lincoln parks, and on busy summer days some 70,000 people walk, run or ride it. | https://en.wikipedia.org/wiki/Chicago_Lakefront_Trail
