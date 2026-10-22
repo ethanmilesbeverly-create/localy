@@ -65,7 +65,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.20c"; // 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.22a"; // 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -83,7 +83,7 @@ const DRY_RUN = env("PREWARM_DRY_RUN") === "1";
 const RETRY_FAILED = Deno.args.includes("--retry-failed");
 const FAILED_FILE = "prewarm_failed.json";
 
-// Same roster as gate-tiles.ts (26 rows since #482, 2026-10-02).
+// Same roster as gate-tiles.ts (28 rows since #484, 2026-10-22).
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
   { name: "New York", lat: 40.7128, lng: -74.0060 },
@@ -131,6 +131,15 @@ const METROS: Metro[] = [
   // 42 tiles. The best San Fernando Valley centre measured +1.52M. The name omits "Los
   // Angeles" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Orange County", lat: 33.7900, lng: -117.8900 },
+  // #484 (2026-10-22): the roster grows 27 → 28 with Chicago's FIRST extra box, placed by
+  // the same 2020-census tract check as Queens-Nassau: +1.46M people the Chicago box leaves
+  // out (north-west Cook 762k — Des Plaines, Elk Grove Village, Schaumburg, Mount Prospect;
+  // northern DuPage 697k — Elmhurst, Addison, Lombard, Glen Ellyn, Wheaton), zero tiles
+  // shared with Chicago. Any centre in 41.92–41.96 / -88.04–-88.00 gives the same 48 tiles.
+  // The best centres farther out measured less: west (Kane edge) +1.19M, north (Lake
+  // County) +1.18M, south (Lake IN / south Cook) +1.10M. The name omits "Chicago" for the
+  // same substring / submissions.city reason as Queens-Nassau.
+  { name: "DuPage-NW Cook", lat: 41.9400, lng: -88.0200 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

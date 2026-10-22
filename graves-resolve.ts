@@ -389,7 +389,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.20a (#483 — roster 26 → 27, + Orange County, Los Angeles' first extra box; code unchanged. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.22a (#484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -451,6 +451,15 @@ const METROS: Metro[] = [
   // 42 tiles. The best San Fernando Valley centre measured +1.52M. The name omits "Los
   // Angeles" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Orange County", lat: 33.7900, lng: -117.8900 },
+  // #484 (2026-10-22): the roster grows 27 → 28 with Chicago's FIRST extra box, placed by
+  // the same 2020-census tract check as Queens-Nassau: +1.46M people the Chicago box leaves
+  // out (north-west Cook 762k — Des Plaines, Elk Grove Village, Schaumburg, Mount Prospect;
+  // northern DuPage 697k — Elmhurst, Addison, Lombard, Glen Ellyn, Wheaton), zero tiles
+  // shared with Chicago. Any centre in 41.92–41.96 / -88.04–-88.00 gives the same 48 tiles.
+  // The best centres farther out measured less: west (Kane edge) +1.19M, north (Lake
+  // County) +1.18M, south (Lake IN / south Cook) +1.10M. The name omits "Chicago" for the
+  // same substring / submissions.city reason as Queens-Nassau.
+  { name: "DuPage-NW Cook", lat: 41.9400, lng: -88.0200 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode

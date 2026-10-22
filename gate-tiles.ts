@@ -296,7 +296,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the launch roster, 27 rows since #483 (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 28 rows since #484 (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -345,6 +345,15 @@ const METROS: Metro[] = [
   // 42 tiles. The best San Fernando Valley centre measured +1.52M. The name omits "Los
   // Angeles" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Orange County", lat: 33.7900, lng: -117.8900 },
+  // #484 (2026-10-22): the roster grows 27 → 28 with Chicago's FIRST extra box, placed by
+  // the same 2020-census tract check as Queens-Nassau: +1.46M people the Chicago box leaves
+  // out (north-west Cook 762k — Des Plaines, Elk Grove Village, Schaumburg, Mount Prospect;
+  // northern DuPage 697k — Elmhurst, Addison, Lombard, Glen Ellyn, Wheaton), zero tiles
+  // shared with Chicago. Any centre in 41.92–41.96 / -88.04–-88.00 gives the same 48 tiles.
+  // The best centres farther out measured less: west (Kane edge) +1.19M, north (Lake
+  // County) +1.18M, south (Lake IN / south Cook) +1.10M. The name omits "Chicago" for the
+  // same substring / submissions.city reason as Queens-Nassau.
+  { name: "DuPage-NW Cook", lat: 41.9400, lng: -88.0200 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -1113,7 +1122,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-20a (#483 roster 26 → 27, + Orange County, LA's first extra box; code unchanged. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
+const BUILD_MARKER = "gate-tiles 2026-10-22a (#484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
