@@ -1,0 +1,9 @@
+# names-500-bergen-westchester-achter-col.txt — #500 Bergen-Westchester, the one line the judge flipped on the commit run
+# COMMIT (2026-10-25): names-500-bergen-westchester.txt inserted 88 seeds + 88 story rows; the judge flipped this line
+# to review on the commit run (near-named article "Bogota station", within 90 m — a railroad station, not the 1642
+# trading-post site). Marked new here and committed alone. DO NOT re-run the main file with --commit.
+# Dry run, then commit, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported:
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-500-bergen-westchester-achter-col.txt
+# name: marker title has quotes around "Achter Col"
+# review on the commit run: near-named article "Bogota station" — a station, not this colony site — marked new.
+Achter Col Colony | @40.87709,-74.033585 | In 1642, when this was New Netherland, Johannes Winckelman built a ninety-foot fur trading post and farmhouse near here that sheltered settlers and cattle alike. | https://www.hmdb.org/m.asp?m=7128 | new

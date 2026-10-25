@@ -1,0 +1,163 @@
+# names-500-bergen-westchester.txt — #500 New York's second extra box (Bergen-Westchester), pass 1 (story lines, 2026-10-25)
+# Source: Historical Marker Database — the Bergen County Historical Society blue-marker series, keyword list,
+# all 171 entries EXCEPT entries 94–100 (the fetched page cut off at 93; fetch them before pass 2).
+# NOT in this pass: Westchester, Rockland, Passaic and the north Bronx (the box's other ~1.3M people), and Bergen
+# markers outside the BCHS series — pass-2 rows. Skipped on purpose: commemorative-only plaques ("200 Years Later"),
+# New Bridge Landing's interpretive panels (timeline, flax, two-page site boards — the bridge, the inn and the
+# Steuben House carry the story), a blank-excerpt plaque (Site of Old Block House), the Tower and Water Wheel of
+# Easton Gardens (one line of text), and everything outside the box (Franklin Lakes, Oakland, Ramapo Valley Road,
+# Hackensack's south edge, Ridgefield, Teterboro, Edgewater, Lyndhurst, Wood-Ridge, Little Ferry, Manalapan, Vreeland House).
+# CUT — already served with the same story on a live pin within 2 km (read 2026-10-25 through all 48 tiles, then
+# the 7 tiles that were cold re-read after the drip warmed them, so every line's OSM pins were checked too):
+#   Hopper-Goetschius House (→ Hopper-Goetschius House Museum, OSM, 59 m — found on the re-read after its tile warmed) · Benjamin P. Westervelt Homesite (→ Benjamin P. Westervelt House, 43 m) · Captain John Huyler's Farm (→ Peter Huyler House, on the Huyler farm, 31 m) · Derick Banta House (→ Derick Banta House, 66 m) · Old North Church (→ Schraalenburgh North Church, 113 m) · Van Houten-Hillman House (→ Van Houten–Hillman House, 18 m) · Saint Paul's Episcopal Church (→ St. Paul's Episcopal Church (Englewood), 75 m) · Naugle House (→ Naugle House, 85 m) · Hopper Homestead (→ Hendrick Hopper House, 18 m) · Abraham D. Blauvelt Homestead (→ Blauvelt House (Harrington Park), 44 m) · Zabriskie-Christie House (→ Garret Zabriskie House, 73 m) · Lozier House (→ Lozier House and Van Riper Mill, 129 m) · Eckerson House (→ Eckerson House, 15 m) · Richard T. Cooper House (→ Thunise & Richard Cooper House, 50 m) · Van Buskirk-Oakley House (→ Van Buskirk-Oakley House, 72 m) · Sluckup (→ Sluckup (OSM, carries the marker's own text), 10 m) · Wortendyke Dutch Barn (→ Wortendyke Barn, 10 m) · David Van Gelder House (→ David Van Gelder House, 88 m) · William Holdrum, Jr., House (→ William Holdrum House, 94 m) · Abraham A. Haring House (→ Abraham A. Haring House, 116 m) · John A. Haring House (→ Nicholas Haring House (also called the John A. Haring House), 39 m) · Seven Chimneys (→ Seven Chimneys, 69 m) · Peter P. Post House (→ Peter P. Post House (its Wikipedia coordinate is ~1 km off), 1061 m) · Camp Merritt (→ Camp Merritt Memorial Monument, at the camp's centre, 17 m) · Demarest Railroad Station (→ Demarest station, 8 m) · Grave of Gen. Enoch Poor (→ Grave of Enoch Poor (gem), 85 m) · Baylor Massacre Site (→ Baylor Massacre, 486 m) · Baylor Massacre Burial Site (→ Baylor Massacre (pinned at the burial site), 18 m) · Rockleigh (→ Rockleigh Historic District, 217 m)
+# HELD — not in either file:
+#   Laroe-Van Horn House: 70 m from the live Hopper–Van Horn House; may be the same building — check before adding · Wortendyke Homestead: Frederick Wortendyke House (Wikipedia) is served ~1 km away and is likely this house mis-placed; adding a pin here would double it
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# A name differs from the marker title only where the title isn't a place name; each such line is marked.
+# `| new` is set on every line within 400 m of a live pin or another line (DuPage lesson (1), handoff §6): the
+# same-place judge re-rolls on every run, so it is decided up front, not left to the judge.
+# COMMIT (2026-10-25): 88 seeds + 88 story rows inserted; the judge flipped Achter Col Colony to review on the commit
+# run (near-named "Bogota station"), so it was not inserted. It is committed alone from names-500-bergen-westchester-achter-col.txt.
+# DO NOT re-run this file with --commit: its other 88 lines are already in.
+# After the commit: run curated_category_backfill(true) in the SQL editor (#495).
+# DRY RUN 2 (2026-10-25): 89 new-seed, 0 review, 0 held; 12 seeded under their article's title — matched.
+# DRY RUN 1 (2026-10-25): 77 new-seed, 0 story-attached, 12 review, 0 held; Wikipedia failed 0, timeouts 0. 4 seeded
+# under their article's title (#425) — Teunis Haring House, Brinkerhoff–Demarest House, Reformed Dutch Church of
+# Wyckoff, Christie-Parsels House, each the same building, 27–74 m off — kept. The 12 reviews are settled below
+# (each carries a `review after dry run 1` comment): 8 renamed to the article title, 4 marked new.
+# Every coordinate below was checked against the Bergen-Westchester tile set (48 tiles, roster 41.0400, -73.9700).
+# RUN ORDER (the #441 lesson): every line in this file sits in a warm tile. The drip (prewarm-tiles.ts 2026.10.25b
+# --until-warm) left one tile cold, 823_-1482, and no line sits in it. A first draft split 38 lines into a separate
+# -cold file; once their 7 tiles warmed and re-checked clean (one more cut, above), they were folded back in here.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-500-bergen-westchester.txt
+
+# name: marker title "Piermont Road"
+Piermont Road | @41.008393,-73.929591 | Built in 1859 as an extension of the Closter road, this stretch first called Carterette Road gave farmers an easier wagon route north into New York State. | https://www.hmdb.org/m.asp?m=8631
+Campbell–Christie House | @40.912689,-74.032433 | This Dutch-style sandstone house stood in New Milford from the Revolution until it was saved from demolition and moved here in 1977. | https://www.hmdb.org/m.asp?m=7465 | new
+Site of the French Church and Cemetery | @40.924038,-74.02713 | The French Church of Kinkachemeck and its cemetery stood here on land the Tappan Indians deeded to David Desmarest in 1677. | https://www.hmdb.org/m.asp?m=7234
+Van Houten-Yeomans Homestead | @41.031715,-74.133545 | Paul J. Van Houten built this farmhouse about 1869 on acreage his family had worked since 1792, and willed it to his daughter Margaret Ann Yeomans. | https://www.hmdb.org/m.asp?m=43788
+# name: marker title has quotes around "Achter Col"
+Achter Col Colony | @40.87709,-74.033585 | In 1642, when this was New Netherland, Johannes Winckelman built a ninety-foot fur trading post and farmhouse near here that sheltered settlers and cattle alike. | https://www.hmdb.org/m.asp?m=7128
+Daniel De Clark House | @40.978335,-73.944479 | Daniel De Clark built this house about 1786 and ran a 170-acre cattle and dairy farm from it. | https://www.hmdb.org/m.asp?m=7916 | new
+Nagel (Naugle) House | @40.979482,-73.941257 | Built about 1745 on land the Nagel brothers bought in 1710, this house later belonged to David Naugle, a militiaman in the Revolution. | https://www.hmdb.org/m.asp?m=7910 | new
+# review after dry run 1: near-named article "Demott–Westervelt House" (23 m; the same 1808 house) — renamed to the title to seed under it (#432); marker title "De Mott–Westervelt House".
+Demott–Westervelt House | @40.883815,-73.977245 | Henry DeMott built this sandstone house about 1808; its frame wing reuses material from Albert Lydecker's pre-Revolutionary homestead. | https://www.hmdb.org/m.asp?m=7133
+# name: marker title "Liberty Pole"
+# review after dry run 1: near-named article "Englewood Public School District" — a school district, not this junction — marked new.
+Liberty Pole | @40.896617,-73.980043 | Named for a liberty pole raised before the Revolution, this junction saw the 1776 retreat from Fort Lee and many British and American troop movements. | https://www.hmdb.org/m.asp?m=7012 | new
+Site of Hopper-Croucher Homestead | @40.93812,-74.125045 | One of Fair Lawn's last farmsteads stood here; Sheriff Henry A. Hopper built the house in 1855 and it was razed for road work in 1989. | https://www.hmdb.org/m.asp?m=63049
+Hopper Family Burying Ground | @40.958295,-74.114877 | Two neighbouring Hopper farms shared this family cemetery for nearly a century, with the earliest known burial in 1804. | https://www.hmdb.org/m.asp?m=36966 | new
+# review after dry run 1: near-named article "Garret Hopper House" (35 m; Garret Hopper built the main house) — renamed to the title to seed under it (#432); marker title "Hopper House".
+Garret Hopper House | @40.965775,-74.113566 | Henry G. Hopper began this house about 1788 on a 120-acre farm in the area then called Small Lots, and his son Garret added the Dutch-style main house. | https://www.hmdb.org/m.asp?m=36971
+# name: marker title "The Red Brick Schoolhouse"
+Red Brick Schoolhouse | @40.962346,-74.118123 | Built in 1846 as Ridgewood Grove School No. 44, this one-room school's planned closing in 1894 led to Glen Rock becoming its own borough. | https://www.hmdb.org/m.asp?m=36969 | new
+Bank House | @40.879518,-74.043569 | Built about 1831 for the Washington Banking Company, the first bank in what is now Bergen County, it housed lawyers and judges after the bank failed in 1833. | https://www.hmdb.org/m.asp?m=6817 | new
+# name: marker title "Historic First Reformed Church"
+First Reformed Church of Hackensack | @40.879115,-74.043024 | Records from 1686 make this the second-oldest Dutch church in New Jersey; stones in its east wall carry the initials of founding families. | https://www.hmdb.org/m.asp?m=6820 | new
+Site of the Court-House & Jail | @40.879226,-74.043717 | Bergen County's court-house and jail stood here until the British burned them in 1780. | https://www.hmdb.org/m.asp?m=6872 | new
+# name: marker title "Varick Memorial African Methodist Episcopal Zion Church"
+Varick Memorial AME Zion Church | @40.882703,-74.048483 | Hackensack's first African American church began in 1864 as a mission, and its first building was an old lime shed moved here in 1867. | https://www.hmdb.org/m.asp?m=7223
+Blanch-Haring House | @40.990262,-73.975604 | Isaac Blanch, a Patriot official and state assemblyman during the Revolution, inherited this homestead and grist mill from his father in 1767. | https://www.hmdb.org/m.asp?m=7920 | new
+Old Burying Ground | @40.988112,-73.973257 | Used for nearly two hundred years, mostly by the Blauvelt family, this cemetery holds early settlers, Revolutionary veterans and enslaved people, with burials from 1722. | https://www.hmdb.org/m.asp?m=7877 | new
+Site of the Myers-Bogert Grist Mill | @40.98491,-73.992641 | Abraham Myers built a grist mill on the Hackensack River here before 1765, and it ran for generations as Bogert's Mill. | https://www.hmdb.org/m.asp?m=7940 | new
+Wortendyke Homesite | @40.987424,-73.97557 | Frederick Wortendyke owned this Tappan Patent land in 1723; his son Jacob was taken captive here in one of the British raids on the area. | https://www.hmdb.org/m.asp?m=8683 | new
+Garret J. Durie House | @40.983667,-73.976167 | Garret J. Durie built this Dutch Colonial house about 1811 on a 120-acre farm that ran a mile east to the Tenakill Brook. | https://www.hmdb.org/m.asp?m=7935 | new
+# review after dry run 1: names "Mahwah station" — that is today's NJ Transit stop; this is the 1871 depot, moved and kept by the historical society — marked new.
+Mahwah's First Station | @41.094303,-74.147587 | Mahwah's 1871 railroad station served until 1902, spent fifty years as a storehouse, and was moved and preserved by the town's historical society. | https://www.hmdb.org/m.asp?m=43796 | new
+New Bridge Inn | @40.914312,-74.028433 | Peter P. Demarest built this inn in 1739–40 and was licensed to keep a tavern in 1766; Washington led his retreating army past it in November 1776. | https://www.hmdb.org/m.asp?m=7225 | new
+Peter A. Blauvelt House | @40.998235,-73.962322 | Undertaker Peter A. Blauvelt built this High Victorian house about 1890; from 1922 it was home to Norwood mayor Charles S. Gray. | https://www.hmdb.org/m.asp?m=8682 | new
+Claudius O. Collignon House | @41.000406,-73.988952 | Claudius Collignon built this house about 1864 after buying half of his brother Nicholas's farm and mill works. | https://www.hmdb.org/m.asp?m=7930 | new
+# name: marker title "Haring - DeWolf House"
+Haring-DeWolf House | @41.024353,-73.977531 | Cosyn Haring, one of the sixteen Tappan patentees, built this house about 1709, and it has never been deeded out of the family. | https://www.hmdb.org/m.asp?m=52943 | new
+John Haring, Jr. House | @41.010214,-74.002081 | John Haring Jr. built this Greek Revival house about 1836 and farmed his own and neighbouring land for decades. | https://www.hmdb.org/m.asp?m=7932
+Teunis Haring House | @41.02057,-73.967525 | Built about 1810 in brick and sandstone, this was the homestead of farmer and county freeholder Teunis Haring. | https://www.hmdb.org/m.asp?m=43842
+# name: marker title "The Stone Point"
+Stone Point | @40.999371,-73.989234 | Known as the Stone or Stony Point since 1704, this spot on the Tappan Patent had a grist mill by 1725, fifty years before the Revolution. | https://www.hmdb.org/m.asp?m=7931 | new
+# name: marker title "Dunkerhook Road"
+Dunkerhook Road | @40.947878,-74.09499 | The Dutch named this colonial lane Dunkerhook, the Dark Corner; the Zabriskie family, who bought the land from the Indians in 1702, built houses and a school along it. | https://www.hmdb.org/m.asp?m=8314 | new
+Jacob J. Zabriskie House | @40.967914,-74.091919 | Built about 1826, this house blends Federal and Dutch Colonial styles and stayed in the Zabriskie family for 132 years. | https://www.hmdb.org/m.asp?m=8334
+# name: marker title "One-Room Schoolhouse"
+# review after dry run 1: near-named article "Midland School, Paramus, New Jersey" (23 m; the same 1876 School No. 26) — renamed to the title to seed under it (#432); marker title "One-Room Schoolhouse".
+Midland School, Paramus, New Jersey | @40.960407,-74.089914 | Built in 1876 as School No. 26 of Midland Township, this building became the borough hall when Paramus was formed in 1922. | https://www.hmdb.org/m.asp?m=8333
+Rutan-Terhune-Bidwell House | @40.957949,-74.093419 | Farmer Jacobus Rutan built this house about 1794–95; blacksmith Cornelius H. Zabriskie bought it in 1800 and passed it to his grandson. | https://www.hmdb.org/m.asp?m=8336 | new
+Stephen T. Zabriskie House | @40.951424,-74.093962 | This stone house rose in the early 1800s on the farm Christian J. Zabriskie bought in 1775, and was lived in by his grandson Stephen. | https://www.hmdb.org/m.asp?m=8335
+Terhune-Van Dien House | @40.933458,-74.091004 | Henry S. Terhune built this house about 1795 on a 200-acre Terhune farm, held since 1707, that ran over a mile between the Saddle River and Sprout Brook. | https://www.hmdb.org/m.asp?m=8332
+Jacob Concklin House | @41.003199,-73.926419 | Wheelwright Jacob Concklin Jr. built this Dutch Colonial house about 1796 on a farm his family bought in 1748. | https://www.hmdb.org/m.asp?m=52946 | new
+Joseph Dubois House | @41.005225,-73.925318 | Joseph Dubois built the south wing in 1835 from materials of John Gesner's 18th-century house, in what was then Rockland Neighborhood. | https://www.hmdb.org/m.asp?m=8680 | new
+Brinkerhoff-Demarest House | @40.875878,-74.011848 | Hendricks Brinkerhoff built this early Dutch house around 1735 on family land, and his descendants have held it ever since. | https://www.hmdb.org/m.asp?m=7224
+# name: marker title, kept: names the site
+Revolutionary War Encampment – 1780 | @40.88389,-74.00778 | American troops camped for about two miles along Teaneck Road from August 22 to September 3, 1780, foraging close to British-held New York. | https://www.hmdb.org/m.asp?m=7221 | new
+# review after dry run 1: near-named article "John C. Stagg House" (73 m; the same c.1812 house) — renamed to the title to seed under it (#432); marker title "Stagg Homestead".
+John C. Stagg House | @40.98449,-74.171133 | John C. Stagg built this house about 1812 and ran a grocery store in its basement for many years. | https://www.hmdb.org/m.asp?m=12404
+Wyckoff Reformed Church | @41.006727,-74.173775 | Built in 1806 of local stone and timber, this was the first church in Wyckoff Township, founded by members of the Ponds Church. | https://www.hmdb.org/m.asp?m=12403
+New Bridge | @40.913888,-74.030372 | The first bridge here dated to 1745 and carried Washington's retreat in 1776; the iron swing bridge that replaced it in 1888–89 is the oldest of its kind in the state. | https://www.hmdb.org/m.asp?m=68879 | new
+# name: marker title "The Zabriskie House"
+Zabriskie-Steuben House | @40.91358,-74.030693 | Built in 1752, this house was given by New Jersey to Baron von Steuben in 1783 as the state's share of the nation's debt to him. | https://www.hmdb.org/m.asp?m=51303 | new
+# name: marker title "Lower Closter or New Dock"
+Lower Closter Dock | @40.926757,-73.924998 | Before dawn on November 20, 1776, Cornwallis landed 5,000 British troops here and, guided by three local men, climbed the Palisades to attack Fort Lee. | https://www.hmdb.org/m.asp?m=142465
+Nagel–Auryansen Cemetery | @40.975338,-73.941883 | Barent and Resolvert Nagel set aside this burial ground on their 1,030-acre tract, bought in 1710; the first burial is believed to date to about 1721. | https://www.hmdb.org/m.asp?m=63546 | new
+Cadmus House Museum | @40.9444287,-74.127966 | Jacob Haring built this house about 1806; farmer Thomas Cadmus bought it in 1816, and it carries his name today. | https://www.hmdb.org/m.asp?m=62967
+New Hope Baptist Church | @40.89038056,-74.04896667 | Hackensack's third-oldest African American church was built by carpenters from North Carolina, with services starting in 1920. | https://www.hmdb.org/m.asp?m=291234
+Terhune-Gardner House | @40.94056667,-74.0925 | Weaver and Patriot official David Terhune lived here before the Revolution, and the British raided the farm four times during the war. | https://www.hmdb.org/m.asp?m=18995 | new
+Beech Street School | @40.980145,-74.114381 | Built in 1894 to hold all of Ridgewood's schoolchildren, the school housed one of New Jersey's first kindergartens; mothers' petitions made it brick and stone. | https://www.hmdb.org/m.asp?m=16494 | new
+# name: marker title "Rockleigh Road"
+Rockleigh Road | @40.998728,-73.930371 | Part of this colonial road from Closter to Snedens Landing, the western end of the Dobbs Ferry crossing, was built by New York in 1748. | https://www.hmdb.org/m.asp?m=8632 | new
+# name: marker title "Brett Park / New Bridge Area"
+Brett Park | @40.914021,-74.029714 | This 10½-acre park, named for Teaneck mayor Jim Brett, holds the site of a Hackensack Indian village and the river crossing of Washington's 1776 retreat. | https://www.hmdb.org/m.asp?m=40228 | new
+African American Baptist Church Cemetery | @40.92966,-73.98385 | Francis Jackson, a freed slave, bought this woodland in 1868; it came to hold a Black cemetery and a small church built about 1873. | https://www.hmdb.org/m.asp?m=7509
+South Church | @40.929141,-74.003063 | Organized in 1723 as the Schraalenburg Dutch Reformed Church, the congregation built this church in 1799 and became Presbyterian in 1913. | https://www.hmdb.org/m.asp?m=7506 | new
+Closter Public School | @40.971618,-73.962884 | Closter bought this lot from the Bloomer family in 1899 and opened a two-story Renaissance Revival schoolhouse for grades K–8 the next year. | https://www.hmdb.org/m.asp?m=7912 | new
+Hilderbrant Naugle House | @40.974516,-73.965222 | Built in 1871 near the Closter depot for carpenter and clockmaker Hilderbrant Naugle, the house is known for its Gothic scroll work. | https://www.hmdb.org/m.asp?m=7919 | new
+Reformed Church of Closter | @40.97359,-73.96571 | Dedicated in 1862 as Closter's first church, it is said to have served as headquarters of a local militia, the Harrington Rifles. | https://www.hmdb.org/m.asp?m=7917 | new
+Walter Parcells Homestead | @40.96657,-73.95423 | Mason Walter Parcells built this Federal-style house of local stone in 1795 on a 34-acre farm on what was then Closter New Road. | https://www.hmdb.org/m.asp?m=7915 | new
+Huyler's Landing Road | @40.938183,-73.957229 | Revolutionary maps show Cornwallis's troops used this rough road up from the Hudson landing when they attacked Fort Lee on November 20, 1776. | https://www.hmdb.org/m.asp?m=7206 | new
+# name: marker title "Kinderkamack"
+# review after dry run 1: near-named article "Emerson station (NJ Transit)" — a station, not the colonial district — marked new.
+Kinderkamack | @40.975178,-74.026964 | Recorded as early as 1686, the Kinderkamack district took in parts of today's Emerson and River Edge; this section became Etna and then Emerson in 1909. | https://www.hmdb.org/m.asp?m=8634 | new
+Brookside Chapel | @40.90625,-73.96594 | Englewood's first church, built in 1860 on Palisade Avenue, was taken down stone by stone and rebuilt here when a larger church replaced it. | https://www.hmdb.org/m.asp?m=7011 | new
+English Neighborhood Union School | @40.912274,-73.97239 | Built in 1818 near the Liberty Pole Tavern, this schoolhouse was moved here and rebuilt from its own materials in 1850. | https://www.hmdb.org/m.asp?m=7129
+# name: marker title "First Presbyterian Church"
+First Presbyterian Church of Englewood | @40.891205,-73.970419 | Organized in 1860, the congregation put up Englewood's first church building on this site, the first Presbyterian church in Bergen County. | https://www.hmdb.org/m.asp?m=6970 | new
+John G. Benson House | @40.890714,-73.974575 | Farmer and militia captain John G. Benson built this house about 1800 on land New Jersey had confiscated from a loyalist minister. | https://www.hmdb.org/m.asp?m=7009 | new
+# name: marker title "Schraalenburgh Road"
+Schraalenburgh Road | @40.954889,-73.984077 | Once an Indian trail, this colonial road linking Teaneck with Tappan was surveyed in 1775 and drawn on American, French and British war maps. | https://www.hmdb.org/m.asp?m=7879
+Garret Durie House | @41.000751,-74.056196 | Farmer and blacksmith Garret Durie built this house about 1767, and both armies plundered it during the Revolutionary War. | https://www.hmdb.org/m.asp?m=43787 | new
+Westervelt-Demarest House | @41.003033,-74.056185 | Peter Westervelt built a small house here about 1756, enlarged in 1785; the farm was raided in the Revolution and later owned by a state assemblyman. | https://www.hmdb.org/m.asp?m=43786 | new
+Demarest-Bloomer House | @40.934717,-74.028079 | Farmer John C. Demarest built this Greek Revival house about 1840 when schooners still worked the Hackensack River; coal dealer George Bloomer bought it in 1864. | https://www.hmdb.org/m.asp?m=7226 | new
+Jacobus Demarest Homestead | @40.934102,-74.025748 | The oldest part of this house stands on land bought in 1677 by David Demarest, founder of Bergen County's Huguenot colony; his grandson Jacobus lived here until 1763. | https://www.hmdb.org/m.asp?m=7220 | new
+# name: marker title "Soldier Hill" (Lafayette Encampment)
+Soldier Hill | @40.96052,-74.030754 | In September 1780 the main Continental Army crossed the Hackensack and camped in two lines west of Kinderkamack Road, under Lafayette nearby. | https://www.hmdb.org/m.asp?m=7552
+Old Spring Valley Burial Ground | @40.932479,-74.054401 | Behind the Behnke farm, this cemetery holds early settlers' descendants, including at least two farmer-militiamen of the Revolution. | https://www.hmdb.org/m.asp?m=8345 | new
+# name: marker title "Washington Spring"
+Washington Spring | @40.930281,-74.047236 | The Continental Army came into Bergen County in August 1780 to forage, camping among the farms of miller Cornelius Van Saun and his neighbours here. | https://www.hmdb.org/m.asp?m=8412 | new
+Ackerson Homestead | @41.037293,-74.040875 | John Ackerson and his son Garret built this stone house about 1800 on land bought in 1759; a general store went up across the road in 1777. | https://www.hmdb.org/m.asp?m=29883 | new
+Atkins Glen | @41.032998,-74.051829 | Bear Brook cut this deep sandstone ravine, and the hill above, on an old Indian path, was called Spook Bergh, Ghost Hill, by the Dutch. | https://www.hmdb.org/m.asp?m=29891 | new
+Pascack Historical Society Museum | @41.036474,-74.043077 | Henry Ward Beecher dedicated this building in December 1873 as a Sunday school and mission chapel; it became a Congregational church in 1875. | https://www.hmdb.org/m.asp?m=29893 | new
+Pascack Reformed Church | @41.0321,-74.043649 | Built in 1813 on former Campbell and Wortendyke farmland with thirty-six original members, the church was dedicated by its first pastor, Stephen Goetschius. | https://www.hmdb.org/m.asp?m=29895 | new
+# review after dry run 1: near-named article "Ackerman House (Saddle River, New Jersey)" (10 m; the same stone house on Chestnut Ridge Road) — renamed to the title to seed under it (#432); marker title "Abraham P. Ackerman House".
+Ackerman House (Saddle River, New Jersey) | @41.028294,-74.085169 | Abraham P. Ackerman built this farmhouse about 1802, and his grandson added mansard roofs in the 1870s. | https://www.hmdb.org/m.asp?m=29878
+# name: marker title "Ackerman – Pell House"
+# review after dry run 1: matched live pin "Saddle River Center Historic District" — that is the whole district; this is one house in it — marked new.
+Ackerman-Pell House | @41.031335,-74.102123 | Miller John D. Ackerman's Greek Revival house of about 1835 faces the spot where his blacksmith son built a trip-hammer forge on the Saddle River. | https://www.hmdb.org/m.asp?m=29877 | new
+Everett-Dunn House | @40.923036,-73.956762 | Richard Morris Hunt designed this Swiss chalet–style house about 1867 for inventor Charles J. Everett; illustrator Harvey Dunn lived here from 1919. | https://www.hmdb.org/m.asp?m=7484
+# review after dry run 1: near-named article "Westervelt House" (57 m; the article opens with Roelof Westervelt's 1745 south wing) — renamed to the title to seed under it (#432); marker title "Roelof Westervelt House".
+Westervelt House | @40.921087,-73.968345 | Roelof Westervelt built the south wing of this Dutch Colonial house in 1745 on land his grandfather bought in 1695. | https://www.hmdb.org/m.asp?m=7210
+# name: marker title "The Christie-Parsels House"
+Christie-Parsels House | @40.931924,-73.971066 | William P. Christie built his home here in 1804, and after his sudden death the house and land were auctioned to three buyers to be fair to his heirs. | https://www.hmdb.org/m.asp?m=7209
+# name: marker title "The Tenafly Railroad Station"
+# review after dry run 1: near-named article "Tenafly station" (80 m; the article is the 1874 station building itself, not a live NJ Transit stop) — renamed to the title to seed under it (#432); marker title "Tenafly Railroad Station".
+Tenafly station | @40.92406,-73.964832 | George Huyler gave the land and a third of the cost for this High Victorian Gothic station, designed by Daniel T. Atwood and opened in 1874. | https://www.hmdb.org/m.asp?m=7211
+# name: marker title "Saddle River Reformed Church and Cemetery"
+# review after dry run 1: near-named article "New North Reformed Low Dutch Church" (19 m; the article's other names are Saddle River Reformed Church and the Old Stone Church) — renamed to the title to seed under it (#432); marker title "Saddle River Reformed Church".
+New North Reformed Low Dutch Church | @41.070428,-74.086513 | Known as the Old Stone Church, this congregation has served the area since 1784; the native-stone building was finished in 1819. | https://www.hmdb.org/m.asp?m=29899
+Slave Cemetery | @41.066622,-74.08964 | Once part of the Hopper farm, this ground is believed to be a burial place for enslaved and free Black people, most of its stones unmarked. | https://www.hmdb.org/m.asp?m=286037
+Site of Bogert's Mill | @40.986878,-74.033871 | A Lutheran pastor built Pascack's earliest grist mill on Musquapsink Brook here in 1734; the Bogert family ran it from 1765 until fire destroyed it in 1910. | https://www.hmdb.org/m.asp?m=43779
+# name: marker title "Closter Dock Road"
+Closter Dock Road | @40.948022,-73.92593 | Laid out by New York in 1761, this road carried Closter farm produce down to Closter Dock on the Hudson, and troops used it in the Revolution. | https://www.hmdb.org/m.asp?m=7208 | new
+# name: marker title, kept
+Haworth's Early Water Supply | @40.960747,-73.98707 | In 1895 a company drilled an artesian well here, and a windmill pumped the water uphill to a tank in the middle of Haworth Avenue. | https://www.hmdb.org/m.asp?m=252661 | new
+# name: marker title "The Octagon House"
+Octagon House | @41.040226,-74.030474 | John Blauvelt Jr. built this eight-sided house in 1855–60 using the gravel-wall method Orson Fowler popularized. | https://www.hmdb.org/m.asp?m=33647
+# name: marker title "The Closter Horseman"
+Closter Horseman | @40.965455,-73.955256 | This statue honours the Closter farmer who rode his plow horse through the mist to warn the troops at Fort Lee of the British landing in 1776. | https://www.hmdb.org/m.asp?m=63549 | new
