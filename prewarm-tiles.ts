@@ -1,6 +1,6 @@
 // =============================================================================
 // prewarm-tiles.ts — #292 cold-tile FIRST-VISITOR latency, lever (a): PRE-WARM.
-// Build 2026.09.24a. OFFLINE TOOL at the repo root — NOT a deploy target.
+// Build 2026.10.25a. OFFLINE TOOL at the repo root — NOT a deploy target.
 // Changes no index.html / function / APP_VERSION / CACHE_VERSION.
 //
 // WHAT IT DOES
@@ -35,13 +35,32 @@
 //   PREWARM_PACE_MS      default 1000 — gap each worker waits after a COLD build.
 //   PREWARM_TIMEOUT_MS   default 90000 — per-request timeout.
 //   PREWARM_DRY_RUN=1    enumerate + estimate, POST nothing.
+//   PREWARM_DRIP_GAP_MIN   --until-warm only: minutes between retry rounds (default 20).
+//   PREWARM_DRIP_HOURS     --until-warm only: give up after this many hours (default 6).
+//   PREWARM_DRIP_PACE_MS   --until-warm only: gap between tiles inside a retry round
+//                          (default 5000). Retry rounds always run one tile at a time.
 // FLAGS:
 //   --retry-failed       only re-POST the tiles listed in prewarm_failed.json.
+//   --until-warm         after the pass, keep retrying ONLY the failed tiles, one at a
+//                        time, every PREWARM_DRIP_GAP_MIN minutes, until none fail or
+//                        PREWARM_DRIP_HOURS runs out (#525's $0 shape, 2026-10-25).
+//                        Combines with --retry-failed. prewarm_failed.json is rewritten
+//                        after every round, so Ctrl-C at any point leaves it current.
+//
+// WHY --until-warm (#525, 2026-10-25): overpass-api.de blocks Supabase's egress IPs and
+//   maps.mail.ru — the one public mirror still answering the function — is intermittent,
+//   not dead. #483 and #484 each needed four or five hand-run --retry-failed passes, and
+//   #484's last 6 tiles built hours later on single live requests. --until-warm does that
+//   waiting unattended: slow, spaced, single requests. It posts to the function exactly
+//   as a pass does — it does NOT fetch Overpass itself (that is #525 shape (c), a
+//   gravestone) and it writes no cache row itself.
 //
 // RUN (repo root):
 //   PREWARM_DRY_RUN=1 deno run -A prewarm-tiles.ts
 //   deno run -A prewarm-tiles.ts
 //   deno run -A prewarm-tiles.ts --retry-failed      (or just re-run the full pass)
+//   caffeinate -i deno run -A prewarm-tiles.ts --until-warm   (walk away; caffeinate
+//                        keeps the Mac awake — a sleeping Mac stops the timer)
 //
 // OUTCOMES per tile:
 //   warm      served from cache (cached:true, fresh)
@@ -65,7 +84,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.22a"; // 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.25a"; // 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -81,6 +100,10 @@ const TIMEOUT_MS = Number(env("PREWARM_TIMEOUT_MS") || 90000);
 const METRO_FILTER = env("PREWARM_METRO").toLowerCase();
 const DRY_RUN = env("PREWARM_DRY_RUN") === "1";
 const RETRY_FAILED = Deno.args.includes("--retry-failed");
+const UNTIL_WARM = Deno.args.includes("--until-warm");
+const DRIP_GAP_MS = Math.max(0, Number(env("PREWARM_DRIP_GAP_MIN") || 20)) * 60_000;
+const DRIP_HOURS = Math.max(0, Number(env("PREWARM_DRIP_HOURS") || 6));
+const DRIP_PACE_MS = Math.max(0, Number(env("PREWARM_DRIP_PACE_MS") || 5000));
 const FAILED_FILE = "prewarm_failed.json";
 
 // Same roster as gate-tiles.ts (28 rows since #484, 2026-10-22).
@@ -268,6 +291,59 @@ async function main() {
   }
   console.log(`[prewarm-tiles] target ${NEARBY_URL}`);
 
+  const runStart = Date.now();
+  const first = await runPass(tiles, CONCURRENCY, PACE_MS, "");
+  await Deno.writeTextFile(FAILED_FILE, JSON.stringify(first.failed, null, 2));
+  printSummary(first, tiles.length, "DONE");
+
+  if (!UNTIL_WARM) {
+    if (first.failed.length) console.log(`  ${first.failed.length} failed tile(s) written to ${FAILED_FILE} — re-run with --retry-failed (or re-run the full pass, or add --until-warm).`);
+    else console.log(`  no failures (${FAILED_FILE} cleared).`);
+    return;
+  }
+
+  // --until-warm (#525): retry only what failed, single requests, spaced rounds.
+  let pending = first.failed;
+  const deadline = runStart + DRIP_HOURS * 3_600_000;
+  let round = 0;
+  let builtLater = 0;
+  if (pending.length) {
+    console.log(`\n[prewarm-tiles] --until-warm: ${pending.length} tile(s) cold — retrying one at a time every ${fmtDur(DRIP_GAP_MS)}, giving up after ${DRIP_HOURS} h total (at ${new Date(deadline).toLocaleTimeString()}). Ctrl-C is safe: ${FAILED_FILE} is current after every round.`);
+  }
+  while (pending.length) {
+    if (Date.now() + DRIP_GAP_MS > deadline) break;
+    console.log(`[prewarm-tiles] round ${round + 1} in ${fmtDur(DRIP_GAP_MS)} (at ${new Date(Date.now() + DRIP_GAP_MS).toLocaleTimeString()}) — ${pending.length} cold`);
+    await sleep(DRIP_GAP_MS);
+    round++;
+    const r = await runPass(pending, 1, DRIP_PACE_MS, `round ${round} `);
+    builtLater += pending.length - r.failed.length;
+    pending = r.failed;
+    await Deno.writeTextFile(FAILED_FILE, JSON.stringify(pending, null, 2));
+    console.log(`[prewarm-tiles] round ${round}: built/warm ${r.tiles - r.failed.length} · still cold ${pending.length} — ${FAILED_FILE} rewritten`);
+  }
+
+  console.log("");
+  console.log(`[prewarm-tiles] --until-warm FINISHED after ${fmtDur(Date.now() - runStart)} and ${round} retry round(s) — ${builtLater} tile(s) built in the rounds.`);
+  if (!pending.length) {
+    console.log(`  ALL WARM — ${tiles.length} of ${tiles.length} tiles (${FAILED_FILE} cleared).`);
+  } else {
+    console.log(`  GAVE UP at the ${DRIP_HOURS} h limit with ${pending.length} tile(s) still cold, written to ${FAILED_FILE}:`);
+    for (const t of pending.slice(0, 25)) console.log(`    ${t.metro} ${t.tile}`);
+    if (pending.length > 25) console.log(`    … and ${pending.length - 25} more`);
+    console.log(`  Run again later with --retry-failed --until-warm.`);
+  }
+}
+
+type PassResult = {
+  tiles: number;
+  ms: number;
+  counts: Record<Outcome, number>;
+  failed: TileRef[];
+  failNotes: string[];
+  versions: Set<string>;
+};
+
+async function runPass(tiles: TileRef[], concurrency: number, paceMs: number, label: string): Promise<PassResult> {
   const counts: Record<Outcome, number> = { warm: 0, stale: 0, built: 0, water: 0, empty: 0, failed: 0 };
   const failed: TileRef[] = [];
   const failNotes: string[] = [];
@@ -291,28 +367,27 @@ async function main() {
       if (done % logEvery === 0 || done === tiles.length || r.outcome === "failed") {
         const elapsed = Date.now() - t0;
         const eta = done ? (elapsed / done) * (tiles.length - done) : 0;
-        console.log(`[prewarm-tiles] ${done}/${tiles.length} ${r.t.metro} ${r.t.tile} ${r.outcome} (${fmtDur(r.ms)}; ${r.detail}) — elapsed ${fmtDur(elapsed)}, eta ${fmtDur(eta)}`);
+        console.log(`[prewarm-tiles] ${label}${done}/${tiles.length} ${r.t.metro} ${r.t.tile} ${r.outcome} (${fmtDur(r.ms)}; ${r.detail}) — elapsed ${fmtDur(elapsed)}, eta ${fmtDur(eta)}`);
       }
       // Only pace after real work; warm/stale answers are instant and cost Overpass nothing.
-      if (r.outcome === "built" || r.outcome === "water" || r.outcome === "empty" || r.outcome === "failed") await sleep(PACE_MS);
+      if (r.outcome === "built" || r.outcome === "water" || r.outcome === "empty" || r.outcome === "failed") await sleep(paceMs);
     }
   }
 
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, tiles.length) }, () => worker()));
+  await Promise.all(Array.from({ length: Math.min(concurrency, tiles.length) }, () => worker()));
+  return { tiles: tiles.length, ms: Date.now() - t0, counts, failed, failNotes, versions };
+}
 
-  await Deno.writeTextFile(FAILED_FILE, JSON.stringify(failed, null, 2));
-
+function printSummary(p: PassResult, total: number, word: string) {
+  const c = p.counts;
   console.log("");
-  console.log(`[prewarm-tiles] DONE in ${fmtDur(Date.now() - t0)} — ${tiles.length} tiles`);
-  console.log(`  warm ${counts.warm} · stale ${counts.stale} · built ${counts.built} · water ${counts.water} · empty ${counts.empty} · failed ${counts.failed}`);
-  if (counts.water) console.log(`  ${counts.water} water tile(s) answered empty but were NOT cached — expected only before #399 is deployed (the function should report emptyTileVersion).`);
-  if (versions.size) console.log(`  function reported: ${[...versions].join(", ")}`);
-  if (failed.length) {
-    console.log(`  ${failed.length} failed tile(s) written to ${FAILED_FILE} — re-run with --retry-failed (or re-run the full pass).`);
-    for (const n of failNotes) console.log(`    ${n}`);
-    if (failed.length > failNotes.length) console.log(`    … and ${failed.length - failNotes.length} more`);
-  } else {
-    console.log(`  no failures (${FAILED_FILE} cleared).`);
+  console.log(`[prewarm-tiles] ${word} in ${fmtDur(p.ms)} — ${total} tiles`);
+  console.log(`  warm ${c.warm} · stale ${c.stale} · built ${c.built} · water ${c.water} · empty ${c.empty} · failed ${c.failed}`);
+  if (c.water) console.log(`  ${c.water} water tile(s) answered empty but were NOT cached — expected only before #399 is deployed (the function should report emptyTileVersion).`);
+  if (p.versions.size) console.log(`  function reported: ${[...p.versions].join(", ")}`);
+  if (p.failed.length) {
+    for (const n of p.failNotes) console.log(`    ${n}`);
+    if (p.failed.length > p.failNotes.length) console.log(`    … and ${p.failed.length - p.failNotes.length} more`);
   }
 }
 
