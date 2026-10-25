@@ -1,0 +1,10 @@
+# names-484-dupage-nw-cook-cold.txt — #484 pass 1 lines whose tile was still cold after the pre-warm (837_-1763,
+# St. James Farm). The tile WARMED 2026-10-23 (a live nearby-places request built it; cached=True on re-read), so
+# these run now (handoff §6 (g)). No live pin within 1.5 km; both lines carry `| new` up front because they sit
+# 30 m apart and the judge re-rolls on every run (the Netzley lesson — `new` skips the same-place check).
+#   SEED_CITY_NAME="DuPage-NW Cook" SEED_CITY_LAT=41.9400 SEED_CITY_LNG=-88.0200 deno run -A seed-resolve.ts names-484-dupage-nw-cook-cold.txt
+# Expected: 2 new-seed, 0 review, insert 2 story rows.
+
+Chamossaire Statue | @41.83359757,-88.16156082 | This bronze is a cast of John Skeaping's life-size 1965 statue of Chamossaire, winner of the 1946 St Leger, whose original stands at Snailwell Stud in Newmarket, England. | https://www.hmdb.org/m.asp?m=288782 | new
+# name: marker title "William Deering and Company Factory Doorway"
+William Deering Factory Doorway | @41.83369722,-88.16123333 | This doorway came from the William Deering and Company farm-machinery works, built in Chicago in 1880 between Fullerton and Diversey Avenues on the river's west side. | https://www.hmdb.org/m.asp?m=288789 | new

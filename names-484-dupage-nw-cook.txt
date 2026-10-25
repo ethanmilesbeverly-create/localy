@@ -1,0 +1,141 @@
+# names-484-dupage-nw-cook.txt — #484 Chicago's first extra box (DuPage-NW Cook), pass 1 (story lines, 2026-10-23)
+# Source: Historical Marker Database — DuPage County, Illinois county list, geographic sort, all 421 entries (pages 1–5).
+# North-west Cook (Des Plaines, Park Ridge, Elk Grove Village, Schaumburg, Mount Prospect, Rosemont, the Proviso
+# towns) is NOT in this pass — a pass-2 row. Skipped on purpose: war, police and 9/11 memorials, person-only plaques,
+# bare National Register / local-landmark / "built 19xx" plaques, nature-trail boards, temporary art (the 2025
+# Crossings sculptures), and everything outside the box (Naperville, Darien, Burr Ridge, Willowbrook's Route 66
+# markers, Wayne, Bartlett — tile rows below 836 or columns past −1764).
+# CUT — already served with the same story on a live pin within 2 km (read 2026-10-23 through all 42 warm tiles):
+#   Glen Ellyn's First Train (dry run 1: repeats Glen Ellyn's First Railroad Depot 120 m away; the station is a live pin) ·
+#   Elmhurst Great Western Prairie (→ Elmhurst Great Western Prairie, 188 m) · Lake Ellyn Park (→ Lake Ellyn Park, 120 m) · Stacy's Tavern (→ Stacy's Tavern, 12 m) · Churchville School (→ Churchville School, 50 m) · Fairview (East Grove) Station (→ Fairview Avenue/Downers Grove station, 8 m) · Sheldon Peck Homestead (→ Sheldon Peck House, 16 m) · Mammoth Spring (→ Mammoth Spring (Illinois), 162 m) · Villa Park Historical Museum (→ Villa Park Historical Society Museum, 16 m) · DuPage County Courthouse (→ Old DuPage County Courthouse, 117 m) · Blanchard Hall (→ Blanchard Hall, 15 m)
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# A name differs from the marker title only where the title isn't a place; each such line is marked.
+# Every coordinate below was checked against the DuPage-NW Cook tile set (48 tiles, roster 41.9400, -88.0200).
+# RUN ORDER (the #441 lesson): DuPage-NW Cook is pre-warmed (prewarm-tiles.ts 2026.10.22a — 42 of 48 tiles; the
+# 6 still owed are 837_-1763, 838_-1757, 838_-1758, 839_-1764, 840_-1764, 841_-1762). The 2 lines in those tiles
+# are in names-484-dupage-nw-cook-cold.txt, to run after a warm; every line in THIS file sits in a warm tile.
+# Then the dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="DuPage-NW Cook" SEED_CITY_LAT=41.9400 SEED_CITY_LNG=-88.0200 deno run -A seed-resolve.ts names-484-dupage-nw-cook.txt
+# DRY RUN 1 (2026-10-23): 55 new-seed, 1 story-attached (Museum at Lisle Station Park), 12 review, 0 held;
+# Wikipedia failed 0. The 12 reviews are settled below (each carries a `review after dry run 1` comment; one line is CUT).
+# DRY RUN 2 (2026-10-23): 65 new-seed, 1 story-attached, 1 review (Mansion House — the judge flipped on a line
+# dry run 1 passed; settled below, same call as Danby House).
+# DRY RUN 3 (2026-10-23): 66 new-seed, 1 story-attached, 0 review — matched.
+# COMMIT (2026-10-23): 65 seeds + 66 story rows inserted; the judge flipped Netzley/Yender House to review on the
+# commit run, so it was not inserted. It is committed alone from names-484-dupage-nw-cook-netzley.txt.
+# DO NOT re-run this file with --commit: its other 65 lines are already in.
+# After the commit: run curated_category_backfill(true) in the SQL editor (#495).
+
+# name: marker title "Galena & Chicago Union R.R."
+# review after dry run 1: near-named article "Elmhurst station (Illinois)" — that is the station; this is the railroad's 1849 arrival at Cottage Hill, seeded as its own pin.
+Galena & Chicago Union Railroad at Cottage Hill | @41.89977432,-87.94085394 | Cottage Hill, renamed Elmhurst in 1870, had about 200 residents in 1849 when the Galena & Chicago Union became the first of several railroads to reach the town, bringing freight and passenger service to Chicago. | https://www.hmdb.org/m.asp?m=284277 | new
+Elmhurst National Bank Parapets | @41.89876093,-87.93880949 | These carved stones once crowned the private bank Henry L. Clos founded in 1890, which grew into the Elmhurst National Bank on the site of today's five-story bank building. | https://www.hmdb.org/m.asp?m=256209
+# name: marker title "The History of the Old Dutch Mill"
+Old Dutch Mill | @41.92939544,-87.92324283 | Frederick Fischer began building this windmill in 1847 and finished it in 1850 on the very spot where it still stands. | https://www.hmdb.org/m.asp?m=257832
+# name: marker title "The York Theatre"
+York Theatre | @41.90159832,-87.94007522 | Designed by architect Elmer Behrns, the York has shown films at 150 N. York Street since September 1924, starting with silent pictures accompanied on the organ and live vaudeville. | https://www.hmdb.org/m.asp?m=284268
+# review after dry run 1: matched "Glen Ellyn Downtown North Historic District" — that is the whole district; this is one hotel site in it.
+Danby House | @41.87631111,-88.06685 | Milo Meacham built the village's second hotel here, with rental rooms, a popular ice cream parlor and a large hall where heated political meetings and debates were held. | https://www.hmdb.org/m.asp?m=250236 | new
+Electric Train Depot | @41.87585,-88.06685556 | The Aurora, Elgin and Chicago Railway built a passenger depot on this site in 1901, and electric interurban service to Glen Ellyn began the next year. | https://www.hmdb.org/m.asp?m=249426
+# name: marker title has quotes around "Perry"
+Glen Ellyn's Perry Mastodon | @41.88526111,-88.05719722 | On October 16, 1963, digging for a pond about 100 yards east of here for Judge Sam Perry turned up a fossil thigh bone that the Field Museum identified as a mastodon's. | https://www.hmdb.org/m.asp?m=249606
+Home Site of Dr. Lewy Quitterfeild Newton | @41.87775556,-88.06687222 | Newton's 1840–41 land claim took in today's downtown Glen Ellyn, and by building a depot and water tank at his own expense he got the Galena & Chicago Union to make Newton's Station a stop in 1851. | https://www.hmdb.org/m.asp?m=249602
+Mineral Springs | @41.88619722,-88.056525 | Five springs thought to have healing powers rose near this spot, and in August 1892 they were covered with a tall wooden canopy. | https://www.hmdb.org/m.asp?m=249605
+Moses Stacy Homestead | @41.88424167,-88.06556667 | Moses Stacy came from upstate New York in 1835 and built his first home, a log cabin, here; in 1893 his son Philo sold the family's tavern and built a Victorian house on the same site. | https://www.hmdb.org/m.asp?m=249603
+Site of Glen Ellyn's First Baseball Game | @41.88140833,-88.06159167 | Glen Ellyn's first baseball game was played here in spring 1865 by the Rustics, a team of Civil War veterans organized by Lawrence Cooper and Doc Harcourt. | https://www.hmdb.org/m.asp?m=249607
+Stacy's Corners | @41.89039722,-88.06739167 | Named for the inn Moses Stacy built across the road in 1846, this crossroads had a post office, school, church, blacksmith, grocery and match factory in the 1850s. | https://www.hmdb.org/m.asp?m=250234
+# name: marker title "First Railroad Depot"
+# review after dry run 1: matched "Glen Ellyn Downtown North Historic District" — one depot site inside the district.
+Glen Ellyn's First Railroad Depot | @41.87630556,-88.06641389 | Dr. E. Q. Newton built Glen Ellyn's first railroad station on this site in 1851, and it served the Chicago and North Western from 1864 until 1895. | https://www.hmdb.org/m.asp?m=250306 | new
+# review after dry run 1: matched "Glen Ellyn Downtown South Historic District" — one object inside the district.
+Glen Ellyn Horse Trough | @41.87539748,-88.0659881 | William C. Newton, a trustee on the village's first board, gave this cast-iron horse trough to Glen Ellyn in 1907. | https://www.hmdb.org/m.asp?m=249694 | new
+# review after dry run 2: matched "Glen Ellyn Downtown North Historic District" — that is the whole district; this is Danby's first hotel site in it.
+Mansion House | @41.87649167,-88.06643611 | David Kelley's Mansion House, Danby's first hotel and first post office, stood on this corner and was known for its ballroom until fire destroyed it. | https://www.hmdb.org/m.asp?m=250307 | new
+# review after dry run 1: matched "Glen Ellyn Downtown North Historic District" — one store inside the district.
+McChesney Store | @41.87677778,-88.066575 | Civil War lieutenant Joseph R. McChesney opened a general store in a frame building in 1862 and moved it into this brick building in 1892. | https://www.hmdb.org/m.asp?m=250235 | new
+# name: marker title "Site of First Log Cabin"
+Winslow Churchill's Log Cabin Site | @41.89023333,-88.04969722 | Deacon Winslow Churchill built the first log cabin in this area on this site in 1834. | https://www.hmdb.org/m.asp?m=249877
+# name: marker title "The Memorial Building and Outdoor Plaza"
+Hinsdale Memorial Building | @41.80417222,-87.92836667 | Hinsdale built its Memorial Building in 1927 with money raised from residents, to honor townspeople who served in war and those who died. | https://www.hmdb.org/m.asp?m=265432
+Itasca Historical Depot | @41.97104425,-88.0195373 | Built in 1873, this depot served as a working rail station until 1976. | https://www.hmdb.org/m.asp?m=286407
+# name: marker title "01839 Milwaukee Road"
+Milwaukee Road Caboose 01839 | @41.970825,-88.01911111 | This 1939 Milwaukee Road caboose has the bay-window design introduced in 1923, safer for crews than a rooftop cupola and better for watching the wheels ahead. | https://www.hmdb.org/m.asp?m=286413
+# review after dry run 1: matched "Museum at Lisle Station Park" — a separate building on the museum grounds.
+Beaubien Tavern | @41.79957115,-88.07100232 | This tavern, a place to drink, lodge, trade and even sign town charters, first stood on the Southwest Plank Road, today's Ogden Avenue, before it was moved here. | https://www.hmdb.org/m.asp?m=304947 | new
+# review at commit: matched "Museum at Lisle Station Park" — a separate farmhouse on the museum grounds, same call as Beaubien Tavern.
+Netzley/Yender House | @41.79946111,-88.07114444 | An original Lisle farmhouse, it was home to only two families in 175 years, the first of them arriving in 1849. | https://www.hmdb.org/m.asp?m=304946 | new
+# FIX: the live pin of this name carries Lisle station's Metra story (a wrong attach) — this line is named exactly as the pin and placed at its coordinate so the curated story replaces it
+Museum at Lisle Station Park | @41.7994352,-88.0710095 | This museum began in the 1970s when the Lisle Heritage Society moved and restored the Lisle Depot of about 1874; the first train had come through Lisle in 1864. | https://www.hmdb.org/m.asp?m=305040
+# name: marker title "Chicago, Burlington and Quincy Railroad Waycar #14584"
+CB&Q Waycar 14584 | @41.79956581,-88.07067714 | The Chicago, Burlington & Quincy built this crew car in Aurora in 1881; the Burlington called its cabooses waycars. | https://www.hmdb.org/m.asp?m=305030
+# review: may collide with the road itself
+Army Trail Road | @41.93195,-87.9942 | This road follows an old Native trail that ran from Chicago through DuPage, Kane, DeKalb, Boone and Winnebago Counties to a Winnebago village at Beloit, and U.S. Army reinforcements marched it in August 1832 during the Black Hawk War. | https://www.hmdb.org/m.asp?m=47438
+Kinderheim Arch | @41.932159,-87.992111 | This arch is built from the cornerstone, bricks, doorframe and windowsills of the Kinderheim, a Lutheran foster home for children that stood here from 1925 to 1960. | https://www.hmdb.org/m.asp?m=47431
+# name: marker title "Old Mill"
+Heidemann Mill Site | @41.94483333,-88.00203333 | Christian Heidemann's mill stood 50 feet west of this marker, on today's Ronald Drive, from 1867 until 1958. | https://www.hmdb.org/m.asp?m=47439
+# name: marker title "Site of Lutheran Teacher’s Seminary"
+Site of the Lutheran Teachers' Seminary | @41.93303333,-87.99176667 | Grateful alumni built this monument in 1924 from the windowsills and steps of the Lutheran teachers' seminary that stood here from 1864 until it moved to River Forest in 1913, where it became Concordia. | https://www.hmdb.org/m.asp?m=261804
+Site of St. Paul Lutheran School | @41.93131667,-87.992 | St. Paul Lutheran School's first building stood here from 1849 to 1974, and its first teacher, Henry Bartling, also served as Addison's postmaster for more than 50 years. | https://www.hmdb.org/m.asp?m=47429
+# name: marker title "The Gazebos of Addison"
+Addison Village Green Gazebo | @41.9323,-87.99138333 | Three gazebos have stood on Addison's Village Green; the first, dedicated in 1965, had been built in Rome in 1873 and was brought here by Joseph Incandella. | https://www.hmdb.org/m.asp?m=47432
+Breiter-Palm Park | @41.94903845,-87.95199377 | Before it was a park, this land was the Greenhouse on Church, a cut-flower business brothers Herman Breiter and Willard Palm ran from 1936. | https://www.hmdb.org/m.asp?m=250857
+# name: marker title "Bloomingdale's Holstein Mill"
+Holstein Windmill | @41.94578317,-88.07522768 | German immigrants Henry and Louisa Holstein settled less than half a mile from here in the 1850s and built this windmill on their farm at Bloomingdale and Schick Roads. | https://www.hmdb.org/m.asp?m=282669
+# name: marker title "The Israel Blodgett House"
+Israel Blodgett House | @41.79246389,-88.005425 | Built in 1846 by Israel and Avis Blodgett, abolitionists who settled here in 1836, this house is believed to have been a stop on the Underground Railroad with Israel as a conductor. | https://www.hmdb.org/m.asp?m=301771
+Belmont Prairie | @41.7994,-88.04696667 | Neighborhood kids played in this field until a photography assignment drew botanists' attention in the 1970s, and on August 24, 1980 it was dedicated as an Illinois Nature Preserve of original tallgrass prairie. | https://www.hmdb.org/m.asp?m=270172
+Downer Family Well | @41.805375,-88.02178889 | Pierce Downer, Downers Grove's first settler in 1832, dug two shallow wells on his land, one for people and one for livestock, and this is one of them. | https://www.hmdb.org/m.asp?m=301773
+# name: marker title "Farmer's and Merchant's Bank Building"
+Farmers and Merchants Bank Building | @41.79386,-88.010075 | This building went up in 1892 for Downers Grove's first bank, which was organized on May 10 of that year. | https://www.hmdb.org/m.asp?m=60037
+# second end from the Oak Brook marker on the same line (m246237)
+Indian Boundary Line | @41.792869,-88.005477 | Just north of here runs the Indian Boundary Line, set by an August 24, 1816 treaty with the Chippewa, Ottawa and Potawatomi to open a corridor from Lake Michigan southwest to the Illinois River. | https://www.hmdb.org/m.asp?m=60035
+Main Street Cemetery | @41.792921,-88.010351 | In 1856 Samuel Curtiss gave part of his sheep pasture for a cemetery, and was paid $15 for it when a cemetery association formed in 1864; nearly 100 of Downers Grove's early settlers rest here. | https://www.hmdb.org/m.asp?m=60038
+# name: marker title "Masonic Temple"
+Downers Grove Masonic Temple | @41.7939,-88.007859 | Architects Fugard & Knapp designed this temple in 1924 for Grove Lodge No. 824, chartered in 1893 with several Downers among its founders. | https://www.hmdb.org/m.asp?m=60036
+Mochels' Hardware Building | @41.79421154,-88.01047148 | Levi Mertz and Charles Mochel put up the original building here and opened their store, Mertz & Mochel, on June 25, 1884. | https://www.hmdb.org/m.asp?m=271917
+Pierce and Lucy Downer Burial Ground | @41.80442144,-88.01585224 | Pierce Downer, who pitched his tent on this hill in 1833 as the village's first settler, and his wife Lucy died a day apart in March 1863 and were buried side by side here. | https://www.hmdb.org/m.asp?m=271838
+Prince Pond | @41.79818006,-88.01534128 | Once called Grove Lake, this pond was improved in the 1890s by developer E. H. Prince, who advertised it as "our beautiful lake" to sell the lots around it. | https://www.hmdb.org/m.asp?m=271914
+Grant E. Dicke Fire Station | @41.79631111,-88.01301667 | After fires at the Dicke Tool Company in 1903 and 1911, the Dicke family pushed for a better fire department, and in 1927 voters approved $20,000 to build this station. | https://www.hmdb.org/m.asp?m=271916
+# name: marker title has quotes
+Big Rock | @41.89874064,-87.93876291 | This boulder came from the old swimming hole in Salt Creek at Graue's Woods, kept by the Elmhurst Historical Commission as a reminder of early-1900s summers. | https://www.hmdb.org/m.asp?m=256208
+# review after dry run 1: near-named article "Elmhurst station (Illinois)" — this marks the 1871 arrival that founded Elmhurst College, not the station.
+Carl F. Kranz and Elmhurst College | @41.89982295,-87.94102725 | On December 6, 1871, Inspector Carl F. Kranz and fourteen students stepped off the train here from Evansville, Indiana, to start the school that became Elmhurst College. | https://www.hmdb.org/m.asp?m=284278 | new
+Chicago Great Western Railway Depot | @41.8847713,-87.93880948 | This depot served the Chicago Great Western from its founding as the Minnesota & Northwestern in 1887 until service ended in 1968. | https://www.hmdb.org/m.asp?m=237001
+# review: likely mapped as "Lombard Cemetery"
+Babcock's Grove Cemetery | @41.8781667,-88.01911085 | Lombard's cemetery began in 1851 as a burial plot on high ground of Reuben Mink's farm in Babcock's Grove, the settlement that became Lombard. | https://www.hmdb.org/m.asp?m=288475
+# name: marker title "Main Street Station"
+Lombard's Main Street Station | @41.88188611,-88.01810556 | Interurban trains of the Chicago, Aurora and Elgin stopped at this station, which had a full waiting room and ticket office, from August 25, 1902 until July 3, 1957. | https://www.hmdb.org/m.asp?m=288913
+# name: marker title "Votes For Women"
+Lombard Women's Vote of 1891 | @41.88391939,-88.01939244 | On April 6, 1891, attorney Ellen Martin and 14 other women cast ballots in Lombard's election, arguing the town charter gave the vote to every citizen of voting age. | https://www.hmdb.org/m.asp?m=173085
+York Woods | @41.85796022,-87.93156569 | York Woods was DuPage County's very first forest preserve, bought in 1917 to protect land for residents' recreation, and partly so the county could build a road through it. | https://www.hmdb.org/m.asp?m=273262
+# review after dry run 1: matched "Graue House" — a different family's house, about 70 m away at the Graue Mill site.
+Ben Fuller House | @41.81965,-87.92666667 | Built between 1835 and 1842 by early settler Benjamin Fuller, this farmhouse is one of the oldest surviving buildings in DuPage County, if not the oldest. | https://www.hmdb.org/m.asp?m=48058 | new
+Portiuncula Chapel | @41.82952525,-87.96008036 | Francis S. Peabody's family built this copy of the Italian chapel where St. Francis of Assisi heard his call in 1208, raising it in 1926 beside the lake as a memorial to him. | https://www.hmdb.org/m.asp?m=263550
+# name: marker title "The Gatehouse at Mayslake"
+Mayslake Gatehouse Horse Trough | @41.82936318,-87.96105685 | This concrete bowl is a horse trough, one of three pieces left of the 1922 gatehouse of the Mayslake Peabody Estate, with the gateposts and the stone wall along 31st Street. | https://www.hmdb.org/m.asp?m=246244
+# name: marker title "The Men of V-1668"
+CCC Camp at Fullersburg Woods | @41.82628695,-87.93220446 | From 1934 to 1938 Fullersburg Woods was home to Civilian Conservation Corps Company V-1668, made up mostly of World War I veterans who began by building their own barracks. | https://www.hmdb.org/m.asp?m=264856
+# name: marker title "Original Butler School Merry-Go-Round"
+# review after dry run 1: same-named "Butler School (Oak Brook, Illinois)" 216 m — the old playground ride, not the school.
+Butler School Merry-Go-Round | @41.83278174,-87.94605329 | This merry-go-round spun on Butler School's original playground, about 100 yards northeast of here, from 1921 until a new school was built in 1961. | https://www.hmdb.org/m.asp?m=246245 | new
+# name: marker title "The Great Western Trail"
+Great Western Trail Gateway Arch | @41.88723559,-87.96929429 | This arch marks the start of the Great Western Trail, 12 miles through DuPage County on an abandoned spur of the Chicago Great Western Railway. | https://www.hmdb.org/m.asp?m=244829
+# name: marker title "Site of “The Colonel's Tavern”"
+Site of The Colonel's Tavern | @41.81685278,-88.16863333 | Julius Morton Warren built Warrenville's first hotel here, on the highest corner of the village he founded, and opened it on September 28, 1838 with a party in its second-floor ballroom. | https://www.hmdb.org/m.asp?m=275044
+Albright Building | @41.81824554,-88.17015826 | Built by the Methodist Episcopal Church in 1858, this building housed the Albright Gallery of Painting and Sculpture from 1924 to 1957 and the Warrenville Historical Society from 1984. | https://www.hmdb.org/m.asp?m=275046
+# review: dam detail from m292975 "A Dam Struggle", same spot
+Site of Julius M. Warren's Saw Mill | @41.82118199,-88.17321027 | Julius M. Warren ran a sawmill here from 1835 to 1857, and Warrenville's gristmill followed from 1847 to 1897, powered by a dam the millers rebuilt of brush, straw and mud after every spring flood. | https://www.hmdb.org/m.asp?m=292961
+# name: marker title "The Robert & Ada McKee Wildlife Marsh"
+McKee Marsh | @41.84568333,-88.19199046 | This wildlife refuge honors Robert and Ada McKee, who worked to save DuPage County's best woods and wetlands; Robert was the forest preserve district's first superintendent, from 1932 to 1962. | https://www.hmdb.org/m.asp?m=275050
+# review: marker suggests the station is gone
+1912 Chicago Aurora & Elgin Station | @41.86447222,-88.10678056 | Wheaton's interurban riders used a massive brick station designed by Horatio R. Wilson on this site from 1912 until the Chicago, Aurora and Elgin stopped running in 1957. | https://www.hmdb.org/m.asp?m=256806
+# review after dry run 1: matched "DuPage County Historical Museum" — the park block, not the old Adams Memorial Library building.
+Adams Park | @41.86664596,-88.10607432 | This block was the home and grounds of John Quincy Adams's family from 1876 to 1942, and the fountain dates from 1885; his daughter Katharine Adams Wells left the land to the city. | https://www.hmdb.org/m.asp?m=284806 | new
+# review: excerpt says it originally stood elsewhere
+Marcellus E. Jones House | @41.86227377,-88.10396044 | Carpenter and house mover Marcellus E. Jones built this home in 1865; it first stood at the southwest corner of Naperville Road and Indiana Street. | https://www.hmdb.org/m.asp?m=284804
+# review after dry run 1: matched "Grand Theatre (Wheaton, Illinois)" — a wrong match; Reber's yard is a different place.
+Site of the World's First Radio Telescope | @41.86672745,-88.10887166 | In 1937, 26-year-old radio engineer Grote Reber built the world's first radio telescope in the side yard of his house here, at 212 West Seminary Street, and ran experiments at night for ten years. | https://www.hmdb.org/m.asp?m=230987 | new
+Warren L. Wheaton Home Site | @41.85934722,-88.10234167 | Warren Lyon Wheaton, who founded the town with his brother Jesse, built his home here in 1848, and it survives hidden inside the much larger building on the site. | https://www.hmdb.org/m.asp?m=230989
+TWA Flight 529 Memorial | @41.78023226,-87.95508003 | On September 1, 1961, TWA Flight 529, a Lockheed Constellation with 78 people aboard, crashed just southwest of this spot, the deadliest single-plane accident in U.S. history at the time. | https://www.hmdb.org/m.asp?m=271014
+# name: marker title "Hedges Station, 1849"
+Hedges Station | @41.88201559,-88.15648548 | Built in 1849 on the Galena and Chicago Union, Hedges Station, also called the Besch House, is Illinois' oldest surviving railroad depot; the Winfield Historical Society moved it here in 1981 to save it. | https://www.hmdb.org/m.asp?m=288481

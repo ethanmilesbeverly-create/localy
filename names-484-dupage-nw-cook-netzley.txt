@@ -1,0 +1,6 @@
+# names-484-dupage-nw-cook-netzley.txt — #484 pass 1, the one line the commit run held back (2026-10-23).
+#   SEED_CITY_NAME="DuPage-NW Cook" SEED_CITY_LAT=41.9400 SEED_CITY_LNG=-88.0200 deno run -A seed-resolve.ts names-484-dupage-nw-cook-netzley.txt
+# Expected: 1 new-seed, 0 review, insert 1 story row.
+
+# review at commit: matched "Museum at Lisle Station Park" — a separate farmhouse on the museum grounds, same call as Beaubien Tavern.
+Netzley/Yender House | @41.79946111,-88.07114444 | An original Lisle farmhouse, it was home to only two families in 175 years, the first of them arriving in 1849. | https://www.hmdb.org/m.asp?m=304946 | new
