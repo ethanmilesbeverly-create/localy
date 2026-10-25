@@ -389,7 +389,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.22a (#484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.25a (#500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -460,6 +460,15 @@ const METROS: Metro[] = [
   // County) +1.18M, south (Lake IN / south Cook) +1.10M. The name omits "Chicago" for the
   // same substring / submissions.city reason as Queens-Nassau.
   { name: "DuPage-NW Cook", lat: 41.9400, lng: -88.0200 },
+  // #500 (2026-10-25): the roster grows 28 → 29 with New York's SECOND extra box, north,
+  // straddling the Hudson, placed by #482's 2020-census tract check: +1.96M people the New
+  // York and Queens-Nassau boxes leave out (Bergen 620k, southern Westchester 603k — Yonkers,
+  // Mount Vernon, New Rochelle, White Plains — Rockland 281k, the north Bronx 264k, Passaic
+  // 181k), zero tiles shared with any roster row (re-checked on the 28-row roster). Any
+  // centre in 41.02–41.06 / -73.99–-73.95 gives the same 48 tiles. It outranks Houston's
+  // best extra box (west, 29.79/-95.74, +1.20M, #485). The name omits "New York" for the
+  // same substring / submissions.city reason as Queens-Nassau.
+  { name: "Bergen-Westchester", lat: 41.0400, lng: -73.9700 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode
