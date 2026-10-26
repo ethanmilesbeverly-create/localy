@@ -1,0 +1,75 @@
+# names-532-bergen-westchester.txt — #532 Bergen-Westchester story pass 2, PART 1 (story lines, 2026-10-26)
+# Source: Historical Marker Database. TWO SLICES, by what the fetcher could read:
+#   (a) Westchester County list, GEOGRAPHIC SORT, entries 1–191 of 428 (Ardsley → Hastings-on-Hudson, Mount Vernon,
+#       the start of New Rochelle). Pages 3–5 (entries 192–428: rest of New Rochelle, Ossining, Pelham, Pleasantville,
+#       Scarsdale, Sleepy Hollow, Tarrytown, Tuckahoe, Yonkers …) could NOT be read: HMdb drops the page number on a
+#       redirect, so the fetcher returned page 1 again — owed to #532 part 2, via town lists.
+#   (b) Bergen County list, page 1 (Allendale → Fort Lee), markers OUTSIDE the BCHS series only (pass 1 mined the series;
+#       a list entry with a series number is BCHS). Bergen pages 2–5 owed to part 2.
+# NOT in this pass at all: Rockland, the north Bronx, Passaic, BCHS entries 94–100 — part 2.
+# Skipped on purpose: name-list war memorials and honor rolls, commemorative-only plaques, site panels that describe a
+#   photograph (Hastings' Museum in the Streets: one line per place, not per panel), New Rochelle's Walk of Fame plaques
+#   (person plaques at one spot), things that are gone with nothing to see (Tower Ridge clock tower, the Buccaneer, the
+#   Hastings Theater), and everything outside the box (lat 40.875–41.175, lng −74.175 to −73.775).
+# CUT — already served with the same story (read 2026-10-26 through all 48 tiles, all warm, + the app's anon gem query):
+#   Hilderbrant Naugle House, Nagel–Auryansen Cemetery, Walter Parcells Homestead, Cadmus House Museum (each already a
+#   live gem at 0 m) · Battle of Edgar's Lane (→ Battle of Edgar's Lane, wiki, 36 m) · Draper Observatory (→ Henry Draper
+#   Observatory, wiki, 38 m) · New Rochelle Walk of Fame (→ Library Green, OSM, 33 m — that pin already carries the Walk
+#   of Fame's own story).
+# HELD — not in this file (carried forward on #532):
+#   Laroe–Van Horn House (m43801, Mahwah): no Wikipedia article; 70 m from live Hopper–Van Horn House (1769 stone house,
+#   398 Ramapo Valley Road). The marker page could not be read this pass (the fetcher served another marker's cached page).
+#   Wortendyke Homestead (m29885, Park Ridge): TWO articles are now served under disambiguated titles — Frederick Wortendyke
+#   House (Park Ridge, New Jersey) at 41.0194, −74.0469 and (Woodcliff Lake, New Jersey) at 41.0119, −74.05; a gem
+#   "Wortendyke Homesite" is also live at 40.9874, −73.9756. Settle which, if any, the marker is before adding a line.
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# A name differs from the marker title only where the title isn't a place name; each such line is marked.
+# `| new` is set on every line within 400 m of a live pin or another line (DuPage lesson (1), handoff §6).
+# RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-26) — no -cold file.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester.txt
+
+Alpine Community Church | @40.948489,-73.925536 | Built of local bluestone at the top of the Palisades on the old Closter Dock Road, this church was designed by architect J. Cleveland Cady and dedicated in 1871. | https://www.hmdb.org/m.asp?m=207905 | new
+# Wikipedia article of the same title 7 m off, in no stored tile (tile 819_-1479 holds only the Wittmer Lustron House).
+Harold Hess Lustron House | @40.970772,-73.967214 | To ease the housing shortage after World War II, Ohio's Lustron Corporation built houses entirely of prefabricated steel on an assembly line; Harold Hess bought this Westchester Deluxe model. | https://www.hmdb.org/m.asp?m=174139 | new
+# also covers "Sautes Tave's Begraven Ground" (m63548, 18 m) — the pre-Revolutionary burying ground he lies in.
+Grave of Douwe Talema | @40.961036,-73.957035 | In this pre-Revolutionary burying ground lies Douwe Talema, who was nearly ninety when a party of Tories murdered him at his home nearby in May 1779. | https://www.hmdb.org/m.asp?m=63547 | new
+# name: marker title "Bathing in the Hudson"
+Bloomer's Beach | @40.881743,-73.944672 | In the 1930s this stretch of riverfront below the Palisades was a public bathing beach with bath houses, open from late May until Labor Day. | https://www.hmdb.org/m.asp?m=64906
+Rockefeller Lookout | @40.892141,-73.941065 | This overlook is named for John D. Rockefeller Jr., whose land gifts and vision of a parkway helped keep the Palisades in their natural state. | https://www.hmdb.org/m.asp?m=163101
+# name: marker title "Radburn Station" — renamed to the Wikipedia article's exact title (58 m off; not in any stored tile, so not a hidden pin).
+Radburn station | @40.939922,-74.12166 | This Dutch Colonial Revival station was built in 1930 to a design by the architect Clarence S. Stein. | https://www.hmdb.org/m.asp?m=62968 | new
+# name: marker title "Slave House" — the building is gone.
+Site of the Slave House | @40.936252,-74.131523 | A building known as the Slave House stood here on the Acker estate, Fair Lawn, which gave the borough its name; it predated the Ackers' 1865 house. | https://www.hmdb.org/m.asp?m=63295
+Ardsley Station | @41.01211,-73.84989 | Rail service reached Ardsley here in 1880 on the New York & Northern line, later the New York Central's Putnam Division; the last passenger train ran in 1958. | https://www.hmdb.org/m.asp?m=282667
+# name: marker title "Birthplace of John L. Worden 1818-1897"
+John L. Worden Birthplace | @41.133888,-73.860574 | John Lorimer Worden, born here in 1818, commanded the ironclad Monitor in its 1862 duel with the Merrimack at Hampton Roads. | https://www.hmdb.org/m.asp?m=47278 | new
+Sparta Cemetery | @41.136825,-73.861041 | Set aside by the Philipse family, this burying ground holds Revolutionary War soldiers, and one of its old headstones was struck by cannon fire. | https://www.hmdb.org/m.asp?m=47280 | new
+Willow Point | @41.011876,-73.880464 | The river crossing that gave Dobbs Ferry its name started here, run by the family of John Dobbs, who settled in 1698, and then by his son and grandson. | https://www.hmdb.org/m.asp?m=42443 | new
+# 44 m from live Elmsford Reformed Church and Cemetery (the churchyard it stands in; that pin's story is the church's) — a different thing, so new.
+Isaac Van Wart Memorial | @41.053589,-73.820614 | Isaac Van Wart, one of the three militiamen who captured the British spy Major John André in 1780, was an elder of this church and is buried here. | https://www.hmdb.org/m.asp?m=42375 | new
+# name: marker title "The Great Hunger Memorial of Westchester County"
+Great Hunger Memorial | @41.025621,-73.845098 | Westchester County's memorial to the Irish famine of 1845–1851, when the failure of the potato crop drove a million people to their deaths and millions more to emigrate. | https://www.hmdb.org/m.asp?m=258421
+# also covers the marker "Billie and Flo" (m231259) — one pin for Burkeley Crest, at the pond you can still see.
+Billie Burke's Reflecting Pool | @40.991208,-73.877669 | Actress Billie Burke, Glinda in The Wizard of Oz, built this elliptical pond on Burkeley Crest, the estate she shared with showman Florenz Ziegfeld, which once kept a private zoo. | https://www.hmdb.org/m.asp?m=193476 | new
+# 165 m from live Henry Draper Observatory (the house inside the park; its story is Henry's) — this line is the park and John William Draper, so new.
+Draper Park | @40.991983,-73.878017 | This park was the estate of John William Draper, the chemist who made one of the first photographs of a human face in 1839 and an early photograph of the moon. | https://www.hmdb.org/m.asp?m=39351 | new
+Forge Cottage | @40.991283,-73.878433 | This gardener's cottage keeps remnants of the Neutral Forge, a blacksmith's shop that worked in the no-man's-land between the armies during the Revolution. | https://www.hmdb.org/m.asp?m=193473 | new
+# name: marker title "Longue Vue" — the restaurant is gone.
+Site of Longue Vue | @40.984075,-73.880128 | In the 1910s and '20s a fashionable hilltop restaurant with its own golf course stood here, drawing Manhattan socialites, gangsters and stars for the view. | https://www.hmdb.org/m.asp?m=238448
+Olinda | @40.993214,-73.876992 | The Hopke family, whose waterfront sugar refinery burned in 1875, named their stone mansion after the Brazilian city that shipped them their raw sugar. | https://www.hmdb.org/m.asp?m=193467 | new
+# name: marker title "Hastings' First High Rise"
+La Barranca | @40.993314,-73.878242 | Hastings' first apartment building caused an uproar when it opened in 1929 at six stories, by far the tallest thing in the village. | https://www.hmdb.org/m.asp?m=193469 | new
+# name: marker title "Municipal Building"
+Hastings-on-Hudson Municipal Building | @40.995381,-73.883392 | Hastings' village hall was designed by Shreve and Lamb, the architects of the Empire State Building, on the site of a bluestone-yard owner's home. | https://www.hmdb.org/m.asp?m=193506 | new
+Protection Engine Company No. 1 | @40.9958,-73.882294 | Thirty-seven men founded this volunteer fire company in 1876, five weeks after fires destroyed the Hastings waterfront and three years before the village was incorporated. | https://www.hmdb.org/m.asp?m=193520 | new
+# name: marker title "School, Blacksmith's Shop and Firehouse"
+Fraser Free School | @40.994222,-73.88048 | Built in 1863 for the village's elementary grades, when high-school students had to travel to Yonkers, the school later served as library and civic centre. | https://www.hmdb.org/m.asp?m=193456 | new
+# name: marker title "Carl Brandt, Portrait Painter"
+Carl Brandt House | @40.99539,-73.882145 | The German-born portrait painter Carl Brandt settled in this Greek Revival house in the 1860s, on the edge of the Chrystie estate. | https://www.hmdb.org/m.asp?m=193522 | new
+# name: marker title "Squirrel Alley and River Place"
+Squirrel Alley | @40.998589,-73.882561 | The squirrel guarding this path is by sculptor Raffaele Menconi, who also made the aluminium eagle on the village hall. | https://www.hmdb.org/m.asp?m=193515 | new
+# name: marker title "Community Gardens in Zinsser Park"; 29 m from the live Battle of Edgar's Lane pin — a different subject, so new.
+Zinsser Park | @40.998183,-73.881675 | The community vegetable plots here began as World War I victory gardens on the estate of Frederick Zinsser, village mayor and owner of the local factory. | https://www.hmdb.org/m.asp?m=193436 | new
+Old Broadway | @40.995135,-73.87864 | A surviving stretch of the narrow original Albany Post Road runs here, beside the house that was once the Baker family's funeral home. | https://www.hmdb.org/m.asp?m=193459 | new
+Glover's Brigade Encampment | @40.902215,-73.818 | Colonel John Glover's brigade of the Continental Army camped on this hillside on October 17, 1776, and went into battle at Pelham the next day. | https://www.hmdb.org/m.asp?m=192139 | new
