@@ -3302,23 +3302,45 @@ async function resolveCuratedByName(name, lat, lng) {
 // SUPERSEDED BY #419: curated now WINS on any OSM or Wikipedia-feed facts pin it
 // matches, thin or not — see applyCuratedToServe below.
 const CURATED_INDEX_TTL_MS = 5 * 60 * 1000;
-let _curatedIndex = { at: 0, byName: new Map(), ok: false };
+// #535 — THE INDEX IS READ IN PAGES. PostgREST caps every response at the
+// project's max-rows (1000), whatever .limit() asks for, so the old single
+// .limit(5000) read silently returned only 1000 rows once the table grew past
+// that — every curated row beyond the first 1000 (by physical order: the newest)
+// never reached a pin, while the action path's per-name read (resolveCuratedByName, above)
+// still found them. Proven 2026-10-26: #532's six hidden-pin rows read dist_m 0
+// in curated_category_backfill but never served, while #519's older rows did.
+// Now: pages of CURATED_INDEX_PAGE ordered by id, until a short page, up to
+// CURATED_INDEX_MAX_ROWS. A failed page keeps the previous index whole (a
+// partial index would silently drop stories) — a read failure never blocks a
+// serve. curatedIndexRows on every tile response is the deploy-confirm count.
+const CURATED_INDEX_VERSION = "535-curated-index-paged-v1";
+const CURATED_INDEX_PAGE = 1000;        // = the project's PostgREST max-rows; a page shorter than this is the last
+const CURATED_INDEX_MAX_ROWS = 50000;   // safety stop (50 pages); the table held ~1,300 rows at #535
+let _curatedIndex = { at: 0, byName: new Map(), ok: false, rows: 0 };
 async function loadCuratedIndex() {
   if (_curatedIndex.ok && Date.now() - _curatedIndex.at < CURATED_INDEX_TTL_MS) return _curatedIndex.byName;
   try {
-    const { data, error } = await supabase
-      .from("curated_descriptions")
-      .select("id,name,name_clean,description,lat,lng")
-      .limit(5000);
-    if (!error && Array.isArray(data)) {
+    const all = [];
+    let complete = false;
+    for (let from = 0; from < CURATED_INDEX_MAX_ROWS; from += CURATED_INDEX_PAGE) {
+      const { data, error } = await supabase
+        .from("curated_descriptions")
+        .select("id,name,name_clean,description,lat,lng")
+        .order("id", { ascending: true })
+        .range(from, from + CURATED_INDEX_PAGE - 1);
+      if (error || !Array.isArray(data)) break;          // keep the previous index whole
+      all.push(...data);
+      if (data.length < CURATED_INDEX_PAGE) { complete = true; break; }
+    }
+    if (complete) {
       const m = new Map();
-      for (const r of data) {
+      for (const r of all) {
         if (!r || !r.name_clean || !r.description) continue;
         const k = String(r.name_clean);
         if (!m.has(k)) m.set(k, []);
         m.get(k).push(r);
       }
-      _curatedIndex = { at: Date.now(), byName: m, ok: true };
+      _curatedIndex = { at: Date.now(), byName: m, ok: true, rows: all.length };
     }
   } catch (_e) { /* keep the previous index (or empty) — a read failure never blocks a serve */ }
   return _curatedIndex.byName;
@@ -4903,6 +4925,7 @@ function cachedEnvelope(tile, cached, s) {
     suppressed: s.f.suppressed, suppressionFailed: false,
     storyHidden: s.g.hidden, storyGateVersion: STORY_GATE_VERSION, storyHiddenWikidata: s.g.wikidata, storyHiddenGraveFiller: s.g.graveFiller, // #510/#511 — of storyHidden, how many by each new rule
     osmCurated: s.cur.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
+    curatedIndexVersion: CURATED_INDEX_VERSION, curatedIndexRows: _curatedIndex.rows, // #535 deploy-confirm + rows the curated index holds (0 = never loaded)
     graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: s.graveStruct.demoted, graveStoryStripped: s.graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
     qidVersion: "164-wikidata-qid-v1", // #164 deploy-confirm (the Q-id bake runs at tile BUILD; a warm tile gains it on its next rebuild)
     swrVersion: SWR_VERSION, // #394 deploy-confirm
@@ -5190,6 +5213,7 @@ Deno.serve(async (req) => {
         cacheVersion: CACHE_VERSION,
         storyHidden: gated.hidden, storyGateVersion: STORY_GATE_VERSION, storyHiddenWikidata: gated.wikidata, storyHiddenGraveFiller: gated.graveFiller, // #510/#511
         osmCurated: curC.curated, curatedOsmVersion: CURATED_WINS_VERSION, // #362/#419 deploy-confirm + curated lines applied this serve
+        curatedIndexVersion: CURATED_INDEX_VERSION, curatedIndexRows: _curatedIndex.rows, // #535 deploy-confirm + rows the curated index holds
         graveStructVersion: "375-structure-grave-remove-v1", graveDemoted: graveStruct.demoted, graveStoryStripped: graveStruct.stripped, // #374/#375 deploy-confirm + counts this serve
         overpassStatus: osm.status, overpassError: osm.error, overpassVersion: OVERPASS_VERSION, overpassMirror: osm.mirror || null, // #498 deploy-confirm + which mirror answered
         chainsDropped: osm.chainsDropped, trailsDropped: osm.trailsDropped,

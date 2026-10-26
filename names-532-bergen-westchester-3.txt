@@ -1,0 +1,142 @@
+# names-532-bergen-westchester-3.txt — #532 Bergen-Westchester story pass 2, PART 3 (story lines, 2026-10-26)
+# Source: Historical Marker Database, Rockland County list, all 282 entries (geographic sort) — page 1 via the plain
+#   county URL, page 2 via its "Next 100" link, page 3 via results.asp?Search=County&state=New+York&county=Rockland+County
+#   &StartAt=1001&Page=3 (a shape a web search surfaced); each page's "Entries N through M" line was checked.
+#   NOT READ: entries 98–100 (Nyack: a second Underground Railroad marker, the Upper Nyack Firehouse, Hopper House) and
+#   195–200 (Stony Point, all north of the box). Each page is cut at ~40k tokens.
+# In the box (lat 40.875–41.175, lng −74.175 to −73.775): Airmont, Blauvelt, Chestnut Ridge, Congers, Hillburn, Monsey,
+#   Montebello, Nanuet, New City, New Hempstead, Nyack, South and Upper Nyack, Orangeburg, Palisades, Pearl River,
+#   Piermont, Pomona (south), Sloatsburg (Torne Brook only), Sparkill, Spring Valley, Suffern, Tappan, Valley Cottage,
+#   West Nyack. Out of the box: Bear Mountain, Garnerville, Haverstraw, Ladentown, Sloatsburg village, Stony Point,
+#   Tomkins Cove, West Haverstraw.
+# Skipped on purpose: name-list war and 9/11 memorials, honor rolls, NRHP-plaque-only markers (Blauvelt House, Dr. Morris
+#   Bartow House, St. Paul's Episcopal Spring Valley), historic-district signs, road and trail panels, things gone with
+#   nothing to see (Shanks Village, the Snow House, the Hesdra home, the First Courthouse), a missing marker (Grand
+#   View-on-Hudson), generic area panels.
+# CUT — already served (read 2026-10-26 through all 48 tiles, all warm, + the app's anon gem query, 395 rows):
+#   914 Sound Recording Studios (wiki 914 Sound Studios, 28 m) · Thurgood Marshall and the Hillburn Schools (wiki Main
+#   School (Hillburn), 14 m) · Jacob Blauvelt House (wiki Blauvelt House (New City), 94 m) · Rockland County Court House
+#   (wiki Courthouse and Dutch Gardens, 118 m) · Snedekers Landing (OSM Snedeckers Landing, 9 m, marker text) · Nyack
+#   Library (wiki, 31 m) · Old Stone Church (wiki First Methodist Episcopal Church of Nyack, 40 m) · Salyer House (wiki
+#   Michael Salyer Stone House, 33 m) · Onderdonk House (wiki, 69 m) · Torne Brook Farm (wiki, 178 m) · Carson McCullers
+#   House (wiki, 36 m) · Bridge Street Bridge (wiki Sparkill Creek Drawbridge, 20 m) · Christ Episcopal Church of
+#   Piermont and Sparkill (wiki Christ Church (Sparkill), 68 m) · Brick Church, 1786 Schoolhouse, First Town Hall, 1700
+#   Cemetery (wiki Brick Church Complex, 30–84 m; Dan Beard's grave pin) · Soldier's Monument, Suffern (OSM + wiki, 3 m)
+#   · Camp Shanks (wiki, 231 m) · Mount Moor Cemetery (wiki Mount Moor African-American Cemetery, 76 m).
+# HELD — not in this file: the target is a HIDDEN live OSM pin (handoff §6 story-lines (y)); each gets a curated row in
+#   532_hidden_curated.sql instead: Piermont Flywheel (m138606 → "The Flywheel: A Monument to Piermont's Industrial
+#   Past", 5 m) · Indian Rock (m215815 → "Indian Rock", 4 m) · Piermont Station (m138616 → "Piermont Train Station
+#   Museum", 14 m) · Suffern's Depot (m84081 → "Suffern Railroad Museum", 25 m).
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# Names that differ from the marker title: Thomas Fortune Ryan Estate (marker "Montebello" — the village's name),
+#   Grave of John C. Frémont (marker "Gravesite of General John Charles Frémont" — the graves pins' naming), The '76 House
+#   and Major John André Monument and Reformed Church of Tappan (the Wikipedia titles, settled from each article — same
+#   building, 2–25 m), Cynthia Hesdra Bench by the Road, Capt. John Green House, John G. Bell House, St. Paul's Church
+#   (Congers), Slave Burial Ground Grave Markers, Sarvent's Quarry (each marker is titled for a person or an event).
+# `| new` is set on every line within 400 m of a live pin or another line (DuPage lesson (1)), EXCEPT the three lines
+#   named to a Wikipedia article's exact title — they must stay matchable so they seed under the article (#425).
+# RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-26) — no -cold file.
+# SANDBOX DRY RUN (Gemini stubbed, handoff §5 (x), DENO_TLS_CA_STORE=system; live map, submissions and Wikipedia arms
+#   real), 2026-10-26: 56 new-seed · 0 review · 0 held · 56 curated rows staged · Wikipedia calls 56, failed 0. Three lines
+#   read "↳ seeded under its Wikipedia article" — The '76 House (5 m), Major John André Monument (16 m), Reformed Church of
+#   Tappan (23 m) — as intended. A first run before the renames read 2 reviews (#437 LARGER-place on "Old '76 House",
+#   #432 near-named on "André Monument"), both settled from the articles.
+#   EXPECT on the Mac: the same 56 / 0 / 0, and #439 "56 to insert, 0 skipped, 0 replaced". Any difference is a stop.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester-3.txt
+
+# --- Airmont ---
+Christ Evangelical Lutheran Church | @41.100528,-74.116067 | Founded on June 14, 1715 as Ramapo Lutheran by Palatine Germans who had left the Lower Rhine for the Hudson Valley. | https://www.hmdb.org/m.asp?m=84073 | new
+Dogwoods | @41.1100583,-74.1100447 | Economist and philosopher Ralph Borsodi and his family built this fieldstone homestead with their own labor between 1924 and 1934. | https://www.hmdb.org/m.asp?m=84060
+
+# --- Blauvelt ---
+Blauvelt-Norris-Burr House | @41.075648,-73.96204 | The main section of this Dutch sandstone homestead dates from about 1790-1800, with a north addition around 1840; Garret I. Blauvelt was its first known occupant. | https://www.hmdb.org/m.asp?m=84058 | new
+Cuyper-Van Houten House | @41.059167,-73.991667 | Tunis Cooper built the main section of this sandstone farmhouse in 1731; around 1812 Rulof Van Houten bought it with a nearby saw and grist mill. | https://www.hmdb.org/m.asp?m=84069
+Jacob J. Blauvelt Homestead | @41.058203,-73.95619 | Jacob J. Blauvelt built the main section of this sandstone house around 1780 on his father Johannes's farm. | https://www.hmdb.org/m.asp?m=84124 | new
+Johannes Isaac Blauvelt House | @41.077327,-73.963352 | This Dutch farmhouse on the northwest corner of the Tappan Patent shows late 18th and early 19th century building work; Johannes Blauvelt was a charter member of the Greenbush Church. | https://www.hmdb.org/m.asp?m=84125 | new
+Johannes J. Blauvelt Homestead | @41.056448,-73.95598 | Johannes J. Blauvelt built the sandstone south section of this house around 1755; seven generations of Blauvelts lived on the farm. | https://www.hmdb.org/m.asp?m=84123 | new
+
+# --- Chestnut Ridge ---
+Haring Homestead | @41.070542,-74.044077 | The Halstead family began this sandstone farmhouse around 1788, and a later owner ran a sawmill and gristmill on nearby Pascack Brook. | https://www.hmdb.org/m.asp?m=84059
+
+# --- Congers ---
+Collyer Farm Pond and New City Park | @41.136377,-73.997883 | An American Scandinavian group found this old 19th-century mill pond, sawmill and icehouse in 1926 and made it a summer colony. | https://www.hmdb.org/m.asp?m=44210 | new
+Congers School | @41.150748,-73.944157 | The Congers School opened as a high school in 1928, with students coming from as far as West Nyack and Tappan, often by train. | https://www.hmdb.org/m.asp?m=44286 | new
+Congers Station | @41.150537,-73.941026 | The railroad came through in 1880 on land given by Abraham and Mary Conger, and the stop was named for them. | https://www.hmdb.org/m.asp?m=44285 | new
+Doctor Davies Farm | @41.150904,-73.923382 | This c. 1836 farmhouse became the home in 1891 of artist Arthur Bowen Davies, a pioneer of modern art in America. | https://www.hmdb.org/m.asp?m=44211
+Paul Farmhouse | @41.136217,-73.941806 | John Paul built the east half of this Dutch farmhouse in the early 1800s; a matching west half soon followed, giving it rare twin front doors. | https://www.hmdb.org/m.asp?m=44282 | new
+Snedeker Farm | @41.153052,-73.947636 | The Snedeker family farmed here from about 1730 to 1909; part of the stone house was built around 1747 by Johannes Snedeker, a colonial militia captain. | https://www.hmdb.org/m.asp?m=131428 | new
+St. Paul's Church (Congers) | @41.148089,-73.935954 | St. Paul's was started in 1891 for local ice and quarry workers; quarry owners donated the brick and the first Mass was Easter 1894. | https://www.hmdb.org/m.asp?m=44288
+
+# --- Montebello ---
+Bayard Lane | @41.13661,-74.126557 | Founded in 1935, Bayard Lane was the first of Ralph Borsodi's back-to-the-land homestead communities. | https://www.hmdb.org/m.asp?m=84075 | new
+Cobblestone Farm | @41.136272,-74.107264 | The cobblestone barn, carriage house and dairy barn were the heart of the country estate of Henry von L. Meyer Sr., founder of White Laboratories. | https://www.hmdb.org/m.asp?m=84085
+Thomas Fortune Ryan Estate | @41.124407,-74.127207 | Financier Thomas Fortune Ryan built this 44-room country mansion in 1901, with a private chapel and two bowling alleys. | https://www.hmdb.org/m.asp?m=84056
+School of Living | @41.135099,-74.125421 | Ralph Borsodi founded the School of Living in 1934 to teach self-sufficient living; this building went up in 1937 to house it. | https://www.hmdb.org/m.asp?m=84076 | new
+
+# --- Nanuet ---
+Scotland Hill Burial Ground | @41.09549,-74.035962 | Named for Scots who arrived in the early 1700s, this ground holds tenant farmers and Blauvelts, including Revolutionary War veterans, buried 1749-1859. | https://www.hmdb.org/m.asp?m=84083
+
+# --- New City ---
+Martinus Hogenkamp Cemetery | @41.13651,-74.000525 | This 18th-century family burial ground was abandoned and forgotten until an association rescued it; several stones are inscribed in Dutch. | https://www.hmdb.org/m.asp?m=44209 | new
+New Hempstead Presbyterian Church | @41.149549,-74.032364 | Founded in 1734 and called the English Church by Dutch settlers, it was rebuilt in 1827; Washington's troops camped on the grounds. | https://www.hmdb.org/m.asp?m=44220 | new
+
+# --- New Hempstead ---
+Shady Side Farm | @41.151117,-74.048643 | In 1826 Gilbert and Phebe Johnson gave their son Daniel five acres and a small farmhouse; he added the main east section in 1836. | https://www.hmdb.org/m.asp?m=84061 | new
+
+# --- Nyack ---
+Cynthia Hesdra Bench by the Road | @41.08873605,-73.91702189 | One of the Toni Morrison Society's Benches by the Road, placed here in memory of Cynthia Hesdra of Nyack. | https://www.hmdb.org/m.asp?m=130327 | new
+Capt. John Green House | @41.0903929,-73.91588 | Captain John Green, a Hudson sloop master and a founder of the Nyack Steamboat Company in 1826, owned this house around 1819. | https://www.hmdb.org/m.asp?m=212745 | new
+First Reformed Church of Nyack | @41.090254,-73.91851 | Dutch Reformed residents built their first small church on this site in 1836 and incorporated in 1853. | https://www.hmdb.org/m.asp?m=44226 | new
+Oak Hill Cemetery | @41.095441,-73.927442 | This nonsectarian cemetery was dedicated on June 27, 1848 before a crowd of 3,000, marking a shift away from small family and church burial grounds. | https://www.hmdb.org/m.asp?m=18274 | new
+Rockland Brink's Robbery | @41.094715,-73.936049 | On October 20, 1981 a Weather Underground crew that had robbed a Brink's truck at the Nanuet Mall was stopped here, ending a three-year crime spree. | https://www.hmdb.org/m.asp?m=33649
+
+# --- Orangeburg ---
+Clausland Cemetery | @41.05131,-73.94478 | The burial ground of the first settlers of the northern Tappan Patent, among them the Smith and Blauvelt families; its earliest marked grave is from 1744. | https://www.hmdb.org/m.asp?m=84064
+John G. Bell House | @41.03614349,-73.92802237 | Naturalist and taxidermist John Graham Bell, a pioneer of taxidermy who traveled with John James Audubon in 1843, lived here with his wife Ann. | https://www.hmdb.org/m.asp?m=122290
+
+# --- Palisades ---
+Skunk Hollow | @41.001495,-73.911658 | Skunk Hollow, also called the mountain, was a free Black community from 1806 to 1905, founded on land first deeded to Jack Earnest. | https://www.hmdb.org/m.asp?m=8630
+
+# --- Pearl River ---
+Johannes Perry House | @41.049352,-74.016447 | Peter Perry bought this lot of the Kakiat Patent around 1773, and his son Johannes probably built the earliest part of the house about a year later. | https://www.hmdb.org/m.asp?m=84128 | new
+
+# --- Piermont ---
+Bogertown | @41.04001,-73.912891 | A little early 19th-century settlement of ten houses named for the Bogert family; around 1824 Paradise Avenue was pushed through the salt marsh to a river pier. | https://www.hmdb.org/m.asp?m=84078 | new
+Sneden House | @41.038919,-73.914819 | The c. 1800 home of shipbuilder John Sneden Jr., grandson of Molly Sneden, the famed ferrywoman of the Dobbs-Sneden crossing. | https://www.hmdb.org/m.asp?m=127922 | new
+The Mine Hole | @41.03415448,-73.92186842 | The neighborhood along the creek took its name from this mine hole and was settled mainly by Black families who built a thriving community of homeowners and churchgoers. | https://www.hmdb.org/m.asp?m=307944 | new
+
+# --- Pomona ---
+Pig Knoll School | @41.170292,-74.067898 | Architect Walter Robb Wilder designed this one-room schoolhouse in 1915; local children went here for 16 years. | https://www.hmdb.org/m.asp?m=84072
+
+# --- South Nyack ---
+Couch Court | @41.089116,-73.91891 | Built in 1854 for tub and pail maker A. J. Storms, it was later home to a Nyack-Tarrytown ferry captain, and Dr. Louis Couch ran his homeopathic practice from the tower. | https://www.hmdb.org/m.asp?m=44276 | new
+Stephen Rowe Bradley Sr. Park | @41.084,-73.9357 | Shortly before he died in 1910, Stephen Rowe Bradley Sr. said he meant to give 212 acres of his land to the Palisades Interstate Park Commission, and his heirs carried it out. | https://www.hmdb.org/m.asp?m=84087
+
+# --- Sparkill ---
+Grave of John C. Frémont | @41.040437,-73.928289 | The explorer who opened the way west in the 1840s and issued the first Emancipation Proclamation is buried at the top of Rockland Cemetery. | https://www.hmdb.org/m.asp?m=8606 | new
+St. Charles A.M.E. Zion Church | @41.029407,-73.925727 | Built in 1897, this church succeeded Skunk Hollow's 1856 mountain church and the 1865 Swamp Church of Palisades. | https://www.hmdb.org/m.asp?m=84065 | new
+
+# --- Suffern ---
+Viola United Methodist Church | @41.13635,-74.08396667 | Built in 1856 as the Methodist Episcopal Church of Mechanicsville, named for the hamlet's thriving mills. | https://www.hmdb.org/m.asp?m=84074 | new
+
+# --- Tappan ---
+The '76 House | @41.021713,-73.947796 | Major John André, the British spy who plotted with Benedict Arnold to hand over West Point, was held here before his execution. | https://www.hmdb.org/m.asp?m=7304
+Major John André Monument | @41.021284,-73.954846 | Major John André of the British Army was hanged here as a spy on October 2, 1780, after he was caught carrying Benedict Arnold's plans for West Point. | https://www.hmdb.org/m.asp?m=166357
+Slave Burial Ground Grave Markers | @41.02005,-73.945654 | These gravestones come from a burial ground for enslaved people on farmland once owned by the Mann family; Tappan's earliest settlers held slaves, among them Daniel DeClark on this site. | https://www.hmdb.org/m.asp?m=7894 | new
+Hickory Hill Cooperative | @41.022646,-73.958389 | In 1950 World War II veterans from Shanks Village, studying on the G.I. Bill, planned and built their own homes here together on farmland. | https://www.hmdb.org/m.asp?m=52951 | new
+Reformed Church of Tappan | @41.022348,-73.947829 | Organized in 1694, the church served as a military hospital and prison in the Revolution, and Major André's trial as a spy was held here in 1780. | https://www.hmdb.org/m.asp?m=7375
+The Manse | @41.02226,-73.9488 | Built in 1726, this was the home during the Revolution of Domine Samuel Verbryck, a friend of Washington and a founder of what became Rutgers. | https://www.hmdb.org/m.asp?m=8639 | new
+
+# --- Upper Nyack ---
+Sarvent's Quarry | @41.09951118,-73.916954 | In 1776 and 1777 British soldiers came ashore here from ships in the Hudson to seize livestock, and Continental troops skirmished with them. | https://www.hmdb.org/m.asp?m=278549 | new
+
+# --- West Nyack ---
+Clarkstown Reformed Church | @41.102008,-73.972587 | Worship here began around 1740 in a log meeting house, and the First Reformed Protestant Dutch Church was organized in 1750. | https://www.hmdb.org/m.asp?m=44204 | new
+Clarksville Inn | @41.094016,-73.972496 | Thomas Warner built this inn in 1840 as a stop for stagecoaches to and from the port of Nyack; it held farewell balls for recruits. | https://www.hmdb.org/m.asp?m=15351 | new
+Pye's Corner | @41.103883,-73.972461 | Dr. Abraham Cornelison, first president of the Rockland County Medical Society, bought the sandstone house here in 1798 and lived in it for 51 years. | https://www.hmdb.org/m.asp?m=26199 | new
+Old Clarkstown Reformed Church Cemetery | @41.109175,-73.981034 | A Dutch meeting house and burial ground stood here around 1740; the congregation organized in 1750 and built a sandstone church in 1826. | https://www.hmdb.org/m.asp?m=44201
+Tallman-Budke House | @41.11738368,-73.98685666 | Built in phases from about 1791 to 1880, this house is an example of the sandstone farmhouses of Dutch-settled Rockland and Bergen counties. | https://www.hmdb.org/m.asp?m=125289 | new
+Vanderbilt-Budke-Traphagen House | @41.11643273,-73.9862127 | Rockland County historian George H. Budke Jr. grew up in this farmhouse, built on land first owned by the Vanderbilt family. | https://www.hmdb.org/m.asp?m=125290 | new
+The Old Parsonage | @41.101587,-73.972523 | When the Clarkstown Reformed Church called its first full-time pastor in 1834, it bought this house for him and enlarged it in 1835. | https://www.hmdb.org/m.asp?m=26196 | new
+Van Houten Fields | @41.088938,-73.97202 | In 1937 Ralph Borsodi organized a group to buy this 106-acre Dutch farm and lease it in plots, the largest self-run back-to-the-land community in Rockland. | https://www.hmdb.org/m.asp?m=44203 | new
