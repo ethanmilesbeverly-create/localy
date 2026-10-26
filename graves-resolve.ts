@@ -241,6 +241,27 @@
 // ("SAME NAME ALREADY LIVE ELSEWHERE") with the candidate's QID, instead of under
 // "#384 HAND-PLACED GRAVES", which read as if it were a hand placement.
 //
+// RING SLOTS ARE HELD WHEN TAKEN (#533, 2026-10-26). Ranks 1..N-1 of a cemetery
+// sit on the deterministic #372 ring, so rank k ALWAYS lands on the same point.
+// Wikidata sitelink counts drift, so a later run's rank k at a cemetery can be a
+// DIFFERENT person from the one an earlier run planted there — and the #338 skip
+// (name + coordinate) and #384 (core name) both pass, because the name differs.
+// #500's dry run proposed Bel Kaufman 0 m from live "Grave of Luther Adler"
+// (Mount Carmel, Queens) and Charles Wellford Leavitt 0 m from live "Grave of
+// Edward Leslie Molineux" (St. James the Less, Scarsdale); both were cut by hand.
+// Every run now checks each row it would insert against the LIVE grave rows the
+// skip already reads: a row within GRAVE_RING_SLOT_M (default 10 m — well inside
+// the ~38 m between neighbouring ring points) of a live row of a DIFFERENT person
+// is HELD and listed in a "RING SLOT TAKEN" block, beside the #442 block. The hold
+// runs on all three commit paths, after #442, and keeps the row in
+// graves_records.json. Decide by hand: delete it (the safe default — the
+// cemetery's earlier-loaded person keeps the slot), or move it to a free point
+// and run --from-records --commit. It needs the loaded read, so it is OFF exactly
+// when the skip is OFF (a dry run without the secrets; --commit always has it).
+// Not built (row's second idea): capping a cemetery at N live rows — the hold
+// already catches every collision, and a cap would also block a new person whose
+// ring point is free.
+//
 // RESTING-PLACE CHECK (#492, 2026-10-06). #342's gate asks whether P119 is a
 // cemetery; it never asked whether it is THIS person's cemetery. The #492 spike
 // found 20 wrong live pins of ~1,670 it could check: same-named cemeteries (Whitney
@@ -374,6 +395,12 @@ const WD_PAGE_SIZE = Number(Deno.env.get("GRAVE_PAGE_SIZE") ?? 300);
 const MAX_DESC_CHARS = Number(Deno.env.get("GRAVE_MAX_DESC_CHARS") ?? 600);
 const MATCH_RADIUS_M = 90; // same constant as index.html dedupeReal()
 
+// #533 ring-slot hold: a row about to be inserted within this many metres of a
+// LIVE grave row of a different person is held, not committed. Must stay well
+// under the gap between neighbouring #372 ring points (~38 m at the 50 m ring),
+// or two honest ring neighbours would hold each other.
+const RING_SLOT_M = Math.max(0, Number(Deno.env.get("GRAVE_RING_SLOT_M") ?? 10));
+
 // Submissions-aware skip (#338): ON by default when the DB is reachable. Set
 // GRAVE_SKIP_LOADED=0 to disable it and propose every candidate (the pre-#338
 // behaviour — then --commit CAN double-insert an already-loaded metro).
@@ -389,7 +416,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.25a (#500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.26a (#533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -2064,6 +2091,56 @@ function holdDuplicateLabels(rows: GraveRow[], commit: boolean): GraveRow[] {
 }
 
 // ---------------------------------------------------------------------------
+// #533 RING SLOT TAKEN: a row about to be inserted that sits within RING_SLOT_M
+// of a LIVE grave row of a DIFFERENT person (different core name) is held — a
+// drifted top-N order handed this ring point to a new person after an earlier
+// run gave it to someone else. Reads LOADED_BY_NAME (filled by the #338 loaded
+// read), so it is a no-op when the skip is off; prints its block whenever there
+// is anything to show, on a dry run too. Never edits graves_records.json.
+// ---------------------------------------------------------------------------
+function holdRingSlots(rows: GraveRow[], commit: boolean, skipActive: boolean): GraveRow[] {
+  if (!skipActive) {
+    console.log("\n#533 RING SLOT TAKEN: OFF — the submissions-aware skip is off, so live graves were not read.");
+    return rows;
+  }
+  if (RING_SLOT_M <= 0) {
+    console.log("\n#533 RING SLOT TAKEN: OFF (GRAVE_RING_SLOT_M=0).");
+    return rows;
+  }
+  const live = [...LOADED_BY_NAME.values()].flat().filter((r) => r.live);
+  // Cheap prefilter on latitude before the haversine (1° lat ≈ 111 km).
+  const dLatMax = RING_SLOT_M / 111000 * 1.5;
+  const hits: { row: GraveRow; taken: LoadedRow; distM: number }[] = [];
+  for (const r of rows) {
+    const core = graveNameCore(r.name);
+    let best: { taken: LoadedRow; distM: number } | null = null;
+    for (const l of live) {
+      if (Math.abs(l.lat - r.lat) > dLatMax) continue;
+      if (graveNameCore(l.name) === core) continue; // same person — #338/#384's job, not a collision
+      const d = haversineM(r.lat, r.lng, l.lat, l.lng);
+      if (d <= RING_SLOT_M && (!best || d < best.distM)) best = { taken: l, distM: d };
+    }
+    if (best) hits.push({ row: r, ...best });
+  }
+  if (!hits.length) {
+    console.log(`\n#533 RING SLOT TAKEN: none — no row lands within ${RING_SLOT_M} m of a live grave of a different person (${live.length} live grave rows checked).`);
+    return rows;
+  }
+  const held = new Set<GraveRow>(hits.map((h) => h.row));
+  console.log(`\n⚠ #533 RING SLOT TAKEN — ${held.size} row(s) within ${RING_SLOT_M} m of a LIVE grave of a different person are ${commit ? "HELD from this --commit" : "flagged (they would be HELD from --commit)"}:`);
+  for (const h of hits) {
+    const m = (h.row.grave_meta ?? {}) as any;
+    const rank = typeof m.cemeteryRank === "number" ? ` rank ${m.cemeteryRank + 1}` : "";
+    console.log(`  • "${h.row.name}" — ${h.row.city} (${h.row.lat}, ${h.row.lng})${m.qid ? ` [${m.qid}]` : ""}${m.burialLabel ? ` at "${m.burialLabel}"${rank}` : ""}`);
+    console.log(`      ${Math.round(h.distM)} m from live "${h.taken.name}" (${h.taken.lat}, ${h.taken.lng})`);
+  }
+  console.log("  The cemetery's top-N order drifted since it was loaded, so this ring point is already someone else's.");
+  console.log("  Decide each by hand in graves_records.json: delete the row (the safe default), or move it to a free");
+  console.log("  point, then run --from-records --commit.");
+  return rows.filter((r) => !held.has(r));
+}
+
+// ---------------------------------------------------------------------------
 // #342 RETIRE AUDIT: an ALREADY-LOADED grave whose P119 burial place is not a
 // cemetery is a MISPLACED live pin (the old ungated tool planted it before the
 // gate existed). This crawl now surfaces those: collect the report entries that
@@ -2222,7 +2299,7 @@ async function runFromRecords(loadedKeys: Set<string>, skipActive: boolean, comm
     console.log("  (submissions-aware skip was OFF for this run, so NO rows were filtered — see the skip status above; a --commit here trusts the file not to overlap the DB.)");
   }
 
-  const toInsert = holdDuplicateLabels(fresh, commit);
+  const toInsert = holdRingSlots(holdDuplicateLabels(fresh, commit), commit, skipActive);
   if (commit) {
     console.log("\n--from-records --commit: inserting the un-loaded rows now (no crawl).");
     await commitToSupabase(toInsert);
@@ -2307,7 +2384,7 @@ async function run() {
     console.log(`MULTI-P119 people collapsed (2+ burial coordinates → one grave kept, #378): ${multiP119} — see graves_report.json (outcome:"multi-p119-collapsed").`);
     console.log("wrote graves_records.json (all metros, load into submissions) and graves_report.json (per-metro blocks, every verdict).");
 
-    const allToInsert = holdDuplicateLabels(allRows, COMMIT);
+    const allToInsert = holdRingSlots(holdDuplicateLabels(allRows, COMMIT), COMMIT, skipActive);
     if (COMMIT) {
       console.log("\n--commit passed: writing every metro's new grave rows to submissions now.");
       await commitToSupabase(allToInsert);
@@ -2329,7 +2406,7 @@ async function run() {
   await writeRetireAudit(collectStrays(report), report);
   console.log("wrote graves_records.json (load into submissions) and graves_report.json (every verdict).");
 
-  const toInsert = holdDuplicateLabels(rows, COMMIT);
+  const toInsert = holdRingSlots(holdDuplicateLabels(rows, COMMIT), COMMIT, skipActive);
   if (COMMIT) {
     console.log("\n--commit passed: writing the new grave rows to submissions now.");
     await commitToSupabase(toInsert);
