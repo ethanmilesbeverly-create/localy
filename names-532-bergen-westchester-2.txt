@@ -1,0 +1,79 @@
+# names-532-bergen-westchester-2.txt — #532 Bergen-Westchester story pass 2, PART 2 (story lines, 2026-10-26)
+# Source: Historical Marker Database, Westchester County list, entries 201–428 of 428 (the rest of New Rochelle → Yonkers).
+#   Reached through a different URL shape that HMdb keeps across its redirect (…&County=Westchester%20County&Page=N);
+#   each page's heading and "Entries N through M" line were checked before use. Pages are cut at ~40k tokens, so
+#   entries 277–300 (the tail of Ossining's Museum in the Streets / Dale Cemetery trail) and 192–200 (New Rochelle,
+#   Walk of Fame plaques) were not read — owed to part 3 with the rest of #532.
+# In the box (lat 40.875–41.175, lng −74.175 to −73.775): Ossining, Pelham, Pelham Manor, Scarsdale, Sleepy Hollow,
+#   Tarrytown, Valhalla, the west edge of White Plains, Yonkers (2 entries only). Out of the box: North Castle, North
+#   Salem, Peekskill, Port Chester, Pound Ridge, Rye, Rye Brook, Somers, Verplanck, Yorktown, most of White Plains.
+# Skipped on purpose: name-list war memorials and honor rolls, Walk of Fame person plaques, NRHP-plaque-only markers,
+#   things gone with nothing to see, generic welcome panels.
+# CUT — already served with the same story (read 2026-10-26 through all 48 tiles, all warm, + the app's anon gem query):
+#   Highland Cottage (wiki, 21 m) · Pelhamdale (wiki, 33 m) · Daniel D. Tompkins Birthplace (OSM, 10 m, carries the
+#   marker's text) · Wayside Inn (→ Wayside Cottage, wiki, 42 m) · André Captors Monument (OSM, 1 m, marker text) ·
+#   Thomas Paine farm marker (→ Thomas Paine Monument 28 m / Cottage 42 m) · Philipsburg Manor, Old Dutch Church,
+#   Sleepy Hollow Cemetery (all served) · Dale Cemetery graves of Franz Boas, John T. Hoffman, Chester "Red" Hoff
+#   (already live grave pins).
+# HELD — not in this file: their target is a HIDDEN live OSM pin (handoff §6 (y)), which this tool cannot see, so a
+#   story line would plant a second pin beside it. They need a curated row by SQL (part 3):
+#   Gen. Howe's Headquarters (m310589) → hidden "Sir William Howe Headquarters" (osm_node8184514271, 5 m)
+#   Battle Park, White Plains (m8310) → hidden "Battle of White Plains Park" (osm_way651415881, 32 m)
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# A name differs from the marker title only where the title isn't a place name; each such line is marked.
+# `| new` is set on every line within 400 m of a live pin or another line (DuPage lesson (1)), EXCEPT the four lines
+#   named to a Wikipedia article's exact title — they must stay matchable so they seed under the article (#425).
+# RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-26) — no -cold file.
+# SANDBOX DRY RUN (Gemini stubbed, handoff §5 (x); live map, submissions and Wikipedia arms real), 2026-10-26:
+#   21 new-seed · 0 review · 0 held · 21 curated rows staged · Wikipedia calls 21, failed 0. Four lines read
+#   "↳ seeded under its Wikipedia article" — Pelham Memorial High School (31 m), Christ Episcopal Church (Tarrytown,
+#   New York) (18 m), Reformed Church of the Tarrytowns (20 m), Battle of Young's House (17 m) — as intended.
+#   EXPECT on the Mac: the same 21 / 0 / 0, and #439 "21 to insert, 0 skipped, 0 replaced". Any difference is a stop.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+
+# --- Ossining (village) ---
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester-2.txt
+Careswell | @41.15928333,-73.86074167 | Built in 1835 in the Greek Revival style, this house was the home of General Aaron Ward, a War of 1812 veteran who later served in Congress. | https://www.hmdb.org/m.asp?m=193213 | new
+Ossining High School | @41.16045467,-73.8608912 | Designed by architect James Gamble Rogers and opened in 1929, the school has a tower rising three storeys above the main building that was the highest point in the village when built. | https://www.hmdb.org/m.asp?m=193216 | new
+Ossining United Methodist Church | @41.15884296,-73.8607651 | Built around 1889 of the local snowflake marble, this church has windows designed by Tiffany and by J. R. Lamb. | https://www.hmdb.org/m.asp?m=193164 | new
+The Crescent | @41.162125,-73.86164167 | Ossining's upper Main Street is called the Crescent for the half-moon curve it makes on its way down from the Albany Post Road. | https://www.hmdb.org/m.asp?m=193186 | new
+# also covers "Union Hotel" (m34686, 5 m) — the NYS marker for the same corner.
+Cynthard Building | @41.16086111,-73.86125278 | The Union Hotel, the village's stagecoach stop on the turnpike between New York and Albany, stood on this corner from about 1800 until about 1890. | https://www.hmdb.org/m.asp?m=193191 | new
+
+# --- Ossining, Dale Cemetery ---
+# also covers "Sing Sing Marble" (m259166, 4 m) — the entrance columns. Its graves of Franz Boas, John T. Hoffman, Red Hoff, Aaron Ward and Fox Conner are already live grave pins (93–200 m).
+Dale Cemetery | @41.17158889,-73.85716111 | Sing Sing's citizens bought this ground around 1850 for a park-like rural cemetery laid out by architect Howard Daniels, who also designed the 30-foot marble columns at its gate. | https://www.hmdb.org/m.asp?m=259168 | new
+# Dale Cemetery Heritage Trail stop 33; 18 m from live Grave of Franz Boas (a different person), so new.
+Grave of Elijah Hunter | @41.17114722,-73.85622222 | Elijah Hunter, buried here, served as a captain in the Revolutionary War and as a spy known by the single letter H. | https://www.hmdb.org/m.asp?m=259157 | new
+# Dale Cemetery Heritage Trail stop 8.
+Grave of George Borup | @41.17283056,-73.85410278 | Ossining-born George Borup, buried here, was a member of Robert Peary's expedition to the North Pole. | https://www.hmdb.org/m.asp?m=258964 | new
+# Dale Cemetery Heritage Trail stop 3; 13 m from the Sonny Sharrock line (a different person).
+Grave of Henry Gourdine | @41.17485833,-73.85584444 | Henry Gourdine, who grew up on Croton Point and became known as the dean of Hudson River fishermen, is buried here. | https://www.hmdb.org/m.asp?m=258938 | new
+# Dale Cemetery Heritage Trail stop 5.
+Grave of Sonny Sharrock | @41.17496944,-73.85572778 | Ossining native Sonny Sharrock, buried here, did not take up an instrument until he was 19 and came to be called the father of free jazz guitar. | https://www.hmdb.org/m.asp?m=258953 | new
+
+# --- Pelham / Pelham Manor ---
+# name: marker title "Colonel Philip Pell" — named to the Wikipedia article's exact title (31 m off; not in any stored tile, not a hidden pin), so it seeds under the article (#425).
+Pelham Memorial High School | @40.902785,-73.811595 | The school's grounds were once part of the farm of Colonel Philip Pell, judge advocate of the Continental Army and later a member of the New York State Assembly. | https://www.hmdb.org/m.asp?m=32023
+# name: marker title "Battle of Pelham" — the battle has its own article, not here; this line is the marker.
+Battle of Pelham Memorial | @40.889718,-73.81064 | Placed for the battle's bicentennial, this marker honours Colonel John Glover's 750 Continentals, whose stand on October 18, 1776 delayed the British advance. | https://www.hmdb.org/m.asp?m=310796
+
+# --- Sleepy Hollow / Tarrytown ---
+# name: marker title "Cold Spring" (a duplicate entry, m237037, sits 16 m off).
+Frémont Memorial Spring | @41.100141,-73.861159 | This spring memorial, erected in 1913, honours the explorer John C. Frémont, the Pathfinder, who once lived in Sleepy Hollow. | https://www.hmdb.org/m.asp?m=47308 | new
+# name: marker title "The Headless Horseman Bridge" — the bridge is gone.
+Site of the Headless Horseman Bridge | @41.089721,-73.861839 | The bridge Washington Irving wrote into The Legend of Sleepy Hollow once crossed the stream at this spot. | https://www.hmdb.org/m.asp?m=8616 | new
+Memorial Church of Washington Irving | @41.0826,-73.8587 | Built in 1868 as St. Mark's Episcopal Church, the memorial church to Washington Irving, this building has been the Roman Catholic Church of the Immaculate Conception since 1957. | https://www.hmdb.org/m.asp?m=37407 | new
+Action at Tarrytown | @41.075898,-73.864634 | A tablet put up in 1899 marks the skirmish fought near here on July 15, 1781, and the bravery of Colonel Sheldon and Captain Hurlbut. | https://www.hmdb.org/m.asp?m=8612 | new
+Asbury M. E. Church | @41.07555556,-73.86055556 | The itinerant preacher John Barnet Matthias founded this Methodist congregation in 1796, and the present building went up in 1837. | https://www.hmdb.org/m.asp?m=34651 | new
+# name: marker title "Christ Church" — named to the Wikipedia article's exact title (18 m off; not in any stored tile).
+Christ Episcopal Church (Tarrytown, New York) | @41.074857,-73.858991 | Washington Irving served as vestryman and warden of this 1837 church, and its ivy was grown from cuttings of the vine at his home, Sunnyside. | https://www.hmdb.org/m.asp?m=8709
+# name: marker title "Second Reformed Church" — the article (20 m off; not in any stored tile) is the same 1837 building.
+Reformed Church of the Tarrytowns | @41.077494,-73.857648 | Built in 1837 as the south church of the Old Dutch Church of Sleepy Hollow, this congregation became a church of its own in 1851. | https://www.hmdb.org/m.asp?m=8708
+
+# --- Valhalla ---
+# name: marker title "Battle of Young's House Memorial" — named to the Wikipedia article's exact title (17 m off; not in any stored tile).
+Battle of Young's House | @41.07428889,-73.802625 | Continental soldiers who fell defending Young's Corners on February 3, 1780 lie buried here on the field, together with several of their opponents. | https://www.hmdb.org/m.asp?m=284565
+
+# --- Yonkers ---
+Mile Square Road | @40.918591,-73.847945 | This colonial road from Eastchester to White Plains carried American troops on their way to the Battle of White Plains in October 1776. | https://www.hmdb.org/m.asp?m=136864
