@@ -1,0 +1,85 @@
+# names-532-bergen-westchester-6.txt — #532 Bergen-Westchester story pass 2, PART 4b-2 (story lines, 2026-10-27)
+# Source: Historical Marker Database, Bergen County, towns Montvale → Wyckoff (N–Z, plus Montvale), read through the
+#   county list in the shape results.asp?Search=County&FilterState=New+Jersey&County=Bergen+County&Page=N (surfaced by an
+#   extended web search), each page's heading and entry range checked before use:
+#   (a) page 3, "Entries 201 through 300" of 435 — read to 294 (Montvale 248 → Oradell 294).
+#   (b) page 4, "Entries 301 through 400" of 435 — read to 395 (Paramus → Saddle River).
+#   (c) page 5, "The final 35", entries 401–435 (Teaneck's last entry → Wyckoff), whole.
+#   (d) Paramus town list, 18 entries, whole — covers 295–300 (296 Dunkerhook Road, 297 George Washington Kneeling in
+#       Prayer, 298 a war tablet, 299 Jacob J. Zabriskie House, 300 Old Spring Valley Burial Ground; 295 is Palisades
+#       Park's Comfort Women memorial, outside the box, seen in a search excerpt).
+#   (e) Teaneck town list, 5 entries, whole — covers 397–401.
+#   NOT READ: entry 396 (one Saddle River entry; no town list surfaced). Everything else in the county list is now read.
+# In the box (lat 40.875–41.175, lng −74.175 to −73.775). OUT: North Arlington, Ridgefield, Ridgefield Park, Rutherford,
+#   Teterboro, Wallington, Wood-Ridge (all south of 40.875); Oakland and Wyckoff's Van Voorhees–Quackenbush–Zabriskie
+#   House (west of −74.175).
+# BCHS 94–100 (handoff §6 lesson, roadmap #532): every Bergen County Historical Society marker in these towns was checked
+#   against the served map by its own coordinate, whatever its series number — pass 1's BCHS gems already serve almost
+#   all of them (at 0 m). Every BCHS-series marker in N–Z is now accounted for: served, or a line below.
+# Skipped on purpose: war memorials, honor rolls, 9/11 memorials and person plaques (Hosking, Godwin, Mulhare, Bellon,
+#   Lester, Springstead, Clinton and Gore), town and borough signs (Paramus, Oradell, Rockleigh, Borough of River Edge,
+#   Maywood), roads (Dunkerhook Road, Historic Glen Avenue, Piermont Road, Rockleigh Road), interpretive panels (Van
+#   Buskirk Island, Brett Park, Cattails = Clay, Flax for Linen, Camp Kitchen, the Baylor Massacre trail panels, New
+#   Bridge timeline), things gone with nothing to see (Hagler's Diner, Red Mill, Bogert's Mill, the Old Block House),
+#   thin sites (Lutheran Church Site and Cemetery in Teaneck — one line of text and no article; British & Hessian
+#   Invasion; "Near this House of God").
+# CUT — already served (read 2026-10-27: all 48 tiles warm, 668 unique map pins; 484 approved gems/seeds; 1,548 unique
+#   stored pins):
+#   pass 1 BCHS gems at 0–81 m — Octagon House, Demarest-Bloomer House, Jacobus Demarest Homestead, New Bridge Inn, New
+#   Bridge, Peter A. Blauvelt House, Claudius O. Collignon House, Haring-DeWolf House, John Haring, Jr. House, Teunis
+#   Haring House, Stone Point, Soldier Hill, Jacob J. Zabriskie House, Old Spring Valley Burial Ground, Rutan-Terhune-
+#   Bidwell House, Stephen T. Zabriskie House, Terhune-Gardner House, Terhune-Van Dien House, Washington Spring,
+#   Ackerson Homestead, Atkins Glen, Pascack Historical Society Museum, Pascack Reformed Church, Beech Street School,
+#   Campbell–Christie House, Jacob Concklin House, Joseph Dubois House, Ackerman House (Saddle River), Ackerman-Pell
+#   House, Brinkerhoff–Demarest House, Revolutionary War Encampment – 1780, Everett-Dunn House, Westervelt House,
+#   Christie-Parsels House, Tenafly station, Slave Cemetery, John C. Stagg House, Reformed Dutch Church of Wyckoff,
+#   Midland School (One-Room Schoolhouse), Site of the French Church and Cemetery (the French Burying Ground marker,
+#   203 m — same burial ground), Zabriskie-Steuben House (The Steuben House) ·
+#   Wikipedia pins — Eckerson House (15 m), Haring–DeWolf House, New Milford Plant of the Hackensack Water Company (the
+#   water-works panels, 119 m), Thunise & Richard Cooper House (Richard T. Cooper House, 50 m), Van Buskirk-Oakley House
+#   (72 m), Wortendyke Barn and its three panels (22 m), David Van Gelder House (88 m), Van Dien House (38 m), Baylor
+#   Massacre (the park and the gravesite, 18–82 m), William Holdrum House (94 m), Abraham A. Haring House (116 m),
+#   Nicholas Haring House (= the John A. Haring House by its own lead, 39 m), Seven Chimneys (69 m), Hopper–Goetschius
+#   House (40 m), New North Reformed Low Dutch Church (Saddle River Reformed Church, 19 m), Peter P. Post House (served
+#   ~1 km off, as #500 recorded) ·
+#   OSM pins with a story — Easton Tower (3 m; Red Mill's site, 80 m), Sluckup (10 m), Old Stone House (Ramsey, 39 m),
+#   Archibald-Vroom House (13 m), Erie Railroad Signal Tower, Waldwick Yard (12 m), Waldwick's station museum (4 m).
+# HIDDEN-PIN TARGETS — no line; each gets a curated row by SQL instead (532_hidden_curated_3.sql, handoff §6 (y)):
+#   Schoolhouse Museum (marker m24985) → hidden OSM "School House Museum" (osm_node736950265, 30 m);
+#   Carriage House and Stables (m143637) → hidden OSM "Hiram Bauvelt Wildlife Art Museum" (osm_way667891619, 63 m).
+# Not hidden-pin targets: Demarest House sits 7 m from the hidden "Historic New Bridge Landing" pin — the park, a
+#   different subject (4b-1's Veteran's Park case).
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text (and,
+#   where named, the article) | marker URL
+# Names that differ from the marker title: Demarest House (River Edge, New Jersey) (marker "Old Demarest House"; the
+#   article of that title sits 2 m away and is in no tile, so the line takes its exact title), Ridgewood station (marker
+#   "Ridgewood Station"; same, article 42 m), USS Enterprise (CV-6) Stern Plate (as titled).
+# `| new` is set on every line within 400 m of a live pin, another line, a gem or a near-named article (DuPage lesson
+#   (1)): George Washington Kneeling in Prayer (Terhune–Gardner–Lindenmeyr House 125 m, the Terhune-Gardner gem 151 m),
+#   Old Paramus Reformed Church (the Historic District article, a LARGER place, 189 m), Demarest House (Zabriskie-Steuben
+#   gem 64 m, New Bridge 108 m, Campbell–Christie 119 m).
+# RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-27) — no -cold file.
+# SANDBOX DRY RUN (Gemini stubbed, handoff §6 (x), DENO_TLS_CA_STORE=system; live map, submissions and Wikipedia arms
+#   real), 2026-10-27: 7 new-seed · 0 review · 0 held · 7 curated rows staged (titles = the 7 line names) · 1 seeded
+#   under an article title (Ridgewood station — same name, moved to the article's coordinate, 42 m from the marker;
+#   intended) · Wikipedia calls 7, failed 0.
+#   EXPECT on the Mac: the same 7 / 0 / 0, the same one ↳ line, and #439 "7 to insert, 0 skipped, 0 replaced". Any
+#   difference is a stop — in particular a Gemini `match` on an unflagged line, or any `story-attached` / REPLACED.
+# Run on seed-resolve 2026.10.27a (#537) or later — the `| new` story lines above are exactly the case #537 fixed.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester-6.txt
+
+# --- New Milford / River Edge (New Bridge) ---
+Demarest House (River Edge, New Jersey) | @40.913105,-74.031125 | Long thought to have been built for Samuel des Marest around 1679, this stone house stood in New Milford until Hiram B. D. Blauvelt had it moved here in 1955. | https://www.hmdb.org/m.asp?m=51304 | new
+
+# --- Paramus ---
+George Washington Kneeling in Prayer | @40.941793,-74.091732 | Donald De Lue's statue of Washington at prayer was put up in 1989 to mark fifty years of George Washington Memorial Park, the cemetery founded here in 1939. | https://www.hmdb.org/m.asp?m=32427 | new
+
+# --- Ridgewood ---
+Old Paramus Reformed Church | @40.98527,-74.092006 | Dutch settlers organized this congregation in 1725 and built their first church in 1735 on land given by the Huguenot Peter Fauconier; Washington's army camped beside it in 1778. | https://www.hmdb.org/m.asp?m=24983 | new
+Joseph H. Chapman Summer Residence | @40.98429,-74.130689 | Built about 1869 in the late Italianate style, this was the summer home of Wall Street insurance agent Joseph H. Chapman in Ridgewood Park, a development laid out by investors in 1868. | https://www.hmdb.org/m.asp?m=24986
+Ridgewood station | @40.981014,-74.120675 | Engineers W. W. Drinker and Frank A. Howard designed this 1916 station, a rare New Jersey example of the Mission Revival style that began in California in the 1890s. | https://www.hmdb.org/m.asp?m=108051
+
+# --- River Vale ---
+Blauvelt-Seaman House | @41.02915,-74.00883 | Blacksmith David C. Blauvelt built this house around 1828 on a 37-acre farm in the old Overkill Neighborhood, and his son John bought the homestead in 1842. | https://www.hmdb.org/m.asp?m=7943
+USS Enterprise (CV-6) Stern Plate | @41.00843295,-74.00943428 | Henry Hoffman, the engineer who oversaw the scrapping of the carrier USS Enterprise in 1958–60, saved this stern plate from the ship, whose 20 battle stars were the most of any World War II vessel. | https://www.hmdb.org/m.asp?m=113980
