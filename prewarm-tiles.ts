@@ -84,7 +84,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.25b"; // 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.27a"; // 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -172,6 +172,17 @@ const METROS: Metro[] = [
   // best extra box (west, 29.79/-95.74, +1.20M, #485). The name omits "New York" for the
   // same substring / submissions.city reason as Queens-Nassau.
   { name: "Bergen-Westchester", lat: 41.0400, lng: -73.9700 },
+  // #501 (2026-10-27): the roster grows 29 → 30 with New York's THIRD extra box, south-west,
+  // in central New Jersey, placed by #482's 2020-census tract check: +1.42M people the New
+  // York, Queens-Nassau and Bergen-Westchester boxes leave out (Middlesex 651k — New
+  // Brunswick, Edison, Woodbridge, Piscataway; Union 449k — Elizabeth, Plainfield, Union,
+  // Westfield; Somerset 234k; Essex 47k; south Staten Island 16k), zero tiles shared with any
+  // roster row (re-checked on the 29-row roster). Any centre in 40.57–40.61 / -74.44–-74.40
+  // gives the same 48 tiles (rows 809–814, columns -1492…-1485); this is the plateau's middle
+  // (#501's step (0) recorded the corner, 40.61/-74.40 — same tiles). A centre 0.1° east
+  // (40.61/-74.30) gains slightly more but shares 6 tiles with New York. The name omits "New
+  // York" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Middlesex-Union", lat: 40.5900, lng: -74.4200 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

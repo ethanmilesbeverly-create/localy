@@ -416,7 +416,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.26a (#533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.27a (#501 — roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10.26a: #533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -496,6 +496,17 @@ const METROS: Metro[] = [
   // best extra box (west, 29.79/-95.74, +1.20M, #485). The name omits "New York" for the
   // same substring / submissions.city reason as Queens-Nassau.
   { name: "Bergen-Westchester", lat: 41.0400, lng: -73.9700 },
+  // #501 (2026-10-27): the roster grows 29 → 30 with New York's THIRD extra box, south-west,
+  // in central New Jersey, placed by #482's 2020-census tract check: +1.42M people the New
+  // York, Queens-Nassau and Bergen-Westchester boxes leave out (Middlesex 651k — New
+  // Brunswick, Edison, Woodbridge, Piscataway; Union 449k — Elizabeth, Plainfield, Union,
+  // Westfield; Somerset 234k; Essex 47k; south Staten Island 16k), zero tiles shared with any
+  // roster row (re-checked on the 29-row roster). Any centre in 40.57–40.61 / -74.44–-74.40
+  // gives the same 48 tiles (rows 809–814, columns -1492…-1485); this is the plateau's middle
+  // (#501's step (0) recorded the corner, 40.61/-74.40 — same tiles). A centre 0.1° east
+  // (40.61/-74.30) gains slightly more but shares 6 tiles with New York. The name omits "New
+  // York" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Middlesex-Union", lat: 40.5900, lng: -74.4200 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode

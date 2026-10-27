@@ -363,6 +363,17 @@ const METROS: Metro[] = [
   // best extra box (west, 29.79/-95.74, +1.20M, #485). The name omits "New York" for the
   // same substring / submissions.city reason as Queens-Nassau.
   { name: "Bergen-Westchester", lat: 41.0400, lng: -73.9700 },
+  // #501 (2026-10-27): the roster grows 29 → 30 with New York's THIRD extra box, south-west,
+  // in central New Jersey, placed by #482's 2020-census tract check: +1.42M people the New
+  // York, Queens-Nassau and Bergen-Westchester boxes leave out (Middlesex 651k — New
+  // Brunswick, Edison, Woodbridge, Piscataway; Union 449k — Elizabeth, Plainfield, Union,
+  // Westfield; Somerset 234k; Essex 47k; south Staten Island 16k), zero tiles shared with any
+  // roster row (re-checked on the 29-row roster). Any centre in 40.57–40.61 / -74.44–-74.40
+  // gives the same 48 tiles (rows 809–814, columns -1492…-1485); this is the plateau's middle
+  // (#501's step (0) recorded the corner, 40.61/-74.40 — same tiles). A centre 0.1° east
+  // (40.61/-74.30) gains slightly more but shares 6 tiles with New York. The name omits "New
+  // York" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Middlesex-Union", lat: 40.5900, lng: -74.4200 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -1131,7 +1142,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-25a (#500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
+const BUILD_MARKER = "gate-tiles 2026-10-27a (#501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.
