@@ -36,6 +36,8 @@
 #   Bridge" — the bridge and river ford are what stands there).
 # `| new` is set on every line within 400 m of a live pin, another line or a hidden pin (DuPage lesson (1)).
 # RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-26) — no -cold file.
+# COMMITTED 2026-10-26: 10 of 11 (seed:reddit +10, curated_descriptions +10); the courthouse line flipped on the commit — see
+#   its HELD note. A re-run must read 10 × `already committed (its own seed)`.
 # SANDBOX DRY RUN (Gemini stubbed, handoff §5 (x), DENO_TLS_CA_STORE=system; live map, submissions and Wikipedia arms
 #   real), 2026-10-26: 11 new-seed · 0 review · 0 held · 11 curated rows staged (titles = the 11 line names) · 0 seeded
 #   under an article title · Wikipedia calls 11, failed 0.
@@ -46,7 +48,10 @@
 #   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester-5.txt
 
 # --- Hackensack ---
-Bergen County Court House | @40.878923,-74.043367 | James Riely Gordon designed this Beaux-Arts courthouse to express the dignity of the law; ground was broken on November 29, 1909. | https://www.hmdb.org/m.asp?m=6869 | new
+# HELD 2026-10-26 — the commit's #429 own-seed check took Gemini's canonicalName ("Site of the Court-House & Jail") as
+#   this line's own seed and wrote this story onto that #500 gem (undone by 532_courthouse_restore.sql). Do NOT re-run
+#   until seed-resolve.ts's #429 check stops comparing canonicalName (new roadmap row); then uncomment and commit alone.
+# Bergen County Court House | @40.878923,-74.043367 | James Riely Gordon designed this Beaux-Arts courthouse to express the dignity of the law; ground was broken on November 29, 1909. | https://www.hmdb.org/m.asp?m=6869 | new
 Bergen County Old Jail | @40.878539,-74.042975 | Built in 1910-12 and restored in 2002-05, the old county jail has a cross-shaped plan, castle-like battlements and a squat octagonal central tower. | https://www.hmdb.org/m.asp?m=62941 | new
 The Green | @40.879163,-74.04421 | John Berry gave this green in 1696; it became the village centre of New Barbadoes Township, and Washington made his headquarters beside it in November 1776. | https://www.hmdb.org/m.asp?m=6867 | new
 Archibald Campbell Family Monument | @40.879369,-74.043126 | Archibald Campbell, born on the Isle of Man, kept the tavern that fed Washington's headquarters in November 1776 and became Hackensack's first postmaster. | https://www.hmdb.org/m.asp?m=62947 | new
