@@ -1,0 +1,63 @@
+# names-532-bergen-westchester-7.txt — #532 Bergen-Westchester story pass 2, PART 4b-3 (story lines, 2026-10-27)
+# Source: Historical Marker Database. Every list page read whole; heading, county and "Entries N through M" checked on each.
+#   PASSAIC COUNTY, 179 entries, two pages, read in the shape results.asp?Search=County&state=New+Jersey&county=Passaic+County&DP=-A
+#     (surfaced by an extended web search) and its own "The final 79" link (…&DP=-A&Page=2, "Entries 101 through 179").
+#     Cross-checked against the Paterson town list (63 entries, whole).
+#   BRONX COUNTY, 381 entries, four pages, read in the inscription-free shape
+#     results.asp?Search=County&State=New+York&DP=-A.O&County=Bronx+County&Page=1 (surfaced by an extended web search) and its
+#     own "Next 100" / "The final 81" links (…&DP=-A.O&Page=2/3/4). Each page about 12k tokens, coordinates included.
+#   NOTHING UNREAD in either county. Marble Hill (New York County, 40.876–40.879) sits inside the box but in Manhattan's
+#     2,310-entry list; it was not mined (two markers seen: The Wading Place / Kings Bridge / Fort Prince Charles, m172530,
+#     and Carolina Baptist Church, m226346).
+# In the box (tiles 818–823 × −1483…−1476: lat 40.875–41.175, lng −74.175 to −73.775).
+#   OUT, Passaic: Great Falls / S.U.M. cluster, Hinchliffe Stadium, Rogers Works, Columbus Monument, Federici Park, Lou's On
+#     First (all west of −74.175); Haledon, Clifton, Passaic, Totowa, Wayne, Woodland Park, Pompton Lakes, Ringwood, West
+#     Milford, Bloomingdale. Garret Mountain Reservation is SKIPPED, not cut: its marker is in the box but the park's own
+#     article sits at 40.9006, −74.1778, west of the edge — seeding it at the marker would stand a second pin beside the
+#     article pin tile 818_-1484 serves when it is built.
+#   OUT, Bronx: everything south of 40.875 (Fort Number Four and the Olmec Head miss by ~130 m; Bartow-Pell and Glover's Rock).
+# Skipped on purpose: war memorials and honor rolls (Paterson's Pennington Park memorials, Passaic County Soldiers and
+#   Sailors Monument, Hawthorne's three, Memorial Grove), person plaques (Abraham Godwin, Charles Curie, Robert Dix Benson,
+#   Bishop McLaughlin, William J. Bate, Algernon Sydney Sullivan, Josiah Porter, Major General Porter, Pulaski), parks-sign
+#   and playground panels (Marble Hill Playground, Marcus Garvey Square, Van Cortlandt Stadium, Van Cortlandt Park,
+#   Vinmont Veteran Park, Henry Hudson Park, Anniversary of Manhattan College, Marie V. McGovern Plaza), interpretive
+#   panels (Watchung Ridge, The Empire State Trail), roads (The York Road — also served), things gone with nothing to see
+#   (Simeon Van Winkle's house and ford, Site of John George Ryerson House, Site of the Redoubt), a part of a larger place
+#   (The Hinchcliffe Altar Piece, inside the cathedral below).
+# CUT — already served (read 2026-10-27: all 48 tiles warm, 670 unique map pins; 428 approved gems/seeds; 1,548 unique
+#   stored pins): The Dublin Spring Water Boy (OSM, 2 m, with the marker's story), The York Road (OSM, 3 m), Seton Falls
+#   Park (OSM, 155 m), Riverdale Presbyterian Church (wiki *Riverdale Presbyterian Church Complex*, 36 m), Vinmont Veteran
+#   Park (wiki, 23 m), Valentine-Varian House (OSM *Museum of Bronx History*, 15 m, with the house's article), Williamsbridge
+#   Oval (OSM, 145 m), Grand Central Stones (OSM, 21 m), David Glasgow Farragut (wiki *Admiral David Glasgow Farragut
+#   Gravesite*, 204 m — the marker is the grave's own).
+# The Van Cortlandt House cluster (Van Cortlandt Mansion, Cortlandt House, Van Cortlandt House Museum ×2, Adoption of the
+#   Constitution, Prison Window) is ONE line under the article title; Kingsbridge Burial Ground shares its point with the
+#   Enslaved African Burial Ground marker and rides in that line's story.
+# Articles that no tile serves (each tile keeps only its 20 nearest articles): Passaic County Court House, Cathedral of
+#   St. John the Baptist (Paterson, New Jersey), Van Cortlandt House — checked as not-hidden (no stored pin of the name in
+#   any of the 48 tiles) and seeded under the article's exact title (handoff §6 story-lines (w)).
+# HIDDEN-PIN ROWS (handoff §6 story-lines (y)) are NOT here — see 532_hidden_curated_4.sql (Eastside Park, Fort
+#   Independence Park).
+# WRONG STORY ON A LIVE PIN: OSM *Henry Hudson Monument* (osm_node2520341952) serves the Riverdale Monument bell tower's
+#   article, a different memorial ~1 km north. The line below attaches the monument's own story to that pin by its exact
+#   name and coordinate (#419 curated wins).
+# Lines flagged `| new`: the Custom House (54 m from the Court House article), Lambert Tower (159 m from Lambert Castle,
+#   one shared word), the Bronx River Soldier (21 m from the Museum of Bronx History pin — the statue, not the house).
+# Expect (sandbox SIM run): 11 new-seed (3 of them ↳ under the article title) + 1 story-attached (Henry Hudson Monument);
+#   0 review, 0 held.
+
+# --- Paterson (Passaic County) ---
+Passaic County Court House | @40.91384388,-74.1713959 | Samuel Burrage Reed won a public design competition for this Italian Renaissance Revival courthouse, built in 1904 on what had been the estate of Roswell L. Colt. | https://www.hmdb.org/m.asp?m=136722
+Cathedral of St. John the Baptist (Paterson, New Jersey) | @40.91259967,-74.17244149 | The parish began in 1820 at Mill and Market Streets, on land Roswell Colt gave from the Society for Useful Manufactures; as Irish mill hands filled the city it moved here, and it is now the seat of the Diocese of Paterson. | https://www.hmdb.org/m.asp?m=229333
+United States Custom House & Post Office | @40.91418333,-74.17161667 | Finished in 1899 after more than ten years of work, Paterson's old customs house and post office is a rare American example of the Flemish Renaissance Revival style. | https://www.hmdb.org/m.asp?m=291207 | new
+Lambert Tower | @40.90010833,-74.17466944 | Silk manufacturer Catholina Lambert built this seventy-foot lookout tower on Garret Mountain in 1896, styled like the British castles of his boyhood, as was his house below. | https://www.hmdb.org/m.asp?m=194029 | new
+
+# --- North Bronx ---
+Lou Gehrig House | @40.89981389,-73.90548611 | The Yankees' "Iron Horse," who played 2,130 games in a row, made this Delafield Avenue house his last home, living here from 1939 until his death in 1941. | https://www.hmdb.org/m.asp?m=193301
+Site of the Colored Orphan Asylum | @40.91046389,-73.90735 | After her mother died in 1932, a teenage Ella Fitzgerald was sent to the orphanage that stood here and first sang in its children's choir; two years later she won the Apollo's Amateur Night. | https://www.hmdb.org/m.asp?m=304281
+Vault Hill | @40.89608333,-73.89221944 | The Van Cortlandt family vault crowns this ridge; in August 1776 City Clerk Augustus Van Cortlandt hid New York's municipal records inside it to keep them from the British. | https://www.hmdb.org/m.asp?m=278474
+Van Cortlandt House | @40.89136944,-73.89488333 | Completed in 1749 by Frederick Van Cortlandt, this fieldstone Georgian house is the oldest surviving house in the Bronx; British and American troops each occupied it during the Revolution. | https://en.wikipedia.org/wiki/Van_Cortlandt_House
+Enslaved African Burial Ground | @40.89030833,-73.89296667 | Enslaved Africans who worked the Van Cortlandt plantation for more than a century were buried here beside the 17th-century Kingsbridge Burial Ground; a 2019 radar survey found coffin-shaped forms underground. | https://www.hmdb.org/m.asp?m=278477
+Bronx River Soldier | @40.877562,-73.87949261 | John Grignola carved this granite Union soldier for Woodlawn Cemetery, but it stood for decades on a pier in the Bronx River instead, was toppled into the water in 1964, and was fished out and set here in 1970. | https://www.hmdb.org/m.asp?m=275751 | new
+Site of the King's Bridge | @40.87673561,-73.90736065 | Within 600 feet of here the King's Bridge crossed Spuyten Duyvil Creek from 1693 until the creek was filled in 1913; both armies marched over it in the Revolution, and Washington rested here in June 1775. | https://www.hmdb.org/m.asp?m=172740
+Henry Hudson Monument | @40.8823543,-73.918364 | Walter Cook's 100-foot Doric column went up in 1912 for the Hudson-Fulton celebration, but the money ran out and sculptor Karl Bitter died in 1915, so the bronze Hudson on top was not dedicated until 1938. | https://en.wikipedia.org/wiki/Henry_Hudson_Park
