@@ -62,7 +62,7 @@
 // Config (all overridable by env; safe Chicago-pilot defaults).
 // ---------------------------------------------------------------------------
 // Printed at start so a Codespace run can confirm it is on the build delivered.
-const TOOL_VERSION = "seed-resolve 2026.10.04a (#506 every fetch has a timeout — a stalled connection holds or retries instead of hanging the run; carries #499 #495 #429 #434 #439 #441)";
+const TOOL_VERSION = "seed-resolve 2026.10.27a (#537 a `new` story line is its own seed only under its own name — Gemini's canonicalName can no longer aim its story at a differently named seed; carries #506 #499 #495 #429 #434 #439 #441)";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 // #499 (2026-10-02): fallback 3.1 → 3.5 so offline mining runs the same model as the
 // live gate and nearby-places (the Supabase secret GEMINI_MODEL, re-pinned in #496).
@@ -1233,10 +1233,33 @@ async function run() {
     // story re-attaches to its own seed (same story, a harmless rewrite) instead
     // of inserting the pin a second time. The marker still overrides a match to a
     // DIFFERENTLY named pin, which is what it is for (#422).
+    // #537 — WHICH NAME IS "ITS OWN". A `new` STORY line is always seeded under
+    // its own display name (`candidate`, see pinName below), so its own seed is
+    // found by that name ONLY. Gemini's canonicalName is free text that changes
+    // run to run; matching on it let a `new` line read as "already committed"
+    // against a DIFFERENT seed within 90 m, and --commit (which re-judges every
+    // line) PATCHed that seed's story — Bergen County Court House overwrote the
+    // #500 gem "Site of the Court-House & Jail" (#532 part 4b-1). A BARE `new`
+    // line (no story) is seeded under canonicalName, so it keeps that arm: there a
+    // wrong match can only skip the pin (reported), never overwrite a story.
+    const ownNames = line.story ? [candidate] : [candidate, verdict.canonicalName];
     const ownSeed = line.forceNew && verdict.decision !== "held"
-      ? existing.find((e) => e.source === "submission" && [candidate, verdict.canonicalName].some((n) => key(n) === key(e.name)))
+      ? existing.find((e) => e.source === "submission" && ownNames.some((n) => key(n) === key(e.name)))
       : undefined;
+    if (line.forceNew && line.story && !ownSeed && verdict.decision !== "held" && verdict.canonicalName) {
+      const lookalike = existing.find((e) => e.source === "submission" && key(e.name) === key(verdict.canonicalName) && key(e.name) !== key(candidate));
+      if (lookalike) console.log(`    (#537: Gemini named this "${verdict.canonicalName}", the name of nearby seed "${lookalike.name}" — NOT treated as this line's own seed; that seed's story is left alone)`);
+    }
     if (ownSeed) {
+      // #537 BACKSTOP — a `new` story line may rewrite only a seed carrying its
+      // own name. Unreachable with ownNames above; kept so a future edit to the
+      // match can't silently bring the overwrite back.
+      if (line.story && key(ownSeed.name) !== key(candidate)) {
+        report.push({ ...base, outcome: "review", why: `#537 guard: \`new\` story line matched seed "${ownSeed.name}" under a different name — nothing written` });
+        console.log(`  ? ${candidate} → REVIEW: #537 guard — \`new\` story line matched seed "${ownSeed.name}" under a different name; its story was NOT attached`);
+        await sleep(7000);
+        continue;
+      }
       if (line.story && ownSeed.seed) seedPatches.push({ name: ownSeed.name, lat: ownSeed.lat, lng: ownSeed.lng, story: line.story });
       report.push({
         candidate, geo, locate: line.locate || null, story: line.story || null, verdict, arms: near.arms,
