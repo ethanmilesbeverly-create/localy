@@ -1,0 +1,67 @@
+# names-532-bergen-westchester-5.txt — #532 Bergen-Westchester story pass 2, PART 4b-1 (story lines, 2026-10-26)
+# Source: Historical Marker Database, Bergen County, towns Fort Lee → Midland Park (A–M after page 1), read three ways,
+#   each page's heading and entry range checked before use:
+#   (a) Hackensack town list, 46 entries, whole (opened from m108424's "Touch for a list").
+#   (b) Mahwah town list, 17 entries, whole (opened from m43905).
+#   (c) Bergen county list in the shape results.asp?Search=County&HistMark=Y&WarMem=Y&County=Bergen+County&State=New+Jersey
+#       &Page=3 (surfaced by a web search) — "Entries 201 through 300" of 435, read to 294; and its "Previous 100" link,
+#       results.asp?County=Bergen%20County&HistMark=Y&Page=2 — "Entries 101 through 200" of 398 (markers only, so its
+#       numbering differs). Together: Fort Lee's tail, Franklin Lakes, Garfield, Glen Rock, Hackensack, Harrington Park,
+#       Hasbrouck Heights, Haworth, Hillsdale, Ho-Ho-Kus, Leonia, Little Ferry, Lyndhurst, Mahwah, Maywood, Midland Park.
+#       Page 3 also runs on through Montvale, New Milford, North Arlington, Norwood, Oakland, Old Tappan, Oradell — left
+#       for part 4b-2.
+# In the box (lat 40.875–41.175, lng −74.175 to −73.775). OUT: Fort Lee, Leonia, Little Ferry, Lyndhurst, Hasbrouck
+#   Heights (all south of 40.875); Franklin Lakes and Mahwah's Ramapo Valley markers (Darling, Darlington, Dellbrook,
+#   Cleveland Bridge, Winter Farmhouse, Ramapo Valley Road — all west of −74.175); Hackensack's John I. Hopper House and
+#   Revolutionary War Cemetery (just south).
+# Skipped on purpose: memorial plaques on Hackensack's Green (Armenian Genocide, Comfort Women, Great Hunger, Holocaust,
+#   Slavery, Huguenots), honor rolls and pastor/founder lists, war memorials, the derelict Ling museum's missing displays,
+#   things gone with nothing to see (Campbell's Tavern, Mansion House, First House, Hopper Gristmill, Haworth's water
+#   tower, Rosencrantz mills), photo panels at the Hermitage, person plaques at served places (Theodosia Bartow Prevost,
+#   Henry J. Werner), roads (Schraalenburgh Road, Passaic Street), thin sites (Garfield's Post Ford, Washington's March),
+#   the Mahwah Tree of Life and Wanamaker Utility Shed.
+# CUT — already served (read 2026-10-26: all 48 tiles, 668 unique map pins; 410 approved gems/seeds; 2,411 stored pins):
+#   most of the BCHS-series houses (pass 1 gems at 0 m) · Grave of Enoch Poor, Grave of Richard Varick, New Hope Baptist
+#   Church, Site of the Court-House & Jail, First Reformed Church of Hackensack (gems) · Zabriskie-Christie House (wiki
+#   Garret Zabriskie House, 73 m) · Capt. John H. Banta Homestead (wiki John Banta House, 75 m) · Lozier House (wiki
+#   Lozier House and Van Riper Mill, 129 m) · Maywood Station (OSM + wiki Maywood Station Museum, 16 m) · The Hermitage
+#   (OSM 12 m) · Glen Rock (wiki Glen Rock (boulder), 8 m) · Ramapo Reformed Church (wiki Dutch Reformed Church at
+#   Romopock, 20 m) · Mahwah's First Station (gem, 0 m) · U.S.S. Ling (OSM).
+# No hidden-pin targets (handoff §6 story-lines (y)): no stored-but-hidden pin within 150 m of any line names its subject.
+#   The bell and the police booth sit 16 m / 49 m from hidden "Veteran's Park" pins — the park, a different subject.
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# Names that differ from the marker title: Bergen County Court House (marker "Bergen County Court House / Bergen County
+#   Old Jail"; the article "Bergen County Court House" is 96 m off and in no tile, so this seeds under the line's own name),
+#   USS Lang Bell (marker "This Bell"), Ramapo Valley Road Bridge (marker "American Brake Shoe Foundry & Ramapo Valley Road
+#   Bridge" — the bridge and river ford are what stands there).
+# `| new` is set on every line within 400 m of a live pin, another line or a hidden pin (DuPage lesson (1)).
+# RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-26) — no -cold file.
+# SANDBOX DRY RUN (Gemini stubbed, handoff §5 (x), DENO_TLS_CA_STORE=system; live map, submissions and Wikipedia arms
+#   real), 2026-10-26: 11 new-seed · 0 review · 0 held · 11 curated rows staged (titles = the 11 line names) · 0 seeded
+#   under an article title · Wikipedia calls 11, failed 0.
+#   EXPECT on the Mac: the same 11 / 0 / 0, and #439 "11 to insert, 0 skipped, 0 replaced". Any difference is a stop —
+#   in particular a Gemini `match` on the four Hackensack lines (each sits 29–64 m from the First Reformed Church gem;
+#   all four are flagged `new`, so the same-place check is skipped and they should seed as their own pins).
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester-5.txt
+
+# --- Hackensack ---
+Bergen County Court House | @40.878923,-74.043367 | James Riely Gordon designed this Beaux-Arts courthouse to express the dignity of the law; ground was broken on November 29, 1909. | https://www.hmdb.org/m.asp?m=6869 | new
+Bergen County Old Jail | @40.878539,-74.042975 | Built in 1910-12 and restored in 2002-05, the old county jail has a cross-shaped plan, castle-like battlements and a squat octagonal central tower. | https://www.hmdb.org/m.asp?m=62941 | new
+The Green | @40.879163,-74.04421 | John Berry gave this green in 1696; it became the village centre of New Barbadoes Township, and Washington made his headquarters beside it in November 1776. | https://www.hmdb.org/m.asp?m=6867 | new
+Archibald Campbell Family Monument | @40.879369,-74.043126 | Archibald Campbell, born on the Isle of Man, kept the tavern that fed Washington's headquarters in November 1776 and became Hackensack's first postmaster. | https://www.hmdb.org/m.asp?m=62947 | new
+
+# --- Mahwah ---
+The Ackerman House | @41.030224,-74.168293 | This 19th-century farmhouse was home to Garret G. Ackerman until 1870, when he was killed after being thrown from his wagon on today's Fardale Avenue. | https://www.hmdb.org/m.asp?m=27051
+Ramapo Valley Road Bridge | @41.103342,-74.150878 | On August 25, 1781, Rochambeau's army, marching 600 miles toward Yorktown, had to ford the Ramapo River here because the old bridge was in poor shape. | https://www.hmdb.org/m.asp?m=165837
+Old Lutheran Cemetery | @41.091093,-74.15316 | Eleven German Palatine families settled here in 1713 under Pastor Justus Falckner and built a log church near this burying ground around 1720. | https://www.hmdb.org/m.asp?m=13359
+The Valentine Homestead | @41.031663,-74.15312 | The Valentines, a family of carpenters and house builders, put up the main block of this house around 1820, with a Greek Revival doorway. | https://www.hmdb.org/m.asp?m=27054 | new
+
+# --- Glen Rock ---
+USS Lang Bell | @40.96172658,-74.13365538 | The Navy gave Glen Rock this bell in December 1954; it came from the destroyer USS Lang (DD-399), a veteran of ten World War II operations. | https://www.hmdb.org/m.asp?m=209463 | new
+
+# --- Harrington Park ---
+The Perry Cemetery | @40.97926111,-73.99108611 | Farmer David Perry's 1868 will set aside a 40-foot-square burying ground west of his house for his children and their families. | https://www.hmdb.org/m.asp?m=241777
+
+# --- Hillsdale ---
+Hillsdale Police Booth | @41.00283333,-74.04073333 | John Henry Olley built this little police booth in 1925, and the borough treats it as its symbol. | https://www.hmdb.org/m.asp?m=22214 | new

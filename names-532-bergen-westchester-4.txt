@@ -1,0 +1,89 @@
+# names-532-bergen-westchester-4.txt — #532 Bergen-Westchester story pass 2, PART 4 (story lines, 2026-10-26)
+# Source: Historical Marker Database. Part 4 closes the gaps parts 2–3 left in their county lists:
+#   WESTCHESTER 277–300 (the tail of Ossining's Museum in the Streets and the Dale Cemetery Heritage Trail) — mined from
+#     HMdb's Ossining TOWN list (results.asp?Search=Place&Town=Ossining&State=New%20York, 68 entries, all read), which
+#     covers that tail and every other Ossining entry; each entry was judged afresh against parts 2's lines and cuts.
+#   WESTCHESTER 192–200 — New Rochelle Walk of Fame person plaques (as part 2 recorded from the page heading): skipped by
+#     the standing rule; the live OSM "Library Green" pin already carries the Walk of Fame's story (part 1).
+#   ROCKLAND 98–100 (Nyack) — Hopper House (m44206): CUT, served as wiki "Edward Hopper Birthplace and Boyhood Home",
+#     44 m. Historic Underground Railroad (m44218): skipped — a one-sentence donor plaque about Nyack Brook, no site.
+#     Upper Nyack Firehouse: one line below; its HMdb page could not be found, so the line is sourced from the
+#     Wikipedia article and placed at the article's coordinate.
+#   BCHS 94–100 — moved to part 4b: Bergen's county pages 2–5 list every BCHS marker with its series number, so they are
+#     read there in one pass instead of through the series list that cut off at 93.
+# FETCHER NOTE: a request for Nyack's town list came back as Bergen's county page 1 (the misdirect recurred, handoff §6
+#   FROM BERGEN-WESTCHESTER (5)); every page used here was checked by title and marker ID before use.
+# In the box (lat 40.875–41.175, lng −74.175 to −73.775): all of the lines below.
+# Skipped on purpose: the Civil War memorial (a name list), the Ossining welcome panel and Lower Main Street (district
+#   panels — the served wiki "Downtown Ossining Historic District" carries them), Bella Vista (the house is gone), the
+#   Old Croton Aqueduct Promenade (the same spot as the Old Croton Aqueduct marker — see 532_hidden_curated_2.sql),
+#   Dale trail markers for family plots (Collyer, Foshay, Heuss, Holden, Hyatt, Jenks, Moore, O'Brien) and for people
+#   with no Wikipedia article (Bryan Johnson, Jesse Collyer Jr., Frances Brandreth Kane, Eleanor Wunderlich, John Holla,
+#   Munson Lockwood, James McCord, Catharine McCord Smith, James Trowbridge, George Titlar, Theodore Pine, and Marlborough
+#   Churchill the schoolmaster — the article of that name is his son), and the Pilat family plot (whether Ignaz Pilát of
+#   Central Park lies in it could not be confirmed from the list excerpt).
+# CUT — already served (read 2026-10-26 through all 48 tiles, all warm, + the app's anon gem query, 451 rows):
+#   Grave of Gen. Aaron Ward (live gem "Grave of Aaron Ward", 66 m) · The Carnegie Library (wiki Ossining Public Library,
+#   46 m — its story names the Carnegie building) · Mount Pleasant Academy Library (wiki Mt. Pleasant Military Academy,
+#   35 m — the library is the academy's last building) · The United Methodist Church (part 2's Ossining United Methodist
+#   Church, 15 m) · Sing Sing Marble (part 2's Dale Cemetery line, 8 m, already tells the gate columns) · Hopper House.
+# HIDDEN-PIN ROWS — not in this file (handoff §6 story-lines (y)): the Old Croton Aqueduct marker (m193184) targets the
+#   hidden OSM "Old Croton Aqueduct Trail" — 34 stored segments from Yonkers to Ossining, none served. They get 10
+#   curated rows in 532_hidden_curated_2.sql. RUN THIS FILE'S --commit FIRST: once the trail serves, its segment 28 m
+#   from The Double Arch would be on the live map when this file's duplicate check reads it.
+# Every line: Name | @lat,lng (the marker's own coordinate) | one sentence in our own words from the marker text | marker URL
+# Names that differ from the marker title: the five graves take the graves pins' naming, "Grave of <Wikidata label>"
+#   (so a later graves-resolve run's #338 skip sees them); Dale Cemetery Receiving Tomb and Dale Cemetery Superintendent's
+#   Cottage (titles without the cemetery's name); Joseph G. Caputo Community Center (marker "Village of Ossining
+#   Community Center"); First Baptist Church of Ossining (the Wikipedia title); First Presbyterian Church of Ossining.
+# `| new` is set on every line within 400 m of a live pin or another line (DuPage lesson (1)), EXCEPT Upper Nyack
+#   Firehouse — named to its Wikipedia article's exact title, unserved, so it must stay matchable and seed under the
+#   article (#425). Eight more articles exist without coordinates (the five graves, First Baptist, Calvary Baptist) —
+#   no tile can serve them, so their lines are flagged new like the rest.
+# RUN ORDER (the #441 lesson): all 48 tiles were warm at mining time (2026-10-26) — no -cold file.
+# SANDBOX DRY RUN (Gemini stubbed, handoff §5 (x), DENO_TLS_CA_STORE=system; live map, submissions and Wikipedia arms
+#   real), 2026-10-26: 22 new-seed · 0 review · 0 held · 22 curated rows staged · Wikipedia calls 22, failed 0. One
+#   line read "↳ seeded under its Wikipedia article" — Upper Nyack Firehouse, 0 m — as intended.
+#   EXPECT on the Mac: the same 22 / 0 / 0, and #439 "22 to insert, 0 skipped, 0 replaced". Any difference is a stop.
+# Dry run, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Bergen-Westchester" SEED_CITY_LAT=41.0400 SEED_CITY_LNG=-73.9700 deno run -A seed-resolve.ts names-532-bergen-westchester-4.txt
+# Commit: the same command with --commit on the end. Then, in the SQL editor: select * from public.curated_category_backfill(true);
+
+# --- Ossining (village), The Museum in the Streets ---
+Calvary Baptist Church | @41.15953227,-73.86453467 | Built as St. Paul's Episcopal Church during Ossining's 19th-century industrial boom, this church and its annex are now home to the Calvary Baptist congregation. | https://www.hmdb.org/m.asp?m=193246 | new
+The Double Arch | @41.16234167,-73.86280833 | The Croton Aqueduct's granite arch here, keystoned in 1838, spans 88 feet and stands 100 feet above the Sing Sing Kill; a stone street bridge built under it in 1862 made it a double arch. | https://www.hmdb.org/m.asp?m=193227 | new
+Ellis Place | @41.16149167,-73.86119167 | This street began as the 13-acre Ellis Estate, sold to local investors in 1851 and divided into 66 lots, and is still lined with Victorian houses. | https://www.hmdb.org/m.asp?m=193217 | new
+First Baptist Church of Ossining | @41.16114235,-73.86144167 | The congregation was organized in 1790 under Elijah Hunter, the Revolutionary War spy, and built this brick Gothic Revival church with its tall wooden steeple in the 1870s. | https://www.hmdb.org/m.asp?m=193188 | new
+First National Bank and Trust Company | @41.16305278,-73.86136667 | Designed by the Hoggson Brothers in a blend of Art Deco and Neoclassical styles, this bank opened its doors on May 20, 1930. | https://www.hmdb.org/m.asp?m=193225 | new
+First Presbyterian Church of Ossining | @41.15990833,-73.86111389 | Architect Isaac Gale Perry designed this High Victorian Gothic church, finished in 1870 at a cost of $95,000 — the third church the congregation built. | https://www.hmdb.org/m.asp?m=193192 | new
+George Rohr's Saloon and Boarding House | @41.16235961,-73.86134778 | This French Second Empire building on the village's busiest corner held George Rohr's saloon and boarding house when Ossining was a bustling industrial and river town. | https://www.hmdb.org/m.asp?m=193221 | new
+James Robinson House | @41.15828056,-73.86539444 | With its tall columns and hipped roof, this house is a standout example of the Greek Revival style popular around the time of the Civil War. | https://www.hmdb.org/m.asp?m=193250 | new
+Ossining Bank for Savings | @41.161775,-73.86156389 | Founded in 1854 as the Sing Sing Bank for Savings with $3,900 on deposit, the bank had patent-medicine maker Benjamin Brandreth as its first president. | https://www.hmdb.org/m.asp?m=193187 | new
+Ossining National Bank | @41.16100828,-73.86373813 | Remodeled in the Renaissance Revival style in 1906, this bank building takes its look from St. Mark's Library in Venice, red hipped roof included. | https://www.hmdb.org/m.asp?m=193228 | new
+Smith-Robinson House | @41.15740833,-73.86541111 | Built of Sing Sing marble quarried at the prison, this house is one of only four Sing Sing marble buildings left in the village. | https://www.hmdb.org/m.asp?m=193252 | new
+Trinity Episcopal Church | @41.16195278,-73.86134444 | Designed by Robert W. Gibson and built of limestone in 1891, this Gothic Revival church is laid out in the shape of a cross along an east–west axis. | https://www.hmdb.org/m.asp?m=193220 | new
+# marker titled "Village of Ossining Community Center"; the building is the former Weskora Hotel.
+Joseph G. Caputo Community Center | @41.16280278,-73.86178611 | Once the Weskora Hotel, this building is now the village community center and holds the Ossining Heritage Area exhibit on Westchester's first chartered village. | https://www.hmdb.org/m.asp?m=193226 | new
+Ossining Municipal Building | @41.16324167,-73.86094722 | Built in the Beaux-Arts style in 1915, this building gave the village government room for its offices, its police department and its courts. | https://www.hmdb.org/m.asp?m=193222 | new
+
+# --- Ossining, Dale Cemetery (Heritage Trail) ---
+# trail stop 11; 7 m from the McAlpin line (a different person — the Brandreth family ground).
+Grave of Benjamin Brandreth | @41.17240556,-73.85435556 | Benjamin Brandreth, buried here, came from England in 1835 with his grandfather's formula for a laxative pill and made a fortune selling it with some of America's earliest mass advertising. | https://www.hmdb.org/m.asp?m=258962 | new
+# trail stop 2.
+Grave of Charles L. Brieant | @41.17406944,-73.85610278 | Ossining-born Charles Brieant, buried here, served 37 years as a federal judge in the Southern District of New York, seven of them as its chief judge. | https://www.hmdb.org/m.asp?m=258933 | new
+# trail stop 10.
+Grave of Edwin A. McAlpin | @41.17245833,-73.85430833 | Edwin McAlpin, son of tobacco magnate David H. McAlpin, enlisted as a private in New York's 7th Regiment in 1869, rose to general, and later ran the family tobacco firm. | https://www.hmdb.org/m.asp?m=258961 | new
+# trail stop 21; 52 m from the Receiving Tomb line.
+Grave of Samuel Youngs | @41.17107778,-73.85526944 | Samuel Youngs, a schoolteacher and friend of Washington Irving thought to be one model for Ichabod Crane, was moved here from Sleepy Hollow as Dale Cemetery's first burial in 1851. | https://www.hmdb.org/m.asp?m=259120 | new
+# trail stop 14.
+Grave of George Jackson Fisher | @41.17258056,-73.85492778 | Dr. George Jackson Fisher, buried here, was a skilled surgeon, a prolific writer on medicine and local history, and an avid collector of books and natural specimens. | https://www.hmdb.org/m.asp?m=258967 | new
+# trail stop 30.
+Dale Cemetery Receiving Tomb | @41.17092222,-73.85585 | Cemetery architect Howard Daniels designed this receiving vault in 1851 of Sing Sing marble, a coarse dolomite that inmates quarried at the nearby prison. | https://www.hmdb.org/m.asp?m=259156 | new
+# trail stop 37.
+Dale Cemetery Superintendent's Cottage | @41.17137778,-73.8572 | Howard Daniels designed this small two-storey cottage in 1851 as the home of Dale's first superintendent, James McDuffie, at a cost of $1,250. | https://www.hmdb.org/m.asp?m=259164 | new
+
+# --- Upper Nyack (Rockland) ---
+# HMdb entry 99 of Rockland's list; its marker page could not be found, so the article is the source. Seeded under the
+# article's title at its coordinate (#425) — no served or hidden pin within 150 m (Van Houten's Landing Historic
+# District, wiki, 155 m, is the district it stands in).
+Upper Nyack Firehouse | @41.10166667,-73.91777778 | Finished in July 1887 for the Empire Hook & Ladder Company No. 1, this brick Queen Anne firehouse with its corner bell tower still houses the company today. | https://en.wikipedia.org/wiki/Upper_Nyack_Firehouse
