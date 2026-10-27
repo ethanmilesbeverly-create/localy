@@ -1,0 +1,43 @@
+# names-501-middlesex-union.txt — #501 Middlesex-Union story pass, PART 1 (story lines, 2026-10-27)
+# Source: Historical Marker Database, MIDDLESEX COUNTY, NJ list (331 entries), entries 1–100 (Avenel → New Brunswick "On This High
+#   Ground"), read in the geographic sort: results.asp?Search=County&County=Middlesex+County&State=New+Jersey (excerpts, cut at 96)
+#   and its own "Omit Inscription" shape …&DP=.O (coordinates, 1–100). Heading and range checked on both.
+#   UNREAD: Middlesex entries 101–331 (rest of New Brunswick, Perth Amboy, Piscataway, Plainsboro, Sayreville, South Amboy,
+#   South Plainfield, Woodbridge …) — the DP=.O "Next 100" link is …results.asp?County=Middlesex%20County&DP=.O&Search=County&State=New%20Jersey&Page=2.
+#   Union (145) and Somerset (179) are untouched; Staten Island and Essex slivers too.
+# In the box: tiles 809–814 × −1492…−1485 (lat 40.425–40.725, lng −74.625 to −74.225).
+#   OUT: Cranbury, Monroe Township, Jamesburg, Helmetta, East Brunswick's Basilone Bridge and Appleby Devoe Library (south of 40.425).
+# CUT — already served (read 2026-10-27: 48 tiles POSTed, 29 warm; 396 unique map pins; 922 stored pins in 30 rows; 98 approved
+#   gems in the box, all graves): Thomas Alva Edison Memorial Tower (OSM 4 m + wiki 40 m), Menlo Park Invention Factory / Office /
+#   Phonograph / Electric Railway (Thomas Edison Center at Menlo Park, OSM 11–58 m), Kirkpatrick Chapel ×2 (wiki 38 m), Daniel S.
+#   Schanck Observatory (wiki 6 m), First Constitutional Convention (College Avenue Gymnasium, wiki 20 m).
+# TO 501_hidden_curated.sql: Oak Tree Engagement / Oak Tree Pond → the hidden OSM pin Oak Tree Pond Park (a line here would seed a twin, §6 (y)).
+# CUT AS SERVED BY RESOLVE: Old Queens (Queens Campus, served at 0 m with its article) and Geology Hall (Rutgers Geology Museum
+#   redirects to the article — verify on the phone).
+# SKIPPED on purpose: firehouses, schools, churches with only a founding list (Avenel, Iselin), war memorials and honor rolls
+#   (Colonia Memorials, Class of 1924, New Brunswick Civil War Monument, Men of Rutgers College, Brigadier General Anthony Walton
+#   White's stone), things gone with nothing to see (College Hall, New Brunswick Inn Site, Shinn and Westfield airports, U.S. General
+#   Hospital No. 3, Fords Porcelain Works, Gray Terrace, Blyhtmoor), corporate (Innovation — Johnson & Johnson), transit (New
+#   Brunswick Station — the feed filters stations), weak panels (George Street Tunnel Stones, The Raritan River, Fords Corner,
+#   Colonia Triangle, Cuban Howitzer, New Brunswick Sailors), and duplicate markers (Buccleuch ×2, Christ Church Parish, Guest House).
+# NAMES: a line whose Wikipedia article is in no stored tile takes the article's exact title (story-lines (w), #539's cap):
+#   Christ Church, New Brunswick, New Jersey · Henry Guest House · New Brunswick Free Public Library · Landing Lane Bridge.
+# | new — set up front on every line within ~100 m of a live pin, another line, or a near-named article (DuPage (1), Bergen (2)).
+# COLD-TILE LINES are in names-501-middlesex-union-cold.txt (Orange County (g)); fold back in once their tiles read warm.
+
+Camp Kilmer | @40.519679,-74.425431 | Opened in 1942 as the first Army camp built purely to stage troops through the New York Port of Embarkation, Camp Kilmer sent soldiers to Europe in the Second World War and later took in refugees from the 1956 Hungarian uprising. | https://www.hmdb.org/m.asp?m=166517
+St. James Episcopal Church (Piscatawaytown) | @40.500626,-74.396 | The parish was founded in 1704 and built its church in 1724; when a tornado flattened it in 1835, it was rebuilt with as much of the old timber as could be saved, beside the Piscatawaytown burial ground. | https://www.hmdb.org/m.asp?m=53332
+Danish Home | @40.541448,-74.392591 | Danish Brotherhood and Sisterhood lodges of the Northeast bought a 72-acre farm here in 1914 to open a home for their aged members. | https://www.hmdb.org/m.asp?m=53349
+Sarah Jordan Boarding House | @40.56326591,-74.3380239 | In 1878 Thomas Edison asked Sarah Jordan, a relative of his wife Mary, to run a boarding house for the young men working at his Menlo Park laboratory up the hill. | https://www.hmdb.org/m.asp?m=162083 | new
+Band-Aid Bench | @40.49930833,-74.42611667 | Highland Park resident Earle Dickson invented the Band-Aid here in 1920 to help his wife Josephine; this mosaic bench, made in 2019, marks the town's claim to it. | https://www.hmdb.org/m.asp?m=165720
+South Main Street Firehouse | @40.447568,-74.434151 | Built in 1889 as Milltown School No. 78, the building later served as the borough's municipal hall and firehouse. | https://www.hmdb.org/m.asp?m=95772
+Air-Inflated Double-Layer Polyethylene Greenhouse | @40.47222923,-74.43714178 | Rutgers professor William J. Roberts developed the cheap, energy-saving inflated double-plastic greenhouse here in 1964, a design now used by growers worldwide. | https://www.hmdb.org/m.asp?m=195092
+Alexander Hamilton Horse Artillery Battery | @40.49887297,-74.44537908 | In early December 1776 young Alexander Hamilton's artillery held the Raritan ford here, slowing the British while Washington's army slipped away toward Princeton. | https://www.hmdb.org/m.asp?m=10010 | new
+Alexander Johnston Hall | @40.497835,-74.447171 | Designed by Nicholas Wyckoff in 1830 for the Rutgers Preparatory School, this is the second-oldest building at Rutgers. | https://www.hmdb.org/m.asp?m=62727 | new
+Anshe Emeth Memorial Temple | @40.48575,-74.45179 | Founded in 1859, Congregation Anshe Emeth was the first incorporated Jewish congregation in Middlesex County and the fourth in New Jersey. | https://www.hmdb.org/m.asp?m=94036
+Buccleuch Mansion | @40.50602,-74.45726 | Anthony White built this house around 1735–39 for his bride Elizabeth, daughter of Governor Lewis Morris; their son became one of Washington's aides, and British officers occupied it during the Revolution. | https://www.hmdb.org/m.asp?m=242002 | new
+Christ Church, New Brunswick, New Jersey | @40.49584,-74.44285 | Founded in 1742, Christ Church saw the third public reading of the Declaration of Independence, given from the foot of its tower in July 1776. | https://www.hmdb.org/m.asp?m=94014 | new
+Henry Guest House | @40.49166389,-74.44528333 | Tanner Henry Guest built this stone house in 1760, and Thomas Paine stayed here briefly; it is the second-oldest building in New Brunswick and was moved to this spot in 1925. | https://www.hmdb.org/m.asp?m=208907 | new
+New Brunswick Free Public Library | @40.49159167,-74.44570833 | Andrew Carnegie gave the city $50,000 for this library in 1902, and George K. Parsells' building opened to the public in November 1903. | https://www.hmdb.org/m.asp?m=208910 | new
+Landing Lane Bridge | @40.509177,-74.463764 | Built in 1895 by the Penn Bridge Company, this three-span girder bridge crosses the Raritan at Raritan Landing, once the colonial river port for the farms upstream. | https://www.hmdb.org/m.asp?m=109273 | new
+Milestones in Microbiology | @40.48083333,-74.43888889 | The country's first academic department of soil microbiology began here in 1901; Selman Waksman's work in it led to streptomycin and a Nobel Prize. | https://www.hmdb.org/m.asp?m=99308

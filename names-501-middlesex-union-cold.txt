@@ -1,0 +1,10 @@
+# names-501-middlesex-union-cold.txt — #501 part 1 lines whose tiles were COLD on 2026-10-27 (Orange County (g)).
+# DO NOT dry-run until the tiles read warm: 812_-1486 (Colonia), 811_-1486 (Fords), 809_-1488 (East Brunswick). A cold tile's
+# duplicate check cannot see the OSM half of the map (#441). Once --until-warm reports them warm, re-read them, re-check for a
+# served twin, fold these lines into names-501-middlesex-union.txt, and DELETE this file before the commit (Bergen (1)).
+
+The Trees | @40.58652904,-74.31522061 | Built around 1775, the "Old Cone Place" was the Cone family's first home here; the Cones went on to found the planned estate colony that gave Colonia its name. | https://www.hmdb.org/m.asp?m=199090
+Kinnekort | @40.58731988,-74.30972987 | Edward and Helen Savage Cone, founders and developers of The Colony, an elite planned estate community, built this country home in 1904. | https://www.hmdb.org/m.asp?m=199433 | new
+Colonia Inn | @40.5904903,-74.30625776 | This circa-1774 house was the home of romance novelist Laura Jean Libbey, born in 1862, and later a roadhouse known for its chicken dinners. | https://www.hmdb.org/m.asp?m=250369
+Cutter House | @40.537934,-74.314004 | Built around 1700 as the farmhouse of the Cutter plantation, it stayed a working farm under later families into the 1950s. | https://www.hmdb.org/m.asp?m=202550
+L.J. Smith Farmhouse | @40.44112,-74.3995 | Built around 1860, this farmhouse was home to George Smith and his son Lawrence, East Brunswick's celebrated "Apple Kings." | https://www.hmdb.org/m.asp?m=93891
