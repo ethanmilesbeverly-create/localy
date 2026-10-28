@@ -1,0 +1,12 @@
+# names-485-katy-energy-corridor-2.txt — #485 Katy-Energy Corridor story pass, PART 2 (story lines, 2026-10-28)
+# The last cold tile, 595_-1913 (Energy Corridor), built in pre-warm round 5; read the same afternoon (served 17, stored 37).
+#   Wheaton's Ford: no pin within 300 m but the served wiki pin Barker Reservoir, 238 m — a different thing (`| new`).
+#   Tagore Grove: the statue is not mapped; the hidden OSM park pin Ray Miller Park sits 125 m off — a different thing (`| new`),
+#     and the line is never named "Rabindranath Tagore" (the person's article). Wikipedia geosearch at 600 m: nothing.
+#   Gray Lodge No. 329 is a HIDDEN OSM pin at 0 m, stored as "Gray Lodge No. 329, A. F. & A. M." → 485_hidden_curated_2.sql.
+# Dry-run and commit this file ALONE, so part 1's 12 committed lines are not re-judged (Middlesex-Union's cold-file precedent).
+# names-485-katy-energy-corridor-cold.txt is retired by this file — delete it; it is never committed (Bergen-Westchester (1)).
+# RUN: SEED_CITY_NAME="Katy-Energy Corridor" SEED_CITY_LAT=29.79 SEED_CITY_LNG=-95.74 deno run -A seed-resolve.ts names-485-katy-energy-corridor-2.txt
+
+Wheaton's Ford on the San Felipe Trail | @29.7692444,-95.6439236 | Austin's colony built the San Felipe Trail in 1830 to haul cotton by ox wagon to Harrisburg; Joel and Elizabeth Wheaton's inn stood at this Buffalo Bayou ford, where Joel's oxen pulled loaded wagons up the steep banks. | https://www.hmdb.org/m.asp?m=254146 | new
+Tagore Grove | @29.7512726,-95.62577335 | A statue of Rabindranath Tagore, the first Asian to win the Nobel Prize in Literature (1913), stands here in Ray Miller Park, placed in 2013 by the Tagore Society of Houston. | https://www.hmdb.org/m.asp?m=199139 | new

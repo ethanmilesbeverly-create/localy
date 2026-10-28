@@ -1,0 +1,46 @@
+# names-485-katy-energy-corridor.txt — #485 Katy-Energy Corridor story pass, PART 1 (story lines, 2026-10-28)
+# STATUS: READY FOR A DRY RUN — the 12 lines below all sit in tiles read WARM (served answer + stored places:v34 rows, 2026-10-28, two reads:
+#   ~12:15 and ~12:40 after pre-warm round 3).
+# In the box: tiles 593–598 × −1918…−1912 (lat 29.625–29.925, lng −95.925 to −95.575). Column −1911 (lng −95.575 to −95.525) is CORE Houston's.
+#
+# WHAT THE MAP READ CHANGED (warm tiles 593_-1917, 593_-1918, 594_-1912, 594_-1918, 596_-1913, 596_-1917, 597_-1913; 38 served pins,
+#   107 stored): most of this box's markers are ALREADY OSM PINS — HIDDEN as storyless (#367). Nodes 124036xxxxx are the area's Texas
+#   Historical Commission markers mapped one by one, and the Katy Heritage Park buildings are OSM ways. A story line for a hidden pin
+#   would seed a twin beside it, so 14 lines (13 active + the held Katy Heritage Park) became curated rows in 485_hidden_curated.sql
+#   (§6 story-lines (y)), with 5 more hidden pins added there from marker text already read (The Featherston House, The Stockdick
+#   House, First Baptist Church of Katy, Pittsville, Foster Community) — 19 hidden pins back.
+# CUT — already served: Bear Creek Pioneers Park (the wiki pin carries its article, 1,047 m from the marker panel).
+# SECOND READ (596_-1916, 596_-1914, 596_-1915, 595_-1912 warm after round 3): downtown Katy's markers are NOT OSM pins (no stored pin
+#   within 150 m except the City of Katy and First Methodist pins, which get curated rows) — 7 lines folded back in below, the MKT Depot
+#   un-held (article "The MKT Depot" is in no stored tile → the line keeps its exact title, §6 (w)). LH7 Ranch and Barker Post Office
+#   ARE hidden pins (1 m, 0 m) → moved to the SQL, plus Moore Log House (core Houston's hidden pin) — 22 rows.
+# COLD-TILE LINES → names-485-katy-energy-corridor-cold.txt: only tile 595_-1913 (Wheaton's Ford, Gray Lodge, Tagore) is still cold.
+#
+# Source: Historical Marker Database (Katy town list, DP=.O shape, 33 entries, 2026-10-28; Fulshear town list, 7; west Houston walked
+#   marker by marker through the nearby blocks), the Harris County Historical Commission inventory (Prairie Grove, full text), and the
+#   THC Atlas. FETCHER MIX-UP (handoff §6 (5), seen again): m=202061 returned m=311371's page and m=209258 returned m=270710's; both
+#   caught by the ID check and re-sourced.
+# Every line is placed at the marker's own directions coordinate and worded only from the marker text.
+# Read against the stored rows: no stored or served pin within 200 m of the first 5 (Katy Community Cemetery: Merrell Center, a
+#   wiki pin, 248 m — a different thing). Wikipedia geosearch (600 m): Dairy (Alief) has Alief, Houston at 403 m (`| new`).
+# COMMITTED 2026-10-28 (12/12). THEN RETIRED: Prairie Grove Cemetery — its seed twinned a hidden OSM pin of the same name 2 m off,
+#   stored in the NEIGHBOURING tile's row (594_-1913; the line's own tile is 594_-1912). The line's curated story now serves that pin;
+#   the seed was set rejected by 485_prairie_grove_twin.sql. Lesson: read every stored row within ~1 km of a line, not only its own tile's.
+# SKIPPED on purpose, OUT OF THE BOX, UNREAD: listed in names-485-katy-energy-corridor-cold.txt's header.
+# RUN: SEED_CITY_NAME="Katy-Energy Corridor" SEED_CITY_LAT=29.79 SEED_CITY_LNG=-95.74 deno run -A seed-resolve.ts names-485-katy-energy-corridor.txt
+#   (service key exported — #439 — for the dry run; --commit only after the review lines are settled.)
+
+Katy Community Cemetery | @29.77892207,-95.83018796 | Also called Antioch Community Cemetery, this is the burial ground of Katy's African American community, among the town's first settlers and key to building its railroad and early farms. | https://www.hmdb.org/m.asp?m=170572
+Koch-Schmidt Cemetery | @29.80744908,-95.67386156 | Johann Koch, who came from near Darmstadt in 1846 and helped found the Bear Creek German community, was buried here in 1854, the earliest grave in a cemetery that also holds the Adicks, Groschke, Marks and Schmidt families. | https://www.hmdb.org/m.asp?m=228817
+Alief Cemetery | @29.70318091,-95.60476733 | Deeded as a graveyard in 1900, this is where Alief Magee, the first postmistress the town is named for, was buried; about half of its roughly 100 graves are those of babies. | https://www.hmdb.org/m.asp?m=159224
+Dairy (Alief) | @29.71226769,-95.59244361 | Surveyors named the town Dairy, but the post office Alief Magee opened in her home in 1895 was named Alief, and the town took that name in 1917; its citizens formed Harris County's first flood control district in 1909. | https://www.hmdb.org/m.asp?m=159205 | new
+Prairie Grove Cemetery | @29.683683,-95.622767 | In 1920 the trustees of Prairie Grove Missionary Baptist Church, an African American congregation in Alief, bought this land; their white frame church doubled as a schoolhouse from 1927 to 1937, and the cemetery beside it is still used by the founders' descendants. | https://www.hmdb.org/m.asp?m=202061
+
+# Folded in from the cold file after the second read (2026-10-28) — `| new` kept from the draft (Katy's lines sit 25–135 m apart).
+Dube's Super Market | @29.78754773,-95.82208936 | Back from the Second World War with a Silver Star and a Purple Heart, William Dube Jr. bought Pitt's Grocery on this spot and turned it into the Katy area's first modern supermarket. | https://www.hmdb.org/m.asp?m=170570 | new
+Copper Range Railroad Caboose | @29.78625043,-95.82144704 | Built around 1910–17 for $2,177, this caboose worked Michigan's copper country on the Keweenaw Peninsula for years before the Katy Heritage Society acquired it in 1986. | https://www.hmdb.org/m.asp?m=311371 | new
+Site of Katy's First Schoolhouse | @29.79097638,-95.82307092 | Katy's first public school, a one-room wooden building for the children of farmers, ranchers and railroad workers, went up here in 1898; the 1900 hurricane destroyed it and it was rebuilt. | https://www.hmdb.org/m.asp?m=169405
+The Morrison-Freeman Home | @29.79007797,-95.82011212 | Built in 1898 for William Patrick Morrison, this house still sits crooked to the street because the 1900 hurricane blew it off its foundation blocks. | https://www.hmdb.org/m.asp?m=169408
+The Stewart-Lott Home | @29.78915495,-95.82235946 | Dr. J.M. Stewart's 1900 home doubled as his office in the front hall, and its two-story tank tower housed the young men who drove for the doctor. | https://www.hmdb.org/m.asp?m=169458
+The Hubler-Pitts Home | @29.79007438,-95.8231312 | Guy Hubler built this house in 1910 for his bride Fannie, whose father, J.O. Thomas, is said to have laid out the town of Katy. | https://www.hmdb.org/m.asp?m=169493
+The MKT Depot | @29.78629209,-95.82196178 | The MKT, the "Katy Railroad" that carried many settlers into Texas, was running through here by 1894 as a water stop for steam engines; the city moved the depot and its caboose to this spot in 2005. | https://www.hmdb.org/m.asp?m=170571 | new
