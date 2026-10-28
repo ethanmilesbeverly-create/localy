@@ -1,0 +1,21 @@
+# names-501-middlesex-union-5.txt — #501 Middlesex-Union story pass, PART 5 — THE SLIVERS (story lines, 2026-10-28)
+# Measured first with the census county outlines (plotly geojson-counties-fips) against the box (lat 40.425–40.725, lng
+#   −74.625 to −74.225): Morris 55.4 km² (Long Hill Township and the south edge of Chatham Township; 17 stored pins) —
+#   step (0) had not listed it; Staten Island 10.9 km² (Tottenville and Charleston west of −74.225; 17 stored pins); Essex
+#   9.2 km² (the box's north edge, 40.708–40.725, south Millburn; 8 stored pins); Monmouth 3.8 km² (the Cliffwood Beach corner,
+#   lat < 40.453; 4 stored pins) — also unlisted at step (0).
+# MORRIS — mined: Long Hill Township's markers, found through the Morris County Heritage Commission series and their own
+#   marker pages (search results; coordinates from each page's location line): Sentinel Elms (m19590), Millington
+#   Schoolhouse #74 (m32987), Signal Beacon #11 (m32988, a site beside Sentinel Elms — skipped), Village of Stirling (m146722 —
+#   no coordinate to place it, the Stirling articles cover the village — skipped), Millington Railroad Station (a station —
+#   skipped). Checked against all 48 stored places:v34 rows, the box's 140 gems and Wikipedia: nothing within 400 m of either
+#   line (nearest a 9/11 monument 683 m and a brewery 424 m).
+# STATEN ISLAND — nothing mined: the sliver's landmarks are already served in tile 810_-1485 (Conference House and its park,
+#   the Staten Island Peace Conference, Ward's Point, Tottenville station, Church of Our Lady Help of Christians).
+# ESSEX and MONMOUTH — nothing mined: 9 and 4 km² of residential edge with 8 and 4 stored pins; their county lists were not
+#   read for so little ground (noted on #501).
+# RUN THIS FILE ALONE; every run carries SEED_CITY_NAME=Middlesex-Union SEED_CITY_LAT=40.59 SEED_CITY_LNG=-74.42 (and
+#   SUPABASE_URL for --commit) on the command.
+
+Sentinel Elms | @40.680383,-74.496967 | The pre-Revolutionary center of this house was the home of Cornelius Ludlow, a colonel in the Eastern Battalion of the Morris County militia who later became a Morris County judge. | https://www.hmdb.org/m.asp?m=19590
+Millington Schoolhouse #74 | @40.675867,-74.518983 | Built in the early 1800s as a one-room school, this building held classes until 1926 and became the Passaic Township hall in 1928. | https://www.hmdb.org/m.asp?m=32987
