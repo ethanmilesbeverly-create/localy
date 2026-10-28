@@ -1,0 +1,51 @@
+# names-501-middlesex-union-4.txt — #501 Middlesex-Union story pass, PART 4 (story lines, 2026-10-28)
+# Source: Historical Marker Database, SOMERSET COUNTY, NJ list, all 179 entries, read in the geographic sort through its
+#   inscription-free view results.asp?County=Somerset%20County&DP=.O&Search=County&state=New%20Jersey (opened from Union's
+#   "Adjacent to" link) and its own "The final 79" link (…&Page=2). Heading and "Entries N through M" checked on both.
+#   DISCARDED: the excerpt-view link …County=Somerset%20County&Search=County&state=New%20Jersey returned UNION's page 1
+#   (heading check). Marker pages fetched for m76447, m258783, m33195 and m76070 — each page's own m= ID checked.
+#   SOMERSET IS NOW READ END TO END.
+# In the box (lat 40.425–40.725, lng −74.625 to −74.225). OUT: Bedminster, Far Hills' station and war monument, Peapack-
+#   Gladstone, Pluckemin's route markers, Branchburg, Neshanic, North Branch, Harlingen, Belle Mead, Hillsborough's Huff
+#   farmstead, Raritan (all west of −74.625 — Raritan's Frelinghuysen House, Hibernia bridge and Basilone markers by under
+#   1 km); Kingston, Skillman and Blawenburg (south of 40.425); Bernardsville's Jockey Hollow panels and "George" (north of
+#   40.725).
+# Duplicate check (2026-10-28): all 48 stored places:v34 rows (1,237 unique pins); the served answer for tiles 811_-1492,
+#   810_-1492, 809_-1492, 811_-1491, 812_-1492 and 811_-1490 (single-file, all cached); the box's 137 approved gems;
+#   Wikipedia geosearch at 500 m around every candidate.
+# CUT — already served or stored with the same story: Basking Ridge Presbyterian Church Graveyard (wiki Basking Ridge white
+#   oak, 12 m), The Brick Academy (wiki 9 m), Boudinot–Southard Farmstead (wiki 51 m), Kennedy–Martin–Stelle Farmstead ×3,
+#   Lord Stirling Manor / Lord Stirling Estate (wiki Lord Stirling Manor Site), Blackwells Mills Canal House (wiki 25 m),
+#   Old Stone Bridge and Battle of Bound Brook ×3 (wiki Old Stone Arch Bridge, Battle of Bound Brook), Queen's Bridge (wiki),
+#   The Presbyterian Church at Bound Brook (wiki 46 m), Middlebrook / 1777 Encampment / Washington Camp Ground (wiki
+#   Middlebrook encampment, OSM Washington Camp Ground), Derrick Van Veghten House and Philip Van Horne House (OSM, with the
+#   articles' text), Jacob Vosseller House (wiki 12 m), Moggy Hollow (wiki Moggy Hollow Natural Area), William L. Hutcheson
+#   Memorial Forest (wiki, stored), Washington Rock ×3 (wiki Washington Rock State Park), General Frederick Frelinghuysen
+#   Memorial (wiki Van Nest – Weston Burying Ground, 34 m), Lyons Station (wiki 6 m), Millstone / Second Court House /
+#   Millstone School House (wiki Millstone Historic District, Battle of Millstone — served), Abraham Staats House ×2 (wiki
+#   36 m), World Affairs at Wallace House (wiki/OSM Wallace House), Somerset County Court House Green (wiki Somerset County
+#   Courthouse), Mt. Bethel Meeting House (wiki Mount Bethel Baptist Meetinghouse, 17 m), Delaware & Raritan Canal State Park
+#   and Locks on the D&R Canal / Lock No. 10 (wiki D&R Canal State Park and D&R Canal Trail, served).
+# TO 501_hidden_curated_5.sql (hidden storyless OSM pin — a line would seed a twin): Fireman's Museum → the OSM pin stored as
+#   "Firemen's Museuem" (sic), which the article West End Hose Company Number 3 (8 m) shows is the museum's firehouse.
+# SKIPPED on purpose: war, 9/11, Persian Gulf and veterans memorials and honor rolls; person plaques (William Childs,
+#   Frederick W. Schmidt, Millicent Fenwick, Purvis Boatwright, Furman Kugler, Ruth St. Denis, Chief Philip Koechlein,
+#   Kate McFarlane and Josephine Swann); the Washington's Route and Washington-Rochambeau route markers; sites with nothing
+#   to see (Widow White's Tavern, French Army Encampment, Madisonville, Somerset Hills Airport, Site of St. Thomas A.M.E. Zion
+#   Parsonage, Site of the National Guard Armory, The Frelinghuysen Tavern, Belle Mead Depot, Thirteen Star Flag, Van Horn
+#   Plaza, Manville's encampment markers, the Martinsville redoubts); thin house and church plaques (Bolmer Farm House,
+#   Voorhees Home, Fisher House, William Annin House, Presbyterian Church of Liberty Corner, Dunster Squibb House, Daniel
+#   Robert House — 19 m from the Somerville Public Library article, likely the same building, so not seeded under a
+#   second name — and the Somerville Main Street building plaques);
+#   Indian Mill Stone (a one-line plaque; no pin for the forge museum it stands at); Hobbstown, Bolmer Cemetery, Saint Olha,
+#   the Ukrainian memorials, General Highway Administration, Southard Park, Vail Family, Bridgewater Township Historic
+#   Monument, Bridgewater and Bernardsville stations.
+# | new — set up front on every line within ~100 m of a live pin, a gem or a near-named article (DuPage (1), Bergen (2)):
+#   The Council Oak (Presbyterian Church at Bound Brook, 67 m). Prince Rodgers Monument and Griggstown Bridge Tender's
+#   Station have no pin, gem or article within 150 m.
+# RUN THIS FILE ALONE; every run carries SEED_CITY_NAME=Middlesex-Union SEED_CITY_LAT=40.59 SEED_CITY_LNG=-74.42 (and
+#   SUPABASE_URL for --commit) on the command.
+
+The Council Oak | @40.567528,-74.530891 | This white oak was already about 80 feet tall on May 4, 1681, when two Lenni-Lenape chiefs sold the 5,000 acres where Bound Brook now stands to Governor Philip Carteret and seven others. | https://www.hmdb.org/m.asp?m=76447 | new
+Prince Rodgers Monument | @40.58936667,-74.61354722 | Born into slavery in Bridgewater in 1815 and freed in 1829, Prince Rodgers became a farmer and builder — he helped build Somerville's first African American church — and fought for the Union in the Civil War. | https://www.hmdb.org/m.asp?m=258783
+Griggstown Bridge Tender's Station | @40.437961,-74.613916 | The Griggstown bridge tender watched boat traffic on the Delaware and Raritan Canal and worked the bridge from this station, which was fitted with a Morse telegraph to send word of emergencies along the line. | https://www.hmdb.org/m.asp?m=33195
