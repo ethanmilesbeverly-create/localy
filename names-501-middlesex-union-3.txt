@@ -1,0 +1,56 @@
+# names-501-middlesex-union-3.txt — #501 Middlesex-Union story pass, PART 3 (story lines, 2026-10-28)
+# Source: Historical Marker Database, UNION COUNTY, NJ list, all 145 entries, read in the geographic sort through
+#   results.asp?County=Union%20County&Search=County&state=New%20Jersey (opened from Middlesex's "Adjacent to" link; page 1
+#   cut at 98) and its own "The final 45" link (…&Page=2, entries 101–145); entries 99–100 from its "Omit Inscription"
+#   view (…&DP=.O). Heading and "Entries N through M" checked on all three. DISCARDED: the first link tried
+#   (…County=Union%20County&DP=.O&FilterState=New%20Jersey&Search=County) returned ESSEX page 2 (heading check), and a
+#   marker-page fetch for m264026 (Fanwood's white oak) returned m194317 — nothing from either was used.
+#   UNION IS NOW READ END TO END.
+# In the box (lat 40.425–40.725, lng −74.625 to −74.225). OUT: all of Elizabeth (east of −74.225); Summit's Signal Beacon
+#   and "Old Sow" (north of 40.725).
+# Duplicate check (2026-10-28): all 48 stored places:v34 rows (1,237 unique pins); the served answer for tiles 814_-1488,
+#   812_-1488, 813_-1488, 814_-1487, 814_-1485, 813_-1487 and 814_-1486 (single-file, 10 s apart, all cached); the box's
+#   129 approved gems; Wikipedia geosearch at 500 m around every candidate.
+# CUT — already served with the same story: Deserted Village of Feltville (wiki Feltville Historic District, served),
+#   Homestead Farm at Oak Ridge (wiki 9 m), Drake House and its flag pole and the Black Revolutionary War Hero Caesar panel
+#   (wiki Nathaniel Drake House / OSM Drake House Museum, 34–64 m), Merchants and Drovers Tavern (wiki), Abraham Clark's grave
+#   and Capt. Thomas Clark (live grave gem, Rahway Cemetery), Baptist Parsonage (wiki Old Baptist Parsonage), Stage House Inn
+#   and Swift Sure Stage Line (wiki), Frazee Homestead (wiki Elizabeth and Gershom Frazee House, 38 m), The Shady Rest
+#   Country Club (wiki 77 m), Springfield's Colonial Church / Battle of Springfield / Springfield / Cannonball House (wiki
+#   Springfield Presbyterian Church, Battle of Springfield 18 m, Hutchings Homestead), Caldwell Parsonage and Caldwell's Home
+#   (wiki Caldwell Parsonage, served in 814_-1486), Connecticut Farms ×2 / First Presbyterian Church of Connecticut Farms /
+#   Washington's Headquarters (wiki Connecticut Farms Presbyterian Church), Liberty Hall ×4 / Early African Americans at
+#   Liberty Hall (OSM Liberty Hall Museum, served with the article's text), Presbyterian Church in Westfield / Westfield
+#   Church / Meeting House (wiki), Crane's Mills and Site of Crane's Ford (Crane-Phillips House area).
+# TO 501_hidden_curated_4.sql (hidden storyless OSM pins — a line would seed a twin): Shakespeare Garden (Plainfield Garden
+#   Club marker), New Providence Historical Society (the Salt Box Museum marker), Briant Park (the Briant Pond Park marker).
+# SKIPPED on purpose: war, 9/11, Purple Heart, POW and memorial-park markers and honor rolls; person plaques and statues
+#   (Harker, Culin, Columbus, Glenn Avenue, Knyphausen ×2, Clinton, Dayton, Angell, Pearl Harbor Square); sites with nothing
+#   to see (Blue Hills Fort, Spanktown, Horsehead Copper, Gallows Hill, Downer Well Cap, Jahn's, Lake Surprise Bathhouse,
+#   Terry Well, American Troops Withdraw, Here the British Turned, In Remembrance of Abraham Clark); cemetery honor markers
+#   (Westfield Revolutionary Cemetery, Men of Westfield, Patriots and Soldiers, The Country's Roll of Honor, New Providence
+#   UMC Cemetery); thin house plaques (Littell Half Way House, Dolbier House, Osborn House 1770, Terrill Tavern — a restored
+#   building beside the served Merchants and Drovers pin, 52 m); Liberty Hall's carriage house, wagon shed, steam tractor and
+#   Serpentine Path (outbuildings of a served museum; the Blue House and the horse chestnut are kept); Copper Mine (a trail
+#   panel); The Academy / Old Borough Hall, Peppertown Park, Carl's Stone Garden, Memorial Tree, Cranford Remembers;
+#   Rahway Valley Railroad (Summit station panel); Fanwood's 300-year white oak (marker of 1964 — whether the tree still
+#   stands could not be checked, and its marker page fetch misdirected).
+# NAMES: Summit Playhouse takes its article's exact title (the article is in no stored tile — #539's cap); its story is the
+#   article's own claim, so the line cites Wikipedia. Osborn Cannonball House is the house's museum name (the marker's
+#   "Cannon Ball House" title).
+# | new — set up front on every line within ~100 m of a live pin, a gem or a near-named article (DuPage (1), Bergen (2)):
+#   Osborn Cannonball House (Stage House Inn 88 m); Caesar's Grave (Scotch Plains Baptist Church 77 m); Summit Playhouse (the
+#   "Summit Downtown Historic District" article 18 m); Mass Grave of British and Hessian Troops (Connecticut Farms
+#   Presbyterian Church 61 m); Liberty Hall Horse Chestnut and The Blue House (the "Liberty Hall (New Jersey)" article
+#   23 m / 124 m, the served Liberty Hall Museum pin ~240 m).
+# RUN THIS FILE ALONE; every run carries SEED_CITY_NAME=Middlesex-Union SEED_CITY_LAT=40.59 SEED_CITY_LNG=-74.42 (and
+#   SUPABASE_URL for --commit) on the command.
+
+Osborn Cannonball House | @40.650257,-74.399003 | Built around 1750, this house was home to Revolutionary War soldiers and later to the Hollingsworth and Darby fur mill, and takes its name from a cannonball linked to the 1777 Battle of the Short Hills. | https://www.hmdb.org/m.asp?m=7809 | new
+Caesar's Grave | @40.652802,-74.400538 | Caesar, an African enslaved in New Jersey, is buried here; he died on February 7, 1806, aged 104, after more than half a century as a member of the Baptist church beside this burial ground. | https://www.hmdb.org/m.asp?m=63467 | new
+Summit Opera House | @40.7187,-74.3614 | Architect Theodore Mead Jr. designed this building in 1893 for the Women's Temperance Union; Civil War veteran Joel G. Van Cise finished building it in return for title to the property. | https://www.hmdb.org/m.asp?m=34621
+Summit Playhouse | @40.71514,-74.36518 | This theater is home to one of the oldest continuously operating amateur community theater companies in the United States. | https://en.wikipedia.org/wiki/Summit_Playhouse | new
+Wallace Chapel AME Zion Church | @40.71382,-74.34346 | Suffragist and ordained minister Florence Spearing Randolph, who organized the New Jersey Federation of Colored Women's Clubs, was pastor of this church from 1925 to 1946. | https://www.hmdb.org/m.asp?m=94510
+Mass Grave of British and Hessian Troops | @40.693785,-74.273468 | British and Hessian soldiers killed at the Battle of Connecticut Farms on June 7, 1780, lie together in this grave in the churchyard. | https://www.hmdb.org/m.asp?m=32311 | new
+Liberty Hall Horse Chestnut | @40.678344,-74.228883 | Susan Livingston, daughter of New Jersey's first elected governor William Livingston, planted this horse chestnut in 1770; it is the oldest tree of its kind on the state register. | https://www.hmdb.org/m.asp?m=66632 | new
+The Blue House | @40.679443,-74.228523 | This circa-1790 house near Liberty Hall was the home of Mildred Barry Hughes, who in 1965 became the first woman elected to the New Jersey Senate. | https://www.hmdb.org/m.asp?m=66607 | new
