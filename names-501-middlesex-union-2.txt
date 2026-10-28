@@ -1,0 +1,69 @@
+# names-501-middlesex-union-2.txt — #501 Middlesex-Union story pass, PART 2 (story lines, 2026-10-28)
+# Source: Historical Marker Database, MIDDLESEX COUNTY, NJ list, entries 101–331 of 331 — every remaining entry, read in the
+#   geographic sort through the shape results.asp?Search=County&FilterState=New+Jersey&County=Middlesex+County&State=New+Jersey
+#   &Page=2 (surfaced by an extended web search) and its own Next 100 / The final 31 links (…&FilterState=New%20Jersey&Page=3,
+#   &Page=4): pages 2, 3 and 4 with excerpts, cut at 193, 294 and whole. Gaps 194–200 and 295–300 read through the
+#   inscription-free shape …&DP=.O&FilterState=New%20Jersey&Page=2 and &Page=3. Heading and "Entries N through M" checked on
+#   all five pages; each marker page used below was fetched and its m= ID checked. MIDDLESEX IS NOW READ END TO END.
+# In the box (tiles 809–814 × −1492…−1485; lat 40.425–40.725, lng −74.625 to −74.225). OUT: Plainsboro, South Brunswick's
+#   Titus Farm, Spotswood, Old Bridge's Browntown and Brownville, and Old Bridge's Methodist Episcopal Churchyard (all south
+#   of 40.425).
+# Duplicate check (2026-10-28): all 48 stored places:v34 rows (1,237 unique pins, handoff §6 FROM MIDDLESEX-UNION (2)); the
+#   served answer for tiles 810_-1489, 810_-1485, 810_-1486, 809_-1487, 811_-1485, 811_-1486 (single-file, 10 s apart, all
+#   cached); the box's 119 approved gems (98 graves, 21 story pins); Wikipedia geosearch at 500 m around every candidate.
+# CUT — already served with the same story: Queen's Campus ×2 / Queen's College / Theological Education in Old Queens (Queens
+#   Campus), Rutgers Preparatory School (= Alexander Johnston Hall, part 1), Selman Waksman and Antibiotics (= Milestones in
+#   Microbiology, 23 m, part 1), Winants Hall ×2 (wiki 37 m), Saint Peter the Apostle Church ×2 (wiki 27 m), The Reformed
+#   Dutch Church founded Queens College (New Brunswick Theological Seminary, wiki 33 m), The Birthplace of College Football and
+#   First College Football Game (College Avenue Gymnasium, wiki 34 m — the 1869 field), Raritan Landing ×2 (Landing Lane Bridge,
+#   part 1, and the Cornelius Low House article), Kearny Cottage ×3 and Elizabeth Lawrence (OSM Kearny Cottage Museum, 12 m),
+#   Governor's House / Proprietary House (wiki 20 m), City Hall / Perth Amboy City Hall / First Black Voter / Thomas Mundy
+#   Peterson's Historic Vote (Perth Amboy City Hall, wiki 23 m), Oldest Parish / St. Peter's Church ×2 (St. Peter's Episcopal
+#   Church, wiki 79 m), Thomas Mundy Peterson (his grave is a live gem, 65 m), George Washington (statue, wiki + OSM),
+#   Perth Amboy Totenville Ferry Slip (wiki 0 m), Simpson United Methodist Church (wiki 41 m), Sayre & Fisher Reading Room
+#   (wiki + OSM 2–52 m), Sayre and Fisher Brick Water Tower (OSM 4 m, served with the marker's own text), 1950 South Amboy
+#   Explosion (wiki "South Amboy powder pier explosion", stored and served in 810_-1486 at the pier, 330 m across the inlet),
+#   Barron Arts Center / Barron Library / Barron Estate (wiki Barron Library 35 m), First Presbyterian Church ×4 and its
+#   Cemetery (wiki "First Presbyterian Church and Cemetery" 36 m), Trinity Church / Trinity Episcopal Church ×3 / Trinity
+#   Churchyard (wiki), Jonathan Dunham House (wiki "Jonathan Singletary Dunham House" 50 m), "The Broker" / Great Woodbridge
+#   Train Wreck of 1951 / Fulton Street Train Wreck (wiki "Woodbridge train derailment", 44 m from the crash-site marker).
+# TO 501_hidden_curated_3.sql: Surveyor General's Office ×2 and Board of Proprietors → the hidden OSM pin Surveyor General's
+#   Office (osm_way1497713236, filler text, absent from the served answer of both its tiles) — a line here would seed a twin.
+# SKIPPED on purpose: war, 9/11, Purple Heart, POW, police and COVID memorials and honor rolls; person statues and busts (Pulaski,
+#   Copernicus, Duarte, Garcilaso de la Vega, the Earl of Perth, SSgt. Molnar, Allie Clark, Daisy Bell Dinkins, Henry Inman,
+#   Captain Carlsen, General Heard); firehouses and fire companies; churches and schools with only a founding list (Sayreville
+#   UMC, Old St. Mary's, St. James ×4, St. John's, St. Anthony, Our Lady of Mount Carmel, First Congregational, Woodbridge UMC,
+#   First Baptist of South Plainfield, Adath Israel — whose article is served); house plaques with names and dates only (the
+#   Green Street and Freeman Street houses, 510 East Avenue, Cedar Cliff, Cooper-Neuberg, Gorham Boynton, Barron House,
+#   Fitz Randolph-Csaki); things gone with nothing to see (Red Lion tavern / First Classes, Perth Amboy Barracks, Boynton Beach
+#   ×2, Hess Oil Refinery, Shinn-Woodbridge Airport, Woodbridge Speedway, Salamander Works, Quaker Meeting House, Samptown
+#   Cemetery, First Air Mail Delivery Flight, Cooper's Dairy Farm, Jewish Agricultural Society); interpretive panels (Indian
+#   Trail, Route Taken by Washington, the Perth Amboy waterfront maritime panels, The Bluff, The Water Highway, Who Was Arthur
+#   Kill?, Terra Cotta, Arthur Kill / Staten Island Sound, Camden & Amboy Railroad, City of South Amboy, Revolutionary War
+#   Skirmishes); the Woodbridge History Trail's 45 panels clustered on Main Street and Rahway Avenue, which stand away from
+#   their subjects (Colonia Country Club, Embassy Theatre, Hampton Cutter Mansion, Kirk Green, Woodbridge Cloverleaf …) —
+#   only a trail marker standing AT its subject is used; Van Nest Hall (19 m from the served Winants Hall pin, and its name
+#   redirects into the Queens Campus article); Ye Town Tavern (a recent plaque whose claim HMdb's own editors could not
+#   confirm); the Liberty Bell replica and Cambridge Elm (2–41 m from the George Washington statue pin in the same small park —
+#   the Fireman's Triangle below is the one kept there); McMyler Coal Dumper and Bowtie (industrial land at Port Reading);
+#   Bowne-Provost Family Cemetery and Baptist Churchyard; Sewaren Free Public Library; Woodbridge National Bank.
+# NAMES: State Theatre's article is in no stored tile, so the line takes its exact title (story-lines (w), #539's cap). Paul
+#   Robeson Plaza is the 2019 plaza (eight granite panels) behind Ford Hall, confirmed from Rutgers' dedication pages.
+# | new — set up front on every line within ~100 m of a live pin, a gem or a near-named article (DuPage (1), Bergen (2)):
+#   Will's Way (Queens Campus 44 m, Alexander Hamilton Horse Artillery Battery gem 93 m); The Ravine Bridge (sculptures 50 m);
+#   Paul Robeson Plaza (New Brunswick Theological Seminary 29 m); State Theatre (The Tuning Fork Oracle 34 m); Perth Amboy
+#   Fireman's Triangle (George Washington statue 30 m, City Hall 35 m); Thomas Mundy Peterson School (the "Thomas Mundy
+#   Peterson" article and his grave gem, 520 m — near-named); Aaron Dunn Homestead (grave gem 66 m).
+# RUN THIS FILE ALONE (not names-501-middlesex-union.txt) so part 1's 21 committed lines aren't re-judged; every run carries
+#   SEED_CITY_NAME=Middlesex-Union SEED_CITY_LAT=40.59 SEED_CITY_LNG=-74.42 on the command.
+
+Will's Way | @40.499099,-74.446444 | The walkway from Hamilton Street to Old Queens is named for Will, an enslaved Black man who helped lay the building's foundations in 1808 — Rutgers' acknowledgment of the part slavery played in its early history. | https://www.hmdb.org/m.asp?m=165148 | new
+The Ravine Bridge | @40.485941,-74.435003 | Known to generations of students as the "Kissing Bridge," this footbridge was the Class of 1926's gift to Douglass College; it spans the ravine that divided the original campus from land given to the college, and was restored in the 1970s and again in 2001. | https://www.hmdb.org/m.asp?m=95770 | new
+Paul Robeson Plaza | @40.50139141,-74.44906044 | Dedicated in 2019, a century after he graduated as valedictorian, this plaza's eight black granite panels tell the life of Paul Robeson — Rutgers football star, singer, actor and civil-rights champion whose passport the government revoked in the McCarthy era. | https://www.hmdb.org/m.asp?m=168734 | new
+State Theatre (New Brunswick, New Jersey) | @40.49305631,-74.44450593 | Opened on December 26, 1921, with vaudeville acts and a silent film, the State was then the largest theater in New Jersey; it has also been known as Reade's State, B.F. Keith's State and the RKO State. | https://www.hmdb.org/m.asp?m=218972 | new
+Perth Amboy Fireman's Triangle | @40.50614667,-74.26609833 | This 400-pound alarm, forged in 1883 from a converted locomotive wheel, became a prized trophy among the city's fire companies — secretly buried, hidden under floors and walled up behind brick, vanishing and turning up again years later. | https://www.hmdb.org/m.asp?m=223861 | new
+Thomas Mundy Peterson School | @40.507567,-74.26808 | Built in 1871 as Perth Amboy's first public school building, it was renamed in 1989 for Thomas Mundy Peterson — the first African American to vote under the Fifteenth Amendment, in 1870, and the school's custodian from its opening until 1877. | https://www.hmdb.org/m.asp?m=93943 | new
+Ambo Point | @40.49942,-74.26841 | Perth Amboy's story begins on this point, which the Lenni Lenape called Ompoge; they used its beaches for thousands of years before it was deeded away in 1651. | https://www.hmdb.org/m.asp?m=25116
+Cross Keys Tavern | @40.55432,-74.283572 | Dating to around 1740, this tavern put up George Washington for the night of April 22, 1789, as he traveled from Mount Vernon to New York City for his inauguration as the first president. | https://www.hmdb.org/m.asp?m=194317
+Dr. Moses Bloomfield House | @40.56281,-74.28038 | This mid-1700s house was the home of Dr. Moses Bloomfield, an Army surgeon in the Revolution and a provincial representative, who freed the people he enslaved in 1783; his son Joseph became governor of New Jersey. | https://www.hmdb.org/m.asp?m=190058
+Aaron Dunn Homestead | @40.56199,-74.27444 | Dating to around 1685, this was the home of Revolutionary War soldier Aaron Dunn; in 1835 it passed to James Bloodgood, who ran a tannery beside the brook that crosses Ridgedale Avenue. | https://www.hmdb.org/m.asp?m=190056 | new
