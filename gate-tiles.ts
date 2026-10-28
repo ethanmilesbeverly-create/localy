@@ -296,7 +296,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the launch roster, 28 rows since #484 (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 31 rows since #485 (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -374,6 +374,17 @@ const METROS: Metro[] = [
   // (40.61/-74.30) gains slightly more but shares 6 tiles with New York. The name omits "New
   // York" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Middlesex-Union", lat: 40.5900, lng: -74.4200 },
+  // #485 (2026-10-28): the roster grows 30 → 31 with Houston's FIRST extra box, west (Katy,
+  // Cinco Ranch, the Energy Corridor, Bear Creek), placed by #482's 2020-census tract check:
+  // the 9-county MSA holds 7.12M, the Houston box covers 1.90M, and this box adds +1.20M of
+  // the 5.22M left outside (Harris 812k, Fort Bend 380k, Waller 10k), zero tiles shared with
+  // any roster row (re-checked on the 30-row roster). Any centre in 29.77–29.81 / -95.76–-95.72
+  // gives the same 42 tiles (rows 593–598, columns -1918…-1912); this is the plateau's middle.
+  // Farther centres measured less: north (30.11/-95.52, Spring / The Woodlands) +1.05M,
+  // south-west (29.69/-95.72, Sugar Land / Missouri City) +1.06M on this box's ground,
+  // south-east (29.69/-95.02, Pasadena / Baytown / Clear Lake) +0.67M. The name omits
+  // "Houston" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Katy-Energy Corridor", lat: 29.7900, lng: -95.7400 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -1142,7 +1153,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-27a (#501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
+const BUILD_MARKER = "gate-tiles 2026-10-28a (#485 roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10-27a: #501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.

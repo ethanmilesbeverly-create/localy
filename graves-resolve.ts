@@ -416,7 +416,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.27a (#501 — roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10.26a: #533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.28a (#485 — roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10.27a: #501 — roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10.26a: #533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -507,6 +507,17 @@ const METROS: Metro[] = [
   // (40.61/-74.30) gains slightly more but shares 6 tiles with New York. The name omits "New
   // York" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Middlesex-Union", lat: 40.5900, lng: -74.4200 },
+  // #485 (2026-10-28): the roster grows 30 → 31 with Houston's FIRST extra box, west (Katy,
+  // Cinco Ranch, the Energy Corridor, Bear Creek), placed by #482's 2020-census tract check:
+  // the 9-county MSA holds 7.12M, the Houston box covers 1.90M, and this box adds +1.20M of
+  // the 5.22M left outside (Harris 812k, Fort Bend 380k, Waller 10k), zero tiles shared with
+  // any roster row (re-checked on the 30-row roster). Any centre in 29.77–29.81 / -95.76–-95.72
+  // gives the same 42 tiles (rows 593–598, columns -1918…-1912); this is the plateau's middle.
+  // Farther centres measured less: north (30.11/-95.52, Spring / The Woodlands) +1.05M,
+  // south-west (29.69/-95.72, Sugar Land / Missouri City) +1.06M on this box's ground,
+  // south-east (29.69/-95.02, Pasadena / Baytown / Clear Lake) +0.67M. The name omits
+  // "Houston" for the same substring / submissions.city reason as Queens-Nassau.
+  { name: "Katy-Energy Corridor", lat: 29.7900, lng: -95.7400 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode
