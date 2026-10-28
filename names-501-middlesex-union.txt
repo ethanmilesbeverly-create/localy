@@ -23,7 +23,11 @@
 # NAMES: a line whose Wikipedia article is in no stored tile takes the article's exact title (story-lines (w), #539's cap):
 #   Christ Church, New Brunswick, New Jersey · Henry Guest House · New Brunswick Free Public Library · Landing Lane Bridge.
 # | new — set up front on every line within ~100 m of a live pin, another line, or a near-named article (DuPage (1), Bergen (2)).
-# COLD-TILE LINES are in names-501-middlesex-union-cold.txt (Orange County (g)); fold back in once their tiles read warm.
+# COLD-TILE LINES (folded in 2026-10-28): the 5 lines at the end sat in names-501-middlesex-union-cold.txt while tiles 812_-1486,
+#   811_-1486 and 809_-1488 were cold (Orange County (g)). All 48 tiles read warm 2026-10-28 (813_-1489, the drip's last, built on a
+#   hand POST). Re-checked against those tiles' stored places:v34 rows (17 rows, 542 unique pins, nothing within ~900 m of any line),
+#   the box's approved gems (nearest 822 m, a grave) and Wikipedia geosearch at 500 m (none) — no twin. Kinnekort keeps `| new`
+#   (~470 m from The Trees, same family). The cold file is deleted in the same commit (Bergen (1)).
 
 Camp Kilmer | @40.519679,-74.425431 | Opened in 1942 as the first Army camp built purely to stage troops through the New York Port of Embarkation, Camp Kilmer sent soldiers to Europe in the Second World War and later took in refugees from the 1956 Hungarian uprising. | https://www.hmdb.org/m.asp?m=166517
 St. James Episcopal Church (Piscatawaytown) | @40.500626,-74.396 | The parish was founded in 1704 and built its church in 1724; when a tornado flattened it in 1835, it was rebuilt with as much of the old timber as could be saved, beside the Piscatawaytown burial ground. | https://www.hmdb.org/m.asp?m=53332
@@ -41,3 +45,10 @@ Henry Guest House | @40.49166389,-74.44528333 | Tanner Henry Guest built this st
 New Brunswick Free Public Library | @40.49159167,-74.44570833 | Andrew Carnegie gave the city $50,000 for this library in 1902, and George K. Parsells' building opened to the public in November 1903. | https://www.hmdb.org/m.asp?m=208910 | new
 Landing Lane Bridge | @40.509177,-74.463764 | Built in 1895 by the Penn Bridge Company, this three-span girder bridge crosses the Raritan at Raritan Landing, once the colonial river port for the farms upstream. | https://www.hmdb.org/m.asp?m=109273 | new
 Milestones in Microbiology | @40.48083333,-74.43888889 | The country's first academic department of soil microbiology began here in 1901; Selman Waksman's work in it led to streptomycin and a Nobel Prize. | https://www.hmdb.org/m.asp?m=99308
+
+# Folded in from names-501-middlesex-union-cold.txt (2026-10-28) — committed by dry-running the cold file alone, so the 16 lines above aren't re-judged.
+The Trees | @40.58652904,-74.31522061 | Built around 1775, the "Old Cone Place" was the Cone family's first home here; the Cones went on to found the planned estate colony that gave Colonia its name. | https://www.hmdb.org/m.asp?m=199090
+Kinnekort | @40.58731988,-74.30972987 | Edward and Helen Savage Cone, founders and developers of The Colony, an elite planned estate community, built this country home in 1904. | https://www.hmdb.org/m.asp?m=199433 | new
+Colonia Inn | @40.5904903,-74.30625776 | This circa-1774 house was the home of romance novelist Laura Jean Libbey, born in 1862, and later a roadhouse known for its chicken dinners. | https://www.hmdb.org/m.asp?m=250369
+Cutter House | @40.537934,-74.314004 | Built around 1700 as the farmhouse of the Cutter plantation, it stayed a working farm under later families into the 1950s. | https://www.hmdb.org/m.asp?m=202550
+L.J. Smith Farmhouse | @40.44112,-74.3995 | Built around 1860, this farmhouse was home to George Smith and his son Lawrence, East Brunswick's celebrated "Apple Kings." | https://www.hmdb.org/m.asp?m=93891
