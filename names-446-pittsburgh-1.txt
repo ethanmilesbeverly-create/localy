@@ -1,0 +1,109 @@
+# names-446-pittsburgh-1.txt — #446 Pittsburgh story pass, part 1: the PHMC state markers in Downtown, Uptown, Mount
+# Washington, the North Side and North Shore, the Hill District, the Strip and Lawrenceville (drafted 2026-10-29).
+# 40 lines. Every line: Name | locate | one sentence in our own words | source URL [| new]. locate is the PHMC marker's
+# own coordinate (Wikipedia's "List of Pennsylvania state historical markers in Allegheny County", which carries the PHMC
+# database coordinates), EXCEPT the 8 article-named lines below, which sit at their article's coordinate.
+# Sources: each marker's subject article on Wikipedia, read for the Pittsburgh-specific facts (the marker text itself was
+# not fetched for these; lines whose story needs the marker text are OWED below, not guessed).
+#
+# DUPLICATE CHECK, done in the sandbox before writing (handoff §6 FROM KATY-ENERGY CORRIDOR (1)/(2), MIDDLESEX-UNION (2)):
+# the 36 warm places:v34 rows of the box's 48 (1,228 unique stored pins), approved gems in the box (none — a clean
+# slate), and Wikipedia geosearch at 150 m around every marker. Every line's tile is warm. Pennsylvania's markers are
+# NOT mapped as OSM plaque nodes (4 plaque pins in 1,228), so Katy (1) does not apply: no hidden pin matched a line,
+# and there is no curated SQL for this part.
+#
+# ARTICLE-NAMED LINES (#539 pattern; Queens-Nassau (d), #502's First Presbyterian): 8 markers stand within 150 m of
+# an article that has its own coordinate but that no stored tile carries (the 20-nearest cap). Each line is named
+# EXACTLY as the article and placed at the article's coordinate, so it should commit as a new seed with one ↳ under
+# that article at 0 m. Not flagged `new` (that would skip the attach): Allegheny Arsenal, August Wilson House, Crawford Grill, Duquesne University, Fort Lafayette (Pennsylvania), Greenlee Field, Three Rivers Stadium, UPMC Mercy.
+# Watch: Allegheny Arsenal sits 7 m from the OSM pin "Arsenal Park" — if it REVIEWS against the park, mark it `| new`.
+#
+# `| new` — set up front on every other line within ~100 m of a stored pin, another line, or a near-named article
+# (DuPage (1), Bergen (2)); the reason is in the comment above each one.
+#
+# CUT — already served by name (stored pin within 600 m carrying the subject): Allegheny Observatory, Avery College,
+# Bost Building, Braddock's Field, McKees Rocks Mound, Pioneer Short-Wave Station, Stephen Foster Memorial, Kennywood
+# Park, Neville House (= Woodville), Braddock's Defeat and Braddock's Crossing (= Battle of the Monongahela); most fall in
+# part 2's ground and are listed here once. SET ASIDE (no place story): Allegheny County, and the two "Pittsburgh" city
+# markers; the Forbes Road "Bouquet Encampment" plaque merges into part 2's Bouquet Camp line.
+#
+# OWED — need the marker's own text (HMdb marker page, ~2k tokens each, m= ID checked), so NOT drafted here:
+# Allegheny Cotton Mill Strikes, Bethel A.M.E. Church, Clinton Furnace, John Scull, McClurg Iron Foundry, Pittsburgh
+# Glass Works, Site of the Western Penitentiary, Steamboat "New Orleans", Union Local 471 (AFM), Pittsburgh Grease Plant,
+# Westinghouse Railroad Air Brake, Lewis and Clark Expedition, Founding Convention of the CIO, John A. Roebling. (14)
+#
+# RUN (Mac), ONLY once all 48 tiles are warm and part 2's cold-tile read is done, with SUPABASE_URL +
+# SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439; Middlesex-Union (4): env | grep -c for the two keys → 2):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-1.txt
+# Dry run first; read every review and every ↳ line; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495) — mostly NULL for new seeds is expected (DuPage (5)).
+
+# --- Downtown, Uptown, Mount Washington ------------------------------------------------------------------
+# PHMC marker (Bluff St.) 64 m from the article's coordinate; named and placed as the article (#539, Queens-Nassau (d)).
+Duquesne University | @40.43611111,-79.99305556 | Spiritan priests who had left Germany during Bismarck's Kulturkampf founded the school in 1878 as the Pittsburgh Catholic College of the Holy Ghost; it moved up to the Bluff in 1885 and became a university in 1911. | https://en.wikipedia.org/wiki/Duquesne_University
+# PHMC "Mercy Hospital" marker 43 m from the article; named and placed as the article (#539).
+UPMC Mercy | @40.4363,-79.9851 | Opened in 1847, Mercy was Pittsburgh's first chartered hospital and the first hospital anywhere founded by the Sisters of Mercy, and it took its first residents as a teaching hospital the next year. | https://en.wikipedia.org/wiki/UPMC_Mercy
+First Mining of Pittsburgh Coal | @40.43438,-80.01127 | The thick Pittsburgh coal seam takes its name from its outcrop high on this hillside, first called Coal Hill: a mine was already working here in 1760, and by 1796 the diggings ran some 1,800 feet along the face of Mount Washington. | https://en.wikipedia.org/wiki/Pittsburgh_coal_seam
+# PHMC marker 24 m from the article; named and placed as the article (#539).
+Fort Lafayette (Pennsylvania) | @40.44392,-79.99836 | General Anthony Wayne built this fort in June 1792 while raising the Legion of the United States; later called Fort Fayette, it stood near today's Penn Avenue and Ninth Street until 1814. | https://en.wikipedia.org/wiki/Fort_Lafayette_(Pennsylvania)
+Sisters of Mercy | @40.443448,-79.999158 | The Sisters of Mercy, the order Catherine McAuley founded in Dublin, set up their first American community here in Pittsburgh in 1843. | https://en.wikipedia.org/wiki/Sisters_of_Mercy | new
+The Pittsburgh Agreement | @40.44312,-80.000314 | Czech and Slovak expatriate leaders signed an agreement in Pittsburgh on May 31, 1918, on their future common state; its main author, Tomáš Masaryk, declared Czechoslovakia's independence that October and became its first president. | https://en.wikipedia.org/wiki/Pittsburgh_Agreement | new
+# PHMC marker stands at Mellon Square's own coordinate (0 m) — a different place.
+Founding of the American Federation of Labor | @40.4409,-79.9975 | On November 15, 1881, union delegates meeting at Turner Hall in Pittsburgh formed the Federation of Organized Trades and Labor Unions, which renamed itself the American Federation of Labor in 1886. | https://en.wikipedia.org/wiki/Federation_of_Organized_Trades_and_Labor_Unions | new
+Founding of the Ironworkers Union | @40.43665,-79.99854 | Sixteen delegates from local unions in cities across the country met in Pittsburgh on February 4, 1896, and founded the union of bridge and structural iron workers. | https://en.wikipedia.org/wiki/International_Association_of_Bridge,_Structural,_Ornamental_and_Reinforcing_Iron_Workers | new
+United Steelworkers of America | @40.437941,-79.997501 | The CIO formed the Steel Workers Organizing Committee in June 1936 to organize the steel industry; in 1942 the committee became the United Steelworkers of America. | https://en.wikipedia.org/wiki/Steel_Workers_Organizing_Committee | new
+# Frick Building article 54 m.
+Henry Clay Frick | @40.43928,-79.996884 | Henry Clay Frick built a coke empire, chaired Carnegie Steel with a hard line against the unions, and held wide Pittsburgh real estate; his family's whiskey business was run from the Frick Building beside this marker. | https://en.wikipedia.org/wiki/Henry_Clay_Frick | new
+Kier Refinery | @40.44145,-79.99405 | Samuel Kier, whose canal-boat company carried coal between Pittsburgh and Philadelphia, became the first American to refine crude oil into kerosene lamp oil — the start of the country's petroleum refining industry. | https://en.wikipedia.org/wiki/Samuel_Kier | new
+Pennsylvania Canal | @40.44398,-79.99289 | Built from 1824 on, while railroads were still in their infancy, the Pennsylvania Canal and its mountain-crossing Allegheny Portage Railroad joined Pittsburgh to Philadelphia. | https://en.wikipedia.org/wiki/Pennsylvania_Canal | new
+# PPG Place article 36 m.
+Martin R. Delany | @40.43948,-80.00325 | Raised partly in Pittsburgh, Martin Delany stayed to treat patients through the city's cholera epidemics of 1833 and 1854 when many doctors fled, and in 1850 he was among the first three Black men admitted to Harvard Medical School. | https://en.wikipedia.org/wiki/Martin_Delany | new
+# PPG Place article 49 m — a different thing (the building).
+Pittsburgh Plate Glass Company | @40.44017,-80.00288 | John Baptiste Ford and John Pitcairn Jr. founded the Pittsburgh Plate Glass Company in 1883; as PPG it is headquartered today in the glass towers of PPG Place around this plaza. | https://en.wikipedia.org/wiki/PPG_Industries | new
+# Market Square article 23 m.
+Work Accidents and the Law | @40.440488,-80.002669 | Crystal Eastman investigated workplace injuries for the Pittsburgh Survey and published Work-Accidents and the Law in 1910; as the first woman named to a state commission, she drafted the first workers' compensation law. | https://en.wikipedia.org/wiki/Crystal_Eastman | new
+# 11 Stanwix Street article 25 m.
+Westinghouse Electric Corporation | @40.43935,-80.006217 | George Westinghouse founded his electric company in Pittsburgh on January 8, 1886; its works in East Pittsburgh turned out the turbines, generators and motors of the electric age. | https://en.wikipedia.org/wiki/Westinghouse_Electric_Corporation_(1886) | new
+Radio Station KDKA | @40.44255,-80.00543 | Westinghouse's KDKA traces its start to the evening of November 2, 1920, when it broadcast the Harding–Cox presidential election returns from the company's East Pittsburgh plant. | https://en.wikipedia.org/wiki/KDKA_(AM) | new
+
+# --- North Side and North Shore --------------------------------------------------------------------------
+# Allegheny Market House 45 m, New Hazlett Theater 53 m.
+Charles Taze Russell | @40.45274,-80.00488 | Born in Allegheny in 1852, Charles Taze Russell founded the Bible Student movement and in July 1879 began publishing Zion's Watch Tower. | https://en.wikipedia.org/wiki/Charles_Taze_Russell | new
+# Colonel James Anderson Monument article 39 m.
+James Hay Reed | @40.45321,-80.00587 | Allegheny-born James Hay Reed formed the law firm of Knox and Reed with Philander C. Knox and served a year as a federal judge before returning to practice in Pittsburgh. | https://en.wikipedia.org/wiki/James_Hay_Reed | new
+Pittsburgh Platform | @40.4509,-80.0019 | Reform rabbis meeting at the Concordia Club in Pittsburgh in November 1885 adopted the Pittsburgh Platform, the founding statement of Classical Reform Judaism. | https://en.wikipedia.org/wiki/Pittsburgh_Platform
+Mary Cassatt | @40.44937,-80.01809 | Mary Cassatt was born in Allegheny in 1844 and spent most of her adult life in France, where she befriended Degas and exhibited with the Impressionists. | https://en.wikipedia.org/wiki/Mary_Cassatt
+Martha Graham | @40.459427,-80.016865 | Born in Allegheny City in 1894, Martha Graham created the Graham technique and danced and taught for more than seventy years, a founder of American modern dance. | https://en.wikipedia.org/wiki/Martha_Graham
+Henry J. Heinz | @40.453317,-79.992673 | Pittsburgh-born Henry J. Heinz co-founded the H. J. Heinz Company and helped win passage of the 1906 Pure Food and Drug Act. | https://en.wikipedia.org/wiki/Henry_J._Heinz
+# Pittsburgh Law Enforcement Memorial article 46 m.
+First Professional Football Game | @40.44546,-80.0137 | In 1892 Pudge Heffelfinger was paid $500 to play for the Allegheny Athletic Association against the Pittsburgh Athletic Club — the first record of an American football player paid to play. | https://en.wikipedia.org/wiki/Professional_American_and_Canadian_football | new
+First World Series | @40.445401,-80.009171 | The Pirates hosted Boston at Exposition Park in Allegheny City in the first modern World Series in 1903; overflow crowds lined the outfield, and Boston won five games to three. | https://en.wikipedia.org/wiki/1903_World_Series | new
+# PHMC marker 117 m from the article; named and placed as the article (#539).
+Three Rivers Stadium | @40.44666667,-80.01277778 | Opened on July 16, 1970 to replace Forbes Field, Three Rivers was home to both the Pirates and the Steelers until 2000 and was imploded in 2001. | https://en.wikipedia.org/wiki/Three_Rivers_Stadium
+
+# --- Hill District ---------------------------------------------------------------------------------------
+# PHMC "August Wilson" marker 14 m from the August Wilson House article; named and placed as that article (#539).
+August Wilson House | @40.44528056,-79.98555556 | Playwright August Wilson spent his early childhood in a two-room apartment behind a grocery store here at 1727 Bedford Avenue before writing the ten plays of his Pittsburgh Cycle. | https://en.wikipedia.org/wiki/August_Wilson
+# PHMC marker 20 m from the article; named and placed as the article (#539).
+Crawford Grill | @40.44567,-79.97804 | Gus Greenlee and Joseph Robinson opened this second Crawford Grill at Wylie Avenue and Elmore Street in 1943, and in the 1950s and '60s it booked jazz greats from Art Blakey to John Coltrane. | https://en.wikipedia.org/wiki/Crawford_Grill
+Art Blakey | @40.4479,-79.97358 | Born in Pittsburgh in 1919, Art Blakey became a jazz drummer and bandleader who made his name in the 1940s big bands of Fletcher Henderson and Billy Eckstine. | https://en.wikipedia.org/wiki/Art_Blakey
+# PHMC marker 92 m from the article; named and placed as the article (#539).
+Greenlee Field | @40.4514,-79.9727 | Built from 1931 on Bedford Avenue for Gus Greenlee's Pittsburgh Crawfords, this was one of the few major-league ballparks in the country built and owned by Black Americans. | https://en.wikipedia.org/wiki/Greenlee_Field
+# Josh Gibson Field article 102 m — a different place.
+Josh Gibson | @40.44861,-79.97754 | Josh Gibson came to Pittsburgh in 1923 when his father found steel-mill work, and grew into the Negro leagues catcher who starred for the Homestead Grays and the Crawfords and entered the Hall of Fame in 1972. | https://en.wikipedia.org/wiki/Josh_Gibson | new
+Daisy E. Lampkin | @40.44991,-79.97201 | Suffragist and civil-rights organizer Daisy Lampkin settled in Pittsburgh in 1909 and became one of the NAACP's leading fundraisers and organizers. | https://en.wikipedia.org/wiki/Daisy_Elizabeth_Adams_Lampkin
+# Centre Avenue YMCA Building article 42 m.
+Frank E. Bolden | @40.4468,-79.96774 | One of only two accredited Black war correspondents of World War II, Frank Bolden had been Pitt's first Black marching-band member, yet was turned away by its medical school and by the city's schools because of his race. | https://en.wikipedia.org/wiki/Frank_E._Bolden | new
+# Centre Avenue YMCA Building article 30 m.
+Robert Lee Vann | @40.447057,-79.967413 | Pitt Law's first Black graduate, Robert L. Vann published and edited the Pittsburgh Courier from 1910 until his death in 1940. | https://en.wikipedia.org/wiki/Robert_Lee_Vann | new
+
+# --- Strip District and Lawrenceville --------------------------------------------------------------------
+# PHMC marker 83 m from the article; named and placed as the article (#539). Arsenal Park (OSM) 82 m.
+Allegheny Arsenal | @40.4666,-79.9611 | Founded in 1814, the arsenal supplied the Union Army, and on September 17, 1862 it exploded — the worst civilian disaster of the Civil War. | https://en.wikipedia.org/wiki/Allegheny_Arsenal
+Railroad Strike of 1877 | @40.45618,-79.97491 | Pittsburgh saw the worst violence of the 1877 national rail strike: on July 21 militiamen fired on strikers, killing 20, and workers burned railroad buildings and rolling stock. | https://en.wikipedia.org/wiki/Great_Railroad_Strike_of_1877
+# Pittsburgh Brass Manufacturing Company Building article 90 m.
+Charles Martin Hall | @40.461581,-79.9707 | Charles Martin Hall found a cheap way to make aluminum in 1886, and with partners raised $20,000 to launch the Pittsburgh Reduction Company here — the company that became Alcoa. | https://en.wikipedia.org/wiki/Charles_Martin_Hall | new
+Stephen C. Foster | @40.46415,-79.96374 | Stephen Foster, the songwriter called the father of American music, was born in Lawrenceville on July 4, 1826, and grew up among its Italian, Scots-Irish and German neighbours. | https://en.wikipedia.org/wiki/Stephen_Foster
+# Arsenal School (OSM) 71 m.
+Johnny Unitas | @40.46827,-79.96268 | Pittsburgh-born Johnny Unitas starred at quarterback for St. Justin's High School before his 18 NFL seasons, most of them with the Baltimore Colts. | https://en.wikipedia.org/wiki/Johnny_Unitas | new
+Shannopin's Town | @40.46953,-79.96358 | By about 1730 a Lenape town stood on the Allegheny here, some two miles above the rivers' meeting point. | https://en.wikipedia.org/wiki/Shannopin%27s_Town | new

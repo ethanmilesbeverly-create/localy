@@ -3214,28 +3214,6 @@
     }
   },
   {
-    "name": "Grave of John Warhola",
-    "description": "John Warhola (May 31, 1925 – December 24, 2010) was an American businessman who played a pivotal role in maintaining the legacy of his younger brother, pop artist Andy Warhol. He had been assigned responsibility by their father on his deathbed to ensure that Andy attended college. Warhola served as a trustee of the Andy Warhol Foundation for the Visual Arts after his brother's death in 1987. He also oversaw the establishment of The Andy Warhol Museum in Pittsburgh and the Andy Warhol Museum of Modern Art in Medzilaborce, Slovakia.",
-    "category": "history",
-    "lat": 40.3549491555875,
-    "lng": -80.0294,
-    "city": "Pittsburgh",
-    "status": "approved",
-    "submitted_by": null,
-    "source": "seed:wikidata-grave",
-    "grave_meta": {
-      "kind": "grave",
-      "qid": "Q15433367",
-      "person": "John Warhola",
-      "burialLabel": "St. John the Baptist Byzantine Catholic Cemetery",
-      "articleTitle": "John Warhola",
-      "descSrc": "wiki",
-      "cemeteryPin": true,
-      "cemeteryRank": 1,
-      "topOfCemetery": false
-    }
-  },
-  {
     "name": "Grave of Julia Warhola",
     "description": "Julia Warhola (born Julianna Zavacka; November 20, 1891 – November 22, 1972) was an American artist of Rusyn descent. She is best known as the mother of Andy Warhol, a leading figure in Pop art.\nBorn in Mikó, Austria-Hungary (present-day Miková, Slovakia), she emigrated to the United States, settling in Pittsburgh, where she raised her family. She later moved to New York City to live with her son and contributed calligraphy and decorative elements to his early commercial illustrations.",
     "category": "history",
