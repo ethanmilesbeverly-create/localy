@@ -1,0 +1,78 @@
+# names-502-queens-nassau-4.txt — #502 Queens-Nassau story pass 2, part 2c-1 (story lines, 2026-10-28)
+# Source: Historical Marker Database. Two list reads, each heading and range checked:
+#   (1) the mixed NY/FL list in the `%3FSearch=CountyNew%20York&County=Nassau%20County&Page=N` shape, page 4 —
+#       "610 entries … Entries 301 through 400" — read whole with excerpts. Entries 301–362 (Hempstead's tail, Hewlett,
+#       Hicksville, Island Park, Lawrence, Levittown, Locust Valley, Long Beach, Lynbrook, Malverne, Manhasset) are this
+#       file's; 363–400 (Massapequa onward) were part 2b's. This IS the "NY entries 234–300" part 2b owed: that range was in
+#       the NY-only numbering, and in this shape's numbering it is 301–362. Page 3 of the same shape (201–300: Freeport,
+#       Garden City, Glen Cove, Hempstead's first 17) was also fetched and holds nothing unread.
+#   (2) the NY-only list (`FilterState=New+York&StartAt=1`), page 2 — "543 entries … Entries 101 through 200" — for
+#       Floral Park's tail (NY entries 101–119), coordinates and excerpts.
+# Every line: Name | locate | one sentence in our own words from the marker text | source URL. locate is the marker's own
+# coordinate (@lat,lng), except Covert Homestead (a street address — see its line). A name differs from the marker title
+# only where the title isn't a place; each such line is marked.
+# Every coordinate sits in the Queens-Nassau 48-tile box and was checked against the 2,076 unique stored pins in the box's
+# 58 places:v34 rows (box + ring) and the 463 approved gems near the box: no line has a same-name or same-subject pin within
+# 150 m, and no line's name appears on any stored pin or gem in the box. The one hidden storyless OSM pin the sort found
+# (Henri Charpentier, a plaque pin 16 m from its marker) is a curated row in 502_hidden_curated_4.sql, NOT a line here
+# (handoff §6 story-lines (y)).
+# Cut as already served: The Goldberg Eagle (Hicksville); Rock Hall (Lawrence); Cobble Villa (Long Beach); House at 73
+# Grove Street, Rockville Cemetery and Bristol and Mexico Monument (Lynbrook); Manhasset Friends Meeting House (served as
+# "Manhasset Monthly Meeting of the Society of Friends"), Horatio Gates Onderdonk House (Manhasset); Quaker Meeting, Locust
+# Valley (part 1's gravestone — the meetinghouse's article serves); Floral Park's John Lewis Childs home-and-seedhouse
+# marker and Tyson Building (each an OSM pin carrying the marker text). Monahan's Crossing (Lynbrook) is already a gem at
+# 0 m; East Rockaway's Haviland grist-mill site and public-oven site are already gems (#482).
+# Skipped on purpose: war memorials, honor rolls and person-only plaques throughout (Pulaski & Kosciuszko, Tremblay, Samuel
+# Carman, Salvatore La Placa, Thomas L. Driscoll Jr. Plaza, Joseph J. Hennessy, Ethan Allen Park); St. George's Cemetery
+# (part 1's gravestone); Tertio Millenio Adveniente and the Millennium of Poland's Christianity plaques; Victory Eng. Co. #4
+# (no story); "Cantiag Woods" (a 1745 boundary rock, commemorative only — Cantiague Park serves 730 m away); the Long Beach
+# LIRR station (opened 1909, renovated 1986 — no story) and the Wreck of the Mexico (Long Beach) — the wrecks are told by
+# #482's East Rockaway line and the served Rockville Cemetery; Floral Park's Fire Department, Padre Pio, John Paul II,
+# Bicentennial and 9/11 plaques; East Rockaway's Alexander Davison Home (thin — descendants lived there to 1921 — and two
+# sources place it at different corners; the served Haviland-Davison Grist Mill carries the family).
+# OWED to part 2c-2: East Rockaway's "A Life in History" (Mill River Green Way trail panel, db m286136) and "Before the
+# Revolutionary War" (Pomeroy folklore marker, db m285969) — neither text reached this chat; and NY entries 431–543.
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439; confirm with
+#   env | grep -c '^GEMINI_API_KEY=\|^SUPABASE_SERVICE_ROLE_KEY='  → 2):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-4.txt
+# Dry run first; read every review and every ↳ line; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Hempstead -------------------------------------------------------------------------
+United Methodist Church of Hempstead | @40.70783482,-73.62063798 | The Methodist congregation here dates to 1812, and this church, dedicated in June 1855 just two years after Hempstead became a village, has the tallest spire in the village. | https://www.hmdb.org/m.asp?m=288589
+
+# --- Hewlett ---------------------------------------------------------------------------
+# Marker title is "This Home" — not a place name, so the line is named for the family.
+Hewlett Family Home | @40.640704,-73.694579 | George Hewlett came here from England in 1636 and gave this house to his grandson John Hewlett, and the marker records that it is still in the family. | https://www.hmdb.org/m.asp?m=190716
+
+# --- Levittown -------------------------------------------------------------------------
+# Two markers stand together here (m=200013 "Site of the Grandstand", m=200014); one line.
+Vanderbilt Motor Parkway Grandstand | @40.73698056,-73.52574167 | The official stand and the start-finish line of the 1908–1910 Vanderbilt Cup races stood near here, on William K. Vanderbilt Jr.'s Motor Parkway, the first concrete limited-access highway in the United States. | https://www.hmdb.org/m.asp?m=200013
+St. John of Jerusalem Chapel | @40.71181944,-73.50265556 | Built in 1856 as a German Methodist-Episcopal mission, this small chapel stands beside the cemetery where many of its first congregants' families lie. | https://www.hmdb.org/m.asp?m=200685
+Weber House | @40.73106207,-73.53902072 | This Cape Cod was the 70th house Levitt & Sons built in 1947, in the new development that came to be called Levittown. | https://www.hmdb.org/m.asp?m=288147
+
+# --- Lynbrook --------------------------------------------------------------------------
+# Marker "Lynbrook and the Long Island Railroad" stands at the station. # expect: new-seed, or a ↳ seed under the article
+# "Lynbrook station" if it is within 90 m (no stored pin carries it) — either is right.
+Lynbrook station | @40.65598962,-73.67497908 | The railroad reached Pearsall's Corners in 1867, and in 1894 the stop was renamed Lynbrook — "Brooklyn" with its syllables swapped — a name coined by station master Thomas Brennan. | https://www.hmdb.org/m.asp?m=289861
+Pearsall's Corners | @40.65763512,-73.67136006 | The Five Corners crossroads was once Pearsall's Corners, where Wright Pearsall built a general store in 1830 on land his family largely owned, and from about 1850 a daily stagecoach stopped here. | https://www.hmdb.org/m.asp?m=289862
+# 127 m from the served Rockville Cemetery pins (outside the 90 m check) — a different place, the congregation's church.
+Sand Hole Church | @40.65859238,-73.65980836 | Circuit rider Philip Cox, who covered some 300 miles of Long Island, gathered this Methodist congregation in 1785, and Isaac Denton deeded the land here in 1790 for its first 20-by-30-foot meeting house. | https://www.hmdb.org/m.asp?m=143256
+
+# --- Manhasset -------------------------------------------------------------------------
+Shelter Rock | @40.78926098,-73.69091027 | Long Island's largest boulder, some 5 million pounds of granite left by a glacier more than 20,000 years ago, has a 30-foot overhang that Native people used as a shelter. | https://www.hmdb.org/m.asp?m=286803
+
+# --- Floral Park (NY entries 101–119) --------------------------------------------------
+Floral Theatre | @40.72885271,-73.70172206 | Opened in 1927 as a home for both vaudeville and motion pictures, with a few shops alongside, the Floral Theatre became a banquet hall in 1992. | https://www.hmdb.org/m.asp?m=139371
+# Marker title is "Masonic Temple" — too generic a name to seed; the village is added.
+Floral Park Masonic Temple | @40.72646667,-73.70877778 | Floral Park's Masons began as a club in 1914, were chartered as Lodge No. 1016 in 1923, and built this temple in 1925. | https://www.hmdb.org/m.asp?m=139465
+The First Church of Floral Park | @40.72350504,-73.70521668 | Founded in 1890, the village's Methodist Episcopal congregation built this church as its first house of worship. | https://www.hmdb.org/m.asp?m=139373 | new
+# Marker title is "Vanderbilt Cup Race" — an event, not a place; the line is named for the course.
+1904 Vanderbilt Cup Course | @40.72967469,-73.69960155 | The first Vanderbilt Cup, on October 8, 1904, was the first major international auto race in the United States run on public roads, and its course passed through Floral Park here. | https://www.hmdb.org/m.asp?m=139411
+# 27 m from the served "Site of Home and SeedHouse" pin (the Childs home site) — a different place. If Gemini reads it as
+# that pin under another name, mark the line `| new` (story-lines (k)).
+Floral Park Woman's Club | @40.72520885,-73.70595193 | Founded in 1898 by Mrs. John Lewis Childs, wife of the village's founder, the club keeps a sphere from the 1939 New York World's Fair. | https://www.hmdb.org/m.asp?m=289116 | new
+# The marker page gives no coordinate (on Tulip Avenue near Covert Avenue); it names the Coverts' house at 501 Tulip
+# Avenue, so locate is that address (Photon places 501 Tulip Avenue, Floral Park at 40.71885,-73.69004; the street-address
+# guard drops the line rather than misplace it).
+Covert Homestead | 501 Tulip Avenue | The Covert family farmed land stretching a mile north of Tulip Avenue, and John Covert gave the county the land for the paved road named Covert Avenue in his honor. | https://www.hmdb.org/m.asp?m=288716
