@@ -1,0 +1,48 @@
+# names-502-queens-nassau-7.txt — #502 Queens-Nassau story pass 2, part 3 (eastern Queens, story lines, 2026-10-28)
+# Source: the HMdb Queens County list read end to end — 338 entries in four pages of the inscription-omitted shape
+# (results.asp?County=Queens%20County&DP=.O&FilterState=New%20York&Page=N; page 2 surfaced by an extended search, pages 1,
+# 3, 4 opened from its own Previous/Next links; heading "Queens County, New York" and "Entries N through M" checked on each:
+# 1–100, 101–200, 201–300, 301–338). Filtered to the box by the tools' own tile math (rows 812–817, cols −1476…−1469 —
+# east of −73.825). Marker texts read from each marker page (m= ID checked) or, for Valencia, the article's lead.
+# No eastern-Queens line was in any earlier names file (#482 pass 1 and #502 parts 1–2c are all Nassau).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. locate is the marker's own coordinate.
+# Every coordinate sits in the Queens-Nassau 48-tile box and was checked against the 2,931 unique stored pins in 76
+# places:v34 rows and the 437 approved gems: the nearest stored pin to any line is 134 m away (Fort Totten Officers' Club,
+# a different building), so no line twins a served or hidden pin and there is no curated SQL for this part.
+# Wikipedia at 250 m: only Valencia has an article at its spot (40 m, served on no pin — #539's pattern); the line is named
+# exactly as the article and NOT flagged `new`, so it seeds under the article (expect one ↳). No line sits within 90 m of a
+# near-named article or another line (closest pair: Thorne-Wilkins and Battery King, ~250 m), so none is flagged `new`.
+# Cut as already served: Voelker Orth Museum (12 m, the Conrad Voelker House marker), Kingsland Homestead (2 markers),
+# John Bowne House (the in-box marker, 10 m), the Jamaica Avenue sidewalk clock (2–12 m), King Manor, La Casina (47 m),
+# St. Monica's Church (17 m), Grace Episcopal Church Complex (~100 m), Prospect Cemetery (article pin 152 m inside the
+# grounds), TWA Flight Center (TWA Hotel / Flight Center pins 20–41 m), Fort Totten itself (article pin).
+# Skipped on purpose: Fort Totten's street-address building panels (207 Totten Ave. … 638 Totten Ave.), Parade Ground and
+# Main Entrance Gates (construction-date panels; the fort serves), the 9/11 "Survivor Tree" sprout and FDNY 9/11 memorial;
+# the Weeping Beech Tree (the tree died in 1998 — story-lines (y) check 3; Kingsland Homestead serves 24 m away); the
+# "Fats Waller" plaque (beside the Addisleigh Park marker — the district line carries the neighbourhood's residents);
+# person-named squares, playgrounds and parks (Sorrentino, Emerald, Archie Spigner, Sgt. Colyer, Freedom Square, Queens
+# Valley); war, veterans and 9/11 memorials throughout (Rosedale, Laurelton, Broad Channel, Fresh Meadows, Jamaica Estates
+# WWII, South Ozone Park); the Cross Bay Veterans Memorial Bridge marker (a memorial dedication); Justice Marshall plaque.
+# NOT READ (owed, texts not fetched in this chat): Site of the Former Home of Daniel Carter Beard (m228705), The Old Stone
+# Church (m127377 — 8 m from the served sidewalk clock), Jamaica Estates – A Residential Park (m38497), Queens County
+# Supreme Courthouse (m239561).
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-7.txt
+# Dry run first; read every review and the ↳ line; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Fort Totten (Willets Point) --------------------------------------------------------
+Battery King | @40.79471667,-73.77811389 | Beneath these ball fields lies Battery King, a mortar battery finished in 1900 whose 12-inch mortars could lob 700-pound shells at ships offshore; deactivated in 1935 and buried, it survives only as the 200-foot "King Battery Mound". | https://www.hmdb.org/m.asp?m=275945
+Thorne-Wilkins Cemetery | @40.7928,-73.77945833 | This small burial ground belonged to the family of William Thorne Sr., who farmed this point from 1645 and signed the 1657 Flushing Remonstrance; the Charles Willets stone here marks no grave, since the namesake of Willets Point was reburied in Brooklyn's Green-Wood Cemetery in 1855. | https://www.hmdb.org/m.asp?m=275866
+
+# --- Bayside and Little Neck -------------------------------------------------------------
+# Marker titled "James J. Corbett" (two markers at the house; one line).
+James J. Corbett House | @40.77016267,-73.76413824 | James J. Corbett, world heavyweight boxing champion from 1892 to 1897, lived in this Bayside house at 221-04 Corbett Road from 1902 until his death in 1933. | https://www.hmdb.org/m.asp?m=139268
+# Marker titled "George Grosz / Claudio Arrau" (on the house).
+George Grosz and Claudio Arrau House | @40.77549722,-73.75385278 | Two émigré artists lived in this house in turn: the German satirical painter George Grosz from 1936 to 1947, then the Chilean pianist Claudio Arrau, one of the twentieth century's greatest, from 1947 to 1990. | https://www.hmdb.org/m.asp?m=215351
+
+# --- Jamaica and St. Albans ---------------------------------------------------------------
+# Marker titled "Addisleigh Park Historic District" (four district markers; one line at the Sayres Ave. corner).
+Addisleigh Park Historic District | @40.69437012,-73.77793742 | Built as an all-white enclave of Tudor and Colonial Revival homes, Addisleigh Park was opened by Black buyers who got around its racial covenants, and by the 1940s and 1950s it was home to Ella Fitzgerald, Count Basie, Lena Horne and Jackie Robinson. | https://www.hmdb.org/m.asp?m=294771
+# Marker "Valencia Theater" (m239555); named as its Wikipedia article.
+Valencia Theatre | @40.70573897,-73.79457267 | Opened in 1929 as one of Loew's five "Wonder Theatres", John Eberson's 3,500-seat Spanish Baroque movie palace has been the Tabernacle of Prayer for All People since 1977. | https://en.wikipedia.org/wiki/Valencia_Theatre
