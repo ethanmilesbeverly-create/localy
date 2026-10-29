@@ -1,0 +1,53 @@
+# names-502-queens-nassau-2.txt — #502 Queens-Nassau story pass 2, part 2a (story lines, 2026-10-28)
+# Source: Historical Marker Database — the Nassau County list (mixed NY/FL county list, DP=-A.O shape), pages 2–3
+# (entries 101–300, each page's "Entries N through M" line checked), read against the Freeport town list (41 entries,
+# excerpts) and the Glen Cove town list (20 entries). #482 pass 1 covered NY entries 1–100 (through Floral Park, part).
+# THIS PART covers Freeport (all 41) and one known line from #502 part 1 (Lakeville A.M.E. Zion Church). Glen Cove's
+# storied markers are already OSM pins, hidden as storyless, so they are curated rows in 502_hidden_curated_2.sql, NOT
+# lines here (handoff §6 story-lines (y)). OWED for part 2b: the rest of Floral Park (Covert Homestead, Floral Theatre,
+# Vanderbilt Cup Race, Masonic Temple, John Lewis Childs, First Church), East Rockaway's newer markers, Franklin Square,
+# Hempstead (Duke's Laws Convention, Carman-Irish House, Denton Green …), then county list pages 4–6 (entries 301–610).
+# Skipped on purpose here: war memorials and rolls of honor; person-only plaques (Col. James Dean, Kelby House); school,
+# firehouse and fire-company plaques whose only fact is a date; the Freeport Post Office and Memorial Library (their
+# articles already serve); Two Shipwrecks (the Bristol and Mexico story is already #482's East Rockaway line); the Trubia
+# Rifle (its pin is stored only as "Cannon", too generic for a curated row); George Washington's 1790 route.
+# Every line: Name | locate | one sentence in our own words from the marker text | source URL. locate is the marker's own
+# coordinate (@lat,lng), except Lakeville, which has no marker (its coordinate is the geocode of its street address).
+# A name differs from the marker title only where the title isn't a place; each is marked.
+# Every coordinate below was checked against the Queens-Nassau tile set (48 tiles) and against the 3,233 stored pins in
+# the box's places:v34 rows: no line has a same-name or same-subject pin within 250 m, stored or served.
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-2.txt
+# Dry run first; read every review; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Freeport: the Nautical Mile and the south end --------------------------------
+The LIGHTS Club | @40.63341141,-73.59028048 | From 1916 to 1939 this was the clubhouse of the LIGHTS, a summer colony of actors and vaudevillians whose members included Al Jolson, Will Rogers, Florenz Ziegfeld and John Philip Sousa. | https://www.hmdb.org/m.asp?m=133521
+# A private home, landmarked by its marker; Lombardo died in 1977. Seen from the street only.
+Guy Lombardo's House | @40.6331365,-73.58046896 | Bandleader Guy Lombardo, whose Royal Canadians made "Auld Lang Syne" the sound of New Year's Eve, lived in this private house and produced the summer musicals at Jones Beach Theater. | https://www.hmdb.org/m.asp?m=133504
+Spirit of Freeport | @40.63413659,-73.58194954 | Built on the Nautical Mile, this 26-foot boat is the one Al Grover took across the Atlantic through a hurricane with winds over 100 mph, a crossing listed by Guinness. | https://www.hmdb.org/m.asp?m=127224
+Freeport Point Shipyard | @40.62864678,-73.58095654 | From 1924 to 1968 the Scopinich family's yard here built rumrunners, then Coast Guard and air-sea rescue boats, and won a Navy excellence award in World War II. | https://www.hmdb.org/m.asp?m=126814
+# Renamed from "Playland Park": the park is gone; the line is for its site.
+Playland Park Site | @40.63956796,-73.5818047 | A small-scale Coney Island of rides and amusements stood here from the 1920s until fire destroyed it in the early 1930s. | https://www.hmdb.org/m.asp?m=126859
+# Renamed from "Crystal Lake Hotel" (burned 1958).
+Crystal Lake Hotel Site | @40.64712632,-73.5834665 | Ward and Allie Frost opened the Crystal Lake Hotel and its cottages here in 1895 with room for 150 guests; fire destroyed it in 1958. | https://www.hmdb.org/m.asp?m=126819
+
+# --- Freeport: the village centre and north -----------------------------------------
+# Renamed from "Village Hall - 1928".
+Freeport Village Hall | @40.65872833,-73.587245 | Built in 1928 and enlarged in 1973, Freeport's Village Hall was designed as a copy of Philadelphia's Independence Hall. | https://www.hmdb.org/m.asp?m=114702
+# Renamed from "Parrot Rifle" (the marker's spelling): the gun is a Parrott rifle, named for its maker.
+Parrott Rifle from the USS Hartford | @40.65595433,-73.59636909 | This gun came from the USS Hartford, Admiral David Farragut's flagship at the Battle of Mobile Bay in August 1864, and was presented to Freeport on July 4, 1902. | https://www.hmdb.org/m.asp?m=133522
+Miracle House | @40.66122431,-73.59213657 | Built in a single day in 1906 to spite a rival in a race between real estate developers, this house changed the layout of Lena Avenue and added Wilson Place to the street map. | https://www.hmdb.org/m.asp?m=126869
+# Renamed from "B'nai Israel Synagogue": the building has been a church since 1971.
+Former B'nai Israel Synagogue | @40.6598046,-73.57987701 | Freeport's first synagogue, built in 1921, became St. Demetrios Greek Orthodox Church in 1971 and the home of the Refuge Apostolic Church of Christ in 1982. | https://www.hmdb.org/m.asp?m=133167
+# Renamed from "Grist and Saw Mill".
+Raynor Grist and Saw Mill Site | @40.65172139,-73.57541987 | Daniel Raynor's grist and saw mill stood here in Raynortown, the settlement begun by Edward Raynor or his children in 1659. | https://www.hmdb.org/m.asp?m=126825
+
+# --- Lake Success / Manhasset: carried from #502 part 1 ----------------------------
+# No marker. Dry run 1 (2026-10-28) geocoded the church's listed address, 467 Community Drive, Manhasset (Town of North
+# Hempstead directory), to 40.7748156, -73.7034185 — ~110 m north of its hidden cemetery pin (40.7738363, -73.7036294) on
+# the same road — but read name-mismatch (an address geocode returns the address as its label, not the church's name).
+# This line now uses that coordinate. The served Valley Road Historic District pin is a different subject (the district).
+# `new` after review, dry run 2: review → "Valley Road Historic District" (the district, one of whose six contributing
+# buildings is this church; Roslyn's district and its buildings serve side by side the same way) — the church is its own pin.
+Lakeville A.M.E. Zion Church | @40.7748156,-73.7034185 | Built in 1832 by the congregation of Success, a free Black and Indigenous community along Valley Road, this church is the only building of that community still standing. | https://considerthesourceny.org/document/old-indian-homestead-clinton-smith-cottage | new
