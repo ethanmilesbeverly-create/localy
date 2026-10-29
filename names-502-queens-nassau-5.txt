@@ -1,0 +1,76 @@
+# names-502-queens-nassau-5.txt — #502 Queens-Nassau story pass 2, part 2c-2 (story lines, 2026-10-28)
+# Source: Historical Marker Database town lists (NY-only numbering of the Nassau County list, entries 431–543 — past HMdb's
+# 500-entry sign-in gate, so town lists only), each read whole with excerpts: Port Washington (26, entries 20–26 new here;
+# 1–19 were part 2b's), Roslyn (8), Rockville Centre (40), Wantagh (9), Westbury (13); Sands Point holds one entry (the
+# Alicia Patterson tribute — a person plaque, skipped). Seaford read from its State marker page only.
+# NOT READ (owed to part 2c-3): Port Washington North's list (only its Bay Walk Park art panels were seen — Bay Walk Park
+# serves), Roosevelt, Roslyn Harbor, Roslyn Heights, Sea Cliff, Syosset, Uniondale, Valley Stream, West Hempstead,
+# Williston Park, Woodbury, Woodmere; East Rockaway's "A Life in History" (m286136) and "Before the Revolutionary War"
+# (m285969).
+# Every line: Name | locate | one sentence in our own words from the marker text | source URL [| new]. locate is the
+# marker's own coordinate. Where a marker title isn't a place name, the line's name differs and the comment says so.
+# Every coordinate sits in the Queens-Nassau 48-tile box and was checked against the 2,076 unique stored pins in the box's
+# 58 places:v34 rows (box + ring) and the 343 approved gems near the box: no line has a same-name or same-subject pin
+# within 250 m. Hidden storyless OSM pins found by the same sort are curated rows in 502_hidden_curated_5.sql, NOT lines here
+# (handoff §6 story-lines (y)).
+# Lines flagged `| new`: Mackay Horse Statue (Gerry Park serves 75 m away — a larger place); 30 Pounder Parrott Gun (South
+# Side School gem 18 m) and First Mass Anvil (St. Agnes Cathedral 46 m; the Parrott line 66 m); Jerusalem Settlement Site,
+# Jerusalem Friends Cemetery and Wantagh Baptist Church (the three lines sit 53–171 m apart); Long Island Motor Parkway (Westbury) (the parkway's own article sits elsewhere); Bethel
+# African Methodist Episcopal Church (Westbury) (a common church name); Westbury Friends Meeting House (Friends cemetery
+# grave gems 62–148 m).
+# Cut as already served: Cedarmere and the William Cullen Bryant marker (OSM, 1–23 m), Roslyn Grist Mill (OSM + wiki),
+# Roslyn's Main Street / Historical District markers (the Main Street district and Clock Tower serve), South Side School
+# (gem, 0 m), Saint Agnes (cathedral article, 48 m), Jackson House (Samuel and Elbert Jackson House, 20 m), the "Wantagh"
+# State marker (Wantagh Railroad Complex, 27 m), Charles A. Lindbergh (the OSM "Lindbergh's Flight" pin tells it).
+# Skipped on purpose: war memorials, honor rolls and 9/11 memorials throughout; person plaques (Gay Pearsall, Tailer,
+# Ahern, Alicia Patterson, Shakespeare Garden); Village of Rockville Centre (a first-meeting plaque); Mill River Greenway
+# and Bay Walk Park interpretive panels; Hempstead Lake panels (the state park serves); Sousa Nautical Bench, The Dawn of a
+# Destination, Shaped by Necessity, Lutheran Church of Our Savior, June 23, 1898, Mill Pond Historic District (part 2b's
+# Mill Pond rows carry it).
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-5.txt
+# Dry run first; read every review; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Port Washington (entries 20–26) ----------------------------------------------------
+Star Class Keel | @40.83561629,-73.70150188 | On this spot Ike Smith built the first 22 Star-class sailboats in the winter of 1910–11, to plans drawn in naval architect William Gardner's office; the Star went on to become an Olympic racing class. | https://www.hmdb.org/m.asp?m=287013
+
+# --- Roslyn ---------------------------------------------------------------------------
+# Marker titled "The Harbor Hill Estate and the Mackay Horse Statues".
+Mackay Horse Statue | @40.79674146,-73.64802743 | This horse statue recalls Harbor Hill, the vast Renaissance-style country house Stanford White designed in 1899 and built in 1900–02 for Clarence and Katherine Mackay, among the largest estates ever built on Long Island. | https://www.hmdb.org/m.asp?m=174033 | new
+
+# --- Rockville Centre --------------------------------------------------------------------
+30 Pounder Parrott Gun | @40.65945,-73.645241 | The War Department presented this 3,475-pound Parrott rifle to the village; during the Civil War it served aboard the gunboat Neptune. | https://www.hmdb.org/m.asp?m=114798 | new
+# Marker titled "Anvil".
+First Mass Anvil | @40.6594021,-73.64639141 | The first Catholic Mass in Rockville Centre was offered over this anvil in the summer of 1887, in Walter Johnson's blacksmith shop on Centre Avenue. | https://www.hmdb.org/m.asp?m=121014 | new
+# Marker titled "The Civil Rights Conscience of the Community"; it faces the church.
+Shiloh Baptist Church | @40.66010158,-73.64994975 | Organized in 1907 and on North Centre Avenue since 1954, this congregation's leaders helped bring Martin Luther King Jr. to Rockville Centre in 1968 for a standing-room-only appearance. | https://www.hmdb.org/m.asp?m=284791
+# Marker titled "The History of Rockville Centre's Smith Pond".
+Smith Pond | @40.66008691,-73.65327228 | Michael DeMott began building a mill on this pond in 1710, foreseeing the spot as a commercial center for the South Shore — the start of Rockville Centre. | https://www.hmdb.org/m.asp?m=286558
+McDonald Pond | @40.67123889,-73.64823889 | Once the Model Boat Pond, it was renamed in 1988 for NYPD officer Steven McDonald, a Malverne resident paralyzed in a 1986 shooting who became known around the world for his message of forgiveness. | https://www.hmdb.org/m.asp?m=239595
+
+# --- Seaford ------------------------------------------------------------------------------
+# Marker titled "Indian Trail" (State Education Department, 1935).
+Indian Trail and Seaman's Neck Path | @40.666517,-73.49015 | This road follows an Indian trail and the path through the tract Captain John Seaman bought from the Massapequa in 1664; it became a public highway in 1762. | https://www.hmdb.org/m.asp?m=160428
+
+# --- Wantagh ------------------------------------------------------------------------------
+# Marker titled "Jerusalem".
+Jerusalem Settlement Site | @40.69755029,-73.50711943 | Around 1666 John Seaman, a founder of the Town of Hempstead, established the English settlement of Jerusalem here — the early name of Wantagh. | https://www.hmdb.org/m.asp?m=126857 | new
+# Marker titled "Quaker Cemetery".
+Jerusalem Friends Cemetery | @40.69621667,-73.50611111 | Land for this Quaker burying ground was bought from William S. and Letitia Hicks in 1861, and descendants of Jerusalem's earliest families are buried here. | https://www.hmdb.org/m.asp?m=196644 | new
+Wantagh Baptist Church | @40.69663333,-73.50641667 | Quakers who settled Jerusalem built this meeting house in 1827; it is now the Wantagh Baptist Church. | https://www.hmdb.org/m.asp?m=196642 | new
+# Marker titled "Robert Jackson".
+Robert Jackson Home Site | @40.68942771,-73.50866573 | Robert Jackson, a pioneer settler of Jerusalem in 1644, had his home here and held the patent to the land running south after the Hempstead Purchase. | https://www.hmdb.org/m.asp?m=126823
+# Marker titled "Washington Tour 1790" (Cedar Creek Park).
+Washington's 1790 Long Island Tour | @40.664699,-73.507199 | President George Washington passed near here on April 21, 1790, while touring Long Island to thank those who had supported the war effort. | https://www.hmdb.org/m.asp?m=65074
+
+# --- Westbury -----------------------------------------------------------------------------
+Bethel African Methodist Episcopal Church (Westbury) | @40.75652914,-73.58204858 | Founded in 1887 by former members of the New Light Baptist Church, this was the first African Methodist church organized in the Village of Westbury. | https://www.hmdb.org/m.asp?m=133530 | new
+Hicks Nursery | @40.76416416,-73.59812839 | Quaker farmer Isaac Hicks founded this nursery as Isaac Hicks & Son in 1853 and built it into one of the area's leading nurseries, supplying fine trees to Long Island's Gold Coast estates. | https://www.hmdb.org/m.asp?m=139415
+House of Ambrose Clark | @40.76173267,-73.58718418 | Ambrose Clark, a Singer sewing machine heir and prominent racehorse breeder, built this house in 1903; it later became Westbury's war memorial community center and, from 1947, its public library. | https://www.hmdb.org/m.asp?m=135406
+Long Island Motor Parkway (Westbury) | @40.737399,-73.571692 | The first parkway built only for automobiles ran here from 1908 to 1938, and this stretch carried the Vanderbilt Cup races of 1908–1910. | https://www.hmdb.org/m.asp?m=288238 | new
+Robert Bacon Memorial Children's Library | @40.76194722,-73.584175 | Opened in 1924 as one of the first libraries in the world built just for children, it was endowed by Martha Bacon in memory of her husband, Colonel Robert Bacon. | https://www.hmdb.org/m.asp?m=133532
+St. Brigid Roman Catholic Church | @40.75082426,-73.58768228 | Founded in 1850, the parish dedicated its first church in 1856, a second in 1896 and the present church in 1916. | https://www.hmdb.org/m.asp?m=125770
+Westbury African Methodist Episcopal Zion Church | @40.75894456,-73.5783756 | Founded in 1834 by freed men and women as the New Light Baptist Church — Westbury's second religious body — it took its present name in 1892; its first building on this site went up in 1867. | https://www.hmdb.org/m.asp?m=133860
+# The "Westbury Monthly Meeting" marker (m=126015) stands ~100 m away; its facts are folded into this line.
+Westbury Friends Meeting House | @40.76649562,-73.58605092 | Westbury's Quaker meeting dates to 1671, with meeting houses on this site in 1702, 1801 and 1902; in the 1700s its members freed the people they had enslaved, taught Black and white children together and opened a cemetery to all. | https://www.hmdb.org/m.asp?m=125931 | new
