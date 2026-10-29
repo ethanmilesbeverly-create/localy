@@ -1,0 +1,114 @@
+# names-446-pittsburgh-3.txt — #446 Pittsburgh story pass, part 2 (b): the remaining PHMC state markers — Oakland, the
+# East End, the Mon Valley and the suburbs, the once-cold markers and Bouquet Camp included (drafted 2026-10-29).
+# 30 lines. Every line: Name | locate | one sentence in our own words | source URL [| new]. locate is the PHMC marker's
+# own coordinate (Wikipedia's "List of Pennsylvania state historical markers in Allegheny County", which carries the PHMC
+# database coordinates), EXCEPT the 2 article-named lines, which sit at their article's coordinate.
+# Sources: each marker's subject article on Wikipedia, read for its place-specific sentences (handoff §6 FROM PITTSBURGH (3)).
+#
+# THE LIST'S REMAINDER: 123 PHMC markers sit inside the box's 48 tiles. Part 1 drafted 40 and cut 11, set 4 aside; part 1
+# (a) settled 14. That left 54, all sorted here: 30 lines (this file), 2 hidden-pin rows (446_hidden_curated.sql), 10 cut
+# as served, 12 OWED to their marker text (below). WASHINGTON / WESTMORELAND: neither county's PHMC list has a marker inside
+# the box's tiles — the Peters Township strip is read and closed with nothing (Washington's nearest, 40.2735, is in row 805).
+#
+# DUPLICATE CHECK, done in the sandbox before writing: the 48 box rows + the 1 stored ring row of places:v34 (1,426 unique
+# pins); approved gems in and around the box (54 non-grave — exactly part 1's 40 and part 1 (a)'s 14, none near a line
+# here); Wikipedia geosearch at 200 m around every marker; the served answer of every tile holding a candidate hidden pin.
+# Every line's tile is warm.
+#
+# ARTICLE-NAMED LINES (#539 pattern; FROM PITTSBURGH (4)): 2 markers stand near an article that has its own coordinate but
+# that no stored tile carries. Named EXACTLY as the article, placed at its coordinate, NOT flagged `new` — expect each to
+# seed with one ↳ under that article at 0 m: Salk Hall (70 m from the "Salk Polio Vaccine" marker), St. Agnes Church
+# (Pittsburgh) (the "John T. Comès" marker stands at the St. Agnes Center; Wikipedia's list prints the Kennedy–Nixon
+# marker's McKeesport coordinate for it by mistake, so the article's coordinate is the only good one).
+# NOT article-named: University of Pittsburgh — its article coordinate sits 13 m from the served Cathedral of Learning pin,
+# so the line stays at the marker (Fifth & Bigelow), flagged `new`.
+#
+# `| new` (14) — set up front on every line within ~100 m of a stored pin, another line, or an article, or near a near-named
+# live pin (George Westinghouse Bridge, Homestead Grays Bridge) (DuPage (1), Bergen (2)); the reason is in the comment
+# above each one.
+#
+# CUT — already served (a stored pin within ~600 m carrying the subject, read in the served answer where it mattered):
+# 1909 McKee's Rocks Strike (OSM pin with the marker's inscription, 312 m), Bethel Presbyterian Church (wiki pin, 12 m),
+# Carnegie Library of Homestead Swim Team (the library's wiki pin, 31 m), Davis Island Lock & Dam (wiki "Davis Island Lock
+# and Dam Site", 158 m), Forbes Field (the outfield-wall pin, 29 m, SERVES the Forbes Field article), Frank Vittor (his
+# Columbus statue's served pin, 22 m), Heidelberg Raceway and Sports Arena (wiki "Heidelberg Raceway", 247 m), Michael A.
+# Musmanno (OSM pin with the inscription, 20 m), National Negro Opera Company (OSM house pin with the inscription, 33 m),
+# Rachel Carson (the Rachel Carson Homestead wiki pin, 601 m — her birthplace).
+#
+# HIDDEN-PIN ROWS — in 446_hidden_curated.sql, NOT here (handoff §6 story-lines (y)): the Forbes Road "Fort Duquesne End"
+# plaque's story goes on the hidden "Fort Duquesne Tracery" pin (the brick outline, 1 m from the Fort Duquesne article's
+# coordinate); the "Homestead Strike" marker's story on the hidden "Homestead Works Pump House" (43 m — the building where
+# the 1892 gunfight happened).
+#
+# OWED — need the marker's own text (HMdb marker page, ~2k tokens each, m= ID checked, commentary read for a removed
+# marker), so NOT drafted here (12): Bouquet Camp (+ the Forbes Road "Bouquet Encampment" plaque, set aside in part 1),
+# First Aluminum Observatory Dome, Hand's Hospital, Homestead Strike Victims, Jane Holmes, John M. Phillips, Old St. Luke's
+# Church, Shadyside Iron Furnace, Presston (its spot is 2 m from the served Presston Veterans Memorial — decide new-or-fold
+# from the text), Polish Army (the Polish Falcons hall), Frances Perkins and Mary Harris "Mother" Jones (both at 9th &
+# Amity in Homestead; the articles carry no Homestead story).
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439; env | grep -c for the two keys
+# → 2; FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-3.txt
+# Dry run first; expect 30 new-seed (2 with ↳), 0 review (dry run 1 read 2 reviews — National Tube Works, William T. Kerr —
+# both different places 51 m from a pin/article, now `| new`); read every ↳ line; then the same command with --commit. After the
+# commit: curated_category_backfill(true) in the SQL editor (#495) — mostly NULL for new seeds is expected (DuPage (5)).
+
+# --- Oakland ---------------------------------------------------------------------------------------------------------
+# Carnegie Museum of Natural History OSM pin 134 m; Carnegie Library / Museums articles 76–95 m; the Victor Herbert line 95 m.
+Andrew Carnegie | @40.44277,-79.95168 | Andrew Carnegie gave Pittsburgh the Institute and Library complex behind this marker, where his art and natural history museums opened together in 1895; his Diplodocus, Dippy, still stands in the Hall of Dinosaurs. | https://en.wikipedia.org/wiki/Carnegie_Museums_of_Pittsburgh | new
+# Dippy (statue) article 13 m; the Andrew Carnegie line 95 m.
+Victor Herbert | @40.443587,-79.951356 | Before the Broadway operettas that made his name, Victor Herbert conducted the Pittsburgh Symphony from 1898 to 1904. | https://en.wikipedia.org/wiki/Victor_Herbert | new
+# The served Forbes Field outfield-wall pin 48 m.
+Barney Dreyfuss | @40.4416,-79.95296 | Pirates owner Barney Dreyfuss built Forbes Field here in 1909, one of baseball's first steel-and-concrete parks, and is credited with creating the modern World Series. | https://en.wikipedia.org/wiki/Barney_Dreyfuss | new
+# Cathedral of Learning 116 m, Nationality Rooms 93 m, William Pitt Union 120 m; the V.F.W. line 31 m.
+University of Pittsburgh | @40.44444,-79.95452 | Hugh Henry Brackenridge chartered the Pittsburgh Academy in 1787, ten weeks before the Constitutional Convention; it became the Western University of Pennsylvania in 1819 and, after moving to Oakland, the University of Pittsburgh in 1908. | https://en.wikipedia.org/wiki/University_of_Pittsburgh | new
+# William Pitt Union 89 m; the University of Pittsburgh line 31 m.
+Veterans of Foreign Wars | @40.44416,-79.95458 | The Foreign Service Veterans, organized in Pittsburgh in October 1901, was one of the veterans' groups whose mergers produced the Veterans of Foreign Wars in 1913. | https://en.wikipedia.org/wiki/Veterans_of_Foreign_Wars | new
+# Article-named (#539): Salk Hall, 70 m from the "Salk Polio Vaccine" marker; no stored tile carries it.
+Salk Hall | @40.44271,-79.962914 | Jonas Salk developed the first polio vaccine in a basement laboratory here, when this was the city's Municipal Hospital for Contagious Diseases; its success was announced in 1955, and Pitt renamed the building for him in 1957. | https://en.wikipedia.org/wiki/Salk_Hall
+# Article-named (#539): the "John T. Comès" marker stands at the St. Agnes Center (Carlow University); no stored tile carries the article.
+St. Agnes Church (Pittsburgh) | @40.4381,-79.9648 | Luxembourg-born architect John T. Comès, who came to Pittsburgh around 1897 and designed churches for Catholic parishes across the country, designed this church, built in 1916–17. | https://en.wikipedia.org/wiki/St._Agnes_Church_(Pittsburgh)
+# Rodef Shalom Biblical Botanical Garden article 72 m.
+Station WQED | @40.44717,-79.94453 | WQED went on the air on April 1, 1954, as the first community-sponsored television station in the United States, and later made Mister Rogers' Neighborhood. | https://en.wikipedia.org/wiki/WQED_(TV) | new
+
+# --- East End --------------------------------------------------------------------------------------------------------
+# Whitehill-Gleason Motors article 53 m — a later building at the same corner, a different thing.
+First Drive-In Filling Station | @40.45934,-79.93066 | Gulf Oil opened what is counted as the first drive-in service station in 1913, at this corner of Baum Boulevard and St. Clair Street. | https://en.wikipedia.org/wiki/Gulf_Oil | new
+# Lincoln Elementary School (Pittsburgh) article 12 m.
+Mary Lou Williams | @40.46,-79.91209 | Jazz pianist Mary Lou Williams grew up in East Liberty and was playing in public by age seven, known around town as "the Little Piano Girl"; she came home to Pittsburgh again in 1942. | https://en.wikipedia.org/wiki/Mary_Lou_Williams | new
+# Tazza d'Oro OSM/wiki pin 102 m.
+Billy Eckstine | @40.475567,-79.91925 | Bandleader and baritone Billy Eckstine, born in Pittsburgh in 1914, grew up in this Highland Park house. | https://en.wikipedia.org/wiki/Billy_Eckstine | new
+Billy Strayhorn | @40.4606,-79.9003 | Billy Strayhorn grew up in Homewood and went to Westinghouse High School, and he wrote the song that became "Lush Life" in Pittsburgh before nearly three decades with Duke Ellington. | https://en.wikipedia.org/wiki/Billy_Strayhorn
+Frank Conrad | @40.445818,-79.891436 | Westinghouse engineer Frank Conrad ran a radio station from the garage beside his Wilkinsburg home, licensed as 8XK in 1916, and his 1920 broadcasts led Westinghouse into broadcasting with KDKA. | https://en.wikipedia.org/wiki/Frank_Conrad
+Jane Grey Swisshelm | @40.42867,-79.89134 | Abolitionist editor Jane Grey Swisshelm, who founded Pittsburgh's Saturday Visiter in 1847, lived on her husband's farm here and named it Swissvale. | https://en.wikipedia.org/wiki/Jane_Swisshelm
+
+# --- Mon Valley ------------------------------------------------------------------------------------------------------
+# Homestead Grays Bridge wiki pin 601 m (near-named); Homestead station article 152 m.
+Homestead Grays | @40.409218,-79.912121 | Cumberland Posey formed the Homestead Grays in 1912, and the Negro league club kept the town's name for 38 seasons, even after it moved its home games across the river to Forbes Field and Greenlee Field. | https://en.wikipedia.org/wiki/Homestead_Grays | new
+Great Steel Strike of 1919 | @40.39852,-79.8622 | Steelworkers here, across from the Edgar Thomson Works, joined the national walkout of September 22, 1919, after months in which the area's mills had denied AFL organizers permits and meeting halls; the strike collapsed on January 8, 1920. | https://en.wikipedia.org/wiki/1919_General_Steel_Strike
+# George Westinghouse Bridge wiki pin 137 m (near-named).
+George Westinghouse | @40.39487,-79.83875 | George Westinghouse moved to Pittsburgh in 1868 for cheaper steel, founded the Westinghouse Air Brake Company the next year, and became a pioneer of alternating-current power. | https://en.wikipedia.org/wiki/George_Westinghouse | new
+Westinghouse Atom Smasher | @40.410474,-79.842308 | Westinghouse built this 65-foot pear-shaped Van de Graaff accelerator at its Forest Hills research labs in 1937, the world's first industrial one; idle after the war, it was laid on its side in 2015. | https://en.wikipedia.org/wiki/Westinghouse_Atom_Smasher
+Duquesne Steel Works | @40.37407,-79.84241 | The Duquesne Works, a Carnegie Steel and later U.S. Steel mill, was the heart of this town, and its "Dorothy Six" was the largest blast furnace in the world. | https://en.wikipedia.org/wiki/Duquesne,_Pennsylvania
+Kennedy-Nixon Taft-Hartley Debate | @40.350572,-79.86764 | Congressmen John F. Kennedy and Richard Nixon met in McKeesport on April 22, 1947, to debate the Taft-Hartley labor bill — the first of their five debates, thirteen years before the famous televised ones. | https://en.wikipedia.org/wiki/McKeesport,_Pennsylvania
+# McKeesport Transportation Center wiki pin 51 m — the bus station on the mill's old ground, a different place (dry run 1 REVIEW).
+National Tube Works | @40.35215,-79.8604 | The National Tube Company's works here were once the world's largest producer of steel pipe; the McKeesport plant shut on August 29, 1987. | https://en.wikipedia.org/wiki/National_Tube_Works_(McKeesport,_Pennsylvania) | new
+Queen Aliquippa | @40.35983,-79.83326 | The Seneca leader Queen Aliquippa and her band lived where the Youghiogheny meets the Monongahela, and young George Washington went up to call on her here in December 1753. | https://en.wikipedia.org/wiki/Queen_Alliquippa
+# The hidden "David McKee Historical Marker" OSM pin 97 m — a different subject.
+Helen Richey | @40.34063,-79.82724 | McKeesport-born Helen Richey became the first woman hired as a pilot by a US commercial airline when Central Airlines took her on in 1934. | https://en.wikipedia.org/wiki/Helen_Richey | new
+Arthur J. Rooney | @40.29597,-79.7993 | Art Rooney was born in Coulter, the Youghiogheny Valley coal town where his father kept a saloon, and in 1933 founded the Pittsburgh Steelers, whom he led until his death in 1988. | https://en.wikipedia.org/wiki/Art_Rooney
+
+# --- North and west suburbs, Neville Island ---------------------------------------------------------------------------
+# Once-cold marker (part 1's list of 6).
+Dravo Corporation Shipyard | @40.51182,-80.12971 | Dravo's Neville Island shipyard, opened in 1919, employed 16,000 people building tank landing ships during the Second World War and closed in 1982. | https://en.wikipedia.org/wiki/Dravo_Corporation
+# Once-cold marker (part 1's list of 6). Fox Chapel Area High School article 180 m.
+General Matthew B. Ridgway | @40.51775,-79.86756 | Matthew Ridgway, who rescued the UN war effort in Korea after taking over the Eighth Army in 1950, settled in Fox Chapel in 1955 to chair the Mellon Institute's trustees, and died in 1993 at 98. | https://en.wikipedia.org/wiki/Matthew_Ridgway
+Carnegie Hero Fund Commission | @40.54106,-79.79061 | After two men died trying to rescue miners in the Harwick Mine disaster near here on January 25, 1904, Andrew Carnegie set up the Carnegie Hero Fund in Pittsburgh that April with $5 million for civilian heroes. | https://en.wikipedia.org/wiki/Carnegie_Hero_Fund
+
+# --- South Hills and the Chartiers valley ------------------------------------------------------------------------------
+Bower Hill | @40.37434,-80.08614 | In July 1794 Whiskey Rebellion militiamen besieged tax inspector John Neville's house at Bower Hill; on the second day their commander, James McFarlane, was shot during a ceasefire and the rebels burned the house. | https://en.wikipedia.org/wiki/Whiskey_Rebellion
+# Campbells Run article 71 m (a creek).
+Honus Wagner | @40.407281,-80.088843 | Honus Wagner, "the Flying Dutchman," was born in 1874 in the borough of Chartiers, now Carnegie, and in 1936 was one of the first five players voted into the Baseball Hall of Fame. | https://en.wikipedia.org/wiki/Honus_Wagner
+# Rennerdale, Pennsylvania article 51 m — the town, not the man (dry run 1 REVIEW, #432).
+William T. Kerr | @40.39809,-80.14012 | Pittsburgh native William T. Kerr founded the American Flag Day Association of Western Pennsylvania in 1888 and chaired the national association for fifty years; Flag Day became law in 1949. | https://en.wikipedia.org/wiki/Flag_Day_(United_States) | new

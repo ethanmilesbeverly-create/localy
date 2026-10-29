@@ -1,0 +1,83 @@
+# names-446-pittsburgh-2.txt — #446 Pittsburgh story pass, part 1 (a): the 14 PHMC markers part 1 owed because their
+# story needed the marker's own text (drafted 2026-10-29).
+# 14 lines. Every line: Name | locate | one sentence in our own words | source URL [| new]. locate is the PHMC marker's
+# own coordinate (Wikipedia's "List of Pennsylvania state historical markers in Allegheny County"), EXCEPT National
+# Aviary, which sits at its article's coordinate (below).
+# Sources: each marker's inscription, read on HMdb with the m= ID checked against the marker's title and place
+# (m=40301 cotton mill strikes, 42023 Bethel A.M.E., 15138 Clinton Furnace, 42024 John Scull, 94741 McClurg Iron
+# Foundry, 8688 Pittsburgh Glass Works, 130272 Western Penitentiary, 48357 Steamboat "New Orleans", 56705 Local 471,
+# 40903 Grease Plant, 47037 Westinghouse Air Brake, 40175 Founding Convention of the CIO, 42221 John A. Roebling;
+# Lewis and Clark's text from the PHMC inscription as transcribed on the Historical Marker Project), plus the subject's
+# Wikipedia article where one exists. Each line's source URL is the page the sentence leans on most.
+#
+# DUPLICATE CHECK, done in the sandbox before writing (handoff §6 FROM KATY-ENERGY CORRIDOR (1)/(2), MIDDLESEX-UNION (2)):
+# the 12 warm places:v34 rows around the 14 markers (556 unique stored pins), the 67 approved gems/seeds in and around
+# the box (part 1's 40 and the graves), and Wikipedia geosearch at 250 m around every marker; plus a keyword scan of
+# every stored pin and gem name for each subject (penitentiary, aviary, Roebling, New Orleans, air brake, grease, glass,
+# Clinton, Scull, Gazette, Bethel, 471, CIO, Lewis, cotton, McClurg, foundry). Nothing served any of the 14 subjects;
+# no hidden pin matched a line, so there is no curated SQL for this part (Pennsylvania's markers are not OSM plaques).
+#
+# ARTICLE-NAMED LINE (#539 pattern; part 1's eight; #502 3b's "a gone-site marker settles by carrying its story to the
+# living place it names"): the Western Penitentiary plaque in the National Aviary's eagle enclosure was REMOVED by PHMC
+# after its 2021 review (HMdb m=130272 commentary), so a "Site of the Western Penitentiary" pin would point at nothing.
+# The living place is the National Aviary — its article stands 17 m from the plaque's spot and no stored tile carries it
+# (the 20-nearest cap again). The line is named EXACTLY as the article, placed at the article's coordinate, and carries
+# the site's history in the aviary's own sentence; it should commit as a new seed with one ↳ under that article at 0 m.
+# Not flagged `new` (that would skip the attach).
+#
+# `| new` — set up front on every line within ~100 m of a stored pin, a gem or a near-named article (DuPage (1),
+# Bergen (2)); the nearest neighbour is in the comment above each one.
+#
+# WATCH (dry run): Lewis and Clark Expedition, Steamboat New Orleans, Allegheny Cotton Mill Strikes and Union Local 471
+# share their subject with a Wikipedia article that has no coordinate here; if any of them REVIEWS against a far
+# article or pin, mark it `| new` and re-run the dry run.
+#
+# #539 GAPS SEEN, NOT FIXED HERE (part 2 or #539's own pass): the Smithfield Street Bridge article (40.43472, −80.00222),
+# 177 m from the Roebling marker, and the Pittsburgh Opera article at the Air Brake factory (43 m) are in no stored
+# tile, so neither is on the map; Duquesne Incline's article (95 m from the glass works) likewise.
+#
+# RUN (Mac), all 48 tiles are warm, with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439;
+# Middlesex-Union (4): env | grep -c for the two keys → 2; Pittsburgh (part 1): echo ${#GEMINI_API_KEY} must not read
+# the length of an `export` command):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-2.txt
+# Dry run first; read every review and the one ↳ line (National Aviary, 0 m); then the same command with --commit.
+# After the commit: curated_category_backfill(true) in the SQL editor (#495) — NULL for new seeds is expected (DuPage (5)).
+
+# --- Downtown and the Point ------------------------------------------------------------------------------
+# 412 Boulevard of the Allies article 66 m, Engine Company No. 1 and No. 30 73 m.
+Bethel A.M.E. Church | @40.43716,-80.0005 | Pittsburgh's oldest Black congregation was organized in 1808 as the "African Church" in a house on Front Street downtown and was chartered in 1818 as Bethel, the first African Methodist Episcopal church west of the Allegheny Mountains. | https://www.hmdb.org/m.asp?m=42023 | new
+# Gem Martin R. Delany 67 m; Boulevard of the Allies article 66 m.
+John Scull | @40.43902,-80.00376 | John Scull brought a press over the mountains and printed the first Pittsburgh Gazette in 1786 — the first newspaper west of the Alleghenies, and the direct ancestor of the Pittsburgh Post-Gazette, formed under that name in 1927. | https://en.wikipedia.org/wiki/Pittsburgh_Post-Gazette | new
+# Warner Centre article 46 m; Mellon National Bank Building 68 m.
+McClurg Iron Foundry | @40.440252,-79.998955 | Joseph McClurg opened an iron foundry at Fifth Avenue and Smithfield Street in 1804; in the War of 1812 it cast cannon and shot bound for the American fleet on Lake Erie, and in 1835 the first locomotive built west of the Alleghenies was made here. | https://www.hmdb.org/m.asp?m=94741 | new
+# Nearest stored pin Firstside Park 178 m; Demmler Brothers Warehouse article 123 m.
+Steamboat New Orleans | @40.435567,-79.99625 | Built here for Robert Fulton and Robert Livingston and launched at Suke's Run in October 1811, the New Orleans was the first steamboat on western waters, and its run down the Ohio and Mississippi made Pittsburgh a center of steamboat building. | https://en.wikipedia.org/wiki/New_Orleans_(steamboat)
+# Nearest: Fort Wayne Railroad Bridge 135 m; gem Fort Lafayette (Pennsylvania) ~430 m — the fort the boat set out from.
+Lewis and Clark Expedition | @40.447,-79.9952 | On August 31, 1803, Meriwether Lewis cast off from Fort Fayette, just downriver of this spot, in a keelboat built in Pittsburgh to his own specifications — the first leg of the Corps of Discovery's journey west. | https://en.wikipedia.org/wiki/Lewis_and_Clark%27s_keelboat
+
+# --- South Shore (Station Square, the foot of Mount Washington) -------------------------------------------
+# Pittsburgh & Lake Erie Railroad Station article 95 m.
+Clinton Furnace | @40.434284,-80.004582 | Fired up here in 1859, Clinton Furnace was Pittsburgh's first successful blast furnace for pig iron and the first in the city to smelt with Connellsville coke, the method that made Pittsburgh the center of American iron and steel; it ran until 1927. | https://www.hmdb.org/m.asp?m=15138 | new
+# Pittsburgh & Lake Erie Railroad Station article 59 m; Smithfield Street Bridge article 177 m (not stored — header).
+John A. Roebling | @40.43335,-80.00328 | In 1846 John A. Roebling hung his first road suspension bridge here on iron-wire cables, replacing the Monongahela bridge lost in the great fire of 1845; today's Smithfield Street Bridge took its place in 1883, and Roebling went on to design the Brooklyn Bridge. | https://www.hmdb.org/m.asp?m=42221 | new
+# Duquesne Incline article 95 m (not stored — header).
+Pittsburgh Glass Works | @40.43986,-80.0174 | James O'Hara and Isaac Craig opened Pittsburgh's first glass factory on this riverbank in 1797, and the bottles and window glass made here into the 1880s set the city on its way to becoming the nation's largest glass producer. | https://www.hmdb.org/m.asp?m=8688 | new
+
+# --- North Side and North Shore ----------------------------------------------------------------------------
+# Nearest stored pins Three Sisters (Pittsburgh) and the Clemente / Stargell statues, 118–120 m.
+Allegheny Cotton Mill Strikes | @40.44706,-80.00258 | Women and children working 12-hour days in Allegheny City's cotton mills struck in 1845 and again in 1848, and their walkouts led to an 1848 state law that limited the workday to ten hours and barred children under twelve from textile mills. | https://en.wikipedia.org/wiki/Allegheny_Textile_Strikes_of_1845_and_1848
+# The plaque (m=130272, "Site of the Western Penitentiary") was removed after PHMC's 2021 review; named and placed as
+# the article, 17 m from the plaque's spot (header). Nearest stored pin West Park (Allegheny Commons) 111 m.
+National Aviary | @40.4533,-80.01 | The country's largest indoor aviary stands on the site of the Western Penitentiary, which opened here in 1826 and was razed in 1880 — and which in 1863–64 held 118 officers of John Hunt Morgan's Confederate cavalry, captured in Ohio. | https://en.wikipedia.org/wiki/National_Aviary
+# OSM North Park 49 m; IBM Building (Pittsburgh) article 122 m.
+Founding Convention of the CIO | @40.45433,-80.00448 | The Congress of Industrial Organizations held its first convention nearby, at the Islam Grotto, from November 14, 1938, with 34 unions taking part as it broke away from the AFL; Pittsburgh's Philip Murray led it from 1940 to 1952. | https://en.wikipedia.org/wiki/Congress_of_Industrial_Organizations | new
+
+# --- Hill District ------------------------------------------------------------------------------------------
+# Nearest: Energy Innovation Center article 166 m.
+Union Local 471, American Federation of Musicians | @40.4431,-79.9874 | Chartered in 1908 for Pittsburgh's Black musicians, Local 471 kept its headquarters nearby until urban renewal cleared the lower Hill in the 1950s, and it was merged into the white Local 60 in 1966 over its members' objections. | https://www.hmdb.org/m.asp?m=56705
+
+# --- Strip District and Lawrenceville ----------------------------------------------------------------------
+# Pittsburgh Opera article 43 m — it sits in this factory (header).
+Westinghouse Railroad Air Brake | @40.45334,-79.979277 | George Westinghouse was 23 when he founded the Westinghouse Air Brake Company in 1869, and its first plant, on this corner of Liberty Avenue and 25th Street, built the compressed-air train brakes that made railroading safe; the building is now the Pittsburgh Opera's home. | https://en.wikipedia.org/wiki/Westinghouse_Air_Brake_Company | new
+# Nearest: The Clemente Museum article 118 m; gem Charles Martin Hall 176 m.
+Pittsburgh Grease Plant | @40.46258,-79.96909 | Grant McCargo founded this lubricating-grease works in 1885; part of Standard Oil of New Jersey from 1929, it shipped 5 million pounds of "Eisenhower grease" to the armed forces in World War II and ran until 1999. | https://www.hmdb.org/m.asp?m=40903
