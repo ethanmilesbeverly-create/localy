@@ -1,0 +1,45 @@
+# names-502-queens-nassau-8.txt — #502 Queens-Nassau story pass 2, part 3b (the four owed eastern-Queens markers, 2026-10-28)
+# Source: the four marker pages part 3 listed as NOT READ, each fetched and its m= ID checked on the page:
+# m228705 (Site of the Former Home of Daniel Carter Beard), m127377 (The Old Stone Church), m38497 (Jamaica Estates –
+# A Residential Park), m239561 (Queens County Supreme Courthouse). With these four settled, #502 has nothing owed.
+# Every line: Name | locate | one sentence in our own words | source URL. locate is the marker's own coordinate, except
+# First Presbyterian, which is its Wikipedia article's coordinate.
+# Duplicate check, done in the sandbox before writing (handoff §6 FROM KATY-ENERGY CORRIDOR (1)/(2), story-lines (y)):
+# the 12 places:v34 rows around the four markers (rows 813–816, cols −1477…−1475; 479 unique stored pins), approved
+# gems within 400 m, and Wikipedia's geosearch at 400 m. The nearest stored pin to any line is 208 m away (the sidewalk
+# clock, from First Presbyterian); no stored pin, served or hidden, shares a name with any line, so there is no curated
+# SQL for this part. Every line's tile (815_-1476, 814_-1476) is in the box and warm. No two lines are within 1 km, and no
+# line has a near-named article within 90 m, so none is flagged `new`.
+#
+# SETTLED WITHOUT A LINE:
+# The Old Stone Church (m127377) — a site marker for a meeting house gone since 1813, standing 8 m from the served
+# Sidewalk Clock on Jamaica Avenue pins (OSM 8 m, wiki 20 m); a pin there would stack on the clock. Its story is carried
+# by the First Presbyterian line below — the same congregation, whose 1813 church stands 213 m away and whose article
+# is in no stored tile (#539's pattern). The clock article (which "Old Stone Church (Jamaica, Queens)" redirects to)
+# does not tell the church's story, so nothing on the map tells it today.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-8.txt
+# Dry run first; read every review and the ↳ line; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Flushing -------------------------------------------------------------------------------
+# Marker titled "The Site of the Former Home of Daniel Carter Beard" (m228705), Roosevelt Ave. just west of Bowne St.
+# expect: new-seed (nearest stored pin John Bowne House, 209 m)
+Daniel Carter Beard Home Site | @40.76100339,-73.82483995 | Daniel Carter "Uncle Dan" Beard, the author and illustrator who helped found the Boy Scouts of America and designed its hat, shirt and neckerchief, once made his home on this Flushing spot. | https://www.hmdb.org/m.asp?m=228705
+
+# --- Jamaica --------------------------------------------------------------------------------
+# Carries the Old Stone Church marker (m127377, Jamaica Ave. at Union Hall St.: worship 1699–1813, a British prison in
+# 1776). Named as its Wikipedia article and located at the article's coordinate (89-60 164th St.).
+# expect: new-seed, one ↳ under "First Presbyterian Church in Jamaica" at 0 m
+First Presbyterian Church in Jamaica | @40.70555556,-73.79638889 | Organized in 1662 and the oldest continuously serving Presbyterian church in the United States, this congregation worshipped from 1699 to 1813 in the Old Stone Church on Jamaica Avenue, which the British used as a prison in 1776, and its 1813 church was moved to this site in 1920. | https://en.wikipedia.org/wiki/First_Presbyterian_Church_in_Jamaica
+# Marker "Queens County Supreme Courthouse" (m239561), Sutphin Blvd. at 88th Ave., on the courthouse block.
+# expect: new-seed (nearest stored pin George Eagle Carr Community Garden, 209 m)
+Queens County Supreme Courthouse | @40.70477222,-73.80912778 | Dedicated by Mayor Fiorello La Guardia in 1939 as the Queens General Court, this WPA-built limestone courthouse was the tallest and costliest public building Queens had ever raised, with seven kinds of marble in its lobby and murals of Mosaic and Constitutional law. | https://www.hmdb.org/m.asp?m=239561
+
+# --- Jamaica Estates --------------------------------------------------------------------------
+# Marker "Jamaica Estates – A Residential Park" (m38497), Hillside Ave. at Midland Pkwy., at the gatehouse it describes.
+# The gatehouse stands — Parks restored it and the Midland Parkway malls for its 2008 centennial (qns.com, 2008).
+# The WWII memorial beside it (m38735) is a war memorial, skipped.
+# expect: new-seed (nearest stored pin Harvard Playground, 449 m)
+Jamaica Estates Gatehouse | @40.71311,-73.782377 | Architect John J. Petit's Elizabethan-style lodge and gatehouse marked the entrance to Jamaica Estates, the 500-acre "residential park" that developers began in 1907 around landscape architect Charles W. Leavitt's curving Midland Parkway. | https://www.hmdb.org/m.asp?m=38497
