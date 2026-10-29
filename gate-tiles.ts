@@ -296,7 +296,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the launch roster, 31 rows since #485 (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 32 rows since #446 (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -385,6 +385,15 @@ const METROS: Metro[] = [
   // south-east (29.69/-95.02, Pasadena / Baytown / Clear Lake) +0.67M. The name omits
   // "Houston" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Katy-Energy Corridor", lat: 29.7900, lng: -95.7400 },
+  // #446 Phase B (2026-10-29): the roster grows 31 → 32 (+ Pittsburgh). NOT the bare city
+  // centre (40.4406/-79.9959): that point gives the right 48 tiles (rows 806–811, columns
+  // -1603…-1596) but sits 0.001° inside the plateau's west edge — 0.002° west loses a
+  // column (Middlesex-Union (1)). Every centre in 40.4106–40.4596 / -79.9969…-79.9479 gives
+  // the same 48 tiles; this is that plateau's middle, ~2 km south-east of downtown. Zero
+  // tiles shared with any roster row. Nearest roster row is Washington, D.C. at ~300 km, so
+  // the ±40 km grave square touches no other box and stays inside Pennsylvania (west edge
+  // -80.44, Ohio's line -80.52) — no territory split (DuPage-NW Cook (4)).
+  { name: "Pittsburgh", lat: 40.4350, lng: -79.9700 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -1153,7 +1162,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-28a (#485 roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10-27a: #501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
+const BUILD_MARKER = "gate-tiles 2026-10-29a (#446 roster 31 → 32, + Pittsburgh, Phase B; code unchanged. Built on 10-28a: #485 roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10-27a: #501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.

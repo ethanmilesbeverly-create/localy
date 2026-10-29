@@ -416,7 +416,7 @@ const REQUIRE_CEMETERY = Deno.env.get("GRAVE_REQUIRE_CEMETERY") !== "0";
 
 // A build banner so a QA run can confirm it is running THIS file (the offline
 // tool carries no APP_VERSION; this is the equivalent confirm-the-build line).
-const BUILD = "graves-resolve 2026.10.28a (#485 — roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10.27a: #501 — roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10.26a: #533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
+const BUILD = "graves-resolve 2026.10.29a (#446 — roster 31 → 32, + Pittsburgh, Phase B; code unchanged. Built on 10.28a: #485 — roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10.27a: #501 — roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10.26a: #533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)";
 
 // A run mode + the metro shape shared by single and all-metros paths.
 type Metro = { name: string; lat: number; lng: number };
@@ -518,6 +518,15 @@ const METROS: Metro[] = [
   // south-east (29.69/-95.02, Pasadena / Baytown / Clear Lake) +0.67M. The name omits
   // "Houston" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Katy-Energy Corridor", lat: 29.7900, lng: -95.7400 },
+  // #446 Phase B (2026-10-29): the roster grows 31 → 32 (+ Pittsburgh). NOT the bare city
+  // centre (40.4406/-79.9959): that point gives the right 48 tiles (rows 806–811, columns
+  // -1603…-1596) but sits 0.001° inside the plateau's west edge — 0.002° west loses a
+  // column (Middlesex-Union (1)). Every centre in 40.4106–40.4596 / -79.9969…-79.9479 gives
+  // the same 48 tiles; this is that plateau's middle, ~2 km south-east of downtown. Zero
+  // tiles shared with any roster row. Nearest roster row is Washington, D.C. at ~300 km, so
+  // the ±40 km grave square touches no other box and stays inside Pennsylvania (west edge
+  // -80.44, Ohio's line -80.52) — no territory split (DuPage-NW Cook (4)).
+  { name: "Pittsburgh", lat: 40.4350, lng: -79.9700 },
 ];
 
 // The single-metro target (env-driven; the default is Chicago). In --all mode

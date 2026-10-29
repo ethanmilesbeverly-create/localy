@@ -84,7 +84,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.28a"; // 28a: #485 roster 30 → 31 (+ Katy-Energy Corridor, Houston's first extra box); code unchanged. 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.10.29a"; // 29a: #446 roster 31 → 32 (+ Pittsburgh, Phase B); code unchanged. 28a: #485 roster 30 → 31 (+ Katy-Energy Corridor, Houston's first extra box); code unchanged. 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -106,7 +106,7 @@ const DRIP_HOURS = Math.max(0, Number(env("PREWARM_DRIP_HOURS") || 6));
 const DRIP_PACE_MS = Math.max(0, Number(env("PREWARM_DRIP_PACE_MS") || 5000));
 const FAILED_FILE = "prewarm_failed.json";
 
-// Same roster as gate-tiles.ts (31 rows since #485, 2026-10-28).
+// Same roster as gate-tiles.ts (32 rows since #446, 2026-10-29).
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
   { name: "New York", lat: 40.7128, lng: -74.0060 },
@@ -194,6 +194,15 @@ const METROS: Metro[] = [
   // south-east (29.69/-95.02, Pasadena / Baytown / Clear Lake) +0.67M. The name omits
   // "Houston" for the same substring / submissions.city reason as Queens-Nassau.
   { name: "Katy-Energy Corridor", lat: 29.7900, lng: -95.7400 },
+  // #446 Phase B (2026-10-29): the roster grows 31 → 32 (+ Pittsburgh). NOT the bare city
+  // centre (40.4406/-79.9959): that point gives the right 48 tiles (rows 806–811, columns
+  // -1603…-1596) but sits 0.001° inside the plateau's west edge — 0.002° west loses a
+  // column (Middlesex-Union (1)). Every centre in 40.4106–40.4596 / -79.9969…-79.9479 gives
+  // the same 48 tiles; this is that plateau's middle, ~2 km south-east of downtown. Zero
+  // tiles shared with any roster row. Nearest roster row is Washington, D.C. at ~300 km, so
+  // the ±40 km grave square touches no other box and stays inside Pennsylvania (west edge
+  // -80.44, Ohio's line -80.52) — no territory split (DuPage-NW Cook (4)).
+  { name: "Pittsburgh", lat: 40.4350, lng: -79.9700 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
