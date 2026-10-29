@@ -1,0 +1,76 @@
+# names-502-queens-nassau-3.txt — #502 Queens-Nassau story pass 2, part 2b (story lines, 2026-10-28)
+# Source: Historical Marker Database — the Nassau County list (mixed NY/FL shape), page 3 (entries 201–300: Hempstead's
+# entries 284–300) and page 5 (entries 401–500), plus the NY-only list's page 4 (NY entries 301–400) and the Franklin
+# Square town list (7 entries), each read whole with excerpts. Together that is NY entries 284–300 and 301–430:
+# Hempstead (first 17), Massapequa, Massapequa Park, Merrick, North Merrick, Mineola, Oceanside, Old Bethpage, Oyster Bay,
+# Port Washington (first 19).
+# HMDB GATES THE COUNTY LIST PAST ENTRY 500: the mixed list's page 6 redirects to sign-in ("lists longer than 500 entries"),
+# so NY entries 431–543 (the rest of Port Washington through Woodmere) must be read town list by town list. OWED for
+# part 2c: those towns; NY entries 234–300 (Hempstead's tail through Manhasset — the mixed page 4 link returned a client
+# error this pass); Floral Park's tail (Covert Homestead, Floral Theatre, Vanderbilt Cup Race, Masonic Temple, John Lewis
+# Childs, First Church); East Rockaway's newer markers. THEN part 3: eastern Queens.
+# Every line: Name | locate | one sentence in our own words from the marker text | source URL. locate is the marker's own
+# coordinate (@lat,lng). A name differs from the marker title only where the title isn't a place; each is marked.
+# Every coordinate below sits in the Queens-Nassau 48-tile box and was checked against the 3,233 stored pins in the box's
+# 58 places:v34 rows (box + ring) and the 444 approved gems near the box: no line has a same-name or same-subject pin
+# within 250 m, stored or served. Hidden storyless OSM pins found by the same sort are curated rows in
+# 502_hidden_curated_3.sql, NOT lines here (handoff §6 story-lines (y)).
+# Cut as already served: Council Rock, Earle-Wightman House, Youngs Home, the Rough Rider statue (Oyster Bay); Monfort
+# Cemetery, Thomas Dodge Homestead (Port Washington); Grace Church Complex (Massapequa); Camp Meeting Grounds and the
+# Campgrounds Minister's House gem (Merrick). Franklin Square National Bank already serves the right article (#502's
+# check — nothing to do).
+# Skipped on purpose: war memorials and rolls; Sagamore Hill's markers, Theodore Roosevelt Memorial Park, the Roosevelt
+# memorial oak and rocks and the Christeen (row 818, outside the box); Old Bethpage's tank-by-tank exhibit markers (the
+# museum's own hidden pin is a curated row instead); Mineola's Irish memorials and Bessie & Roxey (no story in the
+# excerpt); the First Commercial Survey Flight plaque (commemorative only, 40 m from the served Town Dock); the Schoenlein-
+# Mott House (no coordinate — reported unreadable); Cooper Field (no text); the hidden Fort Hill and Presbyterian Church
+# plaque pins (Townsend Cemetery and First Presbyterian Church serve their subjects); Saint George's Episcopal Churdyard
+# (part 1's gravestone — the church's article serves beside it).
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-3.txt
+# Dry run first; read every review; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Hempstead -------------------------------------------------------------------------
+Carman-Irish House | @40.70063831,-73.61783106 | Built before the American Revolution, this house was once the home of Samuel Carman, a descendant of one of the men who founded the Town of Hempstead. | https://www.hmdb.org/m.asp?m=288612
+# The Duke's Laws Convention marker (m=151846) stands a few steps away; its fact is folded into this line.
+Hempstead Town Hall | @40.7066477,-73.62112542 | Built in 1918–19, the Town Hall stands on the "Town Spot" the first settlers set aside for government, and near here in 1665 Governor Richard Nicolls's convention adopted the Duke's Laws. | https://www.hmdb.org/m.asp?m=288592
+Clowes & Denton Homes | @40.70459488,-73.63327488 | These two post–Civil War town houses of about 1868, tied to the Clowes and Denton families, among Hempstead's oldest, stood on Franklin Street until they were moved here around 1940. | https://www.hmdb.org/m.asp?m=288579
+Longman House | @40.70692111,-73.6138916 | Benjamin Place built this house around 1854, a typical summer home of the well-off city families who came out to Hempstead in that era. | https://www.hmdb.org/m.asp?m=288611
+
+# --- Franklin Square --------------------------------------------------------------------
+Peter J. Herman House | @40.7085636,-73.68092706 | Built in 1901, this was the home of Peter J. Herman, a community leader who helped steer Franklin Square from a German-American farming village into a modern suburb. | https://www.hmdb.org/m.asp?m=287604
+
+# --- Merrick ----------------------------------------------------------------------------
+# Renamed from "Kent-Cammann Wing, Merrick Library": the line is for the library building.
+Merrick Library | @40.65973767,-73.55044787 | Founded in 1891 by Richard P. Kent and Edward C. Cammann, the Merrick Library got its first permanent home in this 1897 building, now its Kent-Cammann Wing. | https://www.hmdb.org/m.asp?m=145330
+
+# --- Massapequa and Massapequa Park -----------------------------------------------------
+# Renamed from "Killian's Hotel" (gone; the line is for its site).
+Killian's Hotel Site | @40.67546075,-73.47470509 | From 1868 to 1905 the family-run Killian's Hotel stood here, known among sportsmen for its hospitality and for the hunting and fishing it offered. | https://www.hmdb.org/m.asp?m=126855
+# Renamed from "Massapequa Hotel" (gone).
+Massapequa Hotel Site | @40.666826,-73.470589 | From 1888 to 1916 a grand Victorian resort for 300 guests, with cottages, a boathouse and a bathing pavilion, stood just south of here on Ocean Avenue. | https://www.hmdb.org/m.asp?m=65098
+# Renamed from "Massapequa Manor" (burned 1952).
+Massapequa Manor Site | @40.666844,-73.465816 | Three generations of the Jones and Floyd-Jones families owned the 20-room mansion of 1836 that stood here, with its own polo field and race track, until fire destroyed it in 1952. | https://www.hmdb.org/m.asp?m=108312
+# Renamed from "Old Brick House" (gone 1837).
+Old Brick House Site | @40.66623505,-73.46540792 | Major Thomas Jones and his wife Freelove Townsend, Massapequa's first settlers, built a brick house near here in 1696 that stood until 1837. | https://www.hmdb.org/m.asp?m=133145
+# Razed 1940; the marker already names the site.
+Tryon Hall Site | @40.6672832,-73.45485144 | Tryon Hall, also called Fort Neck House, was a Georgian manor of 1770 that seven generations of the Jones and Floyd-Jones families owned before it was razed in 1940. | https://www.hmdb.org/m.asp?m=133171
+# Renamed from "West Neck": the line is for the burial ground. The Samuel Jones marker (m=65097) is 18 m away.
+Jones Family Burial Ground (West Neck) | @40.666581,-73.472142 | William Jones and his wife Phoebe Jackson lie in this late-1700s family burial ground, and beside it is buried Samuel Jones (1734–1819), called the father of the New York bar, who voted to ratify the U.S. Constitution in 1788. | https://www.hmdb.org/m.asp?m=65096
+Thorn Estate | @40.667645,-73.439991 | Called Little Unqua, the c. 1889 home of Conde and Louise Floyd-Jones Thorn stood on the last of Major Thomas Jones's 1707 land, and descendants lived here until 1961. | https://www.hmdb.org/m.asp?m=108712
+# Renamed from "Flying Field" (closed 1953).
+Fitzmaurice Field Site | @40.690814,-73.449362 | From 1929 to 1953 the 21-acre Fitzmaurice Field, billed as the world's first development airport, operated here, named for Col. James Fitzmaurice of the first flight from Europe to the United States. | https://www.hmdb.org/m.asp?m=65094
+# Renamed from "Woodcastle Hotel" (building gone 1953).
+Woodcastle Hotel Site | @40.678422,-73.449439 | French and German settlers opened the Woodcastle Hotel here as a summer resort around 1870, with board at $5 to $7 a week; it ran into the early 1900s and the building stood until 1953. | https://www.hmdb.org/m.asp?m=108300
+
+# --- Oyster Bay -------------------------------------------------------------------------
+# 32 m from the served Raynham Hall pins: a different building. If the dry run sends it to review as a match to Raynham
+# Hall, add | new (handoff §6 (k)).
+Matinecock Lodge | @40.872235,-73.531246 | Theodore Roosevelt belonged to this Masonic lodge and was raised a Master Mason in it on April 24, 1901. | https://www.hmdb.org/m.asp?m=90328
+
+# --- Port Washington --------------------------------------------------------------------
+# Renamed from "Home of Cato Sands Family".
+Home of the Cato Sands Family | @40.83749531,-73.69913205 | Built around 1835, this was the home of the family of Cato Sands, who was freed from slavery in 1782. | https://www.hmdb.org/m.asp?m=286845
+Mill Pond Model Yacht Club | @40.83809246,-73.69776915 | Founded in 1898, the club began in a waterfront store; its clubhouse later moved to Smull Place and, after the 1938 hurricane, to this spot on the pond. | https://www.hmdb.org/m.asp?m=286870
+Mt. Olive AME Church | @40.82900617,-73.69084281 | Port Washington's first Black congregation formed in 1897 in the Free Church at the Mill Pond and established its church on Mackey Avenue in 1903. | https://www.hmdb.org/m.asp?m=287543
