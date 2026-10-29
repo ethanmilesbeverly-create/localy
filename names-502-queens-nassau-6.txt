@@ -1,0 +1,43 @@
+# names-502-queens-nassau-6.txt — #502 Queens-Nassau story pass 2, part 2c-3a (story lines, 2026-10-28)
+# Source: Historical Marker Database town lists (NY-only numbering of the Nassau County list, entries 431–543 — past HMdb's
+# 500-entry sign-in gate, so town lists only), each opened from one of the town's own marker pages and read whole with
+# excerpts: Uniondale (10, opened from m285234), Port Washington North (8, from m287279), East Rockaway (18, from m286129;
+# heading and m= IDs checked on every page). Roslyn Harbor and Roslyn Heights closed EMPTY — two extended searches each
+# surfaced no HMdb page in either town (HMdb files Roslyn Harbor's two Cedarmere markers under Roslyn, read and cut in
+# part 2c-2). Sea Cliff and Roosevelt closed empty earlier the same day (two extended searches each, no page).
+# NOT READ (owed to part 2c-3b): Syosset, Valley Stream, West Hempstead, Williston Park, Woodbury, Woodmere.
+# Every line: Name | locate | one sentence in our own words from the marker text | source URL [| new]. locate is the
+# marker's own coordinate. Where a marker title isn't a place name, the line's name differs and the comment says so.
+# Every coordinate sits in the Queens-Nassau 48-tile box (all three in tile 815_-1472) and was checked against the 2,931
+# unique stored pins in 76 places:v34 rows (the box's 58 plus a wider ring) and the 437 approved gems in a square around
+# the box: no line has a same-name or same-subject pin. A served read of tile 815_-1472 (cached, 25 pins) shows none of the
+# three subjects. Hidden storyless OSM pins found by the same sort are curated rows in 502_hidden_curated_6.sql, NOT lines
+# here (handoff §6 story-lines (y)).
+# All three lines are flagged `| new` (handoff §6 FROM DUPAGE-NW COOK (1)): they stand 34–96 m apart on Museum Row, 21–105 m
+# from the served Cradle of Aviation Museum and Lindbergh's Flight pins — different things beside live pins.
+# Statue of Sally Ride is named exactly as its Wikipedia article, which sits at the marker's coordinate but serves on no
+# pin (the tile's wiki arm returns other articles — #539's cap pattern); `new` keeps it seeding at the marker.
+# Cut as already served: Dave Push (m285969) and Colonial Schoolhouse Site (the "Before the Revolutionary War" marker,
+# m286076) — both live gems at 0 m, seeded by #482 pass 1 (names-482-queens-nassau.txt); the East Rockaway Grist Mill
+# panel and Milling Stone & Bedding Stone (Haviland-Davison Grist Mill serves); the Site Of / Site of Oven / Historic
+# Waterfront markers (gems from #482); Lindbergh's Flight (OSM pin serves); Mitchel Field (the Mitchel Air Base and Flight
+# Line pin serves its article, ~300 m).
+# Skipped on purpose: A Life in History (m286136 — a Mill River Green Way panel on a Freeport diarist's farm life, nothing
+# at its spot; part 2c-2 gravestoned the Greenway panels); Aviation Field No. 2 (WWI departure memorial); The Ninety-Nines
+# (moved indoors from Curtiss Field, Valley Stream — the story is not here); the second F-14 Tomcat panel (folded into the
+# line below); Port Washington North's five Bay Walk Park Nautical Art Museum panels and The Mill Pond Historic District
+# (part 2c-2 gravestones), Robert H. Dayton Park (a person dedication), Trash Talkin' (a litter exhibit); East Rockaway's
+# war, 9/11, Vietnam and honor-roll memorials, Garden of Heroes, Mayor Joseph F. Carrigan Point and the Alexander Davison
+# Home (part 2c-1 gravestone).
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439):
+#   SEED_CITY_NAME="Queens-Nassau" SEED_CITY_LAT=40.7400 SEED_CITY_LNG=-73.6200 deno run -A seed-resolve.ts names-502-queens-nassau-6.txt
+# Dry run first; read every review; then the same command with --commit. After the commit:
+# curated_category_backfill(true) in the SQL editor (#495).
+
+# --- Uniondale (Museum Row, the former Mitchel Field) -----------------------------------
+# Marker titled "F-14 Tomcat" (two panels under the plane's nose, m285185 and m285189; one line).
+F-14 Tomcat (Felix 101) | @40.727406,-73.59757232 | This F-14D, number 711 of the 712 Tomcats built, is the last Tomcat the U.S. Navy ever flew: its final flight on October 4, 2006 closed a 36-year career that began with the type's first flight at Grumman's Calverton test center in 1970. | https://www.hmdb.org/m.asp?m=285185 | new
+# Marker titled "Sally Ride"; named as its Wikipedia article.
+Statue of Sally Ride | @40.72808555,-73.5973866 | Dedicated in June 2022, this seven-foot bronze shows Sally Ride, the first American woman in space, raising a model Space Shuttle skyward; she flew aboard Challenger in 1983 and again in 1984. | https://en.wikipedia.org/wiki/Statue_of_Sally_Ride | new
+# IEEE Milestone plaque.
+First Blind Takeoff, Flight and Landing, 1929 | @40.7282674,-73.59770526 | On September 24, 1929, Lt. James Doolittle made the world's first blind takeoff, flight and landing at Mitchel Field, flying a Consolidated NY-2 biplane by specially built radio and flight instruments alone; it is now an IEEE Milestone. | https://www.hmdb.org/m.asp?m=285197 | new
