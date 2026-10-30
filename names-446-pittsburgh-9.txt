@@ -1,0 +1,86 @@
+# names-446-pittsburgh-9.txt — #446 Pittsburgh story pass, part 2 (b2-5): the Strip, Troy Hill, Polish Hill & Lower
+# Lawrenceville and the Squirrel Hill, Point Breeze & Wilkinsburg areas of part (b2-3)'s owed Wikipedia-landmark candidates
+# (drafted 2026-10-30). 27 lines (6 flagged `new`), plus one hidden-pin row in 446_hidden_curated_3.sql.
+# Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE SOURCE: part (b2-3)'s four Wikipedia lists — see names-446-pittsburgh-7.txt's header. This file takes two of the five
+# areas still owed after part (b2-4): Strip, Troy Hill, Polish Hill & Lower Lawrenceville (31) and Squirrel Hill, Point Breeze
+# & Wilkinsburg (9; Thaddeus Stevens Elementary in Elliott and Wilkinsburg station were filed here by part (b2-3) and stay).
+#
+# THE SORT, RE-RUN 2026-10-30: 49 stored places:v34 rows (1,426 unique pins, unchanged) by page ID, name and every pin within
+# 120 m; the 333 approved, unmerged gems in 40.2–40.65 / −80.25…−79.7 (204 non-grave — part (b2-4)'s 27 included) by name and
+# within 150 m; a name-token and description scan of every pin and gem within 600 m. None of the 40 page IDs is stored in any
+# tile (#539); no gem or served pin carries any of the 40. ONE HIDDEN PIN: Arsenal Middle School's building is the stored OSM
+# pin "Arsenal School" (osm_way253999569, 31 m from the article) — storyless filler, no article of that exact title, absent
+# from both served answers that store it — so it is NOT a line here (a seed would twin it): it is a curated row under the
+# stored name at the stored coordinate, in 446_hidden_curated_3.sql (story-lines (y); #542 checked there).
+#
+# SET ASIDE (12): thin — Consolidated Ice Company Factory No. 2; Madison Elementary School (Pittsburgh, Pennsylvania);
+# Schiller Elementary School; Tuberculosis Hospital of Pittsburgh; Voegtly Spring (an ownership history, no story of the
+# spring itself); Linden Avenue School; Park Place School; Thaddeus Stevens Elementary School (Pittsburgh); Wightman School.
+# RAZED with nothing of note on the site: St. Nicholas Croatian Church (Pittsburgh, Pennsylvania) (razed January 2013);
+# Troy Hill Incline (closed 1898, razed a decade later; the building long taken for its summit station is not); Abrams House
+# (Pittsburgh) (demolished by 2022, on a private drive).
+#
+# ALL 27 LINES ARE ARTICLE-NAMED (FROM PITTSBURGH (4) with its (b1) guard): named EXACTLY as the article, at the article's own
+# coordinate. Every line sits inside the 48 tiles (tile keys checked).
+# PRE-CHECKS RUN IN THE SANDBOX (no Gemini), as in part (b2-4): #425's big-area same-name test against every live pin and gem
+# 90–300 m from each line — 0 hits; #432's near-named articles within 90 m from a live geosearch — 3 hits, all flagged `new`
+# below; no line's name equals any stored pin's name.
+# FLAGGED `| new` UP FRONT (6) — a different thing beside a live pin or a near-named article (DuPage (1), Bergen (2)); a `new`
+# story line seeds under its own name, which here is the article's, at the article's coordinate, exactly as Allegheny County
+# Mortuary did in part (b2-3):
+#   H. J. Heinz Company complex — the company article "Heinz" sits 8 m off (#432 near-named); the factory, not the company.
+#   Howe Springs and Howe-Childs Gate House — each other's near-named article, 87 m apart; a spring and a house.
+#   Centre Avenue YMCA Building — the Robert Lee Vann and Frank E. Bolden PHMC gems 30–42 m (men, not the building).
+#   Pennsylvania National Bank Building — The Doughboy OSM statue 39 m.
+#   Washington Education Center (Pittsburgh) — the Washington's Allegheny River Crossing gem 29 m (its marker is on the school;
+#     the crossing's story stays on the gem) and Shannopin's Town 66 m.
+# Expect 21 `new-seed` with a ↳ under their article at 0 m and 6 `new-seed` under their own (= the article's) name.
+# THE OTHER ~100 m NEIGHBOURS (read for twins; none is the same place): Former Pittsburgh Wash House and Pennsylvania National
+# Bank — 80 m apart, two lines; Pittsburgh Produce Terminal and St. Stanislaus Kostka — 82 m apart, two lines; The Clemente
+# Museum — The Doughboy 84 m; Pittsburgh Brass — Charles Martin Hall gem 90 m; St. Augustine Church — Stephen C. Foster gem
+# 126 m; H. J. Heinz Company complex — the Henry J. Heinz gem 200 m (the man; the line is the factory).
+# WATCH IN THE DRY RUN: (1) any line that REVIEWs, or reads `= already on the map` — stop and tell Claude before committing (do
+#   not flag it yourself). (2) Lawrence Public School (now a brewery), Naser's Tavern and the lofts (Armstrong Cork, Pittsburgh
+#   Brass, the Heinz complex): if one reads `commercial with no story, not seeded`, add `| new` and re-run the dry run.
+#
+# OWED — 83 candidates in three areas, not yet read for thinness or drafted (lists in names-446-pittsburgh-7.txt's header):
+#   Lawrenceville, Bloomfield, Highland Park & the East End 33; Oakland, Shadyside & the Mon bank 21; South Side, Mount
+#   Washington & the south and west suburbs 29.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-9.txt
+# Dry run first; expect 27 new-seed, 0 review; then the same command with --commit. 446_hidden_curated_3.sql goes in the SQL
+# editor after the commit, then curated_category_backfill(true).
+
+# --- Strip, Troy Hill, Polish Hill & Lower Lawrenceville (and Millvale across the river) ---------------------------
+Armstrong Cork Company | @40.45446667,-79.98327778 | Frederick Osterling designed this riverside factory around 1901 for the Armstrong Cork Company, which grew from cork goods into linoleum, vinyl floors and ceilings as Armstrong World Industries after moving its headquarters to Lancaster; since 2007 the building has been the Cork Factory lofts. | https://en.wikipedia.org/wiki/Armstrong_Cork_Company
+Centre Avenue YMCA Building | @40.44717778,-79.967725 | Put up in 1922 as the only YMCA for African Americans in western Pennsylvania, this building was one of the few recreation places open to Black Pittsburghers into the 1950s and was famed for free symposiums with nationally known Black speakers in the 1930s and '40s. | https://en.wikipedia.org/wiki/Centre_Avenue_YMCA_Building | new
+Former Pittsburgh Wash House and Public Baths Building | @40.46396667,-79.96667778 | A charity started by local church members in 1895 saw that families crowded several to a house had nowhere to bathe, so it bought this Butler Street lot and opened a Romanesque Revival public bath and laundry here in 1904; the building now holds offices. | https://en.wikipedia.org/wiki/Former_Pittsburgh_Wash_House_and_Public_Baths_Building
+H. J. Heinz Company complex | @40.45444444,-79.99083333 | Henry J. Heinz began buying lots on this bank of the Allegheny in 1884, and from 1907 to 1930 his company built red-brick Romanesque Revival factory buildings here to his own taste rather than in plain industrial style; part of the complex is now the Heinz Lofts. | https://en.wikipedia.org/wiki/H._J._Heinz_Company_complex | new
+Immaculate Heart of Mary Church (Pittsburgh) | @40.45638889,-79.96777778 | Polish immigrants settled Herron Hill from 1885 in such numbers that it was renamed Polish Hill; their parish's grand domed church, dedicated in 1905, is a leading example of the "Polish Cathedral" style. | https://en.wikipedia.org/wiki/Immaculate_Heart_of_Mary_Church_(Pittsburgh)
+John Wesley A.M.E. Zion Church (Pittsburgh) | @40.4508,-79.9645 | Founded in 1836, this is one of Pittsburgh's oldest Black congregations; water from an abandoned mine beneath the church flooded it in 1994 and 2006, and since 2008 that same mine water has heated and cooled the building through a geothermal system. | https://en.wikipedia.org/wiki/John_Wesley_A.M.E._Zion_Church_(Pittsburgh)
+Lawrence Public School | @40.4669,-79.9656 | Built in 1872 and named for Captain James Lawrence of "Don't give up the ship" fame, this school taught in German as well as English; children reportedly cheered as it burned in 1912, and after a 1987 fire took its upper floors the surviving ground floor became a brewery. | https://en.wikipedia.org/wiki/Lawrence_Public_School
+Naser's Tavern | @40.46952,-79.96152 | Thought to be the oldest surviving building on Butler Street, put up between 1833 and 1846, this was bought in 1846 by German immigrant John Naser, who ran an inn and tavern here called Our House; his family kept it until 1943. | https://en.wikipedia.org/wiki/Naser's_Tavern
+Pennsylvania National Bank Building | @40.46325,-79.96666 | The Beezer Brothers designed this one-story Beaux-Arts bank of 1902–03 to fit the wedge of Doughboy Square, where Butler Street meets Penn Avenue at what is often called the entrance to Lawrenceville. | https://en.wikipedia.org/wiki/Pennsylvania_National_Bank_Building | new
+Pittsburgh Brass Manufacturing Company Building | @40.46083333,-79.97027778 | Built in 1903, this four-story works held a brass foundry with coke furnaces along with casting, rolling and machining shops; it stood empty for about forty years after the company left in the 1970s and became lofts in 2015. | https://en.wikipedia.org/wiki/Pittsburgh_Brass_Manufacturing_Company_Building
+Pittsburgh Produce Terminal | @40.45219167,-79.98457222 | Built in 1926 for the Pennsylvania Railroad as the Pennsylvania Fruit Auction & Sales Building, this terminal runs 1,533 feet across five blocks of the Strip, laid out so wholesalers could auction produce straight off the rail cars. | https://en.wikipedia.org/wiki/Pittsburgh_Produce_Terminal
+Saint Anthony's Chapel, Pittsburgh | @40.464889,-79.983689 | Father Suitbert Mollinger paid for this chapel from his own family inheritance to house the thousands of relics he gathered in Europe as monasteries were broken up; dedicated in 1883 and enlarged in 1892, it was bought back by the parish for $30,000 after his heirs stripped its valuables. | https://en.wikipedia.org/wiki/Saint_Anthony's_Chapel,_Pittsburgh
+Spring Hill Elementary School | @40.46517222,-79.98947222 | Opened in 1896 as Allegheny City's Seventh Ward Public School, this Classical Revival school stands on land sold for it by Damas Lutz, one of the German immigrants who settled Spring Hill and whose name the street still carries. | https://en.wikipedia.org/wiki/Spring_Hill_Elementary_School
+Springfield Public School | @40.46,-79.97138889 | Students first met in a temporary building they nicknamed "the Shanty" in 1870 while this school for the Strip's crowded Springfield sub-district was built; it opened in 1872, closed in 1934 and served for decades afterwards as a warehouse. | https://en.wikipedia.org/wiki/Springfield_Public_School
+St. Augustine Church (Pittsburgh) | @40.46527778,-79.96388889 | German Americans founded this Lawrenceville parish in 1863, Capuchin friars have run it since 1873, and its 1901 yellow-brick Romanesque Revival church by John T. Comès, paid for by a $50,000 gift from the Frauenheim family, is the headquarters of their Capuchin province. | https://en.wikipedia.org/wiki/St._Augustine_Church_(Pittsburgh)
+St. Nicholas Croatian Church (Millvale, Pennsylvania) | @40.47704444,-79.96968889 | Maxo Vanka painted the murals inside this 1900 church in 1937 and 1941 — among them Immigrant Mother Raises Her Sons for American Industry and The Capitalist — which Time called one of the few distinguished sets of church murals in the U.S. | https://en.wikipedia.org/wiki/St._Nicholas_Croatian_Church_(Millvale,_Pennsylvania)
+St. Stanislaus Kostka Church (Pittsburgh) | @40.45232222,-79.98361111 | Built in 1891–92 for the Strip's Polish parish, this church lost its baroque tower caps after a 1936 explosion at the Pittsburgh Banana Company next door, and on September 20, 1969 Cardinal Karol Wojtyła, the future Pope John Paul II, prayed here. | https://en.wikipedia.org/wiki/St._Stanislaus_Kostka_Church_(Pittsburgh)
+Teutonia Maennerchor Hall | @40.45666667,-79.995 | The Teutonia Männerchor, a German men's choral club founded in 1854, built this half-timbered Fachwerk-style hall in 1888 and still meets here for German singing, Oktoberfest and other heritage festivals. | https://en.wikipedia.org/wiki/Teutonia_Maennerchor_Hall
+The Clemente Museum | @40.4625,-79.9677 | Set in the former Engine House No. 25, this museum founded in 2007 by photographer Duane Rieder holds thousands of pieces of Roberto Clemente memorabilia, from uniforms and bats to seats from Forbes Field. | https://en.wikipedia.org/wiki/The_Clemente_Museum
+Turney House | @40.47138,-79.96167 | Carpenter Lucian Turney built this house around 1851; his 17-year-old daughter Margaret, who lived here, was one of 78 workers killed in the 1862 Allegheny Arsenal explosion, and it is the only surviving house known to be tied to one of its victims. | https://en.wikipedia.org/wiki/Turney_House
+Walton House (Pittsburgh) | @40.47304,-79.96107 | English immigrants William and Martha Walton, who ran a jewelry store in Lawrenceville, built this frame double house around 1868, and part of their property was run as an inn and tavern in the 1870s. | https://en.wikipedia.org/wiki/Walton_House_(Pittsburgh)
+Washington Crossing Bridge (Pittsburgh) | @40.4728,-79.9686 | Opened on December 29, 1924 and better known as the Fortieth Street Bridge, this arch bridge is named for George Washington's crossing of the Allegheny near here in 1753, and it carries the seals of the thirteen original states. | https://en.wikipedia.org/wiki/Washington_Crossing_Bridge_(Pittsburgh)
+Washington Education Center (Pittsburgh) | @40.4695,-79.9628 | Opened in 1909 as the Washington Industrial School, said to be Pittsburgh's first school building given over entirely to industrial training, it taught here until 2006 and has since been turned into a hotel. | https://en.wikipedia.org/wiki/Washington_Education_Center_(Pittsburgh) | new
+# --- Squirrel Hill, Shadyside edge, Point Breeze & Wilkinsburg -------------------------------------------------
+Henry Koerner House | @40.44833333,-79.92861111 | Austrian-American painter Henry Koerner built this house in 1966 and lived, painted and showed his work here until his death in 1991; its tall floor-to-ceiling windows recall the apartments of the Vienna he grew up in. | https://en.wikipedia.org/wiki/Henry_Koerner_House
+Howe Springs | @40.451725,-79.92417778 | After the Johnstown Flood of 1889 the Howe family resolved to give the public free water from this spring, and in 1896 Mary Howe built its first shelter as a memorial to her husband, the congressman Thomas Marshall Howe; when Michael Benedum bought the estate in 1910 the deed kept it free and open. | https://en.wikipedia.org/wiki/Howe_Springs | new
+Howe-Childs Gate House | @40.45115556,-79.92488333 | Built around 1861 for Thomas Marshall Howe and first called Willow Cottage, this board-and-batten Gothic cottage is said to be the oldest wood-frame house in Pittsburgh and the oldest surviving house of Fifth Avenue's Millionaire's Row. | https://en.wikipedia.org/wiki/Howe-Childs_Gate_House | new
+Wilkinsburg station | @40.44305556,-79.88805556 | The Pennsylvania Railroad built this Beaux-Arts station in 1916 when it raised its tracks through Wilkinsburg on an embankment to get rid of dangerous grade crossings; it served commuters until 1975. | https://en.wikipedia.org/wiki/Wilkinsburg_station

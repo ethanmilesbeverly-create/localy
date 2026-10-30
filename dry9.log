@@ -1,0 +1,126 @@
+[seed-resolve 2026.10.27a (#537 a `new` story line is its own seed only under its own name — Gemini's canonicalName can no longer aim its story at a differently named seed; carries #506 #499 #495 #429 #434 #439 #441)] city=Pittsburgh (40.435, -79.97) maxKm=60 model=gemini-3.5-flash-lite
+  dedup = live map + submissions + Wikipedia (#418); map endpoint https://siacjgpqzaylsfefihyr.supabase.co/functions/v1/nearby-places
+Loaded 27 names from names-446-pittsburgh-9.txt
+  + Armstrong Cork Company [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Armstrong Cork Company" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Armstrong Cork Company"
+      articles within 90 m: "Armstrong Cork Company"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Centre Avenue YMCA Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 2 · wiki 1
+      articles within 90 m: "Centre Avenue YMCA Building"
+  + Former Pittsburgh Wash House and Public Baths Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "Former Pittsburgh Wash House and Public Baths Building" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Former Pittsburgh Wash House and Public Baths Building"
+      articles within 90 m: "Former Pittsburgh Wash House and Public Baths Building" · "Dozen Bake Shop" · "Pennsylvania National Bank Building"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + H. J. Heinz Company complex [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "H. J. Heinz Company complex" · "Heinz"
+  + Immaculate Heart of Mary Church (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Immaculate Heart of Mary Church (Pittsburgh)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Immaculate Heart of Mary Church (Pittsburgh)"
+      articles within 90 m: "Immaculate Heart of Mary Church (Pittsburgh)"
+  + John Wesley A.M.E. Zion Church (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "John Wesley A.M.E. Zion Church (Pittsburgh)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "John Wesley A.M.E. Zion Church (Pittsburgh)"
+      articles within 90 m: "John Wesley A.M.E. Zion Church (Pittsburgh)"
+  + Lawrence Public School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Lawrence Public School" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Lawrence Public School"
+      articles within 90 m: "Lawrence Public School"
+  + Naser's Tavern [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "Naser's Tavern" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Naser's Tavern"
+      articles within 90 m: "Naser's Tavern" · "Row House Cinema"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Pennsylvania National Bank Building [history] story✓ (conf 1.00)
+      checked nearby: map 1 · subs 0 · wiki 3
+      articles within 90 m: "Pennsylvania National Bank Building" · "Doughboy (Pittsburgh)" · "Former Pittsburgh Wash House and Public Baths Building"
+  + Pittsburgh Brass Manufacturing Company Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Pittsburgh Brass Manufacturing Company Building" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Pittsburgh Brass Manufacturing Company Building"
+      articles within 90 m: "Pittsburgh Brass Manufacturing Company Building"
+  + Pittsburgh Produce Terminal [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "Pittsburgh Produce Terminal" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Pittsburgh Produce Terminal"
+      articles within 90 m: "Pittsburgh Produce Terminal" · "Pamela's Diner" · "St. Stanislaus Kostka Church (Pittsburgh)"
+  + Saint Anthony's Chapel, Pittsburgh [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Saint Anthony's Chapel, Pittsburgh" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Saint Anthony's Chapel, Pittsburgh"
+      articles within 90 m: "Saint Anthony's Chapel, Pittsburgh"
+  + Spring Hill Elementary School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Spring Hill Elementary School" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Spring Hill Elementary School"
+      articles within 90 m: "Spring Hill Elementary School"
+  + Springfield Public School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Springfield Public School" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Springfield Public School"
+      articles within 90 m: "Springfield Public School"
+  + St. Augustine Church (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "St. Augustine Church (Pittsburgh)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "St. Augustine Church (Pittsburgh)"
+      articles within 90 m: "St. Augustine Church (Pittsburgh)"
+  + St. Nicholas Croatian Church (Millvale, Pennsylvania) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "St. Nicholas Croatian Church (Millvale, Pennsylvania)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "St. Nicholas Croatian Church (Millvale, Pennsylvania)"
+      articles within 90 m: "St. Nicholas Croatian Church (Millvale, Pennsylvania)"
+  + St. Stanislaus Kostka Church (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "St. Stanislaus Kostka Church (Pittsburgh)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "St. Stanislaus Kostka Church (Pittsburgh)"
+      articles within 90 m: "St. Stanislaus Kostka Church (Pittsburgh)" · "Pamela's Diner" · "Pittsburgh Produce Terminal"
+  + Teutonia Maennerchor Hall [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Teutonia Maennerchor Hall" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Teutonia Maennerchor Hall"
+      articles within 90 m: "Teutonia Maennerchor Hall"
+  + The Clemente Museum [history] story✓ (conf 1.00)
+      checked nearby: map 1 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "The Clemente Museum" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "The Clemente Museum"
+      articles within 90 m: "The Clemente Museum" · "Doughboy (Pittsburgh)"
+  + Turney House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Turney House" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Turney House"
+      articles within 90 m: "Turney House"
+  + Walton House (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Walton House (Pittsburgh)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Walton House (Pittsburgh)"
+      articles within 90 m: "Walton House (Pittsburgh)"
+  + Washington Crossing Bridge (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Washington Crossing Bridge (Pittsburgh)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Washington Crossing Bridge (Pittsburgh)"
+      articles within 90 m: "Washington Crossing Bridge (Pittsburgh)"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Washington Education Center (Pittsburgh) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 2 · wiki 1
+      articles within 90 m: "Washington Education Center (Pittsburgh)"
+  + Henry Koerner House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Henry Koerner House" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Henry Koerner House"
+      articles within 90 m: "Henry Koerner House"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Howe Springs [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "Howe Springs" · "Howe-Childs Gate House"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Howe-Childs Gate House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "Howe-Childs Gate House" · "Howe Springs"
+  + Wilkinsburg station [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Wilkinsburg station" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Wilkinsburg station"
+      articles within 90 m: "Wilkinsburg station"
+
+--- #439 check: what the commit will skip or replace ---
+  nothing will be skipped or replaced
+
+--- summary ---
+{ "new-seed": 27 }
+stories attached to existing pins: 0 (0 existing seed(s) updated on commit)
+story lines seeded: 27 (their story ships as resolved_source 'curated'; 27 curated_descriptions rows staged in curated_records.json)
+new seed rows: 27  (unclassified category: 0, no wiki description: 0)
+seeded under their Wikipedia article's title (#425): 21 — read each "↳ seeded under" line before --commit
+#439: 0 staged story row(s) will be SKIPPED (already curated) → expect the commit to insert 27 story row(s); 0 seed story(ies) will be REPLACED
+Wikipedia calls: 27 · retried 0 · failed 0
+TIMEOUTS (#506): Wikipedia 0 · geocode 0 · nearby-places 0 · Gemini 0 · Supabase reads 0 (limits 20 / 20 / 180 / 60 / 30 s).
+wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).
+NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).
