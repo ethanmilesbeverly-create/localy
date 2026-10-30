@@ -1,0 +1,87 @@
+# names-446-pittsburgh-4.txt — #446 Pittsburgh story pass, part 2 (b1): the 12 PHMC markers part 2 (b) owed because their
+# story needed the marker's own text (drafted 2026-10-29). With this file every one of the list's 123 in-box markers is settled.
+# 12 lines. Every line: Name | locate | one sentence in our own words | source URL [| new]. locate is the PHMC marker's own
+# coordinate (Wikipedia's "List of Pennsylvania state historical markers in Allegheny County"), EXCEPT Winchester Thurston
+# School, which sits at its article's coordinate (below).
+#
+# SOURCES — each marker's inscription: HMdb pages with the m= ID checked against title and place (40879 Bouquet Camp, read
+# whole, commentary included — no removal note; 35633 First Aluminum Observatory Dome; 40394 Hand's Hospital; 40891 Homestead
+# Strike Victims; 46526 Jane Holmes; 245526 Old Saint Luke's Church; 46529 Shadyside Iron Furnace; 40905 Presston; 44867
+# Frances Perkins; 44869 Mary Harris "Mother" Jones), with the full PHMC wording from transcriptions where HMdb's snippet was
+# short — OpenPlaques' Pittsburgh, Munhall, Stowe and Ross Township lists (John M. Phillips and Polish Army have no m= ID read
+# here; their text is OpenPlaques' PHMC transcription, the #446 1 (a) precedent for Lewis and Clark), ExplorePAHistory's own
+# marker pages (Perkins, Jones, Homestead Strike Victims), and Waymarking's transcription for Old St. Luke's. Context sentences
+# from the subject's own institution or the local history press where the marker is terse (Old St. Luke's — Neville's
+# congregation; Shadyside — George Anschutz as the furnace's builder).
+# COMMENTARY CAVEAT: only Bouquet Camp's HMdb page was read whole. For the other 11 the marker text came from snippets and
+# transcriptions, so a "marker removed" commentary would not have been seen (#446 1 (a) lesson). None of the 11 sites is a
+# demolished building whose plaque would have moved, and every story is placed at the site, not on the plaque.
+#
+# DUPLICATE CHECK, done in the sandbox before writing: the 36 stored places:v34 rows around the 12 markers (1,208 unique pins,
+# every tile within one row/column of a marker); approved gems/seeds in 40.35–40.53 / −80.15…−79.78 (164 rows, 81 non-grave —
+# none within 400 m of a line but the University of Pittsburgh / VFW / Homestead Grays seeds 340–470 m off, different things);
+# Wikipedia geosearch at 250 m around every marker; a name-token scan of every stored pin within 1.5 km per subject. Nothing
+# served any of the 12 subjects. No hidden pin matched a line, so there is no curated SQL for this part. Every line's tile is
+# warm.
+#
+# ARTICLE-NAMED LINE (#539 pattern; FROM PITTSBURGH (4)): Winchester Thurston School — its article (40.45150, −79.94251) is
+# 94 m from the "Shadyside Iron Furnace" marker, which stands at the school's athletic field, and no stored tile carries it.
+# Named EXACTLY as the article, placed at its coordinate, NOT flagged `new` — expect one ↳ under that article at 0 m. The
+# sentence names the school and the furnace site under its field.
+# NOT article-named, by judgement: John M. Phillips — Concord Elementary School (Pittsburgh) is an article 64 m off in no stored
+# tile, but it is the school NEXT DOOR, not the place the marker names (Phillips's home stood where St. Pius X church is), so
+# the line stays at the marker under his name, flagged `new` so it cannot fold into the school.
+#
+# DECIDED FROM THE TEXT: Presston is a NEW seed, not a fold — the served "Presston Veterans Memorial" 2 m away is a war memorial
+# carrying its own inscription; the marker's subject is the company-town neighbourhood around it.
+# Bouquet Camp carries the Forbes Road "Bouquet Encampment" plaque that stands beside it (part 1's set-aside); the 1930 plaque
+# marks the road, the marker the camp, so one line.
+#
+# `| new` (7) — set up front on every line with a stored pin, an article or another line within ~150 m (the #446 part 2 (b)
+# lesson: every neighbour the duplicate read lists, mechanically). The reason is in the comment above each one.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (#439; env | grep -c for the two keys
+# → 2; FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-4.txt
+# Dry run first; expect 12 new-seed (1 with ↳ — Winchester Thurston School), 0 review, 0 held; then the same command with
+# --commit. After the commit: curated_category_backfill(true) in the SQL editor (#495) — mostly NULL for new seeds is expected
+# (DuPage (5)).
+
+# --- East and north --------------------------------------------------------------------------------------------------
+# Nothing within 250 m; the Forbes Road "Bouquet Encampment" plaque stands beside the marker (folded in, above).
+Bouquet Camp | @40.48414,-79.81905 | Near this corner lay Bouquet Camp, a supply base for General John Forbes's 1758 march on the French at Fort Duquesne, named for Colonel Henry Bouquet, Forbes's second-in-command, who built the road; the 1930 Forbes Road plaque beside the marker counts 97 miles from Fort Bedford. | https://www.hmdb.org/m.asp?m=40879
+# Nothing within 250 m; the name scan found no observatory pin within 1.5 km (the Allegheny Observatory is a different one, ~2 km south).
+First Aluminum Observatory Dome | @40.499846,-80.012819 | On the hill just west of here in 1930, Pittsburgh amateur astronomers led by Leo J. Scanlon built the Valley View Observatory, the first known observatory topped with an aluminum dome, and its shiny shell became the model for how a modern observatory is pictured. | https://www.hmdb.org/m.asp?m=35633
+
+# --- Oakland / Shadyside ---------------------------------------------------------------------------------------------
+# Stored wiki pins: University of Pittsburgh School of Computing and Information 102 m, Ruskin Hall 148 m, Western Pennsylvania
+# School for Blind Children 176 m (served, its own article — the school, not her story).
+Jane Holmes | @40.44823,-79.95295 | Jane Holmes (1805–1885), known as "Pittsburgh Jane," was one of the city's earliest philanthropists, founding homes for the aged and the incurably ill and funding agencies that included the Western Pennsylvania School for Blind Children, here. | https://www.hmdb.org/m.asp?m=46526 | new
+# ARTICLE-NAMED (above): the article is 94 m from the "Shadyside Iron Furnace" marker; Bindley Hardware Company Building article
+# 176 m (a different building). NOT `new`.
+Winchester Thurston School | @40.45149734,-79.94251152 | The lowland where this school's athletic field lies is where George Anschutz built the Pittsburgh region's first iron furnace in 1792, casting stoves and grates until a shortage of ore and wood closed it about a year later. | https://www.hmdb.org/m.asp?m=46529
+
+# --- South Side, Carrick ---------------------------------------------------------------------------------------------
+# Nothing within 150 m (South Side Presbyterian Church article 210 m, not stored). Named by the marker's title, as earlier
+# parts did; the hall is the Polish Falcons' at 97 South 18th Street.
+Polish Army | @40.428158,-79.980289 | At the Polish Falcons' hall on this site on April 3, 1917, the pianist and statesman Ignacy Jan Paderewski addressed the Falcons' convention and launched the drive to raise a Polish army in America to fight beside the Allies for an independent Poland. | https://openplaques.org/places/us/areas/pittsburgh__pa/plaques
+# Concord Elementary School (Pittsburgh) article 64 m — the school next door, not his home (above); near-named Phillips Park pins
+# 575–607 m.
+John M. Phillips | @40.3884,-79.9852 | Conservationist and engineer John M. Phillips (1861–1953), whose home stood here, created Pennsylvania's state game lands system that the rest of the nation copied, helped establish the state Game Commission, and was among the first to bring Boy Scouting to Pennsylvania. | https://openplaques.org/places/us/areas/pittsburgh__pa/plaques | new
+
+# --- West and south-west ---------------------------------------------------------------------------------------------
+# Crafton Park Complex OSM pin 130 m (the park across the road).
+Hand's Hospital | @40.43913,-80.07339 | In 1777 General Edward Hand, commanding at Fort Pitt, built an isolation hospital for his troops on this site, a two-story log building guarded by blockhouses. | https://hmdb.org/m.asp?m=40394 | new
+# Nothing within 250 m; Woodville (the Neville House) 685–718 m, a different place.
+Old St. Luke's Church | @40.38449,-80.09067 | Begun in 1765 as a stockaded chapel for British troops, Old St. Luke's is the oldest Episcopal congregation in southwestern Pennsylvania; Whiskey Rebellion target John Neville worshipped here, and its 1852 stone church holds an 1823 English pipe organ, the first carried over the Alleghenies. | https://hmdb.org/m.asp?m=245526
+# Presston Veterans Memorial OSM pin 2 m (a war memorial — decided NEW, above); Presston Park OSM pin 102 m.
+Presston | @40.482711,-80.062904 | Presston went up from 1899 as Schoenville, company housing the Pressed Steel Car Company rented to its immigrant workers at a price that kept them in debt; strikers were evicted from these homes in 1909, the houses were sold off after the company closed in 1949, and the streets still look much as they did then. | https://www.hmdb.org/m.asp?m=40905 | new
+
+# --- Homestead / Munhall ---------------------------------------------------------------------------------------------
+# "Grave of Cumberland Posey" seed 143 m (Homestead Cemetery — a different grave).
+Homestead Strike Victims | @40.39762,-79.9019 | Six of the seven steelworkers killed in the July 6, 1892 battle with Pinkerton agents at Homestead are buried in these two cemeteries: Peter Ferris, Henry Striegel and Thomas Weldon in St. Mary's, and John Morris, Joseph Sotak and Silas Wain in Homestead Cemetery. | https://www.hmdb.org/m.asp?m=40891 | new
+# The Mother Jones line 29 m; St Nicholas Carpatho-Rusyn church wiki pin 94 m.
+Frances Perkins | @40.40628,-79.91019 | When Labor Secretary Frances Perkins came to Homestead in July 1933 to talk about the New Deal and local officials barred her from meeting steelworkers in a town park, she moved the meeting onto federal ground at the old post office on this corner. | https://www.hmdb.org/m.asp?m=44867 | new
+# The Frances Perkins line 29 m; St Nicholas Carpatho-Rusyn church wiki pin 67 m. Named without the quotation marks (part 1 (a)'s
+# Steamboat New Orleans precedent).
+Mother Jones | @40.40654,-79.91016 | Labor organizer Mary Harris "Mother" Jones was jailed in the old municipal building on this corner in 1919 for speaking to striking steelworkers without a permit, and told the judge her permit came from Patrick Henry, Thomas Jefferson and John Adams; Homestead named the intersection Free Speech Corner in 2003. | https://www.hmdb.org/m.asp?m=44869 | new
