@@ -1,0 +1,84 @@
+# names-446-pittsburgh-8.txt — #446 Pittsburgh story pass, part 2 (b2-4): the North Side & north-west and the Hill, Uptown & upper
+# Oakland areas of part (b2-3)'s owed Wikipedia-landmark candidates (drafted 2026-10-30).
+# 27 lines. Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE SOURCE: part (b2-3)'s four Wikipedia lists (PHLF Historic Landmarks, City of Pittsburgh historic designations, NRHP in
+# Pittsburgh, NRHP in Allegheny County) — see names-446-pittsburgh-7.txt's header for how the 409 in-box articles were drawn.
+# This file takes two of its seven owed areas: North Side & north-west (28) and the Hill & Uptown (12; Allen Hall, Thaw Hall,
+# Gardner Steel, SciTech, Schenley Quadrangle, Soldiers and Sailors and Syria Mosque sit on upper Oakland's Pitt campus but
+# were filed here by coordinate in part (b2-3) and are kept here).
+#
+# THE SORT, RE-RUN 2026-10-30 (the same sandbox read, so gems added since part (b2-3) are cut): the 48 box rows + the 1 stored
+# ring row of places:v34 (49 rows, 1,426 unique pins — unchanged) by page ID (wiki_<pageid>), by name and by every pin within
+# 120 m; the 306 approved, unmerged gems in 40.2–40.65 / −80.25…−79.7 (177 non-grave — unchanged since part (b2-3)) by name and
+# within 150 m; a name-token and description scan of every pin and gem within 600 m. None of the 40 page IDs is stored in any
+# tile (#539); no gem or pin serves any of the 40. Each article was then read whole for thinness.
+#
+# SET ASIDE (13) — thin article, no story past a build date and a listing: 841 North Lincoln Avenue; Aberlie House; Allegheny
+# Social Hall; Chalfant Hall (one fact: a steel heir's house, now CCAC's); Conroy Education Center; Engine Company No. 3
+# (Pittsburgh); Heathside Cottage; Henderson–Metz House; House at 200 West North Avenue; John Morrow Elementary School;
+# Latimer School. RAZED with nothing of note on the site: Croatian Fraternal Union Building (demolished by Pitt in 2022);
+# St. Peter's Episcopal Church (Pittsburgh) (demolished 1989; its 1901 move from Grant Street, where the Frick Building now
+# stands, is already in the live Frick Building gem's story). Syria Mosque, also razed (1991), IS a line, as Civic Arena was in part (b2-3):
+# a major venue whose site is still known by it.
+#
+# ALL 27 LINES ARE ARTICLE-NAMED (FROM PITTSBURGH (4) with its (b1) guard — each line IS the article's subject): named EXACTLY
+# as the article, at the article's own coordinate, NOT flagged `new`. Expect 27 `new-seed`, each with a ↳ under its article
+# at 0 m. Every line sits inside the 48 tiles (tile keys checked).
+# PRE-CHECKS RUN IN THE SANDBOX (no Gemini): #425's big-area same-name test (live pins and gems 90–300 m whose name the line's
+# name carries at >=60%) — 0 hits on all 27; #432's near-named articles within 90 m (a live geosearch around every line) —
+# 0 hits; no line's name equals any stored pin's name, so no curated row can un-hide an OSM pin (#542 does not arise).
+# THE ~100 m NEIGHBOURS (read for twins; none is the same place): Allegheny City Stables and International Harvester Branch
+# House — 56 m apart, two lines, two buildings; Garden Theater and Malta Temple — 46 m apart, two lines, two buildings (City of
+# Asylum's article 26–35 m, an organisation); Ferris House — the House at 200 West North Avenue article 22 m (set aside),
+# Dorothy Mae Richardson gem 98 m; Hoene-Werle House — Allegheny West Historic District OSM pin 80 m; St. Boniface — Scherer Park
+# pin 58 m; William Penn Snyder House — Byers-Lyons House gem 68 m; Emmanuel Episcopal Church — Calvary United Methodist Church
+# gem 113 m; the Pitt cluster — Allen Hall, Gardner Steel Conference Center and Thaw Hall within 50–91 m of each other, Soldiers
+# and Sailors 95 m from Thaw Hall, each its own building; Schenley Quadrangle — William Pitt Union OSM pin 81 m; Syria Mosque —
+# Alumni Hall OSM pin 107 m, Pittsburgh Athletic Association article 64 m. The stored Mellon Institute of Industrial Research
+# wiki pin (470 m) is the institute's 1937 building, not Allen Hall, its first home.
+# WATCH IN THE DRY RUN: (1) any line that REVIEWs, or reads `= already on the map` — stop and tell Claude before committing (do
+#   not flag it yourself). (2) Allegheny General Hospital is a working hospital and Malta Temple / Garden Theater now house
+#   offices and apartments: if one reads `commercial with no story, not seeded`, add `| new` to that line and re-run the dry run.
+#   (3) Syria Mosque's site is a parking lot: if Gemini calls it gone and declines it, tell Claude (do not flag it yourself).
+#
+# OWED — 123 candidates in five areas, not yet read for thinness or drafted (lists in names-446-pittsburgh-7.txt's header):
+#   Strip, Troy Hill, Polish Hill & Lower Lawrenceville 31; Lawrenceville, Bloomfield, Highland Park & the East End 33;
+#   Oakland, Shadyside & the Mon bank 21; Squirrel Hill, Point Breeze & Wilkinsburg 9; South Side, Mount Washington & the south
+#   and west suburbs 29.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-8.txt
+# Dry run first; expect 27 new-seed (27 with ↳), 0 review; read every ↳ line and the WATCH notes; then the same command with
+# --commit.
+
+# --- North Side & north-west ------------------------------------------------------------------------------------
+Allegheny City Stables | @40.45382778,-80.01605 | Built in 1895 for the old City of Allegheny's public works, this Romanesque brick block kept department offices on the ground floor, city horses on the second and their feed and gear on the third; the last civic building Allegheny City put up, it was saved by a neighbourhood campaign and restored as lofts in 2019–21. | https://en.wikipedia.org/wiki/Allegheny_City_Stables
+Allegheny General Hospital | @40.45666667,-80.00333333 | Chartered in 1882, the North Side's hospital opened in 1886 as a 50-bed infirmary in two Allegheny City rowhouses on Stockton Avenue, and later became the first hospital in Pennsylvania designated a Level 1 shock trauma center. | https://en.wikipedia.org/wiki/Allegheny_General_Hospital
+B. F. Jones House | @40.45068611,-80.01374167 | Built in 1908–10 on Ridge Avenue for Benjamin Franklin Jones Jr., son of a founder of the Jones and Laughlin Steel Company, this 42-room mansion cost $375,000; it is now Jones Hall of the Community College of Allegheny County. | https://en.wikipedia.org/wiki/B._F._Jones_House
+Coraopolis station | @40.51888889,-80.16388889 | The Pittsburgh and Lake Erie Railroad built this Richardsonian Romanesque depot in 1896 to designs by Shepley, Rutan and Coolidge, one of three sister stations for its new suburban commuter line; long disused, it is being stabilized for a planned café and history museum beside the future Ohio River Greenway. | https://en.wikipedia.org/wiki/Coraopolis_station
+Emmanuel Episcopal Church (Pittsburgh) | @40.45305556,-80.01944444 | Finished in 1886, this was one of Henry Hobson Richardson's last designs — built of brick to save money, with patterned brickwork and a stepped "mousetooth" band under the roof — and became a National Historic Landmark in 2000; the parish is known for its Sunday-evening Jazz Vespers. | https://en.wikipedia.org/wiki/Emmanuel_Episcopal_Church_(Pittsburgh)
+Ferris House (Pittsburgh) | @40.457058,-80.009097 | George Washington Gale Ferris Jr., who designed and built the original Ferris Wheel for Chicago's World's Columbian Exposition of 1893, lived in this Arch Street house, then numbered 204. | https://en.wikipedia.org/wiki/Ferris_House_(Pittsburgh)
+Garden Theater | @40.45548889,-80.00726667 | Built in 1914–15 as a Beaux-Arts neighbourhood movie house, the Garden was run by Bennett Amdursky until his death in 1970; it began showing Deep Throat in 1973 and stayed an adult theatre for 34 years until it closed in 2007, after which its auditorium was razed and the lobby building redeveloped. | https://en.wikipedia.org/wiki/Garden_Theater
+Hoene-Werle House | @40.45138889,-80.01638889 | Built in 1887 as a double house for two German immigrants — piano dealer Herman H. Hoene and druggist Fred H. Werle — this Manchester home was later abandoned, taken by the city in the 1970s, and restored in the 1980s. | https://en.wikipedia.org/wiki/Hoene-Werle_House
+International Harvester Branch House (Pittsburgh) | @40.45416667,-80.01555556 | Begun in 1901 by the McCormick Harvesting Machine Company, which merged into International Harvester before it was finished, this flatiron-shaped building wedged between North Avenue and the railroad held the company's local showroom, offices and service department until 1959; it is now apartments. | https://en.wikipedia.org/wiki/International_Harvester_Branch_House_(Pittsburgh)
+John A. Brashear House and Factory | @40.46305556,-80.01333333 | Astronomer John Brashear lived here from 1886 and made optical instruments in the factory beside his house; when the derelict factory was torn down in 2015, workers found an 1890s time capsule in its cornerstone holding factory plans, photographs and a lock of his wife Phoebe's hair. | https://en.wikipedia.org/wiki/John_A._Brashear_House_and_Factory
+Langley High School (Pittsburgh) | @40.45417,-80.05472 | Named for aviation pioneer and one-time University of Pittsburgh professor Samuel P. Langley, this Tudor Revival school in Sheraden was built in 1923 and 1927; it closed as a high school in 2012 and now teaches kindergarten through eighth grade. | https://en.wikipedia.org/wiki/Langley_High_School_(Pittsburgh)
+Malta Temple | @40.45539167,-80.00779722 | Built in 1927 for a fraternal order known as the Order of Malta and later used by the Salvation Army, this building on West North Avenue was saved from demolition in 2008 by a 5–2 vote of the Pittsburgh Planning Commission. | https://en.wikipedia.org/wiki/Malta_Temple
+Oliver High School | @40.46388889,-80.02583333 | Opened in 1925 on a former landfill and named for David B. Oliver, the school board president who grew the city's school system, Oliver High took orange and seal brown as its colours in a nod to his middle name, Brown; it closed as a high school in 2012. | https://en.wikipedia.org/wiki/Oliver_High_School
+Perry Traditional Academy | @40.48889,-80.01889 | This school began in 1892 as Allegheny City's North End School, was enlarged after a violent storm damaged it in 1899, became the Perry School when Pittsburgh renamed its numbered schools in 1913, and moved into its current main building in 1922. | https://en.wikipedia.org/wiki/Perry_Traditional_Academy
+St. Boniface Roman Catholic Church (Pittsburgh) | @40.46703333,-80.00000833 | German Americans founded this parish in 1884; their 1925–26 church in the East Street Valley has a pendentive dome and vaulting built with the Guastavino tile system, inside a carved limestone shell. | https://en.wikipedia.org/wiki/St._Boniface_Roman_Catholic_Church_(Pittsburgh)
+State Correctional Institution – Pittsburgh | @40.47027778,-80.04111111 | Western Penitentiary moved here to the Ohio River bank in 1879, onto the grounds of a former juvenile reformatory; the anarchist Alexander Berkman served 14 years here for trying to kill Henry Clay Frick, and the prison processed people arrested at the 2009 G-20 summit before it closed in 2017. | https://en.wikipedia.org/wiki/State_Correctional_Institution_%E2%80%93_Pittsburgh
+William Penn Snyder House | @40.4503,-80.01583333 | Iron-industry millionaire William Penn Snyder built this French Renaissance brownstone on Ridge Avenue's Millionaire's Row in 1911 for $450,000, opening it in January 1912 with a combined housewarming and debutante ball for his daughter. | https://en.wikipedia.org/wiki/William_Penn_Snyder_House
+# --- The Hill, Uptown & upper Oakland --------------------------------------------------------------------------
+Allen Hall (University of Pittsburgh) | @40.44458889,-79.95832778 | Built in 1913–14 as the first home of the Mellon Institute of Industrial Research, founded by Andrew and Richard Mellon, this Greek Revival building later held medical-school labs and is named for physicist Alexander J. Allen, who led the building of Pitt's cyclotron for medical isotopes. | https://en.wikipedia.org/wiki/Allen_Hall_(University_of_Pittsburgh)
+Fifth Avenue High School | @40.4381,-79.9808 | Built in 1894, Fifth Avenue was the first fireproof school in Pennsylvania and home of the National Honor Society's Alpha chapter; Mayor Sophie Masloff studied here, and after it closed in 1976 it stood boarded up for over thirty years before reopening as lofts in 2012. | https://en.wikipedia.org/wiki/Fifth_Avenue_High_School
+Gardner Steel Conference Center | @40.4445,-79.95775278 | Built in 1911–12 for the Central Turnverein, a German-American gymnastics and social club, this Jugendstil-touched building housed wartime army trainees in World War I, then became the university's dental infirmary in 1920, with room for 200 dental chairs. | https://en.wikipedia.org/wiki/Gardner_Steel_Conference_Center
+New Granada Theater | @40.44398889,-79.98010833 | Built in 1927–28 as the Pythian Temple for a Black fraternal order to a design by Louis Bellinger, one of the few Black architects then practising in the US, it was remade in 1937–38 as the New Granada, where Duke Ellington, Ella Fitzgerald, Count Basie and Cab Calloway performed. | https://en.wikipedia.org/wiki/New_Granada_Theater
+Paramount Film Exchange (Pittsburgh) | @40.435889,-79.981722 | Paramount Pictures built this 1926 exchange on the Boulevard of the Allies to screen and rent its films to local theatre owners; the last survivor of Pittsburgh's old film row, it was landmarked in 2010 after a 21-year-old's prize-winning short film rallied support against its demolition. | https://en.wikipedia.org/wiki/Paramount_Film_Exchange_(Pittsburgh)
+Pittsburgh Science and Technology Academy | @40.44333333,-79.95805556 | This building opened as the Henry Clay Frick Training School for Teachers, which Frick founded in 1927; since 2009 it has housed SciTech, a public science and technology school for grades 6 to 12. | https://en.wikipedia.org/wiki/Pittsburgh_Science_and_Technology_Academy
+Schenley Quadrangle | @40.44323333,-79.955775 | Henry Hornbostel designed these five buildings as the Schenley Apartments for developer Franklin Nicola, built in 1922–24 for over $4.5 million and home to well-off Pittsburghers — Hornbostel among them — until Pitt bought them in 1955 and turned them into residence halls. | https://en.wikipedia.org/wiki/Schenley_Quadrangle
+Soldiers and Sailors Memorial Hall and Museum | @40.445116,-79.956442 | Conceived by the Civil War veterans of the Grand Army of the Republic and dedicated in 1910 on ground once used to muster Union troops, Hornbostel's Beaux-Arts hall is the largest US memorial honouring every branch of the military; its Hall of Valor has honoured the region's decorated veterans since 1963. | https://en.wikipedia.org/wiki/Soldiers_and_Sailors_Memorial_Hall_and_Museum
+Syria Mosque | @40.445477,-79.955149 | The Shriners' 3,700-seat Exotic Revival hall, dedicated in 1916, stood here, hosting the Pittsburgh Symphony and touring stars and, on January 11, 1949, the opening broadcast of the city's first network television station; it was demolished in 1991 despite efforts to landmark it. | https://en.wikipedia.org/wiki/Syria_Mosque
+Thaw Hall | @40.44516389,-79.95756667 | Completed in 1910 as the Engineering Building and named for trustee Benjamin Thaw Sr., Thaw Hall is the only surviving building of Henry Hornbostel's original Acropolis Plan for Pitt's move from Observatory Hill to Oakland. | https://en.wikipedia.org/wiki/Thaw_Hall
