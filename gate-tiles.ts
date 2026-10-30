@@ -296,7 +296,7 @@ const PROGRESS_FILE = "gate_tiles_progress.json"; // per-tile checkpoint for --r
 // function's/client's REAL_DESC_FACTS_CATS (#329/#334). Only these OSM pins are gated.
 const FACTS_CATS = new Set(["history", "park", "trail", "art"]);
 
-// ---- the launch roster, 32 rows since #446 (mirror of the graves-resolve roster) ----
+// ---- the launch roster, 34 rows since #447 + #448 (mirror of the graves-resolve roster) ----
 type Metro = { name: string; lat: number; lng: number };
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
@@ -394,6 +394,28 @@ const METROS: Metro[] = [
   // the ±40 km grave square touches no other box and stays inside Pennsylvania (west edge
   // -80.44, Ohio's line -80.52) — no territory split (DuPage-NW Cook (4)).
   { name: "Pittsburgh", lat: 40.4350, lng: -79.9700 },
+  // #447 + #448 Phase B (2026-10-30): the roster grows 32 → 34 (+ San Antonio, + Tampa), added
+  // together so the next metro's pre-warm is queued behind the current one's (the faster
+  // onboarding runbook, 2026-10-30). Both placed as Pittsburgh was: the plateau's middle of
+  // the city centre's own tile set (Middlesex-Union (1)), checked ±0.002° stable, zero tiles
+  // shared with any roster row.
+  // San Antonio: the bare centre (29.4241/-98.4936) sits 0.0135° inside the plateau's south
+  // edge; every centre in 29.4106–29.4601 / -98.5196…-98.4701 gives the same 42 tiles (rows
+  // 586–591, columns -1973…-1967). Measured, not taken: one row north (29.4855) covers +135k
+  // people (1.30M → 1.44M, all Bexar) but drops row 586 and with it Mission Espada, a piece
+  // of the San Antonio Missions World Heritage Site — the four missions and the Alamo stay in
+  // this box. Nearest roster row Austin, ~118 km; the ±40 km grave square (29.07–29.80 /
+  // -98.91…-98.08) is all Texas and touches no other box — no territory split.
+  { name: "San Antonio", lat: 29.4350, lng: -98.4950 },
+  // Tampa: the bare centre (27.9506/-82.4572) sits 0.0095° inside the plateau's north edge;
+  // every centre in 27.9106–27.9601 / -82.4717…-82.4222 gives the same 42 tiles (rows 556–561,
+  // columns -1652…-1646) — downtown, Ybor City, Davis Islands, MacDill, the airport, Brandon,
+  // Busch Gardens and USF. Measured, not taken: shifting ~0.13° west covers +144k people
+  // (921k → 1.07M) by trading east Hillsborough for Pinellas, splitting Tampa across the bay;
+  // St. Petersburg / Clearwater stay outside (an extra box's question, #451). Nearest roster
+  // row Miami, ~327 km; the ±40 km grave square (27.57–28.30 / -82.85…-82.04) reaches
+  // Pinellas, Pasco and Polk, which no box owns, so those graves load here (Bergen (4)).
+  { name: "Tampa", lat: 27.9350, lng: -82.4470 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -1162,7 +1184,7 @@ type TileRecord = {
 
 // The build marker — bump on every delivery (the offline tool's APP_VERSION analog;
 // confirm it in the run log). Shared by the main banner and the prime report.
-const BUILD_MARKER = "gate-tiles 2026-10-29a (#446 roster 31 → 32, + Pittsburgh, Phase B; code unchanged. Built on 10-28a: #485 roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10-27a: #501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
+const BUILD_MARKER = "gate-tiles 2026-10-30a (#447 + #448 roster 32 → 34, + San Antonio, + Tampa, Phase B; code unchanged. Built on 10-29a: #446 roster 31 → 32, + Pittsburgh, Phase B; code unchanged. Built on 10-28a: #485 roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10-27a: #501 roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10-25a: #500 roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10-22a: #484 roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10-20a: #483 roster 26 → 27, + Orange County. Built on 10-08a: #522 --prime-graves: key pre-flight, banked = written (stops on a failed write, verifies the bank row climb), bio excerpts with dates, known-namesake refusal, stale --rewarm advice removed; carries #509 --rebuild + #506 timeouts)";
 
 // #363 — resolve the prime name list. Priority: --names="A|B|C" arg, GRAVE_PRIME_NAMES
 // env, graves-prime.txt (one per line, # comments), then the built-in Oak Woods default.

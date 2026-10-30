@@ -1,0 +1,40 @@
+# names-446-pittsburgh-12.txt — #446 Pittsburgh step (5): two rescue lines from the gate dry run (drafted 2026-10-30).
+# 2 lines, both flagged `new`. Goes with 446_hidden_curated_4.sql (the other three rescues).
+# Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE GATE DRY RUN (2026-10-30, from the sandbox, gate-tiles 2026-10-29a, --all with GATE_METRO=Pittsburgh, Wikipedia only):
+# 48 of 48 tiles, 0 throttled, 0 held, 0 timeouts; 1,475 drops (792 unique, all filler) and 156 resolved. The 125 hidden
+# landmark-class drops were read against the 415 approved gems, the served pins within 80 m and a Wikipedia geosearch; five
+# carry a real story in an article that nothing live tells — see 446_hidden_curated_4.sql's header for the read.
+#
+# WHY THESE TWO ARE SEEDS, NOT HIDDEN-PIN ROWS (#542): each statue is a hidden OSM pin, but the tile CONTAINING it does not
+# store it, so a curated row on the pin would show blank on a far-search landing (the (b2-1) Soldiers and Sailors case):
+#   J.P. "Honus" Wagner Statue — osm_node5338206663, 40.4475413, -80.0074398; containing tile 809_-1600, stored only in
+#     809_-1601.
+#   Dr. Mao Yisheng Statue — osm_node9251992113, 40.4417602, -79.9454678; containing tile 809_-1599, stored only in 809_-1598.
+# So, as #542's workaround: each is seeded at the OSM pin's coordinate under a DIFFERENT name from the OSM pin, so the seed's
+# own curated row cannot un-hide the pin beside it (name_clean "statueofhonuswagner" ≠ "jphonuswagnerstatue";
+# "statueofmaoyisheng" ≠ "drmaoyishengstatue"). "Statue of Honus Wagner" is the article's exact title; the article has no
+# coordinate, so no tile carries it (#539). Mao Yisheng's story is his article's statue and Carnegie Tech sentences.
+# FLAGGED `| new` UP FRONT (both): neither line has an article at its coordinate to attach to, so each seeds under its own
+# name at the given coordinate.
+# PRE-CHECKS (sandbox, live reads): no served pin within 80 m of either line; no approved gem within 150 m; geosearch at 90 m
+# — the Westinghouse Sign article (85 m) beside the Wagner statue and the CMU Department of Social and Decision Sciences
+# article (86 m) beside Mao's, neither name-matching; #425 big-area same-name 90–300 m — 0 (the Honus Wagner PHMC gem is at
+# his Carnegie home, ~10 km off; PNC Park's pin, 151 m, does not name-match).
+# Expect 2 `new-seed` under their own names, 0 review, 0 held.
+# WATCH IN THE DRY RUN: any REVIEW or `= already on the map` — stop and tell Claude before committing.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-12.txt
+# Dry run first; expect 2 new-seed, 0 review; then the same command with --commit, then run 446_hidden_curated_4.sql, then
+# curated_category_backfill(true).
+#
+# OWED after this file and 446_hidden_curated_4.sql: nothing — #446 closes.
+
+# --- North Shore ---------------------------------------------------------------------------------------------------------
+Statue of Honus Wagner | @40.4475413,-80.0074398 | Frank Vittor's statue of the Pirates' Hall of Fame shortstop was unveiled in 1955 in Schenley Park just past Forbes Field's left-field fence, moved to Three Rivers Stadium in 1972 and to this home-plate entrance of PNC Park in 2001, and a tube sealed inside it holds the names of the players who chipped in to pay for it. | https://en.wikipedia.org/wiki/Statue_of_Honus_Wagner | new
+
+# --- Oakland (Carnegie Mellon) -------------------------------------------------------------------------------------------
+Statue of Mao Yisheng | @40.4417602,-79.9454678 | Carnegie Mellon put up this statue in 2006 to Mao Yisheng, the first person ever to earn a doctorate from Carnegie Tech, in 1919 — his thesis on stresses in frames is kept at Hunt Library — who went home to become the founder of modern bridge engineering in China. | https://en.wikipedia.org/wiki/Mao_Yisheng | new
