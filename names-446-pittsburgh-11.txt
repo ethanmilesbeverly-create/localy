@@ -1,0 +1,85 @@
+# names-446-pittsburgh-11.txt — #446 Pittsburgh story pass, part 2 (b2-7): the Lawrenceville, Bloomfield, Highland Park &
+# East End area of part (b2-3)'s owed Wikipedia-landmark candidates — the last of the 215 (drafted 2026-10-30). 23 lines
+# (1 flagged `new`). No hidden-pin row.
+# Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE SOURCE: part (b2-3)'s four Wikipedia lists — see names-446-pittsburgh-7.txt's header. This file takes the one area
+# still owed after part (b2-6): Lawrenceville, Bloomfield, Highland Park & the East End (33). With it, every one of the 215
+# candidates has been drafted or set aside.
+#
+# THE SORT, RE-RUN 2026-10-30: the stored places:v34 rows — the 48 box tiles plus two ring rows (804_-1595, 810_-1595; parts
+# (b2-4)–(b2-6) counted one) — 1,446 unique pins, by page ID, name and every pin within 150 m; the 392 approved, unmerged
+# gems in 40.2–40.65 / −80.25…−79.7 (unchanged since part (b2-6)) by name and within 200 m; a name-token and description
+# scan of every pin and gem within 600 m, and a box-wide name scan to 3 km. None of the 33 page IDs is stored in any tile
+# (#539); no gem or served pin carries any of the 33 names (the served Butler Street Gatehouse wiki pin is the cemetery's
+# gatehouse, its own article, ~650 m from the cemetery's coordinate). NO HIDDEN PIN: no stored pin within 150 m is the
+# same place as any line (Highland Towers, 140 m from Hunt Armory, is an apartment block), so #542 does not arise.
+#
+# SET ASIDE (10): thin — no story beyond a build date, an architect and a listing — 141 Mayflower Street; Baxter High School;
+# Fort Pitt Elementary School; Friendship School; Fulton Elementary School; Sellers House (Pittsburgh, Pennsylvania); Welcome
+# Sculptures (Pittsburgh). ITS ONE STORY IS A LIVE GEM'S: Lincoln Elementary School (Pittsburgh, Pennsylvania) (the article's
+# only story is the state marker for Mary Lou Williams — the Mary Lou Williams gem, 12 m); Whitehill-Gleason Motors (built on
+# the site of the first drive-in filling station — the First Drive-In Filling Station gem, 53 m). RAZED with nothing of note
+# on the site: Ewalt House (torn down 7 October 2020; townhomes were approved for the lot).
+#
+# ALL 23 LINES ARE ARTICLE-NAMED (FROM PITTSBURGH (4) with its (b1) guard): named EXACTLY as the article, at the article's own
+# coordinate. Every line sits inside the 48 tiles (809_-1600, 809_-1599, 809_-1598).
+# PRE-CHECKS RUN IN THE SANDBOX (no Gemini), as in parts (b2-4)–(b2-6), against live reads — nearby-places served pins at
+# each line's coordinate, approved submissions within 300 m, a Wikipedia geosearch at 90 m — with seed-resolve.ts's own
+# matching re-implemented: every line finds exactly ONE target, its own article at 0 m; #425 big-area same-name 90–300 m —
+# 0 hits; #437/#438 containers — 0; #434 differently named — 0; #432 near-named — not reached (every line has its target);
+# no line matches a SERVED pin within 90 m; no line's name equals any stored pin's name.
+# FLAGGED `| new` UP FRONT (1):
+#   Allegheny Cemetery — five grave gems sit on its coordinate (Grave of Stephen Foster at 0 m; Walter Forward, Eben Byers,
+#     Stanley Turrentine, Lillian Russell at 50 m — the #310 graves pass). None name-matches the line, but a Gemini
+#     same-place call on the 0 m grave would send the line to REVIEW (matched a live pin under a different name). The
+#     cemetery is a pin of its own (#310: "the cemetery ITSELF is already a pin"); marked `new`, it seeds under its own name,
+#     which is the article's, at the article's coordinate, and the graves keep their stories.
+# Expect 22 `new-seed` with a ↳ under their article at 0 m and 1 `new-seed` under its own (= the article's) name.
+# THE ~100 m NEIGHBOURS (read for twins; none is the same place): Foster School — the Lawrenceville library 31 m (the library
+# was built on the school's grounds; two buildings, two articles); Saint Mary's Academy Building — St. Mary's Church 28 m (the
+# 1854 first church-and-school and the 1874 church; two articles); Carol Peterson House — the Ewalt House article 80 m (set
+# aside, razed); Motor Square Garden — the UPMC Shadyside School of Nursing article 0 m (a tenant; an article only, no pin);
+# Boys' Club of Pittsburgh — the Career Connections Charter High School article 16 m (the charter school that used the
+# building until 2014) and Attack Theatre 30 m (articles only); Highland Building — the Waffle Shop and The Last Billboard
+# articles 48–56 m (art projects; articles only); Allegheny Cemetery — the five grave gems above.
+# WATCH IN THE DRY RUN: (1) any line that REVIEWs, or reads `= already on the map` — stop and tell Claude before committing (do
+#   not flag it yourself); St. Mary's Church and Saint Mary's Academy Building (28 m) and Foster School and the library (31 m)
+#   are the pairs most likely to draw a Gemini same-place call. (2) Motor Square Garden (AAA offices), Highland Building
+#   (apartments), Ford Motor Company Assembly Plant and Victoria Hall (a school): if one reads `commercial with no story, not
+#   seeded`, add `| new` to that line and re-run the dry run.
+#
+# OWED after this file — no candidates left. Then step (5): gate dry run with `--all` and GATE_METRO=Pittsburgh.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-11.txt
+# Dry run first; expect 23 new-seed, 0 review; then the same command with --commit, then curated_category_backfill(true)
+# (a plain "Success" with 0 rows is expected for new seeds).
+
+# --- Lawrenceville, Bloomfield & Friendship ---------------------------------------------------------------------------
+Albright United Methodist Church | @40.45687222,-79.93691111 | Chancey Hodgdon built this rough-stone Romanesque church in 1905–06 for a congregation that had followed its members out of downtown; its 39 windows are the largest collection of S.S. Marshall stained glass in Pittsburgh, and a fight over its landmark status went all the way to the Commonwealth Court. | https://en.wikipedia.org/wiki/Albright_United_Methodist_Church
+Allegheny Cemetery | @40.4725,-79.95 | Incorporated in 1844 as the sixth-oldest rural cemetery in the United States, this wooded 300-acre hillside holds more than 124,000 people, among them French and Indian War soldiers moved here from the old burial ground at Trinity Cathedral downtown. | https://en.wikipedia.org/wiki/Allegheny_Cemetery | new
+Boys' Club of Pittsburgh | @40.47194444,-79.95916667 | Built in 1912 as the Lawrenceville YMCA, with a gym, a swimming pool, a bowling alley and dormitories, this building was the Pittsburgh Boys' Club's home from 1928 to 2000, then a charter school, and is now apartments. | https://en.wikipedia.org/wiki/Boys'_Club_of_Pittsburgh
+Carol Peterson House | @40.47336389,-79.95985 | This 1886–87 Italianate house rose on a lot cut from Anna Irwin's riverside estate, and for nearly 16 years it was home to architectural historian Carol Peterson, who wrote the histories of some 2,000 Pittsburgh houses and co-wrote a history of Allegheny City with Steelers owner Dan Rooney. | https://en.wikipedia.org/wiki/Carol_Peterson_House
+Foster School | @40.4675,-79.95888889 | This 1886 school stands on a burial ground Stephen Foster's father gave Lawrenceville — some 500 graves, War of 1812 veterans among them — and when grading turned up remains, Morrison Foster sued to stop it; the state Supreme Court let the school go ahead, and a granite monument marks the unclaimed dead still here. | https://en.wikipedia.org/wiki/Foster_School
+Lawrenceville Branch of the Carnegie Library of Pittsburgh | @40.46751944,-79.95925556 | Opened in 1898 from Andrew Carnegie's first Pittsburgh grant, this Alden & Harlow branch was the first Carnegie library in America to let readers take books from open shelves and the first with a children's room; it stands on part of an old cemetery, and a gravestone believed found during construction is kept inside. | https://en.wikipedia.org/wiki/Lawrenceville_Branch_of_the_Carnegie_Library_of_Pittsburgh
+McCleary Elementary School | @40.4802,-79.9512 | School-board infighting nearly quadrupled this school's cost and left it unfinished for two years, so it opened in April 1902 with no ceremony at all — a newspaper called it the quietest school opening the city had seen; it became condominiums in 2015–17. | https://en.wikipedia.org/wiki/McCleary_Elementary_School
+Saint Mary's Academy Building | @40.47004167,-79.95519444 | Built in 1854 as St. Mary's parish's first church and school, this Greek Revival building is one of Lawrenceville's few surviving pre–Civil War buildings; when the neighboring cemetery's owners planned to raze it for burial space, a landmark nomination saved it in 2008. | https://en.wikipedia.org/wiki/Saint_Mary's_Academy_Building
+St. Mary's Church (Pittsburgh) | @40.46986111,-79.95541667 | Built in 1874 beside the parish's first church-and-school, this Lawrenceville church closed in 2004 after its parish merged with three others, and it now serves as the chapel of the adjoining St. Mary Cemetery. | https://en.wikipedia.org/wiki/St._Mary's_Church_(Pittsburgh)
+Victoria Hall (Pittsburgh) | @40.46407778,-79.94235 | Built in the late 1860s for Henry J. Lynch, a director of the Dollar Savings Bank, this 21-room Second Empire mansion became a girls' academy run by the Ursuline Sisters from 1895 to 1981 — they defended its independence against the bishop — and was later a wedding hall and is now a Waldorf school. | https://en.wikipedia.org/wiki/Victoria_Hall_(Pittsburgh)
+Western Pennsylvania Hospital | @40.46138889,-79.94638889 | Pittsburgh's first chartered public hospital, founded in 1848 and run by the Army in the Civil War to treat some 3,000 soldiers, moved into this X-shaped Bloomfield building on New Year's Day 1912, carrying its 219 patients across with it. | https://en.wikipedia.org/wiki/Western_Pennsylvania_Hospital
+Woolslair Elementary School | @40.46333333,-79.95694444 | Dedicated in 1899 as the pride of the 16th Ward, this turreted brick school was built with a 950-seat auditorium that opened onto both floors, and it still teaches children today as one of the district's oldest schools. | https://en.wikipedia.org/wiki/Woolslair_Elementary_School
+
+# --- Highland Park, East Liberty, Larimer, Lemington & Shadyside's edge ---------------------------------------------
+Dilworth Elementary School (Pittsburgh, Pennsylvania) | @40.46821389,-79.91748889 | Finished in 1915 on land given by a widow of the Dilworth family — whose forebear William Dilworth set up a school on Mount Washington in the 1820s — this H-shaped brick school was designed to echo European schools and looked like no other in the city when it opened. | https://en.wikipedia.org/wiki/Dilworth_Elementary_School_(Pittsburgh,_Pennsylvania)
+Ford Motor Company Assembly Plant (Pittsburgh, Pennsylvania) | @40.455,-79.945 | Ford built this reinforced-concrete plant on Baum Boulevard's Automobile Row in 1915 to assemble Model Ts, with a crane shed that hoisted parts off the railroad to each floor; cars stopped rolling out in 1932, and the University of Pittsburgh bought it in 2018. | https://en.wikipedia.org/wiki/Ford_Motor_Company_Assembly_Plant_(Pittsburgh,_Pennsylvania)
+Highland Building | @40.46,-79.92472222 | Henry Clay Frick commissioned Daniel Burnham to design this 13-story East Liberty tower, finished in 1909; as the neighborhood declined it was gutted by water and sat empty for some twenty years before a restoration turned it into apartments. | https://en.wikipedia.org/wiki/Highland_Building
+Horse Tamer Sculptures (Pittsburgh) | @40.47515833,-79.91074722 | Giuseppe Moretti modeled these two bronze youths wrestling rearing horses, set up in 1900 at Highland Park's Stanton Avenue entrance, on the Marly Horses that guard the Champs-Élysées in Paris; each stands about 15 feet tall on an 11-foot granite base. | https://en.wikipedia.org/wiki/Horse_Tamer_Sculptures_(Pittsburgh)
+Hunt Armory | @40.45614167,-79.92393333 | Named for Alfred E. Hunt, the Spanish–American War captain who founded the company that became Alcoa, this block-long armory finished in 1916 was Pittsburgh's largest hall until the Civic Arena; Truman drew more than 25,000 here in 1948, and since 2021 it has been an ice rink. | https://en.wikipedia.org/wiki/Hunt_Armory
+James Scott House | @40.47121111,-79.92450278 | U.S. Steel executive James Scott built this Colonial Revival house in 1900, and in 1906 his daughter Helen eloped from it with Frederick Fairbanks, son of the vice president — a romance that made the front page of the New York Times. | https://en.wikipedia.org/wiki/James_Scott_House
+Larimer School | @40.4656,-79.9128 | Built in 1896, with statues on pillars and carved faces around its richly decorated doorway, this school closed in 1980, stood empty for some 40 years, and was renovated into 35 mixed-income homes in 2021–22. | https://en.wikipedia.org/wiki/Larimer_School
+Lemington Elementary School | @40.4701,-79.8965 | This 1937 school is trimmed in terra cotta with Mayan-inspired motifs — an amber sunburst frieze and stylized human faces among them. | https://en.wikipedia.org/wiki/Lemington_Elementary_School
+Motor Square Garden | @40.45977778,-79.92726111 | The Mellons built this blue-domed market hall in 1898–1900; it failed as a market and became an auto-show hall, a boxing venue, a home court for Pitt basketball and the stage of a 1932–33 Depression dance marathon that ran 838 hours, and it is now AAA's Pittsburgh headquarters. | https://en.wikipedia.org/wiki/Motor_Square_Garden
+Rogers Middle School for the Creative and Performing Arts | @40.469019,-79.930577 | Built in 1915 and named for longtime school-board member James E. Rogers, this building later housed an audition-entry arts magnet created under the city's court-ordered desegregation plan, which trained some 8,000 pupils before the program moved out in 2009. | https://en.wikipedia.org/wiki/Rogers_Middle_School_for_the_Creative_and_Performing_Arts
+Saints Peter and Paul Church (Pittsburgh) | @40.4626,-79.9182 | Known as the Dogma Church since it staged the climax of Kevin Smith's 1999 film, this 1891 Gothic church was gutted in 1909 when lightning struck between its towers and set the organ ablaze; it was rebuilt and rededicated in 1910 and has stood empty since closing in 1992. | https://en.wikipedia.org/wiki/Saints_Peter_and_Paul_Church_(Pittsburgh)
