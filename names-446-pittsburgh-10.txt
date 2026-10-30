@@ -1,0 +1,93 @@
+# names-446-pittsburgh-10.txt — #446 Pittsburgh story pass, part 2 (b2-6): the Oakland, Shadyside & Mon bank and the South
+# Side, Mount Washington & south and west suburbs areas of part (b2-3)'s owed Wikipedia-landmark candidates (drafted
+# 2026-10-30). 32 lines (1 flagged `new`). No hidden-pin row.
+# Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE SOURCE: part (b2-3)'s four Wikipedia lists — see names-446-pittsburgh-7.txt's header. This file takes two of the three
+# areas still owed after part (b2-5): Oakland, Shadyside & the Mon bank (21) and South Side, Mount Washington & the south and
+# west suburbs (29; Racer (Kennywood), Boyce station, Gardner-Bailey House and Longfellow School were filed here by part
+# (b2-3) and stay).
+#
+# THE SORT, RE-RUN 2026-10-30: 49 stored places:v34 rows (1,426 unique pins, unchanged) by page ID, name and every pin within
+# 120 m; the 360 approved, unmerged gems in 40.2–40.65 / −80.25…−79.7 (231 non-grave — part (b2-5)'s 27 included) by name and
+# within 150 m; a name-token and description scan of every pin and gem within 600 m, and a box-wide name scan to 3 km. None
+# of the 50 page IDs is stored in any tile (#539); no gem or served pin carries any of the 50 (the Carrie Furnace Hot Metal
+# Bridge wiki pin is the Rankin railroad bridge, a different one; Westinghouse Park is his estate, not the memorial). NO
+# HIDDEN PIN: no stored pin within 120 m is the same place as any line, so #542 does not arise.
+#
+# SET ASIDE (18): thin — no story beyond a build date, an architect and a listing — Addy-Spencer House; Moreland-Hoffstot
+# House; Beechwood Elementary School; Beltzhoover Elementary School; Boggs Avenue Elementary School; Carnegie Library of
+# Pittsburgh – South Side; Colfax Elementary School (the article is school news); Concord Elementary School (Pittsburgh)
+# (also the (b1) gravestone); Gardner-Bailey House (a floor plan); Homestead station; Knoxville Junior High School;
+# Longfellow School (Swissvale, Pennsylvania); Lowen-Shaffer House; Mifflin Elementary School; Prospect Junior High and
+# Elementary School; Saint Michael's Roman Catholic Church & Rectory; South Side High School (Pittsburgh, Pennsylvania).
+# RAZED with nothing of note on the site: Oakland Public School (demolished 1987; condominiums stand there).
+#
+# ALL 32 LINES ARE ARTICLE-NAMED (FROM PITTSBURGH (4) with its (b1) guard): named EXACTLY as the article, at the article's own
+# coordinate. Every line sits inside the 48 tiles (tile keys checked; Boyce station is in 806_-1602, Racer in 808_-1597).
+# PRE-CHECKS RUN IN THE SANDBOX (no Gemini), as in parts (b2-4) and (b2-5), against live reads — nearby-places served pins,
+# approved submissions within 300 m, a Wikipedia geosearch at 90 m — with seed-resolve.ts's own matching re-implemented:
+# #425 big-area same-name 90–300 m — 0 hits; #437/#438 containers — 0; #434 differently named — 0; no line matches a SERVED
+# pin within 90 m; no line's name equals any stored pin's name. Every line finds its own article at 0 m as its target.
+# FLAGGED `| new` UP FRONT (1):
+#   Monongahela Incline — the article "Monongahela Freight Incline" sits at the SAME coordinate (0 m) and matches the line
+#     both ways, so the tool would see two targets and could seed under the freight incline's title (a separate, former
+#     freight funicular). Marked `new`: it seeds under its own name, which is the article's, at the article's coordinate.
+# Expect 31 `new-seed` with a ↳ under their article at 0 m and 1 `new-seed` under its own (= the article's) name.
+# THE ~100 m NEIGHBOURS (read for twins; none is the same place): Bellefield Hall — Heinz Memorial Chapel 64–82 m, Mellon
+# Institute 79 m, Mellon College of Science 83 m; Pittsburgh Athletic Association — the Syria Mosque gem 64 m (the razed
+# mosque's site, across Bigelow Boulevard), the University of Pittsburgh gem 65 m; Negley–Gwinner–Harter House — the
+# Moreland-Hoffstot House article 69 m (set aside, a different house); Rodef Shalom Congregation — Rodef Shalom Biblical
+# Botanical Garden article 56 m (its garden); Main Building, U.S. Bureau of Mines — Newell Simon Hall 84 m; Garrison Foundry,
+# Oliver Bath House and the Bedford School gem — three buildings 44–70 m apart, each its own; South Side Market Building —
+# the Birmingham borough article 61 m, Cindy Esther Plaza 88 m; Beck's Run School — the Becks Run stream pin 90 m (it does
+# not name-match: "becks" ≠ "beck"); Racer (Kennywood) — Jack Rabbit (Kennywood) 77 m, Steel Curtain 99 m (other coasters).
+# WATCH IN THE DRY RUN: (1) any line that REVIEWs, or reads `= already on the map` — stop and tell Claude before committing (do
+#   not flag it yourself); Pittsburgh Athletic Association beside the Syria Mosque gem is the one most likely to draw a
+#   Gemini same-place call. (2) McCook Family Estate and Sunnyledge (hotels), Pittsburgh Terminal Properties (offices),
+#   Pittsburgh Mercantile Company Building (apartments), Beck's Run School (a saloon) and Old Stone Tavern: if one reads
+#   `commercial with no story, not seeded`, add `| new` to that line and re-run the dry run.
+#
+# OWED — 33 candidates in one area, not yet read for thinness or drafted (list in names-446-pittsburgh-7.txt's header):
+#   Lawrenceville, Bloomfield, Highland Park & the East End 33. Then step (5).
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-10.txt
+# Dry run first; expect 32 new-seed, 0 review; then the same command with --commit, then curated_category_backfill(true).
+
+# --- Oakland, Shadyside & the Mon bank -----------------------------------------------------------------------------
+Bellefield Hall | @40.44541389,-79.95092778 | Benno Janssen borrowed a Siena palazzo's face for this hall, opened in 1926 as the Young Men's and Women's Hebrew Association; Arthur Rubinstein and Isaac Stern made their Pittsburgh debuts in its concert hall, and Pitt has owned it since the 1980s. | https://en.wikipedia.org/wiki/Bellefield_Hall
+Bindley Hardware Company Building | @40.45361111,-79.94111111 | Built in 1903 beside the railroad's Shadyside station as the main warehouse of John P. Bindley, who failed to unite the nation's hardware trade into one trust and instead made his firm the region's dominant hardware wholesaler. | https://en.wikipedia.org/wiki/Bindley_Hardware_Company_Building
+Greenfield Elementary School (Pittsburgh, Pennsylvania) | @40.42638889,-79.945 | Opened in 1922 to replace a schoolhouse the board had rated the worst in the city, this was Pittsburgh's first school built for the "platoon" plan, with pupils moving room to room by subject; its geometric terra cotta is said to show Frank Lloyd Wright's influence. | https://en.wikipedia.org/wiki/Greenfield_Elementary_School_(Pittsburgh,_Pennsylvania)
+Hot Metal Bridge | @40.428268,-79.960776 | From 1900 one of these two spans carried ladle cars of molten iron across the Monongahela between the halves of the Jones and Laughlin steel mill — during World War II some 15 percent of the nation's steelmaking capacity crossed it — and today the pair carry cars, walkers and the Great Allegheny Passage. | https://en.wikipedia.org/wiki/Hot_Metal_Bridge
+Main Building, U.S. Bureau of Mines | @40.44416667,-79.94583333 | Henry Hornbostel designed this building, dedicated in 1919, as the headquarters of the U.S. Bureau of Mines' Central Experiment Station; Carnegie Mellon bought the complex in 1985 and renamed it Hamburg Hall, now home to the Heinz College. | https://en.wikipedia.org/wiki/Main_Building,_U.S._Bureau_of_Mines
+McCook Family Estate | @40.44801667,-79.93831944 | This Fifth Avenue mansion was built in 1906–07 for Willis McCook, a businessman who was Henry Clay Frick's lawyer, and after a long restoration it reopened in 2012 as the Mansions on Fifth hotel. | https://en.wikipedia.org/wiki/McCook_Family_Estate
+Negley–Gwinner–Harter House | @40.44801944,-79.93952778 | Built in 1870–71 for William B. Negley, a Civil War major and nephew of Thomas Mellon, this Second Empire house was enlarged by Frederick Osterling, lost much of its top floor to a 1987 renovation fire, and sat boarded up and near demolition until its 1995 restoration. | https://en.wikipedia.org/wiki/Negley–Gwinner–Harter_House
+Panther Hollow Bridge | @40.43694444,-79.94666667 | Opened in 1896 among Edward Bigelow's Schenley Park improvements, this steel arch is guarded at each corner by Giuseppe Moretti's bronze panthers, added in 1897 — only two were ready in time for their Fourth of July dedication. | https://en.wikipedia.org/wiki/Panther_Hollow_Bridge
+Pittsburgh Athletic Association | @40.445,-79.95472222 | Benno Janssen modeled this 1911 clubhouse on Venetian Renaissance palaces; the club had 2,500 members at its height, Fred Rogers swam here daily, and four players on the 1920 U.S. Olympic hockey team came from its club side. | https://en.wikipedia.org/wiki/Pittsburgh_Athletic_Association
+Pittsburgh Mercantile Company Building | @40.42722222,-79.96833333 | Built in 1907–08 as the Jones and Laughlin steelworks' company store — run as a separate corporation by J&L's own officers to sidestep the state's ban, and selling to workers who were often paid in scrip — this building later housed Goodwill and is now apartments. | https://en.wikipedia.org/wiki/Pittsburgh_Mercantile_Company_Building
+Rodef Shalom Congregation | @40.44805556,-79.94361111 | Henry Hornbostel won the competition to design this 1907 temple for Western Pennsylvania's oldest Jewish congregation, founded in 1856, and raised its 90-foot double dome on Guastavino tile vaults without structural steel. | https://en.wikipedia.org/wiki/Rodef_Shalom_Congregation
+Saint Nicholas Greek Orthodox Cathedral (Pittsburgh) | @40.44446667,-79.949975 | Built in 1904 as the First Congregational Church and Greek Orthodox since 1923, this cathedral hides behind its sandstone Ionic portico a gold-leaf Christ in the dome and a mosaic iconostasis with peacocks on its Royal Doors. | https://en.wikipedia.org/wiki/Saint_Nicholas_Greek_Orthodox_Cathedral_(Pittsburgh)
+Schenley Bridge | @40.4413,-79.9492 | Finished in 1897 to replace a shaky 1890 trestle over Junction Hollow that set off panics when Fourth of July crowds feared it was collapsing, this arch became Schenley Park's grand entrance, a setting in Michael Chabon's The Mysteries of Pittsburgh, and a place for love padlocks. | https://en.wikipedia.org/wiki/Schenley_Bridge
+Schenley High School | @40.45028,-79.95444 | Built in 1916 as a limestone triangle on Mary Schenley's land, this was the first U.S. high school to cost more than a million dollars; Andy Warhol was a student here, and after it closed in 2008 the board sold it for conversion to apartments. | https://en.wikipedia.org/wiki/Schenley_High_School
+Shadyside Presbyterian Church | @40.44916667,-79.93916667 | The congregation's third church, finished in 1890 by Shepley, Rutan & Coolidge — H. H. Richardson's successors — deliberately echoes Richardson's Trinity Church in Boston, and its witch's-hat pyramid roof is a Shadyside skyline mark. | https://en.wikipedia.org/wiki/Shadyside_Presbyterian_Church
+Sunnyledge | @40.44755,-79.93738056 | Longfellow & Harlow designed this house in 1886 as the home and office of Dr. James H. McClelland, founder of nearby Shadyside Hospital; his family lived here until the 1980s, and it is now a small hotel and tea room. | https://en.wikipedia.org/wiki/Sunnyledge
+Tufa Bridges | @40.43397222,-79.93561389 | Parks superintendent George Burke, a horticulturist with no engineering training, built these two footbridges in 1908 of Ohio tufa stone over concrete and set them in a shady ravine so moss and lichen would cover them; they are said to be the only bridges of their kind. | https://en.wikipedia.org/wiki/Tufa_Bridges
+Westinghouse Memorial | @40.43946,-79.94271 | Paid for by more than 50,000 Westinghouse employees and dedicated on George Westinghouse's birthday in 1930 before some 12,000 people, this memorial sets Daniel Chester French's bronze schoolboy gazing at panels of the inventor's life. | https://en.wikipedia.org/wiki/Westinghouse_Memorial
+
+# --- South Side, Mount Washington & the south and west suburbs ------------------------------------------------------
+Beck's Run School | @40.41091111,-79.95705278 | Built in 1899 as a two-room schoolhouse and used until about World War II, this building later became Dower's Tavern and still serves drinks as a saloon. | https://en.wikipedia.org/wiki/Beck's_Run_School
+Birmingham Public School | @40.42725278,-79.98369167 | The borough of Birmingham built this school in 1871, a year before Pittsburgh annexed it; from 1944 it was the middle school of St. Adalbert's parish, and it is now apartments. | https://en.wikipedia.org/wiki/Birmingham_Public_School
+Boyce station | @40.31805556,-80.11361111 | Built around 1900 on the Chartiers Branch, this station also held the community's post office and general store; the last passenger train stopped in 1952, and it is the only intact Pittsburgh-area depot that doubled as its town's commercial centre. | https://en.wikipedia.org/wiki/Boyce_station
+Garrison Foundry-Mackintosh Hemphill Company Offices | @40.42953611,-79.98962778 | These yellow-brick offices of 1895–1902 belonged to the Garrison Foundry, later Mackintosh-Hemphill, which for a century built iron and steel machinery for mills at home and abroad — James Hemphill planned and fitted out the Homestead Works. | https://en.wikipedia.org/wiki/Garrison_Foundry-Mackintosh_Hemphill_Company_Offices
+John Frew House | @40.42931111,-80.05861944 | Its stone core and springhouse date from about 1790, making this one of only five pre-1800 buildings left in the city of Pittsburgh, and the only one still lived in. | https://en.wikipedia.org/wiki/John_Frew_House
+Monongahela Incline | @40.43194444,-80.00555556 | Opened on May 28, 1870 to carry German immigrant workers up Coal Hill, John Endres's incline — built with his daughter Caroline, one of America's first women engineers — is the oldest continuously operating funicular in the United States. | https://en.wikipedia.org/wiki/Monongahela_Incline | new
+Old Stone Tavern (Pittsburgh) | @40.435039,-80.034167 | Probably built around 1782 on the road to Washington County, this is Pittsburgh's oldest commercial building; its 1790s ledger names 89 men tied to the Whiskey Rebellion, and in Prohibition a speakeasy ran in its basement. | https://en.wikipedia.org/wiki/Old_Stone_Tavern_(Pittsburgh)
+Oliver Bath House | @40.42959444,-79.98884167 | Industrialist Henry W. Oliver gave the land and about $100,000 in 1903 for a bath house free to South Siders forever, first sketched by Daniel Burnham; delayed by Oliver's death, it opened in 1915 and still runs as a public pool. | https://en.wikipedia.org/wiki/Oliver_Bath_House
+Pittsburgh Terminal Properties | @40.42980556,-79.99705278 | Built in 1904–06 as a hub where river, rail and road freight met, this warehouse complex stored ammunition for the War Department on its sixth floor during World War II and handled freight until 1963. | https://en.wikipedia.org/wiki/Pittsburgh_Terminal_Properties
+Racer (Kennywood) | @40.38694444,-79.86194444 | John A. Miller's 1927 Racer is one of the oldest operating roller coasters in the world and one of only two wooden coasters left with a Möbius-loop track: its two trains race side by side on one continuous track and return on opposite sides of the station. | https://en.wikipedia.org/wiki/Racer_(Kennywood)
+Samuel F. B. Morse School | @40.42686667,-79.9707 | German, Scotch-Irish and Welsh immigrants on the South Side floated a $66,000 bond to build this school, dedicated in 1875 and named for telegraph pioneer Samuel F. B. Morse; it closed in 1979 and is now senior housing, its old school bell still kept inside. | https://en.wikipedia.org/wiki/Samuel_F._B._Morse_School
+South Side Market Building | @40.42934444,-79.98643611 | First built in 1893 and rebuilt after a fire in 1915, this is one of the last two market houses left in Pittsburgh; its one ornament is a stone cartouche on the south front crowned by a bull's head. | https://en.wikipedia.org/wiki/South_Side_Market_Building
+South Side Presbyterian Church | @40.4275,-79.97797 | Built in 1869–70 by the First Presbyterian Church of Birmingham, this Gothic Revival church took its present name in 1873 after Pittsburgh annexed the borough, and gained its two unequal towers, 100 and 70 feet tall, in 1893. | https://en.wikipedia.org/wiki/South_Side_Presbyterian_Church
+Taylor Allderdice High School | @40.429514,-79.919379 | Opened in 1927 and named for Taylor Allderdice, a member of the city's first school board and president of the National Tube Company, this is the school rapper Wiz Khalifa honoured with his 2012 mixtape Taylor Allderdice. | https://en.wikipedia.org/wiki/Taylor_Allderdice_High_School
