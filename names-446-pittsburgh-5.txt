@@ -1,0 +1,84 @@
+# names-446-pittsburgh-5.txt — #446 Pittsburgh story pass, part 2 (b2-1): HMdb BEYOND THE PHMC SERIES, the Pittsburgh town
+# list's entries 1–98 (A through "Charles Martin Hall") (drafted 2026-10-29).
+# 19 lines. Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE LIST: HMdb's Pittsburgh town list (results.asp?Search=Place&Town=Pittsburgh&State=Pennsylvania, opened from marker
+# m=257248's "Touch for a list" link, heading checked) holds 662 ENTRIES — past 500, so entries 501–662 are sign-in-gated
+# (Bergen (5), #502 2b). It files many suburbs under "Pittsburgh" (Baldwin, Brentwood, Castle Shannon, Edgewood, Scott
+# Township, Wilkinsburg, South Park). This file covers the default (title-sorted, excerpt) list's page 1, entries 1–98 read;
+# 99–100 were cut off by the fetch. Pages 2–5 and the gated tail are still owed (see #446).
+#
+# SORTED (page 1): PHMC markers were all settled in parts 1–2 (b1) and are skipped. War-memorial honour rolls, plant panels,
+# graves (Augustus P. Davis, Calbraith Perry Rodgers, Edward A. Fisher, Charles Parkin) and PHLF plaques with no article
+# behind them (1939 House, Addy-Spencer House, Alder Court, Aria Lofts, Bigham House, C.C. Mellor Library, Castle Shannon,
+# 7 Mile Stone) are skipped as no story. The Strip District "Born …" plaques (Andrew Carnegie, Andy Warhol, August Wilson,
+# m=314xxx) stand together at one spot away from their subjects — skipped (Middlesex-Union (6)). Generic trail panels about
+# a whole district (Allegheny City, Black Diamonds, Cast Iron Columns) and the NPS Allegheny Soldiers' Lot panel (national
+# text) are skipped.
+# CUT — already served: Negley Memorial (OSM pin carrying the inscription, 3 m), Allegheny Aqueduct (wiki pin 138 m),
+# Allegheny Commons (the West Park OSM pin serves its article), Buhl Planetarium and Allegheny Post Office (the served
+# Children's Museum of Pittsburgh pin is the same building), Cathedral of Learning (served).
+# HIDDEN-PIN ROW — in 446_hidden_curated_2.sql, NOT here: the Allegheny County Soldiers' Monument's story on the hidden
+# "Soldiers and Sailors Monument" OSM pin, 7 m away.
+# OWED / LEADS (not drafted): "The Bell Speaks" (m=66452, the Pittsburgh link isn't in the excerpt), 4600 East Carson Street
+# (m=174403), Beechview Centennial Monument (m=261338), 31st Street Bridge (m=191482), Allegheny High School (m=58602 — the
+# stored "Allegheny Traditional Academy" OSM pin is the same school, 18 m; check whether it is hidden before a row).
+#
+# DUPLICATE CHECK, done in the sandbox before writing: the 48 box rows + the ring of places:v34 (1,426 unique pins, every
+# tile warm); the 96 live non-grave gems in and around the box (parts 1–2 (b1) exactly); a Wikipedia geosearch at 150 m
+# around every marker, each article checked against the stored titles.
+#
+# ARTICLE-NAMED LINES (14; #539 pattern, FROM PITTSBURGH (4) with its (b1) guard — the article IS the place the marker
+# names): named EXACTLY as the article, placed at the article's coordinate, NOT flagged `new` — expect each to seed with one
+# ↳ under that article at 0 m. Downtown's notable articles are mostly in no stored tile (Allegheny County Courthouse, Frick
+# Building, BNY Mellon Center … seen beside the Sadowski plaque) — recorded on #539.
+# `| new` (5) — every seed line, each within ~120 m of a stored pin, a gem or an article (DuPage (1), Bergen (2)).
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-5.txt
+# Dry run first; expect 19 new-seed (14 with ↳), 0 review; read every ↳ line; then the same command with --commit.
+
+# --- Downtown & the Cultural District ---------------------------------------------------------------------------
+# PHLF "Burke's Landmark" plaque (m=67183), 11 m from the article; article in no stored tile (#539). Benedum–Trees article 20 m — a different building, its own line below.
+Burke Building | @40.44,-80.0025 | Built in 1836 as Pittsburgh's first major office building on the Fourth Avenue banking street, it is the only large Greek Revival building left in the city after the Great Fire of 1845. | https://en.wikipedia.org/wiki/Burke_Building
+# PHLF plaque (m=67184), 18 m from the article; article in no stored tile (#539). Burke Building line 20 m (different building).
+Benedum–Trees Building | @40.43979167,-80.00215556 | Caroline Jones Machesney, a Pittsburgh banker's daughter and sole heir, commissioned this 1905 tower by Thomas H. Scott, making it the first skyscraper in the city built for a woman. | https://en.wikipedia.org/wiki/Benedum–Trees_Building
+# PHLF plaque (m=67181), 14 m from the article; article in no stored tile (#539).
+Arrott Building | @40.43953889,-80.0013 | Frederick John Osterling designed this 1902 skyscraper at Fourth Avenue and Wood Street, in the heart of the old Fourth Avenue financial district. | https://en.wikipedia.org/wiki/Arrott_Building
+# PHLF plaque (m=273286), 7 m from the article; article in no stored tile (#539). Smithfield United Church of Christ OSM pin 58 m (different building).
+Allegheny HYP Club | @40.44170833,-79.99635 | The Harvard-Yale-Princeton Club, founded in 1930, meets in this 1890s building on William Penn Place, enlarged in 1930 by architect Edward B. Lee. | https://en.wikipedia.org/wiki/Allegheny_HYP_Club
+# NRHP plaque (m=74724), 24 m from the article; article in no stored tile (#539). Wood Street Galleries OSM pin 74 m (different place).
+Benedum Center | @40.44277778,-79.99972222 | Opened as the Stanley Theatre, the Pittsburgh flagship of the Stanley-Clark movie chain designed by Philadelphia's Hoffman-Henon, this movie palace was restored and reopened in 1987 as the home of the Pittsburgh Opera, Pittsburgh Ballet Theatre and Civic Light Opera. | https://en.wikipedia.org/wiki/Benedum_Center
+# Marker text from HMdb's list excerpt (m=66451). Henry Clay Frick gem 43 m; Allegheny County Courthouse article 84 m — flagged new.
+Anthony Sadowski | @40.439117,-79.996412 | Anthony Sadowski, a trader and interpreter whom Pennsylvania's provincial governor employed as an agent to the Native nations of the western country, traded down the Ohio as far as Logstown and is remembered by this plaque in downtown Pittsburgh. | https://www.hmdb.org/m.asp?m=66451 | new
+# --- North Side ---------------------------------------------------------------------------------------------------
+# Marker text from HMdb's list excerpt (m=41048). West Park OSM pin 46 m, National Aviary gem 82 m — flagged new.
+Battleship Maine Memorial | @40.45315278,-80.01095278 | This West Park memorial recalls the sinking of the battleship Maine in Havana harbor on February 15, 1898, and honors the Allegheny County soldiers, sailors and marines who served in the Spanish-American War that followed. | https://www.hmdb.org/m.asp?m=41048 | new
+# Marker text (m=78335). Allegheny City Stables article 98 m, Allegheny West Historic District OSM pin 101 m — flagged new.
+Birthplace of Gertrude Stein | @40.452981,-80.016405 | Gertrude Stein, the writer and champion of modern art, was born in this Allegheny West house on February 3, 1874, to Daniel and Amelia Stein. | https://www.hmdb.org/m.asp?m=78335 | new
+# PHLF "Byers-Lyon House" plaque (m=65207), 5 m from the article; article in no stored tile (#539).
+Byers-Lyons House | @40.44972222,-80.01611111 | Alden & Harlow designed this 1898 Allegheny West mansion, which now serves as Byers Hall of the Community College of Allegheny County. | https://en.wikipedia.org/wiki/Byers-Lyons_House
+# PHLF plaque (m=65165), 16 m from the article; article in no stored tile (#539).
+Calvary United Methodist Church | @40.4521444,-80.0188389 | Vrydaugh & Shepherd, with T. B. Wolfe, designed this Gothic Revival church on Beech Avenue, built between 1892 and 1895. | https://en.wikipedia.org/wiki/Calvary_United_Methodist_Church
+# PHLF plaque (m=65226), 13 m from the article; article in no stored tile (#539).
+Brown Chapel A.M.E. Church (Pittsburgh) | @40.45758889,-80.00613333 | This African Methodist Episcopal church on Boyle Street in the Central Northside was built in 1903 to a design by Frederick C. Sauer. | https://en.wikipedia.org/wiki/Brown_Chapel_A.M.E._Church_(Pittsburgh)
+# "The Biergarten" panel (m=123168), 21 m from the article; article in no stored tile (#539). Lieberth walkway OSM pin 106 m.
+Penn Brewery | @40.45714,-79.99152 | Penn Brewery has brewed since 1986 in the Troy Hill buildings of the Eberhardt and Ober Brewery, founded in 1848; its biergarten was once the yard where horse-drawn wagons collected the beer barrels. | https://en.wikipedia.org/wiki/Penn_Brewery
+# --- South Side & Station Square ----------------------------------------------------------------------------------
+# NRHP plaque (m=181886), 46 m from the article; article in no stored tile (#539). Oliver Bath House article 30 m (different building).
+Bedford School (Pittsburgh, Pennsylvania) | @40.42916667,-79.98944444 | Built in 1850 on Bingham Street in the South Side Flats, Bedford School is the oldest public school building still standing in Pittsburgh. | https://en.wikipedia.org/wiki/Bedford_School_(Pittsburgh,_Pennsylvania)
+# Marker text from HMdb's list excerpt (m=61313). Clinton Furnace gem 6 m (a different subject) — flagged new.
+Bessemer Converter | @40.4343,-80.00465 | This 10-ton Bessemer converter, built in 1930 by the Pennsylvania Engineering Corporation of New Castle, worked at the A. M. Byers Company in Ambridge and was one of the last of its kind in commercial use before it came to rest here at Station Square. | https://www.hmdb.org/m.asp?m=61313 | new
+# --- Lawrenceville ------------------------------------------------------------------------------------------------
+# Marker page read whole (m=182079, no removal note). St. Mary Cemetery (Pittsburgh) article 116 m; Allegheny Arsenal gem ~900 m — flagged new.
+Allegheny Arsenal Explosion Monument | @40.4694745,-79.95169421 | On September 17, 1862, an explosion at the Allegheny Arsenal killed seventy-eight workers, most of them young women filling cartridges; forty-five lie in this Allegheny Cemetery plot, where the Sons of Union Veterans raised this monument in 1928 to replace the worn 1863 original. | https://www.hmdb.org/m.asp?m=182079 | new
+# --- Oakland & Shadyside -----------------------------------------------------------------------------------------
+# Marker (m=65042), 18 m from the article; article in no stored tile (#539).
+Calvary Episcopal Church (Pittsburgh) | @40.455977,-79.922554 | On January 2, 1921, Westinghouse broadcast a service from this Shadyside church over the radio, the first church service ever sent out by wireless. | https://en.wikipedia.org/wiki/Calvary_Episcopal_Church_(Pittsburgh)
+# PHLF plaque (m=264018), 51 m from the article; article in no stored tile (#539). OSM statues 55–100 m (different things).
+Central Catholic High School (Pittsburgh) | @40.44667,-79.94556 | The De La Salle Brothers run this all-boys Catholic school, whose school building and faculty house were built in 1926 and 1927 to designs by Link, Weber & Bowers. | https://en.wikipedia.org/wiki/Central_Catholic_High_School_(Pittsburgh)
+# PHLF plaque (m=263711), 3 m from the article; article in no stored tile (#539). University Child Development Center wiki pin 101 m.
+Chancellor's Residence (University of Pittsburgh) | @40.448937,-79.944636 | Peabody and Stearns designed this 1897 Shadyside house, the Childs-Callery-Casey-Falk House, now the University of Pittsburgh chancellor's home. | https://en.wikipedia.org/wiki/Chancellor's_Residence_(University_of_Pittsburgh)
+# Marker (m=65044), 1 m from the article; article in no stored tile (#539). Neill Log House wiki pin 38 m (different place).
+Catahecassa (Snyder) Spring | @40.43550556,-79.93563889 | Built in 1906 and 1907, this Schenley Park spring is one of only three left in the city and is named for Catahecassa, or Blackhoof, the Shawnee war chief who fought at Braddock's defeat in 1755 and became a United States ally after the Treaty of Greenville. | https://en.wikipedia.org/wiki/Catahecassa_(Snyder)_Spring

@@ -1,0 +1,15 @@
+# names-446-pittsburgh-soldiers.txt — #446 Pittsburgh part 2 (b2-1) fix (2026-10-29): 1 line.
+# WHY: 446_hidden_curated_2.sql gave the hidden OSM pin "Soldiers and Sailors Monument" (osm_node5330245776,
+# 40.4530436, -80.0125113) its story, but that pin is stored ONLY in tile 809_-1601's row while it sits inside tile
+# 809_-1600. A far-search landing loads 809_-1600, cannot adopt the pin, and shows a blank placeholder (phone QA
+# 2026-10-29; the story appeared only after panning west loaded 809_-1601). The curated row is backed out FIRST
+# (delete … where note = '#446 hidden-pin row — Pittsburgh part 2 (b2-1) (2026-10-29)'), so the OSM pin is hidden again,
+# and the monument is seeded instead — gems load by area, so it shows from any landing.
+# NAMED BY HMdb's TITLE, NOT THE OSM NAME, ON PURPOSE: a story line also writes a curated row under its own name, and one
+# named "Soldiers and Sailors Monument" would un-hide the OSM pin beside the seed whenever 809_-1601 is loaded.
+# `| new`: the hidden pin is invisible to the same-place check anyway; West Park OSM pin 102 m, National Aviary gem 221 m.
+# RUN (Mac, keys exported):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-soldiers.txt
+# Expect 1 new-seed, no ↳, 0 review; then --commit.
+
+Allegheny County Soldiers' Monument | @40.4530436,-80.0125113 | Allegheny County raised this West Park monument to the memory of its 4,000 men who died fighting to hold the Union together in the Civil War. | https://www.hmdb.org/m.asp?m=58142 | new
