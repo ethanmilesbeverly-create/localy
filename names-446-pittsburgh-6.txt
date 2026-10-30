@@ -1,0 +1,113 @@
+# names-446-pittsburgh-6.txt — #446 Pittsburgh story pass, part 2 (b2-2): HMdb BEYOND THE PHMC SERIES, the Pittsburgh town
+# list's entries 101–198 (Charles "Teenie" Harris through "The Forks") plus the page-1 leads (drafted 2026-10-29).
+# 27 lines. Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# THE PAGE: results.asp?Search=Place&State=Pennsylvania&Town=Pittsburgh&Page=2, reached from page 1's own "Next 100" link
+# (page 1 opened from m=156265's "Touch for a list" link). Heading checked: "662 entries match your criteria. Entries 101
+# through 200 are listed." Entries 199–200 were cut off by the fetch, as were 99–100 on page 1 (99 is Charles Parkin, a
+# grave — skipped). Pages 3–5 (201–500) and the gated tail (501–662) are still owed (see #446).
+#
+# SORTED (page 2): PHMC markers already live as gems are skipped — Crawford Grill, Daisy E. Lampkin, Duquesne University,
+# Dravo Corporation Shipyard, Clinton Furnace, First Mining of Pittsburgh Coal, First Professional Football Game, First World
+# Series, Forbes Field. Two PHMC markers erected after Wikipedia's list was compiled are NOT gems and are drafted below:
+# Dorothy Mae Richardson (page 2) and Charles "Chuck" Cooper (page 1, m=228346 — page 1's "PHMC markers all settled"
+# skipped it in error).
+# CUT — already served: Clayton (The Frick Pittsburgh pin, 72 m), Church of the Ascension (wiki pin 17 m), Corliss Street
+# Tunnel (Corliss Tunnel wiki pin 123 m), First Free Public Library Building (Carnegie Free Library of Allegheny wiki pin
+# 27 m), Charles "Teenie" Harris at Homewood (OSM "Teenie Harris Home" carries the inscription, 12 m), First MLB All-Minority
+# Lineup (Three Rivers Stadium gem 36 m), the two 1877 strike panels "The Desperate and the Decadent" and "The Empty Pocket
+# Pays" (the Railroad Strike of 1877 gem tells it), E & O Brewery and The Biergarten (Penn Brewery gem), Birthplace of the
+# Aluminum Industry (Charles Martin Hall gem 80 m), Early Baseball in Pittsburgh (First World Series gem).
+# SKIPPED as no story: honour rolls and war memorials, plant panels, graves (Daniel William Cooper, Dr. Nathaniel Bedford),
+# dedication plaques (Chuck Muer, D.A.R., Duquesne Class Ring, Victory Garden, Housing Authority), the removed Forbes Road
+# plaque (m=42022, reported permanently removed), trail panels about a whole district (Coal Transportation, Ferry Landing,
+# Flood of 1936, Coal Tipple, Early Land Use), sculptures with no history (Flora, The Forks), Crafton Boro and Creighton
+# Avenue, and PHLF plaques with no article behind them (Good Shepherd, Holy Cross, Colonial Place, Commerce Court, Crescent
+# Apartments, Cross Keys Hotel, D'Arlington, First Church of Christ Scientist, First English Lutheran, First Hungarian
+# Reformed, First Presbyterian of Edgewood, First United Methodist, First Associated Reformed, Nativity, College of Fine
+# Arts, Doherty Hall, First Muslim Mosque) or a thin one (County Office Building, Dilworth School, 841 Lincoln Avenue).
+# LEADS NOT DRAFTED: "The City of Pittsburgh was named by General John Forbes" tablet (m=156215, on the City-County
+# Building — its own story, but no good pin name); "The Bell Speaks" (m=66452, page not read); 4600 East Carson Street
+# (m=174403, the Hays mansion — lost in the 1936 flood, plaque on a later building; skipped).
+#
+# DUPLICATE CHECK, done in the sandbox before writing: the 48 box rows + the one stored ring row of places:v34 (1,426 unique
+# pins, read 2026-10-29); the 245 approved, unmerged gems in 40.2–40.65 / −80.25…−79.7 (graves included); a name scan of
+# every stored pin and gem for each subject; a Wikipedia geosearch at 200 m around every marker, each article checked
+# against the stored titles.
+#
+# ARTICLE-NAMED LINES (12; #539 pattern, FROM PITTSBURGH (4) with its (b1) guard — the article IS the place the marker
+# names): named EXACTLY as the article, placed at the article's coordinate, NOT flagged `new` — expect each to seed with one
+# ↳ under that article at 0 m. None of the 12 titles is carried by any stored tile (downtown again, #539).
+# WATCH IN THE DRY RUN: Allegheny High School's article coordinate is ~70 m from the hidden storyless OSM pin "Allegheny
+# Traditional Academy" (osm_way253992557, the same school). If the dry run REVIEWs or story-attaches it to that pin, stop and
+# tell Claude before committing (#542 — that pin's containing tile must store it before any curated row targets it).
+# `| new` (9) — every seed line within ~100 m of a stored pin, a gem or an article, applied mechanically (part 2 (b) lesson).
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-6.txt
+# Dry run first; expect 27 new-seed (12 with ↳), 0 review; read every ↳ line; then the same command with --commit.
+
+# --- Downtown & the Point ----------------------------------------------------------------------------------------
+# PHLF plaque (m=156235), 18 m from the article; article in no stored tile (#539). Courthouse article ~95 m (its own line).
+Pittsburgh City-County Building | @40.43836667,-79.99714722 | Designed by Henry Hornbostel with Edward B. Lee and built from 1915 to 1917, this Grant Street building is the city's third seat of government and still holds a courtroom where the Pennsylvania Supreme Court sits when it meets in Pittsburgh. | https://en.wikipedia.org/wiki/Pittsburgh_City-County_Building
+# NHL plaque (m=156216, page 1 — recorded on #539 then, not drafted) and the old jail's PHLF plaque (m=65613); article 31 m.
+Allegheny County Courthouse | @40.4384,-79.9961 | H. H. Richardson called this Romanesque courthouse, finished in 1888, his great achievement, and a stone "Bridge of Sighs" modeled on Venice's links it to his old county jail, which now houses the family courts and a small jail museum. | https://en.wikipedia.org/wiki/Allegheny_County_Courthouse
+# PHLF plaque (m=74766), 6 m from the article; article in no stored tile (#539).
+Duquesne Club | @40.441933,-79.998592 | Founded in 1873 as a meeting place for the city's industrialists and civic leaders, this private club has occupied its Romanesque Sixth Avenue clubhouse by Longfellow, Alden & Harlow since 1890. | https://en.wikipedia.org/wiki/Duquesne_Club
+# PHLF plaque (m=65607), 31 m from the article; article in no stored tile (#539).
+Church of the Epiphany (Pittsburgh) | @40.44003333,-79.99066944 | Edward Stotz designed this Catholic church beside today's hockey arena early in the 1900s, with interiors by the noted church designer John T. Comès. | https://en.wikipedia.org/wiki/Church_of_the_Epiphany_(Pittsburgh)
+# Marker (m=43570) in Point State Park; Point State Park OSM pin 50 m, Fort Pitt Block House 84 m.
+David L. Lawrence | @40.441942,-80.009917 | David L. Lawrence, born on June 18, 1889 in the old Point district that is now this park, served four terms as mayor and then as governor, and led the cleanup and rebuilding known as the Pittsburgh Renaissance. | https://www.hmdb.org/m.asp?m=43570 | new
+# Marker (m=99061), 18 m from the served Fort Pitt Block House pin — a different subject (the woman who saved it).
+Edith Darlington Ammon | @40.4411,-80.009962 | As regent of the Pittsburgh chapter of the Daughters of the American Revolution, Edith Darlington Ammon led the six-year legal and political fight, from 1901 to 1907, that kept the Pennsylvania Railroad from destroying the Fort Pitt Block House. | https://en.wikipedia.org/wiki/Edith_Dennison_Darlington_Ammon | new
+# Marker (m=176870); "Welcome to Pittsburgh" OSM garden pin 89 m; Fort Pitt (Pennsylvania) article 127 m, not stored.
+Flag Bastion | @40.44006939,-80.00836511 | From this bastion of Fort Pitt, built between 1759 and 1761, the British flag flew over the Forks of the Ohio to proclaim victory over New France and claim the land west of the mountains. | https://www.hmdb.org/m.asp?m=176870 | new
+# Marker (m=65608); articles within 100 m (Stanwix Street 26 m, Bell Telephone building 50 m, United Steelworkers Building 86 m).
+First Holy Mass at Fort Duquesne | @40.439856,-80.004673 | A tablet here recalls the first Catholic Mass at the Forks of the Ohio, said on April 16, 1754 by Father Denys Baron, chaplain to the French troops who were taking the point. | https://www.hmdb.org/m.asp?m=65608 | new
+# --- Uptown & the Hill -------------------------------------------------------------------------------------------
+# PHMC marker (m=228346, 2019 — after Wikipedia's list); UPMC Cooper Fieldhouse article 57 m, Nasuti College article 15 m.
+Chuck Cooper | @40.437775,-79.98835556 | After an All-American career at Duquesne, Chuck Cooper became the first African American drafted by an NBA team when the Boston Celtics chose him on April 25, 1950. | https://www.hmdb.org/m.asp?m=228346 | new
+# --- North Side --------------------------------------------------------------------------------------------------
+# PHLF plaque (m=58602, page 1), 74 m from the article; article in no stored tile (#539). See the WATCH note in the header.
+Allegheny High School | @40.45305556,-80.00888889 | Willa Cather taught English and Latin at this school, which ran as Allegheny City's high school from 1883 to 1983 and whose 1904 building was designed by Frederick J. Osterling. | https://en.wikipedia.org/wiki/Allegheny_High_School
+# PHLF plaque (m=260152), 11 m from the article; article in no stored tile (#539).
+Anderson Manor, Pennsylvania | @40.45457222,-80.02738889 | Colonel James Anderson lived in this Manchester house, built around 1830, and opened his 400-book library to working boys on Saturday nights — among them a young Andrew Carnegie, who later built libraries across the world. | https://en.wikipedia.org/wiki/Anderson_Manor,_Pennsylvania
+# PHMC marker (m=141861, after Wikipedia's list); Randyland wiki/OSM pin 15 m, Engine Company No. 3 article 30 m.
+Dorothy Mae Richardson | @40.457814,-80.009702 | Lifelong Central North Side resident Dorothy Mae Richardson led neighbours and bankers in founding Neighborhood Housing Services here in 1968, a resident-led model copied in some 300 cities and the root of NeighborWorks America. | https://en.wikipedia.org/wiki/Dorothy_Mae_Richardson | new
+# Marker (m=40305); nothing stored within 200 m.
+First Visit of Abraham Lincoln | @40.45006944,-80.00484444 | A tablet marks where Abraham Lincoln arrived on February 14, 1861, stopping in Pittsburgh on his way to Washington for his inauguration. | https://www.hmdb.org/m.asp?m=40305
+# HMdb marker (m=191482); the article's coordinate (350 m east, mid-river) is used; article in no stored tile (#539).
+31st Street Bridge | @40.463,-79.9758 | Opened in 1928 to replace the low 30th Street Bridge, the last span on the Allegheny that blocked big river boats, this arch bridge links Troy Hill and the Strip District high over Washington's Landing. | https://en.wikipedia.org/wiki/31st_Street_Bridge
+# --- Lawrenceville & the East End --------------------------------------------------------------------------------
+# Marker (m=259781) — named for its subject, since the title is a bare date. Shannopin's Town gem 37 m (its story does not
+# mention Washington), Washington Education Center article 29 m.
+Washington's Allegheny River Crossing | @40.46952391,-79.96313909 | Near this spot on the morning of December 30, 1753, George Washington and Christopher Gist crossed the Allegheny on their way home from their dangerous mission to the French commander at Fort Le Boeuf. | https://www.hmdb.org/m.asp?m=259781 | new
+# PHLF plaque (m=65133), 7 m from the article; article in no stored tile (#539).
+Congregation B'nai Israel (Pittsburgh) | @40.46638889,-79.92916667 | Henry Hornbostel designed this domed 1923 synagogue on North Negley Avenue, which closed in 1995, housed a charter school, and is now being turned into apartments. | https://en.wikipedia.org/wiki/Congregation_B'nai_Israel_(Pittsburgh)
+# PHLF plaque (m=122315) and a second plaque (m=247288); article 40 m; article in no stored tile (#539).
+East Liberty Presbyterian Church | @40.46102778,-79.92561111 | Richard B. and Jennie King Mellon paid for this whole-block Gothic church in memory of their mothers, and Ralph Adams Cram, who built it from 1931 to 1935 as the fifth church on a site used since 1819, called it his masterpiece. | https://en.wikipedia.org/wiki/East_Liberty_Presbyterian_Church
+# Marker (m=71947); nothing stored within 200 m.
+Forbes Road, 1758 | @40.454479,-79.913473 | A tablet marks where a giant oak stood beside the road General John Forbes cut through in 1758 on his march against the French at Fort Duquesne, which his army took on November 25 of that year. | https://www.hmdb.org/m.asp?m=71947
+# --- Oakland & Schenley Park -------------------------------------------------------------------------------------
+# HMdb marker (m=189203), 5 m from the article; article in no stored tile (#539). Victor Herbert gem 8 m (different subject).
+Dippy (statue) | @40.44355556,-79.9515 | This 84-foot fibreglass model outside the Carnegie Museum shows Diplodocus carnegii, the dinosaur museum crews dug up in Wyoming on July 4, 1899 and named for Andrew Carnegie. | https://en.wikipedia.org/wiki/Dippy_(statue)
+# Memorial (m=225214); Panther Hollow Bridge article 135 m.
+Colonel Alexander Leroy Hawkins | @40.43579313,-79.94614918 | This Schenley Park memorial honours Colonel Alexander Hawkins, a Civil War veteran who led the 10th Pennsylvania Volunteers in the Philippines and died at sea on the way home on July 18, 1899. | https://en.wikipedia.org/wiki/Alexander_Leroy_Hawkins
+# Trail panel (m=191485) on the Eliza Furnace Trail; nothing stored within 200 m.
+Eliza Furnace | @40.42628,-79.95381 | James Laughlin, a founder of Jones & Laughlin, built the first Eliza Furnace near here in 1858, a stone blast furnace that marked the start of the city's iron and steel age. | https://www.hmdb.org/m.asp?m=191485
+# --- Mount Washington & the South Hills --------------------------------------------------------------------------
+# NHL plaque (m=257594), 166 m from the article; article in no stored tile (#539).
+Chatham Village | @40.43111111,-80.01694444 | Built from 1932 to 1936 with Buhl Foundation money and designed by Clarence Stein and Henry Wright, this resident-owned Garden City enclave on Mount Washington became a National Historic Landmark in 2005. | https://en.wikipedia.org/wiki/Chatham_Village
+# HMdb marker (m=8859), 122 m from the article (the plaque is at the upper station); article in no stored tile (#539 — first
+# recorded there from part 1 (a)).
+Duquesne Incline | @40.43916667,-80.01805556 | Samuel Diescher's steam-powered incline opened up Mount Washington on May 20, 1877, and when it faced closure in the early 1960s neighbours raised the money to reopen it in 1963. | https://en.wikipedia.org/wiki/Duquesne_Incline
+# Marker (m=257248); nothing stored within 150 m.
+Enlightenment | @40.43095403,-80.01035456 | This granite "Lady of Stone," carved by Eugenio Pedon in 1889, once stood over the entrance of the old Smithfield Street post office and was rescued when that building came down in 1966. | https://www.hmdb.org/m.asp?m=257248
+# Monument (m=261338, page 1); the OSM "Beechview Community War Memorial" pin 1 m is a different memorial.
+Beechview Centennial Monument | @40.40369561,-80.03018903 | Planted with a beech tree and a time capsule in 2005, this monument marks a century since Beechview became a borough in 1905, three years after a new trolley line brought a building boom. | https://www.hmdb.org/m.asp?m=261338 | new
+# Park field (m=260765); Mt. Lebanon Park OSM pin 93 m.
+Dixon Field | @40.37488188,-80.05673978 | Mt. Lebanon dedicated this field in 1997 to Martha Dixon Martinez, a 1977 graduate of the town's high school and an FBI special agent killed in the line of duty. | https://www.hmdb.org/m.asp?m=260765 | new
+# --- Ohio River north shore -------------------------------------------------------------------------------------
+# Marker (m=187567); the stored Dixmont State Hospital wiki pin is 1 km away (the hospital site, not the cemetery).
+Dixmont State Hospital Cemetery | @40.524995,-80.111428 | More than 1,300 patients of the Dixmont state mental hospital, some of them veterans of the Civil War and both world wars, were buried here between 1863 and 1937; the hospital closed in 1984 and was torn down in 2006. | https://www.hmdb.org/m.asp?m=187567
