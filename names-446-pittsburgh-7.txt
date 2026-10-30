@@ -1,0 +1,165 @@
+# names-446-pittsburgh-7.txt — #446 Pittsburgh story pass, part 2 (b2-3): SOURCE SWITCHED from HMdb's town list to four
+# Wikipedia landmark lists; this file drafts Downtown, the Point, the Bluff and the Mon crossings (drafted 2026-10-29).
+# 34 lines. Every line: Name | locate | one sentence in our own words | source URL [| new].
+#
+# WHY THE SWITCH: HMdb's Pittsburgh town list past page 2 is unreachable — the chat fetch tool collapses page 2's `Next 100`
+# link (it carries `Page=` twice) back onto page 2, and sandbox curl gets HMdb's Cloudflare challenge (403,
+# `cf-mitigated: challenge`) even with hmdb.org allowlisted. Neither route is retried.
+#
+# THE SOURCE: four Wikipedia lists, fetched by curl in the sandbox (action=parse&prop=wikitext) and parsed there —
+# "List of Pittsburgh History and Landmarks Foundation Historic Landmarks" (287 linked rows), "List of City of Pittsburgh
+# historic designations" (175), "National Register of Historic Places listings in Pittsburgh, Pennsylvania" (191 NRHP rows)
+# and "... in Allegheny County, Pennsylvania" (82). 735 rows → 511 distinct linked titles, each resolved through the API
+# (redirects followed, disambiguation pages and missing pages dropped) to its article's primary coordinate. KEPT ONLY:
+# entries with their own article AND that article's coordinate inside the 48-tile box (40.275–40.575 / −80.175…−79.775):
+# 409 articles.
+#
+# THE SORT (all 409, read 2026-10-29): against the 48 box rows + the 1 stored ring row of places:v34 (1,426 unique pins) —
+# by page ID (wiki_<pageid>), by name, and by every pin within 200 m; the 272 approved, unmerged gems in 40.2–40.65 /
+# −80.25…−79.7 (143 non-grave) by name and within 200 m; each article's lead compared with every stored pin description
+# within 500 m (catches an OSM pin carrying the article under another name). 159 already served or already a gem — cut.
+# Of the other 250: CUT AS SERVED — King Estate (Pittsburgh) (the King Museum OSM pin carries the article, 8 m), Allegheny
+# Commons (the West Park pin, 64 m), Forbes Field, Buhl Planetarium and Allegheny Post Office (cut in earlier parts);
+# SKIPPED, NOT A PIN — neighbourhoods, boroughs, historic districts, a street and two house rows (Aspinwall, Edgewood,
+# Squirrel Hill, Manchester, South Side Flats, Strip District, Mexican War Streets, Evergreen Hamlet, Creighton Avenue, and
+# the Highland Park Residential, Lawrenceville, Alpha Terrace, Old Allegheny Rows, Allegheny Second Ward Industrial,
+# Schenley Farms, Penn–Liberty, Pittsburgh Central Downtown, Pittsburgh Renaissance, Fourth Avenue and Firstside districts;
+# Houses at 2501–2531 Charles Street; Houses at 838–862 Brightridge Street) and organisations (Carnegie Museums of
+# Pittsburgh, Carnegie Library of Pittsburgh, Carnegie Mellon University and its School of Design and College of Fine Arts,
+# City Theatre, Iron City Brewing Company, Duquesne Brewing Company). 215 candidates left: 52 in Downtown/the Point/the
+# Bluff/the Mon crossings (this file), 163 elsewhere (OWED, below).
+#
+# THIS FILE'S AREA (52): 34 lines. SET ASIDE (18) — thin article, no story beyond build date and listing: Byrnes & Kiefer
+# Building, Buhl Building, Mount Washington Branch of the Carnegie Library, Allegheny County Office Building, Four Gateway
+# Center, Hartley-Rose Belting Company Building, Grace Anglican Church, Letsche Elementary School, 109–115 Wood Street,
+# 412 Boulevard of the Allies, Engine Company No. 1 and No. 30, Century Building, Kaufmann's Department Store Warehouse,
+# Phipps–McElveen Building; Ewart Building (thin, and its one story fact — built on Fort Fayette's ground — is the live
+# Fort Lafayette (Pennsylvania) gem's, 82 m); Allegheny County Jail (the article is the 1995 jail; the old jail's story is
+# on the live Allegheny County Courthouse gem); Manchester Bridge (razed 1970; its surviving footing holds the served
+# Fred Rogers statue pin, its portal figures were moved); Station Square (an entertainment complex — its 1898 station is
+# its own line below).
+#
+# ALL 34 LINES ARE ARTICLE-NAMED (FROM PITTSBURGH (4) with its (b1) guard — each line IS the article's subject): named
+# EXACTLY as the article, at the article's own coordinate, NOT flagged `new` — except one (below). None of the 34 page IDs is
+# stored in any tile (#539 — downtown again). Expect 33 lines to seed with one ↳ under their article at 0 m.
+# DRY RUN 1 (2026-10-29): 33 `new-seed` (33 ↳), 1 REVIEW — Allegheny County Mortuary against the live gem "Allegheny County
+# Courthouse", 121 m (#425 big-area same-name: the shared words are only "Allegheny County"). A different building — Osterling's
+# 1903 morgue on Fourth Avenue, not Richardson's courthouse — so the line is marked `| new`: it seeds under its own name,
+# which is the article's title, at the article's coordinate.
+# THE ~100 m NEIGHBOURS (read for twins; none is the same place): Trinity Cathedral — Grave of Thomas Hutchins gem 43 m
+# (buried in its churchyard), Duquesne Club gem 71 m; Market Square — Work Accidents and the Law gem 23 m, Pittsburgh Plate
+# Glass Company 62 m, Burke Building 74 m; Frick Building — Henry Clay Frick gem 54 m (the man, not the building), Anthony
+# Sadowski 92 m, Pittsburgh City-County Building 94 m; Union Trust Building — Henry Clay Frick 81 m; Omni William Penn
+# Hotel, Oliver Building, Mellon National Bank Building, Regional Enterprise Tower — Mellon Square pin 57–87 m, Founding of
+# the American Federation of Labor gem 55–83 m; Koppers Tower and Regional Enterprise Tower — Allegheny HYP Club gem 62–72 m;
+# Mellon National Bank Building — McClurg Iron Foundry gem 69 m; Heinz 57 Center — Duquesne Club 53 m; United Steelworkers
+# Building — Westinghouse Electric Corporation gem 61 m, First Holy Mass at Fort Duquesne 86 m; Bell Telephone building —
+# First Holy Mass at Fort Duquesne 50 m; St. Benedict the Moor — Freedom Corner OSM pin 53 m; Demmler Brothers Warehouse —
+# Firstside Park pin 62 m; Guckenheimer Warehouse and Mamaux Building (13 m apart, each its own building) — John Scull gem
+# 67–78 m; Pittsburgh & Lake Erie Railroad Station — John A. Roebling gem 59 m (the 1846 bridge), Clinton Furnace 95 m. The
+# stored "IBM Building (Pittsburgh)" wiki pin is the 1975 North Side building, 1.5 km from the United Steelworkers Building.
+# WATCH IN THE DRY RUN: (1) any line that REVIEWs against a neighbour above, or reads `= already on the map` — stop and
+#   tell Claude before committing (do not flag it yourself). (2) Omni William Penn Hotel, Oliver Building and Heinz 57
+#   Center are a hotel and offices: if one reads `commercial with no story, not seeded`, add `| new` to that line (a `new`
+#   story line is seeded as history under its own name, which is the article's name at the article's coordinate) and
+#   re-run the dry run. (3) No line targets a hidden pin, so #542 does not arise.
+#
+# OWED — 163 candidates outside this area, not yet read for thinness or drafted (rough areas by coordinate; the same
+# sandbox sort reproduces them; thin articles get set aside as above):
+#   North Side & north-west (28): 841 North Lincoln Avenue; Aberlie House; Allegheny City Stables; Allegheny General
+#     Hospital; Allegheny Social Hall; B. F. Jones House; Chalfant Hall; Conroy Education Center; Coraopolis station;
+#     Emmanuel Episcopal Church (Pittsburgh); Engine Company No. 3 (Pittsburgh); Ferris House (Pittsburgh); Garden Theater;
+#     Heathside Cottage; Henderson–Metz House; Hoene-Werle House; House at 200 West North Avenue; International Harvester
+#     Branch House (Pittsburgh); John A. Brashear House and Factory; John Morrow Elementary School; Langley High School
+#     (Pittsburgh); Latimer School; Malta Temple; Oliver High School; Perry Traditional Academy; St. Boniface Roman Catholic
+#     Church (Pittsburgh); State Correctional Institution – Pittsburgh; William Penn Snyder House.
+#   Strip, Troy Hill, Polish Hill & Lower Lawrenceville (31): Armstrong Cork Company; Arsenal Middle School; Centre Avenue
+#     YMCA Building; Consolidated Ice Company Factory No. 2; Former Pittsburgh Wash House and Public Baths Building; H. J.
+#     Heinz Company complex; Immaculate Heart of Mary Church (Pittsburgh); John Wesley A.M.E. Zion Church (Pittsburgh);
+#     Lawrence Public School; Madison Elementary School (Pittsburgh, Pennsylvania); Naser's Tavern; Pennsylvania National
+#     Bank Building; Pittsburgh Brass Manufacturing Company Building; Pittsburgh Produce Terminal; Saint Anthony's Chapel,
+#     Pittsburgh; Schiller Elementary School; Spring Hill Elementary School; Springfield Public School; St. Augustine Church
+#     (Pittsburgh); St. Nicholas Croatian Church (Millvale, Pennsylvania); St. Nicholas Croatian Church (Pittsburgh,
+#     Pennsylvania); St. Stanislaus Kostka Church (Pittsburgh); Teutonia Maennerchor Hall; The Clemente Museum; Troy Hill
+#     Incline; Tuberculosis Hospital of Pittsburgh; Turney House; Voegtly Spring; Walton House (Pittsburgh); Washington
+#     Crossing Bridge (Pittsburgh); Washington Education Center (Pittsburgh).
+#   Lawrenceville, Bloomfield, Highland Park & the East End (33): 141 Mayflower Street; Albright United Methodist Church;
+#     Allegheny Cemetery; Baxter High School; Boys' Club of Pittsburgh; Carol Peterson House; Dilworth Elementary School
+#     (Pittsburgh, Pennsylvania); Ewalt House; Ford Motor Company Assembly Plant (Pittsburgh, Pennsylvania); Fort Pitt
+#     Elementary School; Foster School; Friendship School; Fulton Elementary School; Highland Building; Horse Tamer
+#     Sculptures (Pittsburgh); Hunt Armory; James Scott House; Larimer School; Lawrenceville Branch of the Carnegie Library
+#     of Pittsburgh; Lemington Elementary School; Lincoln Elementary School (Pittsburgh, Pennsylvania); McCleary Elementary
+#     School; Motor Square Garden; Rogers Middle School for the Creative and Performing Arts; Saint Mary's Academy Building;
+#     Saints Peter and Paul Church (Pittsburgh); Sellers House (Pittsburgh, Pennsylvania); St. Mary's Church (Pittsburgh);
+#     Victoria Hall (Pittsburgh); Welcome Sculptures (Pittsburgh); Western Pennsylvania Hospital; Whitehill-Gleason Motors;
+#     Woolslair Elementary School.
+#   The Hill & Uptown (12): Allen Hall (University of Pittsburgh); Croatian Fraternal Union Building; Fifth Avenue High
+#     School; Gardner Steel Conference Center; New Granada Theater; Paramount Film Exchange (Pittsburgh); Pittsburgh Science
+#     and Technology Academy; Schenley Quadrangle; Soldiers and Sailors Memorial Hall and Museum; St. Peter's Episcopal
+#     Church (Pittsburgh); Syria Mosque; Thaw Hall.
+#   Oakland, Shadyside & the Mon bank below them (21): Addy-Spencer House; Bellefield Hall; Bindley Hardware Company
+#     Building; Greenfield Elementary School (Pittsburgh, Pennsylvania); Hot Metal Bridge; Main Building, U.S. Bureau of
+#     Mines; McCook Family Estate; Moreland-Hoffstot House; Negley–Gwinner–Harter House; Oakland Public School; Panther
+#     Hollow Bridge; Pittsburgh Athletic Association; Pittsburgh Mercantile Company Building; Rodef Shalom Congregation;
+#     Saint Nicholas Greek Orthodox Cathedral (Pittsburgh); Schenley Bridge; Schenley High School; Shadyside Presbyterian
+#     Church; Sunnyledge; Tufa Bridges; Westinghouse Memorial.
+#   Squirrel Hill, Point Breeze & Wilkinsburg (9): Abrams House (Pittsburgh); Henry Koerner House; Howe Springs; Howe-Childs
+#     Gate House; Linden Avenue School; Park Place School; Thaddeus Stevens Elementary School (Pittsburgh); Wightman School;
+#     Wilkinsburg station.
+#   South Side, Mount Washington & the south and west suburbs (29): Beck's Run School; Beechwood Elementary School;
+#     Beltzhoover Elementary School; Birmingham Public School; Boggs Avenue Elementary School; Boyce station; Carnegie
+#     Library of Pittsburgh – South Side; Colfax Elementary School; Concord Elementary School (Pittsburgh) (the (b1)
+#     gravestone — the school next to John M. Phillips's home site; judge it as its own subject only); Gardner-Bailey House;
+#     Garrison Foundry-Mackintosh Hemphill Company Offices; Homestead station; John Frew House; Knoxville Junior High School;
+#     Longfellow School (Swissvale, Pennsylvania); Lowen-Shaffer House; Mifflin Elementary School; Monongahela Incline; Old
+#     Stone Tavern (Pittsburgh); Oliver Bath House; Pittsburgh Terminal Properties; Prospect Junior High and Elementary
+#     School; Racer (Kennywood); Saint Michael's Roman Catholic Church & Rectory; Samuel F. B. Morse School; South Side High
+#     School (Pittsburgh, Pennsylvania); South Side Market Building; South Side Presbyterian Church; Taylor Allderdice High
+#     School.
+#
+# RUN (Mac), with SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY + GEMINI_API_KEY exported (env | grep -c for the two keys → 2;
+# FROM PITTSBURGH (5): echo ${#GEMINI_API_KEY} ${GEMINI_API_KEY:0:3} → about 53 AQ., never "expo"):
+#   SEED_CITY_NAME=Pittsburgh SEED_CITY_LAT=40.4350 SEED_CITY_LNG=-79.9700 deno run -A seed-resolve.ts names-446-pittsburgh-7.txt
+# Dry run first; expect 34 new-seed (33 with ↳, Allegheny County Mortuary as its own `new` seed), 0 review; read every ↳
+# line and the WATCH notes; then the same command with --commit.
+
+# --- Downtown: Grant Street, Mellon Square & the Golden Triangle core --------------------------------------------
+Frick Building | @40.43916667,-79.9975 | Henry Clay Frick put up this tower in 1902 on the site of St. Peter's Episcopal Church, right beside a building owned by his estranged partner Andrew Carnegie, and had it designed to overshadow Carnegie's — at 330 feet it was the city's tallest when it opened. | https://en.wikipedia.org/wiki/Frick_Building
+Union Trust Building (Pittsburgh) | @40.44,-79.997 | Frick built this Flemish-Gothic block in 1915–16 as the Union Arcade, a shopping arcade of some 240 shops under a stained-glass dome, on the site of the city's nineteenth-century St. Paul's Cathedral; the Union Trust Company bought and renamed it in 1923. | https://en.wikipedia.org/wiki/Union_Trust_Building_(Pittsburgh)
+Omni William Penn Hotel | @40.4406,-79.9966 | Staff at this Mellon Square hotel came up with the bubble machine that became Lawrence Welk's trademark, Bob Hope proposed marriage here in 1934, and John F. Kennedy was among its guests. | https://en.wikipedia.org/wiki/Omni_William_Penn_Hotel
+Gulf Tower | @40.4425,-79.99527778 | Gulf Oil's 44-story headquarters, finished in 1932 with a step-pyramid crown modeled on the Mausoleum at Halicarnassus, once lit its whole top in neon as a weather forecast for the city; the beacon at its peak still glows blue for rain and red for fair weather. | https://en.wikipedia.org/wiki/Gulf_Tower
+Koppers Tower | @40.44194444,-79.99555556 | Commissioned by Andrew W. Mellon and finished in March 1929, this 34-story limestone tower named for the Koppers chemical company is one of Pittsburgh's finest Art Deco buildings, with a marble lobby and a château-style copper roof lit at night. | https://en.wikipedia.org/wiki/Koppers_Tower
+Oliver Building (Pittsburgh) | @40.4411,-79.9981 | Daniel Burnham designed this 25-story tower, built in 1908–10 under the terms of Henry W. Oliver's will to house the management of his steel and coal businesses, on the lot where the Mellon bank was founded. | https://en.wikipedia.org/wiki/Oliver_Building_(Pittsburgh)
+Mellon National Bank Building | @40.44035,-79.99815556 | Mellon's classical banking house, finished in 1924, stands where Pittsburgh's first public high school opened in 1855; long after the bank left, it held a Lord & Taylor store from 2000 to 2004. | https://en.wikipedia.org/wiki/Mellon_National_Bank_Building
+Regional Enterprise Tower | @40.44138889,-79.99694444 | Alcoa's 1953 headquarters tower replaced the Nixon Theater, an opulent domed playhouse that stood here from 1903 to 1950 and staged Ben-Hur with four horse-drawn chariots; the sale of the theater to Alcoa drew protests. | https://en.wikipedia.org/wiki/Regional_Enterprise_Tower
+Heinz 57 Center | @40.44183,-79.99798 | Built in 1914 for the Kaufmann & Baer department store, this Smithfield Street block was a Gimbels store from 1925 to 1986 and, after years standing empty, the North American headquarters of H. J. Heinz from 2002 to 2013. | https://en.wikipedia.org/wiki/Heinz_57_Center
+Trinity Cathedral (Pittsburgh) | @40.4413,-79.9987 | The 1872 Gothic church stands on a terrace above the Point that was a Native American burial ground, and its churchyard holds the oldest marked graves west of the Atlantic seaboard, of Native leaders and French, British and American settlers. | https://en.wikipedia.org/wiki/Trinity_Cathedral_(Pittsburgh)
+Market Square (Pittsburgh) | @40.440669,-80.002547 | Laid out in 1784 by George Woods and Thomas Vickroy in their plan of the town, the square held the borough's public market house from 1794 and Pittsburgh's first courthouse and jail. | https://en.wikipedia.org/wiki/Market_Square_(Pittsburgh)
+# --- The Cultural District, Penn Avenue & Grant Street north --------------------------------------------------------
+Heinz Hall | @40.4427,-80.0015 | Rapp & Rapp built this movie palace as Loew's Penn Theatre in 1927; it reopened in 1971 as Heinz Hall, home of the Pittsburgh Symphony Orchestra. | https://en.wikipedia.org/wiki/Heinz_Hall
+Byham Theater | @40.4439,-80.0025 | Opened on Halloween night 1904 as the Gayety, a vaudeville house where Ethel Barrymore and Helen Hayes played, it later became the Fulton movie theater, where Night of the Living Dead had its world premiere in 1968. | https://en.wikipedia.org/wiki/Byham_Theater
+Fulton Building | @40.4438,-80.0023 | Henry Phipps paid for this 1906 office building by Grosvenor Atterbury, named for Robert Fulton, and on May 26, 1943 it hosted the country's first night court for wartime gasoline-ration violators. | https://en.wikipedia.org/wiki/Fulton_Building
+Union Station (Pittsburgh) | @40.44475,-79.99213889 | Daniel Burnham designed this station, built from 1898 to 1904 and crowned by a domed rotunda with corner pavilions; the last of the city's grand rail terminals still in use, it became apartments in the 1980s while Amtrak moved into an annex. | https://en.wikipedia.org/wiki/Union_Station_(Pittsburgh)
+Joseph F. Weis, Jr. U.S. Courthouse | @40.44277,-79.99402 | Treasury Secretary Andrew W. Mellon steered federal money to this Beaux-Arts post office and courthouse in his home town, meant to show Pittsburgh's national weight; it is the federal court for western Pennsylvania. | https://en.wikipedia.org/wiki/Joseph_F._Weis,_Jr._U.S._Courthouse
+Federal Reserve Bank of Cleveland Pittsburgh Branch | @40.442836,-79.994811 | The Cleveland Fed's Pittsburgh branch opened this marble Art Deco building by Walker and Weeks in 1931, its façade carrying Henry Hering's cast-aluminum figures of mining, agriculture and commerce; the office later shared the processing of every US savings bond with Minneapolis. | https://en.wikipedia.org/wiki/Federal_Reserve_Bank_of_Cleveland_Pittsburgh_Branch
+# --- Gateway Center & the Point ------------------------------------------------------------------------------------
+United Steelworkers Building | @40.4394,-80.0055 | Built in 1961–64 as the IBM Building in the Gateway Center redevelopment of the Point, this tower carries its weight on a steel diagonal-grid outer frame, one of the first of its kind, and later became the steelworkers' union headquarters. | https://en.wikipedia.org/wiki/United_Steelworkers_Building
+Bell Telephone Company of Pennsylvania Western Headquarters Building | @40.44017222,-80.00509722 | Bell of Pennsylvania's 12-story western headquarters, built in 1956–57, hosted a 1986 cutover to a digital 5ESS switch that news crews covered as a step into the digital age of telephone service. | https://en.wikipedia.org/wiki/Bell_Telephone_Company_of_Pennsylvania_Western_Headquarters_Building
+# --- Firstside & the Monongahela wharf ----------------------------------------------------------------------------
+Guckenheimer Warehouse | @40.43888056,-80.00453333 | This First Avenue building stored Guckenheimer whiskey, distilled up the Allegheny in Freeport until Prohibition shut the company; the lot had been sold by William Penn's grandson in 1786, and its earlier buildings burned in the Great Fire of 1845. | https://en.wikipedia.org/wiki/Guckenheimer_Warehouse
+Mamaux Building | @40.43892778,-80.00466944 | Built around 1865, this Italianate building first housed Andrew Fulton's brass foundry, founded in 1832, which cast bells of every size from tea bells to church bells weighing 20,000 pounds. | https://en.wikipedia.org/wiki/Mamaux_Building
+Salvation Army Building (Pittsburgh, Pennsylvania) | @40.4375,-79.99888889 | The Salvation Army ran its western Pennsylvania headquarters from this Gothic Revival building from 1924 to 2008, and its 1930 wing was the Evangeline Residence, low-cost long-term housing for young working women. | https://en.wikipedia.org/wiki/Salvation_Army_Building_(Pittsburgh,_Pennsylvania)
+Allegheny County Mortuary | @40.43731389,-79.99615 | Frederick Osterling designed the county morgue in 1903 to echo Richardson's courthouse and jail, and about 27 years later a hundred men jacked the whole building some 297 feet along to this spot to clear room for the County Office Building. | https://en.wikipedia.org/wiki/Allegheny_County_Mortuary | new
+Try Street Terminal | @40.4375,-79.99527778 | This 1921 freight terminal and warehouse, now apartments, was a backdrop for Wiz Khalifa's 2011 music video for Black and Yellow. | https://en.wikipedia.org/wiki/Try_Street_Terminal
+Jones & Laughlin Headquarters Building | @40.43682,-79.99675 | Jones and Laughlin Steel, then the country's second-largest steelmaker after Carnegie's U.S. Steel, ran its business from this 1907 Jacobean Revival building until 1952. | https://en.wikipedia.org/wiki/Jones_%26_Laughlin_Headquarters_Building
+Demmler Brothers Warehouse | @40.43638889,-79.99722222 | Built in 1889–90 as a livery stable for the Pittsburgh Transfer Company, this building still shows the big ground-floor arches where horses and carts went in; the Demmler hardware and sheet-metal firm took it over in 1904. | https://en.wikipedia.org/wiki/Demmler_Brothers_Warehouse
+# --- The Bluff & the Lower Hill ------------------------------------------------------------------------------------
+Civic Arena (Pittsburgh) | @40.44166667,-79.99 | The 1961 Civic Arena, the first major sports venue with a retractable roof and the Penguins' home from 1967 to 2010, stood here until 2011–12; clearing the site had displaced some 8,000 residents and 400 businesses of the Lower Hill, the heart of Black Pittsburgh. | https://en.wikipedia.org/wiki/Civic_Arena_(Pittsburgh)
+St. Benedict the Moor Catholic Church (Pittsburgh) | @40.44141111,-79.98590278 | Built in 1894 as Holy Trinity Church, this building became the home of St. Benedict the Moor parish in the 1960s, gained Frederick Shrady's 18-foot statue of the saint atop its tower in 1968, and was made a personal parish for African American Catholics in 2020. | https://en.wikipedia.org/wiki/St._Benedict_the_Moor_Catholic_Church_(Pittsburgh)
+Energy Innovation Center | @40.44424444,-79.98866667 | The former Connelley Trade School, once a leader in vocational training, closed in 2004 and was rebuilt to LEED Platinum standards as a centre for skilled-trades training and green-energy research. | https://en.wikipedia.org/wiki/Energy_Innovation_Center
+Reymer Brothers Candy Factory | @40.43777778,-79.98555556 | Reymer and Anderson, one of Pittsburgh's first confectioners, boomed in the Civil War when families sent candy to soldiers; this 1906 Romanesque factory carried the name on, and its Lemon Blennd soft drink made up seventy percent of its sales in 1959. | https://en.wikipedia.org/wiki/Reymer_Brothers_Candy_Factory
+Armstrong Tunnel | @40.4362,-79.99118 | Bored under the Bluff in 1926–27 to link Second Avenue and the Tenth Street Bridge with Forbes Avenue, the tunnel bends halfway through, and local legend calls the bend a mistake — though mines, property lines or road alignments are likelier causes. | https://en.wikipedia.org/wiki/Armstrong_Tunnel
+# --- Across the Monongahela ---------------------------------------------------------------------------------------
+Smithfield Street Bridge | @40.43472222,-80.00222222 | Gustav Lindenthal, later the engineer of New York's Hell Gate Bridge, designed this lenticular truss, opened on March 19, 1883 as the third bridge at the crossing; it is the second-oldest steel bridge in the United States. | https://en.wikipedia.org/wiki/Smithfield_Street_Bridge
+South Tenth Street Bridge | @40.43251667,-79.98921389 | Built in 1931–33, this is Allegheny County's only cable suspension bridge, with the longest main span on the Monongahela, and since Labor Day 2007 it has been named for Philip Murray, the first president of the United Steelworkers. | https://en.wikipedia.org/wiki/South_Tenth_Street_Bridge
+Pittsburgh & Lake Erie Railroad Station | @40.43361111,-80.00388889 | The Pittsburgh & Lake Erie's 1898 terminal also handled Baltimore and Ohio trains from Washington, Chicago and St. Louis from 1934 into the 1960s, and now houses a restaurant at Station Square. | https://en.wikipedia.org/wiki/Pittsburgh_%26_Lake_Erie_Railroad_Station
