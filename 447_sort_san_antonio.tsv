@@ -2,24 +2,24 @@ id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story 
 SA005	CURATED ROW — hidden pin	written (part 2a)	Mission San Francisco de la Espada Dam, Ditch and Aqueduct	29.3329	-98.46159	Mission San Francisco de la Espada Dam, Ditch and Aqueduct · osm_node12395077363 · 89 m	Espada Acequia			Espada Aqueduct
 SA006	CURATED ROW — hidden pin	written (part 2a)	Hangar Nine	29.34402	-98.444	Hangar Nine · osm_node12395077341 · 22 m	Hangar 9, Brooks Air Force Base			Hangar 9
 SA007	CURATED ROW — hidden pin	written (part 2a)	Mission San Juan Capistrano	29.3328186	-98.4548968	Mission San Juan Capistrano · osm_way130922318 · 107 m	Mission San Juan Capistrano (Texas)			Mission San Juan Capistrano
-SA012	CURATED ROW — hidden pin	story owed	The Carver Center	29.4218045	-98.4717573	The Carver Center · osm_way78567673 · 74 m		NRHP nomination 03001162		George Washington Carver Library and Auditorium
+SA012	CURATED ROW — hidden pin	written (part 2d-1)	The Carver Center	29.4218045	-98.4717573	The Carver Center · osm_way78567673 · 74 m	https://sanantonioreport.org/?p=97028			George Washington Carver Library and Auditorium
 SA052	CURATED ROW — hidden pin	written (part 2b)	Little Church of La Villita Historic District	29.4216642	-98.4886937	Little Church of La Villita Historic District · osm_node356861879 · 8 m		RTHL/NRHP nomination		Little Church of La Villita
-SA090	CURATED ROW — hidden pin	story owed	Dionicio Rodriguez Bridge	29.4647951	-98.4684689	Dionicio Rodriguez Bridge · osm_way576102623 · 8 m		NRHP nomination 04001166		Dionicio Rodriguez Bridge in Brackenridge Park
+SA090	CURATED ROW — hidden pin	written (part 2d-1)	Dionicio Rodriguez Bridge	29.4647951	-98.4684689	Dionicio Rodriguez Bridge · osm_way576102623 · 8 m	https://historicbridges.org/texas/dioniciorodriguezbridge/nomination.pdf			Dionicio Rodriguez Bridge in Brackenridge Park
 SA102	CURATED ROW — hidden pin	story owed	William J. Morrison Jr., House	29.428129	-98.4714443	William J. Morrison Jr., House · osm_way1202586396 · 34 m		NRHP nomination 90001078		William J. Morrison, Jr. House
-SA135	CURATED ROW — hidden pin	story owed	Hays Street Bridge	29.4302052	-98.4769761	Hays Street Bridge · osm_way40841573 · 74 m		NRHP nomination 12000787		Hays Street Bridge
+SA135	CURATED ROW — hidden pin	written (part 2d-1)	Hays Street Bridge	29.4302052	-98.4769761	Hays Street Bridge · osm_way40841573 · 74 m	https://www.sa.gov/Directory/Departments/OHP/About/Resources/Hays-Street-Bridge			Hays Street Bridge
 SA188	CURATED ROW — hidden pin	written (part 2b)	St. Mary's University	29.45303	-98.56112	St. Mary's University · osm_node12395077309 · 28 m		NRHP nomination 08000239	row under the stored name St. Mary's University tells both halls (St. Louis Hall, Reinbolt Hall)	St. Louis Hall at St. Mary's University
 SA193	CURATED ROW — hidden pin	written (part 2b)	The Argyle	29.47566	-98.47179	The Argyle · osm_node12395077334 · 19 m		THC atlas 197 inscription		The Argyle
 SA198	CURATED ROW — hidden pin	written (part 2b)	Huebner-Onion Homestead	29.4942038	-98.6165295	Huebner-Onion Homestead · osm_way462418463 · 14 m		NRHP nomination 05000860		Huebner-Onion Homestead and Stagecoach Stop
 SA205	CURATED ROW — hidden pin	written (part 2a)	La Villita			La Villita · osm_way78486005 · 37 m	La Villita			La Villita Historic District
 SA004	SEED under a different name — containing tile 587_-1967 does not store the pin (#542)	written (part 2c)	Boldtville School	29.36253	-98.35945	Boldtville Schoolhouse · osm_node12395077348 · 60 m		THC atlas 447 inscription		Boldtville Schoolhouse
 SA010	SEED — unmapped	written (part 2c)	Charles V. Bellinger House	29.4142	-98.4612			NRHP nomination 100012298		Charles V. Bellinger House and Greater Corinth Baptist Church and Community Center
-SA011	SEED — unmapped	story owed	Friedrich Complex	29.420556	-98.470556			NRHP nomination 02001059		Friedrich Complex
+SA011	SEED — unmapped	written (part 2d-1)	Friedrich Complex	29.420556	-98.470556		https://www.opengreenmap.org/ro/greenmap/san-antonio-green-map/friedrich-building-2689			Friedrich Complex
 SA015	SEED under a different name — containing tile 588_-1970 does not store the pin (#542)	written (part 2a)	Alamo Madre Acequia	29.4196504	-98.486817	Acequia Madre de Valero · osm_node6541326006 · 68 m	Acequia Madre de Valero (San Antonio)			Acequia Madre de Valero (Main Irrigation Ditch of Valero Mission)
-SA017	SEED — unmapped	story owed	Alamo National Bank Building	29.423833	-98.489167			NRHP nomination 84001574		Alamo National Bank Building
-SA018	SEED — unmapped	story owed	Alamo National Bank Building	29.424167	-98.491667			NRHP nomination 06000364		Alamo National Bank Building
-SA019	SEED — unmapped	story owed	Aldrete Houses	29.420556	-98.488889			THC atlas 13326 inscription		Aldrete Houses
+SA017	SEED — unmapped	story owed	Alamo National Bank Building	29.423833	-98.489167			NRHP nomination 84001574	two listings named Alamo National Bank Building (316 E. Commerce, 1984; 105 S. St. Mary's, 2006) — the lines need different names	Alamo National Bank Building
+SA018	SEED — unmapped	story owed	Alamo National Bank Building	29.424167	-98.491667			NRHP nomination 06000364	two listings named Alamo National Bank Building (316 E. Commerce, 1984; 105 S. St. Mary's, 2006) — the lines need different names	Alamo National Bank Building
+SA019	SEED — unmapped	written (part 2d-1)	Dolores Alderete House	29.4207337	-98.4888047		https://www.hmdb.org/m.asp?m=213447		new: 20 m from part 2b's Caile House line: two houses on one lot (the marker stands on the Caile House's west side); placed at the HMdb marker, not the shared RTHL point	Aldrete Houses
 SA020	SEED — unmapped	written (part 2b)	Alfred Giles Home	29.414722	-98.492778			THC atlas 18172 inscription		Alfred Giles Home
-SA021	SEED — unmapped	story owed	Altgelt-Isbell House	29.415556	-98.491944			THC atlas 134 inscription	HMdb page carries only HABS / National Register boilerplate; HMdb marker is HABS/NRHP boilerplate only — story owed to the NRHP nomination	Altgelt-Isbell House
+SA021	SEED — unmapped	story owed	Altgelt-Isbell House	29.415556	-98.491944			THC atlas 134 inscription	HMdb page carries only HABS / National Register boilerplate; HMdb marker is HABS/NRHP boilerplate only — story owed to the NRHP nomination; THC atlas entry is medallion only (no inscription) — owed to the nomination or another source	Altgelt-Isbell House
 SA022	SEED — article in no tile (#539)	written (part 2a)	Anton Wulff House	29.41777778	-98.49083333		Anton Wulff House			Anton Wulff House
 SA023	SEED — article in no tile (#539)	written (part 2a)	Aztec Theatre (San Antonio)	29.42444444	-98.49083333		Aztec Theatre (San Antonio)			Aztec Theater
 SA024	SEED — article in no tile (#539)	written (part 2a)	Bexar County Courthouse	29.42361111	-98.49361111		Bexar County Courthouse			Bexar County Courthouse
@@ -27,20 +27,20 @@ SA025	SEED — unmapped	written (part 2b)	Biesenbach House	29.411944	-98.495278	
 SA026	SEED — unmapped	written (part 2b)	Caile House	29.420556	-98.488889			THC atlas 622 inscription		Caile House
 SA029	SEED — unmapped	written (part 2a)	Casa Villita	29.421944	-98.488333		Jeremiah Dashiell House		matched the La Villita district pin, not the house	Casa Villita
 SA030	SEED — unmapped	written (part 2b)	Chabot House	29.413333	-98.493333			THC atlas 796 inscription		Chabot House
-SA032	SEED — unmapped	story owed	Cos House	29.421944	-98.488889			THC atlas 1072 inscription		Cos House
-SA033	SEED — unmapped	story owed	Dominguez-Micheli Houses	29.419444	-98.489722			THC atlas 13344 inscription		Dominguez-Micheli Houses
+SA032	SEED — unmapped	written (part 2d-1)	Cos House	29.421944	-98.488889		https://www.txgenwebcounties.com/bexar/Landmarks/Cos_House.htm		new: inside the served La Villita pin (25 m) and beside its church (36 m) — a distinct building, #422	Cos House
+SA033	SEED — unmapped	story owed	Dominguez-Micheli Houses	29.419444	-98.489722			THC atlas 13344 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source	Dominguez-Micheli Houses
 SA034	SEED — unmapped	written (part 2b)	Elias and Lucy Edmonds House	29.413611	-98.494444			THC atlas 15407 inscription		Elias and Lucy Edmonds House
 SA035	SEED — unmapped	written (part 2b)	Ernst Homestead	29.419167	-98.49			THC atlas 1498 inscription		Ernst Homestead
-SA036	SEED — unmapped	story owed	Fest-Steves Block	29.424444	-98.495833			THC atlas 13349 inscription		Fest-Steves Block
-SA037	SEED — unmapped	story owed	Fiesta House	29.421944	-98.488056			THC atlas 13350 inscription	the geosearch hit (Fiesta Noche del Rio) is a different subject	Fiesta House
+SA036	SEED — unmapped	written (part 2d-1)	Fest-Steves Block	29.424444	-98.495833		https://www.txgenwebcounties.com/bexar/Landmarks/Fest-Steves_Block.htm		new: next to the served Spanish Governor's Palace (50 m) and Plaza de Armas (63 m) — different buildings	Fest-Steves Block
+SA037	SEED — unmapped	story owed	Fiesta House	29.421944	-98.488056			THC atlas 13350 inscription	the geosearch hit (Fiesta Noche del Rio) is a different subject; THC atlas entry is medallion only (no inscription) — owed to the nomination or another source; shares its list point with SA065 — needs its own coordinate	Fiesta House
 SA038	SEED — unmapped	written (part 2b)	Old San Antonio National Bank Building	29.424444	-98.490278			THC atlas 3804 inscription; NRHP nomination 72001348		First National Bank of San Antonio
 SA039	SEED — unmapped	story owed	Fourth Ward School	29.417222	-98.486667			NRHP nomination 78002891		Fourth Ward School
-SA040	SEED — unmapped	story owed	George Isbell Home	29.415556	-98.491944			THC atlas 13366 inscription		George Isbell Home
+SA040	CUT — same building	folded into SA021	George Isbell Home	29.415556	-98.491944			THC atlas 13366 inscription	George Isbell Home and Altgelt-Isbell House are both 226 King William St. (THC atlas 5507013366 / 5029000134); one line, under SA021	George Isbell Home
 SA041	SEED — unmapped	written (part 2b)	German-English School	29.420278	-98.488611			THC atlas 2178 inscription		German-English School
-SA042	SEED — unmapped	story owed	Gilbeau Slave Quarters	29.419444	-98.495			THC atlas 13354 inscription		Gilbeau Slave Quarters
+SA042	SEED — unmapped	story owed	Gilbeau Slave Quarters	29.419444	-98.495			THC atlas 13354 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source	Gilbeau Slave Quarters
 SA043	SEED — unmapped	written (part 2b)	Gustav Blersch House	29.416944	-98.493056			THC atlas 16997 inscription		Gustav Blersch House
 SA045	SEED — unmapped	written (part 2b)	J.M. and Birdie Nix House	29.412778	-98.494444			THC atlas 13658 inscription		J.M. and Birdie Nix House
-SA046	SEED — unmapped	story owed	Jack Hays House	29.421667	-98.489722			THC atlas 13365 inscription		Jack Hays House
+SA046	SEED — unmapped	story owed	Jack Hays House	29.421667	-98.489722			THC atlas 13365 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source	Jack Hays House
 SA047	SEED — unmapped	story owed	James Butler Bonham Elementary School	29.413889	-98.488889			NRHP nomination 78002890		James Butler Bonham Elementary School
 SA048	SEED — unmapped	story owed	Jose Antonio Navarro Elementary School	29.4197	-98.5022			NRHP nomination 78002892		Jose Antonio Navarro Elementary School
 SA049	SEED — article in no tile (#539)	written (part 2a)	Casa Navarro	29.42277778	-98.49694444		Casa Navarro			Jose Antonio Navarro House Complex
@@ -54,7 +54,7 @@ SA061	SEED — unmapped	story owed	San Antonio Drug Company	29.423611	-98.491389
 SA062	SEED — unmapped	story owed	San Antonio Loan and Trust Building	29.423611	-98.490556			NRHP nomination 76002006		San Antonio Loan and Trust Building
 SA063	SEED — unmapped	written (part 2b)	Sartor House	29.416111	-98.492222			THC atlas 4595 inscription		Sartor House
 SA064	SEED — unmapped	story owed	Schroeder-Yturri House	29.422153	-98.481667			NRHP nomination 75001954		Schroeder-Yturri House
-SA065	SEED — unmapped	story owed	Schultze Hardware Store	29.421944	-98.488056			THC atlas 13388 inscription		Schultze Hardware Store
+SA065	SEED — unmapped	story owed	Schultze Hardware Store	29.421944	-98.488056			THC atlas 13388 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source; shares its list point with SA037 — needs its own coordinate	Schultze Hardware Store
 SA066	SEED under a different name — containing tile 588_-1970 does not store the pin (#542)	written (part 2b)	Schulze-Schilo House (1891)	29.4098136	-98.4916936	Schulze-Schilo House · osm_node6550487964 · 11 m		THC atlas 4609 inscription		Schulze-Schilo House
 SA068	SEED — unmapped	written (part 2a)	Southern Pacific Railroad Passenger Station	29.42	-98.477778		San Antonio station (Texas)			Southern Pacific Railroad Passenger Station
 SA069	SEED — unmapped	written (part 2b)	St. John's Lutheran Church	29.420556	-98.489444			THC atlas 5045 inscription		"St. John's Lutheran Church, ""the Rooster Church"""
@@ -64,20 +64,20 @@ SA073	SEED — article in no tile (#539)	written (part 2a)	Stevens Building (San
 SA075	SEED — article in no tile (#539)	written (part 2a)	Fairmount Hotel (San Antonio, Texas)	29.42027778	-98.48805556		Fairmount Hotel (San Antonio, Texas)			The Fairmount Hotel
 SA076	SEED — unmapped	written (part 2b)	The Oge House	29.417222	-98.492778			THC atlas 3680 inscription		The Oge House
 SA077	SEED — story lead, own name	written (part 2a)	Tomb of the Alamo defenders	29.424444	-98.494		William B. Travis § Alleged burial; Juan Seguín; James Bowie; Battle of the Alamo		served cathedral pin 23 m away is the building; the tomb is a separate story (bio-read lead)	Tomb of the Alamo defenders (San Fernando Cathedral)
-SA078	SEED — unmapped	story owed	U.S. San Antonio Arsenal	29.407778	-98.495556			THC atlas 212 inscription; NRHP nomination 69000200		U.S. San Antonio Arsenal
-SA079	SEED — unmapped	story owed	Vogel Belt Complex	29.424444	-98.495833			NRHP nomination 75001956		Vogel Belt Complex
-SA080	SEED — unmapped	story owed	Vollrath Building	29.416944	-98.488333			THC atlas 13397 inscription		Vollrath Building
+SA078	SEED — unmapped	written (part 2d-1)	U.S. San Antonio Arsenal	29.41663	-98.49363		https://www.txgenwebcounties.com/bexar/Landmarks/United_States_San_Antonio_Arsenal.htm		new: relocated from the NRHP list point (~1 km south) to HMdb 118552 'established at this location'; the 'Abandoned Mill' pin 69 m and part 2b's Gustav Blersch House line 65 m are different places	U.S. San Antonio Arsenal
+SA079	SEED — unmapped	story owed	Vogel Belt Complex	29.424444	-98.495833			NRHP nomination 75001956	shares its list point with SA036 Fest-Steves Block (written at 111-121 Military Plaza) — needs its own coordinate	Vogel Belt Complex
+SA080	SEED — unmapped	story owed	Vollrath Building	29.416944	-98.488333			THC atlas 13397 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source	Vollrath Building
 SA081	SEED — unmapped	written (part 2c)	W. B. Teagarden House	29.419167	-98.493889			THC atlas 14565 inscription		W. B. Teagarden House
 SA082	SEED — unmapped	written (part 2b)	William and Mary Ann Richter House	29.418889	-98.49			THC atlas 13156 inscription		William and Mary Ann Richter House
-SA084	SEED — unmapped	story owed	Eagar House	29.419444	-98.488056			THC atlas 1324 inscription		Eagar House
+SA084	SEED — unmapped	written (part 2d-1)	Eagar House	29.419444	-98.488056		https://www.txgenwebcounties.com/bexar/Landmarks/Eagar_House.htm		new: Yanaguana Garden pin 70 m — a different place	Eagar House
 SA085	SEED — unmapped	written (part 2b)	Halff House	29.420556	-98.486944			THC atlas 2333 inscription		Halff House
 SA086	SEED — unmapped	story owed	Pereida House	29.418889	-98.488056			THC atlas 3987 inscription		Pereida House
 SA087	SEED — unmapped	story owed	Billy Mitchell Village	29.3858	-98.5579			NRHP nomination 100008496		Billy Mitchell Village
-SA088	SEED — unmapped	story owed	Brooke Army Medical Center	29.466111	-98.449167			NRHP nomination 01001281	matched the Army Medical Museum 339 m away	Brooke Army Medical Center
+SA088	SEED — unmapped	written (part 2d-1)	Old Brooke Army Medical Center	29.466111	-98.449167		https://en.wikipedia.org/wiki/Brooke_Army_Medical_Center		matched the Army Medical Museum 339 m away	Brooke Army Medical Center
 SA089	SEED — unmapped	written (part 2b)	Bullis House	29.442778	-98.464722			THC atlas 568 inscription		Bullis House
 SA091	SEED — unmapped	story owed	Dubuis Hall	29.4678	-98.4647			NRHP nomination 100009010		Dubuis Hall
-SA092	SEED — unmapped	story owed	Emil Elmendorf House	29.432778	-98.472778			THC atlas 1467 inscription; NRHP nomination 80004077		Emil Elmendorf House
-SA093	SEED — unmapped	story owed	Fort Sam Houston, 4th U.S. Army Headquarters Quadrangle	29.444444	-98.462222			THC atlas 2014 inscription		Fort Sam Houston, 4th U.S. Army Headquarters Quadrangle
+SA092	SEED — unmapped	written (part 2d-1)	Emil Elmendorf House	29.432778	-98.472778		https://www.txgenwebcounties.com/bexar/Landmarks/Elmendorf,_Emil_House.htm			Emil Elmendorf House
+SA093	SEED — unmapped	written (part 2d-1)	Fort Sam Houston, 4th U.S. Army Headquarters Quadrangle	29.444444	-98.462222		https://www.hmdb.org/m.asp?m=308810			Fort Sam Houston, 4th U.S. Army Headquarters Quadrangle
 SA094	SEED — unmapped	written (part 2a)	Monkey House and Commissary (San Antonio Zoo)	29.4626	-98.4733		San Antonio Zoo		a building inside the zoo; the served zoo pin is the zoo	Monkey House/Commissary (San Antonio Zoo)
 SA096	SEED — unmapped	story owed	Post Chapel, Fort Sam Houston	29.448333	-98.458611			NRHP nomination 74002057		Post Chapel, Fort Sam Houston
 SA097	SEED — unmapped	written (part 2c)	Ruiz House	29.461944	-98.468056			THC atlas 4384 inscription	HMdb has only a one-line 1935 marker	Ruiz House
@@ -90,14 +90,14 @@ SA104	SEED — unmapped	written (part 2b)	Alamo Portland and Roman Cement Works	
 SA105	SEED — article in no tile (#539)	written (part 2a)	Alamo Stadium	29.46276389	-98.47903056		Alamo Stadium			Alamo Stadium and Gymnasium
 SA107	SEED — unmapped	story owed	Barnes-Laird House	29.449444	-98.494444			NRHP nomination 88001146		Barnes-Laird House
 SA108	SEED — unmapped	story owed	Barr Building	29.428056	-98.4875			NRHP nomination 85000766		Barr Building
-SA110	SEED — unmapped	story owed	Benjamin Grossenbacher House	29.428889	-98.485556			THC atlas 13360 inscription		Benjamin Grossenbacher House
-SA111	SEED — unmapped	story owed	Book Building	29.426389	-98.4925			THC atlas 450 inscription		Book Building
-SA112	SEED — unmapped	story owed	Borden's Creamery	29.447	-98.4824			NRHP nomination 100007273		Borden's Creamery
+SA110	SEED — unmapped	story owed	Benjamin Grossenbacher House	29.428889	-98.485556			THC atlas 13360 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source	Benjamin Grossenbacher House
+SA111	SEED — unmapped	written (part 2d-1)	Book Building	29.426389	-98.4925		https://www.txgenwebcounties.com/bexar/Landmarks/Book_Building.htm			Book Building
+SA112	SEED — unmapped	written (part 2d-1)	Borden's Creamery	29.447	-98.4824		https://atlas.thc.texas.gov/NR/pdfs/100007273/100007273.pdf			Borden's Creamery
 SA113	SEED — article in no tile (#539)	written (part 2a)	Charline McCombs Empire Theatre	29.42583333	-98.49083333		Charline McCombs Empire Theatre			Brady Building-Empire Theater
 SA114	SEED — unmapped	story owed	Buick Motor Company	29.4342	-98.4809			NRHP nomination 100012349		Buick Motor Company
 SA115	SEED — article in no tile (#539)	written (part 2a)	Exchange Building (San Antonio)	29.428432	-98.491676		Exchange Building (San Antonio)			Builders Exchange Building
 SA116	SEED — unmapped	story owed	Burns Building	29.426389	-98.488333			NRHP nomination 99000284		Burns Building
-SA117	SEED — unmapped	story owed	Bushnell	29.462222	-98.487778			NRHP nomination 82004491		Bushnell
+SA117	SEED — unmapped	written (part 2d-1)	The Bushnell	29.462222	-98.487778		https://atlas.thc.texas.gov/NR/pdfs/82004491/82004491.pdf			Bushnell
 SA118	SEED — unmapped	story owed	Calcasieu Building	29.427639	-98.487361			NRHP nomination 96000588		Calcasieu Building
 SA119	SEED — unmapped	story owed	Casa de Dios (House of God)	29.4532	-98.4837			NRHP nomination 100010651		Casa de Dios (House of God)
 SA120	SEED — unmapped	story owed	Central Trust Company Building	29.426667	-98.49			NRHP nomination 82004492		Central Trust Company Building
@@ -106,18 +106,18 @@ SA123	SEED — unmapped	written (part 2b)	Christopher Columbus Italian Society H
 SA124	SEED — unmapped	story owed	City Public Service Company Building	29.425278	-98.491667			NRHP nomination 95001422		City Public Service Company Building
 SA125	SEED — article in no tile (#539)	written (part 2a)	San Antonio Municipal Auditorium	29.43055556	-98.48888889		San Antonio Municipal Auditorium			City of San Antonio Municipal Auditorium
 SA126	SEED — unmapped	story owed	Daniel J. Sullivan Stable and Carriage House	29.429672	-98.485558			NRHP nomination 78002895		Daniel J. Sullivan Stable and Carriage House
-SA128	SEED — unmapped	story owed	Dr. Claudius E. R. King House	29.435278	-98.4875			THC atlas 2952 inscription		Dr. Claudius E. R. King House
+SA128	SEED — unmapped	written (part 2d-1)	Dr. Claudius E. R. King House	29.435278	-98.4875		https://www.txgenwebcounties.com/bexar/Landmarks/King,_Dr._Claudius_E._R._House.htm			Dr. Claudius E. R. King House
 SA129	SEED — unmapped	written (part 2c)	Engleman-Muench House	29.429722	-98.483056			THC atlas 1483 inscription		Engleman-Muench House
 SA130	SEED — unmapped	story owed	Garcia-Garza House	29.428056	-98.495			NRHP nomination 83003091		Garcia-Garza House
 SA131	SEED — unmapped	story owed	Goad Motor Company Building	29.433333	-98.490278			NRHP nomination 97001530	HMdb page carries only HABS / National Register boilerplate; HMdb marker is HABS/NRHP boilerplate only — story owed to the NRHP nomination	Goad Motor Company Building
-SA132	SEED — unmapped	story owed	Gould-Onderdonk House	29.449722	-98.495278			THC atlas 13355 inscription		Gould-Onderdonk House
+SA132	SEED — unmapped	written (part 2d-1)	Gould-Onderdonk House	29.449722	-98.495278		https://www.txgenwebcounties.com/bexar/Landmarks/Gould-Onderdonk_House.htm			Gould-Onderdonk House
 SA133	SEED — unmapped	written (part 2a)	Gunter Hotel	29.42669	-98.491111		Gunter Hotel			Gunter Hotel
 SA134	SEED — unmapped	story owed	Gustav Uhl House and Store	29.431111	-98.481111			NRHP nomination 02001061		Gustav Uhl House and Store
 SA136	SEED — unmapped	story owed	Heimann Building	29.426806	-98.504861			NRHP nomination 04001396		Heimann Building
 SA137	SEED — unmapped	story owed	Hiram Partee House	29.4522	-98.4978			NRHP nomination 84001576		Hiram Partee House
 SA138	SEED — unmapped	story owed	Hugo & Schmeltzer Company Warehouse	29.425	-98.4781			NRHP nomination 100009887		Hugo & Schmeltzer Company Warehouse
 SA139	SEED — unmapped	story owed	International & Great Northern Railroad Passenger Station	29.426944	-98.505278			NRHP nomination	the I&GN railroad article never mentions this station	International & Great Northern Railroad Passenger Station
-SA140	SEED — unmapped	story owed	Jacala Restaurant	29.450278	-98.486944			NRHP nomination 04001168		Jacala Restaurant
+SA140	SEED — unmapped	written (part 2d-1)	Jacala Restaurant	29.450278	-98.486944		https://atlas.thc.state.tx.us/NR/pdfs/04001168/04001168.pdf			Jacala Restaurant
 SA141	SEED — unmapped	written (part 2b)	Jay Adams House	29.451389	-98.497778			THC atlas 17233 inscription		Jay Adams House
 SA142	SEED — article in no tile (#539)	written (part 2a)	Johann and Anna Heidgen House	29.42611111	-98.48222222		Johann and Anna Heidgen House			Johann and Anna Heidgen House
 SA143	SEED — unmapped	written (part 2b)	L. B. Clegg House	29.444167	-98.495278			THC atlas 916 inscription; NRHP nomination 79002913		L. B. Clegg House
@@ -133,7 +133,7 @@ SA156	SEED — article in no tile (#539)	written (part 2a)	Petty House (San Anto
 SA157	SEED — unmapped	story owed	Poe Motor Company	29.4334	-98.4813			NRHP nomination 100003073		Poe Motor Company
 SA159	SEED — unmapped	written (part 2b)	Rechel-Stumpf House	29.438889	-98.495833			THC atlas 4215 inscription		Rechel-Stumpf House
 SA160	SEED — article in no tile (#539)	written (part 2a)	Rincon School	29.429961	-98.492498		Rincon School			Rincon / Douglass School
-SA161	SEED — unmapped	story owed	Robert B. Green Memorial Hospital	29.429968	-98.501682			NRHP nomination 100002127		Robert B. Green Memorial Hospital
+SA161	SEED — unmapped	written (part 2d-1)	Robert B. Green Memorial Hospital	29.429968	-98.501682		https://en.wikipedia.org/wiki/University_Health_(San_Antonio)			Robert B. Green Memorial Hospital
 SA162	SEED — unmapped	story owed	Robert E. Lee Hotel	29.4275	-98.494167			NRHP nomination 96000063		Robert E. Lee Hotel
 SA163	SEED — unmapped	written (part 2b)	Roy and Madge Hearne House	29.449722	-98.497222			THC atlas 18444 inscription		Roy and Madge Hearne House
 SA164	SEED — article in no tile (#539)	written (part 2a)	The St. Anthony Hotel	29.42722222	-98.48861111		The St. Anthony Hotel			Saint Anthony Hotel
@@ -142,24 +142,24 @@ SA166	SEED — article in no tile (#539)	written (part 2a)	Hipolito F. Garcia Fe
 SA167	SEED — unmapped	story owed	San Antonio Water Works Pump Station No. 2	29.4487	-98.4769			NRHP nomination 81000625		San Antonio Water Works Pump Station No. 2
 SA168	SEED — unmapped	written (part 2b)	San Francesco Di Paola Catholic Church	29.430833	-98.498889			THC atlas 4539 inscription		San Francisco Di Paola Catholic Church
 SA171	SEED — unmapped	written (part 2b)	Site of Old St. Mary's	29.425556	-98.491111			THC atlas 3818 inscription		Site of Old St. Mary's
-SA172	SEED — unmapped	story owed	Site of Original Building, First Baptist Church	29.427778	-98.488056			THC atlas 13352 inscription		Site of Original Building, First Baptist Church
+SA172	SEED — unmapped	written (part 2d-1)	Site of Original Building, First Baptist Church	29.427778	-98.488056		https://www.txgenwebcounties.com/bexar/Landmarks/First_Baptist_Church.htm			Site of Original Building, First Baptist Church
 SA175	SEED — article in no tile (#539)	written (part 2a)	St. Mark's Episcopal Church (San Antonio, Texas)	29.4284	-98.4896		St. Mark's Episcopal Church (San Antonio, Texas)			St. Mark's Episcopal Church
 SA176	SEED — article in no tile (#539)	written (part 2a)	Alamo Mission	29.42583333	-98.48611111		Alamo Mission			The Alamo
-SA177	SEED — unmapped	story owed	The Havana	29.430833	-98.489722			NRHP nomination 86000725		The Havana
+SA177	SEED — unmapped	written (part 2d-1)	The Havana	29.430833	-98.489722		https://www.sacurrent.com/?p=379824			The Havana
 SA178	SEED — unmapped	written (part 2b)	The Toltec	29.430278	-98.487778			THC atlas 17893 inscription; NRHP nomination 10000498		The Toltec
 SA179	SEED — unmapped	written (part 2b)	Thiele Cottage	29.429722	-98.483333			THC atlas 5461 inscription; NRHP nomination 83003092		Thiele House and Thiele Cottage
 SA180	SEED — unmapped	story owed	Thomas H. Franklin House	29.450556	-98.493611			NRHP nomination 86001135		Thomas H. Franklin House
 SA181	SEED — unmapped	story owed	Travelers Hotel	29.428261	-98.487099			NRHP nomination 15000617		Travelers Hotel
 SA182	SEED — article in no tile (#539)	written (part 2a)	Ursuline Academy (San Antonio, Texas)	29.43111111	-98.49222222		Ursuline Academy (San Antonio, Texas)		"hidden ""Visitor's Center Museum"" pin 3 m away is a different name"	Ursuline Academy
 SA183	SEED — unmapped	written (part 2b)	Wolfson House	29.430278	-98.485833			THC atlas 5887 inscription		Wolfson House
-SA185	SEED — unmapped	story owed	Zambrano House	29.455	-98.48			THC atlas 5938 inscription		Zambrano House
+SA185	SEED — unmapped	written (part 2d-1)	Zambrano House	29.455	-98.48		https://www.txgenwebcounties.com/bexar/Landmarks/Zambrano_House.htm			Zambrano House
 SA187	SEED — unmapped	story owed	Sacred Heart Conventual Chapel	29.4256	-98.5441			NRHP nomination 100006774		Sacred Heart Conventual Chapel
 SA189	SEED — article in no tile (#539)	written (part 2a)	Thomas Jefferson High School (San Antonio)	29.46527778	-98.53805556		Thomas Jefferson High School (San Antonio)			Thomas Jefferson High School
 SA191	SEED — unmapped	written (part 2a)	Fort Sam Houston National Cemetery	29.4768	-98.4327		Fort Sam Houston National Cemetery		matched the Dodd Field camp plaque, not the cemetery	Fort Sam Houston National Cemetery
 SA192	SEED — unmapped	story owed	Light House	29.475417	-98.469514			NRHP nomination 11000131	HMdb page carries only HABS / National Register boilerplate	Light House
 SA002	HOLD — neighbour tile cold	waits on drip						NRHP nomination 10000737		Herrera Ranch
 SA003	HOLD — neighbour tile cold	waits on drip						THC atlas 11747 inscription; NRHP nomination 10000469		Krause House
-SA158	HOLD — coordinate disputed	needs geocode					Prospect Hill Missionary Baptist Church		list point and article point 1,036 m apart and no stored pin to settle it; a geocode of 1601 Buena Vista settles it	Prospect Hill Missionary Baptist Church
+SA158	SEED — unmapped	story owed	Prospect Hill Missionary Baptist Church	29.4266725	-98.517403		Prospect Hill Missionary Baptist Church	NRHP nomination 86002185	geocoded 2026-10-31: OSM node 356852275 (Photon), 147 m from the list point, stored in no tile; Wikipedia has only built 1911 / listed 1986	Prospect Hill Missionary Baptist Church
 SA190	HOLD — neighbour tile cold	waits on drip						THC atlas 13380 inscription		Perrin Home
 SA197	HOLD — neighbour tile cold	waits on drip						NRHP nomination 100000669		The Wedgwood
 SA199	HOLD — neighbour tile cold	waits on drip						THC atlas 17996 inscription		Locke Hill Auditorium
