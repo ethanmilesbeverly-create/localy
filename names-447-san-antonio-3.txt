@@ -1,0 +1,16 @@
+# names-447-san-antonio-3.txt — #447 San Antonio story batch, part 2c: 5 seed lines (drafted 2026-10-31).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# San Antonio batch dry-runs and commits in one Mac session (handoff §6 THE FAST RUNBOOK (b)).
+# SOURCES: four THC marker inscriptions on HMdb, matched by THC number within 150 m or title within 60 m (the rule part 2b used);
+# Bellinger from the San Antonio Report's history of the estate, corroborated by the 2025 National Register nomination
+# (atlas.thc.texas.gov NR 100012298). Every fact was matched to its source text.
+# FLAGGED `new` (2): Boldtville School — #542: the hidden pin "Boldtville Schoolhouse" is stored only in 587_-1968 while its
+# containing tile is 587_-1967, so the seed sits on the pin's coordinate under a different name; Ruiz House — rebuilt in 1943 on
+# the grounds of the served Witte Museum pin (74 m), #422's distinct-place-inside-a-bigger-pin case.
+# Expect 5 new-seed, 0 review, 0 held.
+#
+Boldtville School | @29.36253,-98.35945 | Albert F. Boldt gave Bexar County this land in 1919, and that year local resident Fritz Gembler built the two-room schoolhouse with its pedimented porch and cupola, which taught the children of nearby farm families until 1960. | https://www.hmdb.org/m.asp?m=205699 | new
+W. B. Teagarden House | @29.419167,-98.493889 | Built in 1903 for the William Joske family, this two-story Queen Anne house with porches wrapping both floors takes its name from a later owner, the judge and long-time Southern Pacific Railroad attorney William Baker Teagarden, and is one of the few homes left from its old neighbourhood. | https://www.hmdb.org/m.asp?m=235038
+Ruiz House | @29.461944,-98.468056 | Built around 1745 facing Military Plaza, this house was where José Francisco Ruiz — a signer of the Texas Declaration of Independence and San Antonio's first official schoolmaster — held classes in the front room; it was rebuilt here on the museum grounds in 1943. | https://www.hmdb.org/m.asp?m=239099 | new
+Engleman-Muench House | @29.429722,-98.483056 | Built in three stages from 1858 on what had been Alamo farmland, this caliche-block double house with built-in end chimneys mixes Spanish and German ways of building; German immigrant Martin Engleman sold it in 1865 to businessman and city alderman Martin Muench. | https://www.hmdb.org/m.asp?m=235149
+Charles V. Bellinger House | @29.4142,-98.4612 | Charles V. Bellinger, the Black political boss whose backing was all but required to win local office in San Antonio through the 1920s and 1930s, lived on this estate; after his death in 1937 his son Valmo sold it to Greater Corinth Baptist Church in the late 1940s. | https://sanantonioreport.org/?p=2550789
