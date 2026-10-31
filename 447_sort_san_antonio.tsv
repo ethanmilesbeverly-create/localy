@@ -157,13 +157,13 @@ SA187	SEED — unmapped	story owed	Sacred Heart Conventual Chapel	29.4256	-98.54
 SA189	SEED — article in no tile (#539)	written (part 2a)	Thomas Jefferson High School (San Antonio)	29.46527778	-98.53805556		Thomas Jefferson High School (San Antonio)			Thomas Jefferson High School
 SA191	SEED — unmapped	written (part 2a)	Fort Sam Houston National Cemetery	29.4768	-98.4327		Fort Sam Houston National Cemetery		matched the Dodd Field camp plaque, not the cemetery	Fort Sam Houston National Cemetery
 SA192	SEED — unmapped	story owed	Light House	29.475417	-98.469514			NRHP nomination 11000131	HMdb page carries only HABS / National Register boilerplate	Light House
-SA002	HOLD — neighbour tile cold	waits on drip						NRHP nomination 10000737		Herrera Ranch
-SA003	HOLD — neighbour tile cold	waits on drip						THC atlas 11747 inscription; NRHP nomination 10000469		Krause House
+SA002	SEED — unmapped	story owed	Herrera Ranch	29.283056	-98.614028			NRHP nomination 10000737	settled after the edge tiles warmed: no stored pin within 150 m (Ruiz-Herrera Cemetery 1.2 km — a different subject); no HMdb marker within 0.2 mi	Herrera Ranch
+SA003	CURATED ROW — hidden pin	written (447_hidden_curated_4)	Krause House/Mann's Crossing Post Office	29.30541	-98.6655	Krause House/Mann's Crossing Post Office · osm_node12395077366 · 17 m	https://www.hmdb.org/m.asp?m=179926		settled after the edge tiles warmed: hidden (not served on a cached POST), containing tile stores it (#542)	Krause House
 SA158	SEED — unmapped	story owed	Prospect Hill Missionary Baptist Church	29.4266725	-98.517403		Prospect Hill Missionary Baptist Church	NRHP nomination 86002185	geocoded 2026-10-31: OSM node 356852275 (Photon), 147 m from the list point, stored in no tile; Wikipedia has only built 1911 / listed 1986	Prospect Hill Missionary Baptist Church
-SA190	HOLD — neighbour tile cold	waits on drip						THC atlas 13380 inscription		Perrin Home
-SA197	HOLD — neighbour tile cold	waits on drip						NRHP nomination 100000669		The Wedgwood
-SA199	HOLD — neighbour tile cold	waits on drip						THC atlas 17996 inscription		Locke Hill Auditorium
-SA222	HOLD — neighbour tile cold	waits on drip						NRHP nomination 14000402		Voelcker Farmstead Historic District
+SA190	SEED — unmapped	story owed	Perrin Home	29.525	-98.413611			THC atlas 13380 inscription	settled after the edge tiles warmed: no stored pin within 150 m; no HMdb marker within 0.2 mi	Perrin Home
+SA197	SEED — unmapped	story owed	The Wedgwood	29.517643	-98.508008			NRHP nomination 100000669	settled after the edge tiles warmed: no stored pin within 150 m; no HMdb marker within 0.2 mi	The Wedgwood
+SA199	CURATED ROW — hidden pin	written (447_hidden_curated_4)	Locke Hill Auditorium	29.5549	-98.58643	Locke Hill Auditorium · osm_node13971413917 · 11 m	https://www.hmdb.org/m.asp?m=295010		settled after the edge tiles warmed: hidden (not served on a cached POST), containing tile stores it (#542)	Locke Hill Auditorium
+SA222	NO LINE — district centroid							NRHP nomination 14000402	settled after the edge tiles warmed: no stored pin for the district; a centroid pin would be arbitrary	Voelcker Farmstead Historic District
 SA001	CUT — served					Mission San Francisco de la Espada · wiki_2221020 · 37 m	Mission San Francisco de la Espada			Mission San Francisco de la Espada
 SA008	CUT — served					Ethel Wilson Harris House · wiki_29870389 · 74 m	Ethel Wilson Harris House			Ethel Wilson Harris House
 SA009	CUT — served					Mission San José (Texas) · wiki_3246929 · 0 m	Mission San José (Texas)			San Jose Mission National Historic Site
