@@ -17,6 +17,9 @@
 #   SA078: relocated from the NRHP list point (~1 km south) to HMdb 118552 'established at this location'; the 'Abandoned Mill' pin 69 m and part 2b's Gustav Blersch House line 65 m are different places
 # RENAMED: SA019 Aldrete Houses → Dolores Alderete House (the marker's subject); SA088 → Old Brooke Army Medical Center (the 1937
 # hospital, not today's BAMC 3 km east); SA117 Bushnell → The Bushnell (the nomination's name).
+# MAC DRY RUN 2026-11-01 (seed-resolve 2026.10.27a, all 151 lines): Gemini matched The Havana to a NEARBY WIKIPEDIA
+#   ARTICLE about a different subject (map 0 · subs 0 for each — no live pin involved) and filed them `review`; each is a
+#   distinct building, so each is now flagged `new` (#422's shape).
 # Expect 19 new-seed, 0 review, 0 held. WATCH: SA177 The Havana is a hotel (sold Oct 2025) — a `commercial-skip` would be wrong;
 # it carries a story, so it should file as history.
 #
@@ -35,7 +38,7 @@ Old Brooke Army Medical Center | @29.466111,-98.449167 | Begun in 1936 on the si
 Robert B. Green Memorial Hospital | @29.429968,-98.501682 | Opened in 1917, this was San Antonio's first public hospital; its uneven funding led voters in 1955 to create a hospital district and a property tax to support it. | https://en.wikipedia.org/wiki/University_Health_(San_Antonio)
 Friedrich Complex | @29.420556,-98.470556 | These interconnected buildings, almost 500,000 square feet in all, were built for the Friedrich Refrigeration Company, a maker of commercial refrigeration and room air conditioning equipment. | https://www.opengreenmap.org/ro/greenmap/san-antonio-green-map/friedrich-building-2689
 Jacala Restaurant | @29.450278,-98.486944 | The Quinones family gave this building its false-front faux bois facade when they opened their Jacala #3 restaurant here around 1952, and it is listed with the Sculpture by Dionicio Rodriguez in Texas. | https://atlas.thc.state.tx.us/NR/pdfs/04001168/04001168.pdf
-The Havana | @29.430833,-98.489722 | Grocer Edward Franz Melcher opened the Havana in 1914, paying tribute to the Cuban capital with a Mediterranean-style design and tropical shrubbery; it was restored nearly 100 years later. | https://www.sacurrent.com/?p=379824
+The Havana | @29.430833,-98.489722 | Grocer Edward Franz Melcher opened the Havana in 1914, paying tribute to the Cuban capital with a Mediterranean-style design and tropical shrubbery; it was restored nearly 100 years later. | https://www.sacurrent.com/?p=379824 | new
 The Bushnell | @29.462222,-98.487778 | Built in 1926 by the Kelwood Company in the Spanish Colonial Revival style, the Bushnell was a rare multi-story apartment house in a city where single family homes were the rule, and it is one of only two large pre-Depression apartment buildings left in San Antonio. | https://atlas.thc.texas.gov/NR/pdfs/82004491/82004491.pdf
 Borden's Creamery | @29.447,-98.4824 | Atlee B. and Robert M. Ayres designed this two-story concrete Moderne plant in 1933 for the Mistletoe Creamery; Borden's bought it shortly before completion and ran it as Borden's Creamery. | https://atlas.thc.texas.gov/NR/pdfs/100007273/100007273.pdf
 Book Building | @29.426389,-98.4925 | Civil engineer and Spanish-American War veteran Dwight Dana Book bought this lot in 1904 — where the U.S. Army had occupied stone and adobe buildings in the 1850s — and put up this red brick office building in 1906; a popular club called the Night Spot was once in its basement. | https://www.txgenwebcounties.com/bexar/Landmarks/Book_Building.htm
