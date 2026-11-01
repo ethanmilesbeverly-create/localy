@@ -1,0 +1,29 @@
+# names-447-san-antonio-7.txt — #447 San Antonio story batch, part 2d-3b: 7 seed lines from the 27 stories owed after part
+# 2d-3a (drafted 2026-11-01). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: NRHP nomination text carried in search results (Buick Motor Company, Poe Motor Company); HMdb's quotation of the
+# Goad Motor Company nomination (m=235166, read from bash); the Conservation Society's WWII exhibit (Calcasieu Building); the San
+# Antonio Report (Casa de Dios, The Wedgwood); Hotel Online quoting the Conservation Society (Central Trust Company Building).
+# Every number and capitalised name in every sentence was checked against its source text in the sandbox; every line sits in the
+# box (42 tiles) and was checked against the stored places:v34 rows (box + ring, 731 pins) and every earlier line of the batch
+# (names 1-6, curated 1-4): no same name_clean anywhere; nothing within 30 m.
+# FLAGGED `new`: none (nearest stored pins 117-118 m away).
+# NEAR EARLIER LINES: SA118 Calcasieu Building is 48 m from part 2d-2's Barr Building and 74 m from part 2d-3a's Travelers Hotel —
+#   three neighbours on the 200 block of Broadway; SA120 Central Trust is 62 m from part 2a's Majestic Theatre (across Houston St.).
+# NOTE: SA197 The Wedgwood's story is its 2014 fire (five residents killed) and the state-law changes that followed — it is the
+#   building's documented history, written plainly.
+# NOTE: SA131's HMdb page is a National Register plaque; no stored pin carries it (none within 120 m).
+# STILL OWED (20, carried to part 2d-3c): searched with nothing usable yet — SA102 Morrison, SA033 Dominguez-Micheli, SA037 Fiesta
+#   House, SA061 San Antonio Drug, SA192 Light House; not yet searched — SA050, SA062, SA064, SA080, SA110, SA116, SA126, SA130,
+#   SA134, SA136, SA137, SA138, SA145, SA180, SA190.
+# Expect 7 new-seed, 0 review, 0 held. WATCH: SA120 (now a Home2 Suites hotel) carries a story — a `commercial-skip` would be
+#   wrong; it should file as history (part 2d-1's Havana note). SA114/SA131/SA157 are former car dealerships, not live businesses.
+#
+Buick Motor Company | @29.4342,-98.4809 | Built in 1927 at Broadway and 10th Street, this building on Broadway, a major commercial street leading from downtown to the suburbs, served mainly as a factory branch of the Buick Motor Company supplying Buick dealerships in south Texas. | https://atlas.thc.texas.gov/NR/pdfs/100012349/100012349.pdf
+Calcasieu Building | @29.427639,-98.487361 | In the war years the District Recruiting Office in this building at Broadway and Travis was one of the places where the city held drives to recruit local Latinas into the Air-WACs, who were sworn in at Municipal Auditorium on March 26, 1944. | https://saconservation.org/VirtualExhibits/WWII/892A09DC-0BBB-42EE-900F-464510522820.htm
+Casa de Dios (House of God) | @29.4532,-98.4837 | Built on farmland in 1909, this wood-frame mission house of Frances Ostrom gave migrants food, clothing and health care; it predates the original Our Lady of Sorrows church steps away, built in 1915, and she ran it until 1942. | https://sanantonioreport.org/?p=5352641
+Central Trust Company Building | @29.426667,-98.49 | Completed in 1919 to designs by Sanguinet and Staats, this Beaux Arts office building — later known as the South Texas Building — was the tallest building in the city at the time, according to the San Antonio Conservation Society. | https://www.hotel-online.com/News/PR2010_3rd/Sep10_BaywoodHome2.html
+Goad Motor Company Building | @29.433333,-98.490278 | Pioneer Texas automobile dealer Thomas Jefferson Goad, who controlled a 52-county area of South Texas, built this showroom in 1927 for the Cadillac-LaSalle dealership he had opened in San Antonio in 1924; architect Harvey Partridge Smith fitted it with decorative Spanish tile, wrought iron grills and imitation travertine pilasters. | https://www.hmdb.org/m.asp?m=235166
+Poe Motor Company | @29.4334,-98.4813 | This two-story reinforced concrete building at 900 Broadway was built for the car trade and passed through a string of dealers — among them the San Antonio Overland Company, Murray-Winerich Motor Company and Baker Motor Company — before the Poe Motor Company gave it its listed name. | https://npgallery.nps.gov/GetAsset/6b70d1f5-ca29-4b4d-a620-090bb6da2caa
+The Wedgwood | @29.517643,-98.508008 | A fire that killed five senior citizens in this high-rise became notorious because the building lacked common safety features, and it led to changes in state law; the building was later remodeled and rebranded as the Ensemble. | https://sanantonioreport.org/?p=2548414
