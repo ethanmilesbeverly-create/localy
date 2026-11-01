@@ -1,0 +1,34 @@
+# names-447-san-antonio-6.txt — #447 San Antonio story batch, part 2d-3a: 8 seed lines from the 35 stories owed after part
+# 2d-2 (drafted 2026-11-01). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: NRHP nomination text carried in search results (Robert E. Lee Hotel, Prospect Hill, Sacred Heart Conventual Chapel,
+# Travelers Hotel); the Texas Transportation Museum's Missouri Pacific timeline (I&GN station); the San Antonio Report (Maverick
+# Building); Drury Hotels' history page (City Public Service Building); Waymarking's quotation of the nomination (Pump Station
+# No. 2). Every number and capitalised name in every sentence was checked against its source text in the sandbox; every line sits
+# in the box (42 tiles) and was checked against the stored places:v34 rows (box + ring, 731 pins) and every earlier line of the
+# batch (names 1-5, curated 1-4): no same name_clean anywhere; nothing within 30 m.
+# FLAGGED `new` (2):
+#   SA148 Maverick Building: the served Buckhorn Saloon and Museum pin is 38 m away — a different building
+#   SA187 Sacred Heart Conventual Chapel: the served Our Lady of the Lake University pins are 83 m and 95 m away — a distinct
+#     building on the campus (#422)
+# NEAR AN EARLIER LINE: SA181 Travelers Hotel is 45 m from part 2d-2's Barr Building — neighbours on Broadway (220 vs 213-219).
+# PROSPECT HILL'S GEOCODE SETTLED: SA158 stays on OSM node 356852275 (29.4266725, -98.517403), the church's own node on Buena Vista
+#   ~170 m from the Buena Vista / South San Jacinto corner the nomination names. The NRHP list / Wikipedia point (29.42611,
+#   -98.50528) is ~1.2 km east and wrong. The nomination and NPGallery disagree on the architect (Barker / Harker), so the line
+#   names none.
+# MOVED: SA167 to the Waymarking fix of the pump house (N 29 26.933 W 98 28.619; 20 m from the list point).
+# STILL OWED (27, carried to part 2d-3b): SA102 Morrison, SA033 Dominguez-Micheli, SA037 Fiesta House, SA061 San Antonio Drug,
+#   SA192 Light House (searched: listing or style metadata only), and SA050, SA062, SA064, SA080, SA110, SA114, SA116, SA118,
+#   SA119, SA120, SA126, SA130, SA131, SA134, SA136, SA137, SA138, SA145, SA157, SA180, SA190, SA197 (not yet searched).
+# Expect 8 new-seed, 0 review, 0 held. WATCH: SA124 (now a Drury hotel) and SA181 (now Hotel 1914) carry stories — a
+#   `commercial-skip` would be wrong; both should file as history (part 2d-1's Havana note).
+#
+City Public Service Company Building | @29.425278,-98.491667 | This building was constructed in 1921 for the offices of the San Antonio Public Service Company, which provided commercial and residential gas and electric services, and it now houses the Drury Inn & Suites San Antonio Riverwalk. | https://www.druryhotels.com/historic-renovations-san-antonio-riverwalk
+International & Great Northern Railroad Passenger Station | @29.426944,-98.505278 | The International & Great Northern opened this grand passenger station at the corner of Commerce and Medina in 1907, and it served the line's later owner, the Missouri Pacific, until MoPac ended its "Texas Eagle" service and shuttered the station in 1970. | https://txtransportationmuseum.org/missouri-pacific-page-2
+Maverick Building | @29.42625,-98.488472 | The estate of George M. Maverick — a son of Samuel Maverick, a signer of the Texas Declaration of Independence — built this nine-story building on the site of the former Maverick Hotel, and it is easily recognized by the namesake neon sign on its roof. | https://sanantonioreport.org/?p=101148 | new
+Prospect Hill Missionary Baptist Church | @29.4266725,-98.517403 | Built in 1911 of buff-colored brick at the corner of Buena Vista and South San Jacinto streets, this is the largest ecclesiastical structure in its once prosperous late-Victorian neighborhood; after a fire destroyed its dome, the exterior was restored and the interior adapted as apartments for the elderly. | https://atlas.thc.texas.gov/NR/pdfs/86002185/86002185.pdf
+Robert E. Lee Hotel | @29.4275,-98.494167 | When it was completed in 1923, the Robert E. Lee was both the city's tallest hotel and its tallest building at the north edge of downtown, and its location and stature still define the northwest boundary of the downtown business district. | https://atlas.thc.state.tx.us/NR/pdfs/96000063/96000063.pdf
+San Antonio Water Works Pump Station No. 2 | @29.44888,-98.47698 | George W. Brackenridge's waterworks completed this stone pump station in 1885 on the north bank of the millpond that supplied it; abandoned in 1915, it was later spotted by sculptor Gutzon Borglum as an ideal spot for his San Antonio studio, and it is now the Amy & V.H. McNutt Events Center. | https://www.waymarking.com/waymarks/WM16XHM_San_Antonio_Water_Works_Pump_Station_No_2_San_Antonio_TX
+Travelers Hotel | @29.428261,-98.487099 | The 1914 Travelers Hotel at 220 Broadway is a seven-story block of reinforced concrete with a brick and stucco exterior, built to hold a hotel above business and restaurant space. | https://npgallery.nps.gov/GetAsset/fdcd463c-5318-4d0e-85d5-5d632b548ff3
+Sacred Heart Conventual Chapel | @29.4256,-98.5441 | Completed in 1923 at Our Lady of the Lake University to a design by architect Leo M.J. Dielmann, this Late Gothic Revival chapel has a cruciform plan and a 193-foot-tall central tower. | https://atlas.thc.texas.gov/NR/pdfs/100006774/100006774.pdf | new

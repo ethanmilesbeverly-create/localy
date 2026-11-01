@@ -103,7 +103,7 @@ SA119	SEED — unmapped	story owed	Casa de Dios (House of God)	29.4532	-98.4837	
 SA120	SEED — unmapped	story owed	Central Trust Company Building	29.426667	-98.49			NRHP nomination 82004492		Central Trust Company Building
 SA122	SEED — unmapped	written (part 2b)	Christ Episcopal Church	29.451389	-98.496944			THC atlas 841 inscription		Christ Episcopal Church
 SA123	SEED — unmapped	written (part 2b)	Christopher Columbus Italian Society Hall	29.430833	-98.498611			THC atlas 848 inscription		Christopher Columbus Italian Society Hall
-SA124	SEED — unmapped	story owed	City Public Service Company Building	29.425278	-98.491667			NRHP nomination 95001422		City Public Service Company Building
+SA124	SEED — unmapped	written (part 2d-3a)	City Public Service Company Building	29.425278	-98.491667		https://www.druryhotels.com/historic-renovations-san-antonio-riverwalk	NRHP nomination 95001422		City Public Service Company Building
 SA125	SEED — article in no tile (#539)	written (part 2a)	San Antonio Municipal Auditorium	29.43055556	-98.48888889		San Antonio Municipal Auditorium			City of San Antonio Municipal Auditorium
 SA126	SEED — unmapped	story owed	Daniel J. Sullivan Stable and Carriage House	29.429672	-98.485558			NRHP nomination 78002895		Daniel J. Sullivan Stable and Carriage House
 SA128	SEED — unmapped	written (part 2d-1)	Dr. Claudius E. R. King House	29.435278	-98.4875		https://www.txgenwebcounties.com/bexar/Landmarks/King,_Dr._Claudius_E._R._House.htm			Dr. Claudius E. R. King House
@@ -116,7 +116,7 @@ SA134	SEED — unmapped	story owed	Gustav Uhl House and Store	29.431111	-98.4811
 SA136	SEED — unmapped	story owed	Heimann Building	29.426806	-98.504861			NRHP nomination 04001396		Heimann Building
 SA137	SEED — unmapped	story owed	Hiram Partee House	29.4522	-98.4978			NRHP nomination 84001576		Hiram Partee House
 SA138	SEED — unmapped	story owed	Hugo & Schmeltzer Company Warehouse	29.425	-98.4781			NRHP nomination 100009887		Hugo & Schmeltzer Company Warehouse
-SA139	SEED — unmapped	story owed	International & Great Northern Railroad Passenger Station	29.426944	-98.505278			NRHP nomination	the I&GN railroad article never mentions this station	International & Great Northern Railroad Passenger Station
+SA139	SEED — unmapped	written (part 2d-3a)	International & Great Northern Railroad Passenger Station	29.426944	-98.505278		https://txtransportationmuseum.org/missouri-pacific-page-2	NRHP nomination	the I&GN railroad article never mentions this station; 2d-3a: NRHP 75001951	International & Great Northern Railroad Passenger Station
 SA140	SEED — unmapped	written (part 2d-1)	Jacala Restaurant	29.450278	-98.486944		https://atlas.thc.state.tx.us/NR/pdfs/04001168/04001168.pdf			Jacala Restaurant
 SA141	SEED — unmapped	written (part 2b)	Jay Adams House	29.451389	-98.497778			THC atlas 17233 inscription		Jay Adams House
 SA142	SEED — article in no tile (#539)	written (part 2a)	Johann and Anna Heidgen House	29.42611111	-98.48222222		Johann and Anna Heidgen House			Johann and Anna Heidgen House
@@ -124,7 +124,7 @@ SA143	SEED — unmapped	written (part 2b)	L. B. Clegg House	29.444167	-98.495278
 SA145	SEED — unmapped	story owed	Livingston-Hess House	29.455833	-98.496111			NRHP nomination 96000036		Livingston-Hess House
 SA146	SEED — unmapped	written (part 2b)	Madison Square Presbyterian Church	29.435278	-98.491667			THC atlas 13368 inscription	matched Madison Square Park, not the church	Madison Square Presbyterian Church
 SA147	SEED — article in no tile (#539)	written (part 2a)	Majestic Theatre (San Antonio)	29.42611111	-98.49		Majestic Theatre (San Antonio)			Majestic Theatre
-SA148	SEED — unmapped	story owed	Maverick Building	29.42625	-98.488472			NRHP nomination 94001593		Maverick Building
+SA148	SEED — unmapped	written (part 2d-3a)	Maverick Building	29.42625	-98.488472		https://sanantonioreport.org/?p=101148	NRHP nomination 94001593	2d-3a: `new`: Buckhorn Saloon and Museum pin 38 m	Maverick Building
 SA149	SEED — unmapped	written (part 2b)	Maverick-Carter House	29.43	-98.487778			THC atlas 16377 inscription; NRHP nomination 98000844		Maverick-Carter House
 SA150	SEED — unmapped	written (part 2b)	Menger Soap Works	29.429167	-98.496667			THC atlas 3336 inscription; NRHP nomination 73001958		Menger Soap Works
 SA151	SEED — article in no tile (#539)	written (part 2a)	Milam Building	29.4275	-98.49277778		Milam Building			Milam Building
@@ -134,12 +134,12 @@ SA157	SEED — unmapped	story owed	Poe Motor Company	29.4334	-98.4813			NRHP nom
 SA159	SEED — unmapped	written (part 2b)	Rechel-Stumpf House	29.438889	-98.495833			THC atlas 4215 inscription		Rechel-Stumpf House
 SA160	SEED — article in no tile (#539)	written (part 2a)	Rincon School	29.429961	-98.492498		Rincon School			Rincon / Douglass School
 SA161	SEED — unmapped	written (part 2d-1)	Robert B. Green Memorial Hospital	29.429968	-98.501682		https://en.wikipedia.org/wiki/University_Health_(San_Antonio)			Robert B. Green Memorial Hospital
-SA162	SEED — unmapped	story owed	Robert E. Lee Hotel	29.4275	-98.494167			NRHP nomination 96000063		Robert E. Lee Hotel
+SA162	SEED — unmapped	written (part 2d-3a)	Robert E. Lee Hotel	29.4275	-98.494167		https://atlas.thc.state.tx.us/NR/pdfs/96000063/96000063.pdf	NRHP nomination 96000063		Robert E. Lee Hotel
 SA163	SEED — unmapped	written (part 2b)	Roy and Madge Hearne House	29.449722	-98.497222			THC atlas 18444 inscription		Roy and Madge Hearne House
 SA164	SEED — article in no tile (#539)	written (part 2a)	The St. Anthony Hotel	29.42722222	-98.48861111		The St. Anthony Hotel			Saint Anthony Hotel
 SA165	SEED — unmapped	written (part 2b)	San Antonio Casino Club Building	29.425	-98.488611			THC atlas 752 inscription; NRHP nomination 80004078		San Antonio Casino Club Building
 SA166	SEED — article in no tile (#539)	written (part 2a)	Hipolito F. Garcia Federal Building and United States Courthouse	29.42694444	-98.48611111		Hipolito F. Garcia Federal Building and United States Courthouse			San Antonio US Post Office and Courthouse
-SA167	SEED — unmapped	story owed	San Antonio Water Works Pump Station No. 2	29.4487	-98.4769			NRHP nomination 81000625		San Antonio Water Works Pump Station No. 2
+SA167	SEED — unmapped	written (part 2d-3a)	San Antonio Water Works Pump Station No. 2	29.44888	-98.47698		https://www.waymarking.com/waymarks/WM16XHM_San_Antonio_Water_Works_Pump_Station_No_2_San_Antonio_TX	NRHP nomination 81000625	2d-3a: moved 20 m to the Waymarking fix	San Antonio Water Works Pump Station No. 2
 SA168	SEED — unmapped	written (part 2b)	San Francesco Di Paola Catholic Church	29.430833	-98.498889			THC atlas 4539 inscription		San Francisco Di Paola Catholic Church
 SA171	SEED — unmapped	written (part 2b)	Site of Old St. Mary's	29.425556	-98.491111			THC atlas 3818 inscription		Site of Old St. Mary's
 SA172	SEED — unmapped	written (part 2d-1)	Site of Original Building, First Baptist Church	29.427778	-98.488056		https://www.txgenwebcounties.com/bexar/Landmarks/First_Baptist_Church.htm			Site of Original Building, First Baptist Church
@@ -149,17 +149,17 @@ SA177	SEED — unmapped	written (part 2d-1)	The Havana	29.430833	-98.489722		htt
 SA178	SEED — unmapped	written (part 2b)	The Toltec	29.430278	-98.487778			THC atlas 17893 inscription; NRHP nomination 10000498		The Toltec
 SA179	SEED — unmapped	written (part 2b)	Thiele Cottage	29.429722	-98.483333			THC atlas 5461 inscription; NRHP nomination 83003092		Thiele House and Thiele Cottage
 SA180	SEED — unmapped	story owed	Thomas H. Franklin House	29.450556	-98.493611			NRHP nomination 86001135		Thomas H. Franklin House
-SA181	SEED — unmapped	story owed	Travelers Hotel	29.428261	-98.487099			NRHP nomination 15000617		Travelers Hotel
+SA181	SEED — unmapped	written (part 2d-3a)	Travelers Hotel	29.428261	-98.487099		https://npgallery.nps.gov/GetAsset/fdcd463c-5318-4d0e-85d5-5d632b548ff3	NRHP nomination 15000617		Travelers Hotel
 SA182	SEED — article in no tile (#539)	written (part 2a)	Ursuline Academy (San Antonio, Texas)	29.43111111	-98.49222222		Ursuline Academy (San Antonio, Texas)		"hidden ""Visitor's Center Museum"" pin 3 m away is a different name"	Ursuline Academy
 SA183	SEED — unmapped	written (part 2b)	Wolfson House	29.430278	-98.485833			THC atlas 5887 inscription		Wolfson House
 SA185	SEED — unmapped	written (part 2d-1)	Zambrano House	29.455	-98.48		https://www.txgenwebcounties.com/bexar/Landmarks/Zambrano_House.htm			Zambrano House
-SA187	SEED — unmapped	story owed	Sacred Heart Conventual Chapel	29.4256	-98.5441			NRHP nomination 100006774		Sacred Heart Conventual Chapel
+SA187	SEED — unmapped	written (part 2d-3a)	Sacred Heart Conventual Chapel	29.4256	-98.5441		https://atlas.thc.texas.gov/NR/pdfs/100006774/100006774.pdf	NRHP nomination 100006774	2d-3a: `new`: Our Lady of the Lake University pins 83 m and 95 m	Sacred Heart Conventual Chapel
 SA189	SEED — article in no tile (#539)	written (part 2a)	Thomas Jefferson High School (San Antonio)	29.46527778	-98.53805556		Thomas Jefferson High School (San Antonio)			Thomas Jefferson High School
 SA191	SEED — unmapped	written (part 2a)	Fort Sam Houston National Cemetery	29.4768	-98.4327		Fort Sam Houston National Cemetery		matched the Dodd Field camp plaque, not the cemetery	Fort Sam Houston National Cemetery
-SA192	SEED — unmapped	story owed	Light House	29.475417	-98.469514			NRHP nomination 11000131	HMdb page carries only HABS / National Register boilerplate	Light House
+SA192	SEED — unmapped	story owed	Light House	29.475417	-98.469514			NRHP nomination 11000131	HMdb page carries only HABS / National Register boilerplate; 2d-3a: searched — listing metadata only (300 Argyle Ave, 1961); carried	Light House
 SA002	SEED — unmapped	written (part 2d-2)	Herrera Ranch	29.283056	-98.614028		https://abc7.com/archive/8331927/	NRHP nomination 10000737	settled after the edge tiles warmed: no stored pin within 150 m (Ruiz-Herrera Cemetery 1.2 km — a different subject); no HMdb marker within 0.2 mi	Herrera Ranch
 SA003	CURATED ROW — hidden pin	written (447_hidden_curated_4)	Krause House/Mann's Crossing Post Office	29.30541	-98.6655	Krause House/Mann's Crossing Post Office · osm_node12395077366 · 17 m	https://www.hmdb.org/m.asp?m=179926		settled after the edge tiles warmed: hidden (not served on a cached POST), containing tile stores it (#542)	Krause House
-SA158	SEED — unmapped	story owed	Prospect Hill Missionary Baptist Church	29.4266725	-98.517403		Prospect Hill Missionary Baptist Church	NRHP nomination 86002185	geocoded 2026-10-31: OSM node 356852275 (Photon), 147 m from the list point, stored in no tile; Wikipedia has only built 1911 / listed 1986	Prospect Hill Missionary Baptist Church
+SA158	SEED — unmapped	written (part 2d-3a)	Prospect Hill Missionary Baptist Church	29.4266725	-98.517403		https://atlas.thc.texas.gov/NR/pdfs/86002185/86002185.pdf	NRHP nomination 86002185	geocoded 2026-10-31: OSM node 356852275 (Photon), 147 m from the list point, stored in no tile; Wikipedia has only built 1911 / listed 1986; 2d-3a: geocode settled: OSM node kept; the NRHP list point is ~1.2 km east	Prospect Hill Missionary Baptist Church
 SA190	SEED — unmapped	story owed	Perrin Home	29.525	-98.413611			THC atlas 13380 inscription	settled after the edge tiles warmed: no stored pin within 150 m; no HMdb marker within 0.2 mi	Perrin Home
 SA197	SEED — unmapped	story owed	The Wedgwood	29.517643	-98.508008			NRHP nomination 100000669	settled after the edge tiles warmed: no stored pin within 150 m; no HMdb marker within 0.2 mi	The Wedgwood
 SA199	CURATED ROW — hidden pin	written (447_hidden_curated_4)	Locke Hill Auditorium	29.5549	-98.58643	Locke Hill Auditorium · osm_node13971413917 · 11 m	https://www.hmdb.org/m.asp?m=295010		settled after the edge tiles warmed: hidden (not served on a cached POST), containing tile stores it (#542)	Locke Hill Auditorium
