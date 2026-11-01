@@ -108,20 +108,20 @@ SA125	SEED — article in no tile (#539)	written (part 2a)	San Antonio Municipal
 SA126	SEED — unmapped	story owed	Daniel J. Sullivan Stable and Carriage House	29.429672	-98.485558			NRHP nomination 78002895	2d-3c: HELD — relocated in 1988 to the San Antonio Botanical Garden entrance (555 Funston Pl.); story sourced (wikipedia Alfred Giles), exact point owed; will be `new` inside the served garden	Daniel J. Sullivan Stable and Carriage House
 SA128	SEED — unmapped	written (part 2d-1)	Dr. Claudius E. R. King House	29.435278	-98.4875		https://www.txgenwebcounties.com/bexar/Landmarks/King,_Dr._Claudius_E._R._House.htm			Dr. Claudius E. R. King House
 SA129	SEED — unmapped	written (part 2c)	Engleman-Muench House	29.429722	-98.483056			THC atlas 1483 inscription		Engleman-Muench House
-SA130	SEED — unmapped	story owed	Garcia-Garza House	29.428056	-98.495			NRHP nomination 83003091		Garcia-Garza House
+SA130	SEED — unmapped	written (part 2d-3d)	Garcia-Garza House	29.428056	-98.495		https://sahouseregistry.com/houses/214-w-salinas	NRHP nomination 83003091		Garcia-Garza House
 SA131	SEED — unmapped	written (part 2d-3b)	Goad Motor Company Building	29.433333	-98.490278		https://www.hmdb.org/m.asp?m=235166	NRHP nomination 97001530	HMdb page carries only HABS / National Register boilerplate; HMdb marker is HABS/NRHP boilerplate only — story owed to the NRHP nomination	Goad Motor Company Building
 SA132	SEED — unmapped	written (part 2d-1)	Gould-Onderdonk House	29.449722	-98.495278		https://www.txgenwebcounties.com/bexar/Landmarks/Gould-Onderdonk_House.htm			Gould-Onderdonk House
 SA133	SEED — unmapped	written (part 2a)	Gunter Hotel	29.42669	-98.491111		Gunter Hotel			Gunter Hotel
-SA134	SEED — unmapped	story owed	Gustav Uhl House and Store	29.431111	-98.481111			NRHP nomination 02001061		Gustav Uhl House and Store
+SA134	SEED — unmapped	story owed	Gustav Uhl House and Store	29.431111	-98.481111			NRHP nomination 02001061	2d-3d: searched — style/architect/address metadata only; carried	Gustav Uhl House and Store
 SA136	SEED — unmapped	written (part 2d-3c)	Heimann Building	29.426806	-98.504861		https://www.saconservation.org/VirtualExhibits/NIOSA/83D72E7E-59D5-4F11-83D6-513436515961.htm	NRHP nomination 04001396		Heimann Building
-SA137	SEED — unmapped	story owed	Hiram Partee House	29.4522	-98.4978			NRHP nomination 84001576		Hiram Partee House
+SA137	SEED — unmapped	written (part 2d-3d)	Hiram Partee House	29.4522	-98.4978		https://atlas.thc.texas.gov/NR/pdfs/84001576/84001576.pdf	NRHP nomination 84001576		Hiram Partee House
 SA138	SEED — unmapped	written (part 2d-3c)	Hugo & Schmeltzer Company Warehouse	29.425	-98.4781		https://sanantonioreport.org/san-antonio-east-side-warehouse-restoration-office-space/	NRHP nomination 100009887		Hugo & Schmeltzer Company Warehouse
 SA139	SEED — unmapped	written (part 2d-3a)	International & Great Northern Railroad Passenger Station	29.426944	-98.505278		https://txtransportationmuseum.org/missouri-pacific-page-2	NRHP nomination	the I&GN railroad article never mentions this station; 2d-3a: NRHP 75001951	International & Great Northern Railroad Passenger Station
 SA140	SEED — unmapped	written (part 2d-1)	Jacala Restaurant	29.450278	-98.486944		https://atlas.thc.state.tx.us/NR/pdfs/04001168/04001168.pdf			Jacala Restaurant
 SA141	SEED — unmapped	written (part 2b)	Jay Adams House	29.451389	-98.497778			THC atlas 17233 inscription		Jay Adams House
 SA142	SEED — article in no tile (#539)	written (part 2a)	Johann and Anna Heidgen House	29.42611111	-98.48222222		Johann and Anna Heidgen House			Johann and Anna Heidgen House
 SA143	SEED — unmapped	written (part 2b)	L. B. Clegg House	29.444167	-98.495278			THC atlas 916 inscription; NRHP nomination 79002913		L. B. Clegg House
-SA145	SEED — unmapped	story owed	Livingston-Hess House	29.455833	-98.496111			NRHP nomination 96000036		Livingston-Hess House
+SA145	SEED — unmapped	story owed	Livingston-Hess House	29.455833	-98.496111			NRHP nomination 96000036	2d-3d: searched — style/architect/address metadata only; carried	Livingston-Hess House
 SA146	SEED — unmapped	written (part 2b)	Madison Square Presbyterian Church	29.435278	-98.491667			THC atlas 13368 inscription	matched Madison Square Park, not the church	Madison Square Presbyterian Church
 SA147	SEED — article in no tile (#539)	written (part 2a)	Majestic Theatre (San Antonio)	29.42611111	-98.49		Majestic Theatre (San Antonio)			Majestic Theatre
 SA148	SEED — unmapped	written (part 2d-3a)	Maverick Building	29.42625	-98.488472		https://sanantonioreport.org/?p=101148	NRHP nomination 94001593	2d-3a: `new`: Buckhorn Saloon and Museum pin 38 m	Maverick Building
@@ -148,7 +148,7 @@ SA176	SEED — article in no tile (#539)	written (part 2a)	Alamo Mission	29.4258
 SA177	SEED — unmapped	written (part 2d-1)	The Havana	29.430833	-98.489722		https://www.sacurrent.com/?p=379824			The Havana
 SA178	SEED — unmapped	written (part 2b)	The Toltec	29.430278	-98.487778			THC atlas 17893 inscription; NRHP nomination 10000498		The Toltec
 SA179	SEED — unmapped	written (part 2b)	Thiele Cottage	29.429722	-98.483333			THC atlas 5461 inscription; NRHP nomination 83003092		Thiele House and Thiele Cottage
-SA180	SEED — unmapped	story owed	Thomas H. Franklin House	29.450556	-98.493611			NRHP nomination 86001135		Thomas H. Franklin House
+SA180	SEED — unmapped	written (part 2d-3d)	Thomas H. Franklin House	29.450556	-98.493611		https://atlas.thc.texas.gov/NR/pdfs/86001135/86001135.pdf	NRHP nomination 86001135	2d-3d: `new`: San Antonio Academy pin 120 m (on its campus, #422)	Thomas H. Franklin House
 SA181	SEED — unmapped	written (part 2d-3a)	Travelers Hotel	29.428261	-98.487099		https://npgallery.nps.gov/GetAsset/fdcd463c-5318-4d0e-85d5-5d632b548ff3	NRHP nomination 15000617		Travelers Hotel
 SA182	SEED — article in no tile (#539)	written (part 2a)	Ursuline Academy (San Antonio, Texas)	29.43111111	-98.49222222		Ursuline Academy (San Antonio, Texas)		"hidden ""Visitor's Center Museum"" pin 3 m away is a different name"	Ursuline Academy
 SA183	SEED — unmapped	written (part 2b)	Wolfson House	29.430278	-98.485833			THC atlas 5887 inscription		Wolfson House

@@ -1,0 +1,21 @@
+# names-447-san-antonio-9.txt — #447 San Antonio story batch, part 2d-3d: 3 seed lines from the 18 stories owed after part
+# 2d-3c (drafted 2026-11-01). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: the San Antonio House Registry (Garcia-Garza); NRHP nomination text carried in search results (Hiram Partee, Thomas H.
+# Franklin). Every number and capitalised name in every sentence was checked against its source text in the sandbox; every line
+# sits in the box and was checked against the stored places:v34 rows (box + ring, 731 pins) and every earlier line of the batch
+# (names 1-8, curated 1-4): no same name_clean anywhere; nothing within 30 m.
+# FLAGGED `new` (1):
+#   SA180 Thomas H. Franklin House: it stands on the campus of San Antonio Academy, whose served pin (wiki_6372958) is 120 m away —
+#     a distinct building inside a bigger place (#422)
+# SEARCHED THIS PART, NOTHING TO TELL YET: SA145 Livingston-Hess House and SA134 Gustav Uhl House and Store (style, architect and
+#   address metadata only).
+# STILL OWED (15, carried): searched with nothing usable yet — SA102 Morrison, SA033 Dominguez-Micheli, SA037 Fiesta House, SA061
+#   San Antonio Drug, SA192 Light House, SA145 Livingston-Hess, SA134 Uhl; held for a coordinate — SA126 Sullivan Carriage House;
+#   not yet searched — SA050, SA062, SA064, SA080, SA110, SA116, SA190.
+# Expect 3 new-seed, 0 review, 0 held.
+#
+Garcia-Garza House | @29.428056,-98.495 | Mariano Garcia began this caliche, limestone and brick house about 1856 and it was enlarged about 1900 as the family grew; his descendants lived here until it was sold in 1981 and converted to office use. | https://sahouseregistry.com/houses/214-w-salinas
+Hiram Partee House | @29.4522,-98.4978 | This two-story stuccoed masonry house in the Monte Vista neighborhood was the Hiram Partee residence; it was later converted to medical offices, with the great majority of its original fabric left intact. | https://atlas.thc.texas.gov/NR/pdfs/84001576/84001576.pdf
+Thomas H. Franklin House | @29.450556,-98.493611 | Built in 1891 for prominent San Antonio attorney Thomas H. Franklin, this rare transitional Queen Anne-Shingle style house on a hill at East French Place and Main Avenue is one of architect James Riely Gordon's relatively few residential designs, and it stands on the campus of San Antonio Academy. | https://atlas.thc.texas.gov/NR/pdfs/86001135/86001135.pdf | new
