@@ -1,0 +1,19 @@
+# names-447-san-antonio-11.txt — #447 San Antonio story batch, part 2d-3f: 2 seed lines; the last 4 unsearched candidates are
+# now all searched (drafted 2026-11-01). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: NRHP nomination text carried in search results (L. T. Wright); the THC atlas marker text, fetched in full (Perrin Home —
+# the atlas entry carries the 1968 plate's inscription, not only the medallion). Every number and capitalised name in every
+# sentence was checked against its source text in the sandbox; both lines sit in the box and were checked against the stored
+# places:v34 rows (box + ring, 731 pins) and every earlier line of the batch (names 1-10, curated 1-4): no same name_clean anywhere;
+# nothing within 30 m. FLAGGED `new`: none (no stored pin within 150 m).
+# MOVED: SA190 13 m to the atlas's own UTM point (14N 556836 E, 3266293 N), converted in the sandbox.
+# SEARCHED THIS PART, NOTHING TO TELL YET: SA080 Vollrath Building (only a 1988 archaeology report on the 1874 blacksmith-shop site
+#   and a HABS file title) and SA110 Benjamin Grossenbacher House (medallion only).
+# STILL OWED (10 — every one now searched): nothing usable yet — SA102 Morrison, SA033 Dominguez-Micheli, SA037 Fiesta House,
+#   SA061 San Antonio Drug, SA192 Light House, SA145 Livingston-Hess, SA134 Uhl, SA080 Vollrath, SA110 Grossenbacher; held for a
+#   coordinate — SA126 Sullivan Carriage House. These are the depth follow-up row's list (handoff §6 THE FAST RUNBOOK (e)).
+# Expect 2 new-seed, 0 review, 0 held.
+#
+L. T. Wright House | @29.395,-98.485694 | Designed by George Willis — who had worked with Frank Lloyd Wright just after the turn of the century — and built in 1917 for prominent San Antonio contractor Lawrence T. Wright and his wife Rivarde, this virtually unaltered house is one of the finest examples of Prairie-school architecture in Texas. | https://atlas.thc.texas.gov/NR/pdfs/83003094/83003094.pdf
+Perrin Home | @29.524966,-98.413485 | Alphonse W. Perrin, born in New York City in 1848 of French parents, drew the plans for this house, built in 1875 after he and his bride, Mina Carr of Wisconsin, came to Texas seeking a better climate and settled near the banks of the Salado Creek. | https://atlas.thc.texas.gov/Details/5507013380
