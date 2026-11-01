@@ -1,0 +1,28 @@
+# names-447-san-antonio-12.txt — #447 San Antonio, part 2e: 13 gate rescues for HIDDEN storyless pins whose containing tile does
+# NOT store them (#542), seeded under a DIFFERENT name at the pin's coordinate (#542's workaround: a curated row would un-hide the
+# pin beside the seed). Every line: Name | locate | one sentence in our own words | source URL | new.
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: the marker inscriptions on HMdb, read from bash (every marker matched by title within 1 m of its pin). Every number and
+# capitalised name was checked against its inscription; accented names are written unaccented as the stored pins spell them.
+# ALL FLAGGED `new` — each sits on its own hidden pin (0 m) under a different name by design (#542), as part 2a's Alamo Madre
+#   Acequia and Schulze-Schilo House (1891) did.
+# WITHIN 30 m WITH A REASON: the San Fernando Cemetery No. 1 markers stand at separate graves — Don Jose de Jesus Rodriguez /
+#   Don Juan Ximenes 22 m, Colonel Jose Francisco Ruiz / Placido Olivarri 23 m.
+# NOT RESCUED: SA's Zion Lutheran Church (osm_node12395184201, 140 m from the cemetery) — its marker is a medallion with no text.
+# Expect 13 new-seed, 0 review, 0 held. WATCH: none is a grave — the grave pass loaded none of these people (only Baylor and
+#   Navarro, whose plaques stay hidden by the 2026-10-30 decision).
+#
+Alejo de la Encarnacion Perez Marker | @29.41493,-98.5123 | Alejo Perez, infant son of Maria Juana Navarro Perez, was the youngest known survivor of the 1836 Battle of the Alamo; he served in the Confederate Army from 1861 to 1864, later served San Antonio as a police officer and city marshal, and died the last known Alamo survivor. | https://www.hmdb.org/m.asp?m=201644 | new
+Capt. Jose Antonio Menchaca Marker | @29.41552,-98.51154 | Jose Antonio Menchaca, born in San Antonio in 1797, was a veteran of San Jacinto; he died in 1879, and his wife Teresa Ramon Menchaca died in 1874. | https://www.hmdb.org/m.asp?m=201642 | new
+Colonel Jose Francisco Ruiz Marker | @29.41562,-98.51234 | Jose Francisco Ruiz, born in San Antonio in 1783, was an officer in the Mexican Army in 1831, signed the Texas Declaration of Independence in 1836 and sat as a senator in the Republic's First Congress; he died in 1840. | https://www.hmdb.org/m.asp?m=201637 | new
+Don Jose de Jesus Rodriguez Marker | @29.41549,-98.51105 | Jose de Jesus Rodriguez, a veteran of the Texas War for Independence, was one of the storming party that entered Bexar on December 5, 1835, and is honored as a citizen soldier and Ranger of Texas. | https://www.hmdb.org/m.asp?m=201639 | new
+Don Juan Ximenes Marker | @29.41562,-98.51088 | Juan Ximenes, born in San Antonio de Bexar in 1810, fought in the Texas War for Independence as one of the storming party at Bexar on December 5, 1835, and died in 1877. | https://www.hmdb.org/m.asp?m=201640 | new
+Placido Olivarri Marker | @29.41548,-98.51216 | Placido Olivarri, born in San Antonio in 1815, was a guide to the Texas Army in 1835 and died in 1894; his wife Micaela J. Olivarri died in 1917. | https://www.hmdb.org/m.asp?m=201645 | new
+Young Perry Alsbury Marker | @29.41809,-98.42531 | Young Perry Alsbury, born in Kentucky in 1814, was a San Jacinto veteran and died in 1877; his wife Mary Rodriguez Alsbury died in 1880. | https://www.hmdb.org/m.asp?m=300131 | new
+G.J. Sutton Marker | @29.42254,-98.47632 | Garlington Jerome (G.J.) Sutton of the family funeral home took part in San Antonio's 1960s sit-ins, became in 1972 the first African American from San Antonio elected to the state legislature, and championed the state's 1975 purchase of the SAMSCO complex, renamed for him in 1982. | https://www.hmdb.org/m.asp?m=245212 | new
+Gen. Jonathan M. Wainwright Marker | @29.4725,-98.45096 | Gen. Jonathan M. Wainwright surrendered the Allied forces in the Philippines in May 1942 and spent three years as a prisoner of war; promoted to four-star general, he commanded the Fourth Army at Fort Sam Houston from 1946, made his home in Terrell Hills, and died at Brooke Army Medical Center in 1953. | https://www.hmdb.org/m.asp?m=292141 | new
+Site of Mission San Francisco Xavier de Najera | @29.38451,-98.48935 | Established in 1722, Mission San Francisco Xavier de Najera had few Indian neophytes, who passed to the care of the missionaries at San Antonio de Valero in 1726; its land was later granted to Mission Concepcion, which was reestablished in this vicinity in 1731. | https://www.hmdb.org/m.asp?m=290733 | new
+Protestant Home for Destitute Children Building | @29.44598,-98.52271 | James Riely Gordon designed this building, home from December 1890 to 1926 of the Protestant Home for Destitute Children, organized in 1886; it later served as a Catholic mission and as apartments. | https://www.hmdb.org/m.asp?m=176064 | new
+Silvestre Revueltas Residence | @29.4085591,-98.4917669 | Mexican violinist and composer Silvestre Revueltas lived for a time at this address after coming to San Antonio in 1926 as concertmaster at the Aztec Theatre, and wrote his septet Batik here before Carlos Chavez brought him to Mexico City in 1928. | https://www.hmdb.org/m.asp?m=213306 | new
+Zion Lutheran Cemetery (Helotes) | @29.53443,-98.68556 | The first burial here was German immigrant Anton Gugger, laid to rest on his farmland in 1881; his descendants gave this ground to the Zion Lutheran Church of Helotes in 1906, and many pioneers of the Leon Valley and Culebra areas lie in it. | https://www.hmdb.org/m.asp?m=166321 | new
