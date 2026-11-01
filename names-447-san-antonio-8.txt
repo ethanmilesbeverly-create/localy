@@ -1,0 +1,22 @@
+# names-447-san-antonio-8.txt — #447 San Antonio story batch, part 2d-3c: 2 seed lines from the 20 stories owed after part
+# 2d-3b (drafted 2026-11-01). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: the Conservation Society's NIOSA exhibit (Heimann Building); the San Antonio Report (Hugo & Schmeltzer warehouse).
+# Every number and capitalised name in every sentence was checked against its source text in the sandbox; both lines sit in the
+# box and were checked against the stored places:v34 rows (box + ring, 731 pins) and every earlier line of the batch (names 1-7,
+# curated 1-4): no same name_clean anywhere; nothing within 30 m. FLAGGED `new`: none (no stored pin within 120 m).
+# NEAR AN EARLIER LINE: SA136 Heimann Building is 43 m from part 2d-3a's I&GN passenger station — across Medina Street.
+# HELD (not a line yet): SA126 Daniel J. Sullivan Stable and Carriage House — the story is sourced (Giles, 1896; donated 1971;
+#   re-assembled at the San Antonio Botanical Garden in 1988 for $325,000; reopened 1995 at the garden entrance), but the list
+#   point is the building's ORIGINAL downtown site, now gone. The building stands at the Botanical Garden entrance (555 Funston
+#   Pl.); OSM has no node for it, so its point is owed before a line can be written. The garden itself is served (wiki_7357824,
+#   osm_way78622215), so the line will be a #422 `new` inside it.
+# STILL OWED (18 — the sort status of all 18, SA126 included — carried to part 2d-3d): searched with nothing usable yet — SA102 Morrison, SA033 Dominguez-Micheli, SA037 Fiesta
+#   House, SA061 San Antonio Drug, SA192 Light House; held — SA126; not yet searched — SA050, SA062, SA064, SA080, SA110, SA116,
+#   SA130, SA134, SA137, SA145, SA180, SA190.
+# Expect 2 new-seed, 0 review, 0 held. WATCH: SA138 the former Spaghetti Warehouse closed in 2020 — it carries a story, so it
+#   should file as history, not a `commercial-skip`.
+#
+Heimann Building | @29.426806,-98.504861 | Architect Atlee B. Ayres designed and built this Mission Revival building in 1909 in the once bustling Cattleman's Square neighborhood, and in 2001 the non-profit organization AVANCE renovated it for its headquarters. | https://www.saconservation.org/VirtualExhibits/NIOSA/83D72E7E-59D5-4F11-83D6-513436515961.htm
+Hugo & Schmeltzer Company Warehouse | @29.425,-98.4781 | The wholesale grocer Hugo & Schmeltzer Co., which had operated from the Alamo Long Barrack and owned it until 1904, built this 29,000-square-foot warehouse, later the Spaghetti Warehouse restaurant, with stained glass panels throughout. | https://sanantonioreport.org/san-antonio-east-side-warehouse-restoration-office-space/

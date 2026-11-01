@@ -105,7 +105,7 @@ SA122	SEED — unmapped	written (part 2b)	Christ Episcopal Church	29.451389	-98.
 SA123	SEED — unmapped	written (part 2b)	Christopher Columbus Italian Society Hall	29.430833	-98.498611			THC atlas 848 inscription		Christopher Columbus Italian Society Hall
 SA124	SEED — unmapped	written (part 2d-3a)	City Public Service Company Building	29.425278	-98.491667		https://www.druryhotels.com/historic-renovations-san-antonio-riverwalk	NRHP nomination 95001422		City Public Service Company Building
 SA125	SEED — article in no tile (#539)	written (part 2a)	San Antonio Municipal Auditorium	29.43055556	-98.48888889		San Antonio Municipal Auditorium			City of San Antonio Municipal Auditorium
-SA126	SEED — unmapped	story owed	Daniel J. Sullivan Stable and Carriage House	29.429672	-98.485558			NRHP nomination 78002895		Daniel J. Sullivan Stable and Carriage House
+SA126	SEED — unmapped	story owed	Daniel J. Sullivan Stable and Carriage House	29.429672	-98.485558			NRHP nomination 78002895	2d-3c: HELD — relocated in 1988 to the San Antonio Botanical Garden entrance (555 Funston Pl.); story sourced (wikipedia Alfred Giles), exact point owed; will be `new` inside the served garden	Daniel J. Sullivan Stable and Carriage House
 SA128	SEED — unmapped	written (part 2d-1)	Dr. Claudius E. R. King House	29.435278	-98.4875		https://www.txgenwebcounties.com/bexar/Landmarks/King,_Dr._Claudius_E._R._House.htm			Dr. Claudius E. R. King House
 SA129	SEED — unmapped	written (part 2c)	Engleman-Muench House	29.429722	-98.483056			THC atlas 1483 inscription		Engleman-Muench House
 SA130	SEED — unmapped	story owed	Garcia-Garza House	29.428056	-98.495			NRHP nomination 83003091		Garcia-Garza House
@@ -113,9 +113,9 @@ SA131	SEED — unmapped	written (part 2d-3b)	Goad Motor Company Building	29.4333
 SA132	SEED — unmapped	written (part 2d-1)	Gould-Onderdonk House	29.449722	-98.495278		https://www.txgenwebcounties.com/bexar/Landmarks/Gould-Onderdonk_House.htm			Gould-Onderdonk House
 SA133	SEED — unmapped	written (part 2a)	Gunter Hotel	29.42669	-98.491111		Gunter Hotel			Gunter Hotel
 SA134	SEED — unmapped	story owed	Gustav Uhl House and Store	29.431111	-98.481111			NRHP nomination 02001061		Gustav Uhl House and Store
-SA136	SEED — unmapped	story owed	Heimann Building	29.426806	-98.504861			NRHP nomination 04001396		Heimann Building
+SA136	SEED — unmapped	written (part 2d-3c)	Heimann Building	29.426806	-98.504861		https://www.saconservation.org/VirtualExhibits/NIOSA/83D72E7E-59D5-4F11-83D6-513436515961.htm	NRHP nomination 04001396		Heimann Building
 SA137	SEED — unmapped	story owed	Hiram Partee House	29.4522	-98.4978			NRHP nomination 84001576		Hiram Partee House
-SA138	SEED — unmapped	story owed	Hugo & Schmeltzer Company Warehouse	29.425	-98.4781			NRHP nomination 100009887		Hugo & Schmeltzer Company Warehouse
+SA138	SEED — unmapped	written (part 2d-3c)	Hugo & Schmeltzer Company Warehouse	29.425	-98.4781		https://sanantonioreport.org/san-antonio-east-side-warehouse-restoration-office-space/	NRHP nomination 100009887		Hugo & Schmeltzer Company Warehouse
 SA139	SEED — unmapped	written (part 2d-3a)	International & Great Northern Railroad Passenger Station	29.426944	-98.505278		https://txtransportationmuseum.org/missouri-pacific-page-2	NRHP nomination	the I&GN railroad article never mentions this station; 2d-3a: NRHP 75001951	International & Great Northern Railroad Passenger Station
 SA140	SEED — unmapped	written (part 2d-1)	Jacala Restaurant	29.450278	-98.486944		https://atlas.thc.state.tx.us/NR/pdfs/04001168/04001168.pdf			Jacala Restaurant
 SA141	SEED — unmapped	written (part 2b)	Jay Adams House	29.451389	-98.497778			THC atlas 17233 inscription		Jay Adams House
