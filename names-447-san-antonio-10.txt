@@ -1,0 +1,22 @@
+# names-447-san-antonio-10.txt — #447 San Antonio story batch, part 2d-3e: 3 seed lines from the 15 stories owed after part
+# 2d-3d (drafted 2026-11-01). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole San Antonio batch dry-runs and commits in one Mac session (handoff §6 FAST RUNBOOK (b)).
+#
+# SOURCES: NRHP nomination text carried in search results (San Antonio Loan and Trust); the San Antonio House Registry
+# (Schroeder-Yturri, fetched in full); the San Antonio Report (Burns Building). Every number and capitalised name in every sentence
+# was checked against its source text in the sandbox; every line sits in the box and was checked against the stored places:v34
+# rows (box + ring, 731 pins) and every earlier line of the batch (names 1-9, curated 1-4): no same name_clean anywhere.
+# FLAGGED `new` (1):
+#   SA116 Burns Building: 20 m from part 2d-3a's Maverick Building line and 51 m from the served Buckhorn Saloon and Museum pin —
+#     401 and 400 E. Houston face each other across the street; distinct buildings, distinct names
+# WITHIN 30 m WITH A REASON: SA116 / SA148 (above).
+# MOVED: SA064 5 m to the House Registry's own point for 1040 E. Commerce.
+# STILL OWED (12, carried): searched with nothing usable yet — SA102 Morrison, SA033 Dominguez-Micheli, SA037 Fiesta House,
+#   SA061 San Antonio Drug, SA192 Light House, SA145 Livingston-Hess, SA134 Uhl; held for a coordinate — SA126 Sullivan Carriage
+#   House; not yet searched — SA050 L. T. Wright House, SA080 Vollrath Building, SA110 Benjamin Grossenbacher House, SA190 Perrin
+#   Home.
+# Expect 3 new-seed, 0 review, 0 held.
+#
+San Antonio Loan and Trust Building | @29.423611,-98.490556 | George W. Brackenridge, who organized a trust company in 1892, put up this Victorian commercial building in 1901-1903 to house Texas' first trust company; it runs through the block from Commerce Street to Crockett Street, where its back faces the San Antonio River Walk. | https://atlas.thc.texas.gov/NR/pdfs/76002006/76002006.pdf
+Schroeder-Yturri House | @29.4221375,-98.4817199 | George Schroeder, the earliest known owner of this one-story stuccoed-limestone house, lived here until 1910, and E.H. Yturri owned it from 1936 to 1965; its Italianate details dress up a typical late nineteenth century San Antonio house, and the City Water Board once renovated it as a museum. | https://sahouseregistry.com/houses/1040-e-commerce
+Burns Building | @29.426389,-98.488333 | The Burns Building was one of the country's first "daylight stores"; Pincus, Kress and J.C. Penney's later moved in, and a fifth floor was added in 1950. | https://sanantonioreport.org/?p=637857 | new

@@ -51,9 +51,9 @@ SA058	SEED — unmapped	written (part 2b)	Old S. J. Brooks Home	29.407222	-98.49
 SA059	SEED — unmapped	written (part 2b)	Oscar and Rachel Berman House	29.413333	-98.4925			THC atlas 13621 inscription		Oscar and Rachel Berman House
 SA060	SEED — unmapped	written (part 2d-2)	Otto Meerscheidt House	29.408333	-98.490278		https://atlas.thc.texas.gov/NR/pdfs/80004488/80004488.pdf	NRHP nomination 80004488		Otto Meerscheidt House
 SA061	SEED — unmapped	story owed	San Antonio Drug Company	29.423611	-98.491389			NRHP nomination 94000453	2d-2: searched — no usable story source yet (medallion, listing or style metadata only); carried to 2d-3	San Antonio Drug Company
-SA062	SEED — unmapped	story owed	San Antonio Loan and Trust Building	29.423611	-98.490556			NRHP nomination 76002006		San Antonio Loan and Trust Building
+SA062	SEED — unmapped	written (part 2d-3e)	San Antonio Loan and Trust Building	29.423611	-98.490556		https://atlas.thc.texas.gov/NR/pdfs/76002006/76002006.pdf	NRHP nomination 76002006		San Antonio Loan and Trust Building
 SA063	SEED — unmapped	written (part 2b)	Sartor House	29.416111	-98.492222			THC atlas 4595 inscription		Sartor House
-SA064	SEED — unmapped	story owed	Schroeder-Yturri House	29.422153	-98.481667			NRHP nomination 75001954		Schroeder-Yturri House
+SA064	SEED — unmapped	written (part 2d-3e)	Schroeder-Yturri House	29.4221375	-98.4817199		https://sahouseregistry.com/houses/1040-e-commerce	NRHP nomination 75001954		Schroeder-Yturri House
 SA065	SEED — unmapped	written (part 2d-2)	Schultze Hardware Store	29.4209802	-98.4875918		https://www.saconservation.org/VirtualExhibits/hemisfair/78D41E52-054F-47DD-8E7F-274177295083.htm	THC atlas 13388 inscription	THC atlas entry is medallion only (no inscription) — owed to the nomination or another source; shares its list point with SA037 — needs its own coordinate; 2d-2: moved off SA037's shared list point to OSM's store building in Hemisfair	Schultze Hardware Store
 SA066	SEED under a different name — containing tile 588_-1970 does not store the pin (#542)	written (part 2b)	Schulze-Schilo House (1891)	29.4098136	-98.4916936	Schulze-Schilo House · osm_node6550487964 · 11 m		THC atlas 4609 inscription		Schulze-Schilo House
 SA068	SEED — unmapped	written (part 2a)	Southern Pacific Railroad Passenger Station	29.42	-98.477778		San Antonio station (Texas)			Southern Pacific Railroad Passenger Station
@@ -96,7 +96,7 @@ SA112	SEED — unmapped	written (part 2d-1)	Borden's Creamery	29.447	-98.4824		h
 SA113	SEED — article in no tile (#539)	written (part 2a)	Charline McCombs Empire Theatre	29.42583333	-98.49083333		Charline McCombs Empire Theatre			Brady Building-Empire Theater
 SA114	SEED — unmapped	written (part 2d-3b)	Buick Motor Company	29.4342	-98.4809		https://atlas.thc.texas.gov/NR/pdfs/100012349/100012349.pdf	NRHP nomination 100012349		Buick Motor Company
 SA115	SEED — article in no tile (#539)	written (part 2a)	Exchange Building (San Antonio)	29.428432	-98.491676		Exchange Building (San Antonio)			Builders Exchange Building
-SA116	SEED — unmapped	story owed	Burns Building	29.426389	-98.488333			NRHP nomination 99000284		Burns Building
+SA116	SEED — unmapped	written (part 2d-3e)	Burns Building	29.426389	-98.488333		https://sanantonioreport.org/?p=637857	NRHP nomination 99000284	2d-3e: `new`: Maverick Building line 20 m (across Houston St.), Buckhorn pin 51 m	Burns Building
 SA117	SEED — unmapped	written (part 2d-1)	The Bushnell	29.462222	-98.487778		https://atlas.thc.texas.gov/NR/pdfs/82004491/82004491.pdf			Bushnell
 SA118	SEED — unmapped	written (part 2d-3b)	Calcasieu Building	29.427639	-98.487361		https://saconservation.org/VirtualExhibits/WWII/892A09DC-0BBB-42EE-900F-464510522820.htm	NRHP nomination 96000588		Calcasieu Building
 SA119	SEED — unmapped	written (part 2d-3b)	Casa de Dios (House of God)	29.4532	-98.4837		https://sanantonioreport.org/?p=5352641	NRHP nomination 100010651		Casa de Dios (House of God)
