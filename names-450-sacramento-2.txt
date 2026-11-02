@@ -1,0 +1,29 @@
+# names-450-sacramento-2.txt — #450 Sacramento story batch, part 2: the depth-bar HMdb lines and the owed list rows (drafted 2026-11-02).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; it dry-runs and
+# commits with names-450-sacramento-1.txt and both 450_hidden_curated*.sql files in one Mac session (THE FAST RUNBOOK (b)).
+#
+# HMdb CRAWL (FROM TAMPA (1)): adaptive, 37 nearbylist queries, 354 markers inside the box's 42 tiles, every inscription read
+# inline (FROM LAS VEGAS (2) — the inline block is `id=inscription<m> style='display:none;'`). The California Historical
+# Landmarks were settled by the list sort (part 1), so the depth bar here took only the markers whose subject has its own
+# Wikipedia article in no tile (#539, named exactly as the article): Sam Brannan House, Lady Adams Building, Unruh Building,
+# New Helvetia Cemetery. The bar's other hits are settled elsewhere: California State Indian Museum (a curated row in
+# 450_hidden_curated_2.sql), Old Sacramento State Historic Park (a district — no centroid line, as SA062), Bryte (a community).
+# OWED LIST ROWS FROM PART 1 (17 + the three Alkali Flat district pins):
+#   SA080 Southside Park — a line here, from HMdb 144865 ("History of Southside Park"), at the list point; no stored pin.
+#   SA001 Alkali Flat Central — a curated row in 450_hidden_curated_2.sql.
+#   SA040 J Street Wreck — NO LINE: an archaeological site under Old Sacramento's riverfront, nothing to visit.
+#   SA086 Travelers' Hotel — its HMdb plaque (266255) is listing metadata only (NRHP 1978, renovated 2016) → the depth row.
+#   SA009, SA021, SA024, SA026, SA027, SA034, SA037, SA045, SA060, SA084, SA088, SA089, SA092, SA098, SA002, SA003 — no HMdb
+#   marker of the subject within 120 m and no article with a story → the Sacramento depth row (FROM SAN ANTONIO (13)).
+# CUT BY THE PROXIMITY CHECK (FROM LAS VEGAS (6)): the gate drop "Sacramento History Museum" (osm_way504407078, which fails
+# #542) — the museum is SERVED with its story through its Wikipedia pin, wiki_27453999, 3 m away; a seed would have doubled it.
+# FLAGGED `new` (4): every line with a different-subject article within ~100 m — New Helvetia Cemetery (Miwok Middle School 26 m),
+#   Sam Brannan House (Booth Company 28 m, Eagle Theatre 33 m), Lady Adams Building (Ebner's Hotel 34 m), Unruh Building
+#   (Sutter Club, part 1's SA082, 86 m).
+# Expect 5 new-seed, 0 review, 0 held — 42 across both names files.
+#
+Southside Park | @38.568949,-121.502935 | Swampland and a dumping ground outside the old R Street levee in the 1800s, this was one of Sacramento's first large public parks: the city bought its 26.44 acres in 1906 for $19,000, a team including architect Rudolph Herold and Golden Gate Park's John McClaren shaped it, and a freeway took nearly 7 acres in 1965. | https://www.hmdb.org/m.asp?m=144865
+New Helvetia Cemetery | @38.57316,-121.46399 | Sacramento's first cemetery, first called the Sutter Fort Burying Ground, was used until 1912; in the 1950s its graves were moved to other city cemeteries and a school, now Miwok Middle School, was built on the site, which is California Historical Landmark No. 592. | https://en.wikipedia.org/wiki/New_Helvetia_Cemetery | new
+Sam Brannan House | @38.5834,-121.5052 | Sacramento's first post office stood on this lot in 1849; in 1853 Henry E. Robinson bought it from Samuel Brannan and built this three-story brick hotel, and the Sacramento Pioneer Association first organized inside it in 1854. | https://www.hmdb.org/m.asp?m=149178 | new
+Lady Adams Building | @38.5823,-121.5053 | Built in 1852 for $29,000, the oldest building in Old Sacramento was a wholesale and import house for East Coast goods, named for the brig Lady Adams that brought its partners around the Horn; it has survived fires and floods and was lifted one story. | https://en.wikipedia.org/wiki/Lady_Adams_Building | new
+Unruh Building | @38.5778,-121.4974 | Built as the California State Office Building at the east end of Capitol Mall and still home to the State Treasurer's office, this building was renamed in 1987 for Jesse M. Unruh, Speaker of the Assembly from 1961 to 1968 and later state treasurer. | https://en.wikipedia.org/wiki/Unruh_Building | new

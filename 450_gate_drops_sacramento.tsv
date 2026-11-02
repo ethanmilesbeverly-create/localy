@@ -1,0 +1,111 @@
+tile	name	category	desc	pin id	in gate drops	in leads	verdict
+774_-2431	A Fragment of the Universe	art	A piece of public art.	osm_node10249801537	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+774_-2431	Acorn Steam	art	A piece of public art.	osm_node10248018045	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+774_-2431	Active Ecosystem	art	A piece of public art.	osm_node10250002768	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+773_-2428	Aero S-106	history	c/n 460201	osm_node10983928642	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2430	Alkali Flat Central Historic District	history	A local landmark (district).	osm_node358836500	no	yes	RESCUED — curated row in 450_hidden_curated_2.sql (Alkali Flat Historic District article)
+772_-2430	Alkali Flat North Historic District	history	A local landmark (district).	osm_node358836501	no	yes	CARRIED to the depth row — the district article does not tell this district apart from Central; needs its nomination
+772_-2430	Alkali Flat West Historic District	history	A local landmark (district).	osm_node358836503	no	yes	CARRIED to the depth row — the district article does not tell this district apart from Central; needs its nomination
+771_-2428	Assumption of Mary	art	A public statue.	osm_node5833696487	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+773_-2428	Beech UC-45J Expeditor	history	BuNo 51291	osm_node10983928624	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2430	Bishop Alfonso Gallegos	history	A local landmark (monument).	osm_node7217498885	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 137648)
+770_-2428	Blessed Virgin Mary and the child Jesus	art	A public statue.	osm_node7145674526	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+774_-2426	Bob French Memorial	history	A local memorial.	osm_node12549796750	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2428	Boeing 727-225	history	c/n 21292	osm_node10983928634	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2427	Building 10	history	A local landmark (military).	osm_way1074992305	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 100	history	Originally field officer's quarters	osm_way1074992331	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 101	history	Originally field officer's quarters	osm_way1074992346	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 102	history	Originally field officer's quarters	osm_way1074992376	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 107	history	Originally company officer's quarters	osm_way1074992206	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 109	history	Originally company officer's quarters	osm_way1074992301	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 20	history	A local landmark (military).	osm_way1074992217	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 23	history	A local landmark (military).	osm_way1074992274	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 24	history	A local landmark (military).	osm_way1074992333	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 250	history	Originally warehouses, shops and head building	osm_way169145117	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 262B	history	Originally warehouses and shops	osm_way169194879	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 269	history	Originally warehouses and shops	osm_way169145115	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 3	history	A local landmark (military).	osm_way1074992184	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 354	history	A local landmark (military).	osm_way884547136	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 355	history	A local landmark (military).	osm_way884547132	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 70	history	Originally non-commissioned officer's quarters	osm_way1074992242	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 71	history	Originally non-commissioned officer's quarters	osm_way1074992197	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 73	history	Originally non-commissioned officer's quarters	osm_way1074992261	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2428	Building 74	history	Originally non-commissioned officer's quarters	osm_way1074992146	no	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 78	history	A local landmark (military).	osm_way1074992275	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+773_-2427	Building 79	history	A local landmark (military).	osm_way1074992182	yes	yes	NO LINE — a numbered building of the former McClellan Air Force Base, part of the Sacramento Air Depot district (SA067, no centroid line)
+772_-2431	CHP Memorial Fountain	history	A local memorial.	osm_node6981097639	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2430	California Firefighters Memorial	history	A local memorial (statue).	osm_node7217498985	no	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 14836)
+772_-2430	California Peace Officers Memorial	history	A local memorial.	osm_node4357111342	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 14814)
+772_-2430	California Veterans Memorial	history	A local memorial.	osm_node7217499085	yes	yes	NO LINE — its HMdb marker (113219) carries no text, and no article tells its story
+772_-2430	California Vietnam Veterans Memorial	history	park in Sacramento County, California, United States of America	osm_node358836771	no	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 137482)
+771_-2430	Charles Swanston Memorial	history	"To the Pioneers"	osm_way342492537	no	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2428	Chrome Mustang	art	A sculpture by Sean Gurerro.	osm_node12881730083	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2425	Chrome Rooster	art	A statue by Sean Guerrero.	osm_node12141203357	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2428	Convair F-102A Delta Dagger	history	s/n 56-1140	osm_node10983928644	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Convair QF-106A Delta Dart	history	s/n 59-0010	osm_node10983928633	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Convair VC-131D Samaritan	history	s/n 54-2822	osm_node10983928630	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Dassault HU-25B Guardian	history	BuNo 2118	osm_node10983928626	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+774_-2428	Douglas A-1E Skyraider	history	A local landmark (aircraft).	osm_node10983928636	yes	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Douglas C-53D Skytrooper	history	s/n 42-68835	osm_node10983928625	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+774_-2428	Douglas C-54Q Skymaster	history	s/n 42-72449	osm_node10983928622	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2430	Dr. Sun Yat Sen	art	A public statue.	osm_node7971558211	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2425	Fair Oaks History Center & Museum	history	A local museum.	osm_way1198023995	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2428	Fairchild C-119G Flying Boxcar	history	s/n 22114 RCAF	osm_node10983928628	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Fairchild Republic A-10A Thunderbolt II	history	s/n 76-0540	osm_node10983928647	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	General Dynamics FB-111A	history	s/n 67-0159	osm_node10983928638	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Grumman F-14D Tomcat	history	BuNo 163897	osm_node10983928639	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Grumman HU-16E Albatross	history	BuNo 7209	osm_node10983928627	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Grumman US-2A Tracker	history	BuNo 133251	osm_node10983928629	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+774_-2426	High Water Mark	history	A local landmark (highwater mark).	osm_node9292162885	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+774_-2428	Hunting Aircraft Jet Provost T.3	history	s/n XN472	osm_node10983928623	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2428	Jack in the Box	history	A local landmark (ruins).	osm_node12738271416	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+774_-2425	Korean War Memorial	history	A war memorial.	osm_node9007309938	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+772_-2430	Lady Gaga	art	A mural by Starfighter (Christina Angelina).	osm_node11769139240	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+774_-2431	Leap Red Rabbit	art	A piece of public art.	osm_node10250002770	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+773_-2428	Lockheed EC-121K Warning Star	history	BuNo 141309	osm_node10983928631	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Lockheed F-104B Starfighter	history	s/n 57-1303	osm_node10983928641	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+771_-2429	Lover's Tree	history	“Lover's Tree”	osm_node5268899326	no	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2428	McDonnell F-4C Phantom II	history	s/n 64-0706	osm_node10983928632	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2428	Medical History Museum	history	A local museum.	osm_way612462636	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+771_-2425	Navigator Monument	history	A local landmark (monument).	osm_node1641431430	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 57287)
+773_-2428	North American CT-39A Sabreliner	history	s/n 61-0660	osm_node10983928643	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	North American F-100D Super Sabre	history	s/n 56-3288	osm_node10983928646	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	North American F-86L Sabre	history	s/n 51-2968	osm_node10983928648	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2429	Oaxaca	art	A sculpture by Roger Berry.	osm_node12900615381	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+769_-2428	Peter Rabbit	art	A public sculpture.	osm_node5314075767	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2425	Petrovich Veterans Memorial	history	A war memorial.	osm_node12141175807	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+772_-2430	Pony Express Monument	history	A local landmark (monument).	osm_node358836111	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 11326)
+773_-2428	Republic F-105D Thunderchief	history	s/n 62-4301	osm_node10983928637	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	Republic F-84F Thunderstreak	history	s/n 51-1772	osm_node10983928645	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+772_-2428	Run For The Roses	art	A public sculpture.	osm_node13086173945	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2430	SMUD Museum of Science and Curiosity	history	A local museum.	osm_way983636771	yes	yes	NO LINE — the served PG&E Powerhouse pin (wiki_76922893) ~32 m away tells this building's story and names the museum
+772_-2429	Sacramento Archives and Museum Collection Center Library	history	A local museum.	osm_node368174602	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+771_-2429	Sacramento County WWI Veterans Memoral	history	A local landmark (monument).	osm_way342629810	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 91485)
+772_-2430	Sacramento History Museum	history	A local museum.	osm_way504407078	no	yes	NO LINE — the museum is SERVED with its story through wiki_27453999, 3 m (this hidden OSM twin fails #542)
+772_-2429	Sacramento Police and Sheriff's Memorial	history	A local landmark (monument).	osm_way143925095	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2426	Sacramento Valley Live Steamers Railroad Museum	history	A local museum.	osm_node9297808639	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2430	Saint Anthony	art	“In honor of Saint Anthony in memory of Marion Babich”	osm_node7715064751	no	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+772_-2430	Saint Joseph	art	“In honor of Saint Joseph in memory of Helen Babich”	osm_node7715064727	no	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+770_-2428	Saint Joseph and the child Jesus	art	A public statue.	osm_node7722584412	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+772_-2430	Saint Patrick	art	“In honor of Saint Patrick in memory of Maria Augusta Lewis”	osm_node7715064749	no	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+771_-2428	Saint Peter	art	A public statue.	osm_node5833695774	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+773_-2428	Sikorsky CH-3E	history	s/n 65-5690	osm_node10983928635	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+770_-2429	Sojourner Truth African Heritage Museum	history	A local museum.	osm_node13125177001	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2430	Spanish War Veterans	history	A local landmark (monument).	osm_node7217491186	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2430	Stanley Mosk	history	A local landmark (monument).	osm_node7220746785	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+773_-2425	Star 6 Memorial	history	A local memorial.	osm_node12519392556	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+772_-2429	State Indian Museum (SHP)	history	A local local history museum.	osm_way40186321	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (California State Indian Museum article; HMdb 143488 7 m)
+769_-2428	Steampunk Art	art	A public sculpture.	osm_node5314074604	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+772_-2431	Subtile	art	A sculpture by Federico Díaz.	osm_node12610459436	yes	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+774_-2431	The Baggage Handlers	art	A piece of public art.	osm_node10250002769	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+771_-2429	The Blessed Virgin Mary	art	A public installation.	osm_node7715126661	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+771_-2428	The Crussifiction	art	A public statue.	osm_node5861278354	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+774_-2431	The Gallery at SMF	history	A local museum.	osm_way1120667965	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
+771_-2428	The Ten Commandments	art	A public stone.	osm_node5833695773	yes	yes	NO LINE — a devotional statue on church or cemetery grounds, part of that place
+772_-2430	Theodore Judah Monument	history	park in Sacramento County, California, United States of America	osm_node358836117	no	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 11735)
+772_-2430	Thomas Starr King	art	A public statue.	osm_node5370737515	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 90267)
+772_-2430	U.S.S. California	history	A local landmark (monument).	osm_node7217498886	yes	yes	RESCUED — curated row in 450_hidden_curated_2.sql (HMdb 70035)
+774_-2428	Vought A-7D Corsair II	history	s/n 70-0998	osm_node10983928621	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+773_-2428	WSK-Mielec Lim-5P	history	s/n F-1186	osm_node10983928640	no	yes	NO LINE — an aircraft in the Aerospace Museum of California's air park, an exhibit series inside the museum
+771_-2430	William Land Memorial	history	A local memorial.	osm_way342759302	no	yes	CARRIED to the depth row — no HMdb marker of this subject within 80 m and no Wikipedia article with its story
+774_-2431	Your Words are Music to My Ears	art	A piece of public art.	osm_node10248018048	yes	no	NO LINE — outside the box (a ring tile); its own metro or none
