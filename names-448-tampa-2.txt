@@ -1,0 +1,13 @@
+# names-448-tampa-2.txt — #448 Tampa story batch, part 2: the 7 Riverwalk Historical Monument Trail busts that FAIL #542 (drafted 2026-11-01).
+# Each hidden bust pin is stored only in a NEIGHBOUR tile's row, so a curated row could not reach a far-search landing; each becomes a
+# seed AT THE PIN'S STORED COORDINATE under a different name ("<person> Bust"), flagged `new` (FROM PITTSBURGH (7), #542).
+# The other 13 busts are curated rows in 448_hidden_curated.sql. Sources: the Tampa Riverwalk article's honoree list, the person's
+# own article or Tampa Historical Society marker where one exists. Expect 7 new-seed, 0 review, 0 held.
+#
+Clara C. Frye Bust | @27.9591603,-82.4634647 | This Riverwalk bust honors nurse Clara C. Frye, who in 1908 opened a hospital in her own home — then Tampa's only hospital admitting Black patients — with her dining table as the operating table. | https://en.wikipedia.org/wiki/Clara_C._Frye | new
+Blanche Armwood Bust | @27.9588884,-82.4634658 | This Riverwalk bust honors Blanche Armwood, a Tampa educator and community leader. | https://en.wikipedia.org/wiki/Tampa_Riverwalk | new
+Elizabeth D. Barnard Bust | @27.9586453,-82.463546 | This Riverwalk bust honors Elizabeth D. Barnard, Tampa's first woman postmaster. | https://en.wikipedia.org/wiki/Tampa_Riverwalk | new
+Frank Adamo Bust | @27.9594411,-82.4634869 | This Riverwalk bust honors Dr. Frank Adamo, an Army surgeon captured in the Philippines in World War II who cared for fellow prisoners and found a way to treat gangrene with hydrogen peroxide; Tampa named Frank S. Adamo Drive for him. | https://www.hmdb.org/m.asp?m=215678 | new
+Ignacio Haya Bust | @27.9549215,-82.4643552 | This Riverwalk bust honors Ignacio Haya, Vicente Martinez Ybor's friendly rival, whose factory rolled Ybor City's first cigars. | https://en.wikipedia.org/wiki/Tampa_Riverwalk | new
+Mack R. Winton Bust | @27.9540046,-82.4645235 | This Riverwalk bust honors Mack R. Winton, a Tampa surgeon who worked with Clara C. Frye to found an unsegregated hospital and later a hospital for members of El Centro Español. | https://en.wikipedia.org/wiki/Tampa_Riverwalk | new
+Ossian B. Hart Bust | @27.9551103,-82.4643065 | This Riverwalk bust honors Ossian B. Hart, a Tampa lawyer who became Florida's 10th governor in 1873 — the first born in the state — and a Reconstruction-era voice for civil rights. | https://en.wikipedia.org/wiki/Ossian_B._Hart | new

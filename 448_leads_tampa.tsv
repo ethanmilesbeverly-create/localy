@@ -1,59 +1,59 @@
 pin id	stored name	category	stored desc	lat	lng	containing tile	containing tile stores it (#542)	route if it gets a story	note	verdict
-osm_node9604434819	"Untitled"	art	A sculpture by George Sugarman.	27.9449677	-82.4457725	559_-1649	yes	curated row (exact stored name)		
-osm_node9321733810	Angel of Hope	art	Our children / loved / remembered / and missed	28.0259608	-82.3923614	561_-1648	yes	curated row (exact stored name)		
-osm_node10010311058	Bird of Paradise	art	A public statue.	28.0707009	-82.5223975	561_-1650	yes	curated row (exact stored name)		
-osm_node8462714602	City of Tampa Mural	art	A piece of public art.	27.9535518	-82.4596844	559_-1649	yes	curated row (exact stored name)		
-osm_node4717179512	Dr. King Bust	art	A bust by Linda Ackley.	28.0625675	-82.4132568	561_-1648	yes	curated row (exact stored name)		
-osm_node4608375173	JFK Memorial Statue	art	A public statue.	27.9458968	-82.4636702	559_-1649	yes	curated row (exact stored name)		
-osm_node1556438239	Maze	art	A piece of public art.	28.0640913	-82.4175591	561_-1648	yes	curated row (exact stored name)		
-osm_node2223086573	Name Art	art	A piece of public art.	28.014422	-82.4695411	560_-1649	yes	curated row (exact stored name)		
-osm_node736956784	Recyclosaurus	art	A piece of public art.	28.054051	-82.402932	561_-1648	yes	curated row (exact stored name)		
-osm_node544355270	Solar Rotary	art	A installation by Nancy Holt.	28.0590814	-82.4109088	561_-1648	yes	curated row (exact stored name)		
-osm_way906720263	Solstice	art	A sculpture by Charles O. Perry.	27.9470804	-82.4589467	559_-1649	yes	curated row (exact stored name)		
-osm_way1250060458	9/11 Fallen Heroes Memorial	history	A war memorial.	27.9613405	-82.436974	559_-1649	yes	curated row (exact stored name)		
-osm_node11598319665	Blanch Armwood	history	A local memorial (bust).	27.9588884	-82.4634658	559_-1649	no	seed under a different name, `new` (#542)		
-osm_way420153142	Brandon Family Cemetery	history	cemetery in Hillsborough County, Florida, United States	27.9379184	-82.2817622	559_-1646	yes	curated row (exact stored name)		
-osm_way906558994	Ceremonial Space	history	A local landmark (monument).	27.9417512	-82.4502564	559_-1649	yes	curated row (exact stored name)		
-osm_node11598324271	Clara C. Frye	history	A local memorial (bust).	27.9591603	-82.4634647	559_-1649	no	seed under a different name, `new` (#542)		
-osm_node10115620368	Cody Fowler	history	A local memorial (bust).	27.9418357	-82.449809	559_-1649	yes	curated row (exact stored name)		
-osm_way524527203	Columbia Centennial Museum	history	A local museum.	27.960054	-82.4357007	559_-1649	yes	curated row (exact stored name)		
-osm_node3147216169	Crosses for the killed TPD officers David Curtis and Jeffrey Kocab	history	A local memorial.	27.9725151	-82.4018567	559_-1648	yes	curated row (exact stored name)		
-osm_node10115621818	Cyril (C.) Blythe Andrews	history	A local memorial (bust).	27.9412579	-82.4518236	559_-1649	yes	curated row (exact stored name)		
-osm_node10115620410	Edward Daniel Davis	history	A local memorial (bust).	27.941604	-82.4506288	559_-1649	yes	curated row (exact stored name)		
-osm_node11598324269	Elizabeth Dortsch Barnard	history	A local memorial (bust).	27.9586453	-82.463546	559_-1649	no	seed under a different name, `new` (#542)		
-osm_node2209942989	Endangered Wildlife Wall	history	A local memorial.	28.01421	-82.470328	560_-1649	yes	curated row (exact stored name)		
-osm_node9325232793	Eureka Springs Park	history	“Through the generosity of Albert Greenberg...”	28.0060635	-82.3437108	560_-1647	yes	curated row (exact stored name)		
-osm_node11598324273	Francisco (Frank) Scozzari Adamo	history	A local memorial (bust).	27.9594411	-82.4634869	559_-1649	no	seed under a different name, `new` (#542)		
-osm_node10115620348	Francisco Aristides Rodriquez, Junior	history	A local memorial (bust).	27.9419647	-82.4581648	559_-1649	yes	curated row (exact stored name)		
-osm_node9319271214	Freedom Pavilion	history	A local history museum.	28.0691037	-82.5768677	561_-1652	yes	curated row (exact stored name)		
-osm_node10115620394	Gavino Gutierrez	history	A local memorial (bust).	27.9428204	-82.449235	559_-1649	yes	curated row (exact stored name)		
-osm_node8659427310	History Air Horn	history	A local landmark (pillory).	27.9588197	-82.4287488	559_-1649	yes	curated row (exact stored name)		
-osm_node10115620333	Hugh Campbell Macfarlane	history	A local memorial (bust).	27.940427	-82.4552385	559_-1649	yes	curated row (exact stored name)		
-osm_node11598319668	Ignacio Haya	history	A local memorial (bust).	27.9549215	-82.4643552	559_-1649	no	seed under a different name, `new` (#542)		
-osm_node10115621830	James McKay, Senior	history	A local memorial (bust).	27.9414999	-82.4579779	559_-1649	yes	curated row (exact stored name)		
-osm_way559631991	MOSI Molecular Structure	history	A local landmark (monument).	28.0541093	-82.4050357	561_-1648	yes	curated row (exact stored name)		
-osm_node11598324272	Mack Ramsey Winton, M.D.	history	A local memorial (bust).	27.9540046	-82.4645235	559_-1649	no	seed under a different name, `new` (#542)		
-osm_node11069183296	McQueens Village	history	A local landmark (archaeological site).	27.7828341	-82.4327645	556_-1649	yes	curated row (exact stored name)		
-osm_node10198454352	Memorial Highway	history	A local memorial (plaque).	27.9450028	-82.5296354	559_-1651	yes	curated row (exact stored name)		
-osm_node10115620404	Meroba Hooker Crane	history	A local memorial (bust).	27.9411939	-82.4522637	559_-1649	yes	curated row (exact stored name)		
-osm_node10115620413	Moses White	history	A local memorial (bust).	27.9422678	-82.4579608	559_-1649	yes	curated row (exact stored name)		
-osm_node11598324275	Ossian Bingley Hart	history	A local memorial (bust).	27.9551103	-82.4643065	559_-1649	no	seed under a different name, `new` (#542)		
-osm_node5058235265	Pam Callahan Nature Preserve Marker	history	Hillsborough County Nature Preserve.	27.9778148	-82.5684391	560_-1651	yes	curated row (exact stored name)		
-osm_node10115620329	Paulina Pedroso	history	A local memorial (bust).	27.9421568	-82.4495953	559_-1649	yes	curated row (exact stored name)		
-osm_node10115620362	Peter Oliphant Knight	history	A local memorial (bust).	27.940362	-82.4550335	559_-1649	yes	curated row (exact stored name)		
-osm_node11534941192	Port Tampa Cemetery	history	cemetery in Hillsborough County, Florida, United States	27.8681381	-82.5070244	557_-1650	yes	curated row (exact stored name)		
-osm_node13451036377	Port Tampa Cemetery	history	cemetery in Hillsborough County, Florida, United States	27.8639748	-82.5138152	557_-1650	yes	curated row (exact stored name)		
-osm_node2209930628	Rango the Orangutan Memorial	history	A local memorial.	28.013563	-82.470613	560_-1649	yes	curated row (exact stored name)		
-osm_way551172912	SOCOM Memorial	history	A local memorial.	27.8568436	-82.4875713	557_-1650	yes	curated row (exact stored name)		
-osm_node2210009492	Science Discovery Center	history	A local museum.	28.012569	-82.471464	560_-1649	yes	curated row (exact stored name)		
-osm_node8169145257	Sinkhole Memorial	history	A local memorial.	27.9712075	-82.2810136	559_-1646	yes	curated row (exact stored name)		
-osm_node10115621827	Stephen M. Sparkman	history	A local memorial (bust).	27.9416751	-82.4505004	559_-1649	yes	curated row (exact stored name)		
-osm_way107769981	Tampa Fire Fighters Museum	history	A local museum.	27.9514908	-82.4550605	559_-1649	yes	curated row (exact stored name)		
-osm_node5144067321	Thias Monument	history	Small brass monument to memorialize Thias.	27.977726	-82.5684662	560_-1651	yes	curated row (exact stored name)		
-osm_way523423509	Trilogy	history	A local landmark (castle).	27.9402947	-82.4960083	559_-1650	yes	curated row (exact stored name)		
-osm_way587962338	U.S. Central Command Memorial	history	A local memorial.	27.863666	-82.4922658	557_-1650	yes	curated row (exact stored name)		
-osm_way359647831	USF Student Memorial	history	A local landmark (monument).	28.0651882	-82.4129215	561_-1648	yes	curated row (exact stored name)		
-osm_way43097398	University Of South Florida Contemporary Art Museum;Contemporary Art Museum	history	A local museum.	28.0634958	-82.4155503	561_-1648	yes	curated row (exact stored name)		
-osm_node10115620372	Vicente Martinez-Ybor	history	A local memorial (bust).	27.9430037	-82.4491547	559_-1649	yes	curated row (exact stored name)		
-osm_node9338193244	War Correspondents Memorial	history	A local memorial (plaque).	28.035597	-82.3867459	561_-1648	yes	curated row (exact stored name)		
-osm_way26216188	Ybor City Museum	history	A local history museum.	27.9619192	-82.4383459	559_-1649	yes	curated row (exact stored name)		
+osm_node9604434819	Untitled	art	A sculpture by George Sugarman.	27.9449677	-82.4457725	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node9321733810	Angel of Hope	art	Our children / loved / remembered / and missed	28.0259608	-82.3923614	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node10010311058	Bird of Paradise	art	A public statue.	28.0707009	-82.5223975	561_-1650	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node8462714602	City of Tampa Mural	art	A piece of public art.	27.9535518	-82.4596844	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node4717179512	Dr. King Bust	art	A bust by Linda Ackley.	28.0625675	-82.4132568	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node4608375173	JFK Memorial Statue	art	A public statue.	27.9458968	-82.4636702	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node1556438239	Maze	art	A piece of public art.	28.0640913	-82.4175591	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node2223086573	Name Art	art	A piece of public art.	28.014422	-82.4695411	560_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node736956784	Recyclosaurus	art	A piece of public art.	28.054051	-82.402932	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node544355270	Solar Rotary	art	A installation by Nancy Holt.	28.0590814	-82.4109088	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way906720263	Solstice	art	A sculpture by Charles O. Perry.	27.9470804	-82.4589467	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way1250060458	9/11 Fallen Heroes Memorial	history	A war memorial.	27.9613405	-82.436974	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node11598319665	Blanch Armwood	history	A local memorial (bust).	27.9588884	-82.4634658	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Blanche Armwood Bust"" in names-448-tampa-2.txt (#542)"
+osm_way420153142	Brandon Family Cemetery	history	cemetery in Hillsborough County, Florida, United States	27.9379184	-82.2817622	559_-1646	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_way906558994	Ceremonial Space	history	A local landmark (monument).	27.9417512	-82.4502564	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node11598324271	Clara C. Frye	history	A local memorial (bust).	27.9591603	-82.4634647	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Clara C. Frye Bust"" in names-448-tampa-2.txt (#542)"
+osm_node10115620368	Cody Fowler	history	A local memorial (bust).	27.9418357	-82.449809	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_way524527203	Columbia Centennial Museum	history	A local museum.	27.960054	-82.4357007	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node3147216169	Crosses for the killed TPD officers David Curtis and Jeffrey Kocab	history	A local memorial.	27.9725151	-82.4018567	559_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node10115621818	Cyril (C.) Blythe Andrews	history	A local memorial (bust).	27.9412579	-82.4518236	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node10115620410	Edward Daniel Davis	history	A local memorial (bust).	27.941604	-82.4506288	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node11598324269	Elizabeth Dortsch Barnard	history	A local memorial (bust).	27.9586453	-82.463546	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Elizabeth D. Barnard Bust"" in names-448-tampa-2.txt (#542)"
+osm_node2209942989	Endangered Wildlife Wall	history	A local memorial.	28.01421	-82.470328	560_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node9325232793	Eureka Springs Park	history	“Through the generosity of Albert Greenberg...”	28.0060635	-82.3437108	560_-1647	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node11598324273	Francisco (Frank) Scozzari Adamo	history	A local memorial (bust).	27.9594411	-82.4634869	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Frank Adamo Bust"" in names-448-tampa-2.txt (#542)"
+osm_node10115620348	Francisco Aristides Rodriquez, Junior	history	A local memorial (bust).	27.9419647	-82.4581648	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node9319271214	Freedom Pavilion	history	A local history museum.	28.0691037	-82.5768677	561_-1652	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node10115620394	Gavino Gutierrez	history	A local memorial (bust).	27.9428204	-82.449235	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node8659427310	History Air Horn	history	A local landmark (pillory).	27.9588197	-82.4287488	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node10115620333	Hugh Campbell Macfarlane	history	A local memorial (bust).	27.940427	-82.4552385	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node11598319668	Ignacio Haya	history	A local memorial (bust).	27.9549215	-82.4643552	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Ignacio Haya Bust"" in names-448-tampa-2.txt (#542)"
+osm_node10115621830	James McKay, Senior	history	A local memorial (bust).	27.9414999	-82.4579779	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_way559631991	MOSI Molecular Structure	history	A local landmark (monument).	28.0541093	-82.4050357	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node11598324272	Mack Ramsey Winton, M.D.	history	A local memorial (bust).	27.9540046	-82.4645235	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Mack R. Winton Bust"" in names-448-tampa-2.txt (#542)"
+osm_node11069183296	McQueens Village	history	A local landmark (archaeological site).	27.7828341	-82.4327645	556_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node10198454352	Memorial Highway	history	A local memorial (plaque).	27.9450028	-82.5296354	559_-1651	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node10115620404	Meroba Hooker Crane	history	A local memorial (bust).	27.9411939	-82.4522637	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node10115620413	Moses White	history	A local memorial (bust).	27.9422678	-82.4579608	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node11598324275	Ossian Bingley Hart	history	A local memorial (bust).	27.9551103	-82.4643065	559_-1649	no	seed under a different name, `new` (#542)		"RESCUED — seed ""Ossian B. Hart Bust"" in names-448-tampa-2.txt (#542)"
+osm_node5058235265	Pam Callahan Nature Preserve Marker	history	Hillsborough County Nature Preserve.	27.9778148	-82.5684391	560_-1651	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node10115620329	Paulina Pedroso	history	A local memorial (bust).	27.9421568	-82.4495953	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node10115620362	Peter Oliphant Knight	history	A local memorial (bust).	27.940362	-82.4550335	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node11534941192	Port Tampa Cemetery	history	cemetery in Hillsborough County, Florida, United States	27.8681381	-82.5070244	557_-1650	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node13451036377	Port Tampa Cemetery	history	cemetery in Hillsborough County, Florida, United States	27.8639748	-82.5138152	557_-1650	yes	curated row (exact stored name)		NO LINE — second Port Tampa Cemetery point, 800 m from the marker; the first carries the story
+osm_node2209930628	Rango the Orangutan Memorial	history	A local memorial.	28.013563	-82.470613	560_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way551172912	SOCOM Memorial	history	A local memorial.	27.8568436	-82.4875713	557_-1650	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node2210009492	Science Discovery Center	history	A local museum.	28.012569	-82.471464	560_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node8169145257	Sinkhole Memorial	history	A local memorial.	27.9712075	-82.2810136	559_-1646	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node10115621827	Stephen M. Sparkman	history	A local memorial (bust).	27.9416751	-82.4505004	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_way107769981	Tampa Fire Fighters Museum	history	A local museum.	27.9514908	-82.4550605	559_-1649	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_node5144067321	Thias Monument	history	Small brass monument to memorialize Thias.	27.977726	-82.5684662	560_-1651	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way523423509	Trilogy	history	A local landmark (castle).	27.9402947	-82.4960083	559_-1650	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way587962338	U.S. Central Command Memorial	history	A local memorial.	27.863666	-82.4922658	557_-1650	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way359647831	USF Student Memorial	history	A local landmark (monument).	28.0651882	-82.4129215	561_-1648	yes	curated row (exact stored name)		CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+osm_way43097398	University Of South Florida Contemporary Art Museum;Contemporary Art Museum	history	A local museum.	28.0634958	-82.4155503	561_-1648	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node10115620372	Vicente Martinez-Ybor	history	A local memorial (bust).	27.9430037	-82.4491547	559_-1649	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_node9338193244	War Correspondents Memorial	history	A local memorial (plaque).	28.035597	-82.3867459	561_-1648	yes	curated row (exact stored name)		RESCUED — curated row 448_hidden_curated.sql
+osm_way26216188	Ybor City Museum	history	A local history museum.	27.9619192	-82.4383459	559_-1649	yes	curated row (exact stored name)		NO LINE — the served Ybor City Museum State Park pin (26 m) tells it

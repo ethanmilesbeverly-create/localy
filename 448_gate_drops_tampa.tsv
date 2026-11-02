@@ -1,0 +1,55 @@
+tile	name	category	desc	in leads	verdict
+556_-1652	Bending Arc	art	A sculpture by Janet Echelman.	no	NO LINE — St. Petersburg pin carried in an edge row; outside the box
+556_-1652	Morning Stars	art	A mural by Xenobia Bailey.	no	NO LINE — St. Petersburg pin carried in an edge row; outside the box
+556_-1652	Museum of Fine Arts	history	A local museum.	no	NO LINE — St. Petersburg pin carried in an edge row; outside the box
+556_-1649	McQueens Village	history	A local landmark (archaeological site).	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+557_-1652	Totstalahoeetska	history	A local landmark (archaeological site).	no	CARRIED to #546 — gate-only drop (not in leads); no HMdb marker or article read yet
+557_-1652	Bayflite Historical Marker	history	A local memorial.	no	CARRIED to #546 — gate-only drop (not in leads); no HMdb marker or article read yet
+557_-1650	SOCOM Memorial	history	A local memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+557_-1650	U.S. Central Command Memorial	history	A local memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1651	Memorial Highway	history	A local memorial (plaque).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1650	JFK Memorial Statue	art	A public statue.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1650	Blanch Armwood	history	A local memorial (bust).	yes	"RESCUED — seed ""Blanche Armwood Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Ignacio Haya	history	A local memorial (bust).	yes	"RESCUED — seed ""Ignacio Haya Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Elizabeth Dortsch Barnard	history	A local memorial (bust).	yes	"RESCUED — seed ""Elizabeth D. Barnard Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Clara C. Frye	history	A local memorial (bust).	yes	"RESCUED — seed ""Clara C. Frye Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Mack Ramsey Winton, M.D.	history	A local memorial (bust).	yes	"RESCUED — seed ""Mack R. Winton Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Francisco (Frank) Scozzari Adamo	history	A local memorial (bust).	yes	"RESCUED — seed ""Frank Adamo Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Ossian Bingley Hart	history	A local memorial (bust).	yes	"RESCUED — seed ""Ossian B. Hart Bust"" in names-448-tampa-2.txt (#542)"
+559_-1650	Trilogy	history	A local landmark (castle).	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1650	Solstice	art	A sculpture by Charles O. Perry.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1649	History Air Horn	history	A local landmark (pillory).	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1649	"""Untitled"""	art	A sculpture by George Sugarman.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1649	Paulina Pedroso	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Hugh Campbell Macfarlane	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Francisco Aristides Rodriquez, Junior	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Peter Oliphant Knight	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Vicente Martinez-Ybor	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Gavino Gutierrez	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Meroba Hooker Crane	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Edward Daniel Davis	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Moses White	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Cyril (C.) Blythe Andrews	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Stephen M. Sparkman	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	James McKay, Senior	history	A local memorial (bust).	yes	RESCUED — curated row 448_hidden_curated.sql
+559_-1649	Tampa Fire Fighters Museum	history	A local museum.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1649	Columbia Centennial Museum	history	A local museum.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1649	Ceremonial Space	history	A local landmark (monument).	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1649	9/11 Fallen Heroes Memorial	history	A war memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1648	Crosses for the killed TPD officers David Curtis and Jeffrey Kocab	history	A local memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+559_-1646	Sinkhole Memorial	history	A local memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+560_-1650	Mango's Southern Kitchen + Bar	history		no	CARRIED to #546 — gate-only drop (not in leads); no HMdb marker or article read yet
+560_-1650	Rango the Orangutan Memorial	history	A local memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+560_-1650	Endangered Wildlife Wall	history	A local memorial.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+560_-1650	Science Discovery Center	history	A local museum.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+560_-1650	Name Art	art	A piece of public art.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+560_-1648	War Correspondents Memorial	history	A local memorial (plaque).	yes	RESCUED — curated row 448_hidden_curated.sql
+561_-1652	Freedom Pavilion	history	A local history museum.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1651	Bird of Paradise	art	A public statue.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1649	Solar Rotary	art	A installation by Nancy Holt.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1649	Maze	art	A piece of public art.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1649	Dr. King Bust	art	A bust by Linda Ackley.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1649	University Of South Florida Contemporary Art Museum;Contemporary Art Museum	history	A local museum.	yes	RESCUED — curated row 448_hidden_curated.sql
+561_-1649	USF Student Memorial	history	A local landmark (monument).	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1648	Recyclosaurus	art	A piece of public art.	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
+561_-1648	MOSI Molecular Structure	history	A local landmark (monument).	yes	CARRIED to #546 — no HMdb marker within 120 m and no Wikipedia article with a usable story
