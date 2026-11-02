@@ -16,6 +16,9 @@
 # MAC DRY RUN 2026-11-01 (seed-resolve 2026.10.27a, all 151 lines): Gemini matched Caile House, German-English School, Old St. Mary's College to a NEARBY WIKIPEDIA
 #   ARTICLE about a different subject (map 0 · subs 0 for each — no live pin involved) and filed them `review`; each is a
 #   distinct building, so each is now flagged `new` (#422's shape).
+# MAC COMMIT 2026-11-01: the --commit run re-judged "Site of Old St. Mary's" (the 1857 church site, not the college line
+#   54 m east) as `review` against the Charline McCombs Empire Theatre article (map 0 · subs 0) — 150 of 151 inserted; it is
+#   a distinct site, so it is now flagged `new` and committed alone from a one-line file.
 # Expect 39 new-seed, 0 review, 0 held.
 #
 Alfred Giles Home | @29.414722,-98.492778 | English-born architect Alfred Giles, who came to Texas for his health in 1873 and went on to design homes along King William for Steves, Groos and Sartor, built this small house in 1883 and lived here with his family from 1885 to 1888. | https://www.hmdb.org/m.asp?m=118800 | new
@@ -53,7 +56,7 @@ Rechel-Stumpf House | @29.438889,-98.495833 | Pioneer music teacher Ernst Rechel
 Roy and Madge Hearne House | @29.449722,-98.497222 | Cotton broker Roy Hearne and his wife Madge, a granddaughter of Sam Houston, bought this French Place lot in 1910 and had Atlee B. Ayres design a house mixing Prairie, Craftsman, Mission and Neoclassical styles. | https://www.hmdb.org/m.asp?m=176074
 San Antonio Casino Club Building | @29.425,-98.488611 | Formed in 1925 from the 1854 German Casino Club and the 1881 San Antonio Club, the Casino Club finished this tiered-dome building in 1927; after oilman Thomas Gilcrease bought it in 1942 it became the Gilcrease Building. | https://www.hmdb.org/m.asp?m=201828
 San Francesco Di Paola Catholic Church | @29.430833,-98.498889 | Organized in 1926 after a mission preached for the city's Italian Catholics, this congregation dedicated its Romanesque church on May 1, 1927. | https://www.hmdb.org/m.asp?m=179440 | new
-Site of Old St. Mary's | @29.425556,-98.491111 | Bishop John Odin founded St. Mary's here for the city's Irish, German and other non-Hispanic Catholics; the land was bought in 1852, and a Gothic church opened in mid-1857. | https://www.hmdb.org/m.asp?m=237177
+Site of Old St. Mary's | @29.425556,-98.491111 | Bishop John Odin founded St. Mary's here for the city's Irish, German and other non-Hispanic Catholics; the land was bought in 1852, and a Gothic church opened in mid-1857. | https://www.hmdb.org/m.asp?m=237177 | new
 The Toltec | @29.430278,-98.487778 | This three-story apartment house was built in 1913 for Dr. Augustus Maverick, who was murdered before it was finished; his family kept it until 1996. | https://www.hmdb.org/m.asp?m=235163
 Thiele Cottage | @29.429722,-98.483333 | James Riely Gordon designed this raised Victorian cottage in 1890 for civic leader August Thiele Jr.; its unusual porch has a wagon-bow arch with radiating spindles, and the Thieles owned it for eight decades. | https://www.hmdb.org/m.asp?m=235146
 Wolfson House | @29.430278,-98.485833 | Merchant Saul Wolfson built this brick house with quoined stone corners in 1888–89, fitting it with Moorish light fixtures, marble mantels and a fireplace in every room but the kitchen. | https://www.hmdb.org/m.asp?m=235151
