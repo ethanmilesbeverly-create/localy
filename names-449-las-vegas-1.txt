@@ -1,0 +1,36 @@
+# names-449-las-vegas-1.txt — #449 Las Vegas story batch, part 1: the list spine (drafted 2026-11-02).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Las Vegas batch (this file + names-449-las-vegas-2.txt + 449_hidden_curated.sql) dry-runs and commits in one Mac session
+# (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 449_sort_las_vegas.tsv (story-sort 2026.11.01b, the Nevada historical marker list + the Clark County NRHP list) —
+# its 14 SEED rows, each read against its article's full text and the HMdb marker at the site (crawl: 449_sort_las_vegas_hmdb.tsv).
+# #539 LINES are named exactly as the article, at the article's coordinate: Morelli House, El Cortez (Las Vegas), both
+#   Las Vegas Grammar School articles.
+# CHANGED FROM THE SORT, BY READING:
+#   LV015 Mormon Fort — CUT: the fort is SERVED with its story through its Wikipedia pin (wiki_2048116, 13 m); the sort matched
+#     the hidden OSM twin (osm_way129478115) and missed it. No line.
+#   LV170 Las Vegas Grammar School (Las Vegas Blvd) — the list point was 339 m off; placed at the article's point (401 S. Fourth St),
+#     which the Fifth Street School's HMdb marker (48196) confirms on the grounds. Now a #539 line.
+#   LV171 Grammar School (Washington and D) — IS the Westside School (the article's other name); the HMdb Westside School marker
+#     (51054) adds the railroad-crossing story.
+#   LV161 Christensen House — there is NO Wikipedia article; the story is the HMdb "Castle" marker (51052).
+#   LV174 — a different name from the hidden district pin (#542, its containing tile 723_-2303 does not store it), `new`; story from
+#     side B of the Las Vegas High School marker (47886) and the district article.
+#   LV112 — named "Pop Squires Homesite" (the marker's subject; his grave is a live pin elsewhere).
+# NOT WRITTEN: LV056 Gypsum Cave — NO LINE: on private mining land, its state marker (No. 103) removed by the owner to keep tourists
+#   off, and the list point is the Sunrise Mountain summit pin, ~7 km from the cave. LV177 Moulin Rouge — CUT: the served Moulin
+#   Rouge Hotel pin 185 m away is the same place. LV185 Las Vegas Post Office and Courthouse — CUT: it is the Mob Museum's building,
+#   and the served Mob Museum story names it (FROM SAN ANTONIO (8)). LV182 Jay Dayton Smith House and LV176 LULAC Multi-Purpose
+#   Senior Center (no article) — to the depth row (listing metadata only, FROM SAN ANTONIO (13)).
+# FLAGGED `new` (1): LV174 (the hidden district pin at 0 m).
+# Expect 8 new-seed, 0 review, 0 held.
+#
+Pop Squires Homesite | @36.16468,-115.140812 | Charles "Pop" Squires, often called the Father of Las Vegas, lived here with his wife Delphine from 1931 until his death in 1958; through their newspaper, the Las Vegas Age, they campaigned for Clark County, for incorporating the city and for women's suffrage, and he helped push the plans that led to Hoover Dam. | https://www.hmdb.org/m.asp?m=131061
+Rafael Rivera | @36.083692,-115.072761 | This state marker honors Rafael Rivera, the young New Mexican scout who, scouting for Antonio Armijo's trading caravan in January 1830, became the first non-native on record to cross the Las Vegas Valley; the springs he reached made Las Vegas a vital stop on the Old Spanish Trail. | https://en.wikipedia.org/wiki/Rafael_Rivera
+Morelli House | @36.16527778,-115.13777778 | Built in 1959 at the Desert Inn Country Club for Sands Hotel bandleader Antonio Morelli and his wife Helen, this mid-century modern house was an after-hours gathering spot for Frank Sinatra, Sammy Davis Jr., Dean Martin and other stars; the Junior League of Las Vegas moved it here in 2001 and restored it. | https://en.wikipedia.org/wiki/Morelli_House
+Leroy and Carrie Christensen House | @36.187,-115.1487 | LeRoy Christensen built this towered, stone-faced house, known as "The Castle," in the mid 1930s; his mother Lucretia was the daughter of a white Utah pioneer girl and an African-American blacksmith, and in 1948 a televised fashion show here featured future Moulin Rouge owner Sarann Knight-Preddy. | https://www.hmdb.org/m.asp?m=51052
+El Cortez (Las Vegas) | @36.169369,-115.13862783 | Opened on November 7, 1941 at 6th Street and Fremont, a site first thought too far from downtown, El Cortez was bought in 1945 by Bugsy Siegel, Meyer Lansky and partners and later run for decades by Jackie Gaughan from its tower penthouse; one of the city's oldest casino-hotels, it joined the National Register in 2013. | https://en.wikipedia.org/wiki/El_Cortez_(Las_Vegas)
+Las Vegas Grammar School (Las Vegas Boulevard, Las Vegas, Nevada) | @36.164704,-115.142892 | Built in 1936 to replace the fire-destroyed Clark County High School, this school was nicknamed the Fifth Street School when Las Vegas Boulevard was still Fifth Street; it taught until 1966 and, after a $9.5 million renovation, houses the city's Office of Cultural Affairs and UNLV's Downtown Design Center. | https://en.wikipedia.org/wiki/Las_Vegas_Grammar_School_(Las_Vegas_Boulevard,_Las_Vegas,_Nevada)
+Las Vegas Grammar School (Washington and D Streets, Las Vegas, Nevada) | @36.18127,-115.14633 | Built in 1923 on land given by Helen J. Stewart, the Westside School is the oldest remaining schoolhouse in Las Vegas: it spared West Las Vegas children the walk across the railroad tracks to Clark's Townsite, was the first public school attended by Paiute Indian Colony students, and now houses the KCEP-FM radio station. | https://en.wikipedia.org/wiki/Las_Vegas_Grammar_School_(Washington_and_D_Streets,_Las_Vegas,_Nevada)
+Las Vegas High School Neighborhood | @36.1632552,-115.140386 | When the Hoover Dam project began in 1931, the streets around the new Art Deco high school grew into one of the city's leading neighborhoods, its Tudor Revival, Mission and Ranch houses mostly built between 1928 and World War II; the district joined the National Register in 1991 with 150 contributing properties. | https://www.hmdb.org/m.asp?m=47886 | new

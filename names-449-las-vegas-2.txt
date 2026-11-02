@@ -1,0 +1,23 @@
+# names-449-las-vegas-2.txt — #449 Las Vegas story batch, part 2: the HMdb depth bar (drafted 2026-11-02).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — dry-runs with the rest of #449.
+# SOURCE: the sandbox's HMdb crawl of the box (117 markers in its 42 tiles; nearbylist.asp from 16 grid points — every query's
+# 100th marker sat 10-23 km out, so no circle split; pages are Windows-1252), 47 excluded as exhibit series
+# (449_hmdb_excluded_las_vegas.tsv), 70 sorted by story-sort 2026.11.01b → 449_sort_las_vegas_hmdb.tsv.
+# THIS FILE = THE DEPTH BAR (THE FAST RUNBOOK (e), FROM TAMPA (2)): all 7 Nevada state markers in the box are already settled by
+# part 1's list sort (Nos. 40, 86, 224 cut as served; 35 cut — the fort is served; 190, 214, 270 written in part 1). Added here:
+# the markers whose subject has its own Wikipedia article in no tile, named exactly as the article. Merged into part 1 instead:
+# Westside School (LV171), the Fifth Street School (LV170), the Castle (LV161), the LVHS neighborhood (LV174), Morelli (LV156).
+# Everything else goes to the depth row with its sort row ready.
+#   Golden Gate Hotel and Casino — #539 at the article's point (One Fremont Street; the HMdb 1906-2006 plaque and the First
+#     Telephone marker stand there).
+#   Las Vegas Tribe of Paiute Indians of the Las Vegas Indian Colony — the article has no coordinate; at the HMdb colony marker
+#     (North Main Street and Paiute Drive), on the 10 acres the article names.
+#   Helen Wiser Stewart — at her statue and marker beside the fort (the served fort pin 32 m away is the fort, not her), `new`.
+#   Francisco Garcés — at the DAR marker in Lorenzi Park's rose garden (nothing stored within 100 m).
+# FLAGGED `new` (1): Helen Wiser Stewart.
+# Expect 4 new-seed, 0 review, 0 held.
+#
+Golden Gate Hotel and Casino | @36.17138889,-115.14638889 | John F. Miller opened the Hotel Nevada at One Fremont Street on January 13, 1906, the first hotel building in Las Vegas, where the town's first telephone, number 1, went in in 1907; renamed Sal Sagev in 1931 and later the Golden Gate, it served the first fifty-cent shrimp cocktail in 1959. | https://en.wikipedia.org/wiki/Golden_Gate_Hotel_and_Casino
+Las Vegas Tribe of Paiute Indians of the Las Vegas Indian Colony | @36.184531,-115.13813 | On December 30, 1911, Helen J. Stewart deeded these 10 acres of spring-fed downtown land to the Paiutes, creating the Las Vegas Indian Colony, which until 1983 was the tribe's only communal land, a small town within a town; the Tribal Council still keeps its offices here. | https://en.wikipedia.org/wiki/Las_Vegas_Tribe_of_Paiute_Indians_of_the_Las_Vegas_Indian_Colony
+Helen Wiser Stewart | @36.1805701,-115.1332531 | This statue beside the fort honors Helen J. Stewart, who came to the Los Vegas Rancho in 1882, ran it after her husband Archibald was killed in 1884, sold 1,834 acres to the railroad in 1902 for $55,000 (the land that became Las Vegas), and was the valley's first postmaster and the first woman elected to the county school board. | https://en.wikipedia.org/wiki/Helen_Wiser_Stewart | new
+Francisco Garcés | @36.18044281,-115.18723297 | Set with small rocks from the 48 states in the Lorenzi Park rose garden, this marker honors Francisco Garcés, the Spanish Franciscan friar who crossed the Mojave Desert in 1776 and whom it calls the first recorded white man to enter Nevada; Garces Avenue, the southernmost of the 1905 Las Vegas explorer streets, bears his name. | https://en.wikipedia.org/wiki/Francisco_Garc%C3%A9s

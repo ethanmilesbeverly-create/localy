@@ -1,0 +1,175 @@
+tile	name	category	desc	pin id	in leads	verdict
+721_-2304	McKee Ranch	history	A local landmark (farm).	osm_node9837604953	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2304	Carrol Shelby Museum	history	A local automotive museum.	osm_way172591730	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2304	Raiders Preview Center	history	A local museum.	osm_way206891033	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2303	Big Head Statue	art	A public statue.	osm_node6127329927	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2303	McKee Ranch	history	A local landmark (farm).	osm_node9837604953	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2303	Carrol Shelby Museum	history	A local automotive museum.	osm_way172591730	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2303	Raiders Preview Center	history	A local museum.	osm_way206891033	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2302	Big Head Statue	art	A public statue.	osm_node6127329927	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2302	Josh Stevens Memorial	history	A local memorial.	osm_node10617322899	no	NO LINE — a roadside memorial to a private person
+721_-2301	Josh Stevens Memorial	history	A local memorial.	osm_node10617322899	no	NO LINE — a roadside memorial to a private person
+721_-2301	Reunion Trails Labyrinth	art	A piece of public art.	osm_way1138482966	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+721_-2300	It All Starts Here.	art	A public sculpture.	osm_node8000359104	no	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Denny's	history		osm_node3196293389	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+722_-2304	The Big Edge	art	A sculpture by Nancy Rubins.	osm_node1902271548	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Madame Tussauds Las Vegas	history	A local museum.	osm_node4749004363	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Siegfried & Roy Monument	history	A local landmark (monument).	osm_node5255306716	yes	CARRIED to the depth row — no source names this statue (the HMdb Siegfried & Roy marker is the park on Maryland Pkwy)
+722_-2304	Bliss Dance	art	A public sculpture.	osm_node5508838247	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2304	Mechan9	art	A public sculpture.	osm_node8833985972	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Red Ball	art	A public installation.	osm_node9965136742	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	In Every Lieftime I Will Find You	art	A installation by Michael Benisty.	osm_node9965136743	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Be Scorchd	art	A public installation.	osm_node9965136744	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Robot	art	A public installation.	osm_node9965136745	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Infinite Ship	art	A public installation.	osm_node9965136746	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Owl	art	A public installation.	osm_node9965136747	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Gateway	art	A public installation.	osm_node9965136748	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Journey to the West	art	A public sculpture.	osm_node11513107415	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Julius Caesar Statue at Caesars Palace Las Vegas	art	A public sculpture.	osm_node12398251904	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	The Rat Pack Memorial Plaque	history	A local memorial (plaque).	osm_node12400346737	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2304	Statue of Liberty	art	A public statue.	osm_way115663314	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2304	Carrol Shelby Museum	history	A local automotive museum.	osm_way172591730	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Raiders Preview Center	history	A local museum.	osm_way206891033	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2304	Las Vegas Shooting Center;Hollywood Car Museum	history	A local museum.	osm_way225705143	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+722_-2304	Leo the Lion	art	"A statue by Snellen Maurice ""Snell"" Johnson."	osm_way1115332185	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2304	Arte Museum Las Vegas	history	A local art museum.	osm_way1421481100	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Denny's	history		osm_node3196293389	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+722_-2303	The Big Edge	art	A sculpture by Nancy Rubins.	osm_node1902271548	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Elvis Presley Museum	history	A local museum.	osm_node4012421243	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Jerry Tarkanian Statue Monument	art	A statue by Brian Hanlon.	osm_node4405730214	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2303	Madame Tussauds Las Vegas	history	A local museum.	osm_node4749004363	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Siegfried & Roy Monument	history	A local landmark (monument).	osm_node5255306716	yes	CARRIED to the depth row — no source names this statue (the HMdb Siegfried & Roy marker is the park on Maryland Pkwy)
+722_-2303	Bliss Dance	art	A public sculpture.	osm_node5508838247	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2303	Tunnel Ring	history	A local landmark (technical monument).	osm_node8780022617	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Julius Caesar Statue at Caesars Palace Las Vegas	art	A public sculpture.	osm_node12398251904	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	The Rat Pack Memorial Plaque	history	A local memorial (plaque).	osm_node12400346737	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2303	Red Cannon	art	A public installation.	osm_node13082306778	yes	CARRIED to the depth row — the Fremont Cannon is a travelling trophy, not this pin; unidentified
+722_-2303	Tunnel Boring Machine Head	history	A local landmark (technical monument).	osm_node13087346028	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	The Cube	art	A sculpture by Moses Karakouzian.	osm_node13172026772	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Statue of Liberty	art	A public statue.	osm_way115663314	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2303	Carrol Shelby Museum	history	A local automotive museum.	osm_way172591730	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Las Vegas Shooting Center;Hollywood Car Museum	history	A local museum.	osm_way225705143	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+722_-2303	Leo the Lion	art	"A statue by Snellen Maurice ""Snell"" Johnson."	osm_way1115332185	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2303	The Flashlight	art	A public sculpture.	osm_way1382413813	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2303	Arte Museum Las Vegas	history	A local art museum.	osm_way1421481100	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Black Lives Matter Banner	art	A mural by Dexter Emery.	osm_way1433139867	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Different Daring Diverse	art	A mural by Sasha Mosquera.	osm_way1433139872	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Pioneer Wall	art	A public stone.	osm_way1433139877	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	Plants, Portraits, and Patterns	art	A mural by Brian Martinez.	osm_way1433139881	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2303	UNLV Surplus Center	art	A mural by Annie Lin.	osm_way1433139890	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	Jerry Tarkanian Statue Monument	art	A statue by Brian Hanlon.	osm_node4405730214	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2302	Big Head Statue	art	A public statue.	osm_node6127329927	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	Red Cannon	art	A public installation.	osm_node13082306778	yes	CARRIED to the depth row — the Fremont Cannon is a travelling trophy, not this pin; unidentified
+722_-2302	The Cube	art	A sculpture by Moses Karakouzian.	osm_node13172026772	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	The Flashlight	art	A public sculpture.	osm_way1382413813	yes	RESCUED — curated row, 449_hidden_curated.sql
+722_-2302	Black Lives Matter Banner	art	A mural by Dexter Emery.	osm_way1433139867	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	Different Daring Diverse	art	A mural by Sasha Mosquera.	osm_way1433139872	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	Pioneer Wall	art	A public stone.	osm_way1433139877	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	Plants, Portraits, and Patterns	art	A mural by Brian Martinez.	osm_way1433139881	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+722_-2302	UNLV Surplus Center	art	A mural by Annie Lin.	osm_way1433139890	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2306	Sahara West Library and Fine Arts Museum	history	A local museum.	osm_way27523839	yes	RESCUED — curated row, 449_hidden_curated.sql
+723_-2305	Joe Zaher	history	A local memorial (plaque).	osm_node11662126368	yes	NO LINE — a roadside memorial to a private person
+723_-2305	"Charles ""Charlie"" Kellogg"	history	A local memorial (plaque).	osm_node11662175201	yes	NO LINE — a roadside memorial to a private person
+723_-2304	Denny's	history		osm_node3196293389	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2304	Viva Las Vegas Skate Company	history	A local landmark (roller derby).	osm_node1941747523	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2304	Main Street Furniture	history	A local landmark (upholstery).	osm_node1941756558	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2304	Classic Vdubs	history	A local landmark (monument).	osm_node1941763853	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2304	Swm n Pool	history	A local landmark (monument).	osm_node1941765088	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2304	Madame Tussauds Las Vegas	history	A local museum.	osm_node4749004363	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Siegfried & Roy Monument	history	A local landmark (monument).	osm_node5255306716	yes	CARRIED to the depth row — no source names this statue (the HMdb Siegfried & Roy marker is the park on Maryland Pkwy)
+723_-2304	Tunnel Ring	history	A local landmark (technical monument).	osm_node8780022617	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Mechan9	art	A public sculpture.	osm_node8833985972	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Red Ball	art	A public installation.	osm_node9965136742	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	In Every Lieftime I Will Find You	art	A installation by Michael Benisty.	osm_node9965136743	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Be Scorchd	art	A public installation.	osm_node9965136744	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Robot	art	A public installation.	osm_node9965136745	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Infinite Ship	art	A public installation.	osm_node9965136746	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Owl	art	A public installation.	osm_node9965136747	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Gateway	art	A public installation.	osm_node9965136748	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Origen Museum	history	A local local museum.	osm_way159924140	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2304	Native American Jewelry	history	A local landmark (Turquoise Chief).	osm_way316303724	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2304	Waterworks Museum	history	A local museum.	osm_way421588072	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Beauty Bar	history		osm_node2143510295	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Denny's	history		osm_node3196293389	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	G gallery	art	A piece of public art.	osm_node1941728360	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Viva Las Vegas Skate Company	history	A local landmark (roller derby).	osm_node1941747523	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Main Street Furniture	history	A local landmark (upholstery).	osm_node1941756558	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Classic Vdubs	history	A local landmark (monument).	osm_node1941763853	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Swm n Pool	history	A local landmark (monument).	osm_node1941765088	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Cobalt Gallery	art	A piece of public art.	osm_node1941811499	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Photo Bang Bang	art	A piece of public art.	osm_node1941814074	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	GYPSY DEN VINTAGE	history	A local landmark (monument).	osm_node1941815811	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Elvis Presley Museum	history	A local museum.	osm_node4012421243	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Madame Tussauds Las Vegas	history	A local museum.	osm_node4749004363	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Hacienda Horse Neon Sign	art	A piece of public art.	osm_node5250961022	yes	RESCUED — curated row, 449_hidden_curated.sql
+723_-2303	Normandie Motel Neon Sign	art	A piece of public art.	osm_node5250961023	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Dancer Neon Sign	art	A piece of public art.	osm_node5250961027	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Cocktail Neon Sign	art	A piece of public art.	osm_node5250961028	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Pabst Blue Ribbon Neon Sign	art	A piece of public art.	osm_node5250961032	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Lucky Cuss Motel Neon Sign	art	A piece of public art.	osm_node5250961035	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Society Cleaners Neon Sign	art	A piece of public art.	osm_node5250961037	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	Bow & Arrow Motel Neon Sign	art	A piece of public art.	osm_node5250961039	yes	RESCUED — curated row, 449_hidden_curated.sql
+723_-2303	Native American Jewelry	history	A local landmark (Turquoise Chief).	osm_way316303724	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	grass sand maze	history	A local landmark (monument).	osm_way469798647	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2303	cornerstone gallery	art	A piece of public art.	osm_way751365124	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	YU-OR-MI Sushi Bar;Cornerstone Furniture	history	A local landmark (Vintage furniture).	osm_way751365171	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2303	Zak Bagan's The Haunted Museum	history	A local museum.	osm_way806953202	yes	RESCUED — curated row, 449_hidden_curated.sql
+723_-2303	Fremont East Gateway	history		osm_way1426918441	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2302	Beauty Bar	history		osm_node2143510295	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+723_-2302	Dancer Neon Sign	art	A piece of public art.	osm_node5250961027	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2302	Cocktail Neon Sign	art	A piece of public art.	osm_node5250961028	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2302	Shoe	art	A piece of public art.	osm_node11941207523	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2302	grass sand maze	history	A local landmark (monument).	osm_way469798647	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+723_-2302	Zak Bagan's The Haunted Museum	history	A local museum.	osm_way806953202	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2306	Joe Zaher	history	A local memorial (plaque).	osm_node11662126368	yes	NO LINE — a roadside memorial to a private person
+724_-2306	"Charles ""Charlie"" Kellogg"	history	A local memorial (plaque).	osm_node11662175201	yes	NO LINE — a roadside memorial to a private person
+724_-2305	Joe Zaher	history	A local memorial (plaque).	osm_node11662126368	yes	NO LINE — a roadside memorial to a private person
+724_-2305	"Charles ""Charlie"" Kellogg"	history	A local memorial (plaque).	osm_node11662175201	yes	NO LINE — a roadside memorial to a private person
+724_-2304	Origen Museum	history	A local local museum.	osm_way159924140	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2304	Waterworks Museum	history	A local museum.	osm_way421588072	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Beauty Bar	history		osm_node2143510295	yes	NO LINE — a shop, bar, gallery or attraction business with no story of its own (#309)
+724_-2303	Hacienda Horse Neon Sign	art	A piece of public art.	osm_node5250961022	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2303	Normandie Motel Neon Sign	art	A piece of public art.	osm_node5250961023	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Dancer Neon Sign	art	A piece of public art.	osm_node5250961027	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Cocktail Neon Sign	art	A piece of public art.	osm_node5250961028	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Pabst Blue Ribbon Neon Sign	art	A piece of public art.	osm_node5250961032	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Lucky Cuss Motel Neon Sign	art	A piece of public art.	osm_node5250961035	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Society Cleaners Neon Sign	art	A piece of public art.	osm_node5250961037	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Bow & Arrow Motel Neon Sign	art	A piece of public art.	osm_node5250961039	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2303	Cesars Palace Sign	art	A piece of public art.	osm_node5251003417	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Neon Museum Sign	art	A piece of public art.	osm_node5251003419	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2303	Jerry Sign	art	A piece of public art.	osm_node5251003425	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2303	Aladdin's Lamp	art	A piece of public art.	osm_node5251003435	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Frontier Sign	art	A piece of public art.	osm_node5251003444	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Golden Nuget Sign	art	A piece of public art.	osm_node5251003449	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Steiner Cleaners Sign	art	A piece of public art.	osm_node5251003462	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Sassy Sally's Sign	art	A piece of public art.	osm_node5251003480	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Binion's Horseshoe Sign	art	A piece of public art.	osm_node5251003484	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Tam O'Shanter Sign	art	A piece of public art.	osm_node5251003489	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2303	Fremont East Gateway	history		osm_way1426918441	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Bow & Arrow Motel Neon Sign	art	A piece of public art.	osm_node5250961039	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2302	Cesars Palace Sign	art	A piece of public art.	osm_node5251003417	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Neon Museum Sign	art	A piece of public art.	osm_node5251003419	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2302	Jerry Sign	art	A piece of public art.	osm_node5251003425	yes	RESCUED — curated row, 449_hidden_curated.sql
+724_-2302	Aladdin's Lamp	art	A piece of public art.	osm_node5251003435	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Frontier Sign	art	A piece of public art.	osm_node5251003444	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Golden Nuget Sign	art	A piece of public art.	osm_node5251003449	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Steiner Cleaners Sign	art	A piece of public art.	osm_node5251003462	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Sassy Sally's Sign	art	A piece of public art.	osm_node5251003480	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Binion's Horseshoe Sign	art	A piece of public art.	osm_node5251003484	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Tam O'Shanter Sign	art	A piece of public art.	osm_node5251003489	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Yucca Motel Sign	art	A piece of public art.	osm_node5251003490	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Ugly Duckling Sign	art	A piece of public art.	osm_node5251003497	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Algiers Sign	art	A piece of public art.	osm_node5251003504	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2302	Desert Rose Motel	art	A piece of public art.	osm_node5251003505	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+724_-2301	Mikoyan-Gurevich MiG-23BN	history	A local landmark (aircraft).	osm_node12466295147	yes	NO LINE — inside Nellis AFB, open only with military base access (HMdb), so no visitor can capture it
+724_-2301	Nellis Petting Zoo	history	A local history museum.	osm_way1553977384	yes	NO LINE — inside Nellis AFB, open only with military base access (HMdb), so no visitor can capture it
+725_-2306	Cross for Chad David England (1979-2008)	history	A local memorial.	osm_node8491890153	yes	NO LINE — a roadside memorial to a private person
+725_-2305	Andreas Probst	history	A local memorial (ghost bike).	osm_node11256126008	yes	NO LINE — a roadside memorial to a private person
+725_-2301	Shelby Museum	history	A local museum.	osm_node280493787	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+725_-2301	Mikoyan-Gurevich MiG-23BN	history	A local landmark (aircraft).	osm_node12466295147	yes	NO LINE — inside Nellis AFB, open only with military base access (HMdb), so no visitor can capture it
+725_-2301	Nellis Petting Zoo	history	A local history museum.	osm_way1553977384	yes	NO LINE — inside Nellis AFB, open only with military base access (HMdb), so no visitor can capture it
+725_-2300	Shelby Museum	history	A local museum.	osm_node280493787	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+726_-2305	Andreas Probst	history	A local memorial (ghost bike).	osm_node11256126008	yes	NO LINE — a roadside memorial to a private person
+726_-2301	Shelby Museum	history	A local museum.	osm_node280493787	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
+726_-2300	Shelby Museum	history	A local museum.	osm_node280493787	yes	CARRIED to the depth row — no HMdb marker of this subject within 150 m and no Wikipedia article with its story
