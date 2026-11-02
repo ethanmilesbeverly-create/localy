@@ -84,7 +84,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.10.30a"; // 30a: #447 + #448 roster 32 → 34 (+ San Antonio, + Tampa, Phase B); code unchanged. 29a: #446 roster 31 → 32 (+ Pittsburgh, Phase B); code unchanged. 28a: #485 roster 30 → 31 (+ Katy-Energy Corridor, Houston's first extra box); code unchanged. 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.11.02a"; // 02a: #449 + #450 + #452 + #453 + #454 roster 34 → 39 (+ Las Vegas, + Sacramento, Phase B; + Riverside, + Orlando, + Charlotte, Phase C); code unchanged. 30a: #447 + #448 roster 32 → 34 (+ San Antonio, + Tampa, Phase B); code unchanged. 29a: #446 roster 31 → 32 (+ Pittsburgh, Phase B); code unchanged. 28a: #485 roster 30 → 31 (+ Katy-Energy Corridor, Houston's first extra box); code unchanged. 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -106,7 +106,7 @@ const DRIP_HOURS = Math.max(0, Number(env("PREWARM_DRIP_HOURS") || 6));
 const DRIP_PACE_MS = Math.max(0, Number(env("PREWARM_DRIP_PACE_MS") || 5000));
 const FAILED_FILE = "prewarm_failed.json";
 
-// Same roster as gate-tiles.ts (34 rows since #447 + #448, 2026-10-30).
+// Same roster as gate-tiles.ts (39 rows since #449 + #450 + #452–#454, 2026-11-02).
 const METROS: Metro[] = [
   { name: "Chicago", lat: 41.8781, lng: -87.6298 },
   { name: "New York", lat: 40.7128, lng: -74.0060 },
@@ -225,6 +225,58 @@ const METROS: Metro[] = [
   // row Miami, ~327 km; the ±40 km grave square (27.57–28.30 / -82.85…-82.04) reaches
   // Pinellas, Pasco and Polk, which no box owns, so those graves load here (Bergen (4)).
   { name: "Tampa", lat: 27.9350, lng: -82.4470 },
+  // #449 + #450 + #452 + #453 + #454 (2026-11-02): the roster grows 34 → 39 (+ Las Vegas,
+  // + Sacramento, Phase B; + Riverside, + Orlando, + Charlotte, Phase C's first three), added
+  // in one edit so one chained drip warms them in this order while Las Vegas's story batch
+  // runs (THE FAST RUNBOOK (d)). Each centre is the middle of its plateau, checked ±0.002°
+  // stable, with zero tiles shared with any roster row or with each other; populations are
+  // 2020 tract centres counted through the tools' own tile math (Queens-Nassau (a)), and a
+  // better-populated plateau was taken only where it keeps the city's signature sites (FROM
+  // SAN ANTONIO (1)).
+  // Las Vegas: the city centre's plateau, 36.1604–36.2099 / -115.1573…-115.1078 (42 tiles,
+  // rows 721–726, columns -2306…-2300; 1.77M people) — downtown, Fremont Street, the Neon
+  // Museum, the Old Mormon Fort, the Springs Preserve, the Strip to the Welcome sign, UNLV,
+  // North Las Vegas and Henderson's north. Measured, not taken: one row south (36.135/-115.133)
+  // covers +104k (Henderson's south, Enterprise) but drops row 726 and with it Tule Springs
+  // Ranch, the Tule Springs Archaeological Site, Floyd Lamb Park and Ice Age Fossils State
+  // Park; Summerlin stays outside either way. Nearest roster row Orange County, ~363 km; the
+  // ±40 km grave square (35.82–36.55 / -115.58…-114.69) reaches Hoover Dam at the Arizona
+  // line, which no box owns.
+  { name: "Las Vegas", lat: 36.1850, lng: -115.1325 },
+  // Sacramento: NOT the city centre's plateau — 0.12° east of it, keeping the same rows
+  // (769–774) and moving the columns to -2431…-2425 (42 tiles). The two western columns it
+  // drops hold 4.7k people (the Yolo Bypass, Sacramento International Airport, farmland); the
+  // two it gains hold 264k (Rancho Cordova, Carmichael, Arden-Arcade's east): 1.10M → 1.36M.
+  // The Capitol, Old Sacramento, the Tower Bridge, the Crocker, Sutter's Fort and West
+  // Sacramento all stay in; Elk Grove and Folsom stay outside either way. Every centre in
+  // 38.5605–38.6100 / -121.4020…-121.3525 gives the same 42 tiles; this is the middle. Nearest
+  // roster row San Francisco, ~128 km; the grave square (38.22–38.95 / -121.84…-120.92) touches
+  // no other box.
+  { name: "Sacramento", lat: 38.5850, lng: -121.3775 },
+  // Riverside: the city centre's plateau, 33.9103–33.9598 / -117.4117…-117.3622 (42 tiles,
+  // rows 676–681, columns -2351…-2345; 956k people) — downtown and the Mission Inn, Mount
+  // Rubidoux, UC Riverside, the Parent Navel Orange Tree, March Field and Riverside National
+  // Cemetery. Zero tiles shared with Orange County or Los Angeles. Measured, not taken: the
+  // best centre that keeps downtown (34.035/-117.487) covers +515k (Ontario, Fontana, Rancho
+  // Cucamonga) but puts downtown Riverside and UC Riverside on its east edge and drops March
+  // Field, the National Cemetery and Moreno Valley — that ground and San Bernardino are an
+  // extra box's question (#451). Nearest roster row Orange County, ~49 km: the grave square
+  // (33.57–34.30 / -117.82…-116.95) reaches the Orange County and Los Angeles boxes, so its
+  // graves split by county outline before commit (Queens-Nassau (c), #483).
+  { name: "Riverside", lat: 33.9350, lng: -117.3870 },
+  // Orlando: the city centre's plateau, 28.5104–28.5599 / -81.4209…-81.3714 (42 tiles, rows
+  // 568–573, columns -1631…-1625; 1.22M people) — downtown and Lake Eola, Winter Park,
+  // Eatonville, Leu Gardens and Universal; Walt Disney World, Kissimmee, Sanford and UCF stay
+  // outside. The best plateau measured only +27k, not worth a shift. Nearest roster row Tampa,
+  // ~122 km; the grave square (28.17–28.90 / -81.81…-80.99) touches no other box.
+  { name: "Orlando", lat: 28.5350, lng: -81.3960 },
+  // Charlotte: the city centre's plateau, 35.2106–35.2601 / -80.8596…-80.8096 (42 tiles, rows
+  // 702–707, columns -1620…-1614; 889k people) — Uptown, the NASCAR Hall of Fame, the Billy
+  // Graham Library, the Mint Museum, UNC Charlotte, Latta Plantation and the Hezekiah
+  // Alexander House. Measured, not taken: one row south (35.21/-80.82) covers +59k but drops
+  // Latta Plantation. Nearest roster row Atlanta, ~362 km; the grave square (34.88–35.60 /
+  // -81.28…-80.39) reaches York and Lancaster counties in South Carolina, which no box owns.
+  { name: "Charlotte", lat: 35.2355, lng: -80.8345 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

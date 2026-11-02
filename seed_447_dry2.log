@@ -1,0 +1,546 @@
+[seed-resolve 2026.10.27a (#537 a `new` story line is its own seed only under its own name — Gemini's canonicalName can no longer aim its story at a differently named seed; carries #506 #499 #495 #429 #434 #439 #441)] city=San Antonio (29.435, -98.495) maxKm=60 model=gemini-3.5-flash-lite
+  dedup = live map + submissions + Wikipedia (#418); map endpoint https://siacjgpqzaylsfefihyr.supabase.co/functions/v1/nearby-places
+Loaded 151 names from names-447-all.txt
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Alamo Madre Acequia [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Anton Wulff House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Anton Wulff House" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Anton Wulff House"
+      articles within 90 m: "Anton Wulff House"
+  + Aztec Theatre (San Antonio) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Aztec Theatre (San Antonio)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Aztec Theatre (San Antonio)"
+      articles within 90 m: "Aztec Theatre (San Antonio)"
+  + Bexar County Courthouse [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 4
+      ↳ seeded under its Wikipedia article "Bexar County Courthouse" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Bexar County Courthouse"
+      articles within 90 m: "Bexar County Courthouse" · "Camp John Wise" · "Presidio San Antonio de Béxar" · "Main and Military Plazas Historic District"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Casa Villita [history] story✓ (conf 0.80)
+      checked nearby: map 0 · subs 0 · wiki 6
+      articles within 90 m: "Fiesta Noche del Rio" · "Rosita's Bridge" · "Otto Bombach House" · "Arneson River Theater" · "Hilton Palacio del Rio" · "Acequia Madre de Valero (San Antonio)"
+  + Casa Navarro [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Casa Navarro" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Casa Navarro"
+      articles within 90 m: "Casa Navarro"
+  + Menger Hotel [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Menger Hotel" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Menger Hotel"
+      articles within 90 m: "Menger Hotel"
+  + O. Henry House Museum (San Antonio) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "O. Henry House Museum (San Antonio)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "O. Henry House Museum (San Antonio)"
+      articles within 90 m: "O. Henry House Museum (San Antonio)"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Southern Pacific Railroad Passenger Station [history] story✓ (conf 1.00)  (Gemini suggested "San Antonio station (Texas)")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "San Antonio station (Texas)"
+  + St. Joseph Catholic Church (San Antonio, Texas) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "St. Joseph Catholic Church (San Antonio, Texas)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "St. Joseph Catholic Church (San Antonio, Texas)"
+      articles within 90 m: "St. Joseph Catholic Church (San Antonio, Texas)"
+  + Staacke Brothers Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "Staacke Brothers Building" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Staacke Brothers Building"
+      articles within 90 m: "Staacke Brothers Building" · "Stevens Building (San Antonio, Texas)"
+  + Stevens Building (San Antonio, Texas) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "Stevens Building (San Antonio, Texas)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Stevens Building (San Antonio, Texas)"
+      articles within 90 m: "Stevens Building (San Antonio, Texas)" · "Staacke Brothers Building"
+  + Fairmount Hotel (San Antonio, Texas) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "Fairmount Hotel (San Antonio, Texas)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Fairmount Hotel (San Antonio, Texas)"
+      articles within 90 m: "Fairmount Hotel (San Antonio, Texas)" · "La Villita"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Tomb of the Alamo defenders [history] story✓ (conf 0.99)  (Gemini suggested "Cathedral of San Fernando (San Antonio)")
+      checked nearby: map 1 · subs 1 · wiki 10
+      articles within 90 m: "Cathedral of San Fernando (San Antonio)" · "Archdiocese of San Antonio" · "Presidio San Antonio de Béxar" · "Main and Military Plazas Historic District" · "Military Plaza" · "San Antonio" · "Greater San Antonio" · "Tejas Airlines" · "Area codes 210 and 726" · "Camp John Wise"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Monkey House and Commissary (San Antonio Zoo) [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Alamo Stadium [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Alamo Stadium" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Alamo Stadium"
+      articles within 90 m: "Alamo Stadium"
+  + Charline McCombs Empire Theatre [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "Charline McCombs Empire Theatre" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Charline McCombs Empire Theatre"
+      articles within 90 m: "Charline McCombs Empire Theatre" · "Jeremiah Dashiell House" · "Majestic Theatre (San Antonio)"
+  + Exchange Building (San Antonio) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "Exchange Building (San Antonio)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Exchange Building (San Antonio)"
+      articles within 90 m: "Exchange Building (San Antonio)" · "Gunter Hotel" · "Weston Centre (San Antonio)"
+  + San Antonio Municipal Auditorium [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "San Antonio Municipal Auditorium" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "San Antonio Municipal Auditorium"
+      articles within 90 m: "San Antonio Municipal Auditorium"
+  + Gunter Hotel [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Hertzberg Clock (San Antonio)"
+  + Johann and Anna Heidgen House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Johann and Anna Heidgen House" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Johann and Anna Heidgen House"
+      articles within 90 m: "Johann and Anna Heidgen House"
+  + Majestic Theatre (San Antonio) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 7
+      ↳ seeded under its Wikipedia article "Majestic Theatre (San Antonio)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Majestic Theatre (San Antonio)"
+      articles within 90 m: "Majestic Theatre (San Antonio)" · "Buckhorn Saloon & Museum (San Antonio)" · "Downtown San Antonio" · "Nix Professional Building" · "South Texas Building" · "Jeremiah Dashiell House" · "Charline McCombs Empire Theatre"
+  + Milam Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Milam Building" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Milam Building"
+      articles within 90 m: "Milam Building"
+  + Petty House (San Antonio) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Petty House (San Antonio)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Petty House (San Antonio)"
+      articles within 90 m: "Petty House (San Antonio)"
+  + Rincon School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Rincon School" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Rincon School"
+      articles within 90 m: "Rincon School"
+  + The St. Anthony Hotel [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "The St. Anthony Hotel" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "The St. Anthony Hotel"
+      articles within 90 m: "The St. Anthony Hotel"
+  + Hipolito F. Garcia Federal Building and United States Courthouse [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "Hipolito F. Garcia Federal Building and United States Courthouse" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Hipolito F. Garcia Federal Building and United States Courthouse"
+      articles within 90 m: "Hipolito F. Garcia Federal Building and United States Courthouse" · "Emily Morgan Hotel (San Antonio)"
+  + St. Mark's Episcopal Church (San Antonio, Texas) [history] story✓ (conf 1.00)
+      checked nearby: map 1 · subs 0 · wiki 2
+      ↳ seeded under its Wikipedia article "St. Mark's Episcopal Church (San Antonio, Texas)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "St. Mark's Episcopal Church (San Antonio, Texas)"
+      articles within 90 m: "St. Mark's Episcopal Church (San Antonio, Texas)" · "Travis Park"
+  + Alamo Mission [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 5
+      ↳ seeded under its Wikipedia article "Alamo Mission" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Alamo Mission"
+      articles within 90 m: "Alamo Mission" · "Siege of the Alamo" · "Battle of the Alamo" · "Alamo Cenotaph" · "Alamo Plaza Historic District"
+  + Ursuline Academy (San Antonio, Texas) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Ursuline Academy (San Antonio, Texas)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Ursuline Academy (San Antonio, Texas)"
+      articles within 90 m: "Ursuline Academy (San Antonio, Texas)"
+  + Thomas Jefferson High School (San Antonio) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Thomas Jefferson High School (San Antonio)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Thomas Jefferson High School (San Antonio)"
+      articles within 90 m: "Thomas Jefferson High School (San Antonio)"
+  + Fort Sam Houston National Cemetery [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Alfred Giles Home [history] story✓ (conf 0.90)  (Gemini suggested "King William Historic District")
+      checked nearby: map 1 · subs 0 · wiki 1
+      articles within 90 m: "King William Historic District"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Biesenbach House [history] story✓ (conf 0.95)  (Gemini suggested "Guenther House")
+      checked nearby: map 1 · subs 0 · wiki 1
+      articles within 90 m: "Guenther House (San Antonio)"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Caile House [history] story✓ (conf 0.90)  (Gemini suggested "La Villita")
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "La Villita" · "Fairmount Hotel (San Antonio, Texas)"
+  + Chabot House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Elias and Lucy Edmonds House [history] story✓ (conf 0.90)  (Gemini suggested "Norton–Polk–Mathis House")
+      checked nearby: map 2 · subs 0 · wiki 1
+      articles within 90 m: "Norton–Polk–Mathis House"
+  + Ernst Homestead [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Old San Antonio National Bank Building [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "Aztec Theatre (San Antonio)" · "Staacke Brothers Building"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + German-English School [history] story✓ (conf 0.85)  (Gemini suggested "German-English School (La Villita)")
+      checked nearby: map 0 · subs 0 · wiki 2
+      articles within 90 m: "La Villita" · "Fairmount Hotel (San Antonio, Texas)"
+  + Gustav Blersch House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + J.M. and Birdie Nix House [history] story✓ (conf 0.70)
+      checked nearby: map 1 · subs 0 · wiki 1
+      articles within 90 m: "Edward Steves Homestead"
+  + Old S. J. Brooks Home [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Oscar and Rachel Berman House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Sartor House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Schulze-Schilo House (1891) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + St. John's Lutheran Church [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "La Villita"
+  + The Oge House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + William and Mary Ann Richter House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Halff House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Bullis House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + St. Paul's Episcopal Church [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Twohig House [history] story✓ (conf 0.95)  (Gemini suggested "Twohig House (The Witte Museum)")
+      checked nearby: map 1 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Alexander and Alma Oppenheimer Halff House [history] story✓ (conf 0.85)
+      checked nearby: map 1 · subs 0 · wiki 1
+      articles within 90 m: "Aurora Apartment Hotel"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Alamo Portland and Roman Cement Works [history] story✓ (conf 0.85)  (Gemini suggested "San Antonio Japanese Tea Garden")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "San Antonio Japanese Tea Garden"
+  + Christ Episcopal Church [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Christopher Columbus Italian Society Hall [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Jay Adams House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + L. B. Clegg House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Madison Square Presbyterian Church [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Maverick-Carter House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Menger Soap Works [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Old St. Mary's College [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 5
+      articles within 90 m: "Jeremiah Dashiell House" · "Charline McCombs Empire Theatre" · "Nix Professional Building" · "Majestic Theatre (San Antonio)" · "Downtown San Antonio"
+  + Rechel-Stumpf House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Roy and Madge Hearne House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + San Antonio Casino Club Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + San Francesco Di Paola Catholic Church [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Site of Old St. Mary's [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 3
+      articles within 90 m: "Charline McCombs Empire Theatre" · "Jeremiah Dashiell House" · "San Antonio River Walk"
+  + The Toltec [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Thiele Cottage [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Wolfson House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Boldtville School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + W. B. Teagarden House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Federal Reserve Bank of Dallas San Antonio Branch"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Ruiz House [history] story✓ (conf 0.90)
+      checked nearby: map 1 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Engleman-Muench House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Charles V. Bellinger House [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "St. Gerard Catholic High School"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Dolores Alderete House [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 3
+      articles within 90 m: "La Villita" · "Otto Bombach House" · "Fairmount Hotel (San Antonio, Texas)"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Cos House [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 5
+      articles within 90 m: "Arneson River Theater" · "Fiesta Noche del Rio" · "Acequia Madre de Valero (San Antonio)" · "Rosita's Bridge" · "Otto Bombach House"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Eagar House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Emil Elmendorf House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Fest-Steves Block [history] story✓ (conf 0.85)
+      checked nearby: map 2 · subs 0 · wiki 1
+      articles within 90 m: "Spanish Governor's Palace"
+  + Site of Original Building, First Baptist Church [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "The St. Anthony Hotel"
+  + Gould-Onderdonk House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Dr. Claudius E. R. King House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + U.S. San Antonio Arsenal [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Zambrano House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Fort Sam Houston, 4th U.S. Army Headquarters Quadrangle [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Old Brooke Army Medical Center [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Robert B. Green Memorial Hospital [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Friedrich Complex [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Jacala Restaurant [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + The Havana [history] story✓ (conf 0.90)  (Gemini suggested "San Antonio Municipal Auditorium")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "San Antonio Municipal Auditorium"
+  + The Bushnell [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Borden's Creamery [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Book Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Herrera Ranch [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Old Alamo National Bank Building [history] story✓ (conf 0.95)  (Gemini suggested "Stevens Building (San Antonio, Texas)")
+      checked nearby: map 0 · subs 0 · wiki 3
+      articles within 90 m: "Stevens Building (San Antonio, Texas)" · "Schilo's Delicatessen" · "Staacke Brothers Building"
+  + Alamo National Bank Building [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Aztec Theatre (San Antonio)"
+  + Altgelt-Isbell House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Fourth Ward School [history] story✓ (conf 0.95)  (Gemini suggested "Fourth Ward School / San Antonio Independent School District")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "San Antonio Independent School District"
+  + Gilbeau Slave Quarters [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Louis Gresser House [history] story✓ (conf 0.85)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Acequia Madre de Valero (San Antonio)"
+  + James Butler Bonham Elementary School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Jose Antonio Navarro Elementary School [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Otto Meerscheidt House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Schultze Hardware Store [history] story✓ (conf 0.85)  (Gemini suggested "Schultze Hardware Store / Otto Bombach House")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Otto Bombach House"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Pereida House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Billy Mitchell Village [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Dubuis Hall [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Fort Sam Houston Gift Chapel [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Trolley Stop in Alamo Heights [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Barnes-Laird House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Barr Building [history] story✓ (conf 0.85)  (Gemini suggested "Scottish Rite Cathedral (San Antonio, Texas)")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Scottish Rite Cathedral (San Antonio, Texas)"
+  + City Public Service Company Building [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "San Antonio River Walk"
+  + International & Great Northern Railroad Passenger Station [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Maverick Building [history] story✓ (conf 0.95)
+      checked nearby: map 1 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Prospect Hill Missionary Baptist Church [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Robert E. Lee Hotel [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + San Antonio Water Works Pump Station No. 2 [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Travelers Hotel [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Scottish Rite Cathedral (San Antonio, Texas)"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Sacred Heart Conventual Chapel [history] story✓ (conf 0.95)
+      checked nearby: map 1 · subs 0 · wiki 1
+      articles within 90 m: "Our Lady of the Lake University"
+  + Buick Motor Company [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Calcasieu Building [history] story✓ (conf 0.80)  (Gemini suggested "Scottish Rite Cathedral (San Antonio, Texas)")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Scottish Rite Cathedral (San Antonio, Texas)"
+  + Casa de Dios (House of God) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + South Texas Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 3
+      ↳ seeded under its Wikipedia article "South Texas Building" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "South Texas Building"
+      articles within 90 m: "South Texas Building" · "Buckhorn Saloon & Museum (San Antonio)" · "Majestic Theatre (San Antonio)"
+  + Goad Motor Company Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Poe Motor Company [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + The Wedgwood [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Heimann Building [history] story✓ (conf 0.90)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Prospect Hill Missionary Baptist Church"
+  + Hugo & Schmeltzer Company Warehouse [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Garcia-Garza House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Hiram Partee House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Thomas H. Franklin House [history] story✓ (conf 0.85)
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Monte Vista Historic District"
+  + San Antonio Loan and Trust Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Schroeder-Yturri House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Burns Building [history] story✓ (conf 0.95)
+      checked nearby: map 1 · subs 0 · wiki 0
+      articles within 90 m: none
+  + L. T. Wright House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Perrin Home [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Alejo de la Encarnacion Perez Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Capt. Jose Antonio Menchaca Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Colonel Jose Francisco Ruiz Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Don Jose de Jesus Rodriguez Marker [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 1 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Don Juan Ximenes Marker [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 1 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Placido Olivarri Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Young Perry Alsbury Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + G.J. Sutton Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Gen. Jonathan M. Wainwright Marker [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Site of Mission San Francisco Xavier de Najera [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Protestant Home for Destitute Children Building [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Silvestre Revueltas Residence [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Zion Lutheran Cemetery (Helotes) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+
+--- #439 check: what the commit will skip or replace ---
+  nothing will be skipped or replaced
+
+--- summary ---
+{ "new-seed": 151 }
+stories attached to existing pins: 0 (0 existing seed(s) updated on commit)
+story lines seeded: 151 (their story ships as resolved_source 'curated'; 151 curated_descriptions rows staged in curated_records.json)
+new seed rows: 151  (unclassified category: 0, no wiki description: 0)
+seeded under their Wikipedia article's title (#425): 26 — read each "↳ seeded under" line before --commit
+#439: 0 staged story row(s) will be SKIPPED (already curated) → expect the commit to insert 151 story row(s); 0 seed story(ies) will be REPLACED
+Wikipedia calls: 151 · retried 0 · failed 0
+TIMEOUTS (#506): Wikipedia 0 · geocode 0 · nearby-places 0 · Gemini 0 · Supabase reads 0 (limits 20 / 20 / 180 / 60 / 30 s).
+wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).
+NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).
