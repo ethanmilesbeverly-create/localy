@@ -1,0 +1,100 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+SA001	CURATED ROW — hidden pin	OWED — part 2	Alkali Flat Central Historic District	38.5846273	-121.4913441	Alkali Flat Central Historic District · osm_node358836500 · 142 m	Alkali Flat Central Historic District		hidden pin stored in 771_-2430, 772_-2429, 772_-2430; containing tile 772_-2430 stores it (#542)	Alkali Flat Central Historic District	
+SA002	CURATED ROW — hidden pin	OWED — part 2	Alkali Flat North Historic District	38.5865718	-121.4893995	Alkali Flat North Historic District · osm_node358836501 · 141 m	Alkali Flat North Historic District		hidden pin stored in 771_-2430, 772_-2429, 772_-2430; containing tile 772_-2430 stores it (#542)	Alkali Flat North Historic District	
+SA003	CURATED ROW — hidden pin	OWED — part 2	Alkali Flat West Historic District	38.5860162	-121.4941219	Alkali Flat West Historic District · osm_node358836503 · 95 m	Alkali Flat West Historic District		hidden pin stored in 771_-2430, 772_-2429, 772_-2430; containing tile 772_-2430 stores it (#542)	Alkali Flat West Historic District	
+SA012	CURATED ROW — hidden pin	OWED — part 2	U.S.S. California	38.5762128	-121.4917713	U.S.S. California · osm_node7217498886 · 106 m	California State Capitol		CHECK SUBJECT (partial or container match); hidden pin stored in 772_-2430; containing tile 772_-2430 stores it (#542)	California State Capitol	
+SA004	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	American Cash Apartments-American Cash Store	38.57927777777778	-121.49672222222222	article American Cash Apartments-American Cash Store · 48 m	American Cash Apartments-American Cash Store			American Cash Apartments-American Cash Store	
+SA006	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	George & Mabel Barr House	38.546499999999995	-121.47777777777777	article George & Mabel Barr House · 22 m	George & Mabel Barr House			George & Mabel Barr House	
+SA007	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Blue Anchor Building	38.57563888888889	-121.49575	article Blue Anchor Building · 69 m	Blue Anchor Building			Blue Anchor Building	
+SA009	SEED — unmapped	OWED — part 2	Briggs Mansion	38.5648	-121.4834		Briggs Mansion			Briggs Mansion	
+SA013	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Calpak Plant No. 11	38.58583	-121.480407	article Calpak Plant No. 11 · 0 m	Calpak Plant No. 11			Calpak Plant No. 11	
+SA015	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	J. C. Carly House	38.54888888888889	-121.47583333333334	article J. C. Carly House · 0 m	J. C. Carly House			J.C. Carly House	
+SA016	SEED — article in no tile (#539)	NO LINE — demolished 2003	Coolot Company Building	38.58083333333334	-121.49472222222222	article Coolot Company Building · 0 m	Coolot Company Building			Coolot Company Building	
+SA017	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Cranston–Geary House	38.57972222222222	-121.47555555555556	article Cranston–Geary House · 0 m	Cranston–Geary House			Cranston-Geary House	
+SA021	SEED — unmapped	OWED — part 2	James C. Dodd & Associates Offices	38.5586	-121.47682		James C. Dodd & Associates Offices			James C. Dodd & Associates Offices	
+SA023	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Eastern Star Hall	38.572500000000005	-121.47277777777778	article Eastern Star Hall · 0 m	Eastern Star Hall			Eastern Star Hall	
+SA024	SEED — unmapped	OWED — part 2	El Dorado School	38.566	-121.4394		El Dorado School			El Dorado School	
+SA025	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Fire Station No. 6 (Sacramento, California)	38.5505	-121.46988888888889	article Fire Station No. 6 (Sacramento, California) · 111 m	Fire Station No. 6 (Sacramento, California)			Fire Station No. 6	
+SA026	SEED — article in no tile (#539)	OWED — part 2	Firehouse No. 3 (Sacramento, California)	38.574444444444445	-121.48111111111112	article Firehouse No. 3 (Sacramento, California) · 0 m	Firehouse No. 3 (Sacramento, California)			Firehouse No. 3	
+SA027	SEED — unmapped	OWED — part 2	Mary Haley Galarneaux House	38.570833	-121.498889		Mary Haley Galarneaux House			Mary Haley Galarneaux House	
+SA029	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Grant Union High School (Sacramento, California)	38.636231	-121.43496	article Grant Union High School (Sacramento, California) · 5 m	Grant Union High School (Sacramento, California)			Grant Union High School	
+SA030	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	John T. Greene House	38.57441666666667	-121.46302777777778	article John T. Greene House · 119 m	John T. Greene House			John T. Greene House	
+SA032	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Heilbron House	38.575611111111115	-121.49966666666667	article Heilbron House · 129 m	Heilbron House			Heilbron House	
+SA033	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Hotel Lenhart	38.578611111111115	-121.49555555555555	article Hotel Lenhart · 32 m	Hotel Lenhart			Hotel Lenhart	
+SA034	SEED — article in no tile (#539)	OWED — part 2	Hotel Regis	38.578694444444444	-121.49291666666667	article Hotel Regis · 111 m	Hotel Regis			Hotel Regis	
+SA035	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Senator Hotel	38.577574	-121.492076	article Senator Hotel · 87 m	Senator Hotel			Hotel Senator	
+SA036	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Edward P. Howe Jr. House	38.56262222222222	-121.48424166666666	article Edward P. Howe Jr. House · 104 m	Edward P. Howe Jr. House			Edward P. Howe Jr. House	
+SA037	SEED — unmapped	OWED — part 2	Hubbard-Upson House	38.5844	-121.49		Hubbard-Upson House		new: line SA043 51 m; new: line SA045 73 m	Hubbard-Upson House	new
+SA038	SEED — unmapped	CUT — served: I Street Bridge wiki_14430261 at the article point, 0 m (list point ~1 km off)	I Street Bridge	38.5775	-121.505		I Street Bridge		LIST POINT FAR: 1003 m from its article's point (I Street Bridge) — wrong article or a large site?; new: hidden pin Crocker Park 77 m	I Street Bridge	new
+SA040	SEED — unmapped	OWED — part 2	J Street Wreck	38.5839	-121.5053		J Street Wreck		new: hidden pin I Street 84 m	J Street Wreck	new
+SA041	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Thomas Jefferson School (Sacramento, California)	38.57383333333334	-121.48627777777777	article Thomas Jefferson School (Sacramento, California) · 39 m	Thomas Jefferson School (Sacramento, California)			Thomas Jefferson School	
+SA043	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	J. Neely Johnson House	38.58460277777778	-121.49053055555555	article J. Neely Johnson House · 99 m	J. Neely Johnson House			J. Neely Johnson House	
+SA044	SEED — unmapped	LINE — names-450-sacramento-1.txt (at the article point; list point 893 m off)	Theodore Judah School	38.5775	-121.4617		Theodore Judah School			Theodore Judah School	
+SA045	SEED — unmapped	OWED — part 2	Kuchler Row	38.5842	-121.4908		Kuchler Row		new: hidden pin Alkali Flat Central Historic District 67 m; new: line SA001 67 m; new: line SA037 73 m; new: line SA043 51 m; new: line SA088 51 m	Kuchler Row	new
+SA046	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Charles Lais House	38.581583333333334	-121.48797222222223	article Charles Lais House · 94 m	Charles Lais House			Charles Lais House	
+SA047	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Lawrence Warehouse	38.57083333333334	-121.49555555555555	article Lawrence Warehouse · 5 m	Lawrence Warehouse			Lawrence Warehouse	
+SA048	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Libby, McNeill and Libby Cannery	38.56444444444444	-121.46638888888889	article Libby, McNeill and Libby Cannery · 5 m	Libby, McNeill and Libby Cannery			Libby, McNeil and Libby Fruit and Vegetable Cannery	
+SA049	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Maydestone Apartments	38.57833333333333	-121.4863888888889	article Maydestone Apartments · 15 m	Maydestone Apartments			Maydestone Apartments	
+SA050	SEED — unmapped	LINE — names-450-sacramento-1.txt (at OSM node, 3066 Freeport Blvd)	C. K. McClatchy Senior High School	38.5511	-121.4925		C. K. McClatchy High School			C. K. McClatchy Senior High School	
+SA051	SEED — article in no tile (#539)	CURATED ROW — 450_hidden_curated.sql: hidden osm_way25420437 McKinley Park, containing tile 772_-2429 stores it (#542)	McKinley Park, Sacramento	38.5751	-121.4634	article McKinley Park, Sacramento · 0 m	McKinley Park, Sacramento			McKinley Park	
+SA052	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Merchants National Bank of Sacramento	38.58083333333334	-121.49741666666667	article Merchants National Bank of Sacramento · 93 m	Merchants National Bank of Sacramento			Merchants National Bank of Sacramento	
+SA053	SEED — article in no tile (#539)	NO LINE — demolished 1991	Merrium Apartments	38.57805555555556	-121.48666666666666	article Merrium Apartments · 5 m	Merrium Apartments			Merrium Apartments	
+SA055	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Mohr and Yoerk Market	38.57916666666667	-121.49277777777777	article Mohr and Yoerk Market · 8 m	Mohr and Yoerk Market			Mohr and Yoerk Market	
+SA058	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Nisei VFW Post 8985	38.57638888888889	-121.50361111111111	article Nisei VFW Post 8985 · 36 m	Nisei VFW Post 8985			Nisei VFW Post 8985	
+SA060	SEED — unmapped	OWED — part 2	North Sacramento School	38.6092	-121.4514		North Sacramento School			North Sacramento School	
+SA061	SEED — unmapped	CUT — served: Fair Oaks Bridge wiki_2475446 is this article	Old Fair Oaks Bridge	38.6381	-121.265		Fair Oaks Bridge		CHECK: same-named served pin Fair Oaks Bridge (wiki_2475446) 204 m away — the same place, mapped off the list point?; new: same-named pin 204 m	Old Fair Oaks Bridge	new
+SA063	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Old Tavern (Sacramento, California)	38.57083333333334	-121.46916666666667	article Old Tavern (Sacramento, California) · 5 m	Old Tavern (Sacramento, California)			Old Tavern	
+SA064	SEED — unmapped	CUT — served: PG&E Powerhouse wiki_76922893 is this article	PG&E Powerhouse	38.595	-121.505		PG&E Powerhouse		CHECK: same-named served pin PG&E Powerhouse (wiki_76922893) 181 m away — the same place, mapped off the list point?; new: same-named pin 181 m	PG&E Powerhouse	new
+SA065	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Pony Express Terminal	38.58305555555556	-121.50305555555556	article Pony Express Terminal · 6 m	Pony Express Terminal		CHECK SUBJECT: hidden pin Pony Express Monument (osm_node358836111) 79 m from the article may already be this place	Pony Express Terminal	
+SA070	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Sacramento City Library	38.58175000000001	-121.49513888888889	article Sacramento City Library · 6 m	Sacramento City Library			Sacramento City Library	
+SA071	SEED — unmapped	LINE — names-450-sacramento-1.txt (at the article point; list point 1,102 m off)	Sacramento Hall of Justice	38.5836	-121.485		Sacramento Hall of Justice			Sacramento Hall of Justice	
+SA073	SEED — unmapped	LINE — names-450-sacramento-1.txt (at the article point; list point 227 m off)	Sacramento Masonic Temple	38.5819	-121.4908		Sacramento Masonic Temple			Sacramento Masonic Temple	
+SA074	SEED — unmapped	LINE — names-450-sacramento-1.txt (at OSM node, 1515 J St)	Sacramento Memorial Auditorium	38.5789	-121.4847		Sacramento Memorial Auditorium			Sacramento Memorial Auditorium	
+SA078	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Sacramento Valley Station	38.584188798387785	-121.50072601852497	article Sacramento Valley Station · 63 m	Sacramento Valley Station			Southern Pacific Railroad Company's Sacramento Depot	
+SA079	SEED — unmapped	CUT — served: SMUD Headquarters Building wiki_36962102 is this article	SMUD Headquarters Building	38.553122	-121.432861		SMUD Headquarters Building		CHECK: same-named served pin SMUD Headquarters Building (wiki_36962102) 155 m away — the same place, mapped off the list point?; new: same-named pin 155 m	SMUD Headquarters Building	new
+SA080	SEED — unmapped	OWED — part 2	Southside Park	38.568949	-121.502935		Southside Park (Sacramento, California)			Southside Park	
+SA082	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Sutter Club	38.57783333333334	-121.49641666666666	article Sutter Club · 0 m	Sutter Club			Sutter Club	
+SA084	SEED — unmapped	OWED — part 2	Thomson-Diggs Company Building	38.5737	-121.5068		Thomson-Diggs Company Building			Thomson-Diggs Company Building	
+SA085	SEED — unmapped	CUT — served: Tower Bridge (Sacramento, California) wiki_6194093 at the article point, 0 m (list point ~1 km off)	Tower Bridge	38.571667	-121.506944		Tower Bridge (California)		LIST POINT FAR: 996 m from its article's point (Tower Bridge (Sacramento, California)) — wrong article or a large site?	Tower Bridge	
+SA086	SEED — unmapped	OWED — part 2	Travelers' Hotel	38.581667	-121.499444		Travelers' Hotel (Sacramento, California)			Travelers' Hotel	
+SA087	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Federal Building (Sacramento)	38.58236111111111	-121.49483333333333	article Federal Building (Sacramento) · 107 m	Federal Building (Sacramento)			U.S. Post Office, Courthouse and Federal Building	
+SA088	SEED — unmapped	OWED — part 2	Van Voorhies House	38.584167	-121.491389		Van Voorhies House		new: hidden pin Alkali Flat Central Historic District 51 m; new: line SA001 51 m; new: line SA043 89 m; new: line SA045 51 m	Van Voorhies House	new
+SA089	SEED — unmapped	OWED — part 2	Anton Wagner Duplex	38.586944	-121.493056		Anton Wagner Duplex		new: hidden pin Emiliano Zapata Park 92 m	Anton Wagner Duplex	new
+SA090	SEED — unmapped	LINE — names-450-sacramento-1.txt (at the article point; list point 226 m off)	Westminster Presbyterian Church	38.576389	-121.490833		Westminster Presbyterian Church (Sacramento, California)		new: hidden pin Thomas Starr King 69 m; hidden pin Spanish War Veterans 95 m; hidden pin U.S.S. California 84 m; new: line SA012 84 m	Westminster Presbyterian Church	new
+SA091	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt	Julius Wetzlar House	38.58283333333333	-121.49158333333334	article Julius Wetzlar House · 66 m	Julius Wetzlar House			Julius Wetzlar House	
+SA092	SEED — article in no tile (#539)	OWED — part 2	Winters House (Sacramento, California)	38.5775	-121.47305555555556	article Winters House (Sacramento, California) · 0 m	Winters House (Sacramento, California)			Winters House	
+SA095	SEED — article in no tile (#539)	LINE — names-450-sacramento-1.txt as Alhambra Theatre Fountain (theatre demolished 1973; fountain survives)	Alhambra Theatre (Sacramento)	38.57186	-121.46489	article Alhambra Theatre (Sacramento) · 0 m	Alhambra Theatre (Sacramento)			Alhambra Theatre	
+SA098	SEED — unmapped	OWED — part 2	Washington Firehouse	38.588021	-121.510122		Washington Firehouse			Washington Firehouse	
+SA005	CUT — served					American River Grange Hall No. 172 · wiki_28214948 · 60 m	American River Grange Hall No. 172			American River Grange Hall No. 172	
+SA010	CUT — served					Brighton School (Sacramento, California) · wiki_28215028 · 0 m	Brighton School (Sacramento, California)			Brighton School	
+SA011	CUT — served					Governor's Mansion State Historic Park · osm_way40180170 · 112 m	California Governor's Mansion			California Governor's Mansion	
+SA018	CUT — served					Crocker Art Museum · osm_node368174612 · 104 m	Crocker Art Museum			E. B. Crocker Art Gallery	
+SA019	CUT — served					Delta King · wiki_11900525 · 0 m	Delta King			Delta King	
+SA022	CUT — served					Dunlap's Dining Room · wiki_41213801 · 112 m	Dunlap's Dining Room			Dunlap's Dining Room	
+SA028	CUT — served					Julia Morgan House · wiki_28304852 · 92 m	Julia Morgan House			Goethe House	
+SA031	CUT — served					Anne Hathaway Cottage · wiki_76840744 · 5 m	Anne Hathaway Cottage			Anne Hathaway Cottage	
+SA054	CUT — served					Mesick House · wiki_18764921 · 99 m	Mesick House			Mesick House	
+SA059	CUT — served					Nisipowinan Village · wiki_74867797 · 0 m	Nisipowinan Village			Nisenan Village Site	
+SA066	CUT — served					Ruhstaller Building · osm_way331119613 · 73 m	Ruhstaller Building			Ruhstaller Building	
+SA068	CUT — served					Sacramento Bank Building · wiki_76922112 · 104 m	Sacramento Bank Building			Sacramento Bank Building	
+SA069	CUT — served					Sacramento Historic City Cemetery · wiki_30536612 · 56 m	Sacramento Historic City Cemetery			Sacramento City Cemetery	
+SA076	CUT — served					Shiloh Baptist Church (Sacramento, California) · wiki_76921664 · 25 m	Shiloh Baptist Church (Sacramento, California)			Shiloh Baptist Church	
+SA077	CUT — served					Slocum House (Fair Oaks, California) · wiki_76845254 · 0 m	Slocum House (Fair Oaks, California)			Slocum House	
+SA081	CUT — served					Leland Stanford Mansion · osm_node368173324 · 46 m	Leland Stanford Mansion State Historic Park			Stanford-Lathrop House	
+SA083	CUT — served					Sutter's Fort State Historic Park · osm_way40186323 · 117 m	Sutter's Fort		CHECK SUBJECT (partial or container match)	Sutter's Fort	
+SA099	CUT — served					Hapgood-Hume Company · wiki_75047484 · 0 m	First Pacific Coast Salmon Cannery Site			First Pacific Coast Salmon Cannery Site	
+SA008	NO LINE — district centroid						Boulevard Park (Sacramento, California)		no stored pin for the district; a centroid pin would be arbitrary	Boulevard Park	
+SA014	NO LINE — district centroid						Capitol Extension District		no stored pin for the district; a centroid pin would be arbitrary	Capitol Extension District	
+SA020	NO LINE — no coordinate		Delta Meadows Site				Delta Meadows Site		place by hand or cut	Delta Meadows Site	
+SA039	NO LINE — no coordinate		Indian Stone Corral				Indian Stone Corral		place by hand or cut	Indian Stone Corral	
+SA042	NO LINE — no coordinate		Joe Mound				Joe Mound		place by hand or cut	Joe Mound	
+SA056	NO LINE — district centroid						Montgomery Way Gateway Historic District		no stored pin for the district; a centroid pin would be arbitrary	Montgomery Way Gateway Historic District	
+SA057	NO LINE — district centroid						New Helvetia Historic District		no stored pin for the district; a centroid pin would be arbitrary	New Helvetia Historic District	
+SA062	NO LINE — district centroid						Old Sacramento Historic District		no stored pin for the district; a centroid pin would be arbitrary	Old Sacramento Historic District	
+SA067	NO LINE — district centroid						Sacramento Air Depot Historic District		no stored pin for the district; a centroid pin would be arbitrary	Sacramento Air Depot Historic District	
+SA072	NO LINE — district centroid						Sacramento Junior College Annex and Extensions		no stored pin for the district; a centroid pin would be arbitrary	Sacramento Junior College Annex and Extensions	
+SA075	NO LINE — district centroid						Sacramento Shops Historic District		no stored pin for the district; a centroid pin would be arbitrary	Sacramento Shops Historic District	
+SA093	NO LINE — district centroid						Edwin Witter Ranch		no stored pin for the district; a centroid pin would be arbitrary	Edwin Witter Ranch	
+SA094	NO LINE — no coordinate		Woodlake Site				Woodlake Site		place by hand or cut	Woodlake Site	
+SA096	NO LINE — no coordinate		Bennett Mound				Bennett Mound		place by hand or cut	Bennett Mound	
+SA097	NO LINE — no coordinate		Utah Condensed Milk Company Plant				Sego Milk Plant		place by hand or cut	Utah Condensed Milk Company Plant	
