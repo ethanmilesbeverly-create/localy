@@ -1,0 +1,34 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+LV015	SEED under a different name — containing tile 724_-2303 does not store the pin (#542)		Las Vegas Mormon Fort and Rancho	36.1805671	-115.1334716	Old Las Vegas Mormon Fort State Historic Park · osm_way129478115 · 43 m	Old Las Vegas Mormon Fort State Historic Park		hidden pin stored in 723_-2303; containing tile 724_-2303 does NOT store it (#542) — a curated row cannot un-hide it	Las Vegas Mormon Fort and Rancho	new
+LV056	SEED — unmapped		Gypsum Cave	36.2244	-114.9769		Gypsum Cave		new: served pin Sunrise Mountain (Nevada) 6 m	Gypsum Cave	new
+LV112	SEED — unmapped		"Original Homesite of a Las Vegas Pioneer ""Pop"" Squires (1865-1958)"	36.16468	-115.140812		Charles Pember Squires			"Original Homesite of a Las Vegas Pioneer ""Pop"" Squires (1865-1958)"	
+LV126	SEED — unmapped		Rafael Rivera	36.083692	-115.072761		Rafael Rivera			Rafael Rivera	
+LV156	SEED — article in no tile (#539)		Morelli House	36.165277777777774	-115.13777777777779	article Morelli House · 3 m	Morelli House			The Morelli House	
+LV161	SEED — unmapped		Leroy and Carrie Christensen House	36.187	-115.1487		Leroy and Carrie Christensen House			Leroy and Carrie Christensen House	
+LV164	SEED — article in no tile (#539)		El Cortez (Las Vegas)	36.169368999999996	-115.13862783333335	article El Cortez (Las Vegas) · 0 m	El Cortez (Las Vegas)			El Cortez Hotel and Casino	
+LV170	SEED — unmapped		Las Vegas Grammar School	36.164722	-115.146667		Las Vegas Grammar School (Las Vegas Boulevard, Las Vegas, Nevada)		LIST POINT FAR: 339 m from its article's point (Las Vegas Grammar School (Las Vegas Boulevard, Las Vegas, Nevada)) — wrong article or a large site?	Las Vegas Grammar School	
+LV171	SEED — article in no tile (#539)		Las Vegas Grammar School (Washington and D Streets, Las Vegas, Nevada)	36.18127	-115.14633	article Las Vegas Grammar School (Washington and D Streets, Las Vegas, Nevada) · 95 m	Las Vegas Grammar School (Washington and D Streets, Las Vegas, Nevada)			Las Vegas Grammar School	
+LV174	SEED under a different name — containing tile 723_-2303 does not store the pin (#542)		Las Vegas High School Neighborhood Historic District (rename)	36.1632552	-115.140386	Las Vegas High School Neighborhood Historic District · osm_node13205877145 · 129 m	Las Vegas High School Neighborhood Historic District		hidden pin stored in 723_-2302; containing tile 723_-2303 does NOT store it (#542) — a curated row cannot un-hide it	Las Vegas High School Neighborhood Historic District	new
+LV176	SEED — unmapped		LULAC Multi-Purpose Senior Center	36.1686	-115.1297		LULAC Multi-Purpose Senior Center			LULAC Multi-Purpose Senior Center	
+LV177	SEED — unmapped		Moulin Rouge Hotel	36.177778	-115.151667		Moulin Rouge Hotel		CHECK: same-named served pin Moulin Rouge Hotel (wiki_5052143) 185 m away — the same place, mapped off the list point?; new: same-named pin 185 m	Moulin Rouge Hotel	new
+LV182	SEED — article in no tile (#539)		Jay Dayton Smith House	36.16226	-115.1441	article Jay Dayton Smith House · 128 m	Jay Dayton Smith House			Jay Dayton Smith House	
+LV185	SEED — article in no tile (#539)		Las Vegas Post Office and Courthouse	36.172823	-115.141252	article Las Vegas Post Office and Courthouse · 88 m	Las Vegas Post Office and Courthouse			U.S. Post Office and Courthouse	
+LV019	CUT — served					Las Vegas Springs · wiki_10137348 · 108 m	Las Vegas Springs			Las Vegas (The Meadows)	
+LV130	CUT — served					Kyle Ranch · wiki_6047262 · 0 m	Kyle Ranch			Kyle Ranch	
+LV160	CUT — served					Berkley Square · wiki_25214285 · 0 m	Berkley Square			Berkley Square	
+LV162	CUT — served					Clark Avenue Railroad Underpass · wiki_19738914 · 0 m	Clark Avenue Railroad Underpass			Clark Avenue Railroad Underpass	
+LV165	CUT — served					Eureka and Palisade Railroad 4 Eureka · wiki_10157052 · 126 m	Eureka Locomotive			Eureka Locomotive	
+LV167	CUT — served					The Green Shack · wiki_6010536 · 0 m	The Green Shack			Green Shack	
+LV168	CUT — served					Harrison's Guest House · wiki_54401199 · 0 m	Harrison's Guest House			Harrison's Guest House	
+LV169	CUT — served					Huntridge Theater · wiki_5996315 · 89 m	Huntridge Theater			Huntridge Theater	
+LV172	CUT — served					Las Vegas High School Historic District · osm_node13205619120 · 125 m	Las Vegas High School Academic Building, Gymnasium, and Frazier Hall			Las Vegas High School Academic Building, Gymnasium, and Frazier Hall	
+LV173	CUT — served					Las Vegas High School Historic District · osm_node13205619120 · 125 m	Las Vegas High School Historic District			Las Vegas High School Historic District	
+LV175	CUT — served					Little Church of the West · wiki_6024971 · 0 m	The Little Church of the West			Little Church of the West	
+LV179	CUT — served					John S. Park Historic District · wiki_19780531 · 47 m	John S. Park Historic District			John S. Park Historic District	
+LV184	CUT — served					Tule Springs Ranch · wiki_19505099 · 136 m	Tule Springs Ranch			Tule Springs Ranch	
+LV186	CUT — served					Washington School (North Las Vegas, Nevada) · wiki_9942647 · 110 m	Washington School (North Las Vegas, Nevada)			Washington School	
+LV187	CUT — served					Welcome to Fabulous Las Vegas sign · wiki_1710951 · 0 m	Welcome to Fabulous Las Vegas sign			"The ""Welcome to Fabulous Las Vegas"" Sign"	
+LV188	CUT — served					Woodlawn Cemetery (Las Vegas) · wiki_8553935 · 72 m	Woodlawn Cemetery (Las Vegas)			Woodlawn Cemetery	
+LV191	CUT — served					Tule Springs Archaeological Site · wiki_19505091 · 0 m	Tule Springs Archaeological Site			Tule Springs	
+LV178	NO LINE — district centroid						Old Spanish Trail (trade route)#National Register of Historic Places listings		no stored pin for the district; a centroid pin would be arbitrary	Old Spanish Trail – Mormon Road Historic District	
+LV180	NO LINE — district centroid						Railroad Cottage Historic District		no stored pin for the district; a centroid pin would be arbitrary	Railroad Cottage Historic District	
