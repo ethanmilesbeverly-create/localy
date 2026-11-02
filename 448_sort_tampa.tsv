@@ -1,0 +1,91 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+TP058	CURATED ROW — hidden pin		Rogers Park	28.0222412	-82.4237049	Rogers Park · osm_node358704493 · 9 m	Rogers Park, Tampa		hidden pin stored in 560_-1648, 560_-1649, 561_-1648, 561_-1649; containing tile 560_-1648 stores it (#542)	Original Rogers Park Golf Course Site	
+TP003	SEED — article in no tile (#539)		Centro Asturiano de Tampa	27.962	-82.4509	article Centro Asturiano de Tampa · 38 m	Centro Asturiano de Tampa			Centro Asturiano	
+TP004	SEED — unmapped		Circulo Cubano de Tampa	27.960833	-82.445		Circulo Cubano de Tampa		new: line TP079 62 m	Circulo Cubano de Tampa	new
+TP007	SEED — article in no tile (#539)		El Centro Español of West Tampa	27.9618	-82.483	article El Centro Español of West Tampa · 56 m	El Centro Español of West Tampa			El Centro Espanol of West Tampa	
+TP008	SEED — article in no tile (#539)		El Pasaje	27.9618	-82.4444	article El Pasaje · 35 m	El Pasaje			El Pasaje	
+TP009	SEED — article in no tile (#539)		St. James House of Prayer Episcopal Church	27.966666666666665	-82.45555555555556	article St. James House of Prayer Episcopal Church · 0 m	St. James House of Prayer Episcopal Church			Episcopal House of Prayer	
+TP010	SEED — article in no tile (#539)		United States Courthouse Building and Downtown Postal Station (Tampa, Florida)	27.949722222222224	-82.4575	article United States Courthouse Building and Downtown Postal Station (Tampa, Florida) · 0 m	United States Courthouse Building and Downtown Postal Station (Tampa, Florida)		CHECK SUBJECT: served pin Downtown Tampa (wiki_7943710) 109 m from the article may already be this place	Federal Building, U.S. Courthouse, Downtown Postal Station	
+TP011	SEED — unmapped		Federal Office Building	27.950865	-82.456898		Federal Office Building (Tampa, Florida)			Federal Office Building	
+TP012	SEED — unmapped		First Federal Savings and Loan Association of Tampa	27.9483	-82.4585		First Federal Savings and Loan Association of Tampa			First Federal Savings and Loan Association of Tampa	
+TP013	SEED — unmapped		Floridan Hotel	27.951667	-82.448333		Floridan Palace Hotel			Floridan Hotel	
+TP014	SEED — unmapped		Fort Homer W. Hesterly National Guard Armory	27.949601	-82.484021		Fort Homer W. Hesterly Armory			Fort Homer W. Hesterly National Guard Armory	
+TP015	SEED — article in no tile (#539)		Isaac Gardner Sr. House	27.964166666666667	-82.46305555555556	article Isaac Gardner Sr. House · 0 m	Isaac Gardner Sr. House			Isaac Gardner Sr. House	
+TP018	SEED — article in no tile (#539)		Bro Bowl	27.9550236	-82.455622	article Bro Bowl · 1 m	Bro Bowl			Perry Harvey Sr. Park Skateboard Bowl	
+TP019	SEED — article in no tile (#539)		House at 36 Aegean Avenue	27.934444444444445	-82.45944444444444	article House at 36 Aegean Avenue · 0 m	House at 36 Aegean Avenue			House at 36 Aegean Avenue	
+TP020	SEED — article in no tile (#539)		House at 36 Columbia Drive	27.934722222222224	-82.45722222222223	article House at 36 Columbia Drive · 0 m	House at 36 Columbia Drive			House at 36 Columbia Drive	
+TP021	SEED — article in no tile (#539)		House at 53 Aegean Avenue	27.93277777777778	-82.45916666666668	article House at 53 Aegean Avenue · 0 m	House at 53 Aegean Avenue			House at 53 Aegean Avenue	
+TP022	SEED — article in no tile (#539)		House at 59 Aegean Avenue	27.9325	-82.45916666666668	article House at 59 Aegean Avenue · 0 m	House at 59 Aegean Avenue			House at 59 Aegean Avenue	
+TP023	SEED — article in no tile (#539)		House at 84 Adalia Avenue	27.930972222222223	-82.46083333333334	article House at 84 Adalia Avenue · 31 m	House at 84 Adalia Avenue			House at 84 Adalia Avenue	
+TP024	SEED — article in no tile (#539)		House at 97 Adriatic Avenue	27.931944444444447	-82.46027777777778	article House at 97 Adriatic Avenue · 0 m	House at 97 Adriatic Avenue			House at 97 Adriatic Avenue	
+TP033	SEED — unmapped		House at 200 Corsica Avenue	27.925278	-82.460556		House at 200 Corsica Avenue		new: served pin House at 220 Blanca Avenue 27 m	House at 200 Corsica Avenue	new
+TP043	SEED — article in no tile (#539)		S. H. Kress and Co. Building (Tampa, Florida)	27.950833333333332	-82.45944444444444	article S. H. Kress and Co. Building (Tampa, Florida) · 0 m	S. H. Kress and Co. Building (Tampa, Florida)			S. H. Kress and Co. Building	
+TP044	SEED — unmapped		Lafayette Street Bridge	27.946667	-82.461111		Lafayette Street Bridge (Tampa, Florida)<!--(name under which it is listed on NRHP)-->			Lafayette Street Bridge	
+TP046	SEED — article in no tile (#539)		Leiman House	27.935555555555556	-82.47166666666666	article Leiman House · 0 m	Leiman House			Leiman House	
+TP048	SEED — article in no tile (#539)		Meacham Elementary School	27.955277777777777	-82.45305555555557	article Meacham Elementary School · 0 m	Meacham Elementary School			Meacham Elementary School	
+TP049	SEED — unmapped		Michigan Avenue Bridge	27.966793	-82.475174		Michigan Avenue Bridge (Tampa, Florida)			Michigan Avenue Bridge	
+TP052	SEED — article in no tile (#539)		D. W. Waters Career Center	27.968055555555555	-82.46305555555556	article D. W. Waters Career Center · 0 m	D. W. Waters Career Center			Old Hillsborough County High School	
+TP053	SEED — unmapped		Old People's Home	27.961389	-82.446667		Old People's Home (Tampa, Florida)			Old People's Home	
+TP054	SEED — article in no tile (#539)		Old School House (Tampa, Florida)	27.946666666666665	-82.46527777777779	article Old School House (Tampa, Florida) · 0 m	Old School House (Tampa, Florida)			Old School House	
+TP055	SEED — article in no tile (#539)		Old Tampa Children's Home	27.974444444444444	-82.45972222222223	article Old Tampa Children's Home · 31 m	Old Tampa Children's Home			Old Tampa Children's Home	
+TP056	SEED — article in no tile (#539)		Tampa Free Library	27.960277777777776	-82.46055555555556	article Tampa Free Library · 0 m	Tampa Free Library			Old Tampa Free Public Library	
+TP059	SEED — article in no tile (#539)		Palace of Florence Apartments	27.933888888888887	-82.45777777777778	article Palace of Florence Apartments · 0 m	Palace of Florence Apartments			Palace of Florence Apartments	
+TP063	SEED — article in no tile (#539)		Roosevelt Elementary School (Tampa, Florida)	27.91638888888889	-82.49777777777778	article Roosevelt Elementary School (Tampa, Florida) · 0 m	Roosevelt Elementary School (Tampa, Florida)			Roosevelt Elementary School	
+TP064	SEED — article in no tile (#539)		St. Andrew's Episcopal Church (Tampa, Florida)	27.949444444444445	-82.45666666666666	article St. Andrew's Episcopal Church (Tampa, Florida) · 9 m	St. Andrew's Episcopal Church (Tampa, Florida)			St. Andrews Episcopal Church	
+TP066	SEED — article in no tile (#539)		Spanish Apartments	27.935555555555556	-82.45972222222223	article Spanish Apartments · 0 m	Spanish Apartments			Spanish Apartments	
+TP069	SEED — article in no tile (#539)		T. C. Taliaferro House	27.941111111111113	-82.46444444444445	article T. C. Taliaferro House · 0 m	T. C. Taliaferro House			T. C. Taliaferro House	
+TP071	SEED — article in no tile (#539)		Tampa City Hall	27.947222222222223	-82.4575	article Tampa City Hall · 0 m	Tampa City Hall			Tampa City Hall	
+TP073	SEED — article in no tile (#539)		Tampa Theatre	27.95	-82.4588888888889	article Tampa Theatre · 0 m	Tampa Theatre			Tampa Theatre and Office Building	
+TP075	SEED — article in no tile (#539)		Tampa Union Station	27.952222222222222	-82.45111111111112	article Tampa Union Station · 0 m	Tampa Union Station			Union Railroad Station	
+TP079	SEED — article in no tile (#539)		Ybor Factory Building	27.961388888888887	-82.44500000000001	article Ybor Factory Building · 97 m	Ybor Factory Building			Ybor Factory Building	
+TP085	SEED — unmapped		Temple Terrace Golf Course	28.037081	-82.385294		Temple Terrace Golf and Country Club			Temple Terrace Golf Course	
+TP001	CUT — served					Anderson-Frank House · osm_way112686571 · 59 m	Anderson-Frank House			Anderson-Frank House	
+TP002	CUT — served					Bay Isle Commercial Building · wiki_7306560 · 0 m	Bay Isle Commercial Building			Bay Isle Commercial Building	
+TP005	CUT — served					William E. Curtis House · wiki_7290747 · 0 m	William E. Curtis House			William E. Curtis House	
+TP006	CUT — served					El Centro Español de Tampa · osm_way333785161 · 71 m	El Centro Español de Tampa			El Centro Español de Tampa	
+TP016	CUT — served					George Guida Sr. House · wiki_8911943 · 0 m	George Guida Sr. House			George Guida Sr. House	
+TP017	CUT — served					Hampton Terrace Historic District · wiki_5934549 · 0 m	Hampton Terrace Historic District			Hampton Terrace Historic District	
+TP025	CUT — served					House at 100 West Davis Boulevard · wiki_7379589 · 0 m	House at 100 West Davis Boulevard			House at 100 West Davis Boulevard	
+TP026	CUT — served					House at 116 West Davis Boulevard · wiki_7379596 · 0 m	House at 116 West Davis Boulevard			House at 116 West Davis Boulevard	
+TP027	CUT — served					House at 125 Baltic Circle · wiki_7379757 · 82 m	House at 124 Baltic Circle			House at 124 Baltic Circle	
+TP028	CUT — served					House at 125 Baltic Circle · wiki_7379757 · 0 m	House at 125 Baltic Circle			House at 125 Baltic Circle	
+TP029	CUT — served					House at 131 West Davis Boulevard · wiki_7379612 · 0 m	House at 131 West Davis Boulevard			House at 131 West Davis Boulevard	
+TP030	CUT — served					House at 132 Baltic Circle · wiki_7379765 · 21 m	House at 132 Baltic Circle			House at 132 Baltic Circle	
+TP031	CUT — served					House at 161 Bosporous Avenue · wiki_7379622 · 0 m	House at 161 Bosporous Avenue			House at 161 Bosporous Avenue	
+TP032	CUT — served					House at 190 Bosporous Avenue · wiki_7379633 · 34 m	House at 190 Bosporous Avenue			House at 190 Bosporous Avenue	
+TP034	CUT — served					House at 202 Blanca Avenue · wiki_7379822 · 0 m	House at 202 Blanca Avenue			House at 202 Blanca Avenue	
+TP035	CUT — served					House at 220 Blanca Avenue · wiki_7379827 · 0 m	House at 220 Blanca Avenue			House at 220 Blanca Avenue	
+TP036	CUT — served					House at 301 Caspian Street · wiki_7379784 · 0 m	House at 301 Caspian Street			House at 301 Caspian Street	
+TP037	CUT — served					House at 418 Blanca Avenue · wiki_7379837 · 0 m	House at 418 Blanca Avenue			House at 418 Blanca Avenue	
+TP038	CUT — served					Hutchinson House · osm_way112461926 · 33 m	Hutchinson House (Tampa, Florida)			Hutchinson House	
+TP040	CUT — served					Captain William Parker Jackson House · wiki_35226522 · 10 m	Captain William Parker Jackson House			Captain William Parker Jackson House	
+TP041	CUT — served					Jackson Rooming House · wiki_10323649 · 8 m	Jackson Rooming House			Jackson Rooming House	
+TP042	CUT — served					Johnson-Wolff House · wiki_7290473 · 0 m	Johnson-Wolff House			Johnson-Wolff House	
+TP045	CUT — served					LeClaire Apartments · wiki_7306843 · 0 m	LeClaire Apartments			LeClaire Apartments	
+TP047	CUT — served					Masonic Temple No. 25 · wiki_7116560 · 0 m	Masonic Temple No. 25			Masonic Temple No. 25	
+TP057	CUT — served					Old Union Depot Hotel · wiki_7261387 · 0 m	Old Union Depot Hotel			Old Union Depot Hotel	
+TP060	CUT — served					Palmerin Hotel · wiki_7261362 · 0 m	Palmerin Hotel			Palmerin Hotel	
+TP062	CUT — served					Horace T. Robles House · wiki_8912051 · 44 m	Horace T. Robles House			Horace T. Robles House	
+TP065	CUT — served					Seminole Heights Residential District · wiki_6128332 · 0 m	Seminole Heights Residential District			Seminole Heights Residential District	
+TP067	CUT — served					SS American Victory;American Victory Museum · osm_way172645009 · 146 m	SS American Victory			SS AMERICAN VICTORY (Victory ship)	
+TP068	CUT — served					Stovall House · wiki_7290534 · 0 m	Stovall House			Stovall House	
+TP070	CUT — served					Henry B. Plant Museum · osm_node282685801 · 11 m	Henry B. Plant Museum			Tampa Bay Hotel	
+TP074	CUT — served					Tampania House · wiki_7290553 · 0 m	Tampania House			Tampania House	
+TP077	CUT — served					West Tampa Historic District · wiki_6114463 · 0 m	West Tampa Historic District			West Tampa Historic District	
+TP084	CUT — served					Moseley Homestead · wiki_7290858 · 0 m	Moseley Homestead			Moseley Homestead	
+TP089	CUT — served					Weedon Island Preserve · wiki_7631024 · 0 m	Weedon Island Preserve			Weedon Island Site	
+TP039	NO LINE — district centroid						Hyde Park Historic Districts		no stored pin for the district; a centroid pin would be arbitrary	Hyde Park Historic Districts	
+TP050	NO LINE — district centroid						North Franklin Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	North Franklin Street Historic District	
+TP051	NO LINE — district centroid						Oaklawn and St. Louis Cemeteries Historic District		no stored pin for the district; a centroid pin would be arbitrary	Oaklawn and St. Louis Cemeteries Historic District	
+TP061	NO LINE — district centroid						Palmetto Beach Historic District		no stored pin for the district; a centroid pin would be arbitrary	Palmetto Beach Historic District	
+TP072	NO LINE — district centroid						Tampa Heights Historic District		no stored pin for the district; a centroid pin would be arbitrary	Tampa Heights Historic District	
+TP076	NO LINE — district centroid						Upper North Franklin Street Commercial District		no stored pin for the district; a centroid pin would be arbitrary	Upper North Franklin Street Commercial District	
+TP078	NO LINE — district centroid						Ybor City Historic District		no stored pin for the district; a centroid pin would be arbitrary	Ybor City Historic District	
+TP080	NO LINE — no coordinate		Building at 1415 North Franklin Street				Building at 1415 North Franklin Street		place by hand or cut	Building at 1415 North Franklin Street	
+TP081	NO LINE — no coordinate		Chapin House				Chapin House (Tampa, Florida)		place by hand or cut	Chapin House	
+TP082	NO LINE — no coordinate		Hayden Estate Building				Hayden Estate Building		place by hand or cut	Hayden Estate Building	
+TP083	NO LINE — no coordinate		Levick House				Levick House		place by hand or cut	Levick House	
+TP086	NO LINE — no coordinate		Abercrombie Site Complex				Abercrombie Site Complex		place by hand or cut	Abercrombie Site Complex	
+TP087	NO LINE — no coordinate		Maximo Beach Site				Maximo Beach Site		place by hand or cut	Maximo Beach Site	
+TP088	NO LINE — no coordinate		Princess Mound Site				Princess Mound Site		place by hand or cut	Princess Mound Site	
+TP090	NO LINE — no coordinate		Tarpon Springs Sponge Exchange				Tarpon Springs Sponge Exchange		place by hand or cut	Tarpon Springs Sponge Exchange	
