@@ -1,0 +1,64 @@
+tile	name	category	desc	pin id	in gate drops	in leads	verdict
+568_-1631	Turtle Talk with Crush	history		osm_node2990152020	yes	yes	
+568_-1631	Indian Burial Ground	art	A public sculpture.	osm_node3290703317	yes	no	
+568_-1631	Neptune	art	A piece of public art.	osm_node3293477976	yes	no	
+568_-1631	Torii Gate	art	A piece of public art.	osm_way118933968	yes	no	
+568_-1631	Column of San Todaro	art	A public column.	osm_way493363885	yes	no	
+568_-1631	Column of San Marco	art	A public column.	osm_way493363886	yes	no	
+568_-1630	St. Michael	art	A public statue.	osm_node12197636055	yes	yes	
+568_-1630	Chocolate Museum & Cafe	history	A local museum.	osm_way1065535233	yes	yes	
+568_-1629	Chocolate Kingdom - Factory Adventure Tour	history	A local museum.	osm_node12197562740	yes	yes	
+568_-1626	DNA statue	art	A public statue.	osm_node4686437156	yes	no	
+568_-1626	Disco Dog Sculpture	art	A public sculpture.	osm_node11073919407	yes	no	
+568_-1626	Global Angel Wings Project	art	A piece of public art.	osm_node11073939705	yes	no	
+568_-1626	Code Wall	art	A public mural.	osm_way557851950	yes	no	
+568_-1625	Glass House	art	A piece of public art.	osm_node11073939805	yes	no	
+569_-1630	Skeletons: Museum of Osteology	history		osm_node4093977063	yes	yes	
+569_-1630	Revenge of the Mummy	history		osm_node4694456530	yes	yes	
+569_-1630	Krakatau	history		osm_node5599325681	yes	no	
+569_-1630	Piece of Berlin Wall	history	A local memorial.	osm_node5872896268	yes	yes	
+569_-1630	Jurassic Park River Adventure	history		osm_node9108591232	yes	no	
+569_-1630	WonderWorks Family Attractions	history	A local museum.	osm_way140641455	yes	yes	
+569_-1630	Jeep Wrangler Photo Op	art	A public statue.	osm_way985192002	yes	yes	
+569_-1630	Ford Explorer Photo Op	art	A public statue.	osm_way985202906	yes	yes	
+569_-1630	Hogwarts Express Photo Op	art	A public statue.	osm_way985364137	yes	yes	
+569_-1627	Ruins XXIII	art	A sculpture by Ernest Shaw.	osm_node13624214182	yes	yes	
+570_-1631	Air Force Memorial	history	A local memorial (yes).	osm_way553130169	yes	no	
+570_-1627	Lake Haven Monument	history	A local landmark (monument).	osm_node3258880021	yes	yes	
+570_-1627	Earth Day	history	A local landmark (monument).	osm_node3258880056	yes	yes	
+571_-1631	Heritage Foundation History Center	history	A local museum.	osm_node367827616	yes	no	
+571_-1628	Orlando Pottery Studio	art	A piece of public art.	osm_node2001801971	yes	yes	
+571_-1628	Red Tails Memorial	history	A local landmark (monument).	osm_node4639889178	yes	yes	
+571_-1628	Union	art	A sculpture by Ralfonso Gschwend.	osm_node5586711218	yes	yes	
+571_-1628	Take Flight	art	A sculpture by Douwe Blumberg.	osm_node5586711219	yes	yes	
+571_-1628	Centered	art	A sculpture by C.J Rench.	osm_node5586711220	yes	yes	
+571_-1628	Alligator Wrestler Statue	art	A public statue.	osm_node6004911781	yes	yes	
+571_-1628	Alligator Statue	art	A public statue.	osm_node6004918594	yes	yes	
+571_-1628	Discovery Muse	art	A sculpture by Meg White.	osm_node10895921807	yes	yes	
+571_-1628	Battle of the Bulge Memorial	art	A public statue.	osm_node10896595599	yes	yes	
+571_-1628	Cedar of Lebanon	art	A sculpture by Jacob J. Harmeling.	osm_node10899389302	yes	yes	
+571_-1628	LHPS Shoe	art	A sculpture by LHPS Arts Leauge.	osm_node11364762270	yes	yes	
+571_-1628	Solidarity	art	A sculpture by Hunter Brown.	osm_node13424494993	yes	yes	
+571_-1628	Menello Museum of American Folk Art	history	A local museum.	osm_way375858329	yes	yes	
+571_-1628	Well's Built Museum of African American History & Culture	history	A local museum.	osm_way400479603	yes	yes	
+571_-1628	Orlando Fire Museum	history	A local museum.	osm_way550757263	yes	yes	
+571_-1628	Tower of Light	art	A public sculpture.	osm_way1382446202	yes	yes	
+571_-1628	Global Convergence	art	A public sculpture.	osm_way1382648560	yes	yes	
+571_-1628	The Sea Urchin	art	A public sculpture.	osm_way1382881870	yes	yes	
+571_-1628	Artifact	art	A public sculpture.	osm_way1383347933	yes	yes	
+571_-1627	Miracles of Jesus 1	art	A public sculpture.	osm_node6987671092	yes	yes	
+571_-1627	Miracles of Jesus 2	art	A public sculpture.	osm_node6987671093	yes	yes	
+571_-1627	Miracles of Jesus 3	art	A public sculpture.	osm_node6987671094	yes	yes	
+571_-1627	Miracles of Jesus 4	art	A public sculpture.	osm_node6987671095	yes	yes	
+571_-1627	Miracles of Jesus 5	art	A public sculpture.	osm_node6987671096	yes	yes	
+571_-1627	Miracles of Jesus 6	art	A public sculpture.	osm_node6987671097	yes	yes	
+571_-1626	Vietnam War Memorial	history	A war memorial.	osm_node7165361310	yes	yes	
+572_-1627	Umi Japanese Restaurant	history		osm_node3411777862	yes	yes	
+572_-1627	The Lone Sailor	art	A statue by Stanley Bleifeld.	osm_node12964848621	yes	yes	
+573_-1628	Nurture Art Sculpture	art	A statue by Mark Aeling.	osm_node9029818176	yes	yes	
+571_-1631	Minorville	history	A local landmark (archaeological site).	osm_node10861347106	no	yes	
+571_-1629	Orlando Chinatown	history	A local landmark (city gate).	osm_way954749020	no	yes	
+570_-1629	Orlando Metropolitan Museum of Art	history	A local art museum.	osm_node367827541	no	yes	
+569_-1629	Universal CityWalk Orlando	history		osm_way449651135	no	yes	
+569_-1629	Universal Globe	history	A local landmark (monument).	osm_way449162077	no	yes	
+568_-1631	Walt Disney World Airport	history	A local landmark (runway).	osm_way515880913	no	yes	
