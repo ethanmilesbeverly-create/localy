@@ -84,7 +84,7 @@ type Metro = { name: string; lat: number; lng: number };
 type TileRef = { tile: string; lat: number; lng: number; metro: string };
 type Outcome = "warm" | "stale" | "built" | "water" | "empty" | "failed";
 
-const BUILD = "2026.11.02a"; // 02a: #449 + #450 + #452 + #453 + #454 roster 34 → 39 (+ Las Vegas, + Sacramento, Phase B; + Riverside, + Orlando, + Charlotte, Phase C); code unchanged. 30a: #447 + #448 roster 32 → 34 (+ San Antonio, + Tampa, Phase B); code unchanged. 29a: #446 roster 31 → 32 (+ Pittsburgh, Phase B); code unchanged. 28a: #485 roster 30 → 31 (+ Katy-Energy Corridor, Houston's first extra box); code unchanged. 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
+const BUILD = "2026.11.03a"; // 03a: #455 + #456 + #457 + #458 + #459 roster 39 → 44 (+ Cincinnati, + Kansas City, + Columbus, + Indianapolis, + Cleveland, Phase C); code unchanged. 02a: #449 + #450 + #452 + #453 + #454 roster 34 → 39 (+ Las Vegas, + Sacramento, Phase B; + Riverside, + Orlando, + Charlotte, Phase C); code unchanged. 30a: #447 + #448 roster 32 → 34 (+ San Antonio, + Tampa, Phase B); code unchanged. 29a: #446 roster 31 → 32 (+ Pittsburgh, Phase B); code unchanged. 28a: #485 roster 30 → 31 (+ Katy-Energy Corridor, Houston's first extra box); code unchanged. 27a: #501 roster 29 → 30 (+ Middlesex-Union, New York's third extra box); code unchanged. 25b: #500 roster 28 → 29 (+ Bergen-Westchester, New York's second extra box); code unchanged. 25a: #525 $0 shape — --until-warm keeps retrying only the failed tiles, one at a time, every PREWARM_DRIP_GAP_MIN (20) minutes until none fail or PREWARM_DRIP_HOURS (6) runs out; prewarm_failed.json rewritten each round. Roster, tile math and warm call unchanged. 22a: #484 roster 27 → 28 (+ DuPage-NW Cook, Chicago's first extra box); code unchanged. 20c: #483 roster 26 → 27 (+ Orange County, Los Angeles' first extra box); code unchanged. 20b: the Result type now declares overpassVersion/overpassMirror (20a read a field the type lacked; `deno check` would fail) and a built tile prints which mirror answered. 20a: #498 — prints the function's overpassVersion on the "function reported:" line and keeps 240 chars of an Overpass failure (the function now names every mirror's reason). Built on 02a — #482 roster 25 → 26 (+ Queens-Nassau, New York's first extra box). Built on 30b — #486: a cold build whose Wikipedia arm failed is reported as failed (wikipedia: …) and re-queued; #445 roster 24 → 25 (+ St. Louis)
 
 const env = (k: string) => (Deno.env.get(k) ?? "").trim();
 const SUPABASE_URL = env("SUPABASE_URL").replace(/\/+$/, "");
@@ -277,6 +277,58 @@ const METROS: Metro[] = [
   // Latta Plantation. Nearest roster row Atlanta, ~362 km; the grave square (34.88–35.60 /
   // -81.28…-80.39) reaches York and Lancaster counties in South Carolina, which no box owns.
   { name: "Charlotte", lat: 35.2355, lng: -80.8345 },
+  // #455 + #456 + #457 + #458 + #459 (2026-11-03): the roster grows 39 → 44 (+ Cincinnati,
+  // + Kansas City, + Columbus, + Indianapolis, + Cleveland — Phase C's next five), added in
+  // one edit so one chained drip warms them in this order (THE FAST RUNBOOK (d)). Same method
+  // as the 2026-11-02 five: each centre is the middle of its plateau, checked ±0.002° stable,
+  // zero tiles shared with any roster row or with each other (1,709 → 1,937 tiles); 2020 tract
+  // centres counted through the tools' own tile math (Queens-Nassau (a)), and a better-populated
+  // plateau taken only where it keeps the city's signature sites (FROM SAN ANTONIO (1)).
+  // Cincinnati: NOT the city centre's plateau — 0.03° north and 0.04° east of it (rows 780–785,
+  // columns -1693…-1687; 42 tiles). It drops 130k (Erlanger and Florence on the Kentucky side,
+  // Delhi's western edge) for 186k (Springdale, Madeira, Indian Hill, Mariemont): 870k → 926k.
+  // Fountain Square, Over-the-Rhine, Findlay Market, Union Terminal, Spring Grove, the zoo, Eden
+  // Park, the Stowe and Taft houses, Price Hill, Mount Airy Forest, Covington, Newport and Devou
+  // Park all stay in. Every centre in 39.1106–39.1601 / -84.5005…-84.4510 gives the same 42
+  // tiles; this is the middle. Measured, not taken: 39.2031/-84.412 covers +95k over the city
+  // centre but puts downtown and the river on the south edge and trades the West Side and
+  // Northern Kentucky's inner suburbs (268k) for Blue Ash and Sharonville. Nearest roster row
+  // Detroit, ~375 km; the ±40 km grave square (38.78–39.50 / -84.94…-84.01) reaches Boone,
+  // Kenton and Campbell counties in Kentucky and Dearborn County in Indiana, which no box owns.
+  { name: "Cincinnati", lat: 39.1354, lng: -84.4758 },
+  // Kansas City: the city centre's plateau, 39.0602–39.1097 / -94.6006…-94.5511 (42 tiles, rows
+  // 779–784, columns -1895…-1889; 859k people) — the River Market and the Arabia Steamboat
+  // Museum, Union Station, the WWI Museum, 18th & Vine, the Nelson-Atkins, the Plaza, Swope
+  // Park, Kansas City, Kansas's downtown and the Shawnee Indian Mission. Measured, not taken: one
+  // row south (39.05/-94.576) covers +78k (Overland Park's south, Grandview) but drops the
+  // Northland row — Gladstone, North Kansas City and Parkville (105k). Independence (the Truman
+  // Home) stays outside either way. Nearest roster row St. Louis, ~382 km; the grave square
+  // (38.72–39.45 / -95.04…-94.11) spans Missouri and Kansas and touches no other box.
+  { name: "Kansas City", lat: 39.0849, lng: -94.5759 },
+  // Columbus: NOT the city centre's plateau — 0.07° north and 0.03° east of it (rows 798–803,
+  // columns -1663…-1656; 48 tiles). It drops 70k (the far south row and Hilliard's eastern
+  // edge) for 228k (Westerville, Gahanna, Easton, the Columbus Zoo): 1.18M → 1.34M. The
+  // Statehouse, German Village, COSI, the Short North, Ohio State, the Ohio History Center,
+  // Franklin Park Conservatory, Green Lawn and Camp Chase cemeteries, Bexley and Grove City's
+  // north all stay in. Every centre in 40.0102–40.0597 / -82.9983…-82.9488 gives the same 48
+  // tiles; this is the middle. Nearest roster row Detroit, ~255 km; the grave square
+  // (39.67–40.40 / -83.44…-82.50) touches no other box.
+  { name: "Columbus", lat: 40.0349, lng: -82.9736 },
+  // Indianapolis: the city centre's plateau, 39.7604–39.8099 / -86.1991…-86.1496 (48 tiles, rows
+  // 793–798, columns -1727…-1720; 1.01M people) — Monument Circle, the War Memorial, Lucas Oil,
+  // the Motor Speedway, Crown Hill Cemetery, the Children's Museum, Butler, Garfield Park, Beech
+  // Grove and Fort Harrison. The best plateau measured only +21k (Carmel and Conner Prairie for
+  // the south side), not worth a shift. Nearest roster row Chicago, ~263 km; the grave square
+  // (39.42–40.15 / -86.64…-85.71) touches no other box.
+  { name: "Indianapolis", lat: 39.7852, lng: -86.1744 },
+  // Cleveland: the city centre's plateau, 41.4603–41.5098 / -81.6944…-81.6449 (48 tiles, rows
+  // 827–832, columns -1637…-1630; 1.05M people) — Public Square sits on its west edge (as
+  // Pittsburgh's downtown did); the Rock Hall, University Circle and the Museum of Art, Lake View
+  // Cemetery, Little Italy, Ohio City, Tremont, the West Side Market, the Metroparks Zoo,
+  // Lakewood, Edgewater, Shaker and Cleveland Heights. The best plateau measured +15k and drops
+  // the airport's column, not worth a shift. Nearest roster row Detroit, ~148 km; the grave
+  // square (41.12–41.85 / -82.15…-81.19) touches no other box (Lake Erie to the north).
+  { name: "Cleveland", lat: 41.4851, lng: -81.6697 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
