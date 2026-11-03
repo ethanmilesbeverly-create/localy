@@ -1,0 +1,48 @@
+# names-452-riverside-1.txt — #452 Riverside story batch, part 1: the Wikipedia list spine (drafted 2026-11-03).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Riverside batch (this file + part 2's names file(s) + 452_hidden_curated*.sql) dry-runs and commits in one Mac session
+# (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 452_sort_riverside.tsv (story-sort 2026.11.01b; lists: the Riverside County and San Bernardino County NRHP lists, and
+# the two counties' California Historical Landmark lists, whose {{CHL row}} rows were hand-added — #551). 78 candidates; the
+# sort read 20 cut, 5 curated rows, 16 seeds, 37 no line (34 restricted-address archaeological sites with no coordinate, 3
+# districts). REBUILT 2026-11-03: the first build of these inputs never reached `main`; the rebuild reproduced every recorded
+# count (78 / 20 / 5 / 16 / 37; leads 121; gate 45 resolved / 831 dropped; union 70 / 7 / 51).
+# Every line was written from its source's text and passed the mechanical checks (FROM SAN ANTONIO (12), FROM LAS VEGAS (6),
+# FROM SACRAMENTO (3)): every number and proper name in its source; inside the box; no name repeated; stored pins (served and
+# hidden) and approved gems within 120 m read at the LINE's own coordinate, not the list point.
+# CHANGED FROM THE SORT, BY READING:
+#   RV001 Administration Building, Sherman Institute — NOT a seed: the building IS the Sherman Indian Museum, a hidden OSM pin
+#     (osm_node14129783839) 11 m from the marker; its containing tile 679_-2349 stores it (#542) → 452_hidden_curated.sql.
+#   RV013 Federal Post Office — CUT: the 1912 post office is the Museum of Riverside, SERVED (osm_way119281494) 16 m from the
+#     building's point (gohistoric 33.98208, −117.37259); the list point sat 74 m off.
+#   RV020 Cornelius Jensen Ranch — CUT: the sort's two CHECK same-named pins are this place, both SERVED (wiki_29965909 at 191 m,
+#     osm_way919370923 at 152 m); the list point is off.
+#   RV025 Masonic Temple (Riverside, California) — NO LINE: demolished in 1988 for the county Hall of Justice (its article,
+#     FROM SACRAMENTO (5)). That also settles the sort's TWIN CANDIDATE with RV037.
+#   RV033 Perris Depot — the article point (33.7736) is ~1 km south and OUTSIDE the box; the depot is OSM's own way 87554163
+#     (Photon), which agrees with the list point. Placed there.
+#   RV036 San Pedro, Los Angeles, & Salt Lake RR Depot — named exactly as its article, *Riverside station (Union Pacific
+#     Railroad)*, at the article's point (8 m from the marker), not `new`: the sort's `new` came from a hidden Santa Fe Depot pin
+#     98 m from the LIST point; at the depot's own point only a park filler stands within 120 m (FROM PITTSBURGH (4)).
+#   RV039 Sutherland Fruit Company — at the HMdb marker (10 m from OSM's Old Spaghetti Factory node); the list point is 100 m off.
+#   RV074 Rubidoux Grist Mill Site — kept, `new`: the served *Louis Rubidoux* pin (181 m) is the house site, CHL 102 (cut as
+#     RV069); the mill site is its own CHL marker, 303.
+#   RV009 Chinatown — the site is fenced and closed, but its corner and marker are on the public street, so the line stands at
+#     the NRHP point, under the NRHP's other name.
+#   RV072, RV075, RV076, RV016, RV040 — curated rows, not lines (452_hidden_curated.sql); RV075's lot also carries the hidden
+#     *Serrano Tanning Vats* plaque (CHL 186), given a row there too.
+# NOT WRITTEN: the 34 restricted-address archaeological sites (no coordinate and not visitable — FROM LAS VEGAS (5)); the 3
+#   districts (RV021, RV024, RV027 — no stored pin; a centroid would be arbitrary).
+William Childs House | @33.95897222,-117.33686944 | Pasadena architect Louis Dufuget Millar designed this 1910 Craftsman bungalow for William Childs, who had invented early telephone and telegraph equipment back east before settling in Riverside; it is a last remnant of the 200-acre orange nursery in which he was a partner. | https://www.hmdb.org/m.asp?m=303920
+Chinatown Archeological Site | @33.9764,-117.3847 | After fire destroyed Riverside's first Chinatown on Ninth Street, a second rose here in the Tequesquite Arroyo in 1885, home at times to as many as four hundred Chinese residents, many of them from the village of Gom-Benn in southern China; it burned again in 1893 and was rebuilt with a small temple, and George Wong, its last resident, gave his birth name to the study of the site's excavation. | https://aar.ucr.edu/sites/RiversidesChinatown/index.html
+Community Settlement House | @33.9709,-117.3632 | Founded in 1911 out of the settlement-house movement to serve Riverside's ethnic communities, the Community Settlement Association built this house, its third home, on Bermuda Avenue in 1947, designed around the needs of the city's Latino community. | https://www.nps.gov/places/community-settlement-house.htm
+First Congregational Church of Riverside | @33.98166667,-117.37111111 | Founded in 1872, this congregation built this two-story Spanish Colonial Revival church in 1913 to a design by Myron Hunt, crowned by a 125-foot Churrigueresque corner tower. | https://en.wikipedia.org/wiki/First_Congregational_Church_of_Riverside
+Perris Depot | @33.7826755,-117.2293589 | Perris developer J.W. Nance built this red-brick Queen Anne depot on the Santa Fe line in 1892 to a design by Benjamin Franklin Levet Sr., son-in-law of Fred T. Perris; passenger service ended in 1947, and since 1974 it has housed the valley's local history museum. | https://en.wikipedia.org/wiki/Perris_station_(Atchison,_Topeka_and_Santa_Fe_Railway)
+Riverside-Arlington Heights Fruit Exchange | @33.9811,-117.3694 | G. Stanley Wilson designed this small, ornate building, put up in 1923 as headquarters of the Riverside-Arlington Heights Fruit Exchange; one of the last two surviving stretches of Seventh Street's old pergolas still stands in front of it. | https://raincrossgazette.com/the-rise-and-fall-of-riversides-iconic-pergolas
+Riverside station (Union Pacific Railroad) | @33.979825,-117.368562 | The San Pedro, Los Angeles and Salt Lake Railroad opened this Mission Revival depot when its first train pulled in on March 12, 1904; renamed for the Union Pacific in 1921, the Salt Lake Line brought tourists and investors to Riverside and carried its Washington navel oranges to cities across the country. | https://www.hmdb.org/m.asp?m=226053
+M. H. Simon's Undertaking Chapel | @33.97840122,-117.37546074 | Melvin H. Simons moved his mortuary into this 1925 building, designed for every need of his trade by Riverside architect G. Stanley Wilson, a leader of the 1920s civic push to give downtown a Mission Revival and Spanish Colonial look. | https://www.hmdb.org/m.asp?m=304054 | new
+Sutherland Fruit Company | @33.98051535,-117.36772654 | The Salt Lake Route railroad built this concrete packing house in 1912, about eight years after its line reached Riverside, and leased it to the Sutherland Fruit Company; architect Fred Peter's 70-by-126-foot building now holds the Old Spaghetti Factory, with a Riverside-Arlington Electric Railway trolley car inside. | https://raincrossgazette.com/from-citrus-to-spaghetti-the-evolution-of-riversides-historic-packing-house
+University Heights Junior High School | @33.97517389,-117.35637108 | Built on an orange grove once owned by the widow of author Robert Louis Stevenson, this Spanish Renaissance school taught junior high students until 1972; the city bought it in 1974 for a park and social-services center. | https://www.hmdb.org/m.asp?m=226742
+Rubidoux Grist Mill Site | @33.99525,-117.40658333 | Louis Rubidoux, owner of this part of Rancho Jurupa, built the region's first grist mill nearby in 1846, grinding scarce flour for settlers and American troops until the flood of 1862 washed it away. | https://www.hmdb.org/m.asp?m=139100 | new
+Guachama Rancheria | @34.05643,-117.2379222 | The Tongva village of Kaawchama stood here, at the eastern edge of the Gabrieleño world; in 1810 Francisco Dumetz of Mission San Gabriel set up a supply station at the village, which the Spanish called the Guachama Rancheria and which later became part of Rancho San Bernardino. | https://en.wikipedia.org/wiki/Guachama_Rancheria
