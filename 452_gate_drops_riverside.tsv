@@ -2,128 +2,128 @@ tile	name	category	desc	pin id	in gate drops	in leads	verdict
 676_-2350	Serrano Tanning Vats	history	A local memorial.	osm_node911594346	yes	yes	CURATED ROW — 452_hidden_curated.sql
 676_-2350	Site of the Third Serrano Adobe	history	A local memorial.	osm_node911594368	yes	yes	CURATED ROW — 452_hidden_curated.sql
 676_-2350	Tanning Vats	history	A local memorial.	osm_node911594447	yes	yes	NO LINE — a second plaque for the Serrano Tanning Vats (12 m), told by that row
-676_-2345	Perris Valley Historical Museum	history	A local museum.	osm_way278148607	yes	yes	
-676_-2345	Dora Nelson African American Art and History Museum	history	A local museum.	osm_way1197276663	yes	no	
-677_-2351	Museum Barn Exhibit	history	A local museum.	osm_node13535524012	yes	no	
-677_-2351	Corona Heritage Museum	history	A local museum.	osm_way277039908	yes	no	
-677_-2351	Corona Model Railroad Society	history	A local museum.	osm_way1217558892	yes	no	
-677_-2346	United States of America - Department of the Navy	history	A local memorial.	osm_node1398906513	yes	yes	
-677_-2346	Halloween House	art	A piece of public art.	osm_node1486596184	yes	yes	
-677_-2345	Boeing TB-29A Superfortress	history	A local landmark (aircraft).	osm_node1959218743	yes	yes	
-678_-2351	Beacon Hill Cross	history	A local landmark (wayside cross).	osm_node4888263650	yes	yes	
-678_-2350	Glory of God's Grace Sculpture	art	A public sculpture.	osm_node358859684	yes	yes	
-678_-2350	World Museum of Natural History	history	A local museum.	osm_node2281492434	yes	yes	
-678_-2350	Holy Innocents of Present Day Memorial	history	A local memorial.	osm_node3796262592	yes	yes	
-678_-2350	Four To Grow	art	A statue by Natalie Krol.	osm_node9469504247	yes	yes	
-678_-2350	Finding the Lost Coin	art	A public sculpture.	osm_node11923136031	yes	yes	
-678_-2350	Finding the Lost Sheep	art	A public sculpture.	osm_node11923136032	yes	yes	
-678_-2350	Let it shine	art	A public sculpture.	osm_node12583149710	yes	yes	
-678_-2350	Eagle Statue	art	A statue by Class of 2016.	osm_node12650679039	yes	yes	
-678_-2350	Jazz scene	art	A mural by Greg Adamson.	osm_way1448350130	yes	yes	
-678_-2348	S/SGT Ysmael Villegas	history	A local memorial (plaque).	osm_node13535340457	yes	yes	
-678_-2348	Casa Blanca	art	A mural by Juan Navarro.	osm_way1452185825	yes	yes	
-678_-2346	National POW/MIA Memorial	history	A local memorial.	osm_node1299483990	yes	yes	
-678_-2346	March Field Historic District	history	A local landmark (district).	osm_way1552125153	yes	yes	
-679_-2351	Healing Grove Memorial	history	A local memorial.	osm_way1180557686	yes	yes	
-679_-2350	Spiral Suspension	art	A sculpture by Jon Seeman.	osm_node12840925124	yes	yes	
-679_-2349	The Children of the Inland Empire Make-a-Wish Foundation	history	A local memorial.	osm_node997052921	yes	yes	
+676_-2345	Perris Valley Historical Museum	history	A local museum.	osm_way278148607	yes	yes	NO LINE — misplaced pin: the museum is inside the Perris Depot (told by that seed line, part 1), not here
+676_-2345	Dora Nelson African American Art and History Museum	history	A local museum.	osm_way1197276663	yes	no	NO LINE — small museum with no source found for its own story
+677_-2351	Museum Barn Exhibit	history	A local museum.	osm_node13535524012	yes	no	NO LINE — small museum with no source found for its own story
+677_-2351	Corona Heritage Museum	history	A local museum.	osm_way277039908	yes	no	NO LINE — small museum with no source found for its own story
+677_-2351	Corona Model Railroad Society	history	A local museum.	osm_way1217558892	yes	no	NO LINE — small museum with no source found for its own story
+677_-2346	United States of America - Department of the Navy	history	A local memorial.	osm_node1398906513	yes	yes	CUT — a service-seal plaque of the SERVED Medal of Honor Memorial (osm_way114800255)
+677_-2346	Halloween House	art	A piece of public art.	osm_node1486596184	yes	yes	NO LINE — no source found
+677_-2345	Boeing TB-29A Superfortress	history	A local landmark (aircraft).	osm_node1959218743	yes	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2351	Beacon Hill Cross	history	A local landmark (wayside cross).	osm_node4888263650	yes	yes	NO LINE — no source found
+678_-2350	Glory of God's Grace Sculpture	art	A public sculpture.	osm_node358859684	yes	yes	NO LINE — devotional statue on a campus
+678_-2350	World Museum of Natural History	history	A local museum.	osm_node2281492434	yes	yes	NO LINE — small museum with no source found for its own story
+678_-2350	Holy Innocents of Present Day Memorial	history	A local memorial.	osm_node3796262592	yes	yes	NO LINE — devotional statue on a campus
+678_-2350	Four To Grow	art	A statue by Natalie Krol.	osm_node9469504247	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+678_-2350	Finding the Lost Coin	art	A public sculpture.	osm_node11923136031	yes	yes	NO LINE — devotional statue on a campus
+678_-2350	Finding the Lost Sheep	art	A public sculpture.	osm_node11923136032	yes	yes	NO LINE — devotional statue on a campus
+678_-2350	Let it shine	art	A public sculpture.	osm_node12583149710	yes	yes	NO LINE — devotional statue on a campus
+678_-2350	Eagle Statue	art	A statue by Class of 2016.	osm_node12650679039	yes	yes	NO LINE — devotional statue on a campus
+678_-2350	Jazz scene	art	A mural by Greg Adamson.	osm_way1448350130	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+678_-2348	S/SGT Ysmael Villegas	history	A local memorial (plaque).	osm_node13535340457	yes	yes	NO LINE — Villegas is told by the downtown statue (curated row); a second plaque for the same man
+678_-2348	Casa Blanca	art	A mural by Juan Navarro.	osm_way1452185825	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+678_-2346	National POW/MIA Memorial	history	A local memorial.	osm_node1299483990	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+678_-2346	March Field Historic District	history	A local landmark (district).	osm_way1552125153	yes	yes	NO LINE — district on March Air Reserve Base; base access only
+679_-2351	Healing Grove Memorial	history	A local memorial.	osm_way1180557686	yes	yes	NO LINE — private/small memorial with no source
+679_-2350	Spiral Suspension	art	A sculpture by Jon Seeman.	osm_node12840925124	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2349	The Children of the Inland Empire Make-a-Wish Foundation	history	A local memorial.	osm_node997052921	yes	yes	NO LINE — private/small memorial with no source
 679_-2349	De Anza Crossing	history	A local memorial.	osm_node997055831	yes	yes	CURATED ROW — 452_hidden_curated.sql
-679_-2349	Tripod	art	A sculpture by James Rosati.	osm_node12840970421	yes	yes	
-679_-2348	Southern California Medical Museum	history	A local museum.	osm_node2826698923	yes	yes	
-679_-2348	De Anza Statue	history	A local memorial (statue).	osm_node5903058793	yes	yes	
-679_-2348	Staff Sergeant Ysmael R. Villegas	history	A local memorial (statue).	osm_node6517171557	yes	yes	
-679_-2348	Dr. Martin Luther King Jr.	history	A local memorial (statue).	osm_node6517185379	yes	yes	
-679_-2348	Safe in His Arms	history	A local memorial (statue).	osm_node6517185382	yes	yes	
-679_-2348	Officer Leonard Christiansen and Officer Paul Teel Memorial	history	A local memorial (obelisk).	osm_node7278267579	yes	yes	
-679_-2348	The Boy Scout	art	A statue by R. Tait McKenzie.	osm_node7278365919	yes	yes	
-679_-2348	Rise!	art	A mural by Jane Brinkley, Tzeitel Brinkley, Maggie Tello Case, Adeola Davies-Aiyeloja, Cynthia Huerta, Kiandra Jiminez, 	osm_node13278479642	yes	no	
-679_-2348	Memories of a Child	art	A sculpture by Hal Pastorius.	osm_node13289203285	yes	yes	
-679_-2348	Concentric	art	A sculpture by Michael Mogus.	osm_node13289203288	yes	yes	
-679_-2348	Raincross	art	A mosaic by Dominic Panziera.	osm_node13289831278	yes	yes	
-679_-2348	Lock in Your Love	art	A sculpture by Alderette Designs.	osm_node13289831282	yes	yes	
-679_-2348	Chrome Bumpers	art	A sculpture by Paulden Evans.	osm_node13289831283	yes	yes	
-679_-2348	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13289875903	yes	yes	
-679_-2348	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13298802609	yes	yes	
-679_-2348	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13300517955	yes	yes	
-679_-2348	How To Fly	art	A mural by Joey Koslik, Patrick Barwinski.	osm_way1448310052	yes	yes	
-679_-2348	Mariposa Alley	art	A mural by Martín Sanchez.	osm_way1448310053	yes	yes	
-679_-2348	Opera Brand	art	A mural by Ken Stansbury.	osm_way1448348323	yes	yes	
-679_-2348	Gone Like A Ghost, Again	art	A mural by Geoff Gouveia.	osm_way1448348324	yes	yes	
-679_-2348	You Were Our Summer Wind	art	A mural by Geoff Gouveia.	osm_way1448348325	yes	yes	
-679_-2348	Always There, I Know	art	A mural by Geoff Gouveia.	osm_way1448348326	yes	yes	
-679_-2348	Riverside Plaza	art	A mural by Mano Mirande.	osm_way1448348328	yes	yes	
-679_-2348	Love Letter	art	A mural by Katya Orlovie.	osm_way1448348332	yes	yes	
-679_-2348	Unity	art	A mural by Geoff Gouveia, Ruhnau Clark, Tiffany Brooks, Kiara Farias, Brooke Freeman.	osm_way1448348334	yes	no	
-679_-2348	Citrus Labels	art	A public mural.	osm_way1448350129	yes	yes	
-679_-2348	Nada Dura Parasiempre	art	A mural by Pável Acevedo.	osm_way1448507174	yes	yes	
-679_-2347	Sundial Clock	art	A sculpture by Imre Kalincsak.	osm_node7271083289	yes	yes	
-679_-2347	Angela's Wings	art	A mural by Greg Maxwell, Cathy Maxwell.	osm_node13278479648	yes	yes	
-679_-2347	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13300517956	yes	yes	
-679_-2347	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13300517957	yes	yes	
-679_-2347	Riverside Tales	art	A mural by Pável Acevedo, F.C. Aragon, Carlos Castro.	osm_way1448350128	yes	yes	
-679_-2346	3 Piece Pile	art	A public sculpture.	osm_node4297074812	yes	yes	
-679_-2346	Things Change	art	A sculpture by Roy McMakin.	osm_node13334929218	yes	yes	
-679_-2346	Big 'C'	art	A public land art.	osm_way1125736897	yes	yes	
-680_-2349	Mammoth	history	A local landmark (monument).	osm_node1416823990	yes	yes	
-680_-2348	World War II Water Buffalo Tank	history	A local memorial (tank).	osm_node5373724241	yes	yes	
-680_-2348	Mahatma Gandhi	history	A local memorial (statue).	osm_node6517185380	yes	yes	
-680_-2348	Cesar E. Chavez	history	A local memorial (statue).	osm_node6517185381	yes	yes	
-680_-2348	Dosan Ahn Chang-Ho	history	A local memorial (statue).	osm_node6517185383	yes	yes	
-680_-2348	Sower's Dream	art	A statue by Guy Angelo Wilson.	osm_node6517187740	yes	yes	
-680_-2348	Riverside Resilience	art	A mural by Darren Villegas.	osm_way1448348339	yes	yes	
+679_-2349	Tripod	art	A sculpture by James Rosati.	osm_node12840970421	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Southern California Medical Museum	history	A local museum.	osm_node2826698923	yes	yes	NO LINE — small museum with no source found for its own story
+679_-2348	De Anza Statue	history	A local memorial (statue).	osm_node5903058793	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+679_-2348	Staff Sergeant Ysmael R. Villegas	history	A local memorial (statue).	osm_node6517171557	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+679_-2348	Dr. Martin Luther King Jr.	history	A local memorial (statue).	osm_node6517185379	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+679_-2348	Safe in His Arms	history	A local memorial (statue).	osm_node6517185382	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Officer Leonard Christiansen and Officer Paul Teel Memorial	history	A local memorial (obelisk).	osm_node7278267579	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+679_-2348	The Boy Scout	art	A statue by R. Tait McKenzie.	osm_node7278365919	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Rise!	art	A mural by Jane Brinkley, Tzeitel Brinkley, Maggie Tello Case, Adeola Davies-Aiyeloja, Cynthia Huerta, Kiandra Jiminez, 	osm_node13278479642	yes	no	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Memories of a Child	art	A sculpture by Hal Pastorius.	osm_node13289203285	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Concentric	art	A sculpture by Michael Mogus.	osm_node13289203288	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Raincross	art	A mosaic by Dominic Panziera.	osm_node13289831278	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Lock in Your Love	art	A sculpture by Alderette Designs.	osm_node13289831282	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Chrome Bumpers	art	A sculpture by Paulden Evans.	osm_node13289831283	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13289875903	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13298802609	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13300517955	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	How To Fly	art	A mural by Joey Koslik, Patrick Barwinski.	osm_way1448310052	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Mariposa Alley	art	A mural by Martín Sanchez.	osm_way1448310053	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Opera Brand	art	A mural by Ken Stansbury.	osm_way1448348323	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Gone Like A Ghost, Again	art	A mural by Geoff Gouveia.	osm_way1448348324	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	You Were Our Summer Wind	art	A mural by Geoff Gouveia.	osm_way1448348325	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Always There, I Know	art	A mural by Geoff Gouveia.	osm_way1448348326	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Riverside Plaza	art	A mural by Mano Mirande.	osm_way1448348328	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Love Letter	art	A mural by Katya Orlovie.	osm_way1448348332	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Unity	art	A mural by Geoff Gouveia, Ruhnau Clark, Tiffany Brooks, Kiara Farias, Brooke Freeman.	osm_way1448348334	yes	no	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Citrus Labels	art	A public mural.	osm_way1448350129	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Nada Dura Parasiempre	art	A mural by Pável Acevedo.	osm_way1448507174	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2347	Sundial Clock	art	A sculpture by Imre Kalincsak.	osm_node7271083289	yes	yes	NO LINE — no source found
+679_-2347	Angela's Wings	art	A mural by Greg Maxwell, Cathy Maxwell.	osm_node13278479648	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2347	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13300517956	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2347	Decorated utility box	art	A mural by Katya Orlovie.	osm_node13300517957	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2347	Riverside Tales	art	A mural by Pável Acevedo, F.C. Aragon, Carlos Castro.	osm_way1448350128	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2346	3 Piece Pile	art	A public sculpture.	osm_node4297074812	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2346	Things Change	art	A sculpture by Roy McMakin.	osm_node13334929218	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2346	Big 'C'	art	A public land art.	osm_way1125736897	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+680_-2349	Mammoth	history	A local landmark (monument).	osm_node1416823990	yes	yes	NO LINE — no source found
+680_-2348	World War II Water Buffalo Tank	history	A local memorial (tank).	osm_node5373724241	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+680_-2348	Mahatma Gandhi	history	A local memorial (statue).	osm_node6517185380	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+680_-2348	Cesar E. Chavez	history	A local memorial (statue).	osm_node6517185381	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+680_-2348	Dosan Ahn Chang-Ho	history	A local memorial (statue).	osm_node6517185383	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+680_-2348	Sower's Dream	art	A statue by Guy Angelo Wilson.	osm_node6517187740	yes	yes	CURATED ROW — 452_hidden_curated_2.sql
+680_-2348	Riverside Resilience	art	A mural by Darren Villegas.	osm_way1448348339	yes	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
 680_-2347	Trujillo Adobe	history	A local landmark (building).	osm_way694156921	yes	yes	CURATED ROW — 452_hidden_curated.sql
-680_-2346	Monsignor Don Webber Memorial Tree	history	A local memorial.	osm_node2474741092	yes	yes	
-680_-2346	Unborn Child Memorial	history	A local memorial.	osm_node2474741609	yes	yes	
-680_-2346	Riverside Canal County Landmark	history	A local memorial (plaque).	osm_node14178532350	yes	yes	
-681_-2345	San Bernardino County Museum Library	history	A local museum.	osm_way278266555	yes	no	
-680_-2347	Apex Predator	art	Calvin & Hobbes deconstructed	osm_way1448348336	no	yes	
-680_-2347	Hello Riverside!	art	“You Belong Here”	osm_way1448348337	no	yes	
-680_-2347	Historic Riverside	art	A mural by Tiffany Brooks.	osm_way1448348338	no	yes	
-679_-2348	Lado Soleado	art	"Spanish for ""Sunny side"""	osm_way1448348330	no	yes	
-680_-2347	Owls & Friends	art	3 owls, and lady with purple octopus creature	osm_way1448348335	no	yes	
-679_-2348	Riverside	art	A mural by Katya Orlovie.	osm_node13288058823	no	yes	
-679_-2348	Riverside Central	art	A mural by Cloe Hakakian.	osm_way1448348329	no	yes	
-680_-2347	Riverside Gateway	art	A mural by John O. Wehrle.	osm_way1454054287	no	yes	
-680_-2348	U'Mun Chemqal Eppa	art	Native Cahuilla phrase meaning “We Are Still Here.”	osm_way1448348327	no	yes	
-678_-2345	Aero CS-102	history	c/n 712273	osm_node1959218683	no	yes	
-678_-2345	Aero S-106	history	c/n 161101	osm_node1959218724	no	yes	
+680_-2346	Monsignor Don Webber Memorial Tree	history	A local memorial.	osm_node2474741092	yes	yes	NO LINE — private/small memorial with no source
+680_-2346	Unborn Child Memorial	history	A local memorial.	osm_node2474741609	yes	yes	NO LINE — private/small memorial with no source
+680_-2346	Riverside Canal County Landmark	history	A local memorial (plaque).	osm_node14178532350	yes	yes	LINE — names-452-riverside-2.txt (as Highgrove Hydroelectric Plant, new; the pin fails #542)
+681_-2345	San Bernardino County Museum Library	history	A local museum.	osm_way278266555	yes	no	NO LINE — small museum with no source found for its own story
+680_-2347	Apex Predator	art	Calvin & Hobbes deconstructed	osm_way1448348336	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+680_-2347	Hello Riverside!	art	“You Belong Here”	osm_way1448348337	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+680_-2347	Historic Riverside	art	A mural by Tiffany Brooks.	osm_way1448348338	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Lado Soleado	art	"Spanish for ""Sunny side"""	osm_way1448348330	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+680_-2347	Owls & Friends	art	3 owls, and lady with purple octopus creature	osm_way1448348335	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Riverside	art	A mural by Katya Orlovie.	osm_node13288058823	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+679_-2348	Riverside Central	art	A mural by Cloe Hakakian.	osm_way1448348329	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+680_-2347	Riverside Gateway	art	A mural by John O. Wehrle.	osm_way1454054287	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+680_-2348	U'Mun Chemqal Eppa	art	Native Cahuilla phrase meaning “We Are Still Here.”	osm_way1448348327	no	yes	NO LINE — no source tells this piece's story (a name, artist and year are not a story)
+678_-2345	Aero CS-102	history	c/n 712273	osm_node1959218683	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Aero S-106	history	c/n 161101	osm_node1959218724	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
 681_-2347	Agua Mansa Pioneer Cemetery	history	California State Historical Landmark #121	osm_way33225944	no	yes	CURATED ROW — 452_hidden_curated.sql
-678_-2345	Boeing B-47E Stratojet	history	s/n 53-2275	osm_node1959219016	no	yes	
-678_-2345	Boeing B-52D Stratofortress	history	s/n 55-0679	osm_node1959219036	no	yes	
-678_-2345	Boeing CB-17G Fortress	history	s/n 44-6393	osm_node1959218667	no	yes	
-678_-2345	Boeing KC-135A Stratotanker	history	s/n 55-3130	osm_node1959219060	no	yes	
-678_-2345	Boeing KC-97L Stratofreighter	history	s/n 53-0363	osm_node1959218786	no	yes	
-678_-2348	California Citrus State Historic Park	history	historic site in California, United States	osm_way44486177	no	yes	
-678_-2350	Chudzikowski Home Site	history	former historic home in Riverside, California	osm_node14073920777	no	yes	
-678_-2345	Convair VC-131D Samaritan	history	s/n 54-2808	osm_node3740827596	no	yes	
-678_-2345	Department of the Navy - United States Marine Corps	history	Semper Fidelis	osm_node1398906622	no	yes	
-678_-2345	Fairchild C-119G Flying Boxcar	history	s/n 22122 RCAF	osm_node1959219077	no	yes	
-678_-2345	Fairchild C-123K Provider	history	s/n 54-0612	osm_node1959219118	no	yes	
-678_-2350	Five Points Intersection	history	historic intersection in Riverside, California	osm_node14079713557	no	yes	
+678_-2345	Boeing B-47E Stratojet	history	s/n 53-2275	osm_node1959219016	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Boeing B-52D Stratofortress	history	s/n 55-0679	osm_node1959219036	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Boeing CB-17G Fortress	history	s/n 44-6393	osm_node1959218667	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Boeing KC-135A Stratotanker	history	s/n 55-3130	osm_node1959219060	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Boeing KC-97L Stratofreighter	history	s/n 53-0363	osm_node1959218786	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2348	California Citrus State Historic Park	history	historic site in California, United States	osm_way44486177	no	yes	CURATED ROW — 452_hidden_curated_2.sql
+678_-2350	Chudzikowski Home Site	history	former historic home in Riverside, California	osm_node14073920777	no	yes	NO LINE — no source found
+678_-2345	Convair VC-131D Samaritan	history	s/n 54-2808	osm_node3740827596	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Department of the Navy - United States Marine Corps	history	Semper Fidelis	osm_node1398906622	no	yes	CUT — a service-seal plaque of the SERVED Medal of Honor Memorial (osm_way114800255)
+678_-2345	Fairchild C-119G Flying Boxcar	history	s/n 22122 RCAF	osm_node1959219077	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Fairchild C-123K Provider	history	s/n 54-0612	osm_node1959219118	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2350	Five Points Intersection	history	historic intersection in Riverside, California	osm_node14079713557	no	yes	NO LINE — no source found
 680_-2351	Galleano Winery	history	historic winery in Mira Loma, California, United States	osm_node995776093	no	yes	CURATED ROW — 452_hidden_curated.sql
-678_-2345	General Dynamics F-111A	history	s/n 68-0245	osm_node1959218975	no	yes	
-678_-2345	Grumman F-14A Tomcat	history	BuNo 157990	osm_node1959218753	no	yes	
-678_-2345	Lockheed C-141B Starlifter	history	s/n 65-0257	osm_node1959219073	no	yes	
-677_-2349	Mathews Dam	history	dam in Riverside County, California, United States of America	osm_node10735558995	no	yes	
-678_-2345	McDonnell Douglas F-15A Eagle	history	s/n 76-0008	osm_node1959218759	no	yes	
-678_-2345	McDonnell F-101B Voodoo	history	s/n 59-0418	osm_way1470157892	no	yes	
-678_-2345	Mikoyan-Gurevich MiG-19S	history	c/n 150409	osm_node1959218676	no	yes	
-680_-2347	Mission Inn Museum	history	A local history museum.	osm_node6522453826	no	yes	
-679_-2346	Moreno Valley M	history	“M”	osm_way447925337	no	yes	
-678_-2345	North American F-100C Super Sabre	history	s/n 54-1786	osm_way1470159727	no	yes	
-678_-2345	North American F-86H Sabre	history	s/n 53-1304	osm_node1959219026	no	yes	
-678_-2345	North American SNJ-4	history	BuNo 51360	osm_node3740827597	no	yes	
-678_-2345	North American T-39A Sabreliner	history	s/n 62-4465	osm_node1959219006	no	yes	
-678_-2345	Northrop F-89J Scorpion	history	s/n 52-1949	osm_node1959219046	no	yes	
-678_-2345	Republic F-105D Thunderchief	history	s/n 57-5803	osm_node1959218862	no	yes	
-678_-2345	Republic F-84C Thunderjet	history	s/n 47-1595	osm_node1959218973	no	yes	
-680_-2348	Riverside Veterans Memorial	history	A local memorial (statue).	osm_node7278267578	no	yes	
-680_-2348	Ronald O. Loveridge	history	“Public Servant and Visionary”	osm_node13289831279	no	yes	
-680_-2347	Santa Fe Depot	history	A local landmark (building).	osm_way125135482	no	yes	
+678_-2345	General Dynamics F-111A	history	s/n 68-0245	osm_node1959218975	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Grumman F-14A Tomcat	history	BuNo 157990	osm_node1959218753	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Lockheed C-141B Starlifter	history	s/n 65-0257	osm_node1959219073	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+677_-2349	Mathews Dam	history	dam in Riverside County, California, United States of America	osm_node10735558995	no	yes	NO LINE — Lake Mathews dam; closed reserve, no public access
+678_-2345	McDonnell Douglas F-15A Eagle	history	s/n 76-0008	osm_node1959218759	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	McDonnell F-101B Voodoo	history	s/n 59-0418	osm_way1470157892	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Mikoyan-Gurevich MiG-19S	history	c/n 150409	osm_node1959218676	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+680_-2347	Mission Inn Museum	history	A local history museum.	osm_node6522453826	no	yes	CUT — inside the SERVED Mission Inn (wiki_1928196, 71 m), whose story tells it
+679_-2346	Moreno Valley M	history	“M”	osm_way447925337	no	yes	NO LINE — no source found
+678_-2345	North American F-100C Super Sabre	history	s/n 54-1786	osm_way1470159727	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	North American F-86H Sabre	history	s/n 53-1304	osm_node1959219026	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	North American SNJ-4	history	BuNo 51360	osm_node3740827597	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	North American T-39A Sabreliner	history	s/n 62-4465	osm_node1959219006	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Northrop F-89J Scorpion	history	s/n 52-1949	osm_node1959219046	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Republic F-105D Thunderchief	history	s/n 57-5803	osm_node1959218862	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	Republic F-84C Thunderjet	history	s/n 47-1595	osm_node1959218973	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+680_-2348	Riverside Veterans Memorial	history	A local memorial (statue).	osm_node7278267578	no	yes	NO LINE — the city lists its Riverside County Veterans Memorial at 10th and Lemon, not at this point; subject unclear
+680_-2348	Ronald O. Loveridge	history	“Public Servant and Visionary”	osm_node13289831279	no	yes	NO LINE — a dedication plaque; no source beyond its inscription
+680_-2347	Santa Fe Depot	history	A local landmark (building).	osm_way125135482	no	yes	CURATED ROW — 452_hidden_curated_2.sql
 679_-2349	Sherman Indian Museum	history	museum in Riverside, California, United States	osm_node14129783839	no	yes	CURATED ROW — 452_hidden_curated.sql
-680_-2348	The Center for Social Justice & Civil Liberties	history	A local museum.	osm_way118728049	no	yes	
-678_-2345	United States Coast Guard	history	1790 - Semper Paratus	osm_node1398906726	no	yes	
-678_-2345	United States of America - Department of the Air Force	history	MCMXLVII	osm_node1398906747	no	yes	
-678_-2345	United States of America - Department of the Army	history	1775	osm_node1398906722	no	yes	
-678_-2345	Vultee BT-13A Valiant	history	s/n 41-21487	osm_node3740827598	no	yes	
-678_-2345	WSK-Mielec Lim-5	history	c/n 1C 16-05	osm_node1959218689	no	yes	
+680_-2348	The Center for Social Justice & Civil Liberties	history	A local museum.	osm_way118728049	no	yes	CURATED ROW — 452_hidden_curated_2.sql
+678_-2345	United States Coast Guard	history	1790 - Semper Paratus	osm_node1398906726	no	yes	CUT — a service-seal plaque of the SERVED Medal of Honor Memorial (osm_way114800255)
+678_-2345	United States of America - Department of the Air Force	history	MCMXLVII	osm_node1398906747	no	yes	CUT — a service-seal plaque of the SERVED Medal of Honor Memorial (osm_way114800255)
+678_-2345	United States of America - Department of the Army	history	1775	osm_node1398906722	no	yes	CUT — a service-seal plaque of the SERVED Medal of Honor Memorial (osm_way114800255)
+678_-2345	Vultee BT-13A Valiant	history	s/n 41-21487	osm_node3740827598	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)
+678_-2345	WSK-Mielec Lim-5	history	c/n 1C 16-05	osm_node1959218689	no	yes	NO LINE — March Field Air Museum airframe; no source of its own (a row only where an airframe has one)

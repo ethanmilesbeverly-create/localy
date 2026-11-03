@@ -1,0 +1,8 @@
+# names-452-riverside-2.txt — #452 Riverside story batch, part 2: rescues from the gate-drops/leads union (drafted 2026-11-03).
+# Batch file — dry-runs and commits TOGETHER with names-452-riverside-1.txt in one Mac session (handoff §6 THE FAST RUNBOOK (b)).
+# The union's 120 rows were read; 14 became curated rows on their hidden pins (452_hidden_curated_2.sql), and one rescue
+# lands here because its pin fails #542: the Highgrove hydroelectric plant marker (County of Riverside Historical Marker
+# No. 024), hidden as "Riverside Canal County Landmark" (osm_node14178532350), stored only in 680_-2346 while its containing
+# tile is 680_-2347 — so a curated row on it would never show. Seeded under the marker's subject, `new` (the hidden pin 0 m
+# away is never drawn in its own tile, so the two cannot show as a pair). Every other verdict is in the union TSVs.
+Highgrove Hydroelectric Plant | @34.0118056,-117.3399911 | California's first commercially significant hydroelectric plant went into service here in 1888, designed and built by Gustavus Olivio Newman to use the flow of the Riverside Water Company canal; its power lit the arc lights of downtown Riverside and Colton until fire destroyed the plant in 1915. | https://www.hmdb.org/m.asp?m=304661 | new
