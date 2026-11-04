@@ -1,0 +1,66 @@
+# names-454-charlotte-1.txt — #454 Charlotte story batch, part 1: the Wikipedia list spine (drafted 2026-11-04).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Charlotte batch (this file + part 2's names file(s) + 454_hidden_curated*.sql) dry-runs and commits in one Mac session
+# (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 454_sort_charlotte.tsv (story-sort 2026.11.01b; lists: the Mecklenburg, Cabarrus, Union, Gaston and York SC NRHP
+# lists, all {{NRHP row}}, so #551 did not fire — Cabarrus and Union gave 0 because no listing falls in the box). 99
+# candidates; the sort read 53 cut, 32 article-in-no-tile seed, 7 unmapped seed, 1 curated row, 4 district centroid, 2 no
+# coordinate. Every line was written from its source's text and passed the mechanical checks (FROM SAN ANTONIO (12), FROM
+# LAS VEGAS (6), FROM SACRAMENTO (3)): every number and proper name in its source; inside the box (42 stored tiles, read
+# 2026-11-04); no name repeated; stored pins (served and hidden), approved gems (none in the region yet) and other lines
+# within 120 m read at the LINE's own coordinate.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — demolished (FROM SACRAMENTO (5)): CL005 Barringer Hotel (2022 — so CL014's TWIN CANDIDATE flag is moot),
+#     CL013 Charlotte Supply Company Building, CL042 Hotel Charlotte (imploded 1988), CL043 Independence Building
+#     (imploded 1981), CL062 Merchants and Farmers National Bank Building (1989).
+#   CUT — served: CL030 Frederick Apartments — the served OSM pin "Frederick Place" (osm_way1181049747, 24 m) already serves
+#     the Frederick Apartments article (CHECK SUBJECT read). CL074 Robinson Rock House Ruin and Plantation Site — SERVED at
+#     the article's point (wiki_45458623, 0 m, beside osm_way1460535492); the list point is ~1 km off (FROM SACRAMENTO (3)).
+#   CARRIED to Charlotte's depth row (no usable source past listing metadata): CL048 Kimberlee Apartments (no article);
+#     CL093 Dinkins House (moved — the list gives only its original site, and no current point is published).
+#   NO LINE: CL018, CL059, CL064, CL066 (districts — a centroid would be arbitrary); CL094 Thomas Trotter Building and
+#     CL099 Jackson's Furnace Site (38YK217) (no coordinate; the second is an archaeological site).
+#   RE-SOURCED / RE-PLACED: CL012 Charlotte Fire Station No. 4 — at the article's point (North Graham and West Fifth, the
+#     article's own location), 250 m from the list point. CL037 Highland Park Mill No. 1 — no article; at OSM's Optimist Hall
+#     (way 323198228), sourced from the Charlotte-Mecklenburg Historic Landmarks Commission page. CL070 Palmer Fire School —
+#     the article's coordinate is wrong (Buncombe County); at OSM's drill tower (way 919954182). CL098 Woodlawn Mill — no
+#     article; at OSM's mill (way 699668639), sourced from the Gaston Gazette's report of the 2023 listing.
+#   CL022 Ervin Building murals → 454_hidden_curated.sql (the hidden pin IS the mural on the listed building).
+# `| new` UP FRONT (DuPage (1)) on the 9 lines with a different stored pin or another line within 100 m — Philip Carey
+#   (hidden "Queen Charlotte Walks in Her Garden" 89 m), Crane (served Coca-Cola Bottling plant 59 m), First Presbyterian
+#   (hidden "Captain James Jack" 93 m), Grace A.M.E. Zion and Mecklenburg Investment Company (67 m apart), Jonas Federal
+#   Building (hidden William Ewen Shipp Monument 50 m), Latta Arcade (hidden Liberty Hall Monument 52 m), Liddell-McNinch
+#   (served Frederick Place 56 m), the Courthouse (hidden Mahatma Gandhi statue 72 m). The rest are named exactly as their
+#   articles at the articles' points with nothing within 100 m (FROM PITTSBURGH (4)).
+# EXPECT on the Mac dry run: 30 new-seed. Any `review` is a stop: read it before --commit.
+Philip Carey Building | @35.2275,-80.83972222 | Built in 1907–1908, this two-story brick warehouse is dressed in elaborate Victorian Romanesque brickwork. | https://en.wikipedia.org/wiki/Philip_Carey_Building | new
+Carolina School Supply Company Building | @35.22805556,-80.86055556 | This three-story warehouse of 1927 hides heavy-timber mill construction behind its brick veneer, with banks of steel sash windows and a light touch of Gothic Revival detail on the walls. | https://en.wikipedia.org/wiki/Carolina_School_Supply_Company_Building
+Carolina Transfer and Storage Company Building | @35.22888889,-80.86166667 | Raised in 1927 for a moving and storage company, this four-story warehouse is built of flat concrete slabs filled in with brick, under a flat roof and parapet. | https://en.wikipedia.org/wiki/Carolina_Transfer_and_Storage_Company_Building
+John Price Carr House | @35.22111111,-80.83333333 | This two-story Queen Anne house of 1904 is easy to pick out by its four-stage tower, steep hipped roof and porch that wraps around the corner. | https://en.wikipedia.org/wiki/John_Price_Carr_House
+Charlotte Fire Station No. 4 | @35.23111111,-80.84833333 | Charles Christian Hook designed this firehouse at North Graham and West Fifth streets in 1926, and it answered alarms until 1972, when a new station on North Church Street took over. | https://en.wikipedia.org/wiki/Charlotte_Fire_Station_No._4
+Commercial Building at 500 North Tryon Street | @35.23,-80.83833333 | Louis H. Asbury designed this long, two-story brick building in 1921, and its first tenant was an automobile dealership. | https://en.wikipedia.org/wiki/Commercial_Building_at_500_North_Tryon_Street
+Crane Company Building (North Carolina) | @35.22833333,-80.86388889 | This 1928 warehouse for the Crane Company is a two-story reinforced concrete frame wrapped in brick curtain walls, with steel window frames and even steel stairs inside. | https://en.wikipedia.org/wiki/Crane_Company_Building_(North_Carolina) | new
+East Avenue Tabernacle Associate Reformed Presbyterian Church | @35.21944444,-80.83444444 | James M. McMichael designed this domed 1914 church on a Greek cross plan, with a copper dome and a pedimented brick porch; after the congregation merged into Craig Avenue's in 1998 it became a community center and charter school. | https://en.wikipedia.org/wiki/East_Avenue_Tabernacle_Associate_Reformed_Presbyterian_Church
+Fire Station No. 2 (Charlotte, North Carolina) | @35.21666667,-80.85166667 | The Old Dilworth Fire Station of 1909 kept its engines in two ground-floor bays with the firefighters sleeping upstairs; since 2010 the red brick firehouse has been a spa. | https://en.wikipedia.org/wiki/Fire_Station_No._2_(Charlotte,_North_Carolina)
+First Presbyterian Church (Charlotte, North Carolina) | @35.22888889,-80.84388889 | The Gothic Revival church on West Trade Street dates from 1857; its spire was rebuilt in 1883–1884, and in 1894–1895 its side and rear walls came down and a new structure went up. | https://en.wikipedia.org/wiki/First_Presbyterian_Church_(Charlotte,_North_Carolina) | new
+Grace A.M.E. Zion Church | @35.22333333,-80.84194444 | Built in 1901–1902 by African American contractor William W. Smith, this Gothic Revival church with two entry towers of unequal height is one of the few buildings left of Brooklyn, the Black neighborhood razed for urban renewal in the 1960s. | https://en.wikipedia.org/wiki/Grace_A.M.E._Zion_Church | new
+Highland Park Mill No. 1 | @35.2343341,-80.8272829 | Charlotte's fifth cotton mill opened here in 1892 for about $28,000 and within a year had 200 workers weaving gingham on 500 looms; it kept making textiles until 2016, when it was bought and reborn as Optimist Hall. | https://hl.mecknc.gov/Properties/Designated-Historic-Landmarks/charlotte/highland-park-villa-heights/highland-park-mill-1
+Home Federal Building | @35.22638889,-80.84361111 | This seven-story International Style bank of 1967, with its own fountain, pool and walkway bridge, has since been turned into condominiums. | https://en.wikipedia.org/wiki/Home_Federal_Building
+Johnston Building (Charlotte, North Carolina) | @35.2262,-80.8448 | Finished in 1924 on the site of the Trust Building, which burned in 1922, this was Charlotte's tallest building until 1926; its limestone and buff brick are only a skin on the steel frame that holds it up. | https://en.wikipedia.org/wiki/Johnston_Building_(Charlotte,_North_Carolina)
+Charles R. Jonas Federal Building | @35.23027778,-80.84694444 | Completed in 1915 as Charlotte's post office and federal courthouse, it stands on the site where the first branch of the U.S. Mint was built in 1836. | https://en.wikipedia.org/wiki/Charles_R._Jonas_Federal_Building | new
+Latta Arcade | @35.22555556,-80.84583333 | William H. Peeps designed this two-floor arcade in 1914; the glass skylight over its atrium was first there to give cotton graders good natural light. | https://en.wikipedia.org/wiki/Latta_Arcade | new
+Liddell-McNinch House | @35.23138889,-80.83972222 | President William Howard Taft visited this Queen Anne and Shingle Style house in 1909; built in 1891–1893, it is named for owners Vinton Liddell and Charlotte mayor Samuel S. McNinch. | https://en.wikipedia.org/wiki/Liddell-McNinch_House | new
+Louise Cotton Mill | @35.22472222,-80.81833333 | The first section of this mill went up in 1897, a two-story brick building 27 bays long, and in 1901 two one-story wings turned it into a U around a courtyard. | https://en.wikipedia.org/wiki/Louise_Cotton_Mill
+Mecklenburg County Courthouse (North Carolina) | @35.22111111,-80.8375 | Louis H. Asbury designed this limestone courthouse, built from 1925 to 1928, with a front portico of ten Corinthian columns. | https://en.wikipedia.org/wiki/Mecklenburg_County_Courthouse_(North_Carolina) | new
+Mecklenburg Investment Company Building | @35.22277778,-80.84222222 | Built in 1922 in the African American community of Brooklyn, this three-story red brick office building is tied to the "New Negro" movement. | https://en.wikipedia.org/wiki/Mecklenburg_Investment_Company_Building | new
+Orient Manufacturing Company-Chadwick-Hoskins No. 3 | @35.20333333,-80.83138889 | This Romanesque Revival cotton mill of 1901–1902, with a castellated stair tower, takes in parts of an earlier mill of about 1889; it is now the Alpha Mill Apartments. | https://en.wikipedia.org/wiki/Orient_Manufacturing_Company-Chadwick-Hoskins_No._3
+Overcarsh House | @35.23277778,-80.84166667 | Methodist minister Elias Overcarsh built this Queen Anne house with a conical-roofed tower, and his family kept it until 1966. | https://en.wikipedia.org/wiki/Overcarsh_House
+Palmer Fire School | @35.2059749,-80.8090889 | Charlotte trained its firefighters here: a six-story brick drill tower of 1938 and a rock-faced assembly hall of 1940, the only firemen's drill school the Works Progress Administration ever paid for. | https://en.wikipedia.org/wiki/Palmer_Fire_School
+Charlotte station (Seaboard Air Line Railroad) | @35.23388889,-80.83305556 | Charles Christian Hook designed this red brick and pink stucco station, which opened on June 16, 1896; passenger trains stopped running here on November 3, 1958, after 62 years. | https://en.wikipedia.org/wiki/Charlotte_station_(Seaboard_Air_Line_Railroad)
+Joseph Sykes Brothers Company Building | @35.21916667,-80.86055556 | Built in 1926 as the Charlotte plant of the Joseph Sykes Brothers Company, an international maker of card clothing for cotton machinery, this building pairs a small office in front with a large machine shop behind. | https://en.wikipedia.org/wiki/Joseph_Sykes_Brothers_Company_Building
+Textile Mill Supply Company Building | @35.22138889,-80.85861111 | From this three-story red brick building of 1922, the Textile Mill Supply Company sold and shipped the supplies the Piedmont's textile mills needed to keep running. | https://en.wikipedia.org/wiki/Textile_Mill_Supply_Company_Building
+Union Storage and Warehouse Company Building | @35.22833333,-80.85861111 | Built as a warehouse in 1927, this concrete building was bought by the Ford Motor Company in 1942 and turned into an auto repair shop. | https://en.wikipedia.org/wiki/Union_Storage_and_Warehouse_Company_Building
+Victoria (Charlotte, North Carolina) | @35.22388889,-80.81027778 | This Queen Anne house with a conical-roofed tower and slate roof was moved here from the corner of Tryon and Seventh streets about 1895. | https://en.wikipedia.org/wiki/Victoria_(Charlotte,_North_Carolina)
+Carolina Theatre (Charlotte) | @35.22833333,-80.84069444 | Opened in 1927 as a silent movie palace, the Carolina hosted Elvis Presley in 1956 and ran The Sound of Music for a record 79 weeks; it closed in 1978 and sat empty until it reopened in March 2025. | https://en.wikipedia.org/wiki/Carolina_Theatre_(Charlotte)
+Woodlawn Mill | @35.3031826,-81.0187943 | Mount Holly native Charles E. Hutchison founded the Woodlawn Manufacturing Company in 1905 and had Stuart W. Cramer design this one-story brick mill along with 25 houses for its workers. | https://www.yahoo.com/news/gaston-county-mill-added-national-125738704.html
