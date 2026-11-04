@@ -1,0 +1,33 @@
+# names-453-orlando-3.txt — #453 Orlando story batch, part 3: the rest of the state-marker list (drafted 2026-11-04).
+# Batch file — do NOT run alone; it dry-runs and commits with names-453-orlando-1.txt, names-453-orlando-2.txt,
+# 453_hidden_curated.sql and 453_hidden_curated_2.sql in one Mac session.
+# SOURCE: Florida's Division of Historical Resources marker list — Orange County (Home/index/48, 47 markers) and Seminole
+# County (Home/index/59, 5 markers). With parts 1–2 every in-box state marker is now read. Points come from OSM through Photon
+# (the state site publishes none); every line passed the part-1 checks at its own point — nothing stored, no gem, and no
+# Wikipedia article but its own within 150 m of any line below.
+# THE STATE LIST, MARKER BY MARKER (in the box only; out of the box: Fort Christmas 549, White House of Zellwood 1028, Apopka
+#   Schoolhouse 1042, Kelly Park 860, Winter Garden HD 932, FUMC Winter Garden 1160; Seminole 272, 273, 1194, 1221):
+#   LINES — part 1: 931 (Orlando Health/Amtrak station). Part 2: 548, 274, 551. This file: 869, 972, 1240, 1268, 1271, 1282,
+#     1220, 1178. Curated row (453_hidden_curated_2.sql): 837 Dickson Azalea Park.
+#   CUT, already served: 5, 365, 554, 785, 790, 835, 854, 952, 1095, 1163, 1198 (their NRHP twins, cut in the sort);
+#     550 Moseley House (wiki_63843588); 1068 Ocoee massacre (wiki_39245977); 371 Leu House sits inside the served Harry P. Leu
+#     Gardens and its point can't be fixed apart from the garden's.
+#   GRAVES, not lines: 846 Eppes-Shine plot — Francis Wayles Eppes (Jefferson's grandson) is not among Orlando's 29 loaded
+#     graves; he goes on #453's hand-add list with Bob Ross, Robert James Miller and Rex Beach (and July Perry, from 1068).
+#   CARRIED, the subject's point can't be fixed from the sandbox (no coordinate on the state site, HMdb challenged — #556):
+#     24 Carver Court, 271 Black Bear Trail, 275 Railroading in Maitland, 552 Site of Fort Gatlin, 633 John Watts Young house,
+#     652 Orlando Army Air Base, 673 Piedmont, 721 Lovell's Landing, 855 Black Bottom House of Prayer, 961 John R. Mott House
+#     Site, 1197 Lake Ivanhoe HD, 1276 Rosemere HD, 1287 Center for Independent Living, 1158 Altamonte Chapel (Seminole).
+#   Cathedral Church of St. Luke — named exactly as its article (12 m), a ↳ no-op (FROM TAMPA (7)); the St. James Cathedral
+#     article 118 m off is a different church, but the line keeps its article name, so no `new`.
+#   Ronald Reagan's Evil Empire Speech Memorial — at OSM's hotel at 5780 Major Boulevard, the speech's site (the marker's
+#     own location); the sentence keeps to the marker's facts and Reagan's own words.
+# EXPECT on the Mac dry run: 8 new-seed (one a ↳ article-title no-op), 0 review.
+Cathedral Church of St. Luke (Orlando, Florida) | @28.5444195,-81.3778888 | Episcopal settlers gathered by Francis Wayles Eppes, a grandson of Thomas Jefferson, bought this site at the corner of Jefferson Street, named for Eppes's grandfather, in 1882 for $300; Saint Luke became a cathedral in 1902, and the present Gothic Revival church, begun in 1925, was designed by Philip H. Frohman, chief architect of the Washington National Cathedral. | https://markers.flheritage.com/home/details/869
+Episcopal Church of the Holy Spirit | @28.6724976,-81.5053498 | The little board and batten church here was built in 1886 by Apopka's First Congregational Church on Main Street, left empty after the Great Freeze of 1895, bought for $75 in 1902 as an Episcopal mission at the urging of sisters Elizabeth Emma and Mary E. Dart, and moved to this site in 1970, where it is now the parish's Memorial Garden Chapel. | https://markers.flheritage.com/home/details/972
+Lockhart Baptist Church | @28.6252693,-81.4427965 | Lockhart takes its name from David Lockhart, who built a sawmill here in the mid-1880s; under Moses O. Overstreet the mill became the Overstreet Crate Company, which by 1910 furnished nearly 1/5 of all the orange crates shipped from Florida until fire destroyed it in 1917, and this church, the community's centerpiece, was built in 1903. | https://markers.flheritage.com/home/details/1240
+Dubsdread Golf Course | @28.583717,-81.3845433 | Developer Carl Dann Sr. founded this course in 1923, the day after a quarrel with the Orlando Country Club supposedly over wagering, and hired Chicago designer Thomas Bendelow; it opened on December 7, 1924, its name warning off novice "dubs," and in its gambling heyday spectators followed the play in a fleet of cars and passed cash through the car windows before racing to the next green. | https://markers.flheritage.com/home/details/1268
+Original Jones High School | @28.544324,-81.388551 | Opened in 1922 as the first Black school for the Parramore neighborhood, the original Jones High grew so crowded that NAACP attorney Paul C. Perkins sued the school board, which built a new Jones High; this building became Callahan Elementary in 1952, the only school in Orange County to close because of desegregation in 1970, and has been the Dr. J. B. Callahan Neighborhood Center since 1987. | https://markers.flheritage.com/home/details/1271
+Orwin Manor Park | @28.5824157,-81.3694739 | Walter W. Rose's sales office for Orwin Manor, platted in 1924 and named for Orlando and Winter Park because it lies in both, stood here until the late 1950s; Winter Park bought the empty lot from Rose's widow in 1992, and neighbors designed and built this park, dedicated in 1994. | https://markers.flheritage.com/home/details/1282
+Ronald Reagan's Evil Empire Speech Memorial | @28.4794979,-81.4571392 | Here on March 8, 1983, speaking to the National Association of Evangelicals, President Ronald Reagan called the Soviet Union an "evil empire"; asked in 1988 whether he still thought so, he said he did not, calling it "another time, another era." | https://markers.flheritage.com/home/details/1220
+Lock Family Cemetery | @28.3949848,-81.3277501 | Also called the Boggy Creek Cemetery, this pioneer burial ground lies on land Nancy P. Locke bought in 1881 for one dollar an acre, and it holds the Lock family, who came from Georgia after the Civil War, veterans from the Civil War to the Vietnam War, and Jane Green, a pioneer woman of Creek Indian ancestry who ran cattle with Mose Barber. | https://markers.flheritage.com/home/details/1178
