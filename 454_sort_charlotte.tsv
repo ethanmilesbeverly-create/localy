@@ -1,0 +1,100 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+CL022	CURATED ROW — hidden pin		Ervin Building murals	35.200382	-80.7716206	Ervin Building murals · osm_node13721278157 · 71 m	Ervin Building		hidden pin stored in 704_-1615; containing tile 704_-1615 stores it (#542)	Ervin Building	
+CL005	SEED — article in no tile (#539)		Barringer Hotel	35.230000000000004	-80.8386111111111	article Barringer Hotel · 0 m	Barringer Hotel		TWIN CANDIDATE CL014 25 m — one building listed twice, or two plaques on one lot?	Barringer Hotel	
+CL008	SEED — article in no tile (#539)		Philip Carey Building	35.2275	-80.83972222222222	article Philip Carey Building · 0 m	Philip Carey Building			Philip Carey Building	
+CL009	SEED — article in no tile (#539)		Carolina School Supply Company Building	35.22805555555556	-80.86055555555555	article Carolina School Supply Company Building · 0 m	Carolina School Supply Company Building			Carolina School Supply Company Building (Former)	
+CL010	SEED — article in no tile (#539)		Carolina Transfer and Storage Company Building	35.22888888888889	-80.86166666666666	article Carolina Transfer and Storage Company Building · 0 m	Carolina Transfer and Storage Company Building			Carolina Transfer and Storage Company Building, (Former)	
+CL011	SEED — article in no tile (#539)		John Price Carr House	35.221111111111114	-80.83333333333333	article John Price Carr House · 0 m	John Price Carr House			John Price Carr House	
+CL012	SEED — unmapped		Charlotte Fire Station No. 4	35.231111	-80.845556		Charlotte Fire Station No. 4			Charlotte Fire Station No. 4	
+CL013	SEED — article in no tile (#539)		Charlotte Supply Company Building	35.22638888888889	-80.85055555555554	article Charlotte Supply Company Building · 0 m	Charlotte Supply Company Building			Charlotte Supply Company Building	
+CL014	SEED — article in no tile (#539)		Commercial Building at 500 North Tryon Street	35.230000000000004	-80.83833333333332	article Commercial Building at 500 North Tryon Street · 0 m	Commercial Building at 500 North Tryon Street		TWIN CANDIDATE CL005 25 m — one building listed twice, or two plaques on one lot?	Commercial Building at 500 North Tryon Street	
+CL015	SEED — article in no tile (#539)		Crane Company Building (North Carolina)	35.22833333333333	-80.86388888888888	article Crane Company Building (North Carolina) · 0 m	Crane Company Building (North Carolina)			Crane Company Building (Former)	
+CL020	SEED — article in no tile (#539)		East Avenue Tabernacle Associate Reformed Presbyterian Church	35.21944444444445	-80.83444444444444	article East Avenue Tabernacle Associate Reformed Presbyterian Church · 0 m	East Avenue Tabernacle Associate Reformed Presbyterian Church			East Avenue Tabernacle Associate Reformed Presbyterian Church	
+CL023	SEED — article in no tile (#539)		Fire Station No. 2 (Charlotte, North Carolina)	35.21666666666667	-80.85166666666666	article Fire Station No. 2 (Charlotte, North Carolina) · 31 m	Fire Station No. 2 (Charlotte, North Carolina)			Fire Station No. 2	
+CL024	SEED — article in no tile (#539)		First Presbyterian Church (Charlotte, North Carolina)	35.22888888888889	-80.84388888888888	article First Presbyterian Church (Charlotte, North Carolina) · 0 m	First Presbyterian Church (Charlotte, North Carolina)			First Presbyterian Church	
+CL030	SEED — article in no tile (#539)		Frederick Apartments (Charlotte, North Carolina)	35.23169083333334	-80.83935483333333	article Frederick Apartments (Charlotte, North Carolina) · 8 m	Frederick Apartments (Charlotte, North Carolina)		CHECK SUBJECT: served pin Frederick Place (osm_way1181049747) 24 m from the article may already be this place	Frederick Apartments	
+CL032	SEED — article in no tile (#539)		Grace A.M.E. Zion Church	35.223333333333336	-80.84194444444444	article Grace A.M.E. Zion Church · 0 m	Grace A.M.E. Zion Church			Grace A.M.E. Zion Church	
+CL037	SEED — unmapped		Highland Park Mill No. 1	35.235	-80.8267		Highland Park Mill No. 1			Highland Park Mill No. 1	
+CL039	SEED — article in no tile (#539)		Home Federal Building	35.22638888888889	-80.8436111111111	article Home Federal Building · 2 m	Home Federal Building			Home Federal Building	
+CL042	SEED — article in no tile (#539)		Hotel Charlotte (Charlotte, North Carolina)	35.228611111111114	-80.84555555555555	article Hotel Charlotte (Charlotte, North Carolina) · 4 m	Hotel Charlotte (Charlotte, North Carolina)			Hotel Charlotte	
+CL043	SEED — article in no tile (#539)		Independence Building	35.2275	-80.84305555555555	article Independence Building · 4 m	Independence Building			Independence Building	
+CL044	SEED — article in no tile (#539)		Johnston Building (Charlotte, North Carolina)	35.2262	-80.8448	article Johnston Building (Charlotte, North Carolina) · 0 m	Johnston Building (Charlotte, North Carolina)			Johnston Building	
+CL045	SEED — article in no tile (#539)		Charles R. Jonas Federal Building	35.23027777777778	-80.84694444444445	article Charles R. Jonas Federal Building · 5 m	Charles R. Jonas Federal Building			Charles R. Jonas Federal Building	
+CL048	SEED — unmapped		Kimberlee Apartments	35.1758	-80.8479		Kimberlee Apartments			Kimberlee Apartments	
+CL049	SEED — article in no tile (#539)		Latta Arcade	35.22555555555556	-80.84583333333333	article Latta Arcade · 6 m	Latta Arcade			Latta Arcade	
+CL052	SEED — article in no tile (#539)		Liddell-McNinch House	35.231388888888894	-80.83972222222222	article Liddell-McNinch House · 2 m	Liddell-McNinch House			Liddell-McNinch House	
+CL053	SEED — article in no tile (#539)		Louise Cotton Mill	35.224722222222226	-80.81833333333333	article Louise Cotton Mill · 4 m	Louise Cotton Mill			Louise Cotton Mill	
+CL060	SEED — article in no tile (#539)		Mecklenburg County Courthouse (North Carolina)	35.221111111111114	-80.83749999999999	article Mecklenburg County Courthouse (North Carolina) · 0 m	Mecklenburg County Courthouse (North Carolina)			Mecklenburg County Courthouse	
+CL061	SEED — article in no tile (#539)		Mecklenburg Investment Company Building	35.22277777777778	-80.84222222222222	article Mecklenburg Investment Company Building · 0 m	Mecklenburg Investment Company Building			Mecklenburg Investment Company Building	
+CL062	SEED — article in no tile (#539)		Merchants and Farmers National Bank Building	35.22666666666667	-80.84222222222222	article Merchants and Farmers National Bank Building · 0 m	Merchants and Farmers National Bank Building			Merchants and Farmers National Bank Building	
+CL067	SEED — article in no tile (#539)		Orient Manufacturing Company-Chadwick-Hoskins No. 3	35.20333333333333	-80.83138888888888	article Orient Manufacturing Company-Chadwick-Hoskins No. 3 · 0 m	Orient Manufacturing Company-Chadwick-Hoskins No. 3			Orient Manufacturing Company-Chadwick-Hoskins No. 3	
+CL069	SEED — article in no tile (#539)		Overcarsh House	35.23277777777778	-80.84166666666667	article Overcarsh House · 0 m	Overcarsh House			Overcarsh House	
+CL070	SEED — unmapped		Palmer Fire School	35.205811	-80.810394		Palmer Fire School			Palmer Fire School	
+CL074	SEED — unmapped		Robinson Rock House Ruin and Plantation Site	35.276389	-80.7175		Robinson Rock House Ruin and Plantation Site			Robinson Rock House Ruin and Plantation Site	
+CL078	SEED — article in no tile (#539)		Charlotte station (Seaboard Air Line Railroad)	35.23388888888889	-80.83305555555555	article Charlotte station (Seaboard Air Line Railroad) · 0 m	Charlotte station (Seaboard Air Line Railroad)			Seaboard Air Line Railroad Passenger Station	
+CL085	SEED — article in no tile (#539)		Joseph Sykes Brothers Company Building	35.219166666666666	-80.86055555555555	article Joseph Sykes Brothers Company Building · 0 m	Joseph Sykes Brothers Company Building			Joseph Sykes Brothers Company Building	
+CL086	SEED — article in no tile (#539)		Textile Mill Supply Company Building	35.22138888888889	-80.8586111111111	article Textile Mill Supply Company Building · 0 m	Textile Mill Supply Company Building			Textile Mill Supply Company Building	
+CL087	SEED — article in no tile (#539)		Union Storage and Warehouse Company Building	35.22833333333333	-80.8586111111111	article Union Storage and Warehouse Company Building · 0 m	Union Storage and Warehouse Company Building			Union Storage and Warehouse Company Building	
+CL089	SEED — article in no tile (#539)		Victoria (Charlotte, North Carolina)	35.223888888888894	-80.81027777777777	article Victoria (Charlotte, North Carolina) · 0 m	Victoria (Charlotte, North Carolina)			Victoria	
+CL092	SEED — article in no tile (#539)		Carolina Theatre (Charlotte)	35.22833333333333	-80.84069444444444	article Carolina Theatre (Charlotte) · 0 m	Carolina Theatre (Charlotte)			Carolina Theater	
+CL093	SEED — unmapped		Dinkins House	35.127457	-80.7968		Dinkins House		new: hidden pin William Lee House 79 m	Dinkins House	new
+CL098	SEED — unmapped		Woodlawn Mill	35.3034	-81.0186		Woodlawn Mill			Woodlawn Mill	
+CL001	CUT — served					Addison Apartments · osm_way836963283 · 49 m	Addison Apartments			Addison Apartments	
+CL002	CUT — served					1774 Alexander Rock House · wiki_41772582 · 0 m	Hezekiah Alexander House			Hezekiah Alexander House	
+CL003	CUT — served					Neal Somers Alexander House · wiki_45348294 · 40 m	Neal Somers Alexander House			Neal Somers Alexander House	
+CL004	CUT — served					William T. Alexander House · wiki_45348396 · 0 m	William T. Alexander House			William T. Alexander House	
+CL006	CUT — served					Biddle Memorial Hall · wiki_28792300 · 40 m	Biddle Memorial Hall			Biddle Memorial Hall, Johnson C. Smith University	
+CL007	CUT — served					Billingsville School · wiki_45410907 · 0 m	Billingsville School			Billingsville School	
+CL016	CUT — served					Dr. Walter Pharr Craven House · wiki_45357701 · 0 m	Dr. Walter Pharr Craven House			Dr. Walter Pharr Craven House	
+CL017	CUT — served					Croft Historic District · wiki_45409293 · 0 m	Croft Historic District			Croft Historic District	
+CL019	CUT — served					James Buchanan Duke House · wiki_45357801 · 0 m	James Buchanan Duke House			James Buchanan Duke House	
+CL021	CUT — served					Elizabeth (Charlotte neighborhood) · wiki_11405483 · 0 m	Elizabeth (Charlotte neighborhood)			Elizabeth Historic District	
+CL025	CUT — served					Former Charlotte Coca-Cola Bottling Company Plant · wiki_45426195 · 0 m	Former Charlotte Coca-Cola Bottling Company Plant			Former Charlotte Coca-Cola Bottling Company Plant	
+CL026	CUT — served					Former Nebel Knitting Mill · wiki_45426318 · 0 m	Former Nebel Knitting Mill			Former Nebel Knitting Mill	
+CL027	CUT — served					Former Parks-Cramer Company Complex · wiki_45426471 · 0 m	Former Parks-Cramer Company Complex			Former Parks-Cramer Company Complex	
+CL028	CUT — served					Former Thrift Mill · wiki_45457334 · 0 m	Former Thrift Mill			Former Thrift Mill	
+CL029	CUT — served					Former Daniel A. Tompkins Company Machine Shop · wiki_45426522 · 0 m	Former Daniel A. Tompkins Company Machine Shop			Former Daniel A. Tompkins Company Machine Shop	
+CL031	CUT — served					Thomas and Latitia Gluyas House · wiki_45407606 · 0 m	Thomas and Latitia Gluyas House			Thomas and Latitia Gluyas House	
+CL033	CUT — served					Grier-Rea House · wiki_45407875 · 5 m	Grier-Rea House			Grier-Rea House	
+CL034	CUT — served					Grinnell Company-General Fire Extinguisher Company Complex · wiki_45457066 · 5 m	Grinnell Company-General Fire Extinguisher Company Complex			Grinnell Company-General Fire Extinguisher Company Complex	
+CL035	CUT — served					Hayes-Byrum Store and House · wiki_45408593 · 3 m	Hayes-Byrum Store and House			Hayes-Byrum Store and House	
+CL036	CUT — served					Highland Park Manufacturing Company Mill No. 3 · wiki_37692131 · 11 m	Highland Park Manufacturing Company Mill No. 3			Highland Park Manufacturing Company Mill No. 3	
+CL038	CUT — served					Eugene Wilson Hodges Farm · wiki_45408712 · 2 m	Eugene Wilson Hodges Farm			Eugene Wilson Hodges Farm	
+CL040	CUT — served					Hopewell Presbyterian Church and Cemetery · wiki_28733275 · 4 m	Hopewell Presbyterian Church and Cemetery			Hopewell Presbyterian Church and Cemetery	
+CL041	CUT — served					Hoskins Mill · wiki_45457251 · 2 m	Hoskins Mill			Hoskins Mill	
+CL046	CUT — served					Hamilton C. Jones III House · wiki_45367569 · 3 m	Hamilton C. Jones III House			Hamilton C. Jones III House	
+CL047	CUT — served					Bishop John C. Kilgo House · wiki_45367604 · 79 m	Bishop John C. Kilgo House			Bishop John C. Kilgo House	
+CL050	CUT — served					Latta Place · wiki_39740353 · 77 m	Latta Plantation			Latta House	
+CL051	CUT — served					Elizabeth Lawrence House and Garden · wiki_45367652 · 35 m	Elizabeth Lawrence House and Garden			Elizabeth Lawrence House and Garden	
+CL054	CUT — served					Matthews Commercial Historic District · wiki_45463623 · 0 m	Matthews Commercial Historic District			Matthews Commercial Historic District	
+CL055	CUT — served					Mayes House · wiki_45388613 · 0 m	Mayes House			Mayes House	
+CL056	CUT — served					Albert McCoy Farm · wiki_45409084 · 0 m	Albert McCoy Farm			Albert McCoy Farm	
+CL057	CUT — served					Samuel J. McElroy House · wiki_45402977 · 0 m	Samuel J. McElroy House			Samuel J. McElroy House	
+CL058	CUT — served					Frank Ramsay McNinch House · wiki_45399033 · 0 m	Frank Ramsay McNinch House			Frank Ramsay McNinch House	
+CL063	CUT — served					Morrocroft · wiki_45399115 · 0 m	Morrocroft			Morrocroft	
+CL065	CUT — served					North Charlotte Historic District · wiki_37692088 · 0 m	North Charlotte Historic District			North Charlotte Historic District	
+CL068	CUT — served					R.F. Outen Pottery · wiki_47806549 · 11 m	R.F. Outen Pottery			R.F. Outen Pottery	
+CL071	CUT — served					Pharrsdale Historic District · wiki_45409409 · 0 m	Pharrsdale Historic District			Pharrsdale Historic District	
+CL072	CUT — served					Pineville Commercial Historic District · wiki_45463670 · 0 m	Pineville Commercial Historic District			Pineville Commercial Historic District	
+CL073	CUT — served					Pineville Mill Village Historic District · wiki_45463711 · 0 m	Pineville Mill Village Historic District			Pineville Mill Village Historic District	
+CL075	CUT — served					Rosedale (Charlotte, North Carolina) · wiki_45402007 · 0 m	Rosedale (Charlotte, North Carolina)			Rosedale	
+CL076	CUT — served					Edward M. Rozzell House · wiki_45402104 · 0 m	Edward M. Rozzell House			Edward M. Rozzell House	
+CL077	CUT — served					Savona Mill · wiki_45457826 · 0 m	Savona Mill			Savona Mill	
+CL079	CUT — served					Fritz Seifart House · wiki_45402138 · 0 m	Fritz Seifart House			Fritz Seifart House	
+CL080	CUT — served					Siloam School (Charlotte, North Carolina) · wiki_45416659 · 0 m	Siloam School (Charlotte, North Carolina)			Siloam School	
+CL081	CUT — served					Southern Asbestos Company Mills · wiki_45458481 · 0 m	Southern Asbestos Company Mills			Southern Asbestos Company Mills	
+CL082	CUT — served					Speas Vinegar Company · wiki_47806652 · 25 m	Speas Vinegar Company			Speas Vinegar Company	
+CL083	CUT — served					St. Mark's Episcopal Church (Huntersville, North Carolina) · wiki_23485763 · 0 m	St. Mark's Episcopal Church (Huntersville, North Carolina)			St. Mark's Episcopal Church	
+CL084	CUT — served					Steele Creek Presbyterian Church and Cemetery · wiki_28733304 · 0 m	Steele Creek Presbyterian Church and Cemetery			Steele Creek Presbyterian Church and Cemetery	
+CL088	CUT — served					VanLandingham Estate · wiki_45402325 · 0 m	VanLandingham Estate			VanLandingham Estate	
+CL090	CUT — served					Wesley Heights Historic District · wiki_45409498 · 0 m	Wesley Heights Historic District			Wesley Heights Historic District	
+CL091	CUT — served					White Oak Plantation · wiki_45402445 · 0 m	White Oak Plantation			White Oak Plantation	
+CL095	CUT — served					Downtown Mount Holly Historic District · wiki_44561622 · 8 m	Downtown Mount Holly Historic District			Downtown Mount Holly Historic District	
+CL096	CUT — served					Mount Holly Cotton Mill · wiki_44506867 · 5 m	Mount Holly Cotton Mill			Mount Holly Cotton Mill	
+CL097	CUT — served					St. Joseph's Catholic Church (Mountain Island, North Carolina) · wiki_44551275 · 4 m	St. Joseph's Catholic Church (Mountain Island, North Carolina)			St. Joseph's Catholic Church	
+CL018	NO LINE — district centroid						Dilworth (Charlotte neighborhood)		no stored pin for the district; a centroid pin would be arbitrary	Dilworth Historic District	
+CL059	NO LINE — district centroid						McCrorey Heights Historic District		no stored pin for the district; a centroid pin would be arbitrary	McCrorey Heights Historic District	
+CL064	NO LINE — district centroid						Myers Park (Charlotte)		no stored pin for the district; a centroid pin would be arbitrary	Myers Park Historic District	
+CL066	NO LINE — district centroid						Oaklawn Park Historic District		no stored pin for the district; a centroid pin would be arbitrary	Oaklawn Park Historic District	
+CL094	NO LINE — no coordinate		Thomas Trotter Building				Thomas Trotter Building		place by hand or cut	Thomas Trotter Building	
+CL099	NO LINE — no coordinate		Jackson's Furnace Site (38YK217)				Jackson's Furnace Site (38YK217)		place by hand or cut	Jackson's Furnace Site (38YK217)	
