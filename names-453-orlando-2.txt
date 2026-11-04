@@ -1,0 +1,21 @@
+# names-453-orlando-2.txt — #453 Orlando story batch, part 2: state markers and gate-drop rescues that need a seed (drafted 2026-11-04).
+# Batch file — do NOT run alone; it dry-runs and commits with names-453-orlando-1.txt and 453_hidden_curated.sql in one Mac session.
+# SOURCES: Florida's Division of Historical Resources marker list (markers.flheritage.com, Orange County index Home/index/48 — the
+# depth bar's state-program spine now that HMdb challenges the sandbox, #556), and 453_gate_drops_orlando.tsv.
+# Same checks as part 1 (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3)). The state site publishes no
+# coordinates, so a marker becomes a line here only where OSM fixes its subject's point (the church node, the street, the
+# lodge's corner); markers whose subject can't be placed to tens of metres wait for #556's HMdb path (listed on #453).
+#   Cedar of Lebanon Sculpture — the hidden OSM pin "Cedar of Lebanon" (osm_node10899389302) FAILS #542 (stored only in
+#     571_-1628; its containing tile 571_-1627 doesn't store it), so it seeds at the pin's point under a different name, `new`.
+#   First Presbyterian Church of Maitland — OSM's node and name; `new`: the served Church of the Good Shepherd article pin is
+#     117 m away (a different church).
+#   Lake Lily Drive — at OSM's street; `new`: Good Shepherd 111 m, the hidden Lake Lily Park pin and the Fort Maitland article
+#     295 m — all different subjects.
+#   Orange Lodge No. 36 — at OSM's E Main Street / Alabama Avenue node (the marker's stated corner); no pin, gem or article
+#     within 300 m.
+#   CUT by reading: Moseley House (marker 550) — served as wiki_63843588 "Moseley House Museum".
+# EXPECT on the Mac dry run: 4 new-seed, 0 review.
+Cedar of Lebanon Sculpture | @28.5426432,-81.3713462 | Jacob Harmeling's Cedar of Lebanon, one of the eight privately funded See Art Orlando sculptures, is a three-story tree of hand-bent sprinkler pipes topped with mirrored stainless steel canopies for leaves, and it is lit from within. | https://bungalower.com/2013/11/18/photo-tour-see-art-orlando-sculptures-unveiled-tonight/ | new
+First Presbyterian Church of Maitland | @28.6183327,-81.3692357 | Ten Presbyterian settlers organized this congregation in 1882 under the Rev. W.G.F. Wallace, when Maitland was a pioneer hamlet, and built the church in 1883, making it one of the oldest churches still in use in the area. | https://markers.flheritage.com/home/details/548 | new
+Lake Lily Drive | @28.6190021,-81.3672905 | This road along the west side of Lake Lily was the first direct route from Northeast Florida to Maitland and an Army trail linking forts in the Second Seminole War; Orange County paved it in 1915 as Florida's first grouted brick road, it became part of the Dixie Highway, and its bricks, covered with asphalt in the 1960's, were uncovered and restored in 1998. | https://markers.flheritage.com/home/details/274 | new
+Orange Lodge No. 36 | @28.6729844,-81.5021161 | Built in 1859 for a Masonic lodge founded in 1856, this is the oldest Masonic lodge building in continuous use in Florida: lodge meetings have always filled its upper story, while the ground floor served as post office, school, church and general store for a settlement known as The Lodge until Apopka City was chartered in 1882; the lower story was replaced in 1952. | https://markers.flheritage.com/home/details/551

@@ -1,0 +1,36 @@
+# names-453-orlando-1.txt — #453 Orlando story batch, part 1: the Wikipedia list spine (drafted 2026-11-04).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Orlando batch (this file + part 2's names file(s) + 453_hidden_curated*.sql) dry-runs and commits in one Mac session
+# (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 453_sort_orlando.tsv (story-sort 2026.11.01b; lists: the Orange County and Seminole County NRHP lists, both
+# {{NRHP row}}, so #551 did not fire). 55 candidates; the sort read 37 cut, 11 seed, 5 district centroid, 2 no coordinate.
+# Every line was written from its source's text and passed the mechanical checks (FROM SAN ANTONIO (12), FROM LAS VEGAS (6),
+# FROM SACRAMENTO (3)): every number and proper name in its source; inside the box (42 stored tiles, re-read 2026-11-04, all
+# cache hits); no name repeated; stored pins (served and hidden), approved gems and Wikipedia articles within 120–150 m read
+# at the LINE's own coordinate. The box's stored map is thin downtown (660 pins, 357 served — FROM TAMPA (6)), so nothing
+# stored stands within 120 m of any line below.
+# CHANGED FROM THE SORT, BY READING:
+#   OR042 Tinker Field — CUT: the served pin wiki_6206769 IS the field (the article's own point; the list point is 249 m off)
+#     and already serves the article's story (#519 (1): a curated row would overwrite it).
+#   OR045 Wells'Built Museum — NOT a seed: the museum fills the hotel, and its hidden OSM pin "Well's Built Museum of African
+#     American History & Culture" (osm_way400479603) stands 68 m from the article point; containing tile stores it (#542)
+#     → 453_hidden_curated.sql.
+#   OR051 George R. Newell House — NO LINE: demolished in 1975 (its article; FROM SACRAMENTO (5)).
+#   OR052 The Parsonage (Winter Park) — NO LINE: the 1885 Rollins campus building has been demolished (Rollins archives).
+#   OR032 Orlando Utilities Commission Administration Building — at OSM's own building (the Aloft hotel, way 399820004), 40 m
+#     from the list point; `| new` up front (DuPage (1)) because the article *CNL Center City Commons* is 78 m away.
+#   OR014, OR018, OR026, OR027, OR038 (districts) — NO LINE: no stored pin, a centroid would be arbitrary. Lake Ivanhoe and
+#     Rosemere each carry a state marker; part 2 places those lines at the marker if a point can be fixed.
+# EXPECT on the Mac dry run: 9 new-seed. Orlando Health/Amtrak station, Church Street Station, Dr. P. Phillips House, Tinker
+#   Building and J. J. Bridges House are named exactly as their articles (0–42 m) — ↳ article-title seeds that are no-ops
+#   (FROM TAMPA (7)). Any `review` is a stop: read it before --commit.
+Orlando Health/Amtrak station | @28.5259,-81.3813 | When the Atlantic Coast Line dedicated this Spanish Mission style station in January 1927 more than 6,000 people turned out; architect M.A. Griffith had toured the Pacific Coast for ideas, the segregated station gave African American passengers their own waiting room and ticket windows on its south side, and the words "Seaboard Coast Line" on the east parapet replaced "Atlantic Coast Line" after the two railroads merged in 1967. | https://markers.flheritage.com/home/details/931
+Baptist Terrace Apartments | @28.541115,-81.371682 | Completed in 1970 under the federal Section 202 program for elderly housing, this 14-story concrete high-rise was the last affordable rental tower for seniors built in Orlando's central business district in the 1960s, and its completion closed the city's first round of Section 202 building. | https://www.housingonline.com/wp-content/uploads/2024/02/24AM_Rex.pdf
+J. J. Bridges House | @28.53305556,-81.37722222 | Designed by the architects John H. and Wilson C. Ely and built in 1916, this was the first of the strictly academic Colonial Revival houses built in Orlando. | https://en.wikipedia.org/wiki/J._J._Bridges_House
+Gary-Morgan House | @28.5978813,-81.3384271 | Pharmacy owners Claude and Celia Gary built this Classical Revival house above Lake Mizell for $20,000 in 1927, just after the Florida land boom collapsed, when it was one of the largest house starts in Orange County; Gary, a South Carolinian with his family's Edgefield home, Oakley Park, in mind, gave the design to architect D. Harold Hair, also from South Carolina. | https://npgallery.nps.gov/GetAsset/46118849-ed26-4072-939c-9b8e1bc64446
+Church Street Station | @28.54,-81.38055556 | The South Florida Railroad built this depot in 1889, and it served several railroads until 1926, when passenger service moved to what is now the Orlando Health/Amtrak station; in the 1970s the depot and the buildings around it were bought and turned into an entertainment center. | https://en.wikipedia.org/wiki/Church_Street_Station
+Orlando Utilities Commission Administration Building | @28.5365292,-81.3790718 | Designed by Richard Boone Rodgers, this eight-story Modern office building went into use in 1967, built by the Orlando Utilities Commission to handle the extra business expected once the University of Central Florida and Walt Disney World opened; it stood empty for years after the Commission moved out, and in 2011 it was bought and turned into a boutique hotel. | https://en.wikipedia.org/wiki/Orlando_Utilities_Commission_Administration_Building | new
+Dr. P. Phillips House | @28.53555556,-81.37611111 | Colonel Peleg Peckham of Winter Park had this Shingle style house built in 1893 as a wedding present for his daughter; Dr. Philip Phillips, a leading figure in Central Florida's citrus industry, bought it in 1912 and lived here until his death in 1959. | https://en.wikipedia.org/wiki/Dr._P._Phillips_House
+Tinker Building | @28.54083333,-81.37972222 | Hall of Fame Chicago Cubs shortstop Joe Tinker, who had moved to Orlando in December 1920 to manage its baseball team, had this building put up in 1925 for his real estate business; later tenants included a pool hall, a Singer Sewing Machine Company store and Balfour Hardware. | https://www.waymarking.com/waymarks/WM33CH_Tinker_Building__Orlando_FL
+Nils M. and Beverly Schweizer House | @28.641602,-81.385445 | Architect Nils Schweizer, who brought Frank Lloyd Wright's organic design ideals to Central Florida after moving to Orlando with his wife Beverly in 1957, designed this Maitland house for his own family, and three of the children raised here later opened an office with him at the back of it. | https://issuu.com/orangeappealmagazine/docs/ia_ss22-issuu/s/23601102

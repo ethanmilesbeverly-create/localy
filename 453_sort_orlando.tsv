@@ -1,56 +1,56 @@
 id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
-OR005	SEED — article in no tile (#539)		Orlando Health/Amtrak station	28.5259	-81.3813	article Orlando Health/Amtrak station · 110 m	Orlando Health/Amtrak station			Atlantic Coast Line Station	
-OR006	SEED — unmapped		Baptist Terrace Apartments	28.541115	-81.371682		Baptist Terrace Apartments			Baptist Terrace Apartments	
-OR009	SEED — article in no tile (#539)		J. J. Bridges House	28.533055555555556	-81.37722222222222	article J. J. Bridges House · 0 m	J. J. Bridges House			J. J. Bridges House	
-OR016	SEED — unmapped		Gary-Morgan House	28.5979	-81.3384		Gary-Morgan House			Gary-Morgan House	
-OR031	SEED — article in no tile (#539)		Church Street Station	28.540000000000003	-81.38055555555555	article Church Street Station · 62 m	Church Street Station			Old Orlando Railroad Depot	
-OR032	SEED — unmapped		Orlando Utilities Commission Administration Building	28.536609	-81.378688		Orlando Utilities Commission Administration Building			Orlando Utilities Commission Administration Building	
-OR035	SEED — article in no tile (#539)		Dr. P. Phillips House	28.535555555555558	-81.3761111111111	article Dr. P. Phillips House · 0 m	Dr. P. Phillips House			Dr. P. Phillips House	
-OR041	SEED — article in no tile (#539)		Tinker Building	28.540833333333335	-81.37972222222221	article Tinker Building · 0 m	Tinker Building			Tinker Building	
-OR042	SEED — unmapped		Tinker Field	28.540833	-81.404444		Tinker Field		CHECK: same-named served pin Tinker Field (wiki_6206769) 249 m away — the same place, mapped off the list point?; new: same-named pin 249 m	Tinker Field	new
-OR045	SEED — article in no tile (#539)		Wells'Built Museum	28.53805555555556	-81.38583333333334	article Wells'Built Museum · 0 m	Wells'Built Museum		CHECK SUBJECT: hidden pin Well's Built Museum of African American History & Culture (osm_way400479603) 68 m from the article may already be this place	Well'sbuilt Hotel	
-OR055	SEED — unmapped		Nils M. and Beverly Schweizer House	28.641602	-81.385445		Nils M. and Beverly Schweizer House			Nils M. and Beverly Schweizer House	
-OR001	CUT — served					1890 Windermere School · wiki_7603732 · 0 m	1890 Windermere School			1890 Windermere School	
-OR002	CUT — served					All Saints Episcopal Church (Winter Park, Florida) · wiki_7395784 · 0 m	All Saints Episcopal Church (Winter Park, Florida)			All Saints Episcopal Church	
-OR003	CUT — served					Apopka station · wiki_6915957 · 97 m	Apopka Seaboard Air Line Railway Depot			Apopka Seaboard Air Line Railway Depot	
-OR004	CUT — served					S. Howard Atha House · wiki_43779627 · 0 m	S. Howard Atha House			S. Howard Atha House	
-OR007	CUT — served					Robert Bruce Barbour House · wiki_21010499 · 0 m	Robert Bruce Barbour House			Robert Bruce Barbour House	
-OR008	CUT — served					Edward Hill Brewer House · wiki_7302222 · 0 m	Edward Hill Brewer House			Edward Hill Brewer House	
-OR010	CUT — served					Carroll Building (Apopka, Florida) · wiki_7396031 · 0 m	Carroll Building (Apopka, Florida)			Carroll Building	
-OR011	CUT — served					Church of the Good Shepherd (Maitland, Florida) · wiki_31445135 · 77 m	Church of the Good Shepherd (Maitland, Florida)			Church of the Good Shepherd	
-OR012	CUT — served					Comstock-Harris House · wiki_7302146 · 0 m	Comstock-Harris House			Comstock-Harris House	
-OR013	CUT — served					Downtown Winter Park Historic District · wiki_43780295 · 0 m	Downtown Winter Park Historic District			Downtown Winter Park Historic District	
-OR015	CUT — served					St. George Antiochian Orthodox Church (Orlando, Florida) · wiki_7396582 · 0 m	First Church of Christ, Scientist (Orlando, Florida)			First Church of Christ Scientist	
-OR017	CUT — served					Siegmund and Marilyn Goldman House · wiki_60059770 · 0 m	Siegmund and Marilyn Goldman House			Siegmund and Marilyn Goldman House	
-OR019	CUT — served					Holden–Parramore Historic District · wiki_42704470 · 3 m	Holden-Parramore Historic District			Holden-Parramore Historic District	
-OR020	CUT — served					John N. Huttig Estate · wiki_7360347 · 0 m	John N. Huttig Estate			John N. Huttig Estate	
-OR021	CUT — served					Interlachen Avenue Historic District · wiki_43780148 · 0 m	Interlachen Avenue Historic District			Interlachen Avenue Historic District	
-OR022	CUT — served					Jack Kerouac House · wiki_43780740 · 15 m	Jack Kerouac House			Jack Kerouac House	
-OR023	CUT — served					Knowles Memorial Chapel · wiki_15878921 · 41 m	Knowles Memorial Chapel			Knowles Memorial Chapel	
-OR024	CUT — served					Lake Adair–Lake Concord Historic District · wiki_43782033 · 7 m	Lake Adair-Lake Concord Historic District			Lake Adair-Lake Concord Historic District	
-OR025	CUT — served					Lake Eola Heights Historic District · wiki_6127440 · 0 m	Lake Eola Heights Historic District			Lake Eola Heights Historic District	
-OR028	CUT — served					Maitland Art Center · wiki_7321839 · 0 m	Maitland Art Center			Maitland Art Center	
-OR029	CUT — served					Harry P. Leu Gardens · wiki_1687693 · 16 m	Harry P. Leu Gardens			Mizell-Leu House Historic District	
-OR030	CUT — served					Ocoee Christian Church (Ocoee, Florida) · wiki_7254805 · 0 m	Ocoee Christian Church (Ocoee, Florida)			Ocoee Christian Church	
-OR033	CUT — served					Palm Cottage Gardens · wiki_7321723 · 0 m	Palm Cottage Gardens			Palm Cottage Gardens	
-OR034	CUT — served					Cal Palmer Memorial Building · wiki_7322051 · 0 m	Cal Palmer Memorial Building			Cal Palmer Memorial Building	
-OR036	CUT — served					Albin Polasek House and Studio · wiki_7321701 · 0 m	Albin Polasek House and Studio			Albin Polasek House and Studio	
-OR037	CUT — served					Rogers Building (Florida) · wiki_7360356 · 0 m	Rogers Building (Florida)			Rogers Building	
-OR039	CUT — served					Annie Russell Theatre · wiki_6350694 · 0 m	Annie Russell Theatre			Annie Russell Theatre	
-OR040	CUT — served					Ryan & Company Lumber Yard · wiki_7321828 · 0 m	Ryan & Company Lumber Yard			Ryan & Company Lumber Yard	
-OR043	CUT — served					Thomas Picton Warlow Sr. House · wiki_43783514 · 0 m	Thomas Picton Warlow Sr. House			Thomas Picton Warlow Sr. House	
-OR044	CUT — served					William H. Waterhouse House · wiki_7302212 · 0 m	William H. Waterhouse House			William H. Waterhouse House	
-OR046	CUT — served					Windermere Town Hall · wiki_7322070 · 0 m	Windermere Town Hall			Windermere Town Hall	
-OR047	CUT — served					Winter Park Country Club and Golf Course · wiki_7603771 · 0 m	Winter Park Country Club and Golf Course			Winter Park Country Club and Golf Course	
-OR048	CUT — served					Withers-Maguire House · wiki_7302136 · 0 m	Withers-Maguire House			Withers-Maguire House	
-OR049	CUT — served					Woman's Club of Ocoee · wiki_43783835 · 0 m	Woman's Club of Ocoee			Woman's Club of Ocoee	
-OR050	CUT — served					Woman's Club of Winter Park · wiki_7322028 · 0 m	Woman's Club of Winter Park			Woman's Club of Winter Park	
-OR053	CUT — served					Bradlee-McIntyre House · wiki_2579564 · 2 m	Bradlee-McIntyre House			Bradlee-McIntyre House	
-OR054	CUT — served					Nelson and Company Historic District · wiki_6127578 · 7 m	Nelson and Company Historic District			Nelson and Company Historic District	
-OR014	NO LINE — district centroid						Eatonville Historic District		LIST POINT FAR: 930 m from its article's point (Eatonville, Florida) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	Eatonville Historic District	
-OR018	NO LINE — district centroid						Griffin Park Historic District		no stored pin for the district; a centroid pin would be arbitrary	Griffin Park Historic District	
-OR026	NO LINE — district centroid						Lake Ivanhoe Historic Residential District		no stored pin for the district; a centroid pin would be arbitrary	Lake Ivanhoe Historic Residential District	
-OR027	NO LINE — district centroid						Lake Lawsona Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lake Lawsona Historic District	
-OR038	NO LINE — district centroid						Rosemere Historic District		no stored pin for the district; a centroid pin would be arbitrary	Rosemere Historic District	
-OR051	NO LINE — no coordinate		George R. Newell House				George R. Newell House (Orlando, Florida)		place by hand or cut	George R. Newell House	
-OR052	NO LINE — no coordinate		The Parsonage				The Parsonage (Winter Park, Florida)		place by hand or cut	The Parsonage	
+OR005	SEED — article in no tile (#539)	LINE part 1	Orlando Health/Amtrak station	28.5259	-81.3813	article Orlando Health/Amtrak station · 110 m	Orlando Health/Amtrak station			Atlantic Coast Line Station	
+OR006	SEED — unmapped	LINE part 1	Baptist Terrace Apartments	28.541115	-81.371682		Baptist Terrace Apartments			Baptist Terrace Apartments	
+OR009	SEED — article in no tile (#539)	LINE part 1	J. J. Bridges House	28.533055555555556	-81.37722222222222	article J. J. Bridges House · 0 m	J. J. Bridges House			J. J. Bridges House	
+OR016	SEED — unmapped	LINE part 1	Gary-Morgan House	28.5979	-81.3384		Gary-Morgan House			Gary-Morgan House	
+OR031	SEED — article in no tile (#539)	LINE part 1	Church Street Station	28.540000000000003	-81.38055555555555	article Church Street Station · 62 m	Church Street Station			Old Orlando Railroad Depot	
+OR032	SEED — unmapped	LINE part 1 (new; OSM building point)	Orlando Utilities Commission Administration Building	28.536609	-81.378688		Orlando Utilities Commission Administration Building			Orlando Utilities Commission Administration Building	
+OR035	SEED — article in no tile (#539)	LINE part 1	Dr. P. Phillips House	28.535555555555558	-81.3761111111111	article Dr. P. Phillips House · 0 m	Dr. P. Phillips House			Dr. P. Phillips House	
+OR041	SEED — article in no tile (#539)	LINE part 1	Tinker Building	28.540833333333335	-81.37972222222221	article Tinker Building · 0 m	Tinker Building			Tinker Building	
+OR042	SEED — unmapped	CUT — served wiki_6206769 is the field (list point 249 m off)	Tinker Field	28.540833	-81.404444		Tinker Field		CHECK: same-named served pin Tinker Field (wiki_6206769) 249 m away — the same place, mapped off the list point?; new: same-named pin 249 m	Tinker Field	new
+OR045	SEED — article in no tile (#539)	CURATED ROW — hidden museum pin osm_way400479603 (453_hidden_curated.sql)	Wells'Built Museum	28.53805555555556	-81.38583333333334	article Wells'Built Museum · 0 m	Wells'Built Museum		CHECK SUBJECT: hidden pin Well's Built Museum of African American History & Culture (osm_way400479603) 68 m from the article may already be this place	Well'sbuilt Hotel	
+OR055	SEED — unmapped	LINE part 1	Nils M. and Beverly Schweizer House	28.641602	-81.385445		Nils M. and Beverly Schweizer House			Nils M. and Beverly Schweizer House	
+OR001	CUT — served	CUT — served (confirmed)				1890 Windermere School · wiki_7603732 · 0 m	1890 Windermere School			1890 Windermere School	
+OR002	CUT — served	CUT — served (confirmed)				All Saints Episcopal Church (Winter Park, Florida) · wiki_7395784 · 0 m	All Saints Episcopal Church (Winter Park, Florida)			All Saints Episcopal Church	
+OR003	CUT — served	CUT — served (confirmed)				Apopka station · wiki_6915957 · 97 m	Apopka Seaboard Air Line Railway Depot			Apopka Seaboard Air Line Railway Depot	
+OR004	CUT — served	CUT — served (confirmed)				S. Howard Atha House · wiki_43779627 · 0 m	S. Howard Atha House			S. Howard Atha House	
+OR007	CUT — served	CUT — served (confirmed)				Robert Bruce Barbour House · wiki_21010499 · 0 m	Robert Bruce Barbour House			Robert Bruce Barbour House	
+OR008	CUT — served	CUT — served (confirmed)				Edward Hill Brewer House · wiki_7302222 · 0 m	Edward Hill Brewer House			Edward Hill Brewer House	
+OR010	CUT — served	CUT — served (confirmed)				Carroll Building (Apopka, Florida) · wiki_7396031 · 0 m	Carroll Building (Apopka, Florida)			Carroll Building	
+OR011	CUT — served	CUT — served (confirmed)				Church of the Good Shepherd (Maitland, Florida) · wiki_31445135 · 77 m	Church of the Good Shepherd (Maitland, Florida)			Church of the Good Shepherd	
+OR012	CUT — served	CUT — served (confirmed)				Comstock-Harris House · wiki_7302146 · 0 m	Comstock-Harris House			Comstock-Harris House	
+OR013	CUT — served	CUT — served (confirmed)				Downtown Winter Park Historic District · wiki_43780295 · 0 m	Downtown Winter Park Historic District			Downtown Winter Park Historic District	
+OR015	CUT — served	CUT — served (confirmed)				St. George Antiochian Orthodox Church (Orlando, Florida) · wiki_7396582 · 0 m	First Church of Christ, Scientist (Orlando, Florida)			First Church of Christ Scientist	
+OR017	CUT — served	CUT — served (confirmed)				Siegmund and Marilyn Goldman House · wiki_60059770 · 0 m	Siegmund and Marilyn Goldman House			Siegmund and Marilyn Goldman House	
+OR019	CUT — served	CUT — served (confirmed)				Holden–Parramore Historic District · wiki_42704470 · 3 m	Holden-Parramore Historic District			Holden-Parramore Historic District	
+OR020	CUT — served	CUT — served (confirmed)				John N. Huttig Estate · wiki_7360347 · 0 m	John N. Huttig Estate			John N. Huttig Estate	
+OR021	CUT — served	CUT — served (confirmed)				Interlachen Avenue Historic District · wiki_43780148 · 0 m	Interlachen Avenue Historic District			Interlachen Avenue Historic District	
+OR022	CUT — served	CUT — served (confirmed)				Jack Kerouac House · wiki_43780740 · 15 m	Jack Kerouac House			Jack Kerouac House	
+OR023	CUT — served	CUT — served (confirmed)				Knowles Memorial Chapel · wiki_15878921 · 41 m	Knowles Memorial Chapel			Knowles Memorial Chapel	
+OR024	CUT — served	CUT — served (confirmed)				Lake Adair–Lake Concord Historic District · wiki_43782033 · 7 m	Lake Adair-Lake Concord Historic District			Lake Adair-Lake Concord Historic District	
+OR025	CUT — served	CUT — served (confirmed)				Lake Eola Heights Historic District · wiki_6127440 · 0 m	Lake Eola Heights Historic District			Lake Eola Heights Historic District	
+OR028	CUT — served	CUT — served (confirmed)				Maitland Art Center · wiki_7321839 · 0 m	Maitland Art Center			Maitland Art Center	
+OR029	CUT — served	CUT — served (confirmed)				Harry P. Leu Gardens · wiki_1687693 · 16 m	Harry P. Leu Gardens			Mizell-Leu House Historic District	
+OR030	CUT — served	CUT — served (confirmed)				Ocoee Christian Church (Ocoee, Florida) · wiki_7254805 · 0 m	Ocoee Christian Church (Ocoee, Florida)			Ocoee Christian Church	
+OR033	CUT — served	CUT — served (confirmed)				Palm Cottage Gardens · wiki_7321723 · 0 m	Palm Cottage Gardens			Palm Cottage Gardens	
+OR034	CUT — served	CUT — served (confirmed)				Cal Palmer Memorial Building · wiki_7322051 · 0 m	Cal Palmer Memorial Building			Cal Palmer Memorial Building	
+OR036	CUT — served	CUT — served (confirmed)				Albin Polasek House and Studio · wiki_7321701 · 0 m	Albin Polasek House and Studio			Albin Polasek House and Studio	
+OR037	CUT — served	CUT — served (confirmed)				Rogers Building (Florida) · wiki_7360356 · 0 m	Rogers Building (Florida)			Rogers Building	
+OR039	CUT — served	CUT — served (confirmed)				Annie Russell Theatre · wiki_6350694 · 0 m	Annie Russell Theatre			Annie Russell Theatre	
+OR040	CUT — served	CUT — served (confirmed)				Ryan & Company Lumber Yard · wiki_7321828 · 0 m	Ryan & Company Lumber Yard			Ryan & Company Lumber Yard	
+OR043	CUT — served	CUT — served (confirmed)				Thomas Picton Warlow Sr. House · wiki_43783514 · 0 m	Thomas Picton Warlow Sr. House			Thomas Picton Warlow Sr. House	
+OR044	CUT — served	CUT — served (confirmed)				William H. Waterhouse House · wiki_7302212 · 0 m	William H. Waterhouse House			William H. Waterhouse House	
+OR046	CUT — served	CUT — served (confirmed)				Windermere Town Hall · wiki_7322070 · 0 m	Windermere Town Hall			Windermere Town Hall	
+OR047	CUT — served	CUT — served (confirmed)				Winter Park Country Club and Golf Course · wiki_7603771 · 0 m	Winter Park Country Club and Golf Course			Winter Park Country Club and Golf Course	
+OR048	CUT — served	CUT — served (confirmed)				Withers-Maguire House · wiki_7302136 · 0 m	Withers-Maguire House			Withers-Maguire House	
+OR049	CUT — served	CUT — served (confirmed)				Woman's Club of Ocoee · wiki_43783835 · 0 m	Woman's Club of Ocoee			Woman's Club of Ocoee	
+OR050	CUT — served	CUT — served (confirmed)				Woman's Club of Winter Park · wiki_7322028 · 0 m	Woman's Club of Winter Park			Woman's Club of Winter Park	
+OR053	CUT — served	CUT — served (confirmed)				Bradlee-McIntyre House · wiki_2579564 · 2 m	Bradlee-McIntyre House			Bradlee-McIntyre House	
+OR054	CUT — served	CUT — served (confirmed)				Nelson and Company Historic District · wiki_6127578 · 7 m	Nelson and Company Historic District			Nelson and Company Historic District	
+OR014	NO LINE — district centroid	NO LINE — district, no stored pin					Eatonville Historic District		LIST POINT FAR: 930 m from its article's point (Eatonville, Florida) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	Eatonville Historic District	
+OR018	NO LINE — district centroid	NO LINE — district, no stored pin					Griffin Park Historic District		no stored pin for the district; a centroid pin would be arbitrary	Griffin Park Historic District	
+OR026	NO LINE — district centroid	NO LINE — district, no stored pin					Lake Ivanhoe Historic Residential District		no stored pin for the district; a centroid pin would be arbitrary	Lake Ivanhoe Historic Residential District	
+OR027	NO LINE — district centroid	NO LINE — district, no stored pin					Lake Lawsona Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lake Lawsona Historic District	
+OR038	NO LINE — district centroid	NO LINE — district, no stored pin					Rosemere Historic District		no stored pin for the district; a centroid pin would be arbitrary	Rosemere Historic District	
+OR051	NO LINE — no coordinate	NO LINE — demolished 1975	George R. Newell House				George R. Newell House (Orlando, Florida)		place by hand or cut	George R. Newell House	
+OR052	NO LINE — no coordinate	NO LINE — Rollins campus building, demolished	The Parsonage				The Parsonage (Winter Park, Florida)		place by hand or cut	The Parsonage	
