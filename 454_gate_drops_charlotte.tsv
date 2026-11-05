@@ -1,149 +1,149 @@
 tile	name	category	desc	pin id	in gate drops	in leads	verdict
-702_-1614	Ancient Wisdom	art	A sculpture by Maryrose Carroll.	osm_node11565025265	yes	yes	
-702_-1614	Time Further Out	art	A sculpture by Shaun Cassidy, Tom Stanley.	osm_node11565025264	yes	yes	
-702_-1615	Blended Joy	art	A sculpture by Tom Risser.	osm_node11508260188	yes	yes	
-702_-1615	Blue & White Armchair	art	A sculpture by Olivia Hueble.	osm_node11564976477	yes	yes	
-702_-1615	Crimson Arcs	art	A sculpture by Matt Amante.	osm_node11508260187	yes	yes	
-702_-1615	Prismatic Aura 3	art	A sculpture by Jim Gallucci.	osm_node11508260186	yes	yes	
-702_-1615	Public Dusplay of Affection	art	A sculpture by Tom Risser.	osm_node8518889439	yes	yes	
-702_-1615	Stumptown Veterans Memorial	history	A war memorial.	osm_node8518889376	yes	yes	
-702_-1615	Sunset	art	A sculpture by Scott Griffin.	osm_node11508263672	yes	yes	
-702_-1615	The Bee	art	A sculpture by Amy Hart.	osm_node11508263671	yes	yes	
-702_-1616	Art Garden	art	A public installation.	osm_node11406359015	yes	yes	
-702_-1616	Fire Bird	art	A sculpture by Michael Dillon.	osm_node8511266802	yes	yes	
-702_-1616	Fire Station #39 Gate	art	A public artwork by Michael Dillon.	osm_node8511266803	yes	yes	
-702_-1616	Fractured Globe	art	A public sculpture.	osm_node11403895967	yes	yes	
-702_-1616	Olympic Rings	art	A public sculpture.	osm_node11403895968	yes	yes	
-702_-1616	The Hawk	art	A public sculpture.	osm_node11403993628	yes	yes	
-702_-1616	Torsion Sphere	art	A public sculpture.	osm_node11403808471	yes	yes	
-702_-1616	William Lee House	history	A local landmark (house).	osm_way1054074209	yes	yes	
-702_-1617	Open Book, Open Mind	art	A sculpture by Jim Gallucci.	osm_node12892304124	yes	yes	
-702_-1617	The Apple and the Clamp	art	A sculpture by Peter Woytuk.	osm_node5126882174	yes	no	
-702_-1617	The Raven	art	A sculpture by Peter Woytuk.	osm_node5126882176	yes	no	
-702_-1618	Bugle Boy	art	A public statue.	osm_node5256765535	yes	yes	
-702_-1618	Crown of Life	art	“Gabriel the Arc Angel in our Crown of Life Garden.”	osm_node5256765534	no	yes	
-702_-1618	North Carolina/South Carolina line marker	history	A local landmark (boundary stone).	osm_node11693148174	yes	no	
-702_-1618	STEM	art	A sculpture by John Grade.	osm_node11064074558	yes	yes	
-702_-1619	Canopy	art	A sculpture by Billy Lee.	osm_node5029833235	yes	yes	
-702_-1620	Pleasant Hill Presbyterian Church	history	A local memorial (obelisk).	osm_node11390309931	yes	yes	
-703_-1615	Embrace	art	A sculpture by Leslie Scott, Lee Baumgarten.	osm_node8494151160	yes	yes	
-703_-1615	Lucas Family Gristmill Site	history	old mill building ruins	osm_node8911771256	no	yes	
-703_-1616	Grandifloria	art	A public artwork by Thomas Sayre.	osm_node7326913866	yes	yes	
-703_-1617	Isaac Newton Alexander Grist Mill	history	A local landmark (ruins).	osm_node5078860235	yes	yes	
-703_-1617	Rex	art	The world's largest free-standing sculpture of a lion.	osm_node8492753604	no	yes	
-703_-1619	Flash	art	A sculpture by David Černý.	osm_node8507635944	yes	yes	
-703_-1619	Levitation	art	A sculpture by Pavel Kraus.	osm_node11800086789	yes	yes	
-703_-1619	Maersk Anchor	art	A public sculpture.	osm_node5267313100	yes	yes	
-703_-1619	Thánh Giuse	art	“Hãy Đến Cùng Giuse”	osm_node7141868191	no	yes	
-704_-1615	"""Partnership"""	art	A installation by Vivienne McConnell.	osm_node13721278155	yes	yes	
-704_-1615	#42	art	A public artwork by Zack Noble.	osm_node8511301697	yes	yes	
-704_-1615	"Elvis / ""No Barking"""	art	A mural by Kathryn Crawford.	osm_node11889744937	yes	yes	
-704_-1615	Ervin Building murals	art	A public mural.	osm_node13721278157	yes	yes	
-704_-1615	GMEC mural	art	A public mural.	osm_node13721278156	yes	yes	
-704_-1615	Harry Potter mural	art	A mural by Melissa Wineman.	osm_node11889744939	yes	yes	
-704_-1615	Holding Space	art	A mural by Bree Stallings.	osm_node11889744934	yes	yes	
-704_-1615	Merry Oaks mural	art	A public mural.	osm_node13995595181	yes	yes	
-704_-1615	Open Door Studio Mural	art	A mural by Wendy Blue.	osm_node10836130516	yes	yes	
-704_-1615	Painted Utility Box	art	A mural by S. Border.	osm_node10836130515	yes	yes	
-704_-1615	Social Pet mural	art	A mural by Arko and Owl.	osm_node11889744935	yes	yes	
-704_-1615	Teachers	art	A mural by Dwayne Wilson.	osm_node11889744936	yes	yes	
-704_-1615	Wonder	art	A mural by MyLoan Dinh, Bunny Gregory.	osm_node11889744938	yes	yes	
-704_-1616	"""Now Is Fireworks"""	art	A sculpture by Amy Bagwell, Graham Carew.	osm_node8499977950	yes	yes	
-704_-1616	Awi-Spek	art	A sculpture by Jann Rosen-Queralt.	osm_node9656606370	yes	yes	
-704_-1616	Captain James Jack	art	A statue by Chas Fagan.	osm_node4724991906	yes	yes	
-704_-1616	EastSide Pride	art	A mural by Rosalia Torres-Weiner.	osm_node10836116282	yes	yes	
-704_-1616	Finding New Ground	art	A sculpture by Thomas Thoune.	osm_node9384874425	yes	yes	
-704_-1616	Gainseville Midland	history	A local landmark (locomotive).	osm_node8558009126	yes	yes	
-704_-1616	Hugh Pharr McManaway	art	A public statue.	osm_node8626180611	yes	yes	
-704_-1616	Jerry Garcia Mural	art	A mural by Alex Delarge, Despicable D.	osm_node8544485960	yes	yes	
-704_-1616	Joy	art	A mural by Sebastian Coolidge.	osm_node10301192198	yes	yes	
-704_-1616	Mahatma Gandhi	history	A local memorial (statue).	osm_node8494364740	yes	yes	
-704_-1616	Mint Museum Randolph	history	A local art museum.	osm_way784079334	no	yes	
-704_-1616	Natural Rhythm	art	A mural by Georgie Nakima.	osm_way1289786450	yes	yes	
-704_-1616	Reflective Terrain	art	A installation by Blane De St. Croix.	osm_node9384874424	yes	yes	
-704_-1616	Sunflowers	art	A public sculpture.	osm_node8532751352	yes	yes	
-704_-1616	Tate Tower	history	A local landmark (monument).	osm_way1232709612	yes	yes	
-704_-1616	The Column On The Pond	art	A sculpture by Maryrose Carroll.	osm_node10268872997	yes	yes	
-704_-1616	The Rudy Effect	art	A mural by Matt Hooker.	osm_way1196742568	yes	yes	
-704_-1616	Thomas Spratt & King Haigler	art	A statue by Chas Fagan.	osm_node8515336258	yes	yes	
-704_-1617	Aspire	history	A local landmark (monument).	osm_node4724991907	yes	yes	
-704_-1617	Braille Music Box	art	A sculpture by Po Shu Wang.	osm_node5336057599	yes	yes	
-704_-1617	Captain James Jack	art	A statue by Chas Fagan.	osm_node5016558836	yes	yes	
-704_-1617	Charlotte Machine Co.	art	A sculpture by David Furman.	osm_node12958734949	no	yes	
-704_-1617	Firebird	art	A sculpture by Niki de Saint Phalle.	osm_node5016558822	yes	yes	
-704_-1617	Furrow	art	Earth-cast discs.	osm_node6297652308	no	yes	
-704_-1617	Furrow	art	Earth-cast discs.	osm_node6297652312	no	yes	
-704_-1617	Gloria Victus Monument	history	A local memorial.	osm_node4725009585	yes	yes	
-704_-1617	Magic Carpet Mural	art	A mural by Jessie and Katey.	osm_node5286815856	no	yes	
-704_-1617	Queen Charlotte Walks in Her Garden	art	A statue by Bailey Graham Weathers, Jr..	osm_node5016558837	yes	yes	
-704_-1617	Rosati Sculpture	history	A local memorial.	osm_node2162847565	yes	yes	
-704_-1617	Spiral Odyssey	art	A sculpture by Richard Hunt.	osm_node5016558838	yes	yes	
-704_-1617	Vietnam Veterans' Memorial	history	A local memorial.	osm_node1443710808	yes	yes	
-704_-1617	William Henry Belk	art	A public statue.	osm_node4676919717	yes	yes	
-704_-1618	Exclamation Point	art	A sculpture by David Furman.	osm_node11059666871	yes	yes	
-704_-1618	Magic Carpet Mural	art	A mural by Jessie and Katey.	osm_node5286817510	yes	yes	
-704_-1618	Queen's Park sign	art	A public sculpture.	osm_node8521432703	yes	yes	
-704_-1618	Rail Trail Chalkboard	art	A public installation.	osm_way1352819940	yes	yes	
-704_-1618	Soundwave Art	art	A public mural.	osm_node5286819813	yes	yes	
-704_-1618	Steelyard Mural	art	A mural by Ivan Toth Depeña.	osm_way1196928925	yes	yes	
-704_-1618	The James C. Dowd House	history	A local museum.	osm_way553088169	yes	yes	
-704_-1618	The Sting	art	A public mural.	osm_way1352819939	yes	yes	
-704_-1619	Air Midwest Flight 5481 Memorial	history	“Flight 5481”	osm_node6581964391	no	yes	
-704_-1619	Ascendus	art	A sculpture by Ed Carpenter.	osm_node12329988037	yes	yes	
-704_-1619	Morris Field	history	A local memorial (plaque).	osm_node13645924712	yes	yes	
-704_-1619	Sculpture of Queen Charlotte	art	A public statue.	osm_node12862993768	yes	yes	
-704_-1620	Big Pete With The Big Feet	art	A statue by Thomas Dambo.	osm_node14110389560	yes	yes	
-705_-1615	Ascension	art	A sculpture by Dana Gingras.	osm_node11564960908	yes	yes	
-705_-1616	Coexist	art	A mural by Sharon Dowell.	osm_way1192498843	yes	yes	
-705_-1616	Mural by Addision Adams	art	A mural by Addision Adams.	osm_node6473548415	yes	yes	
-705_-1616	Mural by Dr Dax	art	A mural by Dr Dax.	osm_node6473548412	yes	yes	
-705_-1616	Mural by Ezekiel Holley	art	A mural by Ezekiel Holley.	osm_node6473548420	yes	yes	
-705_-1616	Mural by Hnin Nie	art	A mural by Hnin Nie.	osm_node6473548414	yes	yes	
-705_-1616	Mural by James Moore	art	A mural by James Moore.	osm_node6473548417	yes	yes	
-705_-1616	Mural by Marcus Kiser	art	A mural by Marcus Kiser.	osm_node6473548421	yes	yes	
-705_-1616	Mural by Mono Sourcil	art	A mural by Mono Sourcil.	osm_node6473548416	yes	yes	
-705_-1616	Mural by Nico Amortegui	art	A mural by Nico Amortegui.	osm_node6473548422	yes	yes	
-705_-1616	Mural by Rising Red Lotus	art	A mural by Rising Red Lotus.	osm_node6473548419	yes	yes	
-705_-1617	Boileryard Murals	art	A mural by various.	osm_node5471621736	yes	yes	
-705_-1617	Confederate States Navy Yard Marker	history	“Confederate States Navy Yard 1862-1865”	osm_node7087150305	no	yes	
-705_-1617	Liberty Hall Monument	history	“Site of Liberty Hall 1777.”	osm_node5016558835	no	yes	
-705_-1617	Mural by Bree Stallings	art	A mural by Mural by Bree Stallings.	osm_node6473548405	yes	yes	
-705_-1617	Mural by Dammit Wesley	art	A mural by Dammit Wesley.	osm_node6473548410	yes	yes	
-705_-1617	Mural by Elisa Sanchez	art	A mural by Elisa Sanchez.	osm_node6473548407	yes	yes	
-705_-1617	Mural by Ezekiel Holley	art	A mural by Ezekiel Holley.	osm_node6473548413	no	yes	
-705_-1617	Mural by Fabian Williams	art	A mural by Fabian Williams.	osm_node6473548408	yes	yes	
-705_-1617	Mural by Jen Hill	art	A mural by Jen Hill.	osm_node6473548411	yes	yes	
-705_-1617	Mural by Kram	art	A mural by Kram.	osm_node6473548409	yes	yes	
-705_-1617	Mural by Matt Hooker and Matt Moore	art	A mural by Matt Hooker and Matt Moore.	osm_node6473440188	yes	yes	
-705_-1617	Mural by Matt Hooker and Matt Moore	art	A mural by Matt Hooker and Matt Moore.	osm_node6473440187	no	yes	
-705_-1617	Mural by Patch Whiskey	art	A mural by Patch Whiskey.	osm_node6473387313	yes	yes	
-705_-1617	Mural by Rosalia Torres-Weiner	art	A mural by Rosalia Torres-Weiner.	osm_node6473440190	yes	yes	
-705_-1617	Mural by Sharon Dowell	art	A mural by Sharon Dowell.	osm_node6473440189	yes	yes	
-705_-1617	Mural by Solane Siobhan	art	A mural by Solane Siobhan.	osm_node6473548406	yes	yes	
-705_-1617	Mural by The London Police	art	A mural by The London Police.	osm_node6473440186	yes	yes	
-705_-1617	Oaklawn Mausoleum	history	A local landmark (tomb).	osm_way324411744	yes	yes	
-705_-1617	William Ewen Shipp Monument	history	Obelisk	osm_node5016500329	no	yes	
-705_-1618	Charles Jones Mural	art	A mural by Abel Jackson.	osm_way1390214010	yes	yes	
-705_-1618	Faces of Freedom	art	A public mosaic.	osm_node14027783942	yes	yes	
-705_-1618	Old Mount Carmel Baptist Church / School of Social Work	history	A local landmark (church).	osm_way324410411	yes	yes	
-705_-1618	Reflections of Community	art	A sculpture by Jeff Hackney.	osm_node8511221389	yes	yes	
-705_-1618	Tapestry	art	A sculpture by Douwe Blumberg.	osm_node14064670608	yes	yes	
-705_-1618	The Bloom	art	A public sculpture.	osm_node14064670609	yes	yes	
-705_-1618	Westside Unity	art	A mural by Abel Jackson.	osm_way1332556957	yes	yes	
-705_-1618	Wishes of Historic West End	art	A sculpture by Stephen L. Hayes, Jr..	osm_node12297853216	yes	yes	
-705_-1620	Millican Pictorial History Museum	history	A local museum.	osm_way954442786	yes	no	
-706_-1615	Bonnie Cone Memorial	history	A local memorial.	osm_way169460851	yes	yes	
-706_-1615	Orbis	art	A public installation.	osm_node13898014048	yes	yes	
-706_-1615	Quarterback	art	A statue by Jon Hair.	osm_node13898014047	yes	yes	
-706_-1615	The Self-Made Man	art	A public statue.	osm_node1804636491	yes	yes	
-706_-1615	Wings of Pride	art	A sculpture by Kent Ullberg.	osm_node1825406133	yes	yes	
-706_-1617	Charles Manuel Grace Mansion	history	A local landmark (manor).	osm_way858316898	yes	yes	
-706_-1617	McIntyre Skirmish	history	“In Commemoration of the McIntyre Skirmish, Oct. 3, 1780”	osm_node5437844407	no	yes	
-706_-1619	"""Shuffletown Hand"""	art	A public artwork by Pete Beeman.	osm_node8494652103	yes	yes	
-706_-1620	Mount Holly Historical Society Museum	history	A local museum.	osm_way604531502	yes	yes	
-706_-1620	River Oaks Academy Birthday Rock	history	Boulder that wishes classmates Happy Birthday	osm_node5289646327	no	yes	
-707_-1614	Furr Elementary School Spirit Rock	history	A local landmark (monument).	osm_node7622996234	yes	no	
-707_-1614	Morrison Motor Car Museum	history	A local museum.	osm_way990220990	yes	no	
-707_-1615	Hendick Motorsports Museum and Team Shop	history	A local museum.	osm_way727625345	yes	yes	
-707_-1616	Alexandriana Historic Site	history	park in the United States of America	osm_node357813146	no	yes	
-707_-1619	Quest at Latta Nature Preserve	history	A local museum.	osm_way369607088	yes	yes	
+702_-1614	Ancient Wisdom	art	A sculpture by Maryrose Carroll.	osm_node11565025265	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1614	Time Further Out	art	A sculpture by Shaun Cassidy, Tom Stanley.	osm_node11565025264	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Blended Joy	art	A sculpture by Tom Risser.	osm_node11508260188	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Blue & White Armchair	art	A sculpture by Olivia Hueble.	osm_node11564976477	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Crimson Arcs	art	A sculpture by Matt Amante.	osm_node11508260187	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Prismatic Aura 3	art	A sculpture by Jim Gallucci.	osm_node11508260186	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Public Dusplay of Affection	art	A sculpture by Tom Risser.	osm_node8518889439	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Stumptown Veterans Memorial	history	A war memorial.	osm_node8518889376	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	Sunset	art	A sculpture by Scott Griffin.	osm_node11508263672	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1615	The Bee	art	A sculpture by Amy Hart.	osm_node11508263671	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1616	Art Garden	art	A public installation.	osm_node11406359015	yes	yes	NO LINE — on Charlotte Latin School's private campus (access before story, FROM LAS VEGAS (5))
+702_-1616	Fire Bird	art	A sculpture by Michael Dillon.	osm_node8511266802	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1616	Fire Station #39 Gate	art	A public artwork by Michael Dillon.	osm_node8511266803	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1616	Fractured Globe	art	A public sculpture.	osm_node11403895967	yes	yes	NO LINE — on Charlotte Latin School's private campus (access before story)
+702_-1616	Olympic Rings	art	A public sculpture.	osm_node11403895968	yes	yes	NO LINE — on Charlotte Latin School's private campus (access before story)
+702_-1616	The Hawk	art	A public sculpture.	osm_node11403993628	yes	yes	NO LINE — on Charlotte Latin School's private campus (access before story)
+702_-1616	Torsion Sphere	art	A public sculpture.	osm_node11403808471	yes	yes	NO LINE — on Charlotte Latin School's private campus (access before story)
+702_-1616	William Lee House	history	A local landmark (house).	osm_way1054074209	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1617	Open Book, Open Mind	art	A sculpture by Jim Gallucci.	osm_node12892304124	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1617	The Apple and the Clamp	art	A sculpture by Peter Woytuk.	osm_node5126882174	yes	no	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1617	The Raven	art	A sculpture by Peter Woytuk.	osm_node5126882176	yes	no	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1618	Bugle Boy	art	A public statue.	osm_node5256765535	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1618	Crown of Life	art	“Gabriel the Arc Angel in our Crown of Life Garden.”	osm_node5256765534	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1618	North Carolina/South Carolina line marker	history	A local landmark (boundary stone).	osm_node11693148174	yes	no	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1618	STEM	art	A sculpture by John Grade.	osm_node11064074558	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1619	Canopy	art	A sculpture by Billy Lee.	osm_node5029833235	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+702_-1620	Pleasant Hill Presbyterian Church	history	A local memorial (obelisk).	osm_node11390309931	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1615	Embrace	art	A sculpture by Leslie Scott, Lee Baumgarten.	osm_node8494151160	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1615	Lucas Family Gristmill Site	history	old mill building ruins	osm_node8911771256	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1616	Grandifloria	art	A public artwork by Thomas Sayre.	osm_node7326913866	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1617	Isaac Newton Alexander Grist Mill	history	A local landmark (ruins).	osm_node5078860235	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1617	Rex	art	The world's largest free-standing sculpture of a lion.	osm_node8492753604	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1619	Flash	art	A sculpture by David Černý.	osm_node8507635944	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1619	Levitation	art	A sculpture by Pavel Kraus.	osm_node11800086789	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1619	Maersk Anchor	art	A public sculpture.	osm_node5267313100	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+703_-1619	Thánh Giuse	art	“Hãy Đến Cùng Giuse”	osm_node7141868191	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	"""Partnership"""	art	A installation by Vivienne McConnell.	osm_node13721278155	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	#42	art	A public artwork by Zack Noble.	osm_node8511301697	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	"Elvis / ""No Barking"""	art	A mural by Kathryn Crawford.	osm_node11889744937	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Ervin Building murals	art	A public mural.	osm_node13721278157	yes	yes	RESCUED — part 1, 454_hidden_curated.sql (the Ervin Building's mural)
+704_-1615	GMEC mural	art	A public mural.	osm_node13721278156	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Harry Potter mural	art	A mural by Melissa Wineman.	osm_node11889744939	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Holding Space	art	A mural by Bree Stallings.	osm_node11889744934	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Merry Oaks mural	art	A public mural.	osm_node13995595181	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Open Door Studio Mural	art	A mural by Wendy Blue.	osm_node10836130516	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Painted Utility Box	art	A mural by S. Border.	osm_node10836130515	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Social Pet mural	art	A mural by Arko and Owl.	osm_node11889744935	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Teachers	art	A mural by Dwayne Wilson.	osm_node11889744936	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1615	Wonder	art	A mural by MyLoan Dinh, Bunny Gregory.	osm_node11889744938	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	"""Now Is Fireworks"""	art	A sculpture by Amy Bagwell, Graham Carew.	osm_node8499977950	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Awi-Spek	art	A sculpture by Jann Rosen-Queralt.	osm_node9656606370	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Captain James Jack	art	A statue by Chas Fagan.	osm_node4724991906	yes	yes	"RESCUED — seeded as ""Spirit of Mecklenburg"", names-454-charlotte-2.txt, new (#542) — a same-name pin 1,647 m away (#69 row) would take a curated row too (#519 (1))"
+704_-1616	EastSide Pride	art	A mural by Rosalia Torres-Weiner.	osm_node10836116282	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Finding New Ground	art	A sculpture by Thomas Thoune.	osm_node9384874425	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Gainseville Midland	history	A local landmark (locomotive).	osm_node8558009126	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Hugh Pharr McManaway	art	A public statue.	osm_node8626180611	yes	yes	"RESCUED — seeded as ""Hugh McManaway Statue"", names-454-charlotte-2.txt, new (#542)"
+704_-1616	Jerry Garcia Mural	art	A mural by Alex Delarge, Despicable D.	osm_node8544485960	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Joy	art	A mural by Sebastian Coolidge.	osm_node10301192198	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Mahatma Gandhi	history	A local memorial (statue).	osm_node8494364740	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Mint Museum Randolph	history	A local art museum.	osm_way784079334	no	yes	CUT — served: the Mint Museum pin 8 m away is this museum
+704_-1616	Natural Rhythm	art	A mural by Georgie Nakima.	osm_way1289786450	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Reflective Terrain	art	A installation by Blane De St. Croix.	osm_node9384874424	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Sunflowers	art	A public sculpture.	osm_node8532751352	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Tate Tower	history	A local landmark (monument).	osm_way1232709612	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	The Column On The Pond	art	A sculpture by Maryrose Carroll.	osm_node10268872997	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	The Rudy Effect	art	A mural by Matt Hooker.	osm_way1196742568	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1616	Thomas Spratt & King Haigler	art	A statue by Chas Fagan.	osm_node8515336258	yes	yes	"RESCUED — seeded as ""Thomas Spratt and King Haigler Statue"", names-454-charlotte-2.txt, new (#542)"
+704_-1617	Aspire	history	A local landmark (monument).	osm_node4724991907	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Braille Music Box	art	A sculpture by Po Shu Wang.	osm_node5336057599	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Captain James Jack	art	A statue by Chas Fagan.	osm_node5016558836	yes	yes	NO LINE — same name as the Spirit of Mecklenburg statue's pin 1,647 m away; subject on West Trade unconfirmed
+704_-1617	Charlotte Machine Co.	art	A sculpture by David Furman.	osm_node12958734949	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Firebird	art	A sculpture by Niki de Saint Phalle.	osm_node5016558822	yes	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1617	Furrow	art	Earth-cast discs.	osm_node6297652308	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Furrow	art	Earth-cast discs.	osm_node6297652312	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Gloria Victus Monument	history	A local memorial.	osm_node4725009585	yes	yes	CARRIED — the 1929 Confederate pillar between Memorial Stadium and the Grady Cole Center, encased after vandalism; confirm it still stands before writing
+704_-1617	Magic Carpet Mural	art	A mural by Jessie and Katey.	osm_node5286815856	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Queen Charlotte Walks in Her Garden	art	A statue by Bailey Graham Weathers, Jr..	osm_node5016558837	yes	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1617	Rosati Sculpture	history	A local memorial.	osm_node2162847565	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1617	Spiral Odyssey	art	A sculpture by Richard Hunt.	osm_node5016558838	yes	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1617	Vietnam Veterans' Memorial	history	A local memorial.	osm_node1443710808	yes	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1617	William Henry Belk	art	A public statue.	osm_node4676919717	yes	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1618	Exclamation Point	art	A sculpture by David Furman.	osm_node11059666871	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1618	Magic Carpet Mural	art	A mural by Jessie and Katey.	osm_node5286817510	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1618	Queen's Park sign	art	A public sculpture.	osm_node8521432703	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1618	Rail Trail Chalkboard	art	A public installation.	osm_way1352819940	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1618	Soundwave Art	art	A public mural.	osm_node5286819813	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1618	Steelyard Mural	art	A mural by Ivan Toth Depeña.	osm_way1196928925	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1618	The James C. Dowd House	history	A local museum.	osm_way553088169	yes	yes	NO LINE — the served Camp Greene pin stands 5 m away on the same point; a second pin would stack (#534's shape)
+704_-1618	The Sting	art	A public mural.	osm_way1352819939	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1619	Air Midwest Flight 5481 Memorial	history	“Flight 5481”	osm_node6581964391	no	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1619	Ascendus	art	A sculpture by Ed Carpenter.	osm_node12329988037	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1619	Morris Field	history	A local memorial (plaque).	osm_node13645924712	yes	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+704_-1619	Sculpture of Queen Charlotte	art	A public statue.	osm_node12862993768	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+704_-1620	Big Pete With The Big Feet	art	A statue by Thomas Dambo.	osm_node14110389560	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1615	Ascension	art	A sculpture by Dana Gingras.	osm_node11564960908	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1616	Coexist	art	A mural by Sharon Dowell.	osm_way1192498843	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1616	Mural by Addision Adams	art	A mural by Addision Adams.	osm_node6473548415	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Dr Dax	art	A mural by Dr Dax.	osm_node6473548412	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Ezekiel Holley	art	A mural by Ezekiel Holley.	osm_node6473548420	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Hnin Nie	art	A mural by Hnin Nie.	osm_node6473548414	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by James Moore	art	A mural by James Moore.	osm_node6473548417	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Marcus Kiser	art	A mural by Marcus Kiser.	osm_node6473548421	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Mono Sourcil	art	A mural by Mono Sourcil.	osm_node6473548416	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Nico Amortegui	art	A mural by Nico Amortegui.	osm_node6473548422	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1616	Mural by Rising Red Lotus	art	A mural by Rising Red Lotus.	osm_node6473548419	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Boileryard Murals	art	A mural by various.	osm_node5471621736	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Confederate States Navy Yard Marker	history	“Confederate States Navy Yard 1862-1865”	osm_node7087150305	no	yes	"RESCUED — seeded as ""Confederate Navy Yard Tablet"", names-454-charlotte-2.txt, new (#542)"
+705_-1617	Liberty Hall Monument	history	“Site of Liberty Hall 1777.”	osm_node5016558835	no	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+705_-1617	Mural by Bree Stallings	art	A mural by Mural by Bree Stallings.	osm_node6473548405	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Dammit Wesley	art	A mural by Dammit Wesley.	osm_node6473548410	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Elisa Sanchez	art	A mural by Elisa Sanchez.	osm_node6473548407	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Ezekiel Holley	art	A mural by Ezekiel Holley.	osm_node6473548413	no	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Fabian Williams	art	A mural by Fabian Williams.	osm_node6473548408	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Jen Hill	art	A mural by Jen Hill.	osm_node6473548411	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Kram	art	A mural by Kram.	osm_node6473548409	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Matt Hooker and Matt Moore	art	A mural by Matt Hooker and Matt Moore.	osm_node6473440188	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Matt Hooker and Matt Moore	art	A mural by Matt Hooker and Matt Moore.	osm_node6473440187	no	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Patch Whiskey	art	A mural by Patch Whiskey.	osm_node6473387313	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Rosalia Torres-Weiner	art	A mural by Rosalia Torres-Weiner.	osm_node6473440190	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Sharon Dowell	art	A mural by Sharon Dowell.	osm_node6473440189	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by Solane Siobhan	art	A mural by Solane Siobhan.	osm_node6473548406	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Mural by The London Police	art	A mural by The London Police.	osm_node6473440186	yes	yes	CARRIED — Camp North End's Boileryard mural wall; no source past the OSM artist tag
+705_-1617	Oaklawn Mausoleum	history	A local landmark (tomb).	osm_way324411744	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1617	William Ewen Shipp Monument	history	Obelisk	osm_node5016500329	no	yes	RESCUED — curated row, 454_hidden_curated_2.sql
+705_-1618	Charles Jones Mural	art	A mural by Abel Jackson.	osm_way1390214010	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	Faces of Freedom	art	A public mosaic.	osm_node14027783942	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	Old Mount Carmel Baptist Church / School of Social Work	history	A local landmark (church).	osm_way324410411	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	Reflections of Community	art	A sculpture by Jeff Hackney.	osm_node8511221389	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	Tapestry	art	A sculpture by Douwe Blumberg.	osm_node14064670608	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	The Bloom	art	A public sculpture.	osm_node14064670609	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	Westside Unity	art	A mural by Abel Jackson.	osm_way1332556957	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1618	Wishes of Historic West End	art	A sculpture by Stephen L. Hayes, Jr..	osm_node12297853216	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+705_-1620	Millican Pictorial History Museum	history	A local museum.	osm_way954442786	yes	no	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1615	Bonnie Cone Memorial	history	A local memorial.	osm_way169460851	yes	yes	RESCUED — part 1, 454_hidden_curated.sql (Bonnie Cone's burial glen)
+706_-1615	Orbis	art	A public installation.	osm_node13898014048	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1615	Quarterback	art	A statue by Jon Hair.	osm_node13898014047	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1615	The Self-Made Man	art	A public statue.	osm_node1804636491	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1615	Wings of Pride	art	A sculpture by Kent Ullberg.	osm_node1825406133	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1617	Charles Manuel Grace Mansion	history	A local landmark (manor).	osm_way858316898	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1617	McIntyre Skirmish	history	“In Commemoration of the McIntyre Skirmish, Oct. 3, 1780”	osm_node5437844407	no	yes	CUT — served: the Battle of McIntyre Farm Wikipedia pin 31 m away is this skirmish
+706_-1619	"""Shuffletown Hand"""	art	A public artwork by Pete Beeman.	osm_node8494652103	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1620	Mount Holly Historical Society Museum	history	A local museum.	osm_way604531502	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+706_-1620	River Oaks Academy Birthday Rock	history	Boulder that wishes classmates Happy Birthday	osm_node5289646327	no	yes	NO LINE — a school spirit rock
+707_-1614	Furr Elementary School Spirit Rock	history	A local landmark (monument).	osm_node7622996234	yes	no	NO LINE — a school spirit rock
+707_-1614	Morrison Motor Car Museum	history	A local museum.	osm_way990220990	yes	no	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+707_-1615	Hendick Motorsports Museum and Team Shop	history	A local museum.	osm_way727625345	yes	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+707_-1616	Alexandriana Historic Site	history	park in the United States of America	osm_node357813146	no	yes	CARRIED — no source past the OSM tag found in this pass (Wikipedia name and 200 m geosearch empty)
+707_-1619	Quest at Latta Nature Preserve	history	A local museum.	osm_way369607088	yes	yes	NO LINE — a nature-preserve visitor centre with no history of its own

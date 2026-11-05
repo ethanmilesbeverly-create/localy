@@ -1,0 +1,23 @@
+# names-454-charlotte-2.txt — #454 Charlotte story batch, part 2: the gate/leads union rescues that FAIL #542 (drafted 2026-11-04).
+# Same format as part 1: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; it
+# dry-runs and commits with names-454-charlotte-1.txt in the one Mac session (handoff §6 THE FAST RUNBOOK (b)).
+#
+# SOURCE: 454_gate_drops_charlotte.tsv (148 union pins; every verdict is in its `verdict` column). Each line below sits on a
+# HIDDEN storyless OSM pin whose containing tile does not store it, or (Spirit of Mecklenburg) whose name is shared by a second
+# pin 1.6 km away, so a curated row would dress the wrong pin (#519 (1)). Each is therefore seeded under a DIFFERENT name at the
+# pin's own coordinate and flagged `new`, so the hidden pin stays hidden beside it (#542 option (c), FROM SAN ANTONIO (15)).
+#   Hugh McManaway Statue                  ← osm_node8626180611 "Hugh Pharr McManaway" (contains 704_-1617; stored only in 704_-1616)
+#   Spirit of Mecklenburg                  ← osm_node4724991906 "Captain James Jack" (passes #542, but osm_node5016558836 of the same
+#                                            name is 1,647 m away on West Trade and its subject is unconfirmed — a curated row would reach both)
+#   Thomas Spratt and King Haigler Statue  ← osm_node8515336258 "Thomas Spratt & King Haigler" (contains 704_-1617; stored only in 704_-1616)
+#   Confederate Navy Yard Tablet           ← osm_node7087150305 "Confederate States Navy Yard Marker" (contains 705_-1617; stored only in 704_-1617)
+# Mechanical checks run (FROM SAN ANTONIO (12), FROM LAS VEGAS (6)): every number and proper name is in its source text; every
+# point is inside the 42 tiles; no name repeats part 1 or 454_hidden_curated*.sql; within 100 m of each line: McManaway nothing,
+# Spirit of Mecklenburg the hidden Aspire (94 m), Thompson Park (98 m) and the Vietnam memorial row (103 m), Spratt nothing,
+# Navy Yard nothing (nearest gem: Grave of Rufus Barringer, 265 m). No served pin, gem or Wikipedia article of the same subject
+# within 300 m of any line.
+# EXPECT on the Mac dry run: 4 new-seed. Any `review` is a stop: read it before --commit.
+Hugh McManaway Statue | @35.1955643,-80.8273965 | From the 1960s into the 1970s Hugh McManaway, born in 1913 and raised in a 20-room mansion on Queens Road, stood in this median in a bucket hat with a towel tucked under his arm, directing traffic, and this statue of him now stands in his place. | https://m.washingtontimes.com/news/2018/oct/13/the-disappearance-of-one-of-charlottes-beloved-wor/ | new
+Spirit of Mecklenburg | @35.2168395,-80.8326729 | The first statue on the Trail of History, unveiled in 2010, shows Captain James Jack on horseback carrying the Mecklenburg Declaration of Independence on his 1775 ride to Philadelphia. | https://www.charlottetrailofhistory.org/about | new
+Thomas Spratt and King Haigler Statue | @35.2200205,-80.8303584 | Chas Fagan's 2014 bronze pairs Thomas Kanawha Spratt, one of the earliest settlers in this part of the Carolinas, with his friend King Haigler, chief of the Catawbas from 1749 until Shawnee raiders ambushed and killed him in 1763. | https://charlottetrailofhistory.org/sculptures/thomas-spratt-and-king-haigler | new
+Confederate Navy Yard Tablet | @35.2353023,-80.8465239 | This tablet, now in the cemetery's Confederate section, recalls the Confederate Naval Yard, moved to Charlotte from Norfolk, Virginia, in 1862 to protect its work and set it on the rail lines. | https://www.ncpedia.org/node/11618 | new
