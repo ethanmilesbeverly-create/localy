@@ -1,0 +1,364 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+CB042	CURATED ROW — hidden pin		Central Ohio Fire Museum	39.9681908	-82.996956	Central Ohio Fire Museum · osm_way638035970 · 16 m	Central Ohio Fire Museum		hidden pin stored in 799_-1660, 800_-1660; containing tile 799_-1660 stores it (#542)	Engine House No. 16	
+CB055	CURATED ROW — hidden pin		German Village	39.9458811	-82.9925654	German Village · osm_way559723213 · 19 m	German Village		hidden pin stored in 799_-1659, 799_-1660; containing tile 799_-1660 stores it (#542)	German Village	
+CB056	CURATED ROW — hidden pin		Glen Echo	40.017064	-82.9993577	Glen Echo · osm_way556675713 · 34 m	Glen Echo (Columbus, Ohio)		hidden pin stored in 800_-1660, 801_-1660; containing tile 800_-1660 stores it (#542)	Glen Echo Historic District	
+CB082	CURATED ROW — hidden pin		Jefferson Avenue Historic District	39.96562	-82.9846269	Jefferson Avenue Historic District · osm_node357470681 · 33 m	Jefferson Avenue Historic District (Columbus, Ohio)		hidden pin stored in 799_-1659, 799_-1660, 800_-1660; containing tile 799_-1660 stores it (#542)	Jefferson Avenue Historic District	
+CB128	CURATED ROW — hidden pin		Old Beechwold Historic District	40.0607968	-83.0234242	Old Beechwold Historic District · osm_node5733734504 · 58 m	Old Beechwold Historic District		hidden pin stored in 801_-1660, 801_-1661; containing tile 801_-1660 stores it (#542)	Old Beechwold Historic District	
+CB212	CURATED ROW — hidden pin		Historic Dublin	40.1002333	-83.1138953	Historic Dublin · osm_node357470674 · 26 m	Dublin Christian Church (High Street, Dublin, Ohio)		CHECK SUBJECT (partial or container match); hidden pin stored in 802_-1662, 802_-1663; containing tile 802_-1662 stores it (#542); TWIN CANDIDATE CB213 0 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CB214 0 m — one building listed twice, or two plaques on one lot?	Dublin Christian Church	
+CB213	CURATED ROW — hidden pin		Historic Dublin	40.1002333	-83.1138953	Historic Dublin · osm_node357470674 · 91 m	Dublin High Street Historic District		CHECK SUBJECT (partial or container match); hidden pin stored in 802_-1662, 802_-1663; containing tile 802_-1662 stores it (#542); TWIN CANDIDATE CB212 0 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CB214 0 m — one building listed twice, or two plaques on one lot?	Dublin High Street Historic District	
+CB214	CURATED ROW — hidden pin		Historic Dublin	40.1002333	-83.1138953	Historic Dublin · osm_node357470674 · 90 m	Dublin Veterinary Clinic		CHECK SUBJECT (partial or container match); hidden pin stored in 802_-1662, 802_-1663; containing tile 802_-1662 stores it (#542); TWIN CANDIDATE CB212 0 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CB213 0 m — one building listed twice, or two plaques on one lot?	Dublin Veterinary Clinic	
+CB217	CURATED ROW — hidden pin		Ealy House	40.0823037	-82.8197228	Ealy House · osm_way547657216 · 37 m	George and Christina Ealy House		CHECK SUBJECT (partial or container match); hidden pin stored in 801_-1656, 802_-1656, 802_-1657; containing tile 802_-1656 stores it (#542)	George and Christina Ealy House	
+CB229	CURATED ROW — hidden pin		Hanby House	40.1261722	-82.9375602	Hanby House · osm_way516266412 · 9 m	Benjamin Hanby House		hidden pin stored in 802_-1659, 803_-1658, 803_-1659; containing tile 803_-1659 stores it (#542)	Benjamin Hanby House	
+CB238	CURATED ROW — hidden pin		Fort Jackson Mound	40.0486671	-82.9454807	Fort Jackson Mound · osm_way779110594 · 9 m	Jackson Fort		hidden pin stored in 801_-1658, 801_-1659; containing tile 801_-1659 stores it (#542)	Jackson Fort	
+CB248	CURATED ROW — hidden pin		Alexander W. Livingston House	39.9476775	-82.7956883	Alexander W. Livingston House · osm_way1136097126 · 4 m	Alexander W. Livingston House		hidden pin stored in 799_-1656; containing tile 799_-1656 stores it (#542)	Alexander W. Livingston House	
+CB001	SEED — article in no tile (#539)		LeVeque Tower	39.962375	-83.002087	article LeVeque Tower · 0 m	LeVeque Tower			American Insurance Union Citadel	
+CB002	SEED — article in no tile (#539)		Athletic Club of Columbus	39.96277777777778	-82.99694444444445	article Athletic Club of Columbus · 0 m	Athletic Club of Columbus			Athletic Club of Columbus	
+CB003	SEED — article in no tile (#539)		Beatty-Moore House	39.965793	-82.978974	article Beatty-Moore House · 23 m	Beatty-Moore House			Beatty-Moore House	
+CB004	SEED — article in no tile (#539)		Bellows School	39.952732	-83.018306	article Bellows School · 19 m	Bellows School			Bellows Avenue School	
+CB005	SEED — article in no tile (#539)		Berry Brothers Bolt Works	39.981028	-82.994668	article Berry Brothers Bolt Works · 0 m	Berry Brothers Bolt Works			Berry Brothers Bolt Works	
+CB010	SEED — article in no tile (#539)		Broad Street Christian Church	39.965	-82.97277777777778	article Broad Street Christian Church · 0 m	Broad Street Christian Church			Broad Street Christian Church	
+CB011	SEED — article in no tile (#539)		Broad Street United Methodist Church (Columbus, Ohio)	39.96333333333334	-82.9875	article Broad Street United Methodist Church (Columbus, Ohio) · 0 m	Broad Street United Methodist Church (Columbus, Ohio)			Broad Street United Methodist Church	
+CB014	SEED — article in no tile (#539)		Cambridge Arms	39.965391	-82.976114	article Cambridge Arms · 1 m	Cambridge Arms			Cambridge Arms	
+CB017	SEED — article in no tile (#539)		Central Assurance Company	39.964167	-82.981111	article Central Assurance Company · 0 m	Central Assurance Company		TWIN CANDIDATE CB085 6 m — one building listed twice, or two plaques on one lot?	Central Assurance Company	
+CB018	SEED — article in no tile (#539)		Downtown YMCA	39.965	-83.0025	article Downtown YMCA · 0 m	Downtown YMCA			Central Building of the Columbus Young Men's Christian Association	
+CB019	SEED — article in no tile (#539)		Central High School (Columbus, Ohio)	39.95944444444445	-83.0075	article Central High School (Columbus, Ohio) · 100 m	Central High School (Columbus, Ohio)			Central High School	
+CB020	SEED — article in no tile (#539)		Columbus State Hospital	39.958333333333336	-83.05555555555556	article Columbus State Hospital · 0 m	Columbus State Hospital			Central Ohio Lunatic Asylum	
+CB022	SEED — article in no tile (#539)		Truman and Sylvia Bull Coe House	40.02715	-83.012337	article Truman and Sylvia Bull Coe House · 0 m	Truman and Sylvia Bull Coe House			Truman and Sylvia Bull Coe House	
+CB023	SEED — article in no tile (#539)		Columbia Larrimer Building	39.965702	-83.001729	article Columbia Larrimer Building · 0 m	Columbia Larrimer Building			Columbia Building	
+CB024	SEED — article in no tile (#539)		Chase Tower (Columbus, Ohio)	39.96307	-82.99761	article Chase Tower (Columbus, Ohio) · 0 m	Chase Tower (Columbus, Ohio)			Columbus Center	
+CB025	SEED — unmapped		Columbus Carriage Manufacturing Co. - Seagrave Co. Buildings	39.9199	-82.9953		Columbus Carriage Manufacturing Co. - Seagrave Co. Buildings			Columbus Carriage Manufacturing Co. - Seagrave Co. Buildings	
+CB026	SEED — unmapped		Columbus Country Club Mound	39.969167	-82.861389		Columbus Country Club Mound		CHECK: same-named served pin Columbus Country Club Mound (wiki_58337651) 162 m away — the same place, mapped off the list point?; new: same-named pin 162 m	Columbus Country Club Mound	new
+CB029	SEED — article in no tile (#539)		Atlas Building	39.965165	-83.000713	article Atlas Building · 0 m	Atlas Building			Columbus Savings and Trust Building	
+CB030	SEED — article in no tile (#539)		Columbus Transfer Company Warehouse	39.968695	-83.000124	article Columbus Transfer Company Warehouse · 24 m	Columbus Transfer Company Warehouse			Columbus Transfer Company Warehouse	
+CB032	SEED — article in no tile (#539)		Del Monte Apartments	39.955349	-82.996856	article Del Monte Apartments · 1 m	Del Monte Apartments			Del Monte Apartments	
+CB034	SEED — article in no tile (#539)		East Broad Street Commercial Building	39.964263	-82.980608	article East Broad Street Commercial Building · 22 m	East Broad Street Commercial Building		TWIN CANDIDATE CB077 12 m — one building listed twice, or two plaques on one lot?	East Broad Street Commercial Building	
+CB036	SEED — article in no tile (#539)		East Broad Street Presbyterian Church	39.964853	-82.980288	article East Broad Street Presbyterian Church · 0 m	East Broad Street Presbyterian Church			East Broad Street Presbyterian Church	
+CB040	SEED — article in no tile (#539)		The Edna (Columbus, Ohio)	39.967454	-82.977721	article The Edna (Columbus, Ohio) · 0 m	The Edna (Columbus, Ohio)			The Edna	
+CB043	SEED — article in no tile (#539)		Felton School	39.975556	-82.978333	article Felton School · 0 m	Felton School			Felton School	
+CB045	SEED — article in no tile (#539)		First Congregational Church (Columbus, Ohio)	39.964131	-82.988921	article First Congregational Church (Columbus, Ohio) · 49 m	First Congregational Church (Columbus, Ohio)			First Congregational Church	
+CB046	SEED — article in no tile (#539)		Ford Motor Company - Columbus Assembly Plant	39.972726	-82.991061	article Ford Motor Company - Columbus Assembly Plant · 66 m	Ford Motor Company - Columbus Assembly Plant		TWIN CANDIDATE CB362 0 m — one building listed twice, or two plaques on one lot?	Ford Motor Company Columbus Branch Assembly Plant	
+CB049	SEED — article in no tile (#539)		Franklin Park Medical Center	39.968671	-82.952285	article Franklin Park Medical Center · 6 m	Franklin Park Medical Center			Franklin Park Medical Center	
+CB051	SEED — article in no tile (#539)		Franklinton Apartments at State and May	39.958791	-83.013774	article Franklinton Apartments at State and May · 0 m	Franklinton Apartments at State and May		CHECK SUBJECT: served pin Historic Franklinton Post Office (osm_way891758990) 127 m from the article may already be this place	Franklinton Apartments at State and May	
+CB053	SEED — article in no tile (#539)		Gaetz Music House	39.964615	-83.002681	article Gaetz Music House · 0 m	Gaetz Music House		TWIN CANDIDATE CB118 20 m — one building listed twice, or two plaques on one lot?	Gaetz Music House	
+CB054	SEED — article in no tile (#539)		Garfield-Broad Apartments	39.964255	-82.979969	article Garfield-Broad Apartments · 12 m	Garfield-Broad Apartments		TWIN CANDIDATE CB086 27 m — one building listed twice, or two plaques on one lot?	Garfield-Broad Apartments	
+CB057	SEED — unmapped		H.C. Godman Co. Building	39.963611	-82.996667		H.C. Godman Co. Building		new: line CB002 96 m; TWIN CANDIDATE CB100 0 m — one building listed twice, or two plaques on one lot?; new: line CB182 73 m	H.C. Godman Co. Building	new
+CB059	SEED — article in no tile (#539)		Great Southern Hotel & Theatre	39.956089	-82.998729	article Great Southern Hotel & Theatre · 47 m	Great Southern Hotel & Theatre		TWIN CANDIDATE CB328 0 m — one building listed twice, or two plaques on one lot?	Great Southern Hotel and Theatre	
+CB060	SEED — unmapped		Green Lawn Cemetery	39.94	-83.0245		Green Lawn Cemetery (Columbus, Ohio)		LIST POINT FAR: 668 m from its article's point (Green Lawn Cemetery (Columbus, Ohio)) — wrong article or a large site?; new: hidden pin New Garden Mausoleum II 98 m; hidden pin Bicentenial Historical Marker 68 m; hidden pin New Garden Mausoleum I 82 m	Green Lawn Cemetery	new
+CB061	SEED — article in no tile (#539)		Griswold Memorial Young Women's Christian Association	39.961203	-82.996389	article Griswold Memorial Young Women's Christian Association · 4 m	Griswold Memorial Young Women's Christian Association			Griswold Memorial Young Women's Christian Association	
+CB062	SEED — article in no tile (#539)		Gilbert H. Hamilton House	40.01874	-83.00438	article Gilbert H. Hamilton House · 6 m	Gilbert H. Hamilton House			Gilbert H. Hamilton House	
+CB064	SEED — article in no tile (#539)		The Hamlet (Columbus, Ohio)	39.98713	-83.00132	article The Hamlet (Columbus, Ohio) · 58 m	The Hamlet (Columbus, Ohio)			The Hamlet	
+CB066	SEED — article in no tile (#539)		Hanna House	39.96504	-82.97345	article Hanna House · 6 m	Hanna House		TWIN CANDIDATE CB148 25 m — one building listed twice, or two plaques on one lot?	Hanna House	
+CB067	SEED — article in no tile (#539)		Gen. William Henry Harrison Headquarters	39.960532	-83.015907	article Gen. William Henry Harrison Headquarters · 4 m	Gen. William Henry Harrison Headquarters		TWIN CANDIDATE CB160 25 m — one building listed twice, or two plaques on one lot?	Gen. William Henry Harrison Headquarters	
+CB069	SEED — article in no tile (#539)		Hartman Hotel	39.95698	-82.995447	article Hartman Hotel · 15 m	Hartman Hotel			Hartman Hotel	
+CB070	SEED — article in no tile (#539)		Hayden Building (Columbus, Ohio)	39.9626	-82.999958	article Hayden Building (Columbus, Ohio) · 5 m	Hayden Building (Columbus, Ohio)		TWIN CANDIDATE CB108 23 m — one building listed twice, or two plaques on one lot?	Hayden Building	
+CB071	SEED — article in no tile (#539)		Heyne-Zimmerman House	39.964944	-82.974688	article Heyne-Zimmerman House · 0 m	Heyne-Zimmerman House		TWIN CANDIDATE CB152 15 m — one building listed twice, or two plaques on one lot?	Heyne-Zimmerman House	
+CB072	SEED — article in no tile (#539)		H.A. Higgins Building	39.968774	-82.998062	article H.A. Higgins Building · 18 m	H.A. Higgins Building			H.A. Higgins Building	
+CB074	SEED — article in no tile (#539)		Holy Cross Church (Columbus, Ohio)	39.9585	-82.9931	article Holy Cross Church (Columbus, Ohio) · 50 m	Holy Cross Church (Columbus, Ohio)			Holy Cross Church, Rectory and School	
+CB077	SEED — article in no tile (#539)		House at 753 East Broad Street	39.964287	-82.980474	article House at 753 East Broad Street · 15 m	House at 753 East Broad Street		TWIN CANDIDATE CB034 12 m — one building listed twice, or two plaques on one lot?	House at 753 East Broad Street	
+CB078	SEED — article in no tile (#539)		Indianola Junior High School	40.0038	-82.9971	article Indianola Junior High School · 0 m	Indianola Junior High School		CHECK SUBJECT: served pin Indianola Park (wiki_13234069) 114 m from the article may already be this place	Indianola Junior High School	
+CB080	SEED — unmapped		Felix A. Jacobs House	39.994444	-83.000556		Felix A. Jacobs House			Felix A. Jacobs House	
+CB081	SEED — article in no tile (#539)		Jaeger Machine Company Office Building	39.966521	-83.016524	article Jaeger Machine Company Office Building · 0 m	Jaeger Machine Company Office Building			Jaeger Machine Company Office Building	
+CB083	SEED — article in no tile (#539)		Jeffrey Manufacturing Company Office Building	39.980908	-82.997818	article Jeffrey Manufacturing Company Office Building · 9 m	Jeffrey Manufacturing Company Office Building			Jeffrey Manufacturing Company Office Building	
+CB084	SEED — article in no tile (#539)		Johnson-Campbell House	39.965644	-82.968513	article Johnson-Campbell House · 13 m	Johnson-Campbell House			Johnson-Campbell House	
+CB085	SEED — article in no tile (#539)		W.H. Jones Mansion	39.96415972222223	-82.9810375	article W.H. Jones Mansion · 17 m	W.H. Jones Mansion		TWIN CANDIDATE CB017 6 m — one building listed twice, or two plaques on one lot?	W.H. Jones Mansion	
+CB086	SEED — article in no tile (#539)		Joseph-Cherrington House	39.964349	-82.979678	article Joseph-Cherrington House · 0 m	Joseph-Cherrington House		TWIN CANDIDATE CB054 27 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CB144 23 m — one building listed twice, or two plaques on one lot?	Joseph-Cherrington House	
+CB087	SEED — article in no tile (#539)		Julian and Kokenge Company	39.956254	-83.000597	article Julian and Kokenge Company · 26 m	Julian and Kokenge Company			Julian and Kokenge Company	
+CB089	SEED — article in no tile (#539)		Linus B. Kauffman House	39.965302	-82.976615	article Linus B. Kauffman House · 3 m	Linus B. Kauffman House		TWIN CANDIDATE CB147 18 m — one building listed twice, or two plaques on one lot?	Linus B. Kauffman House	
+CB090	SEED — article in no tile (#539)		Frank J. Kaufman House	39.965713	-82.967958	article Frank J. Kaufman House · 16 m	Frank J. Kaufman House			Frank J. Kaufman House	
+CB091	SEED — article in no tile (#539)		Knights of Columbus Building (Columbus, Ohio)	39.961371	-82.992001	article Knights of Columbus Building (Columbus, Ohio) · 0 m	Knights of Columbus Building (Columbus, Ohio)			Knights of Columbus Building	
+CB093	SEED — article in no tile (#539)		Soloman Levy House	39.964761	-82.975888	article Soloman Levy House · 4 m	Soloman Levy House		TWIN CANDIDATE CB151 17 m — one building listed twice, or two plaques on one lot?	Soloman Levy House	
+CB094	SEED — article in no tile (#539)		Lincoln Theatre (Columbus, Ohio)	39.966944444444444	-82.98111111111112	article Lincoln Theatre (Columbus, Ohio) · 0 m	Lincoln Theatre (Columbus, Ohio)			Lincoln Theatre	
+CB095	SEED — article in no tile (#539)		Long and Third Commercial Building	39.965511	-82.998227	article Long and Third Commercial Building · 0 m	Long and Third Commercial Building			Long and Third Commercial Building	
+CB096	SEED — article in no tile (#539)		Carrie Lovejoy House	39.964414	-82.979201	article Carrie Lovejoy House · 28 m	Carrie Lovejoy House		TWIN CANDIDATE CB144 28 m — one building listed twice, or two plaques on one lot?	Carrie Lovejoy House	
+CB098	SEED — unmapped		Market-Mohawk Center	39.959877	-82.993054		Market-Mohawk Center		LIST POINT FAR: 520 m from its article's point (Downtown Columbus, Ohio) — wrong article or a large site?	Market-Mohawk Center	
+CB100	SEED — article in no tile (#539)		Columbus Athenaeum	39.96361111111111	-82.99666666666667	article Columbus Athenaeum · 61 m	Columbus Athenaeum		TWIN CANDIDATE CB057 0 m — one building listed twice, or two plaques on one lot?	Masonic Temple	
+CB104	SEED — article in no tile (#539)		C. E. Morris House	39.964611	-82.977131	article C. E. Morris House · 1 m	C. E. Morris House			C.E. Morris House	
+CB106	SEED — article in no tile (#539)		Municipal Light Plant	39.96691	-83.01832	article Municipal Light Plant · 25 m	Municipal Light Plant			Municipal Light Plant	
+CB108	SEED — article in no tile (#539)		16 East Broad Street	39.9625	-83.0002	article 16 East Broad Street · 5 m	16 East Broad Street		TWIN CANDIDATE CB070 23 m — one building listed twice, or two plaques on one lot?	New Hayden Building	
+CB112	SEED — article in no tile (#539)		North High School (Columbus, Ohio)	40.0183	-83.0086	article North High School (Columbus, Ohio) · 27 m	North High School (Columbus, Ohio)		TWIN CANDIDATE CB349 0 m — one building listed twice, or two plaques on one lot?	North High School	
+CB114	SEED — article in no tile (#539)		Columbus Public Health	39.959313	-82.980719	article Columbus Public Health · 37 m	Columbus Public Health			Ohio Asylum for the Blind	
+CB115	SEED — article in no tile (#539)		Ohio Baptist General Association Headquarters	39.968068	-82.959537	article Ohio Baptist General Association Headquarters · 23 m	Ohio Baptist General Association Headquarters			Ohio Baptist General Association Headquarters	
+CB116	SEED — article in no tile (#539)		Continental Center (Columbus, Ohio)	39.964445	-82.997136	article Continental Center (Columbus, Ohio) · 7 m	Continental Center (Columbus, Ohio)			Ohio Bell Southwestern Headquarters	
+CB118	SEED — article in no tile (#539)		Ohio Finance Building	39.964643	-83.002453	article Ohio Finance Building · 8 m	Ohio Finance Building		TWIN CANDIDATE CB053 20 m — one building listed twice, or two plaques on one lot?	Ohio Finance Building	
+CB120	SEED — article in no tile (#539)		Ohio Institution for the Deaf and Dumb	39.961219	-82.987727	article Ohio Institution for the Deaf and Dumb · 117 m	Ohio Institution for the Deaf and Dumb		LIST POINT FAR: 2901 m from its article's point (Cristo Rey Columbus High School) — wrong article or a large site?	Ohio Institution for the Education of the Deaf and Dumb	
+CB121	SEED — article in no tile (#539)		Ohio Moline Plow Building	39.969316	-83.004274	article Ohio Moline Plow Building · 0 m	Ohio Moline Plow Building			Ohio Moline Plow Company Building	
+CB123	SEED — article in no tile (#539)		Ohio Stadium	40.001666666666665	-83.01972222222223	article Ohio Stadium · 4 m	Ohio Stadium			Ohio Stadium	
+CB124	SEED — article in no tile (#539)		Cultural Arts Center	39.95527777777778	-83.00333333333333	article Cultural Arts Center · 11 m	Cultural Arts Center			Ohio State Arsenal	
+CB125	SEED — article in no tile (#539)		Ohio Judicial Center	39.960291	-83.00239	article Ohio Judicial Center · 0 m	Ohio Judicial Center			Ohio State Office Building	
+CB126	SEED — article in no tile (#539)		Ohio Statehouse	39.96138888888889	-82.99888888888889	article Ohio Statehouse · 0 m	Ohio Statehouse		CHECK SUBJECT: served pin Ohio Holocaust And Liberators Memorial (osm_node4866634600) 107 m from the article may already be this place	Ohio Statehouse	
+CB127	SEED — article in no tile (#539)		Ohio Theatre (Columbus, Ohio)	39.95988	-82.99894	article Ohio Theatre (Columbus, Ohio) · 0 m	Ohio Theatre (Columbus, Ohio)		CHECK SUBJECT: served pin Ohio Holocaust And Liberators Memorial (osm_node4866634600) 77 m from the article may already be this place	Ohio Theatre	
+CB129	SEED — article in no tile (#539)		Columbus Foundation	39.96638888888889	-82.96833333333333	article Columbus Foundation · 0 m	Columbus Foundation			Old Governor's Mansion	
+CB131	SEED — article in no tile (#539)		Hale Hall	39.996998	-83.011791	article Hale Hall · 12 m	Hale Hall			Old Ohio Union	
+CB133	SEED — article in no tile (#539)		Open Air School (Columbus, Ohio)	40.014509	-83.014094	article Open Air School (Columbus, Ohio) · 7 m	Open Air School (Columbus, Ohio)			Open Air School	
+CB134	SEED — article in no tile (#539)		Orton Memorial Laboratory	39.992442	-83.002099	article Orton Memorial Laboratory · 28 m	Orton Memorial Laboratory			Orton Memorial Laboratory	
+CB135	SEED — article in no tile (#539)		Elijah Pierce Properties	39.967076	-82.986767	article Elijah Pierce Properties · 46 m	Elijah Pierce Properties			Elijah Pierce Properties	
+CB136	SEED — article in no tile (#539)		Plaza Hotel (Columbus, Ohio)	39.967502	-82.981399	article Plaza Hotel (Columbus, Ohio) · 39 m	Plaza Hotel (Columbus, Ohio)			Plaza Hotel	
+CB137	SEED — article in no tile (#539)		Frederick Prentiss House	39.96469	-82.981904	article Frederick Prentiss House · 0 m	Frederick Prentiss House			Frederick Prentiss House	
+CB138	SEED — article in no tile (#539)		Prentiss-Tulford House	39.965774	-82.97231	article Prentiss-Tulford House · 54 m	Prentiss-Tulford House			Prentiss-Tulford House	
+CB139	SEED — article in no tile (#539)		King Arts Complex	39.971111111111114	-82.97888888888889	article King Arts Complex · 0 m	King Arts Complex		TWIN CANDIDATE CB332 0 m — one building listed twice, or two plaques on one lot?	Pythian Temple and James Pythian Theater	
+CB140	SEED — unmapped		Railroad Employes<!--sic in the weekly listing--> Building & Loan Company	39.9625	-82.999		Railroad Employes Building & Loan Company		new: hidden pin Northeast Cannon 75 m; served pin Peace 50 m; new: line CB070 82 m	Railroad Employes<!--sic in the weekly listing--> Building & Loan Company	new
+CB141	SEED — article in no tile (#539)		Rankin Building (Columbus, Ohio)	39.96377	-83.00174	article Rankin Building (Columbus, Ohio) · 35 m	Rankin Building (Columbus, Ohio)			Rankin Building	
+CB143	SEED — article in no tile (#539)		St. Clair Hospital	39.971712	-82.980625	article St. Clair Hospital · 2 m	St. Clair Hospital			St. Clair Hospital	
+CB144	SEED — unmapped		Saint Paul's Episcopal Church	39.96425	-82.979444		Saint Paul's Episcopal Church (Columbus, Ohio)		LIST POINT FAR: 10032 m from its article's point (Saint Paul's Episcopal Church (Columbus, Ohio)) — wrong article or a large site?; new: line CB034 99 m; new: line CB036 98 m; new: line CB054 45 m; new: line CB077 88 m; TWIN CANDIDATE CB086 23 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CB096 28 m — one building listed twice, or two plaques on one lot?	Saint Paul's Episcopal Church	new
+CB146	SEED — article in no tile (#539)		Schlee-Kemmler Building	39.955408	-82.999056	article Schlee-Kemmler Building · 0 m	Schlee-Kemmler Building			Schlee-Kemmler Building	
+CB147	SEED — article in no tile (#539)		Erwin W. Schueller House	39.965243	-82.976807	article Erwin W. Schueller House · 0 m	Erwin W. Schueller House		TWIN CANDIDATE CB089 18 m — one building listed twice, or two plaques on one lot?	Erwin W. Schueller House	
+CB148	SEED — article in no tile (#539)		Scofield-Sanor House	39.96506	-82.97316	article Scofield-Sanor House · 11 m	Scofield-Sanor House		TWIN CANDIDATE CB066 25 m — one building listed twice, or two plaques on one lot?	Scofield-Sanor House	
+CB149	SEED — article in no tile (#539)		Second Presbyterian Church (Columbus, Ohio)	39.95944444444445	-82.99722222222222	article Second Presbyterian Church (Columbus, Ohio) · 31 m	Second Presbyterian Church (Columbus, Ohio)			Second Presbyterian Church	
+CB150	SEED — article in no tile (#539)		Seneca Hotel	39.96277777777778	-82.99055555555556	article Seneca Hotel · 24 m	Seneca Hotel		TWIN CANDIDATE CB347 0 m — one building listed twice, or two plaques on one lot?	Seneca Hotel	
+CB151	SEED — article in no tile (#539)		Sharp-Page House	39.964795	-82.975694	article Sharp-Page House · 6 m	Sharp-Page House		TWIN CANDIDATE CB093 17 m — one building listed twice, or two plaques on one lot?	Sharp-Page House	
+CB152	SEED — article in no tile (#539)		Shedd-Dunn House	39.964904	-82.974852	article Shedd-Dunn House · 2 m	Shedd-Dunn House		TWIN CANDIDATE CB071 15 m — one building listed twice, or two plaques on one lot?	Shedd-Dunn House	
+CB153	SEED — article in no tile (#539)		Shiloh Baptist Church (Columbus, Ohio)	39.97027777777778	-82.98194444444445	article Shiloh Baptist Church (Columbus, Ohio) · 92 m	Shiloh Baptist Church (Columbus, Ohio)			Shiloh Baptist Church	
+CB155	SEED — article in no tile (#539)		Benjamin Smith House (Columbus, Ohio)	39.962398	-82.995788	article Benjamin Smith House (Columbus, Ohio) · 10 m	Benjamin Smith House (Columbus, Ohio)			Benjamin Smith House	
+CB158	SEED — article in no tile (#539)		Standard Building (Columbus, Ohio)	39.9657	-82.99656	article Standard Building (Columbus, Ohio) · 18 m	Standard Building (Columbus, Ohio)		TWIN CANDIDATE CB179 27 m — one building listed twice, or two plaques on one lot?	The Standard Building	
+CB159	SEED — article in no tile (#539)		Stoddart Block	39.957236	-82.994798	article Stoddart Block · 34 m	Stoddart Block		TWIN CANDIDATE CB183 10 m — one building listed twice, or two plaques on one lot?	Stoddart Block	
+CB160	SEED — unmapped		Lucas Sullivant Building	39.960737	-83.016029		Sullivant Land Office		TWIN CANDIDATE CB067 25 m — one building listed twice, or two plaques on one lot?	Lucas Sullivant Building	
+CB162	SEED — article in no tile (#539)		Theresa Building	39.967304	-82.979175	article Theresa Building · 9 m	Theresa Building			Theresa Building	
+CB164	SEED — article in no tile (#539)		Thurber House	39.965781	-82.985215	article Thurber House · 0 m	Thurber House		CHECK SUBJECT: hidden pin Thurber Park (osm_way463501257) 54 m from the article may already be this place; TWIN CANDIDATE CB330 0 m — one building listed twice, or two plaques on one lot?	James Thurber House	
+CB165	SEED — article in no tile (#539)		Toledo and Ohio Central Railroad Station	39.96054	-83.01071	article Toledo and Ohio Central Railroad Station · 0 m	Toledo and Ohio Central Railroad Station			Toledo and Ohio Central Railroad Station	
+CB167	SEED — article in no tile (#539)		Trinity Episcopal Church (Columbus, Ohio)	39.96222222222222	-82.9975	article Trinity Episcopal Church (Columbus, Ohio) · 0 m	Trinity Episcopal Church (Columbus, Ohio)			Trinity Episcopal Church	
+CB169	SEED — article in no tile (#539)		United States Carriage Company	39.956111	-82.995278	article United States Carriage Company · 0 m	United States Carriage Company			United States Carriage Company	
+CB170	SEED — article in no tile (#539)		United States Post Office and Courthouse (Columbus, Ohio)	39.960137	-82.997029	article United States Post Office and Courthouse (Columbus, Ohio) · 22 m	United States Post Office and Courthouse (Columbus, Ohio)			U.S. Post Office and Courthouse	
+CB171	SEED — article in no tile (#539)		Joseph P. Kinneary United States Courthouse	39.963918	-83.00521	article Joseph P. Kinneary United States Courthouse · 18 m	Joseph P. Kinneary United States Courthouse			United States Post Office and Courthouse	
+CB172	SEED — article in no tile (#539)		University, Hayes and Orton Halls	40.001327777777774	-83.01456388888889	article University, Hayes and Orton Halls · 0 m	University, Hayes and Orton Halls			University, Hayes and Orton Halls	
+CB174	SEED — article in no tile (#539)		Vincent Walters House-Walters Music Academy	39.969671	-82.978563	article Vincent Walters House-Walters Music Academy · 14 m	Vincent Walters House-Walters Music Academy			Vincent Walters House-Walters Music Academy	
+CB175	SEED — article in no tile (#539)		Welsbach Building	39.968355	-82.998403	article Welsbach Building · 18 m	Welsbach Building			Welsbach Building	
+CB176	SEED — article in no tile (#539)		Welsh Presbyterian Church (Columbus, Ohio)	39.96555555555556	-82.9925	article Welsh Presbyterian Church (Columbus, Ohio) · 0 m	Welsh Presbyterian Church (Columbus, Ohio)			Welsh Presbyterian Church	
+CB178	SEED — article in no tile (#539)		Westminster Presbyterian Church (Columbus, Ohio)	39.96138888888889	-82.99305555555556	article Westminster Presbyterian Church (Columbus, Ohio) · 47 m	Westminster Presbyterian Church (Columbus, Ohio)			Westminster Church	
+CB179	SEED — article in no tile (#539)		Greater Columbus Arts Council	39.96573	-82.99625	article Greater Columbus Arts Council · 12 m	Greater Columbus Arts Council		TWIN CANDIDATE CB158 27 m — one building listed twice, or two plaques on one lot?	Winders Motor Sales Company	
+CB180	SEED — article in no tile (#539)		Wyandotte Building	39.961898	-83.001343	article Wyandotte Building · 6 m	Wyandotte Building			Wyandotte Building	
+CB181	SEED — article in no tile (#539)		York Lodge No. 563	39.98833333333334	-83.00527777777778	article York Lodge No. 563 · 24 m	York Lodge No. 563			York Lodge No. 563	
+CB182	SEED — article in no tile (#539)		Empire Building (Columbus, Ohio)	39.96296	-82.9966	article Empire Building (Columbus, Ohio) · 0 m	Empire Building (Columbus, Ohio)			Yuster Building	
+CB183	SEED — article in no tile (#539)		Zettler Grocery and Hardware	39.957147	-82.994822	article Zettler Grocery and Hardware · 17 m	Zettler Grocery and Hardware		TWIN CANDIDATE CB159 10 m — one building listed twice, or two plaques on one lot?	Zettler Grocery and Hardware	
+CB185	SEED — article in no tile (#539)		Union Station (Columbus, Ohio)	39.970717	-83.001017	article Union Station (Columbus, Ohio) · 0 m	Union Station (Columbus, Ohio)			Union Station Entrance	
+CB190	SEED — unmapped		Bank Block Building	39.982778	-83.045556		Bank Block Building			Bank Block Building	
+CB191	SEED — unmapped		E. Boles Cottage	40.059722	-83.146944		E. Boles Cottage			E. Boles Cottage	
+CB194	SEED — unmapped		J.G. Butler House	40.098806	-83.113889		J.G. Butler House		new: hidden pin Daily Chores 99 m	J.G. Butler House	new
+CB195	SEED — unmapped		Aurora Buttles House	40.091111	-83.0175		Aurora Buttles House			Aurora Buttles House	
+CB196	SEED — unmapped		Buttles-Johnson House	40.093611	-83.017222		Buttles-Johnson House		new: hidden pin Orange Johnson House Museum 33 m	Buttles-Johnson House	new
+CB200	SEED — unmapped		Chapman-Hutchinson House	40.098889	-83.1125		Chapman-Hutchinson House		new: line CB242 62 m; new: line CB244 70 m	Chapman-Hutchinson House	new
+CB202	SEED — unmapped		Walter Datz House	40.077778	-83.128056		Walter Datz House			Walter Datz House	
+CB203	SEED — unmapped		Alexander Davis Cabin	40.078056	-83.112778		Alexander Davis Cabin		new: line CB204 47 m	Alexander Davis Cabin	new
+CB204	SEED — unmapped		Alexander Davis House	40.078056	-83.113333		Alexander Davis House		new: line CB203 47 m	Alexander Davis House	new
+CB205	SEED — unmapped		James Davis Barn	40.082778	-83.115278		James Davis Barn		new: line CB206 62 m	James Davis Barn	new
+CB206	SEED — unmapped		James Davis Farm	40.083333	-83.115278		James Davis Farm		new: line CB205 62 m	James Davis Farm	new
+CB207	SEED — unmapped		Samuel Henry Davis House	40.083889	-83.128056		Samuel Henry Davis House			Samuel Henry Davis House	
+CB209	SEED — unmapped		Drexel Theater	39.9573	-82.9386		Drexel Theater			Drexel Theater	
+CB210	SEED — unmapped		Dublin Cemetery Vaults	40.0975	-83.116944		Dublin Cemetery Vaults			Dublin Cemetery Vaults	
+CB211	SEED — unmapped		Dublin Christian Church	40.098889	-83.116111		Dublin Christian Church (Bridge Street, Dublin, Ohio)		CHECK: same-named hidden pin Historic Dublin (osm_node357470674) 241 m away — the same place, mapped off the list point?; new: same-named pin 241 m	Dublin Christian Church	new
+CB215	SEED — unmapped		John Dun Homestead	40.132361	-83.124306		John Dun Homestead			John Dun Homestead	
+CB216	SEED — unmapped		Robert P. Duncan House	39.976111	-82.941944		Robert P. Duncan House			Robert P. Duncan House	
+CB218	SEED — unmapped		Richard W. Evans House	40.088889	-83.015278		Richard W. Evans House		new: served pin Gilbert House (Worthington, Ohio) 50 m; new: line CB267 62 m; new: line CB281 77 m; new: line CB283 78 m	Richard W. Evans House	new
+CB219	SEED — unmapped		John W. Everal Farm Buildings	40.126389	-82.947778		John W. Everal Farm Buildings		new: hidden pin Everal Park 47 m	John W. Everal Farm Buildings	new
+CB220	SEED — unmapped		Frantz House	40.091944	-83.124167		Frantz House			Frantz House	
+CB222	SEED — unmapped		Gardner House	40.091111	-83.020278		Gardner House (Worthington, Ohio)		new: line CB231 57 m	Gardner House	new
+CB223	SEED — unmapped		Eleanor A. Gelpi House	40.1125	-83.110833		Eleanor A. Gelpi House		new: hidden pin Dublin Arts Center 20 m	Eleanor A. Gelpi House	new
+CB225	SEED — unmapped		Gilbert-Wilcox House	40.088611	-83.011389		Gilbert-Wilcox House			Gilbert-Wilcox House	
+CB228	SEED — unmapped		Martin and Louise Grieve House	40.0864	-83.1148		Martin and Louise Grieve House			Martin and Louise Grieve House	
+CB231	SEED — unmapped		Lucy Hart House	40.091389	-83.019722		Lucy Hart House		new: line CB222 57 m	Lucy Hart House	new
+CB233	SEED — unmapped		Holder-Wright Works	40.112994	-83.106328		Holder-Wright Works			Holder-Wright Works	
+CB234	SEED — unmapped		Home for the Aged Deaf	40.10125	-82.889167		Home for the Aged Deaf		new: served pin Presbyterian Parsonage (Westerville, Ohio) 73 m	Home for the Aged Deaf	new
+CB235	SEED — unmapped		Hotel Central	40.086944	-83.018333		Hotel Central (Worthington, Ohio)		new: served pin Grand Lodge of Ohio 73 m; new: line CB243 95 m; new: line CB249 62 m; new: line CB284 77 m	Hotel Central	new
+CB236	SEED — unmapped		Franz Huntington House	39.971389	-82.937778		Franz Huntington House			Franz Huntington House	
+CB237	SEED — unmapped		Indian Run Cemetery Stone Walls	40.101944	-83.115278		Indian Run Cemetery Stone Walls		new: hidden pin Dublin Veterans Park 59 m	Indian Run Cemetery Stone Walls	new
+CB241	SEED — unmapped		Karrer Barn	40.095	-83.1136		Karrer Barn		new: line CB305 66 m	Karrer Barn	new
+CB242	SEED — unmapped		Henry Karrer House	40.0994	-83.1122		Henry Karrer House		new: line CB200 62 m	Henry Karrer House	new
+CB243	SEED — unmapped		Kilbourn Commercial Building	40.0878	-83.0183		Kilbourn Commercial Building		new: served pin Demas Adams House 98 m; new: line CB235 95 m; new: line CB302 93 m	Kilbourn Commercial Building	new
+CB244	SEED — unmapped		William Kilbourn House	40.0983	-83.1122		William Kilbourn House		new: line CB200 70 m	William Kilbourn House	new
+CB245	SEED — unmapped		Frederick G. Kilgour House	40.0198	-83.05		Frederick G. Kilgour House			Frederick G. Kilgour House	
+CB246	SEED — unmapped		Lanman-Ingram House	39.9895	-83.0611		Lanman-Ingram House			Lanman-Ingram House	
+CB247	SEED — unmapped		C. Leppert Barn	40.091111	-83.128889		C. Leppert Farm		new: hidden pin Smiley Park 59 m	C. Leppert Barn	new
+CB249	SEED — unmapped		Doctor Longenecker Office Building	40.086389	-83.018333		Doctor Longenecker Office Building		new: served pin Grand Lodge of Ohio 37 m; served pin New England Lodge 56 m; new: line CB235 62 m; new: line CB271 94 m; new: line CB274 62 m; new: line CB284 77 m	Doctor Longenecker Office Building	new
+CB250	SEED — unmapped		Mattoon-Woodrow House	40.092778	-83.015556		Mattoon-Woodrow House			Mattoon-Woodrow House	
+CB251	SEED — unmapped		McCracken-Sells House	40.035556	-83.103333		McCracken-Sells House			McCracken-Sells House	
+CB252	SEED — unmapped		Austin McDowell House	40.093611	-83.113056		Austin McDowell House		new: line CB305 96 m	Austin McDowell House	new
+CB253	SEED — unmapped		Dr. McKitrick House	40.099722	-83.113889		Dr. McKitrick House		new: hidden pin Historic Dublin 57 m; hidden pin Daily Chores 11 m; new: line CB212 57 m; new: line CB213 57 m; new: line CB214 57 m; new: line CB254 56 m	Dr. McKitrick House	new
+CB254	SEED — unmapped		Dr. McKitrick Office	40.1	-83.113333		Dr. McKitrick Office		new: hidden pin Historic Dublin 54 m; hidden pin Daily Chores 67 m; new: line CB212 54 m; new: line CB213 54 m; new: line CB214 54 m; new: line CB253 56 m	Dr. McKitrick Office	new
+CB256	SEED — unmapped		J.F. Miller House	39.988472	-83.061389		J.F. Miller House			J.F. Miller House	
+CB257	SEED — unmapped		Charles Mitchell House	40.11	-83.114444		Charles Mitchell House			Charles Mitchell House	
+CB259	SEED — unmapped		Nafzger-Miller House	40.020278	-82.879444		Nafzger-Miller House		new: served pin Creekside Gahanna 62 m	Nafzger-Miller House	new
+CB261	SEED — unmapped		Niles Car & Manufacturing Company Electric Railway Interurban Combine No. 21	40.09	-83.001944		Niles Car & Manufacturing Company Electric Railway Interurban Combine No. 21			Niles Car & Manufacturing Company Electric Railway Interurban Combine No. 21	
+CB262	SEED — unmapped		Lewis Noble House	40.084444	-83.019167		Lewis Noble House			Lewis Noble House	
+CB264	SEED — unmapped		Old Peace Lutheran Church	40.019686	-82.878261		Old Peace Lutheran Church			Old Peace Lutheran Church	
+CB265	SEED — unmapped		Charles S. Osborn House	40.088056	-82.931944		Charles S. Osborn House			Charles S. Osborn House	
+CB266	SEED — unmapped		Otterbein Mausoleum	40.120278	-82.936111		Otterbein Mausoleum			Otterbein Mausoleum	
+CB267	SEED — unmapped		Jonathan Park House	40.088333	-83.015278		Jonathan Park House		new: served pin Gilbert House (Worthington, Ohio) 91 m; new: line CB218 62 m; new: line CB281 77 m; new: line CB283 47 m	Jonathan Park House	new
+CB268	SEED — unmapped		Pinney Road Log Cabin	40.0975	-83.124444		Pinney Road Log Cabin			Pinney Road Log Cabin	
+CB269	SEED — unmapped		Dr. Eli Pinney House	40.097222	-83.112222		Dr. Eli Pinney House		new: served pin Brelsford-Seese House 31 m	Dr. Eli Pinney House	new
+CB271	SEED — unmapped		Principal's Cottage	40.085833	-83.019167		Principal's Cottage		new: line CB249 94 m; new: line CB274 71 m; new: line CB284 93 m	Principal's Cottage	new
+CB272	SEED — unmapped		F. Riley House	40.095833	-83.112778		F. Riley House			F. Riley House	
+CB273	SEED — unmapped		Louis Rings Barn No. 1	40.093611	-83.170833		Louis Rings Farm			Louis Rings Barn No. 1	
+CB274	SEED — unmapped		Ripley House	40.085833	-83.018333		Ripley House (Worthington, Ohio)		new: served pin Grand Lodge of Ohio 71 m; served pin New England Lodge 56 m; new: line CB249 62 m; new: line CB271 71 m	Ripley House	new
+CB276	SEED — unmapped		Mark Russell House	40.08	-83.019167		Mark Russell House			Mark Russell House	
+CB277	SEED — unmapped		Benjamin Sells Barn No. 1	40.068	-83.11625		Benjamin Sells Farm			Benjamin Sells Barn No. 1	
+CB278	SEED — unmapped		Eliud Sells House	40.098056	-83.100833		Eliud Sells House			Eliud Sells House	
+CB279	SEED — unmapped		William Henry Sells House	40.084444	-83.114167		William Henry Sells House			William Henry Sells House	
+CB281	SEED — unmapped		Sharon Township Town Hall	40.088611	-83.016111		Sharon Township Town Hall		new: served pin Gilbert House (Worthington, Ohio) 52 m; new: line CB218 77 m; new: line CB267 77 m; new: line CB283 39 m	Sharon Township Town Hall	new
+CB282	SEED — unmapped		Shepard Street School	40.020278	-82.876944		Shepard Street School			Shepard Street School	
+CB283	SEED — unmapped		Capt. J.S. Skeele House	40.088333	-83.015833		Capt. J.S. Skeele House		new: served pin Gilbert House (Worthington, Ohio) 77 m; new: line CB218 78 m; new: line CB267 47 m; new: line CB281 39 m	Capt. J.S. Skeele House	new
+CB284	SEED — unmapped		John Snow House	40.086667	-83.019167		John Snow House		new: hidden pin Worthington Doll Museum 86 m; hidden pin Old Rectory 88 m; new: line CB235 77 m; new: line CB249 77 m; new: line CB271 93 m; new: line CB300 77 m	John Snow House	new
+CB285	SEED — unmapped		Squire's Glen Farm	40.097222	-82.886111		Squire's Glen Farm			Squire's Glen Farm	
+CB286	SEED — article in no tile (#539)		St. John's Episcopal Church (Worthington, Ohio)	40.08838888888889	-83.01730555555555	article St. John's Episcopal Church (Worthington, Ohio) · 26 m	St. John's Episcopal Church (Worthington, Ohio)			St. John's Episcopal Church	
+CB287	SEED — unmapped		St. John's Lutheran Church	40.08	-83.156667		St. John's Lutheran Church (Dublin, Ohio)			St. John's Lutheran Church	
+CB288	SEED — unmapped		Joshua Stevenson House	39.878889	-82.804444		Joshua Stevenson House			Joshua Stevenson House	
+CB290	SEED — unmapped		Thompson-Builder House	40.116667	-83.1275		Thompson-Builder House			Thompson-Builder House	
+CB291	SEED — unmapped		Towers Hall, Otterbein College	40.125278	-82.936389		Towers Hall, Otterbein College		new: served pin Otterbein University 55 m; served pin Weitkamp Observatory 91 m; near-named article Otterbein University 55 m	Towers Hall, Otterbein College	new
+CB294	SEED — unmapped		Rev. Ebenezer Washburn House	40.104167	-82.888333		Ebenezer Washburn House			Rev. Ebenezer Washburn House	
+CB295	SEED — unmapped		Washington Township School	40.117222	-83.125833		Washington Township School			Washington Township School	
+CB296	SEED — unmapped		Wesley Chapel	40.017222	-83.1		Wesley Chapel (Hilliard, Ohio)			Wesley Chapel	
+CB297	SEED — article in no tile (#539)		Westerville High School-Vine Street School	40.127259	-82.928762	article Westerville High School-Vine Street School · 14 m	Westerville High School-Vine Street School			Westerville High School-Vine Street School	
+CB300	SEED — unmapped		Worthington Historical Society Museum	40.086944	-83.02		Worthington Historical Society Museum		new: hidden pin Worthington Doll Museum 9 m; hidden pin Old Rectory 16 m; new: line CB284 77 m	Worthington Historical Society Museum	new
+CB301	SEED — unmapped		Worthington Manufacturing Company Boardinghouse	40.084722	-83.029444		Worthington Manufacturing Company Boardinghouse			Worthington Manufacturing Company Boardinghouse	
+CB302	SEED — unmapped		Worthington Public Square	40.088611	-83.018056		Worthington Public Square		new: served pin Demas Adams House 59 m; near-named article Worthington Presbyterian Church 117 m; new: line CB243 93 m; new: line CB286 68 m	Worthington Public Square	new
+CB304	SEED — unmapped		Horace Wright House	40.088056	-83.013611		Horace Wright House			Horace Wright House	
+CB305	SEED — unmapped		George Karrer Farm	40.094444	-83.113333		George Karrer Farm		new: line CB241 66 m; new: line CB252 96 m	George Karrer Farm	new
+CB306	SEED — unmapped		Potter Wright House	40.086667	-83.0125		Potter Wright House			Potter Wright House	
+CB307	SEED — unmapped		Zion's Evangelical Lutheran Church	39.876111	-82.947778		Zion Evangelical Lutheran Church (Obetz, Ohio)			Zion's Evangelical Lutheran Church	
+CB308	SEED — unmapped		John Cook Farm	40.151389	-82.823889		John Cook Farm			John Cook Farm	
+CB312	SEED — unmapped		Stephen Sharp House	40.143333	-82.938889		Stephen Sharp House			Stephen Sharp House	
+CB328	SEED — article in no tile (#539)		Great Southern Hotel & Theatre	39.956089	-82.998729	article Great Southern Hotel & Theatre · 0 m	Great Southern Hotel & Theatre		TWIN CANDIDATE CB059 0 m — one building listed twice, or two plaques on one lot?	CR-10	
+CB330	SEED — article in no tile (#539)		Thurber House	39.965781	-82.985215	article Thurber House · 0 m	Thurber House		CHECK SUBJECT: hidden pin Thurber Park (osm_way463501257) 54 m from the article may already be this place; TWIN CANDIDATE CB164 0 m — one building listed twice, or two plaques on one lot?	CR-14	
+CB332	SEED — article in no tile (#539)		King Arts Complex	39.971111111111114	-82.97888888888889	article King Arts Complex · 0 m	King Arts Complex		TWIN CANDIDATE CB139 0 m — one building listed twice, or two plaques on one lot?	CR-18	
+CB340	SEED — article in no tile (#539)		Graham Elementary and Middle School	40.001606	-83.004439	article Graham Elementary and Middle School · 0 m	Graham Elementary and Middle School			CR-33	
+CB344	SEED — article in no tile (#539)		Northwood Park (Columbus, Ohio)	40.008985	-83.006454	article Northwood Park (Columbus, Ohio) · 0 m	Northwood Park (Columbus, Ohio)			CR-45	
+CB347	SEED — article in no tile (#539)		Seneca Hotel	39.96277777777778	-82.99055555555556	article Seneca Hotel · 0 m	Seneca Hotel		TWIN CANDIDATE CB150 0 m — one building listed twice, or two plaques on one lot?	CR-51	
+CB349	SEED — article in no tile (#539)		North High School (Columbus, Ohio)	40.0183	-83.0086	article North High School (Columbus, Ohio) · 0 m	North High School (Columbus, Ohio)		TWIN CANDIDATE CB112 0 m — one building listed twice, or two plaques on one lot?	CR-54	
+CB354	SEED — article in no tile (#539)		Citizens Building (Columbus, Ohio)	39.96336	-83.001399	article Citizens Building (Columbus, Ohio) · 0 m	Citizens Building (Columbus, Ohio)			CR-62	
+CB357	SEED — article in no tile (#539)		Columbus Dispatch Building	39.96173	-82.99736	article Columbus Dispatch Building · 0 m	Columbus Dispatch Building			CR-70	
+CB362	SEED — article in no tile (#539)		Ford Motor Company - Columbus Assembly Plant	39.972726	-82.991061	article Ford Motor Company - Columbus Assembly Plant · 0 m	Ford Motor Company - Columbus Assembly Plant		TWIN CANDIDATE CB046 0 m — one building listed twice, or two plaques on one lot?	CR-80	
+CB015	CUT — served					Camp Chase · wiki_4749681 · 0 m	Camp Chase			Camp Chase Site	
+CB016	CUT — served					Shrum Mound · osm_node4638916564 · 21 m	Shrum Mound			Shrum Mound	
+CB027	CUT — served					Columbus Museum of Art · osm_way293476179 · 29 m	Columbus Museum of Art			Columbus Gallery of Fine Arts	
+CB031	CUT — served					Anson Davis House and Springhouse · wiki_66253341 · 0 m	Anson Davis House and Springhouse			Anson Davis House	
+CB033	CUT — served					Elam Drake House · wiki_66253758 · 50 m	Elam Drake House			Elam Drake House	
+CB035	CUT — served					East Broad Street Historic District · osm_node357470676 · 28 m	East Broad Street Historic District (Columbus, Ohio)			East Broad Street Historic District	
+CB037	CUT — served					East North Broadway Historic District · wiki_66156812 · 0 m	East North Broadway Historic District			East North Broadway Historic District	
+CB038	CUT — served					East Town Street Historic District · osm_node357472753 · 116 m	East Town Street Historic District			East Town Street Historic District	
+CB044	CUT — served					Fifth Avenue and North High Historic District · osm_node357472755 · 55 m	Fifth Avenue and North High Historic District			Fifth Avenue and North High Historic District	
+CB048	CUT — served					Franklin Park Conservatory · wiki_3852341 · 14 m	Franklin Park Conservatory			Franklin Park Conservatory	
+CB050	CUT — served					Franklinton Apartments at Broad and Hawkes · wiki_66200825 · 10 m	Franklinton Apartments at Broad and Hawkes			Franklinton Apartments at Broad and Hawkes	
+CB058	CUT — served					A.B. Graham House · wiki_66301789 · 4 m	A.B. Graham House			A.B. Graham House	
+CB065	CUT — served					Hanford Village George Washington Carver Addition Historic District · wiki_66244235 · 0 m	Hanford Village George Washington Carver Addition Historic District			Hanford Village George Washington Carver Addition Historic District	
+CB068	CUT — served					Hartley Mound · wiki_66225939 · 12 m	Hartley Mound			Hartley Mound	
+CB073	CUT — served					High and Gay Streets Historic District · osm_way818642527 · 32 m	High and Gay Streets Historic District			High and Gay Streets Historic District	
+CB075	CUT — served					Holy Rosary Church (Columbus, Ohio) · wiki_81502368 · 119 m	Holy Rosary Church (Columbus, Ohio)			Holy Rosary Roman Catholic Church Complex	
+CB076	CUT — served					L. Hoster Brewing Company · wiki_66201256 · 65 m	L. Hoster Brewing Company			L. Hoster Brewing Company	
+CB079	CUT — served					Iuka Ravine Historic District · wiki_64396992 · 85 m	Iuka Ravine Historic District			Iuka Ravine Historic District	
+CB088	CUT — served					Kahiki Supper Club · wiki_66030409 · 0 m	Kahiki Supper Club			The Kahiki	
+CB101	CUT — served					McClure-Nesbitt Motor Company · wiki_69886941 · 32 m	McClure-Nesbitt Motor Company			McClure-Nesbitt Motor Company	
+CB102	CUT — served					McDannald Homestead · wiki_66235903 · 67 m	McDannald Homestead			McDannald Homestead	
+CB103	CUT — served					Frederick A. Miller House · wiki_66355675 · 39 m	Frederick A. Miller House			Frederick A. Miller House-Broad Gables	
+CB109	CUT — served					New Indianola Historic District · osm_node9310085979 · 83 m	New Indianola Historic District			New Indianola Historic District	
+CB110	CUT — served					Jonathan Noble House · wiki_66355779 · 12 m	Jonathan Noble House			Jonathan Noble House	
+CB119	CUT — served					Ohio History Center · osm_way835107792 · 119 m	Ohio History Center			Ohio Historical Center and Ohio Village	
+CB132	CUT — served					Old Port Columbus Terminal · wiki_64015903 · 17 m	Old Port Columbus Terminal			Old Port Columbus Airport Control Tower	
+CB142	CUT — served					Captain Edward V. Rickenbacker House · wiki_17977651 · 0 m	Captain Edward V. Rickenbacker House			Capt. Edward V. Rickenbacker House	
+CB156	CUT — served					Charles S. Barrett Building · wiki_65979588 · 0 m	Charles S. Barrett Building			South High School	
+CB157	CUT — served					South High Commercial Historic District · osm_way818857323 · 3 m	South High Commercial Historic District			South High Street Commercial Grouping	
+CB163	CUT — served					Third Avenue and North High Historic District · osm_node357472795 · 101 m	Third Avenue and North High Historic District			Third Avenue and North High Historic District	
+CB166	CUT — served					Tosheff's Restaurant and Hotel · wiki_66338619 · 14 m	Tosheff's Restaurant and Hotel			Tosheff's Restaurant and Hotel	
+CB168	CUT — served					Trinity German Evangelical Lutheran Church · wiki_34378095 · 0 m	Trinity German Evangelical Lutheran Church			Trinity German Evangelical Lutheran Church	
+CB173	CUT — served					Valley Dale Ballroom · wiki_64344409 · 21 m	Valley Dale Ballroom			Valley Dale Ballroom	
+CB177	CUT — served					120 S. Central Avenue · wiki_71350284 · 0 m	120 S. Central Avenue			West High School	
+CB186	CUT — served					Demas Adams House · wiki_12390887 · 12 m	Demas Adams House			Demas Adams House	
+CB187	CUT — served					Agler–La Follette House · wiki_12391196 · 52 m	Agler-La Follette House			Agler-La Follette House	
+CB188	CUT — served					Alkire House · wiki_12391435 · 0 m	Alkire House			Alkire House	
+CB189	CUT — served					Artz House · wiki_12397256 · 59 m	Artz House			Artz House	
+CB192	CUT — served					Asher Brand Residence · wiki_57360986 · 0 m	Asher Brand Residence			Asher Brand Residence	
+CB193	CUT — served					Brelsford-Seese House · wiki_57361173 · 0 m	Brelsford-Seese House			Brelsford-Seese House	
+CB197	CUT — served					Capital University · wiki_1095791 · 119 m	Capital University Historic District			Capital University Historic District	
+CB198	CUT — served					Otterbein University · wiki_9338265 · 80 m	Carnegie Library Otterbein University		CHECK SUBJECT (partial or container match)	Carnegie Library Otterbein University	
+CB199	CUT — served					Central College Presbyterian Church · wiki_39191521 · 27 m	Central College Presbyterian Church			Central College Presbyterian Church	
+CB201	CUT — served					Fletcher Coffman House · osm_way555403024 · 3 m	Fletcher Coffman House			Fletcher Coffman House	
+CB208	CUT — served					Samuel Davis House (Norwich Township, Franklin County, Ohio) · wiki_27628204 · 0 m	Samuel Davis House (Norwich Township, Franklin County, Ohio)			Samuel Davis House	
+CB221	CUT — served					Gantz Homestead · wiki_40267729 · 0 m	Gantz Homestead			Gantz Homestead	
+CB224	CUT — served					Gilbert House (Worthington, Ohio) · wiki_19408950 · 52 m	Gilbert House (Worthington, Ohio)			Gilbert House	
+CB226	CUT — served					A.G. Grant Homestead · wiki_40267958 · 0 m	A.G. Grant Homestead			A.G. Grant Homestead	
+CB227	CUT — served					Green Lawn Abbey · wiki_4667382 · 0 m	Green Lawn Abbey			Green Lawn Abbey	
+CB230	CUT — served					Gideon Hart House · wiki_43957506 · 0 m	Gideon Hart House			Gideon Hart House	
+CB232	CUT — served					Hilliard United Methodist Church · wiki_39202632 · 0 m	Hilliard Methodist Episcopal Church			Hilliard Methodist Episcopal Church	
+CB239	CUT — served					Jeffers Mound · wiki_53131006 · 2 m	Jeffers Mound			H.P. Jeffers Mound	
+CB240	CUT — served					Ohio Governor's Mansion · wiki_12168454 · 2 m	Ohio Governor's Mansion			Malcolm Jeffrey House	
+CB255	CUT — served					Dr. James Merryman House · wiki_57360260 · 0 m	Dr. James Merryman House			Dr. James Merryman House	
+CB258	CUT — served					Myer House (Dublin, Ohio) · wiki_23092643 · 6 m	Myer House (Dublin, Ohio)			Myer House	
+CB260	CUT — served					New England Lodge · wiki_62463241 · 0 m	New England Lodge			New England Lodge	
+CB263	CUT — served					Odd Fellows Hall (Hilliard, Ohio) · wiki_29203979 · 0 m	Odd Fellows Hall (Hilliard, Ohio)			Odd Fellows Hall	
+CB270	CUT — served					Presbyterian Parsonage (Westerville, Ohio) · wiki_39191549 · 0 m	Presbyterian Parsonage (Westerville, Ohio)			Presbyterian Parsonage	
+CB289	CUT — served					Temperance Row Historic District · wiki_20163333 · 0 m	Temperance Row Historic District			Temperance Row Historic District	
+CB298	CUT — served					Winterringer Building and House · wiki_57360680 · 62 m	Winterringer Building and House			Winterringer Building and House	
+CB303	CUT — served					Worthington Presbyterian Church · wiki_20361904 · 0 m	Worthington Presbyterian Church			Worthington United Presbyterian Church	
+CB309	CUT — served					Highbank Park Works · wiki_27419524 · 4 m	Highbank Park Works			Highbank Park Works	
+CB311	CUT — served					O'Shaughnessy Dam (Ohio) · wiki_7669932 · 24 m	O'Shaughnessy Dam (Ohio)			O'Shaughnessy Dam and Bridge	
+CB341	CUT — served					Old Oaks Historic District · wiki_13022052 · 0 m	Old Oaks Historic District			CR-41	
+CB006	NO LINE — no coordinate		Richard Berry Jr. House				Richard Berry Jr. House (Columbus, Ohio)		place by hand or cut	Richard Berry Jr. House	
+CB007	NO LINE — no coordinate		Born Capital Brewery Bottling Works				Born Capital Brewery Bottling Works		place by hand or cut	Born Capital Brewery Bottling Works	
+CB008	NO LINE — no coordinate		Bradford Shoe Company Building				Bradford Shoe Company Building		place by hand or cut	Bradford Shoe Company Building	
+CB009	NO LINE — no coordinate		Broad Street Apartments				Broad Street Apartments		place by hand or cut	Broad Street Apartments	
+CB012	NO LINE — no coordinate		Buckeye State Building and Loan Company Building				Buckeye Building		place by hand or cut	Buckeye State Building and Loan Company Building	
+CB013	NO LINE — no coordinate		Budd Dairy Company				Budd Dairy Company		place by hand or cut	Budd Dairy Company	
+CB021	NO LINE — no coordinate		Coe Mound				Coe Mound		place by hand or cut	Coe Mound	
+CB028	NO LINE — district centroid						Columbus Near East Side District		no stored pin for the district; a centroid pin would be arbitrary	Columbus Near East Side District	
+CB039	NO LINE — district centroid						Eastgate Apartments Historic District		no stored pin for the district; a centroid pin would be arbitrary	Eastgate Apartments Historic District	
+CB041	NO LINE — no coordinate		Engine House No. 6				Engine House No. 6 (Columbus, Ohio)		place by hand or cut	Engine House No. 6	
+CB047	NO LINE — district centroid						Fort Hayes		no stored pin for the district; a centroid pin would be arbitrary	Fort Hayes	
+CB052	NO LINE — no coordinate		Franklinton Post Office				Franklinton Post Office		place by hand or cut	Franklinton Post Office	
+CB063	NO LINE — district centroid						Hamilton Park Historic District (Columbus, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Hamilton Park Historic District	
+CB092	NO LINE — no coordinate		Krumm House				Krumm House		place by hand or cut	Krumm House	
+CB097	NO LINE — no coordinate		The Lubal Manufacturing and Distributing Company				Lubal Manufacturing & Distributing Company		place by hand or cut	The Lubal Manufacturing and Distributing Company	
+CB099	NO LINE — district centroid						Market-Mohawk Historic District		no stored pin for the district; a centroid pin would be arbitrary	Market-Mohawk Historic District	
+CB105	NO LINE — district centroid						Mt. Vernon Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	Mt. Vernon Avenue Historic District	
+CB107	NO LINE — district centroid						Near Northside Historic District (Columbus, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Near Northside Historic District	
+CB111	NO LINE — district centroid						North Columbus Commercial Historic District		no stored pin for the district; a centroid pin would be arbitrary	North Columbus Commercial Historic District	
+CB113	NO LINE — district centroid						North Market Historic District		no stored pin for the district; a centroid pin would be arbitrary	North Market Historic District	
+CB117	NO LINE — no coordinate		Ohio Farm Bureau Federation Offices				Ohio Farm Bureau Federation Offices		place by hand or cut	Ohio Farm Bureau Federation Offices	
+CB122	NO LINE — no coordinate		Ohio National Bank				Ohio National Bank		place by hand or cut	Ohio National Bank	
+CB130	NO LINE — district centroid						Old North End Historic District (Columbus, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Old North End Historic District	
+CB145	NO LINE — no coordinate		Schlee Brewery Historic District				Schlee Brewery Historic District		place by hand or cut	Schlee Brewery Historic District	
+CB154	NO LINE — district centroid						Short North Historic District		no stored pin for the district; a centroid pin would be arbitrary	Short North Historic District	
+CB161	NO LINE — district centroid						Teakwood Heights Historic District		no stored pin for the district; a centroid pin would be arbitrary	Teakwood Heights Historic District	
+CB184	NO LINE — no coordinate		Peruna Drug Manufacturing Company Building				Peruna Drug Manufacturing Company Building		place by hand or cut	Peruna Drug Manufacturing Company Building	
+CB275	NO LINE — district centroid						Rush Creek Village		no stored pin for the district; a centroid pin would be arbitrary	Rush Creek Village Historic District	
+CB280	NO LINE — district centroid						Sessions Village		no stored pin for the district; a centroid pin would be arbitrary	Sessions Village	
+CB292	NO LINE — district centroid						Upper Arlington Historic District		no stored pin for the district; a centroid pin would be arbitrary	Upper Arlington Historic District	
+CB293	NO LINE — district centroid						Uptown Westerville Historic District		no stored pin for the district; a centroid pin would be arbitrary	Uptown Westerville Historic District	
+CB299	NO LINE — district centroid						Worthington Historic District		no stored pin for the district; a centroid pin would be arbitrary	Worthington Historic District	
+CB310	NO LINE — district centroid						Highbanks Metropolitan Park Mounds I and II		LIST POINT FAR: 929 m from its article's point (Highbanks Metropolitan Park Mounds I and II) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	Highbanks Metropolitan Park Mounds I and II	
+CB313	NO LINE — no coordinate		Ufferman Site				Ufferman Site		place by hand or cut	Ufferman Site	
+CB314	NO LINE — no coordinate		Etna Township Mounds I And II				Etna Township Mounds		place by hand or cut	Etna Township Mounds I And II	
+CB315	NO LINE — no coordinate		McDaniel Mound				McDaniel Mound		place by hand or cut	McDaniel Mound	
+CB316	NO LINE — no coordinate		Melick Mound				Melick Mound		place by hand or cut	Melick Mound	
+CB317	NO LINE — no coordinate		Coon Hunters Mound				Coon Hunters Mound		place by hand or cut	Coon Hunters Mound	
+CB318	NO LINE — no coordinate		Ety Enclosure				Ety Enclosure		place by hand or cut	Ety Enclosure	
+CB319	NO LINE — no coordinate		Ety Habitation Site				Ety Habitation Site		place by hand or cut	Ety Habitation Site	
+CB320	NO LINE — no coordinate		Fortner Mounds I, II				Fortner Mounds		place by hand or cut	Fortner Mounds I, II	
+CB321	NO LINE — no coordinate		Old Maid's Orchard Mound				Old Maid's Orchard Mound		place by hand or cut	Old Maid's Orchard Mound	
+CB322	NO LINE — no coordinate		Theodore B. Schaer Mound				Theodore B. Schaer Mound		place by hand or cut	Theodore B. Schaer Mound	
+CB323	NO LINE — no coordinate		Blacklick Covered Bridge				Blacklick Covered Bridge		place by hand or cut	Blacklick Covered Bridge	
+CB324	NO LINE — no coordinate		Loucks Covered Bridge				Loucks Covered Bridge		place by hand or cut	Loucks Covered Bridge	
+CB325	NO LINE — no coordinate		Stemen Road Covered Bridge				Stemen Road Covered Bridge		place by hand or cut	Stemen Road Covered Bridge	
+CB326	NO LINE — no coordinate		CR-7				St. Joseph Cathedral (Columbus, Ohio)		place by hand or cut	CR-7	
+CB327	NO LINE — no coordinate		CR-8				Weisheimer House		place by hand or cut	CR-8	
+CB329	NO LINE — no coordinate		CR-12				First Avenue School (Columbus, Ohio)		place by hand or cut	CR-12	
+CB331	NO LINE — no coordinate		CR-16				Macon Hotel		place by hand or cut	CR-16	
+CB333	NO LINE — no coordinate		CR-20				Joseph Henderson House		place by hand or cut	CR-20	
+CB334	NO LINE — no coordinate		CR-22				Scioto River Bridge Group		place by hand or cut	CR-22	
+CB335	NO LINE — no coordinate		CR-23				Jefferson Avenue Historic Group		place by hand or cut	CR-23	
+CB336	NO LINE — no coordinate		CR-24				Dr. Lewis M. Early Residence		place by hand or cut	CR-24	
+CB337	NO LINE — no coordinate		CR-25				White Castle Restaurant		place by hand or cut	CR-25	
+CB338	NO LINE — no coordinate		CR-30				Broad-Brunson Place Condominiums		place by hand or cut	CR-30	
+CB339	NO LINE — no coordinate		CR-31				Avery Pontiac Building		place by hand or cut	CR-31	
+CB342	NO LINE — no coordinate		CR-43				Indianola Forest Historic District		place by hand or cut	CR-43	
+CB343	NO LINE — no coordinate		CR-44				Bryden Road District		place by hand or cut	CR-44	
+CB345	NO LINE — no coordinate		CR-48				21st & E. Broad Historic Group		place by hand or cut	CR-48	
+CB346	NO LINE — no coordinate		CR-49				18th & E. Broad Historic District		place by hand or cut	CR-49	
+CB348	NO LINE — no coordinate		CR-52				Engine House No. 7 (Columbus, Ohio)		place by hand or cut	CR-52	
+CB350	NO LINE — no coordinate		CR-55				Northmoor Engine House		place by hand or cut	CR-55	
+CB351	NO LINE — no coordinate		CR-57				Southwood Elementary School		place by hand or cut	CR-57	
+CB352	NO LINE — no coordinate		CR-60				St. Mark's Masonic Temple No. 7 of the Prince Hall Free & Accepted Masons		place by hand or cut	CR-60	
+CB353	NO LINE — no coordinate		CR-61				Reeb Avenue Elementary School		place by hand or cut	CR-61	
+CB355	NO LINE — no coordinate		CR-63				1379 N. High Street Apartment Building		place by hand or cut	CR-63	
+CB356	NO LINE — no coordinate		CR-69				Gale House Condominiums		place by hand or cut	CR-69	
+CB358	NO LINE — no coordinate		CR-73				E.O. Snyder Grocer		place by hand or cut	CR-73	
+CB359	NO LINE — no coordinate		CR-74				The Clifton		place by hand or cut	CR-74	
+CB360	NO LINE — no coordinate		CR-75				Dan's Drive-In		place by hand or cut	CR-75	
+CB361	NO LINE — no coordinate		CR-77				Winder's Motor Sales Co. Building		place by hand or cut	CR-77	
+CB363	NO LINE — no coordinate		CR-82				Nagy Brothers Shoe Repair		place by hand or cut	CR-82	

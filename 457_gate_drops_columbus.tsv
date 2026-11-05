@@ -1,0 +1,132 @@
+tile	name	category	desc	pin id	in gate drops	in leads	verdict
+798_-1656	Pickerington Ponds Mural	art	A piece of public art.	osm_node11163949950	yes	yes	
+798_-1657	Otherworld	history	A local museum.	osm_node6781420285	yes	yes	
+798_-1661	John Hoover Memorial	history	A local memorial (grave).	osm_node6349586783	yes	yes	
+799_-1656	Alexander W. Livingston House	history	house museum in Reynoldsburg, Ohio, USA	osm_way1136097126	no	yes	
+799_-1659	Alfred Tibor Sculpture	art	A piece of public art.	osm_node1095072703	no	yes	
+799_-1659	Hanford	history	A local landmark (hamlet).	osm_node154357697	yes	yes	
+799_-1659	Near East Side Historic District	history	A local landmark (district).	osm_node357472747	no	yes	
+799_-1659	Sunshine Arch	art	A piece of public art.	osm_way1302050224	yes	yes	
+799_-1660	Bicentenial Historical Marker	history	A local landmark (monument).	osm_node7985819278	yes	yes	
+799_-1660	Brewery District	history	A local landmark (district).	osm_way559723202	no	yes	
+799_-1660	Brewery District	history	A local landmark (district).	osm_node357472786	no	yes	
+799_-1660	CCAD's ART Sign	history	A local landmark (monument).	osm_node2970772394	yes	yes	
+799_-1660	Central Ohio Fire Museum	history	A local local museum.	osm_way638035970	no	yes	
+799_-1660	Christopher Columbus Discovery Monument	art	A piece of public art.	osm_node5421655680	no	yes	
+799_-1660	Columbus Art Memorial Company	art	A public Memorials.	osm_way808956210	yes	yes	
+799_-1660	German Village	history	A local landmark (district).	osm_way559723213	no	yes	
+799_-1660	Hammer of Justice	art	A piece of public art.	osm_node3659290265	yes	yes	
+799_-1660	Heritage Museum of Kappa Kappa Gamma	history	A local organization museum.	osm_node368155603	yes	yes	
+799_-1660	Jefferson Avenue Historic District	history	A local landmark (district).	osm_node357470681	yes	yes	
+799_-1660	Lincoln Goodale	history	A local memorial (bust).	osm_node6031512652	no	yes	
+799_-1660	Northeast Cannon	art	A piece of public art.	osm_node5421655683	yes	yes	
+799_-1660	Our Single Garment of Destiny,	art	A sculpture by Julian Voss-Andreae.	osm_node11773638518	yes	yes	
+799_-1660	Southeast Cannon	art	A piece of public art.	osm_node5421655681	yes	yes	
+799_-1660	Station 67	history	A local landmark (yes).	osm_way169456061	no	yes	
+799_-1660	The Natures	art	A public mural.	osm_node13358588834	yes	yes	
+799_-1660	The Ten Commandments and Beatitudes	history	A local landmark (monument).	osm_node8786824088	yes	yes	
+799_-1660	These Are My Jewels	art	A public statue.	osm_node5421655685	no	yes	
+799_-1660	Wagner-Hagans Auto Museum	history	A local museum.	osm_node14206477730	yes	yes	
+799_-1661	Columbus State School	history	A local landmark (school).	osm_node357446427	yes	yes	
+799_-1661	Cremation Estates	history	A local landmark (tomb).	osm_way856108982	yes	yes	
+799_-1661	Hayden Mausoleum	history	A local landmark (tomb).	osm_way169380880	yes	yes	
+799_-1661	New Garden Mausoleum I	history	A local landmark (tomb).	osm_way808995933	yes	yes	
+799_-1661	New Garden Mausoleum II	history	A local landmark (tomb).	osm_way169379388	yes	yes	
+799_-1661	New Garden Mausoleum III	history	A local landmark (tomb).	osm_way808995934	yes	yes	
+799_-1661	New Garden Mausoleum IV	history	A local landmark (tomb).	osm_way808995935	yes	yes	
+800_-1657	Adena Indian Mound 1000 BC	history	A local landmark (archaeological site).	osm_node2640192779	yes	yes	
+800_-1658	Gahanna Historical Society	history	A local history museum.	osm_way617495608	yes	yes	
+800_-1658	The Log House	history	A local history museum.	osm_way583304930	yes	yes	
+800_-1659	Evergreen Cemetery - Evergreen Monuments	history	A local landmark (monument).	osm_node9895573808	yes	yes	
+800_-1660	0	art	Sculpture of the number zero	osm_node5891868526	no	yes	
+800_-1660	1	art	Sculpture of the number one	osm_node5891868529	no	yes	
+800_-1660	2	art	Sculpture of the number two	osm_node5891868530	no	yes	
+800_-1660	3	art	Sculpture of the number three	osm_node5891868531	no	yes	
+800_-1660	4	art	Sculpture of the number nine	osm_node5952353774	no	yes	
+800_-1660	5	art	Sculpture of the number five	osm_node5891868532	no	yes	
+800_-1660	6	art	Sculpture of number eight	osm_node5952353773	no	yes	
+800_-1660	7	art	Sculpture of the number seven	osm_node5891868533	no	yes	
+800_-1660	8	art	Sculpture of number eight	osm_node5891868527	no	yes	
+800_-1660	9	art	Sculpture of the number nine	osm_node5891868528	no	yes	
+800_-1660	Amaranth Abbey	history	A local landmark (tomb).	osm_way169345435	yes	yes	
+800_-1660	Bloch Cancer Survivors Plaza	history	A local memorial (sculpture).	osm_node4940870742	yes	yes	
+800_-1660	Butter Cow	art	A public sculpture.	osm_node11223088401	yes	yes	
+800_-1660	Dunkleosteus	art	A public sculpture.	osm_node11348856455	yes	yes	
+800_-1660	Earth	art	A public sculpture.	osm_node6845716814	yes	yes	
+800_-1660	Expo Sculpture	art	A public sculpture.	osm_node11183543355	yes	yes	
+800_-1660	Glen Echo	history	A local landmark (yes).	osm_way556675713	yes	yes	
+800_-1660	Glen Echo Bird Tunnel	art	A public mural.	osm_node11765233765	yes	yes	
+800_-1660	Gnomon	art	A sculpture by Albert Raymond Paley.	osm_node5334148805	yes	yes	
+800_-1660	Heritage Park Sculpture	art	A public sculpture.	osm_node11183543356	yes	yes	
+800_-1660	Mars	art	A public sculpture.	osm_node6845716815	yes	yes	
+800_-1660	Mercury	art	A public sculpture.	osm_node6845716812	yes	yes	
+800_-1660	Modern Head	art	A sculpture by Roy Lichtenstein.	osm_node6525714599	yes	yes	
+800_-1660	Nicklaus Museum	history	A local museum.	osm_way503889161	no	yes	
+800_-1660	Northern Cardinal Statue	art	A public sculpture.	osm_node11174967965	yes	yes	
+800_-1660	Ohio Tree	art	A public sculpture.	osm_node11193928554	no	yes	
+800_-1660	Ohio Union Reliefs	art	A public sculpture.	osm_node5205147887	no	yes	
+800_-1660	Old North	art	A public mural.	osm_node12651098889	yes	yes	
+800_-1660	Orton Geological Museum	history	A local museum.	osm_node618411600	yes	yes	
+800_-1660	Penultimate Curving Pavilion	art	A sculpture by Daniel Graham.	osm_node5334148804	yes	yes	
+800_-1660	Smokey Bear Statue	art	Interactive Smokey bear statue.	osm_node11172389842	no	yes	
+800_-1660	Sun	art	A public sculpture.	osm_node6845716811	yes	yes	
+800_-1660	Teepee	art	A public sculpture.	osm_node9980746471	yes	yes	
+800_-1660	The Dodridge Street Bridge 2012	history	A local memorial (plaque).	osm_node8756006945	yes	yes	
+800_-1660	This Artwork	art	A public artwork by Mary Miss.	osm_node5334148922	yes	yes	
+800_-1660	Venus	art	A public sculpture.	osm_node6845716813	yes	yes	
+800_-1661	Golden Bear Sculpture	art	A public sculpture.	osm_node13952543924	yes	yes	
+800_-1661	Grandview Heights Memorial	history	A war memorial.	osm_node1724206185	no	yes	
+800_-1661	Ohio Craft Museum	history	A local local museum.	osm_way790918470	yes	yes	
+801_-1659	Fort Jackson Mound	history	A local landmark (archaeological site).	osm_way779110594	yes	yes	
+801_-1659	Veteran's Memorial	history	A war memorial.	osm_way748892394	yes	yes	
+801_-1660	Alrosa Villa	history		osm_node8315954996	yes	yes	
+801_-1660	Clintonville Woman's Club /  Kiwanis Club of Northern Columbus	history	A local memorial.	osm_node8758274898	yes	yes	
+801_-1660	Dragon with Toothbrush	history	A local memorial (statue).	osm_node5430554804	yes	yes	
+801_-1660	In Memory of Rand P. Hollenback of Columbus, Ohio	history	A local memorial.	osm_node8758273935	yes	yes	
+801_-1660	Old Beechwold Historic District	history	park in the United States of America	osm_node5733734504	no	yes	
+801_-1660	Saint Anthony Sculpture	history	A local memorial (statue).	osm_node5348538557	yes	yes	
+801_-1660	Tee Jaye's Arrow	history	A local memorial (statue).	osm_node5430555575	yes	yes	
+801_-1661	Animal Swings	history	Animal-shaped swing set	osm_node4643440919	no	yes	
+801_-1661	Olentangy	history	settlement in Franklin County, Ohio, United States	osm_node154073768	no	yes	
+801_-1662	Bill Moose Memorial	history	A local memorial.	osm_node357517057	yes	yes	
+801_-1662	Horse Statue	art	A public statue.	osm_node13011080485	yes	yes	
+801_-1662	PILLAR	history	A local landmark (monument).	osm_node4635201607	yes	yes	
+802_-1656	Ealy House	history	A local museum.	osm_way547657216	no	yes	
+802_-1656	Kerr-Harrington House Museum	history	A local local museum.	osm_node368155596	yes	yes	
+802_-1656	Rose Taylor Dryer house	history	A local local museum.	osm_node812117325	yes	yes	
+802_-1658	Nessie	art	A sculpture by James Mason.	osm_node8617736500	yes	yes	
+802_-1658	Quincy	art	A sculpture by James Mason.	osm_node8617736499	yes	yes	
+802_-1658	The Innis Sisters	art	A sculpture by Joan Wobst.	osm_node8617736498	yes	yes	
+802_-1658	Turtle Mound	history	A local landmark (monument).	osm_way471642221	yes	yes	
+802_-1660	Knights of Columbus Crucifixation Grotto	history	A local memorial (stone).	osm_node5436247438	yes	yes	
+802_-1660	Le Poilu	art	A statue by E.W.G. Benét.	osm_node3658363429	yes	yes	
+802_-1660	Old Rectory	history	A local museum.	osm_way556629342	yes	yes	
+802_-1660	Orange Johnson House Museum	history	A local museum.	osm_way480968771	yes	yes	
+802_-1660	Saint Michael Subdues Satan	history	A local memorial (statue).	osm_node5432301721	yes	yes	
+802_-1660	Worthington Doll Museum	history	A local museum.	osm_node4643466142	yes	yes	
+802_-1662	Daily Chores	art	A statue by Michael Tizzano.	osm_node4267003343	yes	yes	
+802_-1662	Ferris-Wright Earthworks	history	A local history museum.	osm_way442870759	yes	yes	
+802_-1662	Historic Dublin	history	park in Franklin County, Ohio, United States of America	osm_node357470674	no	yes	
+802_-1662	Leatherlips Monument	history	A local memorial (bust).	osm_node2308554368	yes	yes	
+802_-1662	McAlister's Deli	history		osm_node13037340779	yes	yes	
+802_-1663	Out of Bounds (1 of 7)	art	A public architecture.	osm_node4493240388	yes	yes	
+802_-1663	Out of Bounds (2 of 7)	art	A public architecture.	osm_node4493240387	yes	yes	
+802_-1663	Out of Bounds (7 of 7)	art	A public architecture.	osm_node4493240386	yes	yes	
+803_-1659	Community Center Statue	history	A local memorial (statue).	osm_node5377312436	yes	yes	
+803_-1659	Frank Museum of Art	history	A local art museum.	osm_way732195538	yes	yes	
+803_-1659	Hanby House	history	A local museum.	osm_way516266412	yes	yes	
+803_-1659	Hobbie's Dilemma	history	A local memorial (statue).	osm_node5377312483	yes	yes	
+803_-1659	Saint Paul the Apostle Parish	history	A local landmark (church).	osm_way1370562395	yes	yes	
+803_-1659	The Family	art	A sculpture by Cobert C Collins.	osm_node6920859694	yes	yes	
+803_-1659	The North Star	art	A public sculpture.	osm_node5499401795	yes	yes	
+803_-1659	Venus Redux	history	A local memorial (statue).	osm_node5377312435	yes	yes	
+803_-1659	Veterans' Memorial	history	A local memorial.	osm_way1245385010	yes	yes	
+803_-1660	Adena Mound	history	A local landmark (archaeological site).	osm_node4640687889	yes	yes	
+803_-1660	Memorial Wall	history	A local memorial.	osm_node5307696044	yes	yes	
+803_-1661	Cole Earthworks	history	A local memorial (plaque).	osm_node10048374547	yes	yes	
+803_-1661	Powell Liberty Historical Society	history	A local local museum.	osm_way472861351	yes	yes	
+803_-1663	Jack Nicklas Statue	art	A public statue.	osm_node4739066860	yes	yes	
+803_-1663	Out of Bounds (3 of 7)	art	A public architecture.	osm_node4493240385	yes	yes	
+803_-1663	Out of Bounds (4 of 7)	art	A public architecture.	osm_node4493240389	yes	yes	
+803_-1663	Out of Bounds (5 of 7)	art	A public architecture.	osm_node4493240383	yes	yes	
+803_-1663	Out of Bounds (6 of 7)	art	A public architecture.	osm_node4493240384	yes	yes	
