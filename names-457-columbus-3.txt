@@ -1,0 +1,50 @@
+# names-457-columbus-3.txt — #457 Columbus story batch, part 3: the sort's 92 "SEED — unmapped" rows and the remaining
+# CURATED ROW candidates (drafted 2026-11-05). Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole Columbus batch (names-457-columbus-1.txt, -2.txt, this file, part 4's names file +
+# 457_hidden_curated*.sql) dry-runs and commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 457_sort_columbus.tsv (story-sort 2026.11.01b). "Unmapped" = the listing has no Wikipedia article (79 of 92 are red
+# links; a Wikipedia search under other names found none). Lines are written from an article that covers the subject or a
+# named web page; NRHP listing metadata alone is never a line (FROM SAN ANTONIO (13)). Each line passed the mechanical checks
+# (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3)) at the LINE's own point: every number and proper name in
+# its source; inside the box (stored tiles read 2026-11-05, all 50 served as cache hits); no name repeated against parts 1–2;
+# stored pins (served by a live read, hidden), approved gems and graves, and parts 1–2's lines within 110 m.
+# SETTLED FROM THE 92:
+#   13 LINES (below). CB098 Market-Mohawk Center is written from the Downtown Columbus article's Market-Mohawk section (the
+#     listing's title redirects there). CB223 is seeded as "Eleanor A. Gelpi House" at the hidden pin "Dublin Arts Center"
+#     (osm_way442873024) because that pin FAILS #542 (containing tile 802_-1662; stored only in 803_-1662) — the workaround.
+#     CB144 placed at OSM's building at 787 East Broad Street (the article's coordinate is ~10 km off).
+#   3 CURATED ROWS → 457_hidden_curated_2.sql: CB196 (Orange Johnson House Museum), CB300 (Old Rectory), CB233 Holder-Wright
+#     Works (the hidden pin "Ferris-Wright Earthworks" — the park was renamed from Holder-Wright).
+#   3 CUT — served: CB026 Columbus Country Club Mound (wiki_58337651 at its article's point, 0 m); CB060 Green Lawn Cemetery
+#     (wiki_2335106 at its article's point; the list point is 668 m off); CB261 Niles interurban combine No. 21 (an exhibit of
+#     the served Ohio Railway Museum, wiki_9198154, at the same address).
+#   2 HELD — no trustworthy point: CB057 H.C. Godman Co. Building (35 N. 4th St.; its list point is exactly part 1's Columbus
+#     Athenaeum line, 32 N. 4th St., across the street — FROM SAN ANTONIO (14)); CB231 Lucy Hart House (list point ~280 m
+#     north of its own street, no OSM feature).
+#   71 CARRIED to part 4 (Ohio's state markers and the union): CB025, CB140, CB191, CB194, CB195, CB200, CB202–CB207,
+#     CB210, CB211, CB215, CB216, CB218–CB220, CB222, CB225, CB228, CB234–CB237, CB242, CB244–CB247, CB249–CB254,
+#     CB256, CB257, CB259, CB262, CB264, CB265, CB267–CB269, CB271–CB274, CB276–CB279, CB281–CB283, CB285, CB287, CB288,
+#     CB290, CB294–CB296, CB301, CB304–CB308, CB312 — red links with nothing past listing metadata yet.
+# THE CURATED CANDIDATES: CB056, CB128, CB217, CB229, CB248 and CB212–CB214 (one hidden pin, "Historic Dublin") →
+#   457_hidden_curated_2.sql; CB238 Fort Jackson Mound CARRIED (no source past NRHP metadata).
+# `| new` UP FRONT (DuPage (1)) on the 8 lines with a stored pin, grave or line of a different subject within 100 m:
+#   Sullivant Land Office (part 2's Harrison Headquarters line, 25 m — the office was moved behind it in 1983); Saint Paul's
+#   (East Broad Street lines 24–100 m — Carrie Lovejoy House and Joseph-Cherrington House are separately listed buildings on
+#   neighbouring lots, 24 m and 25 m); John Snow House (the curated Old Rectory, 71 m); Towers Hall (served Otterbein
+#   University, 52 m); Kilbourn Commercial Building (served Demas Adams House, 98 m); Worthington Public Square (part 2's
+#   St. John's Episcopal Church, 43 m; Grave of James Kilbourne, 89 m); Eleanor A. Gelpi House (#542 workaround).
+# EXPECT on the Mac dry run: 13 new-seed. Any `review` is a stop: read it before --commit.
+Sullivant Land Office | @39.9607303,-83.0160514 | Built around 1822 by Lucas Sullivant, the founder of Franklinton, this small brick office ran his land business and is the only surviving structure in Franklinton directly tied to him; it was moved here from 714 West Gay Street in 1983. | https://en.wikipedia.org/wiki/Sullivant_Land_Office | new
+Bank Block Building | @39.9838312,-83.0452791 | Designed by retail developer Don Monroe Casto Sr. and built in 1927, this Grandview Heights center is one of the oldest regional shopping centers still standing in the United States, and its 350 free parking spaces were rare for the time. | https://en.wikipedia.org/wiki/Bank_Block_Building
+Drexel Theater | @39.9573747,-82.9387352 | Designed by Robert R. Royce in the Art Deco and Art Moderne styles, this Bexley cinema opened on December 25, 1937, and has been run as a non-profit since 2011. | https://en.wikipedia.org/wiki/Drexel_Theater
+Saint Paul's Episcopal Church (Columbus, Ohio) | @39.9642664,-82.9794063 | Built in 1903 as the second church of the local Episcopalian congregation, this Late Gothic Revival stone church is marked by buttresses, cut stone detailing and a large sanctuary window filled with tracery. | https://en.wikipedia.org/wiki/Saint_Paul%27s_Episcopal_Church_(Columbus,_Ohio) | new
+Felix A. Jacobs House | @39.9920219,-83.0007588 | Built around 1905-10 in Weinland Park, this house is now Huckleberry House, a shelter for youth. | https://en.wikipedia.org/wiki/Felix_A._Jacobs_House
+Market-Mohawk Center | @39.9598658,-82.9930722 | Built in 1970 in the New Formalist style, this brick and concrete building was listed on the National Register in 2020 as a record of the urban redevelopment of a district named for the demolished Central Market and Mohawk Public School. | https://en.wikipedia.org/wiki/Downtown_Columbus,_Ohio
+Karrer Barn | @40.0951688,-83.1134709 | George Michael Karrer built this bank barn in 1876, and apart from new flooring it has never been renovated or restored. | https://en.wikipedia.org/wiki/Karrer_Barn
+Otterbein Mausoleum | @40.120278,-82.936111 | Dedicated on November 30, 1924, and built by the Columbus Mausoleum Company, this mausoleum in Otterbein Cemetery holds more than 280 people. | https://en.wikipedia.org/wiki/Otterbein_Mausoleum
+John Snow House | @40.0867144,-83.0193632 | Built around 1815 and sold to John Snow in 1817, this house stayed with the Snow family until 1939 and was later owned by the Ohio Masonic Historical Society. | https://en.wikipedia.org/wiki/John_Snow_House | new
+Towers Hall | @40.1253502,-82.9364814 | After a suspicious fire destroyed Otterbein's main building on January 26, 1870, the college and the Westerville community raised $29,335 to build this hall, reusing some bricks from the burned building. | https://campustour.otterbein.edu/node/4 | new
+Kilbourn Commercial Building | @40.0878,-83.0183 | James Kilbourne put up this building for a newspaper in 1808, and it is the oldest commercial building in continuous use in Ohio. | https://en.wikipedia.org/wiki/Worthington,_Ohio | new
+Worthington Public Square | @40.08842,-83.0178094 | When the Scioto Company laid out Worthington in 1803, it divided the village into 160 lots around this 5-acre public green at its center. | https://en.wikipedia.org/wiki/Worthington,_Ohio | new
+Eleanor A. Gelpi House | @40.1124953,-83.1110658 | Built in 1941 by Charles and Sarah Krumm and later home to the Gelpi family of Swan Cleaners, this riverside house is now the Dublin Arts Center, leased by Dublin Arts Council from the city. | https://www.dublinarts.org/dublinartscenter | new
