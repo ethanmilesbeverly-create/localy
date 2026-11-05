@@ -1,0 +1,93 @@
+# names-457-columbus-5.txt — #457 Columbus story batch, part 5 (the last): Ohio's state markers as the depth bar, the sort's 55
+# "NO LINE — no coordinate" rows, and the carried items from parts 3–4 (drafted 2026-11-05). Every line: Name | locate | one
+# sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole Columbus batch
+# (names-457-columbus-1.txt … -5.txt + 457_hidden_curated*.sql) dry-runs and commits in one Mac session (handoff §6 THE FAST
+# RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# METHOD: a fresh read of all 50 stored tiles (places:v34) and a live serve read of the same 50 (all cache hits,
+# curatedIndexRows 2,319); a Wikipedia geosearch at 150–200 m around every marker and line; the proximity check at each
+# LINE's own point (stored pins served and hidden, the 86 graves, parts 1–4's 119 lines and 24 curated rows, 110 m); the
+# mechanical source check (every number and proper name in its source). All 31 lines sit in the box; no name repeats parts 1–4.
+#
+# STATE MARKERS (Remarkable Ohio, Franklin County series -25; bash is refused, so read through the chat's web search snippets,
+# which carry each marker's latitude/longitude and text — one marker page costs ~30k tokens through web fetch):
+#   READ ~45 of the county's 141 entries. 17 LINES below come from them (named as the marker, or as the article in no tile the
+#   marker points at — FROM PITTSBURGH (4)): 73-25 → Saint Patrick Church (Columbus, Ohio); 97-25 → Main Library (Columbus, Ohio);
+#   104-25 Site of First Wendy's Restaurant; 21-25 Starling Medical College and St. Francis Hospital; 11-25 → Neville Mansion
+#   (the Hannah Neil Mission's building, 19 m); 83-25 Tod Barracks, 1863; 62-25 Founders of New Albany; 142-25 → Stonewall
+#   Columbus; 5-25 → Mirror Lake (Ohio); 92-25 → Recreation Park (Columbus); 84-25 Coach Woody Hayes (HMdb m=94097); 48-25 →
+#   Roy J. Plunkett; 121-25 Harding Hospital Campus; 137-25 → St. John African Methodist Episcopal Church; 6-25 First Blendon
+#   Presbyterian Church; 122-25 Blendon Township's Early Presbyterian Churches and Church Bell; 111-25 → Southwood Elementary
+#   School (also CB351, below).
+#   CUT, served or already a line: 3, 7, 8 (New England Lodge served), 13 (Topiary Park), 27, 28 (St. Mary served), 31, 34, 36,
+#     38 (Hale Hall line), 39 and 116 (Worthington Public Square line), 41, 44 (curated), 45 (Defense Supply Center served),
+#     52, 54, 57, 60, 66, 72, 75 (Columbus Museum of Art), 78, 79 and 80 (Ohio Statehouse line), 88, 94, 99, 100, 103, 106,
+#     107, 110, 113, 114, 115, 119 (part 4's Snowden-Gray House), 124, 125, 133 (Iuka Ravine HD served), 135, 138, 139, 9 and
+#     143 (curated Hanby House), 59 and 112 (curated).
+#   NO LINE: 120 Columbus Civic Center HD and 35 Merion Village (district/neighbourhood, no pin); 42 Irish in Columbus (topic);
+#     102 Mount Vernon Avenue (a street; marker down for repair); 146 Pater Noster House (marker not yet installed, Dec 2025);
+#     10 Blendon Church Bell and 22 Postle Family Cemetery (marker missing/destroyed); out of box: 17, 64, 81, 47.
+#   CARRIED to the metro's depth row (to be born at the docs pass): 33 Morgan's Escape (no source for the escape at this
+#     point), 51 (text cut off), 15 and 98 (thin), Delaware 3-21 Sharp Family Homes (house demolished 2001; text thin); and
+#     UNREAD — 16, 23, 24, 32, 43, 46, 49, 50, 53, 55, 56, 58, 61, 63, 65, 67, 68, 69, 70, 71, 74, 77, 82, 85, 86, 87, 89, 90,
+#     93, 95, 101, 105, 108, 109 (Campbell Memorial Park is a HIDDEN pin — a curated-row candidate), 118, 123, 127, 128, 129,
+#     130, 131, 132, 134, 136, 140, 141, 144, 145, 147, 148, plus 14, 18, 19, 20, 37, 40 (Groveport/Grove City edge — check box)
+#     and 26, 29, 30, 96, 126 (Canal Winchester/Lockbourne, likely out). Yield fell to zero on the last ZIP sweep (FROM SAN
+#     ANTONIO (13)); the fastest close is the operator's browser on remarkableohio.org/county/franklin/ (FROM CHARLOTTE (3)).
+#
+# THE SORT'S 55 "NO LINE — no coordinate" ROWS (never settled by parts 1–4; resolved through each article's own point):
+#   15 LINES: CB008, CB012 (Buckeye Building), CB013 (Budd Dairy Food Hall, at OSM way 854444099), CB041, CB097, CB122, CB326
+#     (St. Joseph Cathedral), CB329, CB331, CB336, CB338, CB339, CB348, CB351, CB356.
+#   CUT, served at 0–2 m: CB006, CB007, CB052, CB092, CB327, CB333, CB350, CB353, CB360.
+#   NO LINE: districts/groups CB145, CB334, CB342, CB345, CB346; already curated CB335 (Jefferson Avenue), CB343 (Near East
+#     Side); organisation CB361 (Greater Columbus Arts Council, as part 1's CB179); gone CB184 (Peruna, demolished 1973), CB337
+#     (White Castle, moved to Orient 1986); no article CB355, CB359; thin CB009 (Broad Street Apartments); restricted-location
+#     mounds and sites with no point CB021, CB313–CB322; covered bridges with no point CB323–CB325.
+#   HELD, no trustworthy point (only a street centroid — FROM ORLANDO (6)): CB117 Ohio Farm Bureau Federation Offices, CB352
+#     St. Mark's Masonic Temple No. 7, CB358 E.O. Snyder Grocer, CB363 Nagy Brothers Shoe Repair.
+#
+# CARRIED ITEMS FROM PARTS 3–4: part 4's 22 carried union pins, the 71 red links, CB238 Fort Jackson Mound and CB083 Jeffrey
+#   Manufacturing Office: no state marker or article turned up → the depth row. CB057 and CB231 stay HELD (no point).
+# GRAVES SURNAME RE-READ (FROM SAN ANTONIO (5)): 45 of the 86 graves lie outside the stored tiles; a Wikipedia geosearch at
+#   2 km found one same-surname article — John Sherman Birthplace, 1,031 m from Charles Robert Sherman's grave — a museum for
+#   his son, not a duplicate. Nothing retired.
+#
+# `| new` UP FRONT (DuPage (1)) on 14 lines with a stored pin, line or near-named article of a different subject within 100 m:
+#   St. Joseph Cathedral and Site of First Wendy's Restaurant (83 m apart; Museum of Catholic Art and History article 34 m from
+#   the Wendy's site); Starling Medical College (Knights of Columbus Building line, 56 m); Tod Barracks (Park Hotel article,
+#   66 m); Engine House No. 6 (Harrison Headquarters line, 78 m); Lubal (hidden Westbank Park, 76 m); Broad-Brunson Place
+#   (Franklin Park Medical Center line, 81 m); Mirror Lake (hidden Library Hill 43 m, Mirror Lake Hollow 73 m); Roy J. Plunkett
+#   (Modern Head line, 93 m); Coach Woody Hayes (Woody Hayes Athletic Center article, 76 m); Southwood Elementary School (hidden
+#   plaque, 60 m); the two Blendon church sites (72 m apart); Founders of New Albany (the New Albany village article, 64 m).
+# EXPECT on the Mac dry run: 31 new-seed for this file. Any `review` is a stop: read it before --commit.
+Saint Patrick Church (Columbus, Ohio) | @39.969016,-82.991732 | Built in 1852 and dedicated a year later, this Norman Gothic church is the second oldest Roman Catholic church in Columbus; the Dominican Fathers have staffed it since 1885, and in 1905 they opened St. Patrick's College on the site. | https://remarkableohio.org/marker/73-25-st-patrick-church-st-patrick-college-and-aquinas-college-high-school/
+Main Library (Columbus, Ohio) | @39.961238,-82.989516 | Columbus's first free public library was formed in 1873 and housed in City Hall; Andrew Carnegie granted $200,000 for this building, raised on the site of the home of Noah Swayne, whom President Abraham Lincoln appointed to the Supreme Court in 1862. | https://remarkableohio.org/marker/97-25-columbus-main-library-judge-noah-swayne-home/
+St. Joseph Cathedral (Columbus, Ohio) | @39.96333,-82.99472 | Completed in 1878 on Broad Street, this cathedral is the seat of the Catholic Diocese of Columbus. | https://en.wikipedia.org/wiki/St._Joseph_Cathedral_(Columbus,_Ohio) | new
+Site of First Wendy's Restaurant | @39.9628219,-82.9940023 | Dave Thomas opened his first Wendy's hamburger restaurant on this site on November 15, 1969, guided by the principle "Quality is Our Recipe". | https://remarkableohio.org/marker/104-25-site-of-first-wendys-restaurant/ | new
+Starling Medical College and St. Francis Hospital | @39.96088,-82.992141 | Grant Medical Center stands on the original site of the neo-gothic building that housed St. Francis Hospital and Starling Medical College, named for Columbus benefactor Lyne Starling. | https://remarkableohio.org/marker/21-25-starling-medical-college-and-st-francis-hospital/ | new
+Neville Mansion | @39.957646,-82.979976 | Built for M.L. Neville, who bought the property in 1855, this Olde Towne East house became a state asylum school and then, from 1868 to 1977, the Hannah Neil Mission and Home of the Friendless, an orphanage and shelter. | https://en.wikipedia.org/wiki/Neville_Mansion
+Tod Barracks, 1863 | @39.973823,-83.002503 | Named for Governor David Tod and built in 1863 beside Columbus' Union Station, Tod Barracks was the headquarters for military administration in central Ohio, with six barracks for up to 5,000 enlisted soldiers. | https://remarkableohio.org/marker/83-25-tod-barracks-1863/ | new
+Ohio National Bank | @39.95855,-83.0005 | Designed by Richards, McCarty & Bulford and built in 1911, this Neoclassical building was long home to the Ohio National Bank and largely remains as built. | https://en.wikipedia.org/wiki/Ohio_National_Bank
+Buckeye Building | @39.96411,-82.99977 | Built from 1926 to 1927, this 16-story building was the headquarters of the Buckeye State Building and Loan Company and, after 1949, of the Buckeye Federal Savings and Loan Association. | https://en.wikipedia.org/wiki/Buckeye_Building
+Bradford Shoe Company Building | @39.96798,-82.99418 | Also known as the Neilston Building, this four-story downtown building was built in three parts at separate times, its eastern section before 1899, and was listed on the National Register in 1994. | https://en.wikipedia.org/wiki/Bradford_Shoe_Company_Building
+Gale House Condominiums | @39.96622,-82.99142 | Historically a mixed-use building, with Gold's Pharmacy on the first floor and homes above, this downtown building was listed on the Columbus Register of Historic Properties in 2015. | https://en.wikipedia.org/wiki/Gale_House_Condominiums
+Engine House No. 6 (Columbus, Ohio) | @39.9607,-83.01502 | Designed by John Flynn in the Romanesque Revival style and built in 1892, this East Franklinton fire station served the Columbus Fire Department until it was decommissioned in 1966. | https://en.wikipedia.org/wiki/Engine_House_No._6_(Columbus,_Ohio) | new
+Lubal Manufacturing & Distributing Company | @39.9561,-83.00971 | Built around 1900 and 1911, these two industrial buildings at 373 and 375 West Rich Street are among the few left that show Franklinton's early industrial and commercial history. | https://en.wikipedia.org/wiki/Lubal_Manufacturing_%26_Distributing_Company | new
+Macon Hotel | @39.97326,-82.97306 | Completed in 1888, this Mount Vernon hotel hosted noted jazz musicians in the 20th century and is one of four remaining Columbus properties listed in The Green Book, the guide to Black-friendly accommodations. | https://en.wikipedia.org/wiki/Macon_Hotel
+Dr. Lewis M. Early Residence | @39.96785,-82.97341 | This late-19th-century house and office in King-Lincoln Bronzeville, noted for its age and intricate architecture, was listed on the Columbus Register of Historic Properties in 1984. | https://en.wikipedia.org/wiki/Dr._Lewis_M._Early_Residence
+Avery Pontiac Building | @39.96143,-82.96792 | Built in 1909 as the Avery Pontiac dealership, this Near East Side building later served as a warehouse and then as living space for artists and photographers. | https://en.wikipedia.org/wiki/Avery_Pontiac_Building
+Broad-Brunson Place Condominiums | @39.9683,-82.9531 | This seventeen-unit, U-shaped building of stuccoed brick under a red, green and gray slate roof shows French and Spanish influences; its design is attributed, unconfirmed, to Robert Gilmore Hanford, architect of the Ohio Governor's Mansion. | https://en.wikipedia.org/wiki/Broad-Brunson_Place_Condominiums | new
+Budd Dairy Food Hall | @39.985305,-82.998389 | This food hall fills the former Budd Dairy Company building, a milk processing and distribution plant designed by company president William Hooper Budd with D. Riebel & Sons; it opened as a food hall in April 2021. | https://en.wikipedia.org/wiki/Budd_Dairy_Food_Hall
+Engine House No. 7 (Columbus, Ohio) | @39.9911,-83.0055 | Built in 1888, this former Weinland Park fire station was listed on the Columbus Register of Historic Properties in 1994 and now houses Communications Workers of America Local 4501. | https://en.wikipedia.org/wiki/Engine_House_No._7_(Columbus,_Ohio)
+First Avenue School (Columbus, Ohio) | @39.98032,-83.0148 | Built in 1874, this Italianate school in Harrison West is one of the oldest remaining school buildings in Columbus; in 1984 it was remodeled into the First Avenue Office Center. | https://en.wikipedia.org/wiki/First_Avenue_School_(Columbus,_Ohio)
+Stonewall Columbus | @39.985965,-83.005135 | Founded in 1981 by central Ohio LGBTQ+ activists as Stonewall Union and renamed Stonewall Columbus in 1997, the organization opened its community center here as a space for central Ohio's LGBTQ+ community. | https://remarkableohio.org/marker/142-25-stonewall-union-stonewall-columbus/
+Mirror Lake (Ohio) | @39.99805556,-83.01444444 | Beside this campus pond, a state marker recalls that the Ohio Agricultural and Mechanical College grew out of the Cannon Act of March 22, 1870, and took the name The Ohio State University in May 1878. | https://remarkableohio.org/marker/5-25-the-ohio-state-university/ | new
+Roy J. Plunkett | @40.00235,-83.011735 | Chemist Roy J. Plunkett, who discovered polytetrafluoroethylene, better known as Teflon, in 1938, received his Ph.D. in Chemistry from Ohio State University in 1936. | https://en.wikipedia.org/wiki/Roy_J._Plunkett | new
+Coach Woody Hayes | @40.01275,-83.025017 | Woody Hayes, who grew up in Newcomerstown and graduated from Denison University in 1935, began coaching at Ohio State in 1951 and over his 28-year coaching career built the university's tradition of football excellence. | https://www.hmdb.org/m.asp?m=94097 | new
+Recreation Park (Columbus) | @39.94527778,-82.98944444 | Ohio State's football team played its first home game here at Recreation Park II on November 1, 1890, a 64–0 loss to Wooster; a historical marker went up at the former field in 2006. | https://en.wikipedia.org/wiki/Recreation_Park_(Columbus)
+Southwood Elementary School | @39.931936,-82.992563 | Designed by David Riebel and opened on December 3, 1894, this Merion Village school is on the Columbus Register of Historic Properties; its first principal, Mary K. Esper, served from 1894 to 1923. | https://en.wikipedia.org/wiki/Southwood_Elementary_School | new
+Harding Hospital Campus | @40.088253,-83.004435 | George T. Harding II founded this hospital in 1916 as the Columbus Rural Rest Home, with associates who shared his Seventh-day Adventist faith; it has been part of Ohio State's Wexner Medical Center since 1999. | https://remarkableohio.org/marker/121-25-harding-hospital-campus-harding-hospital-campus/
+St. John African Methodist Episcopal Church | @40.0874056,-83.011347 | This A.M.E. church, the center of Worthington's African American community, stands in the Morris Addition, the town's first platted subdivision, annexed in 1856 with 124 lots. | https://remarkableohio.org/marker/137-25-st-john-african-methodist-episcopal-church-the-morris-addition/
+First Blendon Presbyterian Church | @40.09535,-82.90508 | Blendon Township's Presbyterians built their first church on this site in 1829, on land Timothy Lee donated for church and burial; it was destroyed by apparent arson a week after its dedication, and its first minister, the Reverend Ebenezer Washburn, is buried here. | https://remarkableohio.org/marker/6-25-first-blendon-presbyterian-church/ | new
+Blendon Township's Early Presbyterian Churches and Church Bell | @40.095048,-82.90583 | In 2014 Blendon Township's trustees used ground-penetrating radar to locate the Blendon Presbyterian Church here on Phelps Acre; the church's bell, on loan, was placed in the park in 2015, the township's bicentennial year. | https://remarkableohio.org/marker/122-25-blendon-townships-early-presbyterian-churches-and-church-bell/ | new
+Founders of New Albany | @40.0825718,-82.8081839 | This marker stands at Noble Landon's 1835 tavern; Landon, a builder-developer long known as a heavy drinker, is said to have had his kegs of whiskey carried into the street and broken, and then to have attended church regularly. | https://remarkableohio.org/marker/62-25-founders-of-new-albany/ | new
