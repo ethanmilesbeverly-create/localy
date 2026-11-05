@@ -1,0 +1,59 @@
+# names-454-charlotte-3.txt — #454 Charlotte story batch, part 3: North Carolina's highway-marker list as the depth bar (drafted 2026-11-04).
+# Same format as parts 1–2: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; it
+# dry-runs and commits with names-454-charlotte-1.txt and -2.txt in the one Mac session (handoff §6 THE FAST RUNBOOK (b)).
+#
+# SOURCE: the NC Highway Historical Marker Program (district L — Mecklenburg; district O — Gaston), read through HMdb's place lists,
+# which carry each state marker's number, text and coordinate. HMdb challenges bash (#556) but opens through the chat's web fetch:
+# Charlotte's 216 entries were read except 94–100 and 193–216 (the fetch truncates a 100-entry page, and HMdb's pagination is
+# session-bound, so page 3 cannot be requested); targeted searches added L-101, L-111, L-114, L-117, L-86 and Pineville's L-78,
+# L-69, L-38. The state's own guide (Aug 2026 edition) opens but the fetch stops at Cumberland County; ncmarkers.com refuses
+# automated fetches. Candidates and the sort: 454_candidates_charlotte_markers.tsv → 454_sort_charlotte_markers.tsv
+# (story-sort 2026.11.01b; 31 markers; every status filled there).
+# Every line was written from its source's text and passed the mechanical checks (FROM SAN ANTONIO (12), FROM LAS VEGAS (6),
+# FROM SACRAMENTO (3)): every number and proper name in its source; inside the 42 tiles; no name repeated from parts 1–2 or
+# 454_hidden_curated*.sql; stored pins (served and hidden), approved gems and every other line within 120 m read at the LINE's own
+# coordinate — nothing of the same subject.
+# CHANGED FROM THE SORT, BY READING:
+#   CUT — served: L-1 Hezekiah Alexander House (served wiki + OSM pins 245–276 m; the marker stands 400 yd from the house);
+#     L-25 Camp Greene (served wiki_19067114, 430 m — the camp's own point); L-53 Cameron Morrison (his home, Morrocroft, is the
+#     served wiki_45399115); L-78 James K. Polk (the served State Historic Site pins, 159–190 m); L-86 UNC Charlotte (served
+#     wiki_409849, 562 m — campus); L-87 Mint Museum of Art (served wiki_11346128, 292 m); L-101 Johnson C. Smith University
+#     (served wiki_2739220, 255 m); L-105 Charlotte Speedway (served wiki_4433364, 312 m — FROM SACRAMENTO (3)); L-107 Steele
+#     Creek Church (served wiki_28733304; the marker is also reported missing).
+#   CUT — already in the batch: L-118 Morris Field (454_hidden_curated_2.sql's curated row on the same pin, 1 m); L-5 Branch U.S.
+#     Mint (part 1's Charles R. Jonas Federal Building line, 75 m, tells the Mint site); L-56 Confederate Navy Yard (part 2's
+#     Confederate Navy Yard Tablet line tells the yard); L-113 Romare Bearden (folded into the Romare Bearden Park line below —
+#     the park, 128 m from the marker, is named for him and no tile stores it).
+#   CUT — the person is already on the map as a grave: L-103 George E. Davis (Grave of George E. Davis, 0.5 km); L-112 Harry
+#     Golden (Grave of Harry Golden, 3.6 km; his house plaque is HMdb m=261044).
+#   NO LINE: L-19 Nathanael Greene (would stack 15 m from the Mecklenburg Resolves line, and its subject — taking command in
+#     Charlotte — is not tied to that corner); L-38 North Carolina / South Carolina (the statewide boundary text, no local story).
+#   CARRIED to Charlotte's depth row: L-117 John Gibbon (near 5037 N. Tryon St. — Photon gives only a street centroid; no
+#     fixable point).
+#   NAMED AWAY FROM A WRONG ARTICLE: J. P. Caldwell Homesite — Wikipedia's "Joseph Pearson Caldwell" is the 1808–1853
+#     congressman, not the editor; WBT and WBTV Studios Site — "WBT (AM)" places today's studios off West Morehead Street.
+# NOT READ (owed): Charlotte's HMdb entries 94–100 and 193–216 apart from the markers named above (titles Jo–Ju and Th–Z); the
+#   Matthews and Mint Hill lists (Mint Hill lies east of the box); Gaston's sliver of the box (Mount Holly's east edge). The
+#   state markers among them are the last of the depth bar — read them before the Mac session, or carry them by number.
+# `| new` UP FRONT (DuPage (1)) on the 8 lines with a different stored pin or another line within 100 m — Battle of Charlotte
+#   (part 1's Home Federal Building 67 m; Mecklenburg Resolves 73 m), Mecklenburg Resolves (Battle of Charlotte 73 m), J. P.
+#   Caldwell Homesite (Gantt Center 74 m), Queens University of Charlotte (hidden Rosati Sculpture 82 m), N. C. League of
+#   Municipalities Founding Site (Bechtler 48 m, Firebird 56 m, The Green 73 m), Romare Bearden Park (Spiral Odyssey 79 m), WBT and
+#   WBTV Studios Site (part 1's Johnston Building 53 m, Latta Arcade 84 m), Annie Alexander Office Site (part 1's Commercial
+#   Building at 500 North Tryon Street 77 m). The rest have nothing within 100 m (War of Sugar Creek: Grave of Abraham Alexander 110 m).
+# EXPECT on the Mac dry run: 15 new-seed. Any `review` is a stop: read it before --commit.
+Battle of Charlotte | @35.22694444,-80.84333333 | On September 26, 1780, William R. Davie's militia met the advance guard of Cornwallis's army at the county courthouse that stood where the Bank of America tower now rises at Trade and Tryon, in a skirmish that left the British cavalry leader George Hanger wounded, then pulled back toward Salisbury. | https://en.wikipedia.org/wiki/Battle_of_Charlotte | new
+Mecklenburg Resolves | @35.227461,-80.84283 | Thomas Polk called the meeting, held about 50 yards southwest of this spot on May 31, 1775, that adopted the Mecklenburg Resolves, a bold list of anti-British resolutions that fired the spirit of independence. | https://www.hmdb.org/m.asp?m=95844 | new
+Confederate Cabinet Meeting Site | @35.23203891,-80.83606258 | Confederate President Davis and his cabinet held their last full meetings, from April 22 to 26, 1865, in a house that stood on this spot. | https://www.hmdb.org/m.asp?m=16818
+S. B. Alexander | @35.2419266,-80.8778457 | S. B. Alexander (1840–1921), whose home is a block southeast of here, was the first president of the North Carolina Farmers' Alliance in 1887, served in the state senate and in Congress, and championed agricultural education. | https://www.hmdb.org/m.asp?m=145714
+J. P. Caldwell Homesite | @35.22319162,-80.84872931 | J. P. Caldwell, who edited the Statesville "Landmark" from 1880 to 1892 and the Charlotte "Observer" from 1892 to 1909, had his home on this spot. | https://www.hmdb.org/m.asp?m=16794 | new
+D. A. Tompkins | @35.23288056,-80.84969722 | D. A. Tompkins (1851–1914) — manufacturer, engineer, author and publisher — crusaded for the industrial development of the South; his grave lies half a mile north of here. | https://www.hmdb.org/m.asp?m=263890
+Catawba Reservation Boundary | @35.08977,-80.91735 | A survey in 1772 turned the boundary of the Catawba Indian reservation in South Carolina into the line between North and South Carolina along this stretch. | https://www.hmdb.org/m.asp?m=143109
+Queens University of Charlotte | @35.1888,-80.8323 | Presbyterians founded this school in 1857 as the Charlotte Female Institute; it moved to this campus in 1915 and has admitted men since 1987. | https://www.hmdb.org/m.asp?m=125672 | new
+North Carolina Military Institute | @35.21808333,-80.84858333 | Opened in 1859 with D. H. Hill as its first superintendent, the institute stood near here, later served as a Confederate hospital, and was a public school from 1883 to 1950. | https://www.hmdb.org/m.asp?m=173359
+Charlotte Gold Mines | @35.215838,-80.852886 | After 1825 Charlotte was the center of the region's gold rush, and two of its biggest mines, the Rudisill and the Saint Catherine, were worked near here. | https://www.hmdb.org/m.asp?m=173385
+N. C. League of Municipalities Founding Site | @35.22446466,-80.84689334 | The North Carolina League of Municipalities, founded in 1908 to promote sound civic management as a Progressive Era reform, held its first meeting here with delegates from across the state. | https://www.hmdb.org/m.asp?m=16795 | new
+War of Sugar Creek | @35.2581,-80.7959 | In May 1765 backcountry settlers quarrelling over property rights attacked a survey crew near here, a clash typical of the tensions that led to the Regulator War. | https://www.hmdb.org/m.asp?m=126540
+Romare Bearden Park | @35.227,-80.8473 | This 5.4-acre uptown park, opened in late August 2013 and named for Charlotte-born artist Romare Bearden, was designed by supervising artist Norie Sato as an interpretation of his collages and paintings. | https://en.wikipedia.org/wiki/Romare_Bearden_Park | new
+WBT and WBTV Studios Site | @35.225733,-80.844933 | WBT, founded in 1922 and North Carolina's oldest broadcast station, long hosted live country music; WBTV signed on July 15, 1949, and both stations kept their studios at this corner until 1955. | https://www.hmdb.org/m.asp?m=173027 | new
+Annie Alexander Office Site | @35.229861,-80.839161 | Annie Alexander, licensed in 1885 as the first female physician in North Carolina and an acting assistant surgeon at Camp Greene during World War I, kept her office here. | https://www.hmdb.org/m.asp?m=173084 | new
