@@ -6,9 +6,10 @@
 # which carry each state marker's number, text and coordinate. HMdb challenges bash (#556) but opens through the chat's web fetch:
 # Charlotte's 216 entries were read except 94–100 and 193–216 (the fetch truncates a 100-entry page, and HMdb's pagination is
 # session-bound, so page 3 cannot be requested); targeted searches added L-101, L-111, L-114, L-117, L-86 and Pineville's L-78,
-# L-69, L-38. The state's own guide (Aug 2026 edition) opens but the fetch stops at Cumberland County; ncmarkers.com refuses
+# L-69, L-38. PART 3b (2026-11-04, a second pass in a new chat): HMdb's county list in geographic order (entries 1–79 of 342)
+# added L-31 Jefferson Davis and a search added L-36 Trading Path — 2 more lines, appended at the end of this file. The state's own guide (Aug 2026 edition) opens but the fetch stops at Cumberland County; ncmarkers.com refuses
 # automated fetches. Candidates and the sort: 454_candidates_charlotte_markers.tsv → 454_sort_charlotte_markers.tsv
-# (story-sort 2026.11.01b; 31 markers; every status filled there).
+# (story-sort 2026.11.01b; 33 markers; every status filled there).
 # Every line was written from its source's text and passed the mechanical checks (FROM SAN ANTONIO (12), FROM LAS VEGAS (6),
 # FROM SACRAMENTO (3)): every number and proper name in its source; inside the 42 tiles; no name repeated from parts 1–2 or
 # 454_hidden_curated*.sql; stored pins (served and hidden), approved gems and every other line within 120 m read at the LINE's own
@@ -32,7 +33,7 @@
 #     fixable point).
 #   NAMED AWAY FROM A WRONG ARTICLE: J. P. Caldwell Homesite — Wikipedia's "Joseph Pearson Caldwell" is the 1808–1853
 #     congressman, not the editor; WBT and WBTV Studios Site — "WBT (AM)" places today's studios off West Morehead Street.
-# NOT READ (owed): Charlotte's HMdb entries 94–100 and 193–216 apart from the markers named above (titles Jo–Ju and Th–Z); the
+# NOT READ (owed): Charlotte's HMdb entries 94–100 and 193–216 apart from the markers named above and L-31/L-36 (titles Jo–Ju and Th–Z); the
 #   Matthews and Mint Hill lists (Mint Hill lies east of the box); Gaston's sliver of the box (Mount Holly's east edge). The
 #   state markers among them are the last of the depth bar — read them before the Mac session, or carry them by number.
 # `| new` UP FRONT (DuPage (1)) on the 8 lines with a different stored pin or another line within 100 m — Battle of Charlotte
@@ -41,7 +42,7 @@
 #   Municipalities Founding Site (Bechtler 48 m, Firebird 56 m, The Green 73 m), Romare Bearden Park (Spiral Odyssey 79 m), WBT and
 #   WBTV Studios Site (part 1's Johnston Building 53 m, Latta Arcade 84 m), Annie Alexander Office Site (part 1's Commercial
 #   Building at 500 North Tryon Street 77 m). The rest have nothing within 100 m (War of Sugar Creek: Grave of Abraham Alexander 110 m).
-# EXPECT on the Mac dry run: 15 new-seed. Any `review` is a stop: read it before --commit.
+# EXPECT on the Mac dry run: 17 new-seed (15 from part 3, 2 from part 3b). Any `review` is a stop: read it before --commit.
 Battle of Charlotte | @35.22694444,-80.84333333 | On September 26, 1780, William R. Davie's militia met the advance guard of Cornwallis's army at the county courthouse that stood where the Bank of America tower now rises at Trade and Tryon, in a skirmish that left the British cavalry leader George Hanger wounded, then pulled back toward Salisbury. | https://en.wikipedia.org/wiki/Battle_of_Charlotte | new
 Mecklenburg Resolves | @35.227461,-80.84283 | Thomas Polk called the meeting, held about 50 yards southwest of this spot on May 31, 1775, that adopted the Mecklenburg Resolves, a bold list of anti-British resolutions that fired the spirit of independence. | https://www.hmdb.org/m.asp?m=95844 | new
 Confederate Cabinet Meeting Site | @35.23203891,-80.83606258 | Confederate President Davis and his cabinet held their last full meetings, from April 22 to 26, 1865, in a house that stood on this spot. | https://www.hmdb.org/m.asp?m=16818
@@ -57,3 +58,5 @@ War of Sugar Creek | @35.2581,-80.7959 | In May 1765 backcountry settlers quarre
 Romare Bearden Park | @35.227,-80.8473 | This 5.4-acre uptown park, opened in late August 2013 and named for Charlotte-born artist Romare Bearden, was designed by supervising artist Norie Sato as an interpretation of his collages and paintings. | https://en.wikipedia.org/wiki/Romare_Bearden_Park | new
 WBT and WBTV Studios Site | @35.225733,-80.844933 | WBT, founded in 1922 and North Carolina's oldest broadcast station, long hosted live country music; WBTV signed on July 15, 1949, and both stations kept their studios at this corner until 1955. | https://www.hmdb.org/m.asp?m=173027 | new
 Annie Alexander Office Site | @35.229861,-80.839161 | Annie Alexander, licensed in 1885 as the first female physician in North Carolina and an acting assistant surgeon at Camp Greene during World War I, kept her office here. | https://www.hmdb.org/m.asp?m=173084 | new
+Jefferson Davis Lodging Site | @35.22381706,-80.83879808 | Moving south after Lee's surrender, Confederate President Jefferson Davis lodged from April 19 to 26, 1865, in a house that stood near here. | https://www.hmdb.org/m.asp?m=175602
+Trading Path | @35.22102,-80.85097 | A colonial trading route dating from the seventeenth century, running from Petersburg, Virginia, to the Catawba Indians in Carolina, passed near here. | https://www.hmdb.org/m.asp?m=134922
