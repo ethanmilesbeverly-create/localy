@@ -36,16 +36,21 @@
 # NOT READ (owed): Charlotte's HMdb entries 94–100 and 193–216 apart from the markers named above and L-31/L-36 (titles Jo–Ju and Th–Z); the
 #   Matthews and Mint Hill lists (Mint Hill lies east of the box); Gaston's sliver of the box (Mount Holly's east edge). The
 #   state markers among them are the last of the depth bar — read them before the Mac session, or carry them by number.
-# `| new` UP FRONT (DuPage (1)) on the 8 lines with a different stored pin or another line within 100 m — Battle of Charlotte
+# `| new` UP FRONT (DuPage (1)) on the 8 lines with a different stored pin or another line within 100 m (plus a 9th from the
+#   Mac dry run — see DRY RUN below) — Battle of Charlotte
 #   (part 1's Home Federal Building 67 m; Mecklenburg Resolves 73 m), Mecklenburg Resolves (Battle of Charlotte 73 m), J. P.
 #   Caldwell Homesite (Gantt Center 74 m), Queens University of Charlotte (hidden Rosati Sculpture 82 m), N. C. League of
 #   Municipalities Founding Site (Bechtler 48 m, Firebird 56 m, The Green 73 m), Romare Bearden Park (Spiral Odyssey 79 m), WBT and
 #   WBTV Studios Site (part 1's Johnston Building 53 m, Latta Arcade 84 m), Annie Alexander Office Site (part 1's Commercial
 #   Building at 500 North Tryon Street 77 m). The rest have nothing within 100 m (War of Sugar Creek: Grave of Abraham Alexander 110 m).
+# DRY RUN (2026-11-04, the whole 51-line batch): 50 new-seed, 1 review — Confederate Cabinet Meeting Site matched the
+#   McColl Center for Art + Innovation article ~90 m away (map 0 · subs 0 · wiki 1): a different subject on the same block —
+#   the marker's house stood there in 1865; the arts centre fills a later church building. Flagged `new` (FROM SAN ANTONIO (16)).
+#   The McColl Center article is in no tile — a seed candidate for Charlotte's depth row.
 # EXPECT on the Mac dry run: 17 new-seed (15 from part 3, 2 from part 3b). Any `review` is a stop: read it before --commit.
 Battle of Charlotte | @35.22694444,-80.84333333 | On September 26, 1780, William R. Davie's militia met the advance guard of Cornwallis's army at the county courthouse that stood where the Bank of America tower now rises at Trade and Tryon, in a skirmish that left the British cavalry leader George Hanger wounded, then pulled back toward Salisbury. | https://en.wikipedia.org/wiki/Battle_of_Charlotte | new
 Mecklenburg Resolves | @35.227461,-80.84283 | Thomas Polk called the meeting, held about 50 yards southwest of this spot on May 31, 1775, that adopted the Mecklenburg Resolves, a bold list of anti-British resolutions that fired the spirit of independence. | https://www.hmdb.org/m.asp?m=95844 | new
-Confederate Cabinet Meeting Site | @35.23203891,-80.83606258 | Confederate President Davis and his cabinet held their last full meetings, from April 22 to 26, 1865, in a house that stood on this spot. | https://www.hmdb.org/m.asp?m=16818
+Confederate Cabinet Meeting Site | @35.23203891,-80.83606258 | Confederate President Davis and his cabinet held their last full meetings, from April 22 to 26, 1865, in a house that stood on this spot. | https://www.hmdb.org/m.asp?m=16818 | new
 S. B. Alexander | @35.2419266,-80.8778457 | S. B. Alexander (1840–1921), whose home is a block southeast of here, was the first president of the North Carolina Farmers' Alliance in 1887, served in the state senate and in Congress, and championed agricultural education. | https://www.hmdb.org/m.asp?m=145714
 J. P. Caldwell Homesite | @35.22319162,-80.84872931 | J. P. Caldwell, who edited the Statesville "Landmark" from 1880 to 1892 and the Charlotte "Observer" from 1892 to 1909, had his home on this spot. | https://www.hmdb.org/m.asp?m=16794 | new
 D. A. Tompkins | @35.23288056,-80.84969722 | D. A. Tompkins (1851–1914) — manufacturer, engineer, author and publisher — crusaded for the industrial development of the South; his grave lies half a mile north of here. | https://www.hmdb.org/m.asp?m=263890
