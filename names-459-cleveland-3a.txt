@@ -1,0 +1,45 @@
+# names-459-cleveland-3a.txt — #459 Cleveland story batch, part 3a: the sort's "SEED — unmapped" rows that HAVE a
+# Wikipedia article (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1.txt, -2.txt, this file, later parts + 459_hidden_curated*.sql) dry-runs and commits
+# in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 459_sort_cleveland.tsv (story-sort 2026.11.01b, prefix CV). Of the sort's 199 "SEED — unmapped" rows, only 12 link
+# an existing article (10 titles, 2 redirects); the other 187 are red links in the NRHP lists and need outside sources —
+# they are parts 3b onward, split by area. Part 3a = those 12: 4 lines, 6 cuts, 2 no line.
+# Same checks as parts 1–2 (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3)): every number and capitalised
+# name in its source (the checker, re-proven on a planted wrong year and name); inside the box, each line's tile stored
+# (box read 2026-11-05: 844 pins / 51 stored tiles, unchanged); no name repeated across parts 1–3a or clashing with a live
+# grave (148); stored pins, graves, all parts' lines within 100 m and articles within 90 m read at the LINE's own point; no
+# two lines of parts 1–3a within 30 m.
+# CHANGED FROM THE SORT, BY READING:
+#   CUT — served (the sort sorted at the LIST point; FROM SACRAMENTO (3)):
+#     CV036 Cleveland Arcade — served as osm_way126820675 with the article's story (the sort's CHECK flag, 248 m).
+#     CV055 Cleveland West Pierhead Light — served as *Cleveland Harbor Main Entrance Light* (osm_way414659280, 11 m), whose
+#       story IS this light's article (part 1's note on its East twin agrees).
+#     CV196 Perry–Payne Building — served as wiki_40599221 (the sort's CHECK flag, 187 m).
+#     CV208 Riverside Cemetery Gatehouse — served as wiki_52340966 (the sort's CHECK flag, 197 m).
+#     CV071 Dunham Tavern — served as wiki_7163763 at the article's point; the list point is 384 m off (LIST POINT FAR).
+#     CV228 Sidaway Bridge — served as wiki_71918628 at the article's point; the list point (41.45) is a rounded value
+#       ~3.3 km south.
+#   NO LINE:
+#     CV367 North Union Shaker Site — nothing stands: its article says none of the community's buildings remain (the land
+#       is Shaker Lakes parkland), and the list point falls on Doan Brook among houses (FROM SACRAMENTO (5)).
+#     CV382 South Park Site — an archaeological village site with no article of its own (the title redirects to
+#       *Whittlesey culture*); nothing to visit at a point (FROM COLUMBUS (2)).
+#   CV155 Lorain-Carnegie Bridge → "Hope Memorial Bridge", its article's title (a redirect), at the article's point.
+#   CV375 Park Synagogue → "Park Synagogue (Cleveland Heights)" at OSM's own feature (relation 5245123, 3300 Mayfield
+#     Road): the NRHP listing is Erich Mendelsohn's 1950 building, but the article's point and the SERVED pin
+#     (wiki_14748143) are the congregation's present synagogue in Pepper Pike, 7.6 km east. A different building, so a
+#     different name, flagged new (story-lines (w), as part 1's May Company Building).
+#   CV398 Hotel Westlake — the article has no coordinate; placed at OSM's *The Westlake* (way 1000653888, 19000 Lake Road,
+#     Rocky River), the listing's own address (FROM TAMPA (5)).
+#   CV280 Woodland Cemetery (Cleveland) — at the article's point, which is the cemetery's rank-0 grave (*Grave of Reuben
+#     Wood*, 0 m) with four ring graves at 50 m: accepted by design (FROM TAMPA (8)), flagged new.
+# `| new` UP FRONT on 2 lines: Woodland Cemetery (the graves above) and Park Synagogue (Cleveland Heights) (a name that is
+#   not its article's). Hope Memorial Bridge and Hotel Westlake have nothing within reach and take their article's name.
+# EXPECT on the Mac dry run: 4 new-seed. Any `review` is a stop: read it before --commit.
+Hope Memorial Bridge | @41.489407,-81.693554 | Completed in 1932, this 4,490-foot art deco truss bridge over the Cuyahoga River carries the Guardians of Traffic, eight Berea Sandstone figures by Henry Hering and Frank Walker, each holding a vehicle from a hay wagon to a 1930s-era automobile. | https://en.wikipedia.org/wiki/Hope_Memorial_Bridge
+Woodland Cemetery (Cleveland) | @41.490714,-81.642075 | Established in 1853 on land bought from Benjamin Franklin Butler, Woodland became Cleveland's main public cemetery for the next half-century, later decayed badly, and has been restored since its 1986 National Register listing. | https://en.wikipedia.org/wiki/Woodland_Cemetery_(Cleveland) | new
+Park Synagogue (Cleveland Heights) | @41.5157592,-81.5613555 | Erich Mendelsohn, a German-Jewish architect who fled Nazism in 1933, designed this synagogue for the Park Synagogue congregation on the former Park School grounds; the main building was completed in 1950, and the congregation has since left for Pepper Pike. | https://en.wikipedia.org/wiki/Park_Synagogue | new
+Hotel Westlake | @41.4835935,-81.8325966 | Built in 1925 above the Rocky River as one of the first suburban luxury hotels in the United States, this Spanish Renaissance "pink palace" hosted Amelia Earhart and Charles Lindbergh; a 1962 fire ended its hotel days, and it became condominiums in 1983. | https://en.wikipedia.org/wiki/Hotel_Westlake
