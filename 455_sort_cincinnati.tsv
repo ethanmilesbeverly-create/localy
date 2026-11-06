@@ -1,0 +1,562 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+CN412	CURATED ROW — hidden pin		Linden Grove Cemetery	39.073574	-84.515091	Linden Grove Cemetery · osm_way16244556 · 32 m	Linden Grove Cemetery		hidden pin stored in 781_-1690, 781_-1691, 782_-1690, 782_-1691; containing tile 781_-1690 stores it (#542)	Linden Grove Cemetery	
+CN427	CURATED ROW — hidden pin		Peaselburg Neighborhood Historic District	39.068851	-84.5108375	Peaselburg Neighborhood Historic District · osm_way1246076947 · 56 m	Peaselburg Neighborhood Historic District		hidden pin stored in 781_-1690, 781_-1691; containing tile 781_-1690 stores it (#542)	Peaselburg Neighborhood Historic District	
+CN430	CURATED ROW — hidden pin		Ritte's Corner Historic District	39.047269	-84.5037372	Ritte's Corner Historic District · osm_way1246098171 · 35 m	Ritte's Corner Historic District, Latonia		hidden pin stored in 781_-1690, 781_-1691; containing tile 781_-1690 stores it (#542)	Ritte's Corner Historic District, Latonia	
+CN439	CURATED ROW — hidden pin		Wallace Woods Area Residential Historic District	39.0646617	-84.5006958	Wallace Woods Area Residential Historic District · osm_way1246726493 · 40 m	Wallace Woods Area Residential Historic District		hidden pin stored in 781_-1690, 781_-1691; containing tile 781_-1690 stores it (#542)	Wallace Woods Area Residential Historic District	
+CN440	CURATED ROW — hidden pin		West Fifteenth Street Historic District	39.0739785	-84.508436	West Fifteenth Street Historic District · osm_way1246735237 · 23 m	West Fifteenth Street Historic District (Covington, Kentucky)		hidden pin stored in 781_-1690; containing tile 781_-1690 stores it (#542)	West Fifteenth Street Historic District	
+CN001	SEED — article in no tile (#539)		Alkemeyer Commercial Buildings	39.10583333333334	-84.51444444444445	article Alkemeyer Commercial Buildings · 0 m	Alkemeyer Commercial Buildings			Alkemeyer Commercial Buildings	
+CN002	SEED — unmapped		Atlas National Bank Building	39.102214	-84.511502		Atlas National Bank Building		new: line CN050 100 m	Atlas National Bank Building	new
+CN003	SEED — article in no tile (#539)		Brittany Apartment Building	39.10527777777778	-84.51583333333333	article Brittany Apartment Building · 0 m	Brittany Apartment Building			Brittany Apartment Building	
+CN004	SEED — unmapped		Brunswick-Balke-Collender Building	39.102942	-84.510604		Brunswick-Balke-Collender Building		new: served pin Aronoff Center for the Arts 87 m; new: line CN028 54 m; TWIN CANDIDATE CN050 16 m — one building listed twice, or two plaques on one lot?	Brunswick-Balke-Collender Building	new
+CN005	SEED — unmapped		Building at 620–622 Vine Street	39.103378	-84.513515		Building at 620–622 Vine Street		new: line CN011 37 m; TWIN CANDIDATE CN048 15 m — one building listed twice, or two plaques on one lot?	Building at 620–622 Vine Street	new
+CN006	SEED — article in no tile (#539)		Carew Tower	39.1007	-84.5132	article Carew Tower · 136 m	Carew Tower			Carew Tower	
+CN007	SEED — article in no tile (#539)		John Church Company Building	39.10027777777778	-84.51194444444444	article John Church Company Building · 0 m	John Church Company Building			John Church Company Building	
+CN008	SEED — article in no tile (#539)		Cincinnati and Suburban Telephone Company Building	39.10277777777778	-84.51722222222222	article Cincinnati and Suburban Telephone Company Building · 0 m	Cincinnati and Suburban Telephone Company Building			Cincinnati and Suburban Telephone Company Building	
+CN009	SEED — article in no tile (#539)		Cincinnati City Hall	39.10441	-84.51895	article Cincinnati City Hall · 50 m	Cincinnati City Hall			Cincinnati City Hall	
+CN011	SEED — article in no tile (#539)		Cincinnati Enquirer Building	39.10305555555556	-84.51361111111112	article Cincinnati Enquirer Building · 0 m	Cincinnati Enquirer Building			Cincinnati Enquirer Building	
+CN012	SEED — article in no tile (#539)		Cincinnati Gymnasium and Athletic Club	39.1025	-84.51527777777778	article Cincinnati Gymnasium and Athletic Club · 0 m	Cincinnati Gymnasium and Athletic Club			Cincinnati Gymnasium and Athletic Club	
+CN013	SEED — unmapped		Court Street Firehouse	39.105278	-84.519444				new: served pin Lloyd Library and Museum 16 m; served pin Cincinnati Fire Museum 13 m; TWIN CANDIDATE CN537 0 m — one building listed twice, or two plaques on one lot?	Court Street Firehouse	new
+CN014	SEED — article in no tile (#539)		Courtland Flats	39.10638888888889	-84.51166666666667	article Courtland Flats · 0 m	Courtland Flats			Courtland Flats	
+CN015	SEED — article in no tile (#539)		Covenant First Presbyterian Church	39.10388888888889	-84.51722222222222	article Covenant First Presbyterian Church · 0 m	Covenant First Presbyterian Church			Covenant First Presbyterian Church	
+CN016	SEED — unmapped		Covington and Cincinnati Suspension Bridge	39.092222	-84.509444		John A. Roebling Suspension Bridge			Covington and Cincinnati Suspension Bridge	
+CN017	SEED — article in no tile (#539)		Cuvier Press Club Building	39.10472222222222	-84.51444444444445	article Cuvier Press Club Building · 0 m	Cuvier Press Club Building			Cuvier Press Club	
+CN019	SEED — article in no tile (#539)		H. W. Derby Building	39.09935	-84.51773	article H. W. Derby Building · 28 m	H. W. Derby Building			H. W. Derby Building	
+CN020	SEED — article in no tile (#539)		Doctors' Building (Cincinnati, Ohio)	39.10416666666667	-84.51472222222222	article Doctors' Building (Cincinnati, Ohio) · 0 m	Doctors' Building (Cincinnati, Ohio)			Doctors' Building	
+CN021	SEED — unmapped		Duttenhofer Building	39.103132	-84.508666		Duttenhofer Building		new: line CN032 86 m; new: line CN052 49 m; new: line CN542 86 m	Duttenhofer Building	new
+CN024	SEED — article in no tile (#539)		Formica Building	39.10111111111111	-84.5111111111111	article Formica Building · 94 m	Formica Building		TWIN CANDIDATE CN037 12 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CN058 16 m — one building listed twice, or two plaques on one lot?	Formica Corporation-Crystal Arcade-Contemporary Arts Center Building	
+CN025	SEED — article in no tile (#539)		Fourth & Walnut Center	39.09998	-84.51077	article Fourth & Walnut Center · 27 m	Fourth & Walnut Center		CHECK SUBJECT: served pin East Fourth Street Historic District (osm_way46201471) 65 m from the article may already be this place	First National Bank Building	
+CN026	SEED — article in no tile (#539)		Abraham J. Friedlander House	39.10527777777778	-84.51416666666667	article Abraham J. Friedlander House · 0 m	Abraham J. Friedlander House			Abraham J. Friedlander House	
+CN027	SEED — article in no tile (#539)		Goodall Building	39.10447222222222	-84.52	article Goodall Building · 28 m	Goodall Building			Goodall Building	
+CN028	SEED — article in no tile (#539)		Gwynne Building	39.10305555555556	-84.51	article Gwynne Building · 0 m	Gwynne Building			Gwynne Building	
+CN029	SEED — article in no tile (#539)		Hooper Building	39.09916666666667	-84.51555555555555	article Hooper Building · 0 m	Hooper Building			Hooper Building	
+CN030	SEED — article in no tile (#539)		Hotel Metropole (Cincinnati, Ohio)	39.10305555555556	-84.51194444444444	article Hotel Metropole (Cincinnati, Ohio) · 8 m	Hotel Metropole (Cincinnati, Ohio)			Hotel Metropole	
+CN031	SEED — article in no tile (#539)		Ingalls Building	39.1	-84.5125	article Ingalls Building · 0 m	Ingalls Building			Ingalls Building	
+CN032	SEED — article in no tile (#539)		Krippendorf-Dittman Company	39.10390833333334	-84.50863333333334	article Krippendorf-Dittman Company · 26 m	Krippendorf-Dittman Company		TWIN CANDIDATE CN542 0 m — one building listed twice, or two plaques on one lot?	Krippendorf-Dittman Company	
+CN033	SEED — article in no tile (#539)		Lombardy Apartment Building	39.09916666666667	-84.51805555555555	article Lombardy Apartment Building · 0 m	Lombardy Apartment Building			Lombardy Apartment Building	
+CN035	SEED — article in no tile (#539)		Main and Third Street Cluster	39.099444444444444	-84.50861111111111	article Main and Third Street Cluster · 0 m	Main and Third Street Cluster			Main and Third Street Cluster	
+CN036	SEED — unmapped		MAJESTIC	39.096944	-84.504722		Majestic (riverboat)		new: served pin Heritage Bank Center 96 m; served pin The Who concert disaster 66 m; served pin Public Landing, Cincinnati 96 m; served pin Spencer House (Cincinnati) 61 m (+1)	MAJESTIC	new
+CN037	SEED — article in no tile (#539)		Mercantile Library of Cincinnati	39.101	-84.5111111111111	article Mercantile Library of Cincinnati · 33 m	Mercantile Library of Cincinnati		TWIN CANDIDATE CN024 12 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CN058 20 m — one building listed twice, or two plaques on one lot?	Mercantile Library Building	
+CN038	SEED — unmapped		Newport and Cincinnati Bridge	39.094722	-84.494444		Newport Southbank Bridge		new: hidden pin Newport History Museum 72 m; new: line CN501 66 m	Newport and Cincinnati Bridge	new
+CN040	SEED — article in no tile (#539)		Cincinnatian Hotel	39.102447222222224	-84.51328611111111	article Cincinnatian Hotel · 29 m	Cincinnatian Hotel			Palace Hotel	
+CN041	SEED — article in no tile (#539)		Palace Theatre (Cincinnati, Ohio)	39.1025	-84.51277777777777	article Palace Theatre (Cincinnati, Ohio) · 0 m	Palace Theatre (Cincinnati, Ohio)			Palace Theatre	
+CN042	SEED — article in no tile (#539)		Phoenix Building/Cincinnati Club	39.10448888888889	-84.51482222222222	article Phoenix Building/Cincinnati Club · 47 m	Phoenix Building/Cincinnati Club		TWIN CANDIDATE CN043 0 m — one building listed twice, or two plaques on one lot?	Phoenix Building/Cincinnati Club	
+CN043	SEED — article in no tile (#539)		Phoenix Building/Cincinnati Club	39.10448888888889	-84.51482222222222	article Phoenix Building/Cincinnati Club · 69 m	Phoenix Building/Cincinnati Club		TWIN CANDIDATE CN042 0 m — one building listed twice, or two plaques on one lot?	Phoenix Club	
+CN044	SEED — article in no tile (#539)		Isaac M. Wise Temple	39.103611111111114	-84.51805555555555	article Isaac M. Wise Temple · 0 m	Isaac M. Wise Temple		TWIN CANDIDATE CN550 0 m — one building listed twice, or two plaques on one lot?	Plum Street Temple	
+CN045	SEED — unmapped		H. & S. Pogue Service Building	39.099	-84.514		H. & S. Pogue Service Building			H. & S. Pogue Service Building	
+CN046	SEED — article in no tile (#539)		Police Station No. 2 (Cincinnati)	39.10032777777778	-84.50596388888889	article Police Station No. 2 (Cincinnati) · 26 m	Police Station No. 2 (Cincinnati)			Police Station No. 2	
+CN047	SEED — article in no tile (#539)		Power Building	39.10527777777778	-84.50888888888889	article Power Building · 0 m	Power Building			Power Building	
+CN048	SEED — unmapped		Provident Savings Bank and Trust Co.	39.1035	-84.5136		Provident Savings Bank and Trust Co.		TWIN CANDIDATE CN005 15 m — one building listed twice, or two plaques on one lot?; new: line CN011 49 m	Provident Savings Bank and Trust Co.	new
+CN050	SEED — unmapped		Reakirt Building	39.102921	-84.510792		Reakirt Building		new: served pin Aronoff Center for the Arts 81 m; new: line CN002 100 m; TWIN CANDIDATE CN004 16 m — one building listed twice, or two plaques on one lot?; new: line CN028 70 m	Reakirt Building	new
+CN051	SEED — article in no tile (#539)		Nathaniel Ropes Building	39.10611111111111	-84.5111111111111	article Nathaniel Ropes Building · 0 m	Nathaniel Ropes Building			Nathaniel Ropes Building	
+CN052	SEED — article in no tile (#539)		St. Francis Xavier Church (Cincinnati, Ohio)	39.10333333333333	-84.50916666666667	article St. Francis Xavier Church (Cincinnati, Ohio) · 0 m	St. Francis Xavier Church (Cincinnati, Ohio)			St. Francis Xavier Church	
+CN054	SEED — article in no tile (#539)		Saxony Apartment Building	39.10506388888889	-84.51606944444444	article Saxony Apartment Building · 50 m	Saxony Apartment Building			Saxony Apartment Building	
+CN056	SEED — article in no tile (#539)		Terrace Plaza Hotel	39.102111111111114	-84.51402777777778	article Terrace Plaza Hotel · 58 m	Terrace Plaza Hotel			Terrace Plaza Hotel	
+CN057	SEED — article in no tile (#539)		Cincinnati Times-Star Building	39.105475	-84.50723888888889	article Cincinnati Times-Star Building · 63 m	Cincinnati Times-Star Building			Times-Star Building	
+CN058	SEED — unmapped		Traction Company Building	39.101101	-84.511299		Traction Company Building		TWIN CANDIDATE CN024 16 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CN037 20 m — one building listed twice, or two plaques on one lot?; new: line CN060 91 m; new: line CN061 90 m	Traction Company Building	new
+CN059	SEED — article in no tile (#539)		Underwriters Salvage Corps (Cincinnati, Ohio)	39.105000000000004	-84.51166666666667	article Underwriters Salvage Corps (Cincinnati, Ohio) · 0 m	Underwriters Salvage Corps (Cincinnati, Ohio)			Underwriters Salvage Corps	
+CN060	SEED — article in no tile (#539)		Renaissance Cincinnati Downtown Hotel	39.1003	-84.5115	article Renaissance Cincinnati Downtown Hotel · 20 m	Renaissance Cincinnati Downtown Hotel			Union Trust Building	
+CN061	SEED — article in no tile (#539)		Potter Stewart United States Courthouse	39.10166666666667	-84.51055555555556	article Potter Stewart United States Courthouse · 20 m	Potter Stewart United States Courthouse			United States Post Office and Court House	
+CN063	SEED — article in no tile (#539)		Young Women's Christian Association of Cincinnati	39.1054	-84.5121	article Young Women's Christian Association of Cincinnati · 19 m	Young Women's Christian Association of Cincinnati			Young Women's Christian Association of Cincinnati	
+CN066	SEED — article in no tile (#539)		Wesley Chapel (Cincinnati)	39.1023	-84.5074	article Wesley Chapel (Cincinnati) · 0 m	Wesley Chapel (Cincinnati)			Wesley Chapel Methodist Church	
+CN069	SEED — article in no tile (#539)		Apostolic Bethlehem Temple Church	39.10805555555556	-84.51861111111111	article Apostolic Bethlehem Temple Church · 0 m	Apostolic Bethlehem Temple Church			Apostolic Bethlehem Temple Church	
+CN070	SEED — article in no tile (#539)		Longworth Hall	39.095555555555556	-84.52444444444444	article Longworth Hall · 0 m	Longworth Hall			B&O Freight Terminal	
+CN071	SEED — article in no tile (#539)		George Balch House	39.151111111111106	-84.51777777777778	article George Balch House · 0 m	George Balch House			Balch House	
+CN074	SEED — article in no tile (#539)		Cedric G. and Patricia Neils Boulter House	39.15186111111111	-84.52302777777777	article Cedric G. and Patricia Neils Boulter House · 34 m	Cedric G. and Patricia Neils Boulter House			Cedric G. and Patricia Neils Boulter House	
+CN075	SEED — unmapped		Frederick E. and Catherine Bullerdick House	39.166111	-84.541389		Frederick E. and Catherine Bullerdick House			Frederick E. and Catherine Bullerdick House	
+CN076	SEED — article in no tile (#539)		Calvary Episcopal Church (Cincinnati)	39.15222222222222	-84.51752222222223	article Calvary Episcopal Church (Cincinnati) · 2 m	Calvary Episcopal Church (Cincinnati)			Calvary Episcopal Church Sunday School	
+CN077	SEED — unmapped		Freeman Grant Cary Pleasant Hill Academy	39.194028	-84.546111		Ohio Military Institute			Freeman Grant Cary Pleasant Hill Academy	
+CN078	SEED — article in no tile (#539)		Cincinnati Music Hall	39.10944444444445	-84.51888888888888	article Cincinnati Music Hall · 0 m	Cincinnati Music Hall		TWIN CANDIDATE CN549 0 m — one building listed twice, or two plaques on one lot?	Cincinnati Music Hall	
+CN083	SEED — unmapped		Clifton Methodist Episcopal Church	39.144167	-84.518611		Clifton Methodist Episcopal Church			Clifton Methodist Episcopal Church	
+CN085	SEED — article in no tile (#539)		Cote Bonneville	39.17027777777778	-84.55583333333333	article Cote Bonneville · 0 m	Cote Bonneville			Cote Bonneville	
+CN086	SEED — article in no tile (#539)		George B. Cox House	39.1425	-84.515	article George B. Cox House · 0 m	George B. Cox House		CHECK SUBJECT: served pin Charles B. Russell House (wiki_12362673) 62 m from the article may already be this place	George B. Cox House	
+CN089	SEED — unmapped		Benjamin Dombar House and Studio	39.2179	-84.5028		Benjamin Dombar House and Studio			Benjamin Dombar House and Studio	
+CN092	SEED — unmapped		Fairview Public School and Annex	39.125	-84.522222		Fairview Public School			Fairview Public School and Annex	
+CN093	SEED — article in no tile (#539)		Findlay Market	39.11527777777778	-84.51916666666666	article Findlay Market · 0 m	Findlay Market			Findlay Market Building	
+CN094	SEED — article in no tile (#539)		Nast Trinity United Methodist Church	39.109722222222224	-84.51638888888888	article Nast Trinity United Methodist Church · 0 m	Nast Trinity United Methodist Church			First German Methodist Episcopal Church	
+CN095	SEED — article in no tile (#539)		Freund–Heintz House	39.1431	-84.52386666666666	article Freund–Heintz House · 5 m	Freund–Heintz House			Freund-Heintz House	
+CN096	SEED — unmapped		German Evangelical Protestant Cemetery Chapel	39.155833	-84.508889		German Evangelical Protestant Cemetery Chapel		new: served pin Vine Street Hill Cemetery 0 m	German Evangelical Protestant Cemetery Chapel	new
+CN097	SEED — article in no tile (#539)		Moses Goldsmith Building	39.14555555555555	-84.5213888888889	article Moses Goldsmith Building · 39 m	Moses Goldsmith Building			Moses Goldsmith Building	
+CN098	SEED — article in no tile (#539)		Sir Alfred T. Goshorn House	39.14680555555555	-84.51833333333333	article Sir Alfred T. Goshorn House · 46 m	Sir Alfred T. Goshorn House			Sir Alfred T. Goshorn House	
+CN099	SEED — article in no tile (#539)		Hamilton County Memorial Building	39.10861111111111	-84.51833333333333	article Hamilton County Memorial Building · 0 m	Hamilton County Memorial Building			Hamilton County Memorial Building	
+CN100	SEED — article in no tile (#539)		Samuel Hannaford House	39.17111111111111	-84.51805555555555	article Samuel Hannaford House · 101 m	Samuel Hannaford House			Samuel Hannaford House	
+CN101	SEED — unmapped		George Hatch House	39.118453	-84.528239		George Hatch House		new: served pin Brighton 75 m	George Hatch House	new
+CN102	SEED — article in no tile (#539)		Joseph A. Hemann House	39.12722222222222	-84.51416666666667	article Joseph A. Hemann House · 0 m	Joseph A. Hemann House			Joseph A. Hemann House	
+CN103	SEED — article in no tile (#539)		Hewson–Gutting House	39.15469722222222	-84.52669722222223	article Hewson–Gutting House · 146 m	Hewson–Gutting House			Hewson-Gutting House	
+CN105	SEED — article in no tile (#539)		Hulbert House and McAlpin Bridal Cottage	39.15611111111111	-84.52	article Hulbert House and McAlpin Bridal Cottage · 0 m	Hulbert House and McAlpin Bridal Cottage			Hulbert House and McAlpin Bridal Cottage	
+CN106	SEED — article in no tile (#539)		George Hummel House	39.144999999999996	-84.52361111111111	article George Hummel House · 0 m	George Hummel House			George Hummel House	
+CN107	SEED — unmapped		Kirby Road School	39.167778	-84.545833		Kirby Road School			Kirby Road School	
+CN109	SEED — article in no tile (#539)		John Uri Lloyd House	39.15672222222222	-84.51775833333333	article John Uri Lloyd House · 60 m	John Uri Lloyd House			John Uri Lloyd House	
+CN111	SEED — unmapped		S. Gale and Agnes P. Lowrie House	39.152222	-84.5225		S. Gale and Agnes P. Lowrie House		new: line CN074 61 m	S. Gale and Agnes P. Lowrie House	new
+CN113	SEED — unmapped		Masonic Temple Price Hill Lodge, No. 524	39.107099	-84.564662		Masonic Temple Price Hill Lodge, No. 524			Masonic Temple Price Hill Lodge, No. 524	
+CN114	SEED — unmapped		Matthew McWilliams House	39.081111	-84.590833		Matthew McWilliams House			Matthew McWilliams House	
+CN115	SEED — article in no tile (#539)		Melbourne Flats	39.12742222222222	-84.5133	article Melbourne Flats · 9 m	Melbourne Flats			Melbourne Flats	
+CN118	SEED — article in no tile (#539)		Morrison House (Cincinnati, Ohio)	39.148472222222225	-84.5286111111111	article Morrison House (Cincinnati, Ohio) · 16 m	Morrison House (Cincinnati, Ohio)			Morrison House	
+CN122	SEED — article in no tile (#539)		Ohio National Guard Armory	39.11138888888889	-84.5325	article Ohio National Guard Armory · 0 m	Ohio National Guard Armory			Ohio National Guard Armory	
+CN124	SEED — article in no tile (#539)		Our Lady of Mercy High School (Ohio)	39.1105	-84.5321111111111	article Our Lady of Mercy High School (Ohio) · 50 m	Our Lady of Mercy High School (Ohio)			Our Lady of Mercy High School	
+CN126	SEED — unmapped		Parkside Apartments	39.140833	-84.513889		Parkside Apartments			Parkside Apartments	
+CN128	SEED — article in no tile (#539)		Police Station No. 3 (Cincinnati)	39.10989722222222	-84.563175	article Police Station No. 3 (Cincinnati) · 51 m	Police Station No. 3 (Cincinnati)			Police Station No. 3	
+CN129	SEED — article in no tile (#539)		Police Station No. 5 (Cincinnati)	39.117777777777775	-84.5325	article Police Station No. 5 (Cincinnati) · 0 m	Police Station No. 5 (Cincinnati)			Police Station No. 5	
+CN130	SEED — article in no tile (#539)		Police Station No. 7 (Cincinnati)	39.12804166666667	-84.52536111111111	article Police Station No. 7 (Cincinnati) · 7 m	Police Station No. 7 (Cincinnati)			Police Station No. 7	
+CN131	SEED — unmapped		Potter's Field - West Price Hill	39.1188	-84.5907		Potter's Field - West Price Hill			Potter's Field - West Price Hill	
+CN133	SEED — article in no tile (#539)		Henry Probasco House	39.15756666666667	-84.52356666666667	article Henry Probasco House · 61 m	Henry Probasco House			Henry Probasco House	
+CN134	SEED — article in no tile (#539)		Heinrich A. Rattermann House	39.117222222222225	-84.52516666666666	article Heinrich A. Rattermann House · 134 m	Heinrich A. Rattermann House			Heinrich A. Rattermann House	
+CN135	SEED — article in no tile (#539)		Rawson House	39.15222222222222	-84.51944444444445	article Rawson House · 0 m	Rawson House			Rawson House	
+CN136	SEED — unmapped		Regal Theater	39.1081	-84.5281		Regal Theater (Cincinnati, Ohio)			Regal Theater	
+CN139	SEED — article in no tile (#539)		Sacred Heart Academy (Cincinnati, Ohio)	39.153055555555554	-84.52722222222222	article Sacred Heart Academy (Cincinnati, Ohio) · 0 m	Sacred Heart Academy (Cincinnati, Ohio)			Sacred Heart Academy	
+CN140	SEED — article in no tile (#539)		St. Francis Hospital (Cincinnati, Ohio)	39.12605277777778	-84.55917777777778	article St. Francis Hospital (Cincinnati, Ohio) · 137 m	St. Francis Hospital (Cincinnati, Ohio)			St. Francis Hospital	
+CN141	SEED — article in no tile (#539)		St. George's Catholic Church (Cincinnati, Ohio)	39.12804444444445	-84.51230277777778	article St. George's Catholic Church (Cincinnati, Ohio) · 65 m	St. George's Catholic Church (Cincinnati, Ohio)			St. George Parish and Newman Center	
+CN145	SEED — unmapped		George F. Sands School	39.115344	-84.53098		George F. Sands School			George F. Sands School	
+CN146	SEED — article in no tile (#539)		Scarlet Oaks	39.15694444444444	-84.52555555555556	article Scarlet Oaks · 0 m	Scarlet Oaks			Scarlet Oaks	
+CN150	SEED — unmapped		Spring Grove Cemetery	39.1697	-84.5256		Spring Grove Cemetery		LIST POINT FAR: 625 m from its article's point (Spring Grove Cemetery) — wrong article or a large site?	Spring Grove Cemetery	
+CN151	SEED — article in no tile (#539)		Spring Grove Cemetery Chapel	39.16388333333333	-84.52361111111111	article Spring Grove Cemetery Chapel · 58 m	Spring Grove Cemetery Chapel			Spring Grove Cemetery Chapel	
+CN152	SEED — unmapped		Joseph G. Steinkamp House	39.1092	-84.5819		Joseph G. Steinkamp House			Joseph G. Steinkamp House	
+CN159	SEED — article in no tile (#539)		Winton Place Methodist Episcopal Church	39.17333333333333	-84.51638888888888	article Winton Place Methodist Episcopal Church · 4 m	Winton Place Methodist Episcopal Church			Winton Place Methodist Episcopal Church	
+CN164	SEED — unmapped		The Alameda Flats	39.147222	-84.488889		The Alameda Flats		new: line CN215 96 m	The Alameda Flats	new
+CN165	SEED — article in no tile (#539)		The Alexandra (Cincinnati, Ohio)	39.12722222222222	-84.48916666666666	article The Alexandra (Cincinnati, Ohio) · 31 m	The Alexandra (Cincinnati, Ohio)			The Alexandra	
+CN166	SEED — article in no tile (#539)		Alms and Doepke Dry Goods Company	39.10805555555556	-84.51027777777777	article Alms and Doepke Dry Goods Company · 0 m	Alms and Doepke Dry Goods Company			Alms and Doepke Dry Goods Company	
+CN167	SEED — unmapped		The Ambassador	39.149167	-84.489167		The Ambassador (Cincinnati, Ohio)		new: served pin Grace Church (Cincinnati, Ohio) 86 m	The Ambassador	new
+CN168	SEED — article in no tile (#539)		John S. Baker House	39.12916666666667	-84.46777777777778	article John S. Baker House · 0 m	John S. Baker House			John S. Baker House	
+CN169	SEED — unmapped		Baldwin Piano Company Building	39.116667	-84.498056		Baldwin Piano Company Building			Baldwin Piano Company Building	
+CN171	SEED — article in no tile (#539)		Bauer Apartments	39.13194444444444	-84.46222222222222	article Bauer Apartments · 0 m	Bauer Apartments			Bauer Apartments	
+CN174	SEED — unmapped		Bon Air Flats	39.1419	-84.4937		Bon Air Flats			Bon Air Flats	
+CN177	SEED — article in no tile (#539)		Samuel Burdsal House	39.111111111111114	-84.50833333333334	article Samuel Burdsal House · 0 m	Samuel Burdsal House			Samuel Burdsal House	
+CN178	SEED — article in no tile (#539)		C. H. Burroughs House	39.13111111111111	-84.4875	article C. H. Burroughs House · 0 m	C. H. Burroughs House			C. H. Burroughs House	
+CN179	SEED — unmapped		Cincinnati Hebrew Day School	39.2067	-84.461		Cincinnati Hebrew Day School			Cincinnati Hebrew Day School	
+CN181	SEED — article in no tile (#539)		Cincinnati Tennis Club	39.134166666666665	-84.46944444444445	article Cincinnati Tennis Club · 0 m	Cincinnati Tennis Club			Cincinnati Tennis Club	
+CN184	SEED — article in no tile (#539)		Coca-Cola Bottling Plant (Cincinnati, Ohio)	39.14611111111111	-84.47722222222222	article Coca-Cola Bottling Plant (Cincinnati, Ohio) · 86 m	Coca-Cola Bottling Plant (Cincinnati, Ohio)			Coca-Cola Bottling Corporation	
+CN186	SEED — article in no tile (#539)		Jacob D. Cox House	39.121944444444445	-84.50527777777778	article Jacob D. Cox House · 0 m	Jacob D. Cox House			Jacob D. Cox House	
+CN187	SEED — unmapped		The Crescent	39.151111	-84.487222		The Crescent (Cincinnati, Ohio)		new: served pin Walter Field House 78 m; new: line CN281 77 m	The Crescent	new
+CN188	SEED — article in no tile (#539)		Cummins School	39.12777777777778	-84.49083333333333	article Cummins School · 0 m	Cummins School			Cummins School	
+CN189	SEED — article in no tile (#539)		Stephen Decker Rowhouse	39.11555555555556	-84.43333333333334	article Stephen Decker Rowhouse · 0 m	Stephen Decker Rowhouse			Stephen Decker Rowhouse	
+CN190	SEED — article in no tile (#539)		A. M. Detmer House	39.130833333333335	-84.48	article A. M. Detmer House · 0 m	A. M. Detmer House			A. M. Detmer House	
+CN191	SEED — article in no tile (#539)		East Walnut Hills Firehouse	39.13	-84.47444444444444	article East Walnut Hills Firehouse · 0 m	East Walnut Hills Firehouse			East Walnut Hills Firehouse	
+CN192	SEED — unmapped		Eastern Hills Young Men's Christian Association (YMCA)	39.12569	-84.483326		Eastern Hills Young Men's Christian Association			Eastern Hills Young Men's Christian Association (YMCA)	
+CN194	SEED — article in no tile (#539)		Eckert Building	39.12722222222222	-84.47833333333334	article Eckert Building · 0 m	Eckert Building			Eckert Building	
+CN196	SEED — article in no tile (#539)		Eden Park Station No. 7	39.113055555555555	-84.49111111111111	article Eden Park Station No. 7 · 0 m	Eden Park Station No. 7			Eden Park Station No. 7	
+CN197	SEED — article in no tile (#539)		Edgecliff College	39.12111111111111	-84.48388888888888	article Edgecliff College · 62 m	Edgecliff College			Edgecliff	
+CN202	SEED — article in no tile (#539)		First Unitarian Church (Cincinnati, Ohio)	39.13194444444444	-84.49805555555555	article First Unitarian Church (Cincinnati, Ohio) · 0 m	First Unitarian Church (Cincinnati, Ohio)			First Congregational-Unitarian Church	
+CN203	SEED — article in no tile (#539)		First Universalist Church (Cincinnati, Ohio)	39.127830555555555	-84.49820833333334	article First Universalist Church (Cincinnati, Ohio) · 35 m	First Universalist Church (Cincinnati, Ohio)			First Universalist Church	
+CN204	SEED — article in no tile (#539)		Ford Motor Company Cincinnati Plant	39.132688888888886	-84.49361388888889	article Ford Motor Company Cincinnati Plant · 26 m	Ford Motor Company Cincinnati Plant			Ford Motor Company Cincinnati Plant	
+CN205	SEED — article in no tile (#539)		Madam Fredin's Eden Park School and Neighboring Row House	39.118634	-84.494215	article Madam Fredin's Eden Park School and Neighboring Row House · 20 m	Madam Fredin's Eden Park School and Neighboring Row House			Madam Fredin's Eden Park School and Neighboring Row House	
+CN208	SEED — article in no tile (#539)		Stephen A. Gerrard Mansion	39.16111111111111	-84.48527777777778	article Stephen A. Gerrard Mansion · 57 m	Stephen A. Gerrard Mansion			Stephen A. Gerrard Mansion	
+CN209	SEED — article in no tile (#539)		Gilbert Row	39.12	-84.49416666666667	article Gilbert Row · 0 m	Gilbert Row		CHECK SUBJECT: served pin Gilbert-Sinton Historic District (osm_node357471969) 58 m from the article may already be this place	Gilbert Row	
+CN213	SEED — article in no tile (#539)		Time Hill	39.12583333333333	-84.50166666666667	article Time Hill · 0 m	Time Hill			Gruen Watch Company-Time Hill	
+CN215	SEED — unmapped		Edward Hart House	39.1479	-84.4882		Edward Hart House		new: line CN164 96 m	Edward Hart House	new
+CN216	SEED — unmapped		Hauck-Heine House	39.1307	-84.4996		Hauck-Heine House		new: served pin Wilson-Gibson House 90 m; near-named article Hauck Botanic Gardens 136 m	Hauck-Heine House	new
+CN217	SEED — article in no tile (#539)		George Hoadley Jr. House	39.128055555555555	-84.45277777777778	article George Hoadley Jr. House · 0 m	George Hoadley Jr. House			George Hoadley Jr. House	
+CN218	SEED — article in no tile (#539)		Holy Cross Monastery and Church	39.10743055555556	-84.49851111111111	article Holy Cross Monastery and Church · 57 m	Holy Cross Monastery and Church		TWIN CANDIDATE CN539 0 m — one building listed twice, or two plaques on one lot?	Holy Cross Monastery and Chapel	
+CN221	SEED — unmapped		Hyde Park Methodist Episcopal Church	39.13657	-84.43232		Hyde Park Methodist Episcopal Church			Hyde Park Methodist Episcopal Church	
+CN222	SEED — article in no tile (#539)		Ida Street Viaduct	39.10886111111111	-84.49919444444444	article Ida Street Viaduct · 4 m	Ida Street Viaduct			Ida Street Viaduct	
+CN223	SEED — article in no tile (#539)		Immaculata Church	39.1076	-84.49661388888889	article Immaculata Church · 60 m	Immaculata Church			Immaculate Conception Church, School, and Rectory	
+CN225	SEED — unmapped		Kerper and Melbourne Terrace Apartments	39.1372	-84.4866		Kerper and Melbourne Terrace Apartments			Kerper and Melbourne Terrace Apartments	
+CN226	SEED — unmapped		King Records Studio Buildings	39.1443	-84.4763		King Records (United States)			King Records Studio Buildings	
+CN228	SEED — unmapped		The Kinsey	39.125139	-84.505		The Kinsey			The Kinsey	
+CN229	SEED — article in no tile (#539)		Theodore Krumberg Building	39.10888888888889	-84.51166666666667	article Theodore Krumberg Building · 0 m	Theodore Krumberg Building			Theodore Krumberg Building	
+CN231	SEED — unmapped		La Ventura Apartments	39.1502	-84.49		La Ventura Apartments			La Ventura Apartments	
+CN235	SEED — article in no tile (#539)		Lillybanks	39.12777777777778	-84.44972222222222	article Lillybanks · 0 m	Lillybanks			Lillybanks	
+CN237	SEED — article in no tile (#539)		Frederick Lunkenheimer House	39.118611111111115	-84.48833333333333	article Frederick Lunkenheimer House · 0 m	Frederick Lunkenheimer House			Frederick Lunkenheimer House	
+CN240	SEED — article in no tile (#539)		Manse Hotel	39.1313	-84.487	article Manse Hotel · 30 m	Manse Hotel			Manse Hotel and Manse Hotel Annex	
+CN242	SEED — unmapped		Martin House	39.086944	-84.378333		Martin House (Cincinnati, Ohio)		LIST POINT FAR: 5139 m from its article's point (Martin House (Cincinnati, Ohio)) — wrong article or a large site?	Martin House	
+CN244	SEED — article in no tile (#539)		S. C. Mayer House	39.113055555555555	-84.51222222222222	article S. C. Mayer House · 0 m	S. C. Mayer House			S.C. Mayer House	
+CN246	SEED — article in no tile (#539)		Mecklenburg's Garden	39.1325	-84.50277777777778	article Mecklenburg's Garden · 0 m	Mecklenburg's Garden		CHECK SUBJECT: served pin Mecklenburg Gardens (osm_way69689348) 41 m from the article may already be this place	Mecklenburg's Garden	
+CN248	SEED — article in no tile (#539)		Mills' Row	39.12017222222222	-84.48681388888889	article Mills' Row · 37 m	Mills' Row			Mills' Row	
+CN250	SEED — article in no tile (#539)		Bernard H. Moormann House	39.125277777777775	-84.47722222222222	article Bernard H. Moormann House · 0 m	Bernard H. Moormann House			Bernard H. Moormann House	
+CN251	SEED — article in no tile (#539)		Mount Adams Public School	39.1086	-84.4979	article Mount Adams Public School · 14 m	Mount Adams Public School			Mount Adams Public School	
+CN253	SEED — article in no tile (#539)		Norwell Residence	39.11472222222223	-84.43333333333334	article Norwell Residence · 0 m	Norwell Residence			Norwell Residence	
+CN255	SEED — article in no tile (#539)		Old St. Mary's Church (Cincinnati, Ohio)	39.10944444444445	-84.5125	article Old St. Mary's Church (Cincinnati, Ohio) · 48 m	Old St. Mary's Church (Cincinnati, Ohio)			Old St. Mary's Church, School and Rectory	
+CN256	SEED — article in no tile (#539)		Park Flats	39.12555555555556	-84.48611111111111	article Park Flats · 0 m	Park Flats			Park Flats	
+CN259	SEED — article in no tile (#539)		Peters–Kupferschmid House	39.13086666666667	-84.45826666666667	article Peters–Kupferschmid House · 46 m	Peters–Kupferschmid House			Peters-Kupferschmid House	
+CN261	SEED — article in no tile (#539)		Pilgrim Presbyterian Church	39.11	-84.49888888888889	article Pilgrim Presbyterian Church · 0 m	Pilgrim Presbyterian Church			Pilgrim Presbyterian Church	
+CN262	SEED — article in no tile (#539)		Ben Pitman House	39.12034722222222	-84.48065	article Ben Pitman House · 84 m	Ben Pitman House			Ben Pitman House	
+CN263	SEED — unmapped		Poinciana Flats	39.145278	-84.49		Poinciana Flats			Poinciana Flats	
+CN264	SEED — article in no tile (#539)		Police Station No. 6 (Cincinnati)	39.117197222222224	-84.43928333333334	article Police Station No. 6 (Cincinnati) · 38 m	Police Station No. 6 (Cincinnati)			Police Station No. 6	
+CN265	SEED — article in no tile (#539)		Henry Powell House	39.12222222222222	-84.50875	article Henry Powell House · 12 m	Henry Powell House			Henry Powell House	
+CN266	SEED — unmapped		The President Apartments	39.1519	-84.486		President Apartments		new: served pin Walter Field House 66 m; new: line CN296 72 m	The President Apartments	new
+CN267	SEED — article in no tile (#539)		Procter and Collier–Beau Brummell Building	39.12694444444445	-84.5	article Procter and Collier–Beau Brummell Building · 0 m	Procter and Collier–Beau Brummell Building			Procter and Collier-Beau Brummell Building	
+CN269	SEED — article in no tile (#539)		Ransley Apartment Building	39.12555555555556	-84.48777777777778	article Ransley Apartment Building · 0 m	Ransley Apartment Building			Ransley Apartment Building	
+CN270	SEED — article in no tile (#539)		Bernard Ratterman House	39.11194444444445	-84.50888888888889	article Bernard Ratterman House · 0 m	Bernard Ratterman House			Bernard Ratterman House	
+CN271	SEED — unmapped		Riverview House Apartments	39.126	-84.4753		Riverview House Apartments			Riverview House Apartments	
+CN273	SEED — article in no tile (#539)		Rookwood Pottery Company	39.10722222222223	-84.50083333333333	article Rookwood Pottery Company · 29 m	Rookwood Pottery Company			Rookwood Pottery	
+CN274	SEED — unmapped		St. Aloysius Orphanage	39.171389	-84.469167		St. Aloysius Orphanage			St. Aloysius Orphanage	
+CN276	SEED — unmapped		St. Mark's Church and Rectory	39.1425	-84.4709		St. Mark's Church and Rectory (Cincinnati, Ohio)			St. Mark's Church and Rectory	
+CN278	SEED — article in no tile (#539)		St. Rose Church (Cincinnati, Ohio)	39.12388888888889	-84.46166666666667	article St. Rose Church (Cincinnati, Ohio) · 31 m	St. Rose Church (Cincinnati, Ohio)			St. Rosa Church	
+CN279	SEED — unmapped		Robert F. Schulkers House	39.1421	-84.4257		Robert F. Schulkers House			Robert F. Schulkers House	
+CN280	SEED — unmapped		The Somerset Apartments	39.14125	-84.4925		The Somerset Apartments		new: served pin Haddon Hall (Cincinnati, Ohio) 52 m	The Somerset Apartments	new
+CN281	SEED — unmapped		The South Crescent Arms	39.1507	-84.4865		The South Crescent Arms		new: hidden pin Martin Luther King Junior Park 96 m; served pin Walter Field House 77 m; new: line CN187 77 m	The South Crescent Arms	new
+CN284	SEED — article in no tile (#539)		Captain Stone House	39.130833333333335	-84.50138888888888	article Captain Stone House · 0 m	Captain Stone House			Capt. Stone House	
+CN287	SEED — article in no tile (#539)		William Howard Taft National Historic Site	39.11972222222222	-84.50861111111111	article William Howard Taft National Historic Site · 0 m	William Howard Taft National Historic Site		CHECK SUBJECT: hidden pin Taft House (osm_way59339960) 42 m from the article may already be this place	William Howard Taft National Historic Site	
+CN289	SEED — unmapped		United Colored American Cemetery	39.1652	-84.4141		United Colored American Cemetery			United Colored American Cemetery	
+CN290	SEED — unmapped		Verona Apartments	39.124372	-84.486333		Verona Apartments (Cincinnati, Ohio)		new: hidden pin Fechheimer Park 46 m	Verona Apartments	new
+CN291	SEED — article in no tile (#539)		Charlton Wallace House	39.12694444444445	-84.47666666666667	article Charlton Wallace House · 0 m	Charlton Wallace House			Charlton Wallace House	
+CN292	SEED — article in no tile (#539)		Walnut Hills United Presbyterian Church	39.12763888888889	-84.48958333333333	article Walnut Hills United Presbyterian Church · 20 m	Walnut Hills United Presbyterian Church			Walnut Hills United Presbyterian Church	
+CN295	SEED — unmapped		Windsor Public School	39.122222	-84.49		Windsor Public School			Windsor Public School	
+CN296	SEED — unmapped		Isaac M. Wise Temple-Center	39.152222	-84.485278		Isaac M. Wise Temple-Center		new: line CN266 72 m	Isaac M. Wise Temple-Center	new
+CN297	SEED — article in no tile (#539)		Withrow High School	39.14083333333333	-84.4525	article Withrow High School · 78 m	Withrow High School			Withrow High School	
+CN299	SEED — article in no tile (#539)		Gorham A. Worth House	39.12361111111111	-84.50638888888889	article Gorham A. Worth House · 0 m	Gorham A. Worth House			Gorham A. Worth House	
+CN304	SEED — unmapped		Arlington School	39.2181	-84.4547		Arlington School (Arlington Heights, Ohio)			Arlington School	
+CN305	SEED — article in no tile (#539)		Joseph W. Baldwin House	39.22166666666667	-84.47361111111111	article Joseph W. Baldwin House · 0 m	Joseph W. Baldwin House			Joseph W. Baldwin House	
+CN306	SEED — unmapped		Joseph and Cecilia Bappert House	39.123056	-84.633889		Joseph and Cecilia Bappert House			Joseph and Cecilia Bappert House	
+CN308	SEED — unmapped		Benham Mound	39.193889	-84.425278		Benham Mound		LIST POINT FAR: 336 m from its article's point (Benham Mound) — wrong article or a large site?	Benham Mound	
+CN310	SEED — unmapped		Jacob Bromwell House	39.223333	-84.479722		Jacob Bromwell House		LIST POINT FAR: 311 m from its article's point (Jacob Bromwell House) — wrong article or a large site?	Jacob Bromwell House	
+CN313	SEED — unmapped		Cheviot Fieldhouse	39.156111	-84.62		Cheviot Fieldhouse			Cheviot Fieldhouse	
+CN314	SEED — unmapped		Cincinnati & Suburban Bell Telephone Co. Norwood Exchange	39.1646	-84.4529		Cincinnati & Suburban Bell Telephone Co. Norwood Exchange			Cincinnati & Suburban Bell Telephone Co. Norwood Exchange	
+CN326	SEED — article in no tile (#539)		Elmer Hess House	39.223888888888894	-84.47361111111111	article Elmer Hess House · 39 m	Elmer Hess House			Elmer Hess House	
+CN330	SEED — article in no tile (#539)		Luethstrom–Hurin House	39.22833333333333	-84.47361111111111	article Luethstrom–Hurin House · 0 m	Luethstrom–Hurin House			Luethstrom-Hurin House	
+CN331	SEED — unmapped		Madeira Railroad Depot	39.1881	-84.3632		Madeira Railroad Depot			Madeira Railroad Depot	
+CN332	SEED — unmapped		Main Theatre	39.231232	-84.548293		Main Theatre (Mt. Healthy, Ohio)			Main Theatre	
+CN335	SEED — unmapped		Joseph Martin House	39.12935	-84.35974		Joseph Martin House		CHECK: same-named served pin Martin House (Cincinnati, Ohio) (wiki_12350232) 166 m away — the same place, mapped off the list point?; new: same-named pin 166 m	Joseph Martin House	new
+CN336	SEED — unmapped		Mater Dei Chapel	39.0955	-84.6379		Mater Dei Chapel		new: served pin Mount St. Joseph University 67 m	Mater Dei Chapel	new
+CN344	SEED — article in no tile (#539)		Nurre-Royston House	39.16359	-84.49441	article Nurre-Royston House · 21 m	Nurre-Royston House			Nurre-Royston House	
+CN345	SEED — unmapped		Odd Fellows' Cemetery Mound	39.130333	-84.36		Odd Fellows' Cemetery Mound		new: served pin Perin Village Site 6 m	Odd Fellows' Cemetery Mound	new
+CN350	SEED — article in no tile (#539)		John C. Pollock House	39.228611111111114	-84.47611111111111	article John C. Pollock House · 24 m	John C. Pollock House			John C. Pollock House	
+CN351	SEED — unmapped		Frederick and Harriet Rauh House	39.249306	-84.488333		Frederick and Harriet Rauh House			Frederick and Harriet Rauh House	
+CN352	SEED — article in no tile (#539)		W.C. Retszch House	39.221111111111114	-84.47333333333333	article W.C. Retszch House · 78 m	W.C. Retszch House			W.C. Retszch House	
+CN353	SEED — article in no tile (#539)		Riddle–Friend House	39.2275	-84.47277777777778	article Riddle–Friend House · 66 m	Riddle–Friend House			Riddle-Friend House	
+CN356	SEED — unmapped		Louis Sawyer House	39.228056	-84.477778		Louis Sawyer House		CHECK: same-named served pin Louis Sawyer House (wiki_12362694) 171 m away — the same place, mapped off the list point?; new: same-named pin 171 m	Louis Sawyer House	new
+CN361	SEED — article in no tile (#539)		John Tangeman House	39.22777777777778	-84.47583333333334	article John Tangeman House · 57 m	John Tangeman House			John Tangeman House	
+CN368	SEED — unmapped		United States Playing Card Company Complex	39.158889	-84.4425		United States Playing Card Company Complex			United States Playing Card Company Complex	
+CN374	SEED — article in no tile (#539)		Charles Woodruff House (Wyoming, Ohio)	39.225500000000004	-84.47425	article Charles Woodruff House (Wyoming, Ohio) · 0 m	Charles Woodruff House (Wyoming, Ohio)			Charles Woodruff House	
+CN378	SEED — unmapped		Battery Bates and Battery Coombs	39.0777	-84.544		Battery Bates and Battery Coombs			Battery Bates and Battery Coombs	
+CN379	SEED — article in no tile (#539)		Bavarian Brewing Company	39.077222222222225	-84.51805555555555	article Bavarian Brewing Company · 0 m	Bavarian Brewing Company			Bavarian Brewing Company	
+CN380	SEED — article in no tile (#539)		Daniel Carter Beard Boyhood Home	39.08916666666667	-84.50555555555556	article Daniel Carter Beard Boyhood Home · 0 m	Daniel Carter Beard Boyhood Home			Daniel Carter Beard Boyhood Home	
+CN382	SEED — article in no tile (#539)		Cathedral Basilica of the Assumption (Covington, Kentucky)	39.07833333333333	-84.50805555555556	article Cathedral Basilica of the Assumption (Covington, Kentucky) · 0 m	Cathedral Basilica of the Assumption (Covington, Kentucky)			Cathedral Basilica of the Assumption	
+CN386	SEED — unmapped		Frank Duveneck House and Studio	39.0772	-84.5052		Frank Duveneck House and Studio			Frank Duveneck House and Studio	
+CN395	SEED — unmapped		GAR Monument in Covington	39.073056	-84.514722		GAR Monument in Covington		new: served pin Grand Army of the Republic Monument 47 m; served pin Veteran’s Monument 32 m; hidden pin Linden Grove Cemetery 66 m; new: line CN412 66 m; new: line CN437 39 m	GAR Monument in Covington	new
+CN396	SEED — unmapped		Hearne House	39.086389	-84.505833		Hearne House			Hearne House	
+CN398	SEED — unmapped		Hellman Lumber and Manufacturing Company	39.076389	-84.514444		Hellman Lumber and Manufacturing Company		new: line CN442 66 m	Hellman Lumber and Manufacturing Company	new
+CN401	SEED — unmapped		House at 855–857 Oak Street	39.085833	-84.556944		House at 855–857 Oak Street		new: line CN402 95 m	House at 855–857 Oak Street	new
+CN402	SEED — unmapped		House at 859 Oak Street	39.085278	-84.557778		House at 859 Oak Street		new: line CN401 95 m	House at 859 Oak Street	new
+CN403	SEED — unmapped		JOHN W. HUBBARD (sternwheeler)	39.091389	-84.508333		John W. Hubbard (sternwheeler)			JOHN W. HUBBARD (sternwheeler)	
+CN404	SEED — unmapped		Kenney's Crossing	39.09	-84.529028		Kenney's Crossing			Kenney's Crossing	
+CN405	SEED — unmapped		Kenton County Library	39.08	-84.507222		The Carnegie (Covington, Kentucky)			Kenton County Library	
+CN406	SEED — unmapped		Kruempelman Farmhouse	39.056389	-84.548611		Kruempelman Farmhouse			Kruempelman Farmhouse	
+CN407	SEED — article in no tile (#539)		LaSalette Academy	39.08388888888889	-84.50666666666666	article LaSalette Academy · 12 m	LaSalette Academy			LaSalette Academy	
+CN411	SEED — unmapped		Lincoln-Grant School	39.082222	-84.506111		Lincoln-Grant School			Lincoln-Grant School	
+CN413	SEED — unmapped		Ludlow Lagoon Clubhouse	39.084444	-84.554167		Ludlow Lagoon Clubhouse			Ludlow Lagoon Clubhouse	
+CN414	SEED — unmapped		The Ludlow Theater	39.093611	-84.549444		The Ludlow Theater			The Ludlow Theater	
+CN415	SEED — unmapped		Magnus Metal Company Building	39.0952	-84.5427		Magnus Metal Company Building			Magnus Metal Company Building	
+CN416	SEED — unmapped		Maxwell House	39.095833	-84.541528		Maxwell House (Ludlow, Kentucky)			Maxwell House	
+CN417	SEED — unmapped		Prettyman Merry House	39.080417	-84.563611		Prettyman Merry House			Prettyman Merry House	
+CN418	SEED — unmapped		Moser Family Houses	39.089722	-84.532778		Moser Family Houses			Moser Family Houses	
+CN419	SEED — article in no tile (#539)		Mother of God Roman Catholic Church (Covington, Kentucky)	39.08388888888889	-84.5125	article Mother of God Roman Catholic Church (Covington, Kentucky) · 0 m	Mother of God Roman Catholic Church (Covington, Kentucky)			Mother of God Roman Catholic Church	
+CN421	SEED — unmapped		Northern Bank of Kentucky	39.088333	-84.51		Northern Bank of Kentucky			Northern Bank of Kentucky	
+CN422	SEED — article in no tile (#539)		Odd Fellows Hall (Covington, Kentucky)	39.08585277777778	-84.5104861111111	article Odd Fellows Hall (Covington, Kentucky) · 6 m	Odd Fellows Hall (Covington, Kentucky)			Odd Fellows Hall	
+CN424	SEED — unmapped		Overman & Schrader Cordage Company	39.0713	-84.5114		Overman & Schrader Cordage Company			Overman & Schrader Cordage Company	
+CN426	SEED — unmapped		Robert Patton House	39.064167	-84.502778		Robert Patton House			Robert Patton House	
+CN428	SEED — unmapped		Pleasant Run Stone House I	39.075139	-84.558194		Pleasant Run Stone House I			Pleasant Run Stone House I	
+CN429	SEED — unmapped		Pleasant Run Stone House II	39.071806	-84.56		Pleasant Run Stone House II			Pleasant Run Stone House II	
+CN435	SEED — unmapped		Amos Shinkle Summer Residence	39.030278	-84.575556		Amos Shinkle Summer Residence			Amos Shinkle Summer Residence	
+CN436	SEED — article in no tile (#539)		Trinity Episcopal Church (Covington, Kentucky)	39.087500000000006	-84.51083333333334	article Trinity Episcopal Church (Covington, Kentucky) · 0 m	Trinity Episcopal Church (Covington, Kentucky)			Trinity Episcopal Church	
+CN437	SEED — unmapped		Veteran's Monument in Covington	39.072778	-84.515		Veteran's Monument in Covington		new: served pin Grand Army of the Republic Monument 83 m; served pin Veteran’s Monument 71 m; hidden pin Linden Grove Cemetery 89 m; new: line CN395 39 m; new: line CN412 89 m	Veteran's Monument in Covington	new
+CN438	SEED — article in no tile (#539)		Wadsworth Electric Manufacturing Company	39.07916666666667	-84.51	article Wadsworth Electric Manufacturing Company · 0 m	Wadsworth Electric Manufacturing Company			Wadsworth Electric Manufacturing Company	
+CN442	SEED — unmapped		The Wolke House	39.076457	-84.515207		Wolke House		new: line CN398 66 m	The Wolke House	new
+CN444	SEED — unmapped		Peter Barth Farm	39.003611	-84.378889		Peter Barth Farm			Peter Barth Farm	
+CN446	SEED — article in no tile (#539)		Bellevue (Newport, Kentucky)	39.09638888888889	-84.4925	article Bellevue (Newport, Kentucky) · 24 m	Bellevue (Newport, Kentucky)			Bellevue	
+CN447	SEED — unmapped		Bellevue High School	39.103368	-84.479479		Bellevue High School (Bellevue, Kentucky)			Bellevue High School	
+CN448	SEED — unmapped		Bishoff House	39.015	-84.3475		Bishoff House			Bishoff House	
+CN452	SEED — unmapped		John Braun House	39.004722	-84.353611		John Braun House		TWIN CANDIDATE CN461 0 m — one building listed twice, or two plaques on one lot?	John Braun House	
+CN455	SEED — unmapped		Campbell County Courthouse at Newport	39.092222	-84.498056		Campbell County Courthouse (Newport, Kentucky)			Campbell County Courthouse at Newport	
+CN457	SEED — unmapped		Dayton City Hall	39.1136	-84.4714		Dayton City Hall		new: hidden pin Tharp Dayton Heritage Museum 68 m	Dayton City Hall	new
+CN458	SEED — unmapped		Dayton High School	39.109444	-84.476944		Dayton High School (Dayton, Kentucky)			Dayton High School	
+CN461	SEED — unmapped		John Faha House	39.004722	-84.353611		John Faha House		TWIN CANDIDATE CN452 0 m — one building listed twice, or two plaques on one lot?	John Faha House	
+CN463	SEED — unmapped		Foote-Fister Mansion	39.103333	-84.473056		Foote-Fister Mansion			Foote-Fister Mansion	
+CN466	SEED — unmapped		Fort Thomas Women's Club	39.0788	-84.4484		Fort Thomas Women's Club			Fort Thomas Women's Club	
+CN467	SEED — unmapped		Grote Manufacturing Company Building (CP337)	39.1007	-84.4788		Grote Manufacturing Company Building (CP337)			Grote Manufacturing Company Building (CP337)	
+CN468	SEED — unmapped		Gubser-Schuchter Farm	38.983611	-84.363056		Gubser-Schuchter Farm		new: hidden pin Mincey Farm 19 m	Gubser-Schuchter Farm	new
+CN469	SEED — unmapped		Heiert Farm	39.005	-84.343611		Heiert Farm			Heiert Farm	
+CN470	SEED — unmapped		Highland Country Club	39.0617	-84.4542		Highland Country Club			Highland Country Club	
+CN471	SEED — unmapped		Hilbert Farm	39.010833	-84.338333		Hilbert Farm			Hilbert Farm	
+CN472	SEED — unmapped		Harlan Hubbard Studio	39.077004	-84.452098		Harlan Hubbard Studio			Harlan Hubbard Studio	
+CN474	SEED — unmapped		Frederich Kremer House	38.983056	-84.373611		Frederich Kremer House			Frederich Kremer House	
+CN475	SEED — unmapped		Matthias Kremer House	38.993056	-84.3625		Matthias Kremer House			Matthias Kremer House	
+CN476	SEED — unmapped		Nicholas Kremer House	38.989167	-84.354722		Nicholas Kremer House			Nicholas Kremer House	
+CN477	SEED — unmapped		Leick House	38.995	-84.360833		Leick House			Leick House	
+CN478	SEED — unmapped		Marianne Theater	39.108333	-84.481111		Marianne Theater			Marianne Theater	
+CN481	SEED — unmapped		Ort-Heeb Farm	38.98	-84.366944		Ort-Heeb Farm			Ort-Heeb Farm	
+CN482	SEED — unmapped		Posey Flats	39.094444	-84.495833		Posey Flats		new: hidden pin Newport on the Levee 87 m	Posey Flats	new
+CN483	SEED — unmapped		Reitman House	38.995278	-84.375		Reitman House			Reitman House	
+CN484	SEED — unmapped		Reitman's St. Joseph House	38.995278	-84.363333		Reitman's St. Joseph House		CHECK: same-named served pin Reitman House (osm_way958712591) 223 m away — the same place, mapped off the list point?; new: same-named pin 223 m	Reitman's St. Joseph House	new
+CN485	SEED — unmapped		Andrew Ritter Farm	38.983333	-84.358056		Andrew Ritter Farm			Andrew Ritter Farm	
+CN486	SEED — unmapped		E.O. Robinson House	39.035105	-84.447102		E.O. Robinson House			E.O. Robinson House	
+CN487	SEED — unmapped		Roth Farm	39.0125	-84.356111		Roth Farm			Roth Farm	
+CN488	SEED under a different name — containing tile 782_-1690 does not store the pin (#542)		Sacred Heart Church (rename)	39.1035351	-84.4811244	Sacred Heart Church · osm_way163347492 · 128 m	Sacred Heart Church (Bellevue, Kentucky)		hidden pin stored in 782_-1689; containing tile 782_-1690 does NOT store it (#542) — a curated row cannot un-hide it	Sacred Heart Church	new
+CN491	SEED — article in no tile (#539)		St. Joseph Catholic Church (Camp Springs, Kentucky)	38.99388888888889	-84.36166666666666	article St. Joseph Catholic Church (Camp Springs, Kentucky) · 0 m	St. Joseph Catholic Church (Camp Springs, Kentucky)			St. Joseph's Catholic Church and Cemetery	
+CN492	SEED — article in no tile (#539)		St. Paul's Episcopal Church (Newport, Kentucky)	39.09277777777778	-84.49694444444445	article St. Paul's Episcopal Church (Newport, Kentucky) · 0 m	St. Paul's Episcopal Church (Newport, Kentucky)			St. Paul's Episcopal Church	
+CN493	SEED — unmapped		St. Vincent de Paul School	39.080556	-84.486944		St. Vincent de Paul School (Newport, Kentucky)			St. Vincent de Paul School	
+CN494	SEED — article in no tile (#539)		Salem Methodist Episcopal Church and Parsonage (Newport, Kentucky)	39.08833333333334	-84.49305555555556	article Salem Methodist Episcopal Church and Parsonage (Newport, Kentucky) · 0 m	Salem Methodist Episcopal Church and Parsonage (Newport, Kentucky)			Salem Methodist Episcopal Church and Parsonage	
+CN495	SEED — unmapped		August Sauer House	39.08625	-84.495		August Sauer House			August Sauer House	
+CN496	SEED — unmapped		Sauser Farm	39.015556	-84.383611		Sauser Farm			Sauser Farm	
+CN497	SEED — unmapped		Joseph Seiter House	39.103056	-84.483889		Joseph Seiter House			Joseph Seiter House	
+CN498	SEED — unmapped		Southgate-Parker-Maddux House	39.093333	-84.496389		Southgate-Parker-Maddux House		new: line CN492 78 m	Southgate-Parker-Maddux House	new
+CN500	SEED — unmapped		Terrace Gardens	39.1082	-84.4683		Terrace Gardens (Dayton, Kentucky)			Terrace Gardens	
+CN501	SEED — article in no tile (#539)		Third Street Motor Car Company Building	39.09527777777778	-84.49416666666667	article Third Street Motor Car Company Building · 39 m	Third Street Motor Car Company Building			Third Street Motor Car Company Building	
+CN502	SEED — unmapped		Tiemeyer House	39.027778	-84.354444		Tiemeyer House			Tiemeyer House	
+CN503	SEED — unmapped		Trutschell House	39.025556	-84.35		Trutschell House			Trutschell House	
+CN504	SEED — unmapped		U.S. Army Fort Thomas Mess Hall	39.068056	-84.444444		U.S. Army Fort Thomas Mess Hall			U.S. Army Fort Thomas Mess Hall	
+CN505	SEED — unmapped		Uebel House	38.992778	-84.385556		Uebel House			Uebel House	
+CN507	SEED — unmapped		John Weber Farm	39.010328	-84.369842		John Weber Farm			John Weber Farm	
+CN508	SEED — unmapped		Charles Wiedemann House	39.088889	-84.4825		Charles Wiedemann House			Charles Wiedemann House	
+CN517	SEED — unmapped		Florence Hotel	39.001667	-84.626944		Florence Hotel (Florence, Kentucky)		new: served pin Florence Fire Station 93 m; near-named article Florence Fire Station 93 m; new: line CN518 39 m	Florence Hotel	new
+CN518	SEED — unmapped		Virginia Corey Goodridge House	39.001389	-84.626667		Virginia Corey Goodridge House		new: served pin Florence Fire Station 66 m; new: line CN517 39 m	Virginia Corey Goodridge House	new
+CN524	SEED — unmapped		Henry and Agnes Rolsen House	39.073333	-84.639167		Henry and Agnes Rolsen House			Henry and Agnes Rolsen House	
+CN525	SEED — unmapped		Dr. Gladys Rouse Office and House	39.003056	-84.62375		Dr. Gladys Rouse Office and House		new: served pin John Delehunty House 47 m	Dr. Gladys Rouse Office and House	new
+CN537	SEED — article in no tile (#539)		Fire Museum of Greater Cincinnati	39.10527777777778	-84.51944444444445	article Fire Museum of Greater Cincinnati · 0 m	Fire Museum of Greater Cincinnati		TWIN CANDIDATE CN013 0 m — one building listed twice, or two plaques on one lot?	Court Street Fire Station	
+CN539	SEED — article in no tile (#539)		Holy Cross Monastery and Church	39.10743055555556	-84.49851111111111	article Holy Cross Monastery and Church · 0 m	Holy Cross Monastery and Church		TWIN CANDIDATE CN218 0 m — one building listed twice, or two plaques on one lot?	Holy Cross Monastery	
+CN542	SEED — article in no tile (#539)		Krippendorf-Dittman Company	39.10390833333334	-84.50863333333334	article Krippendorf-Dittman Company · 0 m	Krippendorf-Dittman Company		TWIN CANDIDATE CN032 0 m — one building listed twice, or two plaques on one lot?	Krippendorf-Dittman Building	
+CN549	SEED — article in no tile (#539)		Cincinnati Music Hall	39.10944444444445	-84.51888888888888	article Cincinnati Music Hall · 0 m	Cincinnati Music Hall		TWIN CANDIDATE CN078 0 m — one building listed twice, or two plaques on one lot?	Music Hall	
+CN550	SEED — article in no tile (#539)		Isaac M. Wise Temple	39.103611111111114	-84.51805555555555	article Isaac M. Wise Temple · 0 m	Isaac M. Wise Temple		TWIN CANDIDATE CN044 0 m — one building listed twice, or two plaques on one lot?	Plum Street Temple	
+CN018	CUT — served					Tyler Davidson Fountain · osm_way109078597 · 33 m	Tyler Davidson Fountain			Tyler Davidson Fountain	
+CN022	CUT — served					East Fourth Street Historic District · osm_way46201471 · 20 m	East Fourth Street Historic District (Cincinnati, Ohio)			East Fourth Street Historic District	
+CN023	CUT — served					Fenwick Club · wiki_12332146 · 0 m	Fenwick Club Annex			Fenwick Club Annex	
+CN034	CUT — served					Lytle Park Historic District · wiki_33700397 · 0 m	Lytle Park Historic District			Lytle Park Historic District	
+CN053	CUT — served					Cathedral Basilica of Saint Peter in Chains · osm_way34230640 · 30 m	Cathedral Basilica of Saint Peter in Chains (Cincinnati)			St. Peter-In-Chains Cathedral	
+CN055	CUT — served					Taft Museum of Art · wiki_3553525 · 0 m	Taft Museum of Art			Taft Museum	
+CN065	CUT — served					Allen Temple AME Church (Cincinnati, Ohio) · wiki_8578172 · 0 m	Allen Temple AME Church (Cincinnati, Ohio)			Allen Temple	
+CN067	CUT — served					American Can Company Building · wiki_31006318 · 0 m	American Can Company Building			American Can Company Building	
+CN068	CUT — served					Anderson Ferry · wiki_8561554 · 5 m	Anderson Ferry			Anderson Ferry	
+CN072	CUT — served					Beech Avenue Houses · wiki_12186889 · 0 m	Beech Avenue Houses			Beech Avenue Houses	
+CN080	CUT — served					Cincinnati Union Terminal · osm_way27669543 · 16 m	Cincinnati Union Terminal			Cincinnati Union Terminal	
+CN081	CUT — served					Cincinnati Work House and Hospital · wiki_12234002 · 0 m	Cincinnati Work House and Hospital			Cincinnati Work House and Hospital	
+CN084	CUT — served					College Hill Town Hall · wiki_12238916 · 0 m	College Hill Town Hall			College Hill Town Hall	
+CN087	CUT — served					Crosley Building · wiki_58624892 · 58 m	Crosley Building			Crosley Building	
+CN090	CUT — served					Domhoff Buildings · wiki_12239051 · 0 m	Domhoff Buildings			Domhoff Buildings	
+CN104	CUT — served					Hoffner Historic District · wiki_33700400 · 0 m	Hoffner Historic District			Hoffner Historic District	
+CN110	CUT — served					Lower Price Hill Historic District · wiki_12350121 · 0 m	Lower Price Hill Historic District			Lower Price Hill Historic District	
+CN116	CUT — served					Charles A. Miller House · wiki_12351547 · 0 m	Charles A. Miller House			Charles A. Miller House	
+CN119	CUT — served					Mount Airy Forest · wiki_27325031 · 12 m	Mount Airy Forest			Mount Airy Forest	
+CN120	CUT — served					Northside United Methodist Church · wiki_12352014 · 24 m	Northside United Methodist Church			Northside United Methodist Church	
+CN121	CUT — served					Oesterlein Machine Company-Fashion Frocks, Inc. Complex · wiki_12352110 · 30 m	Oesterlein Machine Company-Fashion Frocks, Inc. Complex			Oesterlein Machine Company-Fashion Frocks, Inc. Complex	
+CN123	CUT — served					Old College Hill Post Office · wiki_12352146 · 20 m	Old College Hill Post Office			Old College Hill Post Office	
+CN127	CUT — served					Pinecroft · wiki_20930070 · 15 m	Pinecroft			Pinecroft	
+CN132	CUT — served					Probasco Fountain · osm_way1474218929 · 8 m	Probasco Fountain			Probasco Fountain	
+CN137	CUT — served					William Resor House · wiki_12362614 · 0 m	William Resor House			William Resor House	
+CN138	CUT — served					Charles B. Russell House · wiki_12362673 · 0 m	Charles B. Russell House			Charles B. Russell House	
+CN143	CUT — served					St. Pius X Catholic Church (Cincinnati, Ohio) · wiki_12362794 · 66 m	St. Pius X Catholic Church (Cincinnati, Ohio)			St. Patrick's Catholic Church	
+CN144	CUT — served					St. Peter's Lick Run Historic District · wiki_12362798 · 24 m	St. Peter's Lick Run Historic District			St. Peter's Lick Run Historic District	
+CN147	CUT — served					George Scott House · wiki_12362717 · 66 m	George Scott House			George Scott House	
+CN153	CUT — served					Peter G. Thomson House · wiki_12362878 · 50 m	Peter G. Thomson House			Peter G. Thomson House	
+CN154	CUT — served					Union Baptist Cemetery · wiki_12362930 · 4 m	Union Baptist Cemetery			Union Baptist Cemetery	
+CN156	CUT — served					Westwood Town Center Historic District · wiki_33701966 · 4 m	Westwood Town Center Historic District			Westwood Town Center Historic District	
+CN157	CUT — served					Westwood United Methodist Church · wiki_12363026 · 20 m	Westwood United Methodist Church			Westwood United Methodist Church	
+CN158	CUT — served					Samuel and Sally Wilson House · wiki_12363066 · 16 m	Samuel and Sally Wilson House			Samuel and Sally Wilson House	
+CN161	CUT — served					Daniel Thew Wright House · wiki_12363130 · 4 m	Daniel Thew Wright House			Daniel Thew Wright House	
+CN170	CUT — served					Bates Building · wiki_12186834 · 0 m	Bates Building			Bates Building	
+CN172	CUT — served					August Bepler House · wiki_12196496 · 0 m	August Bepler House			August Bepler House	
+CN173	CUT — served					Bernheim House · wiki_12196508 · 0 m	Bernheim House			Bernheim House	
+CN175	CUT — served					Ayres L. Bramble House · wiki_12196538 · 0 m	Ayres L. Bramble House			Ayres L. Bramble House	
+CN176	CUT — served					A. E. Burckhardt House · wiki_12224604 · 31 m	A. E. Burckhardt House			A. E. Burckhardt House	
+CN180	CUT — served					Cincinnati Observatory · wiki_1057898 · 59 m	Cincinnati Observatory			Cincinnati Observatory Building	
+CN182	CUT — served					Cincinnati Zoo and Botanical Garden · wiki_161582 · 133 m	Cincinnati Zoo Historic Structures			Cincinnati Zoo Historic Structures	
+CN183	CUT — served					Clauder's Pharmacy · wiki_12238879 · 0 m	Clauder's Pharmacy			Clauder's Pharmacy	
+CN185	CUT — served					Pioneer Memorial Cemetery, Cincinnati · wiki_19068790 · 39 m	Pioneer Memorial Cemetery, Cincinnati			Columbia Baptist Cemetery	
+CN193	CUT — served					Eastwood Historic District · wiki_34427802 · 0 m	Eastwood Historic District			Eastwood Historic District	
+CN195	CUT — served					Eden Park Stand Pipe · osm_way46648946 · 11 m	Eden Park Stand Pipe			Eden Park Stand Pipe	
+CN199	CUT — served					Elsinore Arch · osm_way46695911 · 8 m	Elsinore Arch			Elsinore Arch	
+CN201	CUT — served					Walter Field House · wiki_12332172 · 0 m	Walter Field House			Walter Field House	
+CN206	CUT — served					Fulton-Presbyterian Cemetery · wiki_12333670 · 24 m	Fulton-Presbyterian Cemetery			Fulton-Presbyterian Cemetery	
+CN207	CUT — served					General Hospital Nurses' Home · wiki_12333794 · 49 m	General Hospital Nurses' Home			General Hospital Nurses' Home	
+CN210	CUT — served					Gilbert-Sinton Historic District · osm_node357471969 · 77 m	Gilbert-Sinton Historic District			Gilbert-Sinton Historic District	
+CN212	CUT — served					Grace Church (Cincinnati, Ohio) · wiki_12345921 · 127 m	Grace Church (Cincinnati, Ohio)			Grace Church	
+CN214	CUT — served					Haddon Hall (Cincinnati, Ohio) · wiki_12348358 · 0 m	Haddon Hall (Cincinnati, Ohio)			Haddon Hall	
+CN219	CUT — served					Hoodin Building · wiki_12349054 · 0 m	Hoodin Building			Hoodin Building	
+CN220	CUT — served					Houston House · wiki_12349064 · 0 m	Houston House			Houston House	
+CN224	CUT — served					Kellogg House (Cincinnati, Ohio) · wiki_12349283 · 0 m	Kellogg House (Cincinnati, Ohio)			Kellogg House	
+CN227	CUT — served					Kestler Building · wiki_12349293 · 0 m	Kestler Building			Kestler Building	
+CN230	CUT — served					La Tosca Flats · wiki_12349332 · 90 m	La Tosca Flats			La Tosca Flats	
+CN232	CUT — served					Landt Building · wiki_12349338 · 0 m	Landt Building			Landt Building	
+CN233	CUT — served					Langdon House · wiki_12349352 · 0 m	Langdon House			Langdon House	
+CN234	CUT — served					Harry Milton Levy House · wiki_12349377 · 82 m	Harry Milton Levy House			Harry Milton Levy House	
+CN236	CUT — served					LuNeack House · wiki_12350140 · 0 m	LuNeack House			LuNeack House	
+CN239	CUT — served					Madison–Stewart Historic District · wiki_33700394 · 0 m	Madison-Stewart Historic District			Madison-Stewart Historic District	
+CN241	CUT — served					Mardot Antique Shop · wiki_12350206 · 0 m	Mardot Antique Shop			Mardot Antique Shop	
+CN243	CUT — served					David and Mary May House · wiki_12350252 · 66 m	David and Mary May House			David and Mary May House	
+CN245	CUT — served					McKinley School (Cincinnati, Ohio) · wiki_12350277 · 47 m	McKinley School (Cincinnati, Ohio)			McKinley School	
+CN247	CUT — served					Mill & Dunn Historic District · wiki_67110195 · 9 m	Mill & Dunn Historic District			Mill & Dunn Historic District	
+CN249	CUT — served					Richard H. Mitchell House · wiki_12351791 · 117 m	Richard H. Mitchell House			Richard H. Mitchell House	
+CN252	CUT — served					Mount Auburn Historic District · osm_node357472029 · 38 m	Mount Auburn Historic District			Mount Auburn Historic District	
+CN254	CUT — served					Observatory Historic District · wiki_33700392 · 0 m	Observatory Historic District			Observatory Historic District	
+CN258	CUT — served					George Hunt Pendleton House · osm_way50804137 · 8 m	George Hunt Pendleton House			George Hunt Pendleton House	
+CN260	CUT — served					Pfleger Family Houses · wiki_12362409 · 0 m	Pfleger Family Houses			Pfleger Family Houses	
+CN268	CUT — served					Prospect Hill · osm_node153842016 · 49 m	Prospect Hill, Cincinnati			Prospect Hill Historic District	
+CN272	CUT — served					L.B. Robb Drugstore · wiki_12362650 · 0 m	L.B. Robb Drugstore			L.B. Robb Drugstore	
+CN282	CUT — served					Spencer Township Hall · wiki_12362756 · 0 m	Spencer Township Hall			Spencer Town Hall	
+CN283	CUT — served					Stites House · wiki_12362838 · 0 m	Stites House			Stites House	
+CN285	CUT — served					Harriet Beecher Stowe House · osm_way73815053 · 40 m	Harriet Beecher Stowe House (Cincinnati, Ohio)			Harriet Beecher Stowe House	
+CN288	CUT — served					Twentieth Century Theatre · wiki_12362910 · 35 m	Twentieth Century Theatre			Twentieth Century Theatre	
+CN293	CUT — served					John Henry Weston House · wiki_12363006 · 56 m	John Henry Weston House			John Henry Weston House	
+CN294	CUT — served					Wilson-Gibson House · osm_way69687330 · 15 m	Wilson-Gibson House			Wilson-Gibson House	
+CN298	CUT — served					Mary A. Wolfe House · wiki_32080646 · 0 m	Mary A. Wolfe House			Mary A. Wolfe House	
+CN307	CUT — served					James Baxter House · wiki_12186865 · 0 m	James Baxter House			James Baxter House	
+CN309	CUT — served					Blair House (Montgomery, Ohio) · wiki_12196523 · 0 m	Blair House (Montgomery, Ohio)			Blair House	
+CN311	CUT — served					Gorman Heritage Farm · wiki_57290383 · 0 m	Brown-Gorman Farm			Brown-Gorman Farm	
+CN312	CUT — served					Burchenal Mound · wiki_12196619 · 0 m	Burchenal Mound			Burchenal Mound	
+CN315	CUT — served					Clough Creek and Sand Ridge Archaeological District · wiki_12238892 · 0 m	Clough Creek and Sand Ridge Archeological District			Clough Creek and Sand Ridge Archeological District	
+CN316	CUT — served					Clovernook · wiki_8628871 · 0 m	Clovernook			Clovernook	
+CN317	CUT — served					William Edwards Farmhouse · wiki_12239136 · 0 m	William Edwards Farmhouse			William Edwards Farmhouse	
+CN318	CUT — served					Charles Fay House · wiki_12332121 · 96 m	Charles Fay House			Charles Fay House	
+CN319	CUT — served					Eliphalet Ferris House · wiki_12332156 · 0 m	Eliphalet Ferris House			Eliphalet Ferris House	
+CN320	CUT — served					Joseph Ferris House · wiki_12332166 · 0 m	Joseph Ferris House			Joseph Ferris House	
+CN321	CUT — served					Glendale Historic District (Glendale, Ohio) · wiki_12345790 · 0 m	Glendale Historic District (Glendale, Ohio)			Glendale Historic District	
+CN322	CUT — served					Glendale Police Station · wiki_12345872 · 0 m	Glendale Police Station			Glendale Police Station	
+CN325	CUT — served					Harrison–Landers House · wiki_12348400 · 0 m	Harrison-Landers House			Harrison-Landers House	
+CN327	CUT — served					Jediah Hill Covered Bridge · wiki_12348434 · 11 m	Jediah Hill Covered Bridge			Jediah Hill Covered Bridge	
+CN328	CUT — served					Jefferson Schoolhouse · wiki_12349102 · 0 m	Jefferson Schoolhouse			Jefferson Schoolhouse	
+CN329	CUT — served					Josiah Kirby House · wiki_12349302 · 0 m	Josiah Kirby House			Josiah Kirby House	
+CN333	CUT — served					Madisonville site · wiki_12350210 · 0 m	Madisonville Site			Mariemont Embankment and Village Site	
+CN337	CUT — served					Mathew Mound · wiki_12350242 · 0 m	Mathew Mound			Mathew Mound	
+CN338	CUT — served					Miller–Leuser Log House · wiki_12351564 · 0 m	Miller-Leuser Log House			Miller-Leuser Log House	
+CN339	CUT — served					Montgomery Saltbox Houses · wiki_12351865 · 0 m	Montgomery Saltbox Houses			Montgomery Saltbox Houses	
+CN340	CUT — served					Charles H. Moore House · wiki_12351884 · 0 m	Charles H. Moore House			Charles H. Moore House	
+CN341	CUT — served					Mount Healthy Public School · wiki_12351955 · 26 m	Mount Healthy Public School			Mt. Healthy Public School	
+CN342	CUT — served					Norwood Mound · wiki_12352042 · 3 m	Norwood Mound			Norwood Mound	
+CN343	CUT — served					Norwood Municipal Building · wiki_12352056 · 0 m	Norwood Municipal Building			Norwood Municipal Building	
+CN346	CUT — served					Old Gothic Barns · wiki_12352160 · 0 m	Old Gothic Barns			Old Gothic Barns	
+CN347	CUT — served					Professor William Pabodie House · wiki_12352221 · 0 m	Professor William Pabodie House			Professor William Pabodie House	
+CN348	CUT — served					Perin Village Site · wiki_12362392 · 6 m	Perin Village Site			Perin Village Site	
+CN349	CUT — served					Pine Meer · wiki_12362442 · 0 m	Pine Meer			Pine Meer	
+CN354	CUT — served					St. Francis Seminary (Ohio) · wiki_12362780 · 0 m	St. Francis Seminary (Ohio)			St. Francis Seminary	
+CN355	CUT — served					Salem Methodist Church Complex (Cincinnati, Ohio) · wiki_12362685 · 50 m	Salem Methodist Church Complex (Cincinnati, Ohio)			Salem Methodist Church Complex	
+CN357	CUT — served					Smith–Jessup House · wiki_12362749 · 0 m	Smith-Jessup House			Smith-Jessup House	
+CN358	CUT — served					Edward R. Stearns House · wiki_12362824 · 0 m	Edward R. Stearns House			Edward R. Stearns House	
+CN359	CUT — served					William Stearns House · wiki_12362833 · 39 m	William Stearns House			William Stearns House	
+CN360	CUT — served					Gordon E. Pape House · wiki_12362854 · 121 m	Gordon E. Pape House			Sunny Knolls-Gordon E. Pape House	
+CN362	CUT — served					Gerald B. and Beverley Tonkens House · wiki_12362891 · 47 m	Gerald B. and Beverley Tonkens House			Gerald B. and Beverley Tonkens House	
+CN363	CUT — served					Turpin site · wiki_12362898 · 0 m	Turpin Site			Turpin Site	
+CN364	CUT — served					Twelve Mile House · osm_way206064166 · 8 m	Twelve Mile House			Twelve Mile House	
+CN365	CUT — served					Twin Oaks (Wyoming, Ohio) · wiki_12362915 · 0 m	Twin Oaks (Wyoming, Ohio)			Twin Oaks	
+CN366	CUT — served					United Brethren in Christ (Cincinnati, Ohio) · wiki_12362935 · 0 m	United Brethren in Christ (Cincinnati, Ohio)			United Brethren in Christ	
+CN367	CUT — served					Armstrong Chapel United Methodist Church · wiki_12362941 · 0 m	United Methodist Church (Indian Hill, Ohio)			United Methodist Church	
+CN369	CUT — served					Universalist Church Historic District · wiki_12362946 · 25 m	Universalist Church Historic District			Universalist Church Historic District	
+CN371	CUT — served					James Whallon House · wiki_12363037 · 0 m	James Whallon House			James Whallon House	
+CN372	CUT — served					Wilder–Swaim House · wiki_12363050 · 0 m	Wilder-Swaim House			Wilder-Swaim House	
+CN373	CUT — served					W. L. Williams House · wiki_12363057 · 38 m	W. L. Williams House			W. L. Williams House	
+CN375	CUT — served					Wyoming Presbyterian Church · wiki_12363138 · 66 m	Wyoming Presbyterian Church			Wyoming Presbyterian Church	
+CN376	CUT — served					Yost Tavern · wiki_12363142 · 19 m	Yost Tavern			Yost Tavern	
+CN388	CUT — served					Elmwood Hall (Ludlow, Kentucky) · wiki_41192795 · 0 m	Elmwood Hall (Ludlow, Kentucky)			Elmwood Hall	
+CN389	CUT — served					Emery Row · wiki_29899210 · 0 m	Emery Row			Emery Row	
+CN392	CUT — served					Fifth District School · wiki_30014296 · 35 m	Fifth District School			Fifth District School	
+CN400	CUT — served					Holy Cross Church and School Complex-Latonia · wiki_28817704 · 0 m	Holy Cross Church and School Complex-Latonia			Holy Cross Church and School Complex-Latonia	
+CN433	CUT — served					St. Augustine Church Complex · wiki_28817697 · 0 m	St. Augustine Church Complex			St. Augustine Church Complex	
+CN434	CUT — served					Seminary Square Historic District · osm_way1247010304 · 49 m	Seminary Square Historic District			Seminary Square Historic District	
+CN445	CUT — served					Baumann House · wiki_17529336 · 0 m	Baumann House			Baumann House	
+CN449	CUT — served					Blau's Four Mile House · wiki_17530454 · 20 m	Blau's Four Mile House			Blau's Four Mile House	
+CN450	CUT — served					Blenk House · wiki_56962632 · 0 m	Blenk House			Blenk House	
+CN454	CUT — served					Camp Springs House · wiki_17529988 · 0 m	Camp Springs House			Camp Springs House	
+CN459	CUT — served					Doyle Country Club · wiki_58245653 · 0 m	Doyle Country Club			Doyle Country Club	
+CN473	CUT — served					Kort Grocery · wiki_17531092 · 0 m	Kort Grocery			Kort Grocery	
+CN489	CUT — served					St. John's Lutheran Cemetery · wiki_26783659 · 0 m	St. John's Lutheran Cemetery			St. John's Lutheran Cemetery	
+CN490	CUT — served					St. John the Baptist Roman Catholic Church (Wilder, Kentucky) · wiki_6974495 · 0 m	St. John the Baptist Roman Catholic Church (Wilder, Kentucky)			St. John the Baptist Roman Catholic Church	
+CN506	CUT — served					Walter House (Melbourne, Kentucky) · wiki_24584226 · 0 m	Walter House (Melbourne, Kentucky)			Walter House	
+CN513	CUT — served					Clinton Blankenbeker House · wiki_56970671 · 39 m	Clinton Blankenbeker House			Clinton Blankenbeker House	
+CN515	CUT — served					John Delehunty House · wiki_57626162 · 62 m	John Delehunty House			John Delehunty House	
+CN516	CUT — served					Florence Fire Station · wiki_57092318 · 9 m	Florence Fire Station			Florence Fire Station	
+CN520	CUT — served					Hopeful Lutheran Church · wiki_26783366 · 33 m	Hopeful Lutheran Church			Hopeful Lutheran Church	
+CN556	CUT — served					Cathedral Basilica of Saint Peter in Chains · osm_way34230640 · 59 m	St. Peter-in-Chains Cathedral			St. Peter-in-Chains Cathedral	
+CN010	NO LINE — district centroid						Cincinnati East Manufacturing and Warehouse District		no stored pin for the district; a centroid pin would be arbitrary	Cincinnati East Manufacturing and Warehouse District	
+CN039	NO LINE — district centroid						Ninth Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	Ninth Street Historic District	
+CN049	NO LINE — district centroid						Race Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	Race Street Historic District	
+CN062	NO LINE — district centroid						West Fourth Street Historic District (Cincinnati, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	West Fourth Street Historic District	
+CN064	NO LINE — no coordinate		Albee Theatre				Albee Theatre		place by hand or cut	Albee Theatre	
+CN073	NO LINE — district centroid						Betts-Longworth Historic District		no stored pin for the district; a centroid pin would be arbitrary	Betts-Longworth Historic District	
+CN079	NO LINE — no coordinate		Cincinnati Street Gas Lamps				Cincinnati Street Gas Lamps		place by hand or cut	Cincinnati Street Gas Lamps	
+CN082	NO LINE — district centroid						Clifton Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	Clifton Avenue Historic District	
+CN088	NO LINE — district centroid						Dayton Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	Dayton Street Historic District	
+CN091	NO LINE — district centroid						Eighteenth District School		no stored pin for the district; a centroid pin would be arbitrary	Eighteenth District School	
+CN108	NO LINE — district centroid						Laurel Homes Historic District		no stored pin for the district; a centroid pin would be arbitrary	Laurel Homes Historic District	
+CN112	NO LINE — district centroid						Lunkenheimer Valve Company Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lunkenheimer Valve Company Historic District	
+CN117	NO LINE — district centroid						Mohawk Place Historic District		no stored pin for the district; a centroid pin would be arbitrary	Mohawk Place Historic District	
+CN125	NO LINE — district centroid						Over-the-Rhine		no stored pin for the district; a centroid pin would be arbitrary	Over-the-Rhine Historic District	
+CN142	NO LINE — district centroid						St. Leo the Great Historic District		no stored pin for the district; a centroid pin would be arbitrary	St. Leo the Great Historic District	
+CN148	NO LINE — district centroid						Sedamsville River Road Historic District		no stored pin for the district; a centroid pin would be arbitrary	Sedamsville River Road Historic District	
+CN149	NO LINE — district centroid						Sedamsville Village Historic District		no stored pin for the district; a centroid pin would be arbitrary	Sedamsville Village Historic District	
+CN155	NO LINE — district centroid						Warsaw Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	Warsaw Avenue Historic District	
+CN160	NO LINE — district centroid						Winton Terrace Historic District		no stored pin for the district; a centroid pin would be arbitrary	Winton Terrace Historic District	
+CN162	NO LINE — no coordinate		William Salway House				William Salway House		place by hand or cut	William Salway House	
+CN163	NO LINE — no coordinate		Sayler House				Sayler House		place by hand or cut	Sayler House	
+CN198	NO LINE — district centroid						Edgecliff Area Historic Group		no stored pin for the district; a centroid pin would be arbitrary	Edgecliff Area Historic Group	
+CN200	NO LINE — district centroid						Evanston Historic District (Cincinnati, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Evanston Historic District	
+CN211	NO LINE — district centroid						Glencoe-Auburn Hotel and Glencoe-Auburn Place Row Houses		no stored pin for the district; a centroid pin would be arbitrary	Glencoe-Auburn Hotel and Glencoe-Auburn Place Row Houses	
+CN238	NO LINE — district centroid						Madison and Woodburn Historic District		no stored pin for the district; a centroid pin would be arbitrary	Madison and Woodburn Historic District	
+CN257	NO LINE — district centroid						Peeble's Corner Historic District		no stored pin for the district; a centroid pin would be arbitrary	Peeble's Corner Historic District	
+CN275	NO LINE — district centroid						Saint Francis De Sales Catholic Church (Cincinnati, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	St. Francis De Sales Church Historic District	
+CN277	NO LINE — district centroid						St. Paul Church (Over the Rhine)		no stored pin for the district; a centroid pin would be arbitrary	St. Paul Church Historic District	
+CN286	NO LINE — district centroid						Sycamore-13th Street Grouping		no stored pin for the district; a centroid pin would be arbitrary	Sycamore-13th Street Grouping	
+CN300	NO LINE — district centroid						Cincinnati Zoo District		no stored pin for the district; a centroid pin would be arbitrary	Cincinnati Zoo District	
+CN301	NO LINE — no coordinate		-				National Register of Historic Places listings in downtown Cincinnati		place by hand or cut	-	
+CN302	NO LINE — no coordinate		-				National Register of Historic Places listings in eastern Cincinnati		place by hand or cut	-	
+CN303	NO LINE — no coordinate		-				National Register of Historic Places listings in western Cincinnati		place by hand or cut	-	
+CN323	NO LINE — district centroid						Greenhills Historic District		LIST POINT FAR: 548 m from its article's point (Greenhills, Ohio) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	Greenhills Historic District	
+CN324	NO LINE — district centroid						Hahn Field Archeological District		no stored pin for the district; a centroid pin would be arbitrary	Hahn Field Archeological District	
+CN334	NO LINE — district centroid						Mariemont Historic District		LIST POINT FAR: 659 m from its article's point (Mariemont Historic District) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	Mariemont Historic District	
+CN370	NO LINE — district centroid						Village Historic District		no stored pin for the district; a centroid pin would be arbitrary	Village Historic District	
+CN377	NO LINE — district centroid						Austinberg Historic District		no stored pin for the district; a centroid pin would be arbitrary	Austinberg Historic District	
+CN381	NO LINE — district centroid						Beechwood Historic District		no stored pin for the district; a centroid pin would be arbitrary	Beechwood Historic District	
+CN383	NO LINE — district centroid						Central Ludlow Historic District		no stored pin for the district; a centroid pin would be arbitrary	Central Ludlow Historic District	
+CN384	NO LINE — district centroid						Covington Downtown Commercial Historic District		no stored pin for the district; a centroid pin would be arbitrary	Covington Downtown Commercial Historic District	
+CN385	NO LINE — district centroid						Dixie Highway Historic District		no stored pin for the district; a centroid pin would be arbitrary	Dixie Highway Historic District	
+CN387	NO LINE — district centroid						Eleventh District School		no stored pin for the district; a centroid pin would be arbitrary	Eleventh District School	
+CN390	NO LINE — district centroid						Emery-Price Historic District		no stored pin for the district; a centroid pin would be arbitrary	Emery-Price Historic District	
+CN391	NO LINE — district centroid						Erlanger Proper Subdivision Historic District		no stored pin for the district; a centroid pin would be arbitrary	Erlanger Proper Subdivision Historic District	
+CN393	NO LINE — district centroid						Fort Mitchell Heights Historic District		no stored pin for the district; a centroid pin would be arbitrary	Fort Mitchell Heights Historic District	
+CN394	NO LINE — district centroid						Fourth District Elementary School		no stored pin for the district; a centroid pin would be arbitrary	Fourth District Elementary School	
+CN397	NO LINE — district centroid						Helentown Historic District		no stored pin for the district; a centroid pin would be arbitrary	Helentown Historic District	
+CN399	NO LINE — district centroid						Highland Cemetery Historic District		no stored pin for the district; a centroid pin would be arbitrary	Highland Cemetery Historic District	
+CN408	NO LINE — district centroid						Lee-Holman Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lee-Holman Historic District	
+CN409	NO LINE — district centroid						Lewisburg Historic District (Covington, Kentucky)		no stored pin for the district; a centroid pin would be arbitrary	Lewisburg Historic District	
+CN410	NO LINE — district centroid						Licking Riverside Historic District		no stored pin for the district; a centroid pin would be arbitrary	Licking Riverside Historic District	
+CN420	NO LINE — district centroid						Mutter Gottes Historic District		no stored pin for the district; a centroid pin would be arbitrary	Mutter Gottes Historic District	
+CN423	NO LINE — district centroid						Old Fort Mitchell Historic District		no stored pin for the district; a centroid pin would be arbitrary	Old Fort Mitchell Historic District	
+CN425	NO LINE — district centroid						Park Hills Historic District		no stored pin for the district; a centroid pin would be arbitrary	Park Hills Historic District	
+CN431	NO LINE — district centroid						Ritte's East Historic District		no stored pin for the district; a centroid pin would be arbitrary	Ritte's East Historic District	
+CN432	NO LINE — district centroid						Riverside Drive Historic District		no stored pin for the district; a centroid pin would be arbitrary	Riverside Drive Historic District	
+CN441	NO LINE — district centroid						West Side-Main Strasse Historic District		no stored pin for the district; a centroid pin would be arbitrary	West Side-Main Strasse Historic District	
+CN443	NO LINE — no coordinate		Champion Ice Manufacturing and Cold Storage Company				Champion Ice Manufacturing and Cold Storage Company		place by hand or cut	Champion Ice Manufacturing and Cold Storage Company	
+CN451	NO LINE — district centroid						Bonnie Leslie Historic District		no stored pin for the district; a centroid pin would be arbitrary	Bonnie Leslie Historic District	
+CN453	NO LINE — district centroid						Buena Vista Historic District (Kentucky)		no stored pin for the district; a centroid pin would be arbitrary	Buena Vista Historic District	
+CN456	NO LINE — district centroid						Cote Brillante Historic District		no stored pin for the district; a centroid pin would be arbitrary	Cote Brillante Historic District	
+CN460	NO LINE — district centroid						East Row Historic District		LIST POINT FAR: 507 m from its article's point (East Row Historic District) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	East Row Historic District	
+CN462	NO LINE — district centroid						Fairfield Avenue Historic District (Bellevue, Kentucky)		no stored pin for the district; a centroid pin would be arbitrary	Fairfield Avenue Historic District	
+CN464	NO LINE — district centroid						Fort Thomas Commercial District		no stored pin for the district; a centroid pin would be arbitrary	Fort Thomas Commercial District	
+CN465	NO LINE — district centroid						Fort Thomas Military Reservation District		no stored pin for the district; a centroid pin would be arbitrary	Fort Thomas Military Reservation District	
+CN479	NO LINE — district centroid						Monmouth Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	Monmouth Street Historic District	
+CN480	NO LINE — district centroid						Newport Courthouse Square Historic District		no stored pin for the district; a centroid pin would be arbitrary	Newport Courthouse Square Historic District	
+CN499	NO LINE — district centroid						Taylor's Daughters Historic District		no stored pin for the district; a centroid pin would be arbitrary	Taylor's Daughters Historic District	
+CN509	NO LINE — district centroid						York Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	York Street Historic District	
+CN510	NO LINE — no coordinate		Thomas and Mary Jones House				Thomas and Mary Jones House		place by hand or cut	Thomas and Mary Jones House	
+CN511	NO LINE — no coordinate		Archaeological Site 15 BE 36				Archaeological Site 15 BE 36		place by hand or cut	Archaeological Site 15 BE 36	
+CN512	NO LINE — no coordinate		Bedinger Site				Bedinger Site		place by hand or cut	Bedinger Site	
+CN514	NO LINE — no coordinate		Crisler-Crisler Mounds Site				Crisler-Crisler Mounds Site		place by hand or cut	Crisler-Crisler Mounds Site	
+CN519	NO LINE — no coordinate		M. B. Green Site				M. B. Green Site		place by hand or cut	M. B. Green Site	
+CN521	NO LINE — no coordinate		Maplewood				Maplewood (Walton, Kentucky)		place by hand or cut	Maplewood	
+CN522	NO LINE — no coordinate		Reeves Mound				Reeves Mound (Stringtown, Boone County, Kentucky)		place by hand or cut	Reeves Mound	
+CN523	NO LINE — no coordinate		Rogers Site				Rogers Site		place by hand or cut	Rogers Site	
+CN526	NO LINE — no coordinate		Clarke Farm Site				Clarke Farm Site		place by hand or cut	Clarke Farm Site	
+CN527	NO LINE — no coordinate		Devanney Site				Devanney Site		place by hand or cut	Devanney Site	
+CN528	NO LINE — no coordinate		East Fork Site				East Fork Site		place by hand or cut	East Fork Site	
+CN529	NO LINE — no coordinate		Snead Mound				Snead Mound		place by hand or cut	Snead Mound	
+CN530	NO LINE — no coordinate		Pinkham Farm				Pinkham Farm		place by hand or cut	Pinkham Farm	
+CN531	NO LINE — no coordinate		Baldwin Piano Building				Baldwin Piano Building		place by hand or cut	Baldwin Piano Building	
+CN532	NO LINE — no coordinate		Benjamin Stewart Home				Benjamin Stewart House		place by hand or cut	Benjamin Stewart Home	
+CN533	NO LINE — no coordinate		Brunswick Balke Collender Building				Brunswick Balke Collender Building		place by hand or cut	Brunswick Balke Collender Building	
+CN534	NO LINE — no coordinate		Carthage Flagpole				Carthage Flagpole		place by hand or cut	Carthage Flagpole	
+CN535	NO LINE — no coordinate		Cincinnati Bell Building				Cincinnati Bell Building		place by hand or cut	Cincinnati Bell Building	
+CN536	NO LINE — no coordinate		Citadel Building				Citadel Building		place by hand or cut	Citadel Building	
+CN538	NO LINE — no coordinate		Farmers Hotel				Farmers Hotel		place by hand or cut	Farmers Hotel	
+CN540	NO LINE — no coordinate		House of Adam				House of Adam		place by hand or cut	House of Adam	
+CN541	NO LINE — no coordinate		Kinsey Apartment Building				Kinsey Apartment Building		place by hand or cut	Kinsey Apartment Building	
+CN543	NO LINE — no coordinate		Laurel Court				Laurel Court		place by hand or cut	Laurel Court	
+CN544	NO LINE — no coordinate		Manse Hotel and Annex				Manse Hotel		place by hand or cut	Manse Hotel and Annex	
+CN545	NO LINE — no coordinate		Masonic Temple				Price Hill Masonic Temple		place by hand or cut	Masonic Temple	
+CN546	NO LINE — no coordinate		Mercantile Library				Mercantile Library of Cincinnati		place by hand or cut	Mercantile Library	
+CN547	NO LINE — no coordinate		Moore-Knight House				Moore-Knight House		place by hand or cut	Moore-Knight House	
+CN548	NO LINE — no coordinate		Mount Airy Water Towers				Mount Airy Water Towers		place by hand or cut	Mount Airy Water Towers	
+CN551	NO LINE — no coordinate		Provident Bank Building				Provident Bank Building		place by hand or cut	Provident Bank Building	
+CN552	NO LINE — no coordinate		Riverview Playground Entrance				Riverview Playground Entrance		place by hand or cut	Riverview Playground Entrance	
+CN553	NO LINE — no coordinate		Sayler Park Indian Statue				Sayler Park Indian Statue		place by hand or cut	Sayler Park Indian Statue	
+CN554	NO LINE — no coordinate		St. Louis Church				St. Louis Church (Cincinnati, Ohio)		place by hand or cut	St. Louis Church	
+CN555	NO LINE — no coordinate		St. Marks Church				St. Mark's Church (Cincinnati, Ohio)		place by hand or cut	St. Marks Church	
+CN557	NO LINE — no coordinate		Traction Building				Traction Building		place by hand or cut	Traction Building	
+CN558	NO LINE — no coordinate		Union Central Life Annex Building				Union Central Life Annex Building		place by hand or cut	Union Central Life Annex Building	
+CN559	NO LINE — no coordinate		Williams YMCA				Williams YMCA		place by hand or cut	Williams YMCA	
+CN560	NO LINE — no coordinate		Windsor School				Windsor School, Cincinnati		place by hand or cut	Windsor School	
+CN561	NO LINE — no coordinate		Former WLWT studio<br>				WLWT		place by hand or cut	Former WLWT studio<br>	

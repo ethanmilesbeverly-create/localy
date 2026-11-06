@@ -1,0 +1,101 @@
+tile	name	category	desc	pin id	in gate drops	in leads	verdict
+780_-1693	Veteran’s Memorial	history	A local memorial.	osm_way235708628	yes	yes	
+780_-1691	Big Boy	art	A public statue.	osm_node7106248855	yes	yes	
+780_-1689	Box sculpture	art	A piece of public art.	osm_way1420095595	yes	yes	
+780_-1688	Mincey Farm	history	A local landmark (heritage).	osm_way964764975	yes	yes	
+780_-1687	Blessed Virgin Mary	art	A public statue.	osm_node7057486635	yes	yes	
+781_-1693	Saber-Tooth Cat	art	A public statue.	osm_node6781628688	yes	yes	
+781_-1692	US Gorham	history	A local landmark (wreck).	osm_way1567489558	yes	yes	
+781_-1691	Armed Forces Memorial	history	A local memorial.	osm_node8554441307	yes	yes	
+781_-1691	Behringer-Crawford Museum at Devou	history	A local history museum.	osm_way158630587	yes	yes	
+781_-1691	Incinerator	history	A local landmark (ruins).	osm_way542827896	yes	yes	
+781_-1691	Peaselburg Neighborhood Historic District	history	A local landmark (district).	osm_way1246076947	yes	yes	
+781_-1691	Ritte's Corner Historic District	history	A local landmark (district).	osm_way1246098171	yes	yes	
+781_-1691	Wallace Woods Area Residential Historic District	history	A local landmark (district).	osm_way1246726493	yes	yes	
+781_-1691	Batthery Bates	history	A local landmark (ruins).	osm_way1567703631	yes	yes	
+781_-1690	Kentucky Natural History	art	A mural by Joe Hedges.	osm_node12174899161	yes	yes	
+781_-1690	Goose Girl Fountain	history	A local landmark (monument).	osm_way1459706308	yes	yes	
+781_-1689	High Water Marker	history	A local landmark (monument).	osm_node1980844254	yes	yes	
+781_-1689	Trail Shark	art	A public sculpture.	osm_node4408475765	yes	yes	
+781_-1688	G.A.P.P. Peace Pole	history	A local memorial (peace pole).	osm_node13111693033	yes	yes	
+781_-1688	Peace Pole Garden	history	A local memorial.	osm_way1426332492	yes	yes	
+781_-1687	Anderson Township Heritage Center	history	A local landmark (heritage building).	osm_way544224471	yes	no	
+782_-1693	Big Boy	art	A public statue.	osm_node9793854197	yes	yes	
+782_-1692	Saint Peters Lick Run Historic District	history	A local landmark (district).	osm_node357472084	yes	yes	
+782_-1692	Price Hill Historical Society	history	A local museum.	osm_way55208467	yes	yes	
+782_-1692	Panthers	art	A public mural.	osm_way1568598262	yes	yes	
+782_-1691	Abraham Lincoln	art	A public statue.	osm_node344792568	yes	yes	
+782_-1691	Fifth & Pike Street Gateway	history	A local landmark (monument).	osm_node344794226	yes	yes	
+782_-1691	Greater Cincinnati Police Museum	history	A local museum.	osm_way46695243	yes	yes	
+782_-1691	Ollie's Trolley	history	A local landmark (railway car).	osm_way53258350	yes	yes	
+782_-1691	The Crown Brewery	history	A local landmark (brewery).	osm_way53335201	yes	yes	
+782_-1691	Taft House	history	A local museum.	osm_way59339960	yes	yes	
+782_-1691	Southern Caboose	history	A local landmark (railway car).	osm_way1568275371	yes	yes	
+782_-1690	Prospect Hill	history	A local landmark (district).	osm_node153842016	yes	no	
+782_-1690	Newport History Museum	history	A local museum.	osm_way42268834	yes	yes	
+782_-1690	Cincinnati Water Works	history	A local landmark (ruins).	osm_way46145618	yes	yes	
+782_-1689	Presidential Grove	history	A local memorial.	osm_node1039771485	yes	yes	
+782_-1689	Cincinnati Aviation Heritage Society Museum	history	A local museum.	osm_node1086623546	yes	yes	
+782_-1689	Sacred Heart Church	history	A local landmark (heritage).	osm_way163347492	yes	yes	
+782_-1689	Tharp Dayton Heritage Museum	history	A local museum.	osm_way166757781	yes	yes	
+782_-1688	Irish Heritage Center of Cincinnati	history	A local history museum.	osm_node12084184162	yes	yes	
+782_-1688	World War II Comes to Lunken Field	history	A local memorial (plaque).	osm_node13719939470	yes	yes	
+783_-1693	Big Boy	art	A public statue.	osm_node6961232398	yes	yes	
+783_-1692	Big Boy	art	A public statue.	osm_node6961222092	yes	yes	
+783_-1692	Westwood Town Hall Recreation Center	history	A local landmark (townhall).	osm_way201731133	yes	yes	
+783_-1691	Forest Devil	art	A sculpture by Kenneth Snelson.	osm_node3378698150	yes	yes	
+783_-1691	Trailside Nature Center	history	A local museum.	osm_way69545833	yes	yes	
+783_-1689	Cincinnati	art	A relief by Karl Bitter.	osm_node6796261880	yes	yes	
+783_-1689	Cincinnati Porkitecture	art	A public statue.	osm_node7662332016	yes	yes	
+783_-1689	Dare to be a beacon of light	art	A public mural.	osm_way1491863518	yes	yes	
+783_-1688	Madisonville Village	history	A local landmark (archaeological site).	osm_node2018013213	yes	yes	
+783_-1688	Station 66 Monument to the Heroes	history	A local landmark (monument).	osm_node4630902524	yes	yes	
+783_-1688	Madisonville Mural	art	A public mural.	osm_node6606253415	yes	yes	
+783_-1688	Big Boy	art	A public statue.	osm_node6960871836	yes	yes	
+783_-1688	A Pig for all Seasons - Winter	art	A statue by Michael Scott.	osm_node12626441708	yes	yes	
+784_-1693	The German Heritage Museum	history	A local museum.	osm_way672870617	yes	yes	
+784_-1692	Saint Ann Grotto	history	A local landmark (wayside shrine).	osm_node2249999147	yes	yes	
+784_-1692	Big Boy	art	A public statue.	osm_node6961224543	yes	yes	
+784_-1691	Saint Francis Xavier	art	A public statue.	osm_node481802721	yes	yes	
+784_-1691	Big Boy	art	A public statue.	osm_node6961173449	yes	yes	
+784_-1691	SAR Memorial	history	A local memorial.	osm_node7986007353	yes	yes	
+784_-1691	Luke Kuechly Statue	art	A statue by Chad Scholten.	osm_node10127208277	yes	yes	
+784_-1691	Grotto of the Holy Companions	history	A local landmark (wayside shrine).	osm_way1024706006	yes	yes	
+784_-1689	Doughboy	art	A statue by Michael Roth.	osm_node5338728269	yes	yes	
+784_-1688	Armed Forces Memorial	history	A war memorial.	osm_node6818164550	yes	yes	
+784_-1688	Miller House Museum	history	A local local museum.	osm_way676001679	yes	yes	
+784_-1687	Dead Man’s Hand	history	A local memorial (plaque).	osm_node10675494228	yes	no	
+785_-1692	Big Boy	art	A public statue.	osm_node6961483045	yes	yes	
+785_-1691	Greenhills Historic District	history	A local landmark (district).	osm_node357471982	yes	yes	
+785_-1690	Glendale Veterans’ Memorial	history	A war memorial.	osm_node9340083468	yes	yes	
+785_-1690	Scrappy Fritz Kloth	art	A public statue.	osm_node9340083479	yes	yes	
+785_-1690	Faberge Fosdick	art	A public statue.	osm_node10690511975	yes	yes	
+785_-1690	The Open Road Squirrel	art	A public statue.	osm_node10690511976	yes	yes	
+785_-1689	Chrony	art	A public statue.	osm_node9340083418	yes	yes	
+785_-1689	Glendale Heritage Preservation Museum	history	A local history museum.	osm_way52096455	yes	yes	
+785_-1689	Sharonville Roundhouse	history	A local landmark (roundhouse).	osm_way205148195	yes	yes	
+785_-1689	Society of Historic Sharonville Museum	history	A local history museum.	osm_way206064161	yes	yes	
+785_-1688	Sharonville Patriot Pointe	history	A war memorial.	osm_way553002755	yes	yes	
+785_-1687	Blessed Virgin Mary	art	A public statue.	osm_node9381351035	yes	no	
+785_-1687	Saint Francis of Assisi	art	A public statue.	osm_node11932125916	yes	no	
+785_-1687	Peterloon	history	A local landmark (manor).	osm_way670707717	yes	yes	
+785_-1687	Pioneer Section	history	A local landmark (heritage).	osm_way1289059520	yes	yes	
+782_-1690	Capitoline Wolf Replica	art	A public sculpture.	osm_node1595625450	no	yes	
+782_-1690	Castle of Air	art	Large shiny blocks	osm_way657940318	no	yes	
+782_-1689	Stephen C. Foster	art	Stephen C. Foster 1826 1864 presented by Josiah K. Lilly	osm_node11298373151	no	yes	
+784_-1690	Charley Harper House	history	“Charley Harper House”	osm_node6924820084	no	yes	
+782_-1690	Cincinnati Gateway	history	A local landmark (monument).	osm_way46145903	no	yes	
+782_-1692	Delhi Historical Society	history	archive organization in Cincinnati, United States	osm_way448231045	no	yes	
+782_-1690	Elephant	history	A Gift from Repblicans of Hamilton Co.	osm_node1247872183	no	yes	
+780_-1693	Florence Y’All Water Tower	history	water tower in Florence, Kentucky, United States	osm_way258540662	no	yes	
+781_-1689	Fort Thomas Military Museum	history	A local military museum.	osm_way264256290	no	yes	
+782_-1690	Fort Washington Monument	history	A local landmark (monument).	osm_node357454269	no	yes	
+785_-1689	Glendale Historic District	history	A local landmark (district).	osm_node357471975	no	yes	
+781_-1692	Kenton County Veterans Memorial	history	A war memorial.	osm_node1330364011	no	yes	
+783_-1688	Mariemont Embankment	history	A local landmark (archaeological site).	osm_way191202926	no	yes	
+782_-1690	Newport on the Levee	history		osm_way121064759	no	yes	
+781_-1692	Northern Kentucky 9/11 Memorial	history	A war memorial.	osm_node4171690682	no	yes	
+782_-1690	Over-the-Rhine Museum	history	A local museum.	osm_way212399291	no	yes	
+785_-1688	Plainfield School Historic Sign	history	“Plainfield School Historic Sign”	osm_node12620211282	no	yes	
+783_-1691	Temple of Love	history	Pergola	osm_way89261304	no	yes	
+781_-1690	West Fifteenth Street Historic District	history	historic district in Covington, Kentucky, USA	osm_way1246735237	no	yes	
