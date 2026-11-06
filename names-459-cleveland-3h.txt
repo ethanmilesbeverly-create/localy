@@ -1,0 +1,33 @@
+# names-459-cleveland-3h.txt — #459 Cleveland story batch, part 3h: the west side's red-link "SEED — unmapped" rows,
+# first pass (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1 … -3g, this file, later parts + 459_hidden_curated*.sql) dry-runs and commits
+# in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# ROWS (20): the west side — the Cleveland list's unmapped rows west of -81.745 (CV120, CV163, CV191, CV259, CV273, CV276)
+#   and the Cuyahoga County list's west and south-west rows (CV318, CV320, CV321, CV323, CV344, CV350, CV351, CV353,
+#   CV364, CV366, CV377, CV384, CV397, CV400). All 20 re-resolved on Wikipedia first: red links. Every tile stored.
+# SOURCES, one per line: the Lakewood Observer 2016-03-01 (Nicholson); News 5 Cleveland (West Tech); the Encyclopedia of
+#   Cleveland History's *American Chicle Co.* (White Chewing Gum).
+# CHECKS as parts 3f–3g: every number and capitalised name in its source (the checker re-proven on planted 1913 / "Jon"
+#   for the curated row's source, both absent); each line in stored tile 829_-1635, 830_-1635 or 830_-1636 inside the box;
+#   stored pins, gems, all parts' lines within 100 m and articles within 90 m at each line's own point — nothing near any
+#   of the three; no name repeated across parts 1–3h.
+# POINTS: Nicholson House (OSM way 514866697 — its own name, used for the line); White Chewing Gum (way 458608789,
+#   *Chicle: A Post-Industrial Resort*, the building's present name); West Tech at its seconds list point.
+# CURATED ROW, NOT A LINE: CV353 John Honam House is the hidden *Old Stone House Museum* (osm_node1181067423, 12 m from
+#   the list point; stored in 830_-1635 and 830_-1636, containing tile 830_-1636 stores it — #542 passes; not in a live
+#   serve of either tile, which serve 10 and 17 pins) → 459_hidden_curated_2.sql, 1 row.
+# NO LINE — access (FROM LAS VEGAS (5)): CV364 NASA Lewis Research Center Development Engineering Building & Annex
+#   (inside NASA Glenn's secured campus).
+# CARRIED to part 3i, not yet searched (this chat's budget): CV120 Nathaniel Hawthorne Elementary, CV163 McKinley School,
+#   CV191 Oppmann Terrace, CV259 Variety Store Building and Theatre, CV318 Erastus Day House, CV320 Detroit Avenue Bridge,
+#   CV321 Detroit-Warren Building, CV323 Carl Droppers House, CV344 Harvey Hackenberg House, CV350 Phillip Henninger House,
+#   CV351 Robert W. Henry House, CV377 Reidy Bros. & Flanigan Building (the served *Phantasy Theater* stands 40 m off —
+#   read for same-building first), CV384 Lyman Stearns Farm, CV397 Westerly Apartments, CV400 George W. Whitney House.
+#   Five of these (Droppers, Whitney, Day, Hackenberg — the list marks them private residences — and Henninger) are
+#   houses: read access before story.
+# EXPECT on the Mac dry run: 3 new-seed. Any `review` is a stop: read it before --commit.
+Nicholson House | @41.484599,-81.783010 | Pioneer Lakewood settler James Nicholson built this frame colonial house about 1835–1839, and it shares honors with the Honam house as Lakewood's two oldest standing structures. | https://www.lakewoodobserver.com/read/2016/03/01/nicholson-house-designated-local-historic-property
+West Technical High School | @41.471944,-81.746667 | Built in 1912, West Tech High School was the first vocational school in the city, teaching trades like auto, wood working and welding until it shut down in 1995; it is now lofts, with the West Tech Museum in the old auditorium. | https://news5cleveland.com/news/local-news/cleveland-metro/west-tech-high-alumni-fight-back-against-developers-desire-to-remove-school-museum
+White Chewing Gum Company Building | @41.480395,-81.757325 | Gum maker Wm. J. White, who found a way to make chicle more chewable and added flavor to it, opened his first plant in 1884 and four years later built this factory on Detroit Ave. to make Yucatan and Red Robin brand gums. | https://case.edu/ech/articles/a/american-chicle-co
