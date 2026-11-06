@@ -1,0 +1,408 @@
+id	action	status	line name	line lat	line lng	stored pin (name · id · m)	story source	story owed to	why	candidate name	new
+CV041	CURATED ROW — hidden pin		Cleveland East Pierhead Light	41.5102005	-81.7154659	Cleveland East Pierhead Light · osm_way414659021 · 18 m	Cleveland East Pierhead Light		hidden pin stored in 830_-1634, 830_-1635; containing tile 830_-1634 stores it (#542)	Cleveland East Pierhead Light	
+CV167	CURATED ROW — hidden pin		Miles Park	41.4468445	-81.6228439	Miles Park · osm_way467671728 · 31 m	Miles Park Historic District		CHECK SUBJECT (partial or container match); hidden pin stored in 829_-1632, 829_-1633; containing tile 829_-1632 stores it (#542)	Miles Park Historic District	
+CV001	SEED — unmapped		Adams-Bagnall Electric Co.- Cleveland Motorcycle Manufacturing Co.	41.4905	-81.6381		Adams-Bagnall Electric Co.- Cleveland Motorcycle Manufacturing Co.			Adams-Bagnall Electric Co.- Cleveland Motorcycle Manufacturing Co.	
+CV003	SEED — unmapped		Advent Evangelical Lutheran Church	41.4499	-81.5738		Advent Evangelical Lutheran Church			Advent Evangelical Lutheran Church	
+CV004	SEED — article in no tile (#539)		Allen Memorial Medical Library	41.50595555555556	-81.60849444444443	article Allen Memorial Medical Library · 20 m	Allen Memorial Medical Library		CHECK SUBJECT: served pin University Hospitals Cleveland Medical Center (wiki_1280292) 76 m from the article may already be this place	Allen Memorial Medical Library	
+CV005	SEED — article in no tile (#539)		Alta Public Library	41.50865833333334	-81.59605833333333	article Alta Public Library · 67 m	Alta Public Library			Alta Public Library	
+CV009	SEED — unmapped		Arnold Wooden Ware Co.-Arnold Wholesale Corp. Building	41.4859	-81.7229		Arnold Wooden Ware Co.-Arnold Wholesale Corp. Building			Arnold Wooden Ware Co.-Arnold Wholesale Corp. Building	
+CV010	SEED — unmapped		The Astrup Company Building	41.47212	-81.69844		Astrup Company Building		new: served pin Ariel Castro kidnappings 53 m	The Astrup Company Building	new
+CV011	SEED — unmapped		Audubon School	41.4754	-81.6096		Audubon School (Cleveland, Ohio)			Audubon School	
+CV013	SEED — unmapped		Beehive School	41.435081	-81.56475		Beehive School			Beehive School	
+CV014	SEED — article in no tile (#539)		Dr. James Bell House	41.507777777777775	-81.625	article Dr. James Bell House · 11 m	Dr. James Bell House			Dr. James Bell House	
+CV017	SEED — article in no tile (#539)		H. Black and Company Building	41.50666666666667	-81.67916666666667	article H. Black and Company Building · 0 m	H. Black and Company Building			H. Black and Company Building	
+CV018	SEED — article in no tile (#539)		Body Block	41.51277777777778	-81.6525	article Body Block · 0 m	Body Block			Body Block	
+CV024	SEED — article in no tile (#539)		Brownell School and Annex	41.49777777777778	-81.68027777777779	article Brownell School and Annex · 0 m	Brownell School and Annex			Brownell School and Annex	
+CV025	SEED — unmapped		Bruce-Macbeth Engine Company	41.494813	-81.70549		Bruce-Macbeth Engine Company		new: line CV144 97 m; new: line CV238 88 m	Bruce-Macbeth Engine Company	new
+CV026	SEED — article in no tile (#539)		Bryant Building (Cleveland)	41.50416666666667	-81.68555555555555	article Bryant Building (Cleveland) · 0 m	Bryant Building (Cleveland)			Bryant Building	
+CV028	SEED — unmapped		Building at 3101 Euclid Avenue	41.502886	-81.666538		Building at 3101 Euclid Avenue		new: line CV098 81 m	Building at 3101 Euclid Avenue	new
+CV029	SEED — article in no tile (#539)		Calvary Presbyterian Church (Cleveland)	41.50361111111111	-81.63388888888889	article Calvary Presbyterian Church (Cleveland) · 12 m	Calvary Presbyterian Church (Cleveland)			Calvary Presbyterian Church	
+CV030	SEED — article in no tile (#539)		Caxton Building	41.49827777777778	-81.68608333333334	article Caxton Building · 7 m	Caxton Building			Caxton Building	
+CV031	SEED — unmapped		Cedar Branch Young Men's Christian Association (YMCA)	41.5003	-81.6352		Cedar Branch Young Men's Christian Association			Cedar Branch Young Men's Christian Association (YMCA)	
+CV033	SEED — article in no tile (#539)		Central YMCA (Cleveland)	41.499722222222225	-81.6738888888889	article Central YMCA (Cleveland) · 0 m	Central YMCA (Cleveland)			Central YMCA	
+CV034	SEED — unmapped		Cermak Building	41.463333	-81.621111		Cermak Building			Cermak Building	
+CV035	SEED — unmapped		Church of the Holy Spirit-Nazarene Baptist Church	41.5159	-81.6288		Church of the Holy Spirit-Nazarene Baptist Church			Church of the Holy Spirit-Nazarene Baptist Church	
+CV036	SEED — unmapped		Cleveland Arcade	41.499444	-81.693333		Cleveland Arcade		CHECK: same-named served pin Cleveland Arcade (osm_way126820675) 248 m away — the same place, mapped off the list point?; new: served pin Soldiers' and Sailors' Monument 35 m; hidden pin Moses Cleaveland 30 m; hidden pin Public Square 40 m; same-named pin 248 m	Cleveland Arcade	new
+CV038	SEED — article in no tile (#539)		Tudor Arms Hotel	41.50055555555556	-81.61305555555555	article Tudor Arms Hotel · 0 m	Tudor Arms Hotel			Cleveland Club	
+CV039	SEED — unmapped		Cleveland Dental Manufacturing Company Building	41.464444	-81.698056		Cleveland Dental Manufacturing Company Building			Cleveland Dental Manufacturing Company Building	
+CV040	SEED — article in no tile (#539)		Superior Building	41.502361111111114	-81.68944444444445	article Superior Building · 66 m	Superior Building			Cleveland Discount Building	
+CV042	SEED — article in no tile (#539)		Grays Armory	41.49888888888889	-81.68222222222222	article Grays Armory · 0 m	Grays Armory			Cleveland Grays Armory	
+CV045	SEED — unmapped		Cleveland Jewish Center-Cory United Methodist Church	41.5265	-81.6154		Cleveland Jewish Center-Cory United Methodist Church			Cleveland Jewish Center-Cory United Methodist Church	
+CV049	SEED — unmapped		Cleveland Packard Building	41.5025	-81.653056		Cleveland Packard Building		new: line CV185 46 m	Cleveland Packard Building	new
+CV050	SEED — unmapped		Cleveland Public Carnegie Library Hough Branch	41.508889	-81.627222		Cleveland Public Carnegie Library Hough Branch		new: hidden pin African American Museum of Cleveland 16 m	Cleveland Public Carnegie Library Hough Branch	new
+CV052	SEED — article in no tile (#539)		Rhodes Tower	41.503166666666665	-81.67561111111111	article Rhodes Tower · 4 m	Rhodes Tower			Cleveland State University-University Tower	
+CV053	SEED — article in no tile (#539)		Cleveland Trust Company Building	41.50004	-81.68612	article Cleveland Trust Company Building · 24 m	Cleveland Trust Company Building			Cleveland Trust Company	
+CV055	SEED — unmapped		Cleveland West Pierhead Light	41.508889	-81.717778		Cleveland West Pierhead Light		CHECK: same-named hidden pin Cleveland East Pierhead Light (osm_way414659021) 242 m away — the same place, mapped off the list point?; new: served pin Cleveland Harbor Main Entrance Light 11 m; hidden pin Fog Signal House 19 m; same-named pin 242 m	Cleveland West Pierhead Light	new
+CV056	SEED — unmapped		Cleveland Worsted Mills Company	41.464722	-81.649167		Cleveland Worsted Mills Company			Cleveland Worsted Mills Company	
+CV057	SEED — unmapped		Clinton Apartments	41.486944	-81.713889		Clinton Apartments			Clinton Apartments	
+CV058	SEED — unmapped		Colonial and Euclid Arcades	41.498889	-81.689167		Colonial and Euclid Arcades			Colonial and Euclid Arcades	
+CV059	SEED — unmapped		The Commodore Hotel	41.508889	-81.605833		Commodore Hotel (Cleveland, Ohio)		new: served pin Museum of Contemporary Art Cleveland 89 m	The Commodore Hotel	new
+CV060	SEED — unmapped		Consolidated Fruit Auction Company Building	41.492	-81.692		Consolidated Fruit Auction Company Building			Consolidated Fruit Auction Company Building	
+CV061	SEED — unmapped		Cook Building	41.502222	-81.655		Cook Building		new: hidden pin Colonel Charles Young 65 m	Cook Building	new
+CV062	SEED — unmapped		Corlett Building	41.501667	-81.6775		Corlett Building			Corlett Building	
+CV063	SEED — unmapped		The Courtland	41.485278	-81.724444		The Courtland		new: line CV242 94 m	The Courtland	new
+CV065	SEED — article in no tile (#539)		Crawford-Tilden Apartments	41.50694444444444	-81.62916666666666	article Crawford-Tilden Apartments · 0 m	Crawford-Tilden Apartments			Crawford-Tilden Apartments	
+CV067	SEED — article in no tile (#539)		Detroit–Superior Bridge	41.493843	-81.70365	article Detroit–Superior Bridge · 102 m	Detroit–Superior Bridge			Detroit-Superior High Level Bridge	
+CV068	SEED — unmapped		Division Avenue Pumping Station	41.49	-81.716667		Division Avenue Pumping Station			Division Avenue Pumping Station	
+CV069	SEED — unmapped		Dixon Hall Apartments	41.501667	-81.66		Dixon Hall Apartments			Dixon Hall Apartments	
+CV070	SEED — unmapped		Doan School	41.520278	-81.616111		Doan School			Doan School	
+CV071	SEED — unmapped		Dunham Tavern	41.504722	-81.638611		Dunham Tavern		LIST POINT FAR: 384 m from its article's point (Dunham Tavern) — wrong article or a large site?	Dunham Tavern	
+CV076	SEED — article in no tile (#539)		1717 East Ninth Building	41.5021394	-81.6879576	article 1717 East Ninth Building · 2 m	1717 East Ninth Building			The East Ohio Building	
+CV077	SEED — unmapped		East Ohio Gas Company Building	41.5025	-81.691389		East Ohio Gas Company Building		new: hidden pin Abraham Lincoln 85 m	East Ohio Gas Company Building	new
+CV078	SEED — unmapped		Emmanuel Baptist Church	41.4935	-81.6332		Emmanuel Baptist Church (Cleveland, Ohio)			Emmanuel Baptist Church	
+CV079	SEED — unmapped		Empire Junior High School	41.5322	-81.6238		Empire Junior High School			Empire Junior High School	
+CV080	SEED — unmapped		Jeremiah Ensworth House	41.501111	-81.663889		Jeremiah Ensworth House		new: served pin Southworth House (Cleveland) 46 m; new: line CV132 98 m; new: line CV165 77 m; new: line CV199 69 m	Jeremiah Ensworth House	new
+CV081	SEED — unmapped		Erie Railroad Cleveland Powerhouse	41.496389	-81.711667		Erie Railroad Cleveland Powerhouse			Erie Railroad Cleveland Powerhouse	
+CV084	SEED — article in no tile (#539)		Erieview Tower	41.50527777777778	-81.68833333333333	article Erieview Tower · 0 m	Erieview Tower			Erieview Tower	
+CV085	SEED — unmapped		Euclid Avenue Christian Church	41.5034	-81.6192		Euclid Avenue Christian Church			Euclid Avenue Christian Church	
+CV087	SEED — article in no tile (#539)		Church of the Covenant (Cleveland)	41.50833333333333	-81.60749999999999	article Church of the Covenant (Cleveland) · 0 m	Church of the Covenant (Cleveland)			Euclid Avenue Presbyterian Church	
+CV088	SEED — unmapped		Euclid Avenue Temple-Liberty Hill Baptist Church	41.5035	-81.6307		Euclid Avenue Temple-Liberty Hill Baptist Church			Euclid Avenue Temple-Liberty Hill Baptist Church	
+CV089	SEED — unmapped		The Euclid-Seventy-First Street Building	41.504167	-81.640278		Victory Building (Cleveland, Ohio)			The Euclid-Seventy-First Street Building	
+CV091	SEED — unmapped		Fairmont Creamery Company Ice Cream Building	41.480556	-81.695833		Fairmont Creamery Company Ice Cream Building			Fairmont Creamery Company Ice Cream Building	
+CV092	SEED — unmapped		Federal Knitting Mills Building	41.488889	-81.713611		Federal Knitting Mills Building		new: hidden pin Jim Mahone Park 24 m	Federal Knitting Mills Building	new
+CV093	SEED — article in no tile (#539)		Federal Reserve Bank of Cleveland	41.50193888888889	-81.69027777777778	article Federal Reserve Bank of Cleveland · 38 m	Federal Reserve Bank of Cleveland			Federal Reserve Bank of Cleveland	
+CV094	SEED — unmapped		Fellowship Missionary Baptist Church	41.5111	-81.652		Fellowship Missionary Baptist Church			Fellowship Missionary Baptist Church	
+CV095	SEED — unmapped		Fenway Hall	41.503889	-81.613333		Fenway Hall			Fenway Hall	
+CV097	SEED — unmapped		First Evangelical Church - Greater Friendship Baptist Church	41.5341	-81.5997		First Evangelical Church - Greater Friendship Baptist Church			First Evangelical Church - Greater Friendship Baptist Church	
+CV098	SEED — article in no tile (#539)		First Methodist Church (Cleveland)	41.50222222222222	-81.66694444444445	article First Methodist Church (Cleveland) · 0 m	First Methodist Church (Cleveland)			First Methodist Church	
+CV099	SEED — unmapped		Ford Motor Company Cleveland Plant	41.510556	-81.602778		Ford Motor Company Cleveland Plant		new: line CV169 49 m	Ford Motor Company Cleveland Plant	new
+CV100	SEED — unmapped		Forest City Bank Building	41.491111	-81.7075		Forest City Bank Building			Forest City Bank Building	
+CV101	SEED — unmapped		Forest City Brewery	41.463056	-81.64		Forest City Brewery			Forest City Brewery	
+CV104	SEED — article in no tile (#539)		Phillip Gaensslen House	41.50083333333333	-81.66611111111112	article Phillip Gaensslen House · 0 m	Phillip Gaensslen House			Phillip Gaensslen House	
+CV106	SEED — article in no tile (#539)		Dr. William Gifford House	41.50138888888889	-81.66611111111112	article Dr. William Gifford House · 0 m	Dr. William Gifford House			Dr. William Gifford House	
+CV107	SEED — unmapped		Francis K. Glidden House	41.511111	-81.608333		Francis K. Glidden House			Francis K. Glidden House	
+CV108	SEED — unmapped		Globe Iron Works Building	41.495833	-81.708889		Globe Iron Works Building			Globe Iron Works Building	
+CV109	SEED — unmapped		Globe Machine and Stamping Company	41.48627	-81.738047		Globe Machine and Stamping Company			Globe Machine and Stamping Company	
+CV110	SEED — unmapped		Jacob Goldsmith House	41.498056	-81.657222		Jacob Goldsmith House			Jacob Goldsmith House	
+CV111	SEED — unmapped		Gordon Square Building	41.484167	-81.730833		Gordon Square Building		new: served pin Near West Theatre 65 m; new: line CV140 76 m	Gordon Square Building	new
+CV113	SEED — unmapped		Greater Abyssinia Baptist Church	41.5255	-81.6154		Greater Abyssinia Baptist Church			Greater Abyssinia Baptist Church	
+CV114	SEED — article in no tile (#539)		Greyhound Bus Station (Cleveland)	41.50325	-81.68222222222222	article Greyhound Bus Station (Cleveland) · 9 m	Greyhound Bus Station (Cleveland)			Greyhound Bus Station	
+CV115	SEED — unmapped		Grossman Paper Box Company	41.506389	-81.681111		Grossman Paper Box Company			Grossman Paper Box Company	
+CV116	SEED — article in no tile (#539)		Halle Building	41.50036111111111	-81.68386111111111	article Halle Building · 78 m	Halle Building			Halle Building	
+CV117	SEED — article in no tile (#539)		Halle Brothers Shaker Square department store	41.483333333333334	-81.59222222222222	article Halle Brothers Shaker Square department store · 0 m	Halle Brothers Shaker Square department store			Halle's Shaker Square	
+CV118	SEED — unmapped		Harp Apartments	41.484722	-81.729167		Harp Apartments			Harp Apartments	
+CV119	SEED — unmapped		Harvard School	41.448333	-81.641111		Harvard School (Cleveland)			Harvard School	
+CV120	SEED — unmapped		Nathaniel Hawthorne Elementary School	41.4569	-81.7794		Nathaniel Hawthorne Elementary School			Nathaniel Hawthorne Elementary School	
+CV121	SEED under a different name — containing tile 830_-1632 does not store the pin (#542)		Hay-McKinney and Bingham-Hanna House	41.5129074	-81.60969	Hay-McKinney House · osm_node9081385308 · 86 m	Hay-McKinney and Bingham-Hanna House		hidden pin stored in 831_-1632; containing tile 830_-1632 does NOT store it (#542) — a curated row cannot un-hide it	Hay-McKinney and Bingham-Hanna House	new
+CV122	SEED — unmapped		Herold Building	41.498019	-81.69022		Herold Building		TWIN CANDIDATE CV139 26 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CV204 19 m — one building listed twice, or two plaques on one lot?	Herold Building	
+CV123	SEED — unmapped		Hessler Court Wooden Pavement	41.510833	-81.605556		Hessler Court Wooden Pavement		new: near-named article Hessler Street Fair 75 m	Hessler Court Wooden Pavement	new
+CV124	SEED — unmapped		James Hill House	41.481667	-81.726667		James Hill House			James Hill House	
+CV125	SEED — unmapped		Hilliard Apartment Building	41.463611	-81.701667		Hilliard Apartment Building			Hilliard Apartment Building	
+CV126	SEED — article in no tile (#539)		Holy Rosary Church (Cleveland)	41.50888888888889	-81.59888888888888	article Holy Rosary Church (Cleveland) · 0 m	Holy Rosary Church (Cleveland)			Holy Rosary Church	
+CV127	SEED — article in no tile (#539)		The Statler (Cleveland)	41.5007	-81.6848	article The Statler (Cleveland) · 23 m	The Statler (Cleveland)			Hotel Statler	
+CV128	SEED — unmapped		House of Wills	41.490556	-81.651667		House of Wills		new: served pin Shiloh Baptist Church (Cleveland) 95 m	House of Wills	new
+CV129	SEED — unmapped		Hoyt Block	41.499722	-81.698889		Hoyt Block		new: line CV196 77 m	Hoyt Block	new
+CV131	SEED — unmapped		Hubbard Cooke Block	41.493333	-81.706111		Hubbard Cooke Block			Hubbard Cooke Block	
+CV132	SEED — unmapped		Joseph Ireland House	41.500833	-81.662778		Joseph Ireland House		new: served pin Southworth House (Cleveland) 56 m; served pin Tavern Club (Cleveland) 61 m; new: line CV080 98 m; new: line CV170 46 m; new: line CV179 66 m	Joseph Ireland House	new
+CV134	SEED — unmapped		Jennings Apartments	41.475	-81.691389		Jennings Apartments			Jennings Apartments	
+CV135	SEED — unmapped		Jones Home for Children	41.458333	-81.701667		Jones Home for Children			Jones Home for Children	
+CV137	SEED — unmapped		The Joseph and Feiss Clothcraft Shops	41.473056	-81.720556		Joseph and Feiss Clothcraft Shops			The Joseph and Feiss Clothcraft Shops	
+CV138	SEED — article in no tile (#539)		Karamu House	41.493796	-81.624196	article Karamu House · 33 m	Karamu House			Karamu House	
+CV139	SEED — unmapped		Kendel Building	41.497955	-81.69052		Kendel Building		TWIN CANDIDATE CV122 26 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CV204 16 m — one building listed twice, or two plaques on one lot?; new: line CV234 75 m	Kendel Building	new
+CV140	SEED — unmapped		Kennedy Apartments and Commercial Block	41.483889	-81.73		Kennedy Apartments and Commercial Block		new: line CV111 76 m	Kennedy Apartments and Commercial Block	new
+CV141	SEED — unmapped		Lewis Kies House	41.502222	-81.656944		Lewis Kies House		new: hidden pin Colonel Charles Young 99 m; new: line CV253 31 m	Lewis Kies House	new
+CV142	SEED — unmapped		W.H. Kindra Apartments	41.454583	-81.710278		W.H. Kindra Apartments			W.H. Kindra Apartments	
+CV143	SEED — unmapped		Krause Building-Otto Moser's Cafe	41.498889	-81.690833		Krause Building-Otto Moser's Cafe		new: line CV160 98 m; new: line CV204 95 m	Krause Building-Otto Moser's Cafe	new
+CV144	SEED — unmapped		Theodor Kundtz Company Building	41.495556	-81.706111		Theodor Kundtz Company Building		new: line CV025 97 m	Theodor Kundtz Company Building	new
+CV145	SEED — unmapped		Lake Shore Bank and Cleveland Public Library St. Clair Branch	41.521944	-81.652222		Lake Shore Bank and Cleveland Public Library St. Clair Branch			Lake Shore Bank and Cleveland Public Library St. Clair Branch	
+CV146	SEED — unmapped		LaSalle Theatre Building	41.585	-81.549722		LaSalle Theatre Building			LaSalle Theatre Building	
+CV148	SEED — unmapped		Lerner Building	41.500556	-81.691944		Lerner Building		new: line CV187 58 m	Lerner Building	new
+CV149	SEED — unmapped		Lindner Building	41.501111	-81.681944		Lindner Building		new: near-named article Sterling-Lindner Co. 132 m; new: line CV198 98 m	Lindner Building	new
+CV150	SEED — unmapped		Lion Knitting Mills	41.465833	-81.700556		Lion Knitting Mills			Lion Knitting Mills	
+CV151	SEED — unmapped		Liquid Carbonic Corporation Dry Ice Plant	41.4875	-81.726667		Liquid Carbonic Corporation Dry Ice Plant		new: hidden pin Herman Park 88 m	Liquid Carbonic Corporation Dry Ice Plant	new
+CV152	SEED — unmapped		Henry W. Longfellow School	41.5633	-81.5854		Henry W. Longfellow School			Henry W. Longfellow School	
+CV155	SEED — unmapped		Lorain-Carnegie Bridge	41.490556	-81.691667		Hope Memorial Bridge		new: served pin Lorain Avenue 9 m	Lorain-Carnegie Bridge	new
+CV158	SEED — unmapped		Mallo House	41.453333	-81.701111		Mallo House			Mallo House	
+CV160	SEED — article in no tile (#539)		May Company Ohio	41.49861111111111	-81.69194444444445	article May Company Ohio · 0 m	May Company Ohio			May Company	
+CV161	SEED — unmapped		The Mayfield Theatre Building	41.508421	-81.597347		The Mayfield Theatre Building			The Mayfield Theatre Building	
+CV162	SEED — unmapped		McKinley Terrace	41.480833	-81.741389		McKinley Terrace			McKinley Terrace	
+CV163	SEED — unmapped		McKinley School	41.4616	-81.7751		McKinley School (Cleveland, Ohio)			McKinley School	
+CV164	SEED — unmapped		Medical Centre Building	41.5	-81.685		Medical Centre Building		new: line CV053 93 m; new: line CV127 80 m	Medical Centre Building	new
+CV165	SEED — unmapped		George Merwin House	41.501667	-81.664444		George Merwin House		new: line CV080 77 m; new: line CV199 66 m; new: line CV240 93 m	George Merwin House	new
+CV168	SEED — unmapped		Miller Block	41.481944	-81.709167		Miller Block (Cleveland, Ohio)			Miller Block	
+CV169	SEED — unmapped		Monmouth Building	41.511	-81.6028		Monmouth Building		new: line CV099 49 m	Monmouth Building	new
+CV170	SEED — unmapped		Montana Apartments	41.501194	-81.6625		Montana Apartments		new: served pin Southworth House (Cleveland) 70 m; served pin Tavern Club (Cleveland) 20 m; new: line CV132 46 m; TWIN CANDIDATE CV179 22 m — one building listed twice, or two plaques on one lot?	Montana Apartments	new
+CV171	SEED — unmapped		Moreland Theater Building	41.480556	-81.600278		Moreland Theater Building		new: line CV270 66 m	Moreland Theater Building	new
+CV172	SEED — unmapped		Garrett Morgan House	41.514722	-81.653333		Garrett Morgan House			Garrett Morgan House	
+CV173	SEED — unmapped		Mount Auburn School	41.4762	-81.6145		Mount Auburn School			Mount Auburn School	
+CV174	SEED — unmapped		Mueller Electric Company Building	41.508952	-81.667842		Mueller Electric Company Building			Mueller Electric Company Building	
+CV175	SEED — unmapped		Murray Hill School	41.5075	-81.598611		Murray Hill School		new: hidden pin Rocky Colavito 80 m	Murray Hill School	new
+CV177	SEED — article in no tile (#539)		Fenn Tower	41.50222222222222	-81.67222222222223	article Fenn Tower · 0 m	Fenn Tower			National Town and Country Club	
+CV178	SEED — unmapped		Neal Terrace	41.479444	-81.745		Neal Terrace			Neal Terrace	
+CV179	SEED — unmapped		Neff Apartments	41.501389	-81.6625		Neff Apartments		new: served pin Southworth House (Cleveland) 76 m; served pin Tavern Club (Cleveland) 8 m; new: line CV132 66 m; TWIN CANDIDATE CV170 22 m — one building listed twice, or two plaques on one lot?	Neff Apartments	new
+CV180	SEED — article in no tile (#539)		Guardian Bank Building	41.500277777777775	-81.6888888888889	article Guardian Bank Building · 0 m	Guardian Bank Building			New England Building	
+CV182	SEED — unmapped		Northern Ohio Blanket Mills	41.468056	-81.706389		Northern Ohio Blanket Mills			Northern Ohio Blanket Mills	
+CV184	SEED — unmapped		Notre Dame Academy	41.520556	-81.621667		Notre Dame Academy (Cleveland, Ohio)			Notre Dame Academy	
+CV185	SEED — unmapped		Ohio Bell Henderson-Endicott Exchange Building	41.5025	-81.6525		Ohio Bell Henderson-Endicott Exchange Building		new: line CV049 46 m	Ohio Bell Henderson-Endicott Exchange Building	new
+CV187	SEED — article in no tile (#539)		Howard M. Metzenbaum United States Courthouse	41.50055555555556	-81.6926388888889	article Howard M. Metzenbaum United States Courthouse · 16 m	Howard M. Metzenbaum United States Courthouse			Old Federal Building and Post Office	
+CV189	SEED — article in no tile (#539)		Old Stone Church (Cleveland)	41.500277777777775	-81.69472222222223	article Old Stone Church (Cleveland) · 23 m	Old Stone Church (Cleveland)			Old Stone Church	
+CV190	SEED — unmapped		Charles Olney House and Gallery	41.481389	-81.691111		Charles Olney House and Gallery			Charles Olney House and Gallery	
+CV191	SEED — unmapped		Oppmann Terrace	41.479722	-81.754722		Oppmann Terrace			Oppmann Terrace	
+CV192	SEED — unmapped		Panek Block	41.4725	-81.6575		Panek Block		new: served pin Bohemian National Hall (Cleveland) 98 m	Panek Block	new
+CV193	SEED — article in no tile (#539)		Park Building (Cleveland)	41.49	-81.68333333333334	article Park Building (Cleveland) · 0 m	Park Building (Cleveland)			Park Building	
+CV194	SEED — article in no tile (#539)		Peerless Motor Company	41.4932685	-81.6203315	article Peerless Motor Company · 107 m	Peerless Motor Company			Peerless Motor Company Plant No. 1	
+CV196	SEED — unmapped		Perry-Payne Building	41.499167	-81.698333		Perry-Payne Building		CHECK: same-named served pin Perry–Payne Building (wiki_40599221) 187 m away — the same place, mapped off the list point?; new: served pin Academy of Music (Cleveland) 46 m; same-named pin 187 m; new: line CV129 77 m	Perry-Payne Building	new
+CV197	SEED — article in no tile (#539)		Pilgrim Congregational Church (Cleveland)	41.47694444444445	-81.69194444444445	article Pilgrim Congregational Church (Cleveland) · 31 m	Pilgrim Congregational Church (Cleveland)			Pilgrim Congregational Church	
+CV198	SEED — article in no tile (#539)		Playhouse Square	41.50083333333333	-81.68083333333334	article Playhouse Square · 0 m	Playhouse Square			Playhouse Square Group	
+CV199	SEED — article in no tile (#539)		Plaza Apartments (Cleveland)	41.50111111111111	-81.66472222222222	article Plaza Apartments (Cleveland) · 0 m	Plaza Apartments (Cleveland)			Plaza Apartments	
+CV201	SEED — unmapped		Quad Hall	41.504722	-81.636389		Quad Hall		new: line CV222 81 m	Quad Hall	new
+CV202	SEED — unmapped		Eleanor B. Rainey Memorial Institute	41.5174	-81.6519		Eleanor B. Rainey Memorial Institute			Eleanor B. Rainey Memorial Institute	
+CV203	SEED — unmapped		Rauch & Lang Carriage Company Building	41.4822	-81.7018		Rauch & Lang Carriage Company Building			Rauch & Lang Carriage Company Building	
+CV204	SEED — unmapped		Record Rendezvous	41.498084	-81.690434		Record Rendezvous (Cleveland, Ohio)		TWIN CANDIDATE CV122 19 m — one building listed twice, or two plaques on one lot?; TWIN CANDIDATE CV139 16 m — one building listed twice, or two plaques on one lot?; new: line CV143 95 m; new: line CV234 87 m	Record Rendezvous	new
+CV206	SEED — unmapped		The Richman Brothers Company	41.515556	-81.6525		Richman Brothers Company			The Richman Brothers Company	
+CV208	SEED — unmapped		Riverside Cemetery Gatehouse	41.455694	-81.700278		Riverside Cemetery Gatehouse		CHECK: same-named served pin Riverside Cemetery Gatehouse (wiki_52340966) 197 m away — the same place, mapped off the list point?; new: same-named pin 197 m	Riverside Cemetery Gatehouse	new
+CV212	SEED — article in no tile (#539)		St. Elizabeth of Hungary Shrine (Cleveland)	41.48527777777778	-81.62333333333332	article St. Elizabeth of Hungary Shrine (Cleveland) · 0 m	St. Elizabeth of Hungary Shrine (Cleveland)		TWIN CANDIDATE CV269 23 m — one building listed twice, or two plaques on one lot?	St. Elizabeth's Magyar Roman Catholic Church	
+CV213	SEED — article in no tile (#539)		Saint Ignatius High School (Cleveland)	41.483333333333334	-81.70777777777778	article Saint Ignatius High School (Cleveland) · 0 m	Saint Ignatius High School (Cleveland)			St. Ignatius High School	
+CV215	SEED — article in no tile (#539)		St. John's Episcopal Church (Cleveland)	41.49	-81.70833333333334	article St. John's Episcopal Church (Cleveland) · 0 m	St. John's Episcopal Church (Cleveland)			St. John's Episcopal Church	
+CV216	SEED — article in no tile (#539)		St. Luke's Hospital (Cleveland)	41.485	-81.60583333333332	article St. Luke's Hospital (Cleveland) · 0 m	St. Luke's Hospital (Cleveland)			St. Luke's Hospital	
+CV221	SEED — article in no tile (#539)		St. Theodosius Russian Orthodox Cathedral	41.477222222222224	-81.68166666666667	article St. Theodosius Russian Orthodox Cathedral · 0 m	St. Theodosius Russian Orthodox Cathedral			St. Theodosius Russian Orthodox Cathedral	
+CV222	SEED — unmapped		Charles Schweinfurth House	41.505417	-81.636111		Charles Schweinfurth House		new: line CV201 81 m	Charles Schweinfurth House	new
+CV223	SEED — unmapped		Levi Scofield House	41.4916	-81.6092		Levi Scofield House			Levi Scofield House	
+CV228	SEED — unmapped		Sidaway Bridge	41.45	-81.6428		Sidaway Bridge			Sidaway Bridge	
+CV229	SEED — article in no tile (#539)		Society for Savings Building	41.50055555555556	-81.69444444444444	article Society for Savings Building · 0 m	Society for Savings Building			Society for Savings Building	
+CV232	SEED — unmapped		J. Spang Baking Company	41.4754	-81.7009		J. Spang Baking Company			J. Spang Baking Company	
+CV233	SEED — unmapped		Stager-Beckwith House	41.503889	-81.659722		Stager-Beckwith House		new: served pin Children's Museum of Cleveland 48 m	Stager-Beckwith House	new
+CV234	SEED — unmapped		Stanley Block	41.497778	-81.691389		Stanley Block (Cleveland, Ohio)		new: line CV139 75 m; new: line CV204 87 m	Stanley Block	new
+CV235	SEED — unmapped		Stockbridge Apartment Building	41.502778	-81.661389		Stockbridge Apartment Building		new: served pin Sarah Benedict House 62 m	Stockbridge Apartment Building	new
+CV236	SEED — unmapped		Stuyvesant Motor Company Building	41.500556	-81.676389		Stuyvesant Motor Company Building			Stuyvesant Motor Company Building	
+CV238	SEED — unmapped		Superior Avenue Viaduct	41.494722	-81.704444		Superior Avenue Viaduct		new: line CV025 88 m	Superior Avenue Viaduct	new
+CV240	SEED — unmapped		Templar-Farrell Motor Sales Building	41.501111	-81.665278		Templar-Farrell Motor Sales Building		new: line CV104 76 m; new: line CV106 76 m; new: line CV165 93 m; new: line CV199 46 m	Templar-Farrell Motor Sales Building	new
+CV241	SEED — article in no tile (#539)		Maltz Performing Arts Center	41.50805555555556	-81.61611111111111	article Maltz Performing Arts Center · 0 m	Maltz Performing Arts Center			The Temple	
+CV242	SEED — unmapped		Templin-Bradley Company	41.485139	-81.725556		Templin-Bradley Company		new: line CV063 94 m	Templin-Bradley Company	new
+CV244	SEED — article in no tile (#539)		Franklin Castle	41.48574	-81.71655	article Franklin Castle · 24 m	Franklin Castle			Hannes Tiedemann House	
+CV245	SEED — unmapped		Tinnerman Steel Range Company	41.480556	-81.711111		Tinnerman Steel Range Company			Tinnerman Steel Range Company	
+CV246	SEED — unmapped		Clayton Townes House	41.451667	-81.705278		Clayton Townes House			Clayton Townes House	
+CV248	SEED — article in no tile (#539)		Trinity Cathedral (Cleveland)	41.50111111111111	-81.67444444444445	article Trinity Cathedral (Cleveland) · 0 m	Trinity Cathedral (Cleveland)		TWIN CANDIDATE CV249 0 m — one building listed twice, or two plaques on one lot?	Trinity Cathedral	
+CV249	SEED — article in no tile (#539)		Trinity Cathedral (Cleveland)	41.50111111111111	-81.67444444444445	article Trinity Cathedral (Cleveland) · 66 m	Trinity Cathedral (Cleveland)		TWIN CANDIDATE CV248 0 m — one building listed twice, or two plaques on one lot?	Trinity Cathedral Church Home	
+CV250	SEED — unmapped		Union Club	41.503333	-81.684444		Union Club (Cleveland, Ohio)			Union Club	
+CV251	SEED — unmapped		Union Steel Screw Office Building	41.51083	-81.65926		Union Steel Screw Office Building			Union Steel Screw Office Building	
+CV252	SEED — article in no tile (#539)		Tower City Center	41.497777777778	-81.694166666667	article Tower City Center · 0 m	Tower City Center			Union Terminal Group	
+CV253	SEED — unmapped		United Motor Service Building	41.5025	-81.656944		United Motor Service Building		new: line CV141 31 m	United Motor Service Building	new
+CV254	SEED — unmapped		Universal Terminal Company Dock and Warehouse	41.53	-81.655556		Universal Terminal Company Dock and Warehouse			Universal Terminal Company Dock and Warehouse	
+CV255	SEED — article in no tile (#539)		Mather Mansion	41.50309444444444	-81.67060555555555	article Mather Mansion · 6 m	Mather Mansion			University Hall, Cleveland State University	
+CV256	SEED — unmapped		Upson-Walton Company Building	41.498056	-81.702778		Upson-Walton Company Building			Upson-Walton Company Building	
+CV258	SEED — unmapped		Van Rooy Coffee Company Building	41.489722	-81.711389		Van Rooy Coffee Company Building		new: line CV261 39 m	Van Rooy Coffee Company Building	new
+CV259	SEED — unmapped		Variety Store Building and Theatre	41.461111	-81.770556		Variety Store Building and Theatre			Variety Store Building and Theatre	
+CV260	SEED — unmapped		Venice Building	41.503889	-81.628611		Venice Building			Venice Building	
+CV261	SEED — unmapped		Vitrolite Building	41.489444	-81.711667		Vitrolite Building		new: line CV258 39 m	Vitrolite Building	new
+CV262	SEED — article in no tile (#539)		Wade Memorial Chapel	41.51361111111111	-81.595	article Wade Memorial Chapel · 0 m	Wade Memorial Chapel			Wade Memorial Chapel	
+CV264	SEED — unmapped		Walker and Weeks Office Building	41.499444	-81.6725		Walker and Weeks Office Building			Walker and Weeks Office Building	
+CV265	SEED — unmapped		Warner & Swasey Company Building	41.5016	-81.6506		Warner & Swasey Company Building			Warner & Swasey Company Building	
+CV267	SEED — unmapped		Waterman Service Building	41.476111	-81.647222		Waterman Service Building			Waterman Service Building	
+CV268	SEED — unmapped		Watterson School	41.481944	-81.736111		Watterson School			Watterson School	
+CV269	SEED — article in no tile (#539)		Weizer Building (8935 Buckeye Road, Cleveland)	41.48527777777778	-81.6236111111111	article Weizer Building (8935 Buckeye Road, Cleveland) · 0 m	Weizer Building (8935 Buckeye Road, Cleveland)		TWIN CANDIDATE CV212 23 m — one building listed twice, or two plaques on one lot?	Weizer Building	
+CV270	SEED — article in no tile (#539)		Weizer Building (11801 Buckeye Road, Cleveland)	41.48111111111111	-81.60055555555554	article Weizer Building (11801 Buckeye Road, Cleveland) · 0 m	Weizer Building (11801 Buckeye Road, Cleveland)			Weizer Building	
+CV272	SEED — article in no tile (#539)		West Side Market	41.48444444444444	-81.70305555555557	article West Side Market · 0 m	West Side Market			West Side Market	
+CV273	SEED — unmapped		West Technical High School	41.471944	-81.746667		West Technical High School			West Technical High School	
+CV274	SEED — unmapped		Western Reserve Building	41.497222	-81.699722		Western Reserve Building		new: served pin Perry–Payne Building 98 m; hidden pin Superior Hill Park 54 m	Western Reserve Building	new
+CV275	SEED — unmapped		Phillis Wheatley Association	41.5	-81.655		Phillis Wheatley Association			Phillis Wheatley Association	
+CV276	SEED — unmapped		White Chewing Gum Company Building	41.480278	-81.757222		White Chewing Gum Company Building			White Chewing Gum Company Building	
+CV277	SEED — unmapped		Henry P. White House	41.503889	-81.623056		Henry P. White House			Henry P. White House	
+CV279	SEED — unmapped		Woodland Avenue and West Side Railroad Powerhouse	41.496389	-81.703611		Woodland Avenue and West Side Railroad Powerhouse			Woodland Avenue and West Side Railroad Powerhouse	
+CV280	SEED — unmapped		Woodland Cemetery	41.481667	-81.641667		Woodland Cemetery (Cleveland)			Woodland Cemetery	
+CV283	SEED — article in no tile (#539)		Zion Lutheran Church (Cleveland)	41.50055555555556	-81.6675	article Zion Lutheran Church (Cleveland) · 0 m	Zion Lutheran Church (Cleveland)		TWIN CANDIDATE CV284 0 m — one building listed twice, or two plaques on one lot?	Zion Lutheran Church	
+CV284	SEED — article in no tile (#539)		Zion Lutheran Church (Cleveland)	41.50055555555556	-81.6675	article Zion Lutheran Church (Cleveland) · 39 m	Zion Lutheran Church (Cleveland)		TWIN CANDIDATE CV283 0 m — one building listed twice, or two plaques on one lot?	Zion Lutheran School	
+CV291	SEED — article in no tile (#539)		St. Joseph's Church and Friary	41.49305555555556	-81.67277777777778	article St. Joseph's Church and Friary · 0 m	St. Joseph's Church and Friary			St. Joseph's Church and Friary	
+CV300	SEED — unmapped		Bedford Township Hall	41.389933	-81.534683		Bedford Township Hall		new: served pin Bedford Baptist Church 44 m; near-named article Bedford Baptist Church 44 m; new: line CV324 99 m; new: line CV340 70 m	Bedford Township Hall	new
+CV302	SEED — article in no tile (#539)		Berea Union Depot	41.38111111111111	-81.85444444444444	article Berea Union Depot · 0 m	Berea Union Depot			Berea Union Depot	
+CV306	SEED — unmapped		Elizabeth B. and Dudley S. Blossom Estate Service Compound	41.501667	-81.506111		Elizabeth B. and Dudley S. Blossom Estate Service Compound			Elizabeth B. and Dudley S. Blossom Estate Service Compound	
+CV307	SEED — unmapped		Chester and Frances Bolton House	41.507782	-81.50374		Chester and Frances Bolton House			Chester and Frances Bolton House	
+CV308	SEED — unmapped		John Hartness Brown House	41.506667	-81.595		John Hartness Brown House			John Hartness Brown House	
+CV310	SEED — unmapped		Harold B. Burdick House	41.493333	-81.571389		Harold B. Burdick House			Harold B. Burdick House	
+CV311	SEED under a different name — containing tile 830_-1631 does not store the pin (#542)		John Carroll University North Quad Historic District	41.4883691	-81.5336804	John Carroll University Entrance · osm_way744112702 · 74 m	John Carroll University North Quad Historic District		CHECK SUBJECT (partial or container match); hidden pin stored in 830_-1630; containing tile 830_-1631 does NOT store it (#542) — a curated row cannot un-hide it	John Carroll University North Quad Historic District	new
+CV312	SEED — unmapped		Jared Clark House	41.345	-81.642778		Jared Clark House			Jared Clark House	
+CV313	SEED — unmapped		Cleveland and Pittsburgh Railroad Bridge	41.384722	-81.534167		Cleveland and Pittsburgh Railroad Bridge		new: hidden pin Viaduct Park 51 m	Cleveland and Pittsburgh Railroad Bridge	new
+CV316	SEED — unmapped		Commodore Apartment Building	41.466389	-81.568889		Commodore Apartment Building (Shaker Heights, Ohio)			Commodore Apartment Building	
+CV318	SEED — unmapped		Erastus Day House	41.474722	-81.813889		Erastus Day House			Erastus Day House	
+CV320	SEED — unmapped		Detroit Avenue Bridge	41.4825	-81.8314		Detroit Avenue Bridge			Detroit Avenue Bridge	
+CV321	SEED — unmapped		Detroit-Warren Building	41.485	-81.7997		Detroit-Warren Building		new: hidden pin City Center Park 83 m; hidden pin Isaac Warren Pocket Park 72 m	Detroit-Warren Building	new
+CV322	SEED — unmapped		Alonzo Drake House	41.3639	-81.5072		Alonzo Drake House			Alonzo Drake House	
+CV323	SEED — unmapped		Carl Droppers House	41.3587	-81.8604		Carl Droppers House			Carl Droppers House	
+CV324	SEED — unmapped		Hezekiah Dunham House	41.3908	-81.5344		Hezekiah Dunham House		new: served pin Bedford Baptist Church 91 m; new: line CV300 99 m	Hezekiah Dunham House	new
+CV333	SEED under a different name — containing tile 830_-1632 does not store the pin (#542)		Forest Hill Park (rename)	41.5222028	-81.5780327	Forest Hill Park · osm_way119707690 · 94 m	Forest Hill Park (Ohio)		hidden pin stored in 830_-1631, 831_-1631; containing tile 830_-1632 does NOT store it (#542) — a curated row cannot un-hide it	Forest Hill Park	new
+CV334	SEED — unmapped		Forest Hill Realty Sales Office	41.5181	-81.57		Forest Hill Realty Sales Office			Forest Hill Realty Sales Office	
+CV336	SEED — unmapped		John Froelich House	41.3731	-81.6844		John Froelich House			John Froelich House	
+CV337	SEED — unmapped		Fuller-Bramley House	41.3586	-81.6347		Fuller-Bramley House			Fuller-Bramley House	
+CV338	SEED — unmapped		Daniel Gabel House	41.391806	-81.676528		Daniel Gabel House			Daniel Gabel House	
+CV339	SEED — unmapped		Garfield Terrace Apartments	41.5222	-81.5904		Garfield Terrace Apartments			Garfield Terrace Apartments	
+CV340	SEED — unmapped		Holsey Gates House	41.389722	-81.533889		Holsey Gates House		new: served pin Bedford Baptist Church 39 m; new: line CV300 70 m	Holsey Gates House	new
+CV343	SEED — unmapped		Gwinn Estate	41.56	-81.599444		Gwinn Estate			Gwinn Estate	
+CV344	SEED — unmapped		Harvey Hackenberg House	41.48	-81.780556		Harvey Hackenberg House			Harvey Hackenberg House	
+CV345	SEED — unmapped		The Hangar	41.499167	-81.505278		The Hangar (Beachwood, Ohio)			The Hangar	
+CV346	SEED — unmapped		Howard M. Hanna Jr. House	41.555833	-81.609444		Howard M. Hanna Jr. House			Howard M. Hanna Jr. House	
+CV347	SEED — unmapped		E.F. Hauserman Co. Administration, Engineering & Research Building	41.4388	-81.6486		E.F. Hauserman Co. Administration, Engineering & Research Building			E.F. Hauserman Co. Administration, Engineering & Research Building	
+CV348	SEED — unmapped		Heights Rockefeller Building	41.516111	-81.568889		Heights Rockefeller Building			Heights Rockefeller Building	
+CV350	SEED — unmapped		Phillip Henninger House	41.40625	-81.690833		Phillip Henninger House			Phillip Henninger House	
+CV351	SEED — unmapped		Robert W. Henry House	41.382778	-81.778611		Robert W. Henry House			Robert W. Henry House	
+CV353	SEED — unmapped		John Honam House	41.493333	-81.798611		John Honam House		new: hidden pin Old Stone House Museum 13 m	John Honam House	new
+CV356	SEED — unmapped		William Knapp House	41.372222	-81.611667		William Knapp House			William Knapp House	
+CV357	SEED — unmapped		Joseph Kuenzer, II, House	41.403611	-81.671944		Joseph Kuenzer, II, House			Joseph Kuenzer, II, House	
+CV359	SEED — unmapped		Lock No. 37 and Spillway	41.356667	-81.597222		Lock No. 37 and Spillway		new: served pin Wilson Feed Mill 77 m	Lock No. 37 and Spillway	new
+CV360	SEED — unmapped		Lock No. 38 and Spillway	41.372597	-81.612792		Lock No. 38 and Spillway		new: hidden pin Canal Exploration Center 94 m; TWIN CANDIDATE CV362 25 m — one building listed twice, or two plaques on one lot?	Lock No. 38 and Spillway	new
+CV361	SEED — unmapped		Lock No. 39 and Spillway	41.390278	-81.625		Lock No. 39 and Spillway			Lock No. 39 and Spillway	
+CV362	SEED — unmapped		Lock Tender's House and Inn	41.3725	-81.613056		Lock Tender's House and Inn		new: hidden pin Canal Exploration Center 72 m; TWIN CANDIDATE CV360 25 m — one building listed twice, or two plaques on one lot?	Lock Tender's House and Inn	new
+CV364	SEED — unmapped		NASA Lewis Research Center-Development Engineering Building & Annex	41.419722	-81.852778		NASA Lewis Research Center-Development Engineering Building and Annex			NASA Lewis Research Center-Development Engineering Building & Annex	
+CV366	SEED — unmapped		James Nicholson House	41.484444	-81.783056		James Nicholson House (Lakewood, Ohio)			James Nicholson House	
+CV367	SEED — unmapped		North Union Shaker Site	41.483409	-81.563886		North Union Shaker Site			North Union Shaker Site	
+CV374	SEED — unmapped		Packard-Doubler House	41.355	-81.603333		Packard-Doubler House			Packard-Doubler House	
+CV375	SEED — unmapped		Park Synagogue	41.516	-81.5615		Park Synagogue		LIST POINT FAR: 7655 m from its article's point (Park Synagogue) — wrong article or a large site?	Park Synagogue	
+CV376	SEED — unmapped		Jay M. Pickands House	41.545833	-81.622778		Jay M. Pickands House			Jay M. Pickands House	
+CV377	SEED — unmapped		Reidy Bros. & Flanigan Building	41.4838	-81.7701		Reidy Bros. & Flanigan Building		new: served pin Phantasy Theater 40 m	Reidy Bros. & Flanigan Building	new
+CV381	SEED — unmapped		Shore High School	41.606944	-81.526389		Shore High School			Shore High School	
+CV382	SEED — unmapped		South Park Site	41.378547	-81.622218		South Park Site			South Park Site	
+CV384	SEED — unmapped		Lyman Stearns Farm	41.375	-81.728611		Lyman Stearns Farm			Lyman Stearns Farm	
+CV385	SEED — unmapped		Stebbens Farm	41.336667	-81.598889		Stebbens Farm			Stebbens Farm	
+CV386	SEED — unmapped		Jacob Strong House	41.4866	-81.5475		Jacob Strong House			Jacob Strong House	
+CV387	SEED — unmapped		Taylor Mansion-Lakehurst	41.550833	-81.614167		Taylor Mansion (Bratenahl, Ohio)			Taylor Mansion-Lakehurst	
+CV388	SEED — unmapped		William E. Telling House	41.52	-81.512778		William E. Telling House		new: hidden pin Museum of American Porcelain Art 24 m	William E. Telling House	new
+CV389	SEED — unmapped		Temple on the Heights	41.515833	-81.572222		Temple on the Heights			Temple on the Heights	
+CV393	SEED — unmapped		Tremaine-Gallagher Residence	41.488333	-81.571667		Tremaine-Gallagher Residence			Tremaine-Gallagher Residence	
+CV394	SEED — unmapped		Abraham Ulyatt House	41.386111	-81.619722		Abraham Ulyatt House			Abraham Ulyatt House	
+CV396	SEED — unmapped		Moses Warren House	41.463333	-81.555278		Moses Warren House			Moses Warren House	
+CV397	SEED — unmapped		Westerly Apartments	41.485833	-81.793889		Westerly Apartments			Westerly Apartments	
+CV398	SEED — unmapped		Hotel Westlake	41.483889	-81.831667		Hotel Westlake			Hotel Westlake	
+CV400	SEED — unmapped		George W. Whitney House	41.357917	-81.851944		George W. Whitney House			George W. Whitney House	
+CV406	SEED — unmapped		Harry Coulby Mansion	41.5953	-81.4781		Harry Coulby Mansion			Harry Coulby Mansion	
+CV002	CUT — served					Adelbert Hall · wiki_12391083 · 22 m	Adelbert Hall			Adelbert Hall	
+CV007	CUT — served					Archwood Avenue Historic District · wiki_12391883 · 0 m	Archwood Avenue Historic District			Archwood Avenue Historic District	
+CV008	CUT — served					Archwood Congregational Church · wiki_12391893 · 23 m	Archwood Congregational Church			Archwood Congregational Church	
+CV012	CUT — served					Baker Motor Vehicle Company Building · wiki_54007932 · 22 m	Baker Motor Vehicle Company Building			Baker Motor Vehicle Company Building	
+CV015	CUT — served					Sarah Benedict House · wiki_43209069 · 0 m	Sarah Benedict House			Sarah Benedict House	
+CV016	CUT — served					Bingham Company Warehouse · wiki_54039484 · 0 m	Bingham Company Warehouse			Bingham Company Warehouse	
+CV019	CUT — served					Bohemian National Hall (Cleveland) · wiki_32994845 · 0 m	Bohemian National Hall (Cleveland, Ohio)			Bohemian National Hall	
+CV020	CUT — served					Bomante House · wiki_54137062 · 0 m	Bomante House			Bomante House	
+CV021	CUT — served					Broadway Avenue Historic District (Cleveland) · wiki_54201998 · 0 m	Broadway Avenue Historic District (Cleveland, Ohio)			Broadway Avenue Historic District	
+CV022	CUT — served					Brooklyn Bank Building · wiki_54223308 · 35 m	Brooklyn Bank Building			Brooklyn Bank Building	
+CV032	CUT — served					Cedar Glen Apartments · wiki_54441036 · 0 m	Cedar Glen Apartments			Cedar Glen Apartments	
+CV043	CUT — served					Cleveland Harbor United States Coast Guard Station (historical) · osm_node7866708723 · 25 m	Cleveland Harbor Station, U.S. Coast Guard			Cleveland Harbor Station, U.S. Coast Guard	
+CV044	CUT — served					Cleveland Home for Aged Colored People · wiki_17866514 · 0 m	Cleveland Home for Aged Colored People			Cleveland Home for Aged Colored People	
+CV047	CUT — served					Cleveland Masonic Temple · wiki_28210739 · 0 m	Cleveland Masonic Temple			Cleveland Masonic Temple	
+CV048	CUT — served					Cleveland Stadium · wiki_752415 · 0 m	Cleveland Stadium			Cleveland Municipal Stadium	
+CV064	CUT — served					Cozad–Bates House · wiki_33885621 · 0 m	Justus L. Cozad House			Justus L. Cozad House	
+CV066	CUT — served					Andrew and James Dall Houses · wiki_40596599 · 15 m	Andrew and James Dall Houses			Andrew Dall, Jr., and James Dall Houses	
+CV090	CUT — served					Fairhill Road Village · wiki_57692060 · 0 m	Fairhill Road Village			Fairhill Road Village Historic District	
+CV096	CUT — served					First Church of Christ, Scientist (Cleveland) · wiki_17189136 · 39 m	First Church of Christ, Scientist (Cleveland, Ohio)			First Church of Christ, Scientist	
+CV105	CUT — served					James A Garfield Memorial · osm_way345315398 · 5 m	Garfield Memorial			Garfield Memorial	
+CV130	CUT — served					Hruby Conservatory of Music · wiki_42300264 · 12 m	Hruby Conservatory of Music			Hruby Conservatory of Music	
+CV147	CUT — served					League Park · osm_way128292663 · 110 m	League Park			League Park	
+CV183	CUT — served					North Presbyterian Church (Cleveland) · wiki_26644986 · 23 m	North Presbyterian Church (Cleveland, Ohio)			North Presbyterian Church	
+CV207	CUT — served					Riverside Cemetery Chapel · wiki_26645376 · 111 m	Riverside Cemetery Chapel			Riverside Cemetery Chapel	
+CV209	CUT — served					Rockefeller Building (Cleveland) · wiki_47562080 · 0 m	Rockefeller Building (Cleveland)			Rockefeller Building	
+CV210	CUT — served					Cleveland Cultural Gardens · wiki_32319492 · 0 m	Rockefeller Park		CHECK SUBJECT (partial or container match)	Rockefeller Park and Cleveland Cultural Gardens Historic District	
+CV211	CUT — served					Bradley Building · wiki_36284155 · 19 m	Bradley Building			Root and McBride-Bradley Building	
+CV214	CUT — served					St. John African Methodist Episcopal Church (Cleveland) · wiki_26645526 · 0 m	St. John African Methodist Episcopal Church (Cleveland, Ohio)			St. John's AME Church	
+CV217	CUT — served					St. Michael the Archangel Church (Cleveland) · wiki_10312554 · 0 m	St. Michael the Archangel Church (Cleveland, Ohio)			St. Michael the Archangel Catholic Church	
+CV218	CUT — served					St. Paul's Episcopal Church (Cleveland) · wiki_26645651 · 0 m	St. Paul's Episcopal Church (Cleveland, Ohio)			St. Paul's Episcopal Church	
+CV219	CUT — served					Shrine Church of St. Stanislaus · wiki_17833308 · 43 m	St. Stanislaus Church (Cleveland, Ohio)			St. Stanislaus Church	
+CV220	CUT — served					St. Stephen's Catholic Church (Cleveland) · wiki_26645827 · 23 m	St. Stephen's Catholic Church (Cleveland, Ohio)			St. Stephen Church	
+CV227	CUT — served					Shiloh Baptist Church (Cleveland) · wiki_26645870 · 16 m	Shiloh Baptist Church (Cleveland, Ohio)			Shiloh Baptist Church	
+CV231	CUT — served					Southworth House (Cleveland) · wiki_20845571 · 0 m	Southworth House (Cleveland, Ohio)			Southworth House	
+CV239	CUT — served					Tavern Club (Cleveland) · wiki_25800738 · 48 m	Tavern Club (Cleveland, Ohio)			Tavern Club	
+CV243	CUT — served					Third Church of Christ, Scientist (Cleveland) · wiki_17833983 · 0 m	Third Church of Christ, Scientist (Cleveland, Ohio)			Third Church of Christ, Scientist	
+CV257	CUT — served					USS Cod Submarine Memorial · osm_way166174337 · 54 m	USS Cod (SS-224)		CHECK SUBJECT (partial or container match)	USS Cod	
+CV278	CUT — served					Agora Theatre and Ballroom · wiki_4052805 · 51 m	WHK Studio One			WHK Studio One	
+CV282	CUT — served					Zero Gravity Research Facility · wiki_17939329 · 0 m	Zero Gravity Research Facility			Zero Gravity Research Facility (B-2)	
+CV293	CUT — served					Alcazar Hotel (Cleveland Heights, Ohio) · wiki_12391390 · 80 m	Alcazar Hotel (Cleveland Heights, Ohio)			Alcazar Hotel	
+CV294	CUT — served					Ambler Heights Historic District · wiki_12391666 · 0 m	Ambler Heights Historic District			Ambler Heights Historic District	
+CV295	CUT — served					John M. Annis House · wiki_12391811 · 0 m	John M. Annis House			John M. Annis House	
+CV296	CUT — served					Baldwin-Wallace College North Campus Historic District · wiki_38629551 · 2 m	Baldwin-Wallace College North Campus Historic District			Baldwin-Wallace College North Campus Historic District	
+CV297	CUT — served					Baldwin-Wallace College South Campus Historic District · wiki_35296795 · 32 m	Baldwin-Wallace College South Campus Historic District			Baldwin-Wallace College South Campus Historic District	
+CV298	CUT — served					Bedford Baptist Church · wiki_26646346 · 0 m	Bedford Baptist Church			Bedford Baptist Church	
+CV309	CUT — served					Buehl House · wiki_29452644 · 0 m	Buehl House			Buehl House	
+CV328	CUT — served					Fairmount Boulevard Historic District · osm_node357471367 · 31 m	Fairmount Boulevard District			Fairmount Boulevard District	
+CV331	CUT — served					First Church of Christ in Euclid · wiki_26646392 · 6 m	First Church of Christ in Euclid			First Church of Christ in Euclid	
+CV335	CUT — served					Stephen Frazee House · wiki_71417638 · 3 m	Stephen Frazee House			Stephen Frazee House	
+CV341	CUT — served					Edmund Gleason Farm · wiki_29704679 · 23 m	Edmund Gleason Farm			Edmund Gleason House	
+CV342	CUT — served					Greenwood Farm (Richmond Heights, Ohio) · wiki_19461068 · 87 m	Greenwood Farm (Richmond Heights, Ohio)			Greenwood Farm	
+CV349	CUT — served					Albert W. Henn Mansion · wiki_53496067 · 0 m	Albert W. Henn Mansion			Albert W. Henn Mansion	
+CV352	CUT — served					Phantasy Theater · wiki_49945950 · 4 m	Homestead Theatre Block			Homestead Theatre Block	
+CV354	CUT — served					Independence Presbyterian Church · wiki_26646575 · 0 m	Independence Presbyterian Church			Independence Presbyterian Church	
+CV368	CUT — served					Notre Dame College · wiki_2059264 · 12 m	Notre Dame College			Notre Dame College of Ohio	
+CV371	CUT — served					Old District 10 Schoolhouse · wiki_49887390 · 0 m	Old District 10 Schoolhouse			Old District 10 Schoolhouse	
+CV379	CUT — served					St. Paul's Episcopal Church of East Cleveland · wiki_16512512 · 13 m	St. Paul's Episcopal Church of East Cleveland			St. Paul's Episcopal Church of East Cleveland	
+CV383	CUT — served					Stadium Square Historic District · wiki_71349699 · 29 m	Stadium Square Historic District			Stadium Square Historic District	
+CV391	CUT — served					Tinkers Creek Aqueduct · wiki_17991281 · 34 m	Tinkers Creek Aqueduct			Tinkers Creek Aqueduct	
+CV392	CUT — served					Tower East · wiki_28018286 · 0 m	Tower East			Tower East	
+CV399	CUT — served					John Wheeler House (Berea, Ohio) · wiki_73428830 · 44 m	John Wheeler House (Berea, Ohio)			John Wheeler House	
+CV402	CUT — served					Wilson Feed Mill · wiki_71427170 · 0 m	Wilson Feed Mill			Wilson Feed Mill	
+CV404	CUT — served					Edmund Gleason Farm · wiki_29704679 · 23 m	Edmund Gleason House			Edmund Gleason House	
+CV006	NO LINE — district centroid						Ansel Road Apartment Buildings Historic District		no stored pin for the district; a centroid pin would be arbitrary	Ansel Road Apartment Buildings Historic District	
+CV023	NO LINE — district centroid						Brooklyn Centre Historic District		no stored pin for the district; a centroid pin would be arbitrary	Brooklyn Centre Historic District	
+CV027	NO LINE — district centroid						Buckeye Commercial Historic District		no stored pin for the district; a centroid pin would be arbitrary	Buckeye Commercial Historic District	
+CV037	NO LINE — district centroid						Cleveland Centre Historic District		no stored pin for the district; a centroid pin would be arbitrary	Cleveland Centre Historic District	
+CV046	NO LINE — district centroid						The Mall (Cleveland)		no stored pin for the district; a centroid pin would be arbitrary	Cleveland Mall	
+CV051	NO LINE — district centroid						Cleveland Public Square		no stored pin for the district; a centroid pin would be arbitrary	Cleveland Public Square	
+CV054	NO LINE — district centroid						Warehouse District, Cleveland		no stored pin for the district; a centroid pin would be arbitrary	Cleveland Warehouse District	
+CV072	NO LINE — district centroid						East 89th Street Historic District		no stored pin for the district; a centroid pin would be arbitrary	East 89th Street Historic District	
+CV073	NO LINE — district centroid						East Boulevard Apartment House		no stored pin for the district; a centroid pin would be arbitrary	East Boulevard Apartment House	
+CV074	NO LINE — district centroid						East Boulevard Historic District		no stored pin for the district; a centroid pin would be arbitrary	East Boulevard Historic District	
+CV075	NO LINE — district centroid						East Fourth Street Historic District (Cleveland, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	East Fourth Street Historic District	
+CV082	NO LINE — district centroid						Erie Street Cemetery Historic District		no stored pin for the district; a centroid pin would be arbitrary	Erie Street Cemetery Historic District	
+CV083	NO LINE — district centroid						Erieview Historic District		no stored pin for the district; a centroid pin would be arbitrary	Erieview Historic District	
+CV086	NO LINE — district centroid						Euclid Avenue Historic District (Cleveland, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Euclid Avenue Historic District	
+CV102	NO LINE — district centroid						Franklin Boulevard Historic District (Cleveland, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Franklin Boulevard Historic District	
+CV103	NO LINE — district centroid						Franklin Boulevard-West Clinton Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	Franklin Boulevard-West Clinton Avenue Historic District	
+CV112	NO LINE — district centroid						Gordon Square Historic District		no stored pin for the district; a centroid pin would be arbitrary	Gordon Square Historic District	
+CV133	NO LINE — district centroid						Irishtown Bend Archeological District		no stored pin for the district; a centroid pin would be arbitrary	Irishtown Bend Archeological District	
+CV136	NO LINE — district centroid						Jones Home Subdivisions Historic District		no stored pin for the district; a centroid pin would be arbitrary	Jones Home Subdivisions Historic District	
+CV153	NO LINE — district centroid						Lorain Avenue Commercial Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lorain Avenue Commercial Historic District	
+CV154	NO LINE — district centroid						Lorain Station Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lorain Station Historic District	
+CV156	NO LINE — district centroid						Lower Prospect-Huron Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lower Prospect-Huron Historic District	
+CV157	NO LINE — district centroid						Magnolia-Wade Park Historic District		no stored pin for the district; a centroid pin would be arbitrary	Magnolia-Wade Park Historic District	
+CV159	NO LINE — district centroid						Flora Stone Mather College Historic District		no stored pin for the district; a centroid pin would be arbitrary	Flora Stone Mather College District	
+CV166	NO LINE — district centroid						Midtown Historic District (Cleveland, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Midtown Historic District	
+CV176	NO LINE — district centroid						Myrtle-Highview Historic District		no stored pin for the district; a centroid pin would be arbitrary	Myrtle-Highview Historic District	
+CV181	NO LINE — district centroid						Newton Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	Newton Avenue Historic District	
+CV186	NO LINE — district centroid						Ohio City, Cleveland		no stored pin for the district; a centroid pin would be arbitrary	Ohio City Preservation District	
+CV188	NO LINE — district centroid								no stored pin for the district; a centroid pin would be arbitrary	Old River Road Historic District	
+CV195	NO LINE — district centroid						Pennsylvania Railway Ore Dock		no stored pin for the district; a centroid pin would be arbitrary	Pennsylvania Railway Ore Dock	
+CV200	NO LINE — district centroid						Prospect Avenue Row House Group		no stored pin for the district; a centroid pin would be arbitrary	Prospect Avenue Row House Group	
+CV205	NO LINE — district centroid						N.J. Rich and Co. Building		no stored pin for the district; a centroid pin would be arbitrary	N.J. Rich and Co. Building	
+CV224	NO LINE — district centroid						Scranton South Side Historic District		no stored pin for the district; a centroid pin would be arbitrary	Scranton South Side Historic District	
+CV225	NO LINE — district centroid						Shaker Square		no stored pin for the district; a centroid pin would be arbitrary	Shaker Square	
+CV226	NO LINE — district centroid						Shaker Village Historic District (Shaker Heights, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Shaker Village Historic District	
+CV230	NO LINE — district centroid						South Brooklyn Commercial District		no stored pin for the district; a centroid pin would be arbitrary	South Brooklyn Commercial District	
+CV237	NO LINE — district centroid						Superior Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	Superior Avenue Historic District	
+CV247	NO LINE — district centroid						Tremont Historic District		no stored pin for the district; a centroid pin would be arbitrary	Tremont Historic District	
+CV263	NO LINE — district centroid						Wade Park District		no stored pin for the district; a centroid pin would be arbitrary	Wade Park District	
+CV266	NO LINE — district centroid						Slavic Village		no stored pin for the district; a centroid pin would be arbitrary	Warszawa Neighborhood District	
+CV271	NO LINE — district centroid						West 25th Street-Detroit Avenue Historic District		no stored pin for the district; a centroid pin would be arbitrary	West 25th Street-Detroit Avenue Historic District	
+CV281	NO LINE — district centroid						Woodland-Larchmere Commercial Historic District		no stored pin for the district; a centroid pin would be arbitrary	Woodland-Larchmere Commercial Historic District	
+CV285	NO LINE — no coordinate		Cuyahoga Building				Cuyahoga Building		place by hand or cut	Cuyahoga Building	
+CV286	NO LINE — no coordinate		Holy Name High School-Gallagher Building				Holy Name High School-Gallagher Building		place by hand or cut	Holy Name High School-Gallagher Building	
+CV287	NO LINE — no coordinate		McDonald's Drive-in				McDonald's Drive-in		place by hand or cut	McDonald's Drive-in	
+CV288	NO LINE — no coordinate		Newburgh Town Hall				Newburgh Town Hall		place by hand or cut	Newburgh Town Hall	
+CV289	NO LINE — no coordinate		Northern Ohio Lunatic Asylum				Northern Ohio Lunatic Asylum		place by hand or cut	Northern Ohio Lunatic Asylum	
+CV290	NO LINE — no coordinate		Rocket Engine Test Facility				Rocket Engine Test Facility		place by hand or cut	Rocket Engine Test Facility	
+CV292	NO LINE — no coordinate		Sterling School				Sterling School		place by hand or cut	Sterling School	
+CV299	NO LINE — district centroid						Bedford Historic District (Bedford, Ohio)		no stored pin for the district; a centroid pin would be arbitrary	Bedford Historic District	
+CV301	NO LINE — district centroid						Berea District 7 School		no stored pin for the district; a centroid pin would be arbitrary	Berea District 7 School	
+CV303	NO LINE — district centroid						Berea Village Founders Historic District		no stored pin for the district; a centroid pin would be arbitrary	Berea Village Founders Historic District	
+CV304	NO LINE — district centroid						Birdtown Historic District		no stored pin for the district; a centroid pin would be arbitrary	Birdtown Historic District	
+CV305	NO LINE — district centroid						Elizabeth B. Blossom Subdivision Historic District		no stored pin for the district; a centroid pin would be arbitrary	Elizabeth B. Blossom Subdivision Historic District	
+CV314	NO LINE — district centroid						Clifton Park Lakefront District		no stored pin for the district; a centroid pin would be arbitrary	Clifton Park Lakefront District	
+CV315	NO LINE — district centroid						Clifton Park South Historic District		no stored pin for the district; a centroid pin would be arbitrary	Clifton Park South Historic District	
+CV317	NO LINE — district centroid						Cooley Farms		no stored pin for the district; a centroid pin would be arbitrary	Cooley Farms	
+CV319	NO LINE — district centroid						Grant Deming's Forest Hill Allotment Historic District		no stored pin for the district; a centroid pin would be arbitrary	Grant Deming's Forest Hill Allotment Historic District	
+CV325	NO LINE — district centroid						East Cleveland District 9 School		no stored pin for the district; a centroid pin would be arbitrary	East Cleveland District 9 School	
+CV326	NO LINE — district centroid						Euclid Golf Allotment		no stored pin for the district; a centroid pin would be arbitrary	Euclid Golf Allotment	
+CV327	NO LINE — district centroid						Euclid Heights Historic District		no stored pin for the district; a centroid pin would be arbitrary	Euclid Heights Historic District	
+CV329	NO LINE — district centroid						Fairmount Heights Historic District		LIST POINT FAR: 488591 m from its article's point (Fairmount Heights Historic District) — wrong article or a large site?; no stored pin for the district; a centroid pin would be arbitrary	Fairmount Heights Historic District	
+CV330	NO LINE — district centroid						Fairview Community Park Historic District		no stored pin for the district; a centroid pin would be arbitrary	Fairview Community Park Historic District	
+CV332	NO LINE — district centroid						Forest Hill, Ohio		no stored pin for the district; a centroid pin would be arbitrary	Forest Hill Historic District	
+CV355	NO LINE — district centroid						Inglewood Historic District		no stored pin for the district; a centroid pin would be arbitrary	Inglewood Historic District	
+CV358	NO LINE — district centroid						Lakewood Downtown Historic District		no stored pin for the district; a centroid pin would be arbitrary	Lakewood Downtown Historic District	
+CV363	NO LINE — district centroid						Mayfield Heights Historic District		no stored pin for the district; a centroid pin would be arbitrary	Mayfield Heights Historic District	
+CV365	NO LINE — district centroid						Nela Park		no stored pin for the district; a centroid pin would be arbitrary	Nela Park	
+CV369	NO LINE — district centroid						Oakwood Club Subdivision Historic District		no stored pin for the district; a centroid pin would be arbitrary	Oakwood Club Subdivision Historic District	
+CV370	NO LINE — district centroid						Ohio and Erie Canal		no stored pin for the district; a centroid pin would be arbitrary	Ohio and Erie Canal	
+CV372	NO LINE — district centroid						Old Euclid District 4 Schoolhouse		no stored pin for the district; a centroid pin would be arbitrary	Old Euclid District 4 Schoolhouse	
+CV373	NO LINE — district centroid						Overlook Road Carriage House District		no stored pin for the district; a centroid pin would be arbitrary	Overlook Road Carriage House District	
+CV378	NO LINE — district centroid						St. Joseph Convent and Academy Complex		no stored pin for the district; a centroid pin would be arbitrary	St. Joseph Convent and Academy Complex	
+CV380	NO LINE — district centroid						Shaker Farm Historic District		no stored pin for the district; a centroid pin would be arbitrary	Shaker Farm Historic District	
+CV390	NO LINE — district centroid						Terra Vista Archaeological District		no stored pin for the district; a centroid pin would be arbitrary	Terra Vista Archeological District	
+CV395	NO LINE — district centroid						Villa San Bernardo Historic District		no stored pin for the district; a centroid pin would be arbitrary	Villa San Bernardo Historic District	
+CV401	NO LINE — district centroid						William Tricker Inc. Historic District		no stored pin for the district; a centroid pin would be arbitrary	William Tricker Inc. Historic District	
+CV403	NO LINE — no coordinate		Calvin Gilbert House				Calvin Gilbert House		place by hand or cut	Calvin Gilbert House	
+CV405	NO LINE — district centroid						Terra Vista Archeological District		no stored pin for the district; a centroid pin would be arbitrary	Terra Vista Archeological District	
+CV407	NO LINE — no coordinate		Octagon House				Octagon House (Painesville, Ohio)		place by hand or cut	Octagon House	
