@@ -1,0 +1,25 @@
+# names-459-cleveland-3d.txt — #459 Cleveland story batch, part 3d: part 3c's four unsearched Midtown rows and the Trinity
+# Cathedral Church Home's standing check (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1, -2, -3a, -3b, -3c, this file, later parts + 459_hidden_curated*.sql) dry-runs and
+# commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCES: the Cleveland Landmarks Commission's architect pages — Walter Blythe's list (Lewis Kies Residence, 4208 Prospect,
+#   1872, Standing) and Charles Schweinfurth's list (Trinity Church Home, 2227 Prospect, 1895, Standing — this settles the
+#   standing check part 3c carried CV249 for); the Upper Prospect MRA nomination (NPGallery 64000653_text) for the Church
+#   Home's line.
+# CHECKS (as part 3c): every number and capitalised name in its source text (the MRA's "1901-7" written as 1901–7); both lines
+#   in stored tile 830_-1633 inside the box; stored pins (316 in the 9 rows around the lines), gems, all parts' lines within
+#   100 m and articles within 90 m read at each line's own point; no name repeated across parts 1–3d.
+# POINTS: the NRHP list points (seconds precision); Photon has no house numbers on Prospect.
+# `| new` UP FRONT on both: Lewis Kies House — part 3b's United Motor Service Building line 53 m, the hidden *Colonel
+#   Charles Young* bust 99 m; Trinity Cathedral Church Home — part 1's *Trinity Cathedral (Cleveland)* line and article 66 m,
+#   its *Central YMCA (Cleveland)* line 96 m.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — gone: CV110 Jacob Goldsmith House (2200 E. 40th; ECH — burned by arson November 1988, demolished January 1989);
+#     CV062 Corlett Building (1923-35 Euclid; the site is now Cleveland State University's — destroyed, still on the Register).
+#   CARRIED, not yet searched: CV235 Stockbridge Apartment Building (3328 Euclid, 1912) → part 3e.
+#   STILL CARRIED from part 3c: CV179 Neff and CV170 Montana Apartments (no point); CV251 Union Steel Screw (the depth row).
+# EXPECT on the Mac dry run: 2 new-seed. Any `review` is a stop: read it before --commit.
+Lewis Kies House | @41.502222,-81.656944 | Cleveland architect Walter Blythe designed this house at 4208 Prospect Avenue for Lewis Kies in 1872. | https://www.clevelandohio.gov/city-hall/boards-commissions/landmarks-commission/cleveland-architects/blythe-walter | new
+Trinity Cathedral Church Home | @41.500556,-81.674167 | Charles Schweinfurth designed the Trinity Cathedral Church Home in 1895, before Trinity Cathedral itself, which was built in 1901–7 at East 22nd Street and Euclid Avenue. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
