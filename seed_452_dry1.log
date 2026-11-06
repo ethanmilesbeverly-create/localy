@@ -1,0 +1,59 @@
+[seed-resolve 2026.10.27a (#537 a `new` story line is its own seed only under its own name — Gemini's canonicalName can no longer aim its story at a differently named seed; carries #506 #499 #495 #429 #434 #439 #441)] city=Riverside (33.935, -117.387) maxKm=60 model=gemini-3.5-flash-lite
+  dedup = live map + submissions + Wikipedia (#418); map endpoint https://siacjgpqzaylsfefihyr.supabase.co/functions/v1/nearby-places
+Loaded 12 names from names-452-riverside-1.txt
+  + William Childs House [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Chinatown Archeological Site [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Community Settlement House [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + First Congregational Church of Riverside [history] story✓ (conf 1.00)
+      checked nearby: map 3 · subs 0 · wiki 6
+      ↳ seeded under its Wikipedia article "First Congregational Church of Riverside" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "First Congregational Church of Riverside"
+      articles within 90 m: "First Congregational Church of Riverside" · "Riverside Art Museum" · "Riverside Fire Department" · "Riverside Municipal Auditorium" · "Universalist Unitarian Church of Riverside" · "First Congregational Church (Riverside, California)"
+  + Perris Depot [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Riverside-Arlington Heights Fruit Exchange [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Riverside station (Union Pacific Railroad) [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Riverside station (Union Pacific Railroad)" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Riverside station (Union Pacific Railroad)"
+      articles within 90 m: "Riverside station (Union Pacific Railroad)"
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + M. H. Simon's Undertaking Chapel [history] story✓ (conf 0.90)  (Gemini suggested "Masonic Temple (Riverside, California)")
+      checked nearby: map 0 · subs 0 · wiki 1
+      articles within 90 m: "Masonic Temple (Riverside, California)"
+  + Sutherland Fruit Company [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + University Heights Junior High School [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+    (marked `new` — seeded as its own pin, attach/same-place check skipped)
+  + Rubidoux Grist Mill Site [history] story✓ (conf 0.95)
+      checked nearby: map 0 · subs 0 · wiki 0
+      articles within 90 m: none
+  + Guachama Rancheria [history] story✓ (conf 1.00)
+      checked nearby: map 0 · subs 0 · wiki 1
+      ↳ seeded under its Wikipedia article "Guachama Rancheria" at the article's coordinate, 0 m from the marker (#425) — mark the line `new` to keep "Guachama Rancheria"
+      articles within 90 m: "Guachama Rancheria"
+
+--- #439 check: what the commit will skip or replace ---
+  nothing will be skipped or replaced
+
+--- summary ---
+{ "new-seed": 12 }
+stories attached to existing pins: 0 (0 existing seed(s) updated on commit)
+story lines seeded: 12 (their story ships as resolved_source 'curated'; 13 curated_descriptions rows staged in curated_records.json)
+new seed rows: 12  (unclassified category: 0, no wiki description: 0)
+seeded under their Wikipedia article's title (#425): 3 — read each "↳ seeded under" line before --commit
+#439: 0 staged story row(s) will be SKIPPED (already curated) → expect the commit to insert 13 story row(s); 0 seed story(ies) will be REPLACED
+Wikipedia calls: 12 · retried 0 · failed 0
+TIMEOUTS (#506): Wikipedia 0 · geocode 0 · nearby-places 0 · Gemini 0 · Supabase reads 0 (limits 20 / 20 / 180 / 60 / 30 s).
+wrote seed_records.json (load into `submissions`) and seed_report.json (verdicts).
+NOTHING was written to the database. Review the report, then re-run with --commit to insert (or load seed_records.json manually).

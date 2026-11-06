@@ -1,0 +1,19 @@
+graves-resolve 2026.11.03a (#455 + #456 + #457 + #458 + #459 — roster 39 → 44, + Cincinnati, + Kansas City, + Columbus, + Indianapolis, + Cleveland, Phase C; code unchanged. Built on 11.02a: #449 + #450 + #452 + #453 + #454 — roster 34 → 39, + Las Vegas, + Sacramento, Phase B, + Riverside, + Orlando, + Charlotte, Phase C; code unchanged. Built on 10.30a: #447 + #448 — roster 32 → 34, + San Antonio, + Tampa, Phase B; code unchanged. Built on 10.29a: #446 — roster 31 → 32, + Pittsburgh, Phase B; code unchanged. Built on 10.28a: #485 — roster 30 → 31, + Katy-Energy Corridor, Houston's first extra box; code unchanged. Built on 10.27a: #501 — roster 29 → 30, + Middlesex-Union, New York's third extra box; code unchanged. Built on 10.26a: #533 — ring-slot hold: a row within GRAVE_RING_SLOT_M (10 m) of a LIVE grave of a different person is held and listed as RING SLOT TAKEN, on all three commit paths. Built on 10.25a: #500 — roster 28 → 29, + Bergen-Westchester, New York's second extra box; code unchanged. Built on 10.22a: #484 — roster 27 → 28, + DuPage-NW Cook, Chicago's first extra box; code unchanged. Built on 10.20a: #483 roster 26 → 27, + Orange County. Built on 10.06c: #492 — resting-place check: a grave is planted only where Wikidata's cemetery agrees with the person's own Wikipedia article; disputed graves are held or audited, never silently dropped. 06b: four false-positive fixes from the first live audit; 06c: 3 more releases from the second (8 total). Built on 10.04a.)
+Mode: FROM RECORDS (no crawl). Source tag: seed:wikidata-grave.
+Require-wiki: ON. Grave-place gate (#342): ON — burial place must be a cemetery. Resting-place check (#492): ON — 8 released by hand. Top 5 per cemetery coordinate (most famous first; ranks 2..N on the 50 m anti-stack ring; require a description). Dedup: nearby-places.
+Submissions-aware skip: 6242 existing 'seed:wikidata-grave' key(s) loaded from the DB (6242 row(s) read, paged; 5860 live, 382 retired/merged; 6206 distinct core names for the #384 override).
+
+--from-records: 84 row(s) in graves_records.json — 0 already in submissions (skipped), 84 to insert.
+
+#442 DUPLICATE LABELS: none — every row carries a distinct label.
+
+#533 RING SLOT TAKEN: none — no row lands within 10 m of a live grave of a different person (5860 live grave rows checked).
+
+--from-records --commit: inserting the un-loaded rows now (no crawl).
+  committed 84/84…
+
+--commit: INSERTED 84 row(s) into submissions (source='seed:wikidata-grave', status='approved') across 1 city.
+Verify (REST), per city — each count should match:
+  Columbus: submissions?source=eq.seed:wikidata-grave&city=eq.Columbus&select=count (Prefer:count=exact) — should equal 84.
+Verify (REST), whole run: submissions?source=eq.seed:wikidata-grave&select=count (Prefer:count=exact) — should increase by 84.
+Back-out: delete from submissions where source='seed:wikidata-grave' and city='Columbus' and created_at > now() - interval '2 hours';
