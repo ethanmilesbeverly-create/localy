@@ -1,0 +1,82 @@
+# names-459-cleveland-3f.txt — #459 Cleveland story batch, part 3f: Ohio City and the near west side's red-link
+# "SEED — unmapped" rows (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1, -2, -3a, -3b, -3c, -3d, -3e, this file, later parts + 459_hidden_curated*.sql)
+# dry-runs and commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# ROWS (34): the Cleveland list's SEED — unmapped rows not yet settled, west of -81.6935, east of -81.745, north of
+#   41.465 — Ohio City, Hingetown, the Flats' west bank, Tremont, Detroit-Shoreway to W. 81st and north Clark-Fulton,
+#   plus CV256 Upson-Walton on the Flats' east bank (the same lng cut): CV009, CV010, CV025, CV057, CV063, CV068, CV081,
+#   CV091, CV092, CV100, CV108, CV109, CV111, CV118, CV124, CV131, CV137, CV140, CV144, CV150, CV151, CV162, CV168, CV182,
+#   CV203, CV232, CV238, CV242, CV245, CV256, CV258, CV261, CV268, CV279. (Part 3e's note counted 33; the cut above is 34.)
+#   Every title re-resolved on Wikipedia first: all 34 red links. No multiple-property nomination covers these blocks
+#   (each is an individual listing, most 1974–2024 tax-credit nominations), so each row was searched on its own; the
+#   NRHP list's own description cell was read for every row first (it carried three demolitions and Tinnerman's story).
+# SOURCES, one per line: Cleveland Historical (items 65, 211, 459, 751, 1055; files 7796, 9452, 10766); the Encyclopedia
+#   of Cleveland History (Kundtz); the Chesler Group's Van Roy Building page (Van Rooy); Plain Press 2020-02-06 (Federal
+#   Knitting); NPGallery nomination text (Lion Knitting; J. Spang); Cleveland Magazine / NEOtrans 2026-09-24 (Upson-Walton);
+#   Cleveland Water's Morgan plant history (Division Avenue); HMdb 136909, Remarkable Ohio 114-18 (Templin-Bradley);
+#   Wikipedia *Rauch and Lang* and the NRHP list's Tinnerman description cell; the Ohio History Connection's 2018 State
+#   Board release (Astrup).
+# CHECKS (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3), FROM CLEVELAND (6)): every number and capitalised
+#   name in its source text (the checker re-proven on planted 1931 / "Shorway" and 1908 / "Spong", all absent from their
+#   sources); every line in stored tile 829_-1634, 830_-1634 or 830_-1635, inside the box; stored pins (870 across the 52
+#   stored rows 826–833 × -1640…-1629), approved gems (7 in the area, all graves, none within 150 m), all parts' lines
+#   within 100 m and articles within 90 m read at each LINE's own point; no name repeated across parts 1–3f; no line named
+#   "Grave of …".
+# POINTS — OSM's own feature (Photon) unless noted: Gordon Square Arcade (way 127271810); Superior Avenue Viaduct (way
+#   1022165528, the bridge); Forest City Bank Building (node 4295005266, 1400 W. 25th); Van Rooy (node 4621058813,
+#   *Spaces*, the ground-floor gallery); Vitrolite (node 11124088154, *Patron Saint Cafe + Bar*, 2915 Detroit, the
+#   showroom's tenant); Federal Knitting Mills (relation 6837864, 2860 Detroit — the list point is ~250 m south-west, off
+#   the building; Plain Press puts the mill next door to Van Rooy, and the 2860 relation is); Templin-Bradley (way
+#   420306131, *Templin-Bradley Lofts*); Tinnerman (way 585970494, *Tinnerman Lofts*, 2048 Fulton); Astrup (way 896297465,
+#   *Pivot Center for Art, Dance and Expression*); Fairmont Creamery (way 370749544, *The Fairmont Creamery*); J. Spang (way
+#   388142094, *BVQ Lofts*). Menlo Park Academy and Greater Cleveland Aquarium at their articles' points (Pittsburgh (4)).
+#   At the list point (seconds or 4-decimal precision, nothing stored near, Photon has no house number): Lion Knitting
+#   (3264 W. 25th is 54 m south), Kundtz (Elm Ave.), Globe Iron Works (Center St. at Spruce — the source's "between Elm
+#   and Center"), Upson-Walton (Old River Rd., river side), Division Avenue (the plant at the foot of W. 45th), Rauch & Lang
+#   (2168 W. 25th; OSM's *Voss Industries* way, 40 m, may be the same plant but no address confirms it).
+# ARTICLE-NAMED LINES, NOT `new` (FROM PITTSBURGH (4), #539): CV279 Woodland Avenue and West Side Railroad Powerhouse →
+#   *Greater Cleveland Aquarium* (its article 26 m from the list point, in no stored tile — the aquarium fills the
+#   powerhouse); CV137 Joseph and Feiss Clothcraft Shops → *Menlo Park Academy* (its article 21 m from the list point, in
+#   no stored tile — the school is the spared warehouse; the factory was razed in 2003). Each story is the building's.
+# NOTHING STORED near any line but two served history pins (both different subjects): *Near West Theatre* 65 m from the
+#   arcade, *Ariel Castro kidnappings* 74 m from Astrup — no cut, no curated row owed (the stored map here is thin, FROM
+#   TAMPA (6)).
+# VAN ROOY / VITROLITE 33 m apart: 2900 and 2915 Detroit, opposite sides of the street, each separately listed.
+# `| new` UP FRONT on 7 lines: Gordon Square Arcade (*Near West Theatre* pin and article 65 m); Superior Avenue Viaduct
+#   (*Center Street Bridge (Cleveland)* article 86 m, part 1's *Detroit–Superior Bridge* line 118 m); Van Rooy, Vitrolite
+#   and Federal Knitting (each other, 33–99 m); Astrup (*Ariel Castro kidnappings* 74 m); Rauch & Lang (the near-named
+#   article *Rauch and Lang*, no coordinate — Bergen (2)'s precaution). The other 12 have nothing within reach.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — gone (the NRHP list's own description cell): CV081 Erie Railroad Cleveland Powerhouse (demolished May 2014,
+#     HAER 2014); CV268 Watterson School (demolished); CV151 Liquid Carbonic Corporation Dry Ice Plant (demolished — the
+#     list cell cites Street View only; nothing found standing).
+#   CARRIED to the depth row (no story in one search — FROM SAN ANTONIO (13)): CV063 The Courtland (5403 Detroit; 1896–97,
+#     Steffens, Searles & Hirsh — metadata only).
+#   CARRIED to part 3g, not yet searched (this chat's budget): CV009 Arnold Wooden Ware, CV025 Bruce-Macbeth Engine,
+#     CV057 Clinton Apartments, CV109 Globe Machine and Stamping, CV118 Harp Apartments, CV124 James Hill House, CV131
+#     Hubbard Cooke Block, CV140 Kennedy Apartments and Commercial Block, CV162 McKinley Terrace, CV168 Miller Block,
+#     CV182 Northern Ohio Blanket Mills.
+#   STILL CARRIED from parts 3c–3e: CV179 Neff and CV170 Montana Apartments (no point); CV251 Union Steel Screw, CV139
+#     Kendel and CV148 Lerner (depth row).
+# EXPECT on the Mac dry run: 19 new-seed. Any `review` is a stop: read it before --commit.
+Gordon Square Arcade | @41.484307,-81.730865 | The Gordon Square Arcade opened on April 8, 1921, as the centerpiece of the Gordon Square commercial district; after its parapet crashed onto West 65th Street in 1978, citizen groups and the Detroit Shoreway Community Development Organization saved it from demolition. | https://clevelandhistorical.org/items/show/211 | new
+Superior Avenue Viaduct | @41.494643,-81.704363 | Clevelanders greeted the Superior Viaduct, the city's first high-level bridge, with great fanfare when it opened in December 1878; a number of its stone arches on the west side of the river are all that remain. | https://clevelandhistorical.org/items/show/65 | new
+Forest City Bank Building | @41.491207,-81.707484 | A 1917 photo of work at Detroit Avenue and West 25th Street, near the west end of the Detroit-Superior Bridge, shows the Forest City Bank building, which still stands on the southwest corner of the intersection. | https://clevelandhistorical.org/files/show/7796
+Van Rooy Coffee Company Building | @41.489852,-81.711290 | Thompson Products made the pistons for Ford's Tri-Motor airplane here, then in 1935 sold the building to the Van Rooy Coffee Company, which stayed until March 2003. | https://tcgprojects.blogspot.com/p/van-roy-building.html | new
+Vitrolite Building | @41.489559,-81.711373 | The Vitrolite Company built this showroom in 1926 as Cleveland's showcase for its structural glass, and the showroom's original facade is still preserved. | https://clevelandhistorical.org/items/show/1055 | new
+Federal Knitting Mills Building | @41.490293,-81.710684 | When Cleveland ranked close to New York as a leading center of garment production, the Federal Knitting Mills made wool sweaters here from 1907 to 1939. | https://plainpress.blog/2020/02/06/detroit-avenue-has-a-rich-history | new
+Lion Knitting Mills | @41.465833,-81.700556 | In 1921 the Lion Knitting Mills Co., a prominent Cleveland maker of knitted goods established in 1912, moved here from its downtown Power Avenue plant near the garment district. | https://npgallery.nps.gov/GetAsset/d934e939-2052-4ae4-9d52-d04a7d284776
+Menlo Park Academy | @41.473222,-81.720694 | Menlo Park Academy, a charter school for gifted students, opened in 2017 in the spared warehouse of the Joseph and Feiss Co., a clothing maker nationally renowned for its progressive labor policies, whose factory here was razed in 2003. | https://clevelandhistorical.org/files/show/9452
+Greater Cleveland Aquarium | @41.496300,-81.703900 | The Greater Cleveland Aquarium fills the Powerhouse, built in 1892 as the first power plant in Cleveland dedicated to providing electricity to streetcars and closed in 1920 when the streetcars gave way to the automobile. | https://clevelandhistorical.org/items/show/459
+Theodor Kundtz Company Building | @41.495556,-81.706111 | From a modest shop on Elm St., the Theodor Kundtz Co. grew into an industrial giant making sewing machine cabinets, bicycle wheels, church and school furniture, and auto and truck bodies. | https://case.edu/ech/articles/t/theodor-kundtz-co
+Globe Iron Works Building | @41.495833,-81.708889 | Globe Iron Works, an iron foundry on the west bank of the Flats started in 1853, made engines, boilers and other iron products, and from 1876 it built ships as the Globe Ship Building Company. | https://clevelandhistorical.org/files/show/10766
+Upson-Walton Company Building | @41.498056,-81.702778 | Built in 1871 for the Upson-Walton Co. beside the Cuyahoga River, this three-story building on Old River Rd. housed Arhaus Furniture's headquarters from 1986 to 2007. | https://clevelandmagazine.com/articles/historic-flats-buildings-listed-for-sale/
+Division Avenue Pumping Station | @41.490000,-81.716667 | Cleveland's first municipal waterworks opened on this site on September 24, 1856; the Division Avenue Plant here began pumping filtered water in 1918, and in 1991 it was renamed for Garrett A. Morgan, who rescued men from a tunnel disaster. | https://clevelandwater.com/node/144
+Templin-Bradley Company | @41.485693,-81.725747 | In 1907 the Templin-Bradley Company began its Children's Flower Mission for the Cleveland Public Schools Horticulture Program, selling seed packets for 1 cent each, and for fifty years it sold low-cost seeds to school garden groups throughout the country. | https://www.hmdb.org/m.asp?m=136909
+Rauch & Lang Carriage Company Building | @41.482200,-81.701800 | The Rauch & Lang Carriage Company, maker of some of the best known carriages in Cleveland, built electric automobiles in Cleveland from 1905 to 1920, and from 1907 it made all parts of its cars in its own factory. | https://en.wikipedia.org/wiki/Rauch_and_Lang | new
+Tinnerman Steel Range Company | @41.480101,-81.711117 | Built in segments from 1886 to 1914, this factory is where the Tinnerman Steel Range Company made the first steel cooking range and the first speed nut. | https://en.wikipedia.org/wiki/National_Register_of_Historic_Places_listings_in_Cleveland
+Astrup Company Building | @41.472151,-81.698818 | Danish immigrant William Astrup founded the Astrup Co. in 1876 as a sailmaker for the Great Lakes shipping trade; it turned to awnings as ships moved to steam and diesel, and it stayed family-owned until 2007, 125 years of that at this site. | https://ohiohistory.org/?p=16921 | new
+Fairmont Creamery Company Ice Cream Building | @41.480542,-81.696089 | Fairmont Creamery opened its Cleveland operation here in 1930, a five-story building where dairy products were processed for decades and neighbors bought ice cream cones at a retail window. | https://clevelandhistorical.org/items/show/751
+J. Spang Baking Company | @41.475195,-81.700885 | Built in stages from 1906 to 1937, this bakery tells how the J. Spang Baking Co., begun in the Spang family's 1889 home at 2701 Barber Avenue, grew into one of the largest bakery businesses in Ohio. | https://npgallery.nps.gov/GetAsset/c3c8aa30-344d-4e67-b2db-683c25ad329f
