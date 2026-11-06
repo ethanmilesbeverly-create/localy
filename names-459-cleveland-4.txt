@@ -1,0 +1,30 @@
+# names-459-cleveland-4.txt — #459 Cleveland story batch, part 4: the 122-pin gate-drops union (459_gate_drops_cleveland.tsv,
+# 97 shared + 21 leads-only + 4 gate-only), read 2026-11-05. Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole Cleveland batch (names-459-cleveland-1.txt … -4.txt, part 5's names file +
+# 459_hidden_curated*.sql) dry-runs and commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# METHOD: a fresh read of the 51 stored tiles (48 box + ring) and a live serve read of the same (all cache hits,
+# curatedIndexRows 2,493); none of the 122 is served — all hidden. Per pin: a Wikipedia geosearch at 150 m and a name search
+# (#536); #542 by pin id across every stored row; the proximity check at each LINE's own point (stored pins served and hidden,
+# the 87 approved gems in the square, parts 1–3h's 121 lines, 100 m); the mechanical source check (re-proven on 1947 / "Johnsen").
+# RESULT (verdict column): 2 already curated (parts 1, 3h); 21 CURATED ROWS → 459_hidden_curated_3.sql; 5 LINES below, each a
+#   #542 failure seeded at the story's point under a name other than the stored one (the Baseball Heritage Museum line takes
+#   its article's title, which the hidden pin shares — FROM PITTSBURGH (4); the pin stays hidden, so no twin shows):
+#   The Angel of Death Victorious (hidden "Haserot Angel", 6 m), The African American Museum in Cleveland (hidden "African
+#   American Museum of Cleveland", 1 m — the building is CV050's Hough Branch Carnegie Library, settled by this line), Baseball
+#   Heritage Museum (1 m; `new` — League Park's article 24 m), Hough riots (at the hidden "Hough Uprising Memorial", E. 79th and
+#   Hough — the article has no coordinate, #536), Eliot Ness Memorial Marker (at the hidden "Elliot Ness Memorial"; `new` — the
+#   hidden Alan Freed memorial 20 m).
+#   3 CUT: Rocky Colavito (served statue 59 m), Hay-McKinney House (part 1's line, 0 m), Fog Signal House (part of the served
+#   West Pierhead light station, 11 m). 14 NO LINE: 6 GNIS district points (the sort's own district verdicts), the Rockefeller
+#   Monument (his loaded grave, 23 m), 7 cemetery or private memorials.
+#   77 CARRIED to the depth row (by cut-scope directive, 2026-11-05): the 4 gate-only pins outside the box; 5 Lake View grave
+#   memorials as hand-add grave candidates (Freed, Case, Chapman, Wade, Stone — FROM ORLANDO (7)); and every pin with no
+#   place-specific source in this read — among them Bach, Beethoven, the Slovak garden's Kollar and Furdek (beside the served
+#   Štefánik, 9–12 m), the Gandhi statue, the Hanna, Kościuszko, Lincoln and Feller statues, the CWRU and Wade Park art, and the
+#   suburban veterans' memorials and museums.
+The Angel of Death Victorious | @41.51304722,-81.59038333 | Industrialist Francis Henry Haserot commissioned Herman Matzen, an Ohio-based sculptor from Denmark, to make this bronze angel for his wife's grave after her death in 1919; oxidation has left black tears on its face. | https://en.wikipedia.org/wiki/The_Angel_of_Death_Victorious
+The African American Museum in Cleveland | @41.508747,-81.627263 | Founded in 1953 by Icabod Flewellen, this was the first independent African American museum to open in America; it moved in 1983 into this Carnegie Library building on Crawford Rd. | https://en.wikipedia.org/wiki/The_African_American_Museum_in_Cleveland
+Baseball Heritage Museum | @41.51119444,-81.64428333 | Founded in 1997 from Robert Zimmer's family collection, the Baseball Heritage Museum moved in 2014 into the refurbished former Ticket House of League Park, once home of the Cleveland Indians. | https://en.wikipedia.org/wiki/Baseball_Heritage_Museum | new
+Hough riots | @41.5094706,-81.6333458 | The Hough riots began on July 18, 1966 at the Seventy-Niner's Café on the corner of E. 79th Street and Hough Avenue; by July 23, four African Americans had been killed and 50 people injured. | https://en.wikipedia.org/wiki/Hough_riots
+Eliot Ness Memorial Marker | @41.5138378,-81.5931742 | After Eliot Ness's death his body was cremated, and his ashes were scattered in one of the small ponds on the grounds of Lake View Cemetery in Cleveland. | https://en.wikipedia.org/wiki/Eliot_Ness | new
