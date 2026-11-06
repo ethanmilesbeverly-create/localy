@@ -1,0 +1,59 @@
+# names-459-cleveland-5.txt — #459 Cleveland story batch, part 5 (drafted 2026-11-06): the sort's 9 no-coordinate rows, the graves'
+# surname re-read, and Cuyahoga County's Ohio Historical Markers (Remarkable Ohio, series -18) as the depth bar (FROM COLUMBUS (3)).
+# Every line: Name | locate | one sentence in our own words | source URL [| new].
+# Batch file — do NOT run alone; the whole Cleveland batch (names-459-cleveland-1.txt … -5.txt + 459_hidden_curated*.sql)
+# dry-runs and commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# (a) THE 9 NO-COORDINATE ROWS — all NRHP-delisted, settled from each list's own description cell; no line:
+#   CV285 Cuyahoga Building (imploded 3 Oct 1982), CV286 Holy Name High School-Gallagher Building (demolished),
+#   CV287 McDonald's Drive-in (demolished), CV288 Newburgh Town Hall (fire 1984, demolished 1985), CV289 Northern Ohio
+#   Lunatic Asylum (demolished 1994), CV290 Rocket Engine Test Facility (demolished 2003 for the airport runway), CV292
+#   Sterling School (demolished 1982); CV403 Calvin Gilbert House (Solon) and CV407 Octagon House (Painesville) lie
+#   outside the box. None has a Wikipedia article.
+# (b) THE GRAVES' SURNAME RE-READ — all 148 live graves, not only the 30: of the 30 in tiles unread at the graves pass, 13
+#   now sit in stored tiles; 17 remain in tiles no one has warmed (Kent/Hudson 823_-1627, Bedford 825_-1629, 826_-1631,
+#   the west edge 827_-1643, 827_-1641, 828_-1640, Lake County 832_-1627, 834_-1624 — read on Wikipedia only). A surname
+#   match within 2 km over 61 stored rows (+ every approved gem, every Wikipedia article by geosearch, and parts 1–4's 126
+#   lines) found only the pairs the graves pass already read — Franklin Township Hall, John Davey House, Hay-McKinney House
+#   (and part 1's line on it), Rockefeller Monument, Casement Springs Preserve, an East 79th station — none a same-person
+#   pin. Nothing retired.
+# (c) REMARKABLE OHIO — seven search-snippet reads by ZIP and suburb (44113, 44114, 44103/44104, Lakewood, Shaker/Cleveland
+#   Heights …), ~40 Cuyahoga markers seen, every snippet checked against the box's 51 stored rows (845 pins), a live serve of
+#   their tiles, the 148 graves and other gems, parts 1–4's lines and a Wikipedia geosearch at the line's own point:
+#   13 LINES below; 2 CURATED ROWS → 459_hidden_curated_4.sql (African American Cultural Garden, Lakewood Park — both pass #542).
+#   Article-named lines (FROM PITTSBURGH (4) — the article IS the place the marker names, in no stored tile): Public
+#   Auditorium (the Ohio AFL-CIO marker), Cleveland City Hall (the Carl Stokes marker), Cleveland Public Library, Monroe
+#   Street Cemetery, Erie Street Cemetery (settles CV082's district verdict — the cemetery has its own article), Cowan
+#   Pottery and National Carbon Company (articles with no coordinate — at the marker).
+#   Horseshoe Lake: the hidden "Horseshoe Lake Park" (osm_way380825318, 143 m) FAILS #542 (stored only in 829_-1631,
+#   containing 830_-1631) — seeded at its marker under the marker's own name, `new`.
+#   CUT, already told: Federal Reserve Bank of Cleveland, Samuel Mather Mansion, Theater District, Old Stone Church (part 1
+#   lines); Saint Ignatius (part 2); Woodland Cemetery (part 3a); Rear Admiral Isaac C. Kidd (part 4's curated row); served —
+#   The Arcade (2-18), Sarah Benedict House, Cleveland East Ohio Gas Explosion (86-18, the served article 150 m), Rock and
+#   Roll Hall of Fame, League Park (13-18), Cleveland Cultural Gardens (63-18), Nature Center at Shaker Lakes, Alexander
+#   Winton Homestead (128-18 — the served Winton Place's story names his house on the same land).
+#   NO LINE: Ali Summit (the marker stands at the stadium, away from 10501 Euclid where it happened — FROM MIDDLESEX-UNION
+#   (6)); The Council of International Programs USA (73-18, never installed); Lewis Field Historic District (127-18, NASA
+#   access — FROM LAS VEGAS (5)); University Circle (a district); Lakewood Women Get the Vote (137-18, no place subject,
+#   marker down); Moses Cleaveland's "Capitol Town" (39-18, reported missing, no text read).
+#   CARRIED to the depth row (no usable text in a snippet): 112-18 East Cleveland Public Library (one sentence; no article),
+#   38-18 John D. Rockefeller / The Standard Oil Company (side B unread), the Terry v. Ohio marker at the Justice Center (no
+#   longitude), 30-18 Crile Hospital (Parma, text cut), the Market Square Park marker (W. 25th, text unread); and the rest of
+#   Cuyahoga's ~160 markers not surfaced by search — fastest closed in a browser at remarkableohio.org's Cuyahoga index.
+# CHECKS: every number and capitalised name in each sentence appears in its source text (checker re-proven on a planted
+#   1917 and "Russel"); every line in a stored tile inside the box; no name repeated across parts 1–5 or clashing with a
+#   live grave; no two part-5 lines within 30 m; `new` where another line, a stored pin, a gem or an article sits within
+#   ~100 m (Erie Street Cemetery stands 4 m from its rank-0 grave, John William Allen — FROM TAMPA (8)).
+Public Auditorium | @41.504061,-81.694017 | A state marker here recalls that in 1958, three years after the national AFL and CIO merged, more than 2,000 labor delegates representing one million union members met at the Public Auditorium for the founding convention of the Ohio AFL-CIO. | https://remarkableohio.org/?p=4118 | new
+Cleveland City Hall | @41.505,-81.69388889 | Outside City Hall a state marker recalls Carl Stokes, born in Cleveland on June 21, 1927, whose election as mayor in 1967 made him the first African American mayor of a major American city. | https://remarkableohio.org/?p=15208
+Desegregation of Cleveland Public Schools | @41.50216,-81.69133 | This state marker at E. 6th Street and Rockwell Ave. recalls the fight over school segregation: a protester's death in a construction ditch at Howe Elementary School ignited an April 20 boycott in which 85-95% of Cleveland's Black students took part. | https://remarkableohio.org/?p=76326 | new
+Cleveland Public Library | @41.50107,-81.69164 | In 1890 the Cleveland Public Library became the first large metropolitan library in the nation to adopt the open shelf plan, letting readers fetch books themselves, and its Main Library here opened on May 6, 1925. | https://remarkableohio.org/?p=78972 | new
+LGBT Civil Rights Movement | @41.48944,-81.710871 | This block of W. 29th Street housed Cleveland's Lesbian-Gay Community Services Center; Cleveland's first Pride Festival since the mid-1970s was held here in 1989, and in 1990 the city's first Pride Parade ended here. | https://remarkableohio.org/?p=4537 | new
+Monroe Street Cemetery | @41.4783,-81.7053 | Until the late 1890s this was the only public cemetery on Cleveland's west side; architect Joseph Ireland designed its Gothic Revival gateway arch in 1874. | https://remarkableohio.org/?p=4347
+Erie Street Cemetery | @41.49777778,-81.68166667 | In 1939 the Early Settler's Association restored this burial ground and built the stone wall around it; a number of notable people are buried here. | https://historicalmarkerproject.com/markers/HM1XTI_erie-street-cemetery-historical_Cleveland-OH.html | new
+John Heisman Birthplace | @41.4820718,-81.7137792 | John Heisman, the man for whom the Heisman Football Trophy is named, was born here on October 23, 1869; the College Football Hall of Fame enshrines him as a superior coach. | https://remarkableohio.org/?p=3554 | new
+Beth Israel-The West Temple | @41.4624409,-81.7933587 | Here in 1963 congregants of Beth Israel-The West Temple founded the Cleveland Committee on Soviet Anti-Semitism; between 1975 and 2003 an estimated ten thousand Soviet Jews were resettled in Cleveland. | https://remarkableohio.org/?p=4592
+Cowan Pottery | @41.4861011,-81.7829891 | At this spot in 1913 R. Guy Cowan opened Northeast Ohio's only art pottery, first known as the Cleveland Pottery and Tile Company; it closed in 1931, a casualty of the Great Depression. | https://remarkableohio.org/?p=4479
+National Carbon Company | @41.4767808,-81.771324 | Arc carbons from this company's forerunner lit the world's first practical electric street lamp in Cleveland on April 29, 1879; the National Carbon Company built its factory here in southeast Lakewood in 1891 and became GrafTech International in 2002. | https://remarkableohio.org/?p=4399
+Horseshoe Lake | @41.4825103,-81.5612405 | Once land of the North Union Shaker Community, which disbanded in 1889, the Shaker Lakes Parklands were deeded to the City of Cleveland in 1896, and in the 1960s residents fought off the proposed Clark Freeway, saving Horseshoe Lake. | https://remarkableohio.org/?p=3980 | new
+Flowering Grove | @41.48175,-81.560083 | In 1930 nine women from Shaker Heights and Cleveland Heights organized The Village Garden Club to plant the Shaker Parklands with trees, and the club still tends this flowering grove. | https://remarkableohio.org/?p=15207 | new
