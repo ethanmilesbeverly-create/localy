@@ -1,0 +1,71 @@
+# names-459-cleveland-2.txt — #459 Cleveland story batch, part 2: the sort's article-in-no-tile rows OUTSIDE downtown
+# (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1.txt, this file, later parts' names files + 459_hidden_curated*.sql) dry-runs and
+# commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 459_sort_cleveland.tsv (story-sort 2026.11.01b, prefix CV). Part 2 = the sort's 25 "SEED — article in no tile
+# (#539)" rows outside downtown (41.490–41.510 N, 81.705–81.660 W; part 1 took the 35 inside it). 22 lines, 3 rows settled
+# without one. Each line is named exactly as its article, at the article's point unless noted, and passed the mechanical
+# checks (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3)): every number and capitalised name in its source
+# (a checker run, tested on a planted wrong year and name); inside the box, and each line's tile is a stored tile (read
+# 2026-11-05: 844 pins across 51 stored tiles, unchanged since part 1); no name repeated across parts 1–2 or clashing with a
+# live grave (148); stored pins (served and hidden), live graves and both parts' lines within 100 m, and Wikipedia articles
+# within 90 m, read at the LINE's own coordinate; no two lines of parts 1–2 within 30 m. Every point checked against OSM's
+# own feature through Photon (FROM TAMPA (5)) — all within ~45 m except where noted. Live serve read 2026-11-05:
+# curatedIndexRows 2,493.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — gone (FROM SACRAMENTO (5)):
+#     CV194 Peerless Motor Company Plant No. 1 (9400 Quincy Ave.; the sort's article is the carmaker's, *Peerless Motor
+#       Company*). Carling, then C. Schmidt & Sons brewed there until 1984; Cleveland Historical says the plant has since
+#       been torn down, Financial History (Summer 2015) that the idle complex came down in stages through the late '80s and
+#       '90s, and the last buildings were cleared for the Opportunity Corridor.
+#     CV269 Weizer Building (8935 Buckeye Road) — its article: destroyed by 2007, the lot now grass. This also settles the
+#       sort's CV212/CV269 TWIN CANDIDATE flag (23 m): two listings, one of them gone.
+#   CUT — served (FROM CLEVELAND (2)'s logic, a building's served pin): CV004 Allen Memorial Medical Library. Two SERVED pins
+#     stand on the building — *Dittrick Museum of Medical History* (wiki_14718807, 3 m) and *Dittrick Museum of Medicine
+#     History* (osm_node368155521, 5 m) — and their story says the museum is housed in the Allen Memorial Medical Library.
+#     A third pin on the same building would stack; the sort's CHECK SUBJECT flag pointed at the farther UH Cleveland
+#     Medical Center pin (76 m) and missed these two. (The served Dittrick pair is itself a wiki/OSM twin 2 m apart whose
+#     names differ by one word — noted for the docs pass, not touched here.)
+#   CV117 Halle Brothers Shaker Square department store — placed at OSM's own building, way 344286194 (13000 Shaker
+#     Boulevard), 26 m from the article's whole-minute point; written from *Robert Little (architect)*, since the article is
+#     a two-sentence stub and NPGallery metadata alone is not a story (FROM SAN ANTONIO (13)). SAH Archipedia's entry agrees
+#     it was the chain's first suburban branch.
+#   CV270 Weizer Building (11801 Buckeye Road) — the article is a stub; written from Fresh Water Cleveland's Cleveland
+#     Masterworks piece (2023-11-16), which the NRHP data (Hradilek and Thomas, Beaux Arts) agrees with.
+#   CV213 Saint Ignatius High School — the NRHP listing is the 1891 Main Building; the article's point sits 22 m from OSM's
+#     *St. Ignatius Main Building* (way 716003061), so it is kept (the campus relation's centre is 218 m off — not used).
+#   CV241 Maltz Performing Arts Center — the NRHP listing is *The Temple*, the 1924 Tifereth Israel synagogue the centre
+#     occupies; named as the article.
+# `| new` UP FRONT (DuPage (1), Bergen (2)) on the 7 lines with a stored pin or another article within reach — Alta Public
+#   Library (*Guarino's*, 78 m), Dr. James Bell House (the hidden *East Eighty-Ninth Street Historic District* pin, 36 m),
+#   Church of the Covenant (*Mather House*, 27 m; *Flora Stone Mather College Historic District*, 66 m; two hidden CWRU pins
+#   76–83 m), Halle's (*Shaker Square station*, 52 m), Holy Rosary (*Cleveland Feast of the Assumption Festival* at 0 m, the
+#   *Statue of Rocky Colavito* and *Italian American Museum of Cleveland* 60–64 m), St. Elizabeth (the gone Weizer
+#   Building's article, 23 m) and West Side Market (hidden *Market Square* and *Market Square Park*, 63–73 m; *Market
+#   Garden Brewery*, 73 m). The other 15 have nothing within reach and take their article's name (FROM PITTSBURGH (4)).
+# No grave within 100 m of any line (Wade Memorial Chapel's nearest Lake View grave is farther).
+# EXPECT on the Mac dry run: 22 new-seed. Any `review` is a stop: read it before --commit.
+Alta Public Library | @41.50865833,-81.59605833 | George B. Post of New York City designed this library, finished in 1914 as an addition to Alta House, the Little Italy settlement house John D. Rockefeller funded and named for his daughter Alta; the library came through the 1980 fires that doomed Alta House undamaged. | https://en.wikipedia.org/wiki/Alta_Public_Library | new
+Dr. James Bell House | @41.50777778,-81.625 | Local architect George J. Hardway designed this home for dentist James Bell, completed in 1901 in a plain, almost severe Richardsonian Romanesque style that turned its back on high Victorian ornament. | https://en.wikipedia.org/wiki/Dr._James_Bell_House | new
+Body Block | @41.51277778,-81.6525 | Raised in 1892–1893 for wallpaper merchant Charles Body, this Queen Anne block held about 10 stores below 44 apartments, with a skylit arcade through its center that earned it the nickname "Old Smith Arcade." | https://en.wikipedia.org/wiki/Body_Block
+Calvary Presbyterian Church (Cleveland) | @41.50361111,-81.63388889 | Charles F. Schweinfurth designed this Romanesque Revival church, dedicated in 1890 for a mission of the Old Stone Church; in 1953 its congregation took a formal stand against segregation and became one of Cleveland's first racially integrated churches. | https://en.wikipedia.org/wiki/Calvary_Presbyterian_Church_(Cleveland)
+Tudor Arms Hotel | @41.50055556,-81.61305556 | Frank B. Meade designed this 12-story Gothic Revival tower, opened in 1933 as the Cleveland Club, where Al Capone was a regular; it became the Tudor Arms Hotel after the club closed in 1939, and Duke Ellington and Louis Armstrong appeared in its Empress Room supper club. | https://en.wikipedia.org/wiki/Tudor_Arms_Hotel
+Crawford-Tilden Apartments | @41.50694444,-81.62916667 | Burt Corning shaped this 1908 brick building like the letter V to fit an unusual lot; its twenty apartments have barely changed since, and it is one of the area's earliest garden apartment complexes. | https://en.wikipedia.org/wiki/Crawford-Tilden_Apartments
+Church of the Covenant (Cleveland) | @41.50833333,-81.6075 | Cram and Ferguson designed this University Circle Presbyterian church, built in 1911; in 1968 its tower gained the McGaffin Carillon, cast by the Royal Eijsbouts bell foundry. | https://en.wikipedia.org/wiki/Church_of_the_Covenant_(Cleveland) | new
+Halle Brothers Shaker Square department store | @41.4835468,-81.5920855 | This 1948 Halle Brothers branch store at Shaker Square was the first commission of modernist architect Robert Andrews Little, who had married into the Halle department store family, and it won the Cleveland Chamber of Commerce Award for Commercial Building. | https://en.wikipedia.org/wiki/Robert_Little_(architect) | new
+Holy Rosary Church (Cleveland) | @41.50888889,-81.59888889 | Formed in 1892 as Cleveland's first Italian parish, Little Italy's Holy Rosary began this Baroque-styled brick church in 1905, though four years passed before it was ready for consecration. | https://en.wikipedia.org/wiki/Holy_Rosary_Church_(Cleveland) | new
+Karamu House | @41.493796,-81.624196 | Founded in 1915 by Oberlin graduates Russell and Rowena Jelliffe as a meeting place for people of all races, Karamu grew into the oldest producing Black theatre in the United States, where many of Langston Hughes's plays were developed and premiered. | https://en.wikipedia.org/wiki/Karamu_House
+Pilgrim Congregational Church (Cleveland) | @41.47694444,-81.69194444 | Sidney Badgley designed this Richardsonian Romanesque church, finished in 1894 with a gymnasium, library and recreation rooms filling two-thirds of it, and wired for electricity when no other Cleveland building west of the Cuyahoga River had any. | https://en.wikipedia.org/wiki/Pilgrim_Congregational_Church_(Cleveland)
+St. Elizabeth of Hungary Shrine (Cleveland) | @41.48527778,-81.62333333 | Founded in 1892 as the first Hungarian nationality parish in America, St. Elizabeth's raised this limestone Baroque Revival church between 1918 and 1922 to designs by Emile Uhlrich, partly modelled on Rome's Sant'Agnese in Agone. | https://en.wikipedia.org/wiki/St._Elizabeth_of_Hungary_Shrine_(Cleveland) | new
+Saint Ignatius High School (Cleveland) | @41.48333333,-81.70777778 | Founded in 1886 by a German Jesuit, the school still stands on its original site, where the Main Building was completed in 1891; its college program became John Carroll University and moved to University Heights in 1935. | https://en.wikipedia.org/wiki/Saint_Ignatius_High_School_(Cleveland)
+St. John's Episcopal Church (Cleveland) | @41.49,-81.70833333 | Built from 1836 to 1838 to designs by Hezekiah Eldredge, this stone Gothic Revival church is the oldest consecrated building in Cuyahoga County and was known as "Station Hope" on the Underground Railroad. | https://en.wikipedia.org/wiki/St._John%27s_Episcopal_Church_(Cleveland)
+St. Luke's Hospital (Cleveland) | @41.485,-81.60583333 | Hubbell & Benes designed this Georgian Revival hospital, built in 1927 and closed in 1999; after more than 10 years empty it was restored from 2011 as St. Luke's Manor senior housing, with a charter school and offices in its east wing. | https://en.wikipedia.org/wiki/St._Luke%27s_Hospital_(Cleveland)
+St. Theodosius Russian Orthodox Cathedral | @41.47722222,-81.68166667 | Carpatho-Rusyn immigrants in Tremont founded this parish in 1896, and its cathedral, consecrated in 1913 and counted among the finest Russian church buildings in the United States, appears in The Deer Hunter, the 1978 Best Picture winner. | https://en.wikipedia.org/wiki/St._Theodosius_Russian_Orthodox_Cathedral
+Maltz Performing Arts Center | @41.50805556,-81.61611111 | Charles R. Greco designed this Byzantine Revival temple with a 90-foot dome, dedicated in 1924 for the Tifereth Israel congregation of Rabbi Abba Hillel Silver; Case Western Reserve University now uses it as a 1200-seat performance hall. | https://en.wikipedia.org/wiki/Maltz_Performing_Arts_Center
+Franklin Castle | @41.48574,-81.71655 | Cudell & Richardson built this Queen Anne stone house in 1881–1883 for German immigrant Hannes Tiedemann, who added turrets and a fourth-floor ballroom after a run of family deaths; it is reputed to be the most haunted house in Ohio. | https://en.wikipedia.org/wiki/Franklin_Castle
+Wade Memorial Chapel | @41.51361111,-81.595 | Jeptha Wade II gave Lake View Cemetery this Neoclassical chapel in memory of his grandfather, a Western Union co-founder; it was the first commission of Hubbell & Benes, and Louis Comfort Tiffany designed its mosaic and stained-glass interior. | https://en.wikipedia.org/wiki/Wade_Memorial_Chapel
+Weizer Building (11801 Buckeye Road, Cleveland) | @41.48111111,-81.60055556 | Hungarian immigrant John Weizer, who sold more than 2,000 lots to Hungarian residents, hired Henry Hradilek in 1925 to design this Beaux Arts building for his real estate offices in the heart of Buckeye Road's Hungarian community. | https://www.freshwatercleveland.com/breaking-ground/Masterworks_Weizer_111623.aspx
+West Side Market | @41.48444444,-81.70305556 | Hubbell and Benes designed this brick market hall with its clock tower, completed in 1912 with nearly 100 indoor stalls and a wraparound produce arcade; Ohio City's market dates to 1840, on land given by former mayors Josiah Barber and Richard Lord. | https://en.wikipedia.org/wiki/West_Side_Market | new
+Berea Union Depot | @41.38111111,-81.85444444 | Built of sandstone in 1876, when Berea's sandstone quarries were the world's largest, this Gothic Revival depot served trains until 1954 and was restored as a restaurant in 1980. | https://en.wikipedia.org/wiki/Berea_Union_Depot
