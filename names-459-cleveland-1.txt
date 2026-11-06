@@ -1,0 +1,78 @@
+# names-459-cleveland-1.txt — #459 Cleveland story batch, part 1: downtown's Wikipedia-list seeds, the sort's different-name
+# seeds and its curated-row candidates (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (this file + later parts' names files + 459_hidden_curated*.sql) dry-runs and commits in one Mac session
+# (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 459_sort_cleveland.tsv (story-sort 2026.11.01b, prefix CV; lists: NRHP in Cleveland, Cuyahoga County, Cuyahoga
+# Valley National Park, Lake County and Summit County). Part 1 = the sort's 35 "SEED — article in no tile (#539)" rows in
+# downtown (41.490–41.510 N, 81.705–81.660 W), its 3 "SEED under a different name" rows and its 2 "CURATED ROW" rows.
+# Each downtown line is named exactly as its article, at the article's point, written from the article, and passed the
+# mechanical checks (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3)): every number and capitalised name in
+# its source (a checker run, tested on a planted wrong year and name); inside the box, and each line's tile is a stored
+# tile (read 2026-11-05); no name repeated; stored pins (served and hidden, 844 across 51 stored tiles), live graves (148)
+# and the other lines within 100 m, and Wikipedia articles within 90 m, read at the LINE's own coordinate; approved gems in
+# the square other than graves: none. Live serve read 2026-11-05: curatedIndexRows 2,493.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — gone (FROM SACRAMENTO (5)): CV291 St. Joseph's Church and Friary (burned and demolished in February 1993).
+#   ONE LINE FOR TWO LIST ROWS: CV248/CV249 Trinity Cathedral (CV249 is the Trinity Cathedral Church Home, a separate
+#     listing with no article of its own — CARRIED to part 3 with the unmapped rows); CV283/CV284 Zion Lutheran Church
+#     (CV284 is its school; the church's article covers both, and the line names the school beside it).
+#   CV160 May Company Ohio → "May Company Building" at the article's point: the article is the store chain; its "May
+#     Company Cleveland building" section is the 1914 building (a redirect, *May Company Building (Cleveland, Ohio)*, points
+#     there). Flagged new so the judge cannot seed it under the chain's title (story-lines (w)).
+#   CV193 Park Building (Cleveland): the article's point (41.49, -81.683333) is a rounded coordinate ~1 km south of the
+#     building; placed at OSM's own feature, way 122815148 (140 Public Square), by Photon (FROM TAMPA (5), FROM CHARLOTTE (2)).
+#   CV252 Tower City Center (the NRHP Union Terminal Group) → "Terminal Tower" at its own article's point, the group's
+#     52-story centrepiece; the Tower City Center article (66 m) is the larger complex and is left alone, flagged new.
+#   CV121 → "Hay-McKinney and Bingham-Hanna House" (the NRHP name; no article of its own) at the HIDDEN pin "Hay-McKinney
+#     House" (osm_node9081385308, 0 m), which FAILS #542 (containing 830_-1632, stored only in 831_-1632), so a curated row
+#     cannot un-hide it; written from the Western Reserve Historical Society article, whose museum the mansion holds. The
+#     served Cleveland History Center pin (96 m) is the society's whole campus — a distinct building inside it is #422's new.
+#   CV333 → "Forest Hill Park (Ohio)", the article's exact title at its point: the hidden OSM "Forest Hill Park"
+#     (osm_way119707690, 91 m) FAILS #542 (containing 830_-1632, stored only in 830_-1631 and 831_-1631), and a seed under the
+#     pin's own name would un-hide it beside the seed.
+#   CV311 John Carroll University North Quad Historic District — CUT, served: the campus is served as *John Carroll
+#     University* (wiki_173741, 830_-1630), and the quad district has no article of its own.
+#   CV041 Cleveland East Pierhead Light and CV167 Miles Park → 459_hidden_curated.sql (both hidden pins pass #542).
+# `| new` UP FRONT (DuPage (1), Bergen (2)) on the 25 lines with a stored pin, a grave, another line or another article
+#   within reach — Public Square's statues and towers, the Cathedral of St. John's bishops' graves beside 1717 East Ninth,
+#   Erie Street Cemetery's graves beside Brownell School and Grays Armory, Playhouse Square's theatre articles (State Theatre
+#   at 0 m), the Gaensslen/Gifford pair (62 m) and the Old Stone Church/Society for Savings pair (39 m), each two listed
+#   buildings with their own articles. The other 9 have nothing within reach and take their article's name (FROM PITTSBURGH (4)).
+# No two lines sit within 30 m of each other.
+# EXPECT on the Mac dry run: 34 new-seed. Any `review` is a stop: read it before --commit.
+H. Black and Company Building | @41.50666667,-81.67916667 | Completed in 1907 for H. Black and Company, one of the largest makers of women's clothing in the United States, this factory by New York City architect Robert D. Kohn was nearly demolished in the 1980s before an award-winning restoration after 2000. | https://en.wikipedia.org/wiki/H._Black_and_Company_Building | new
+Brownell School and Annex | @41.49777778,-81.68027778 | Its Queen Anne main building, raised in 1884–1885 to designs by John Eisenmann, became the first campus of Cuyahoga Community College in 1962. | https://en.wikipedia.org/wiki/Brownell_School_and_Annex | new
+Bryant Building (Cleveland) | @41.50416667,-81.68555556 | Mall Motor Co. built this as its salesroom and service center, finished in 1921, and Bryant Motor Co. bought it the next year. | https://en.wikipedia.org/wiki/Bryant_Building_(Cleveland)
+Caxton Building | @41.49827778,-81.68608333 | Named for the 15th-century British printer William Caxton, this 1903 office building by F. S. Barnum & Co was made to carry heavy printing presses and housed graphic arts and printing businesses. | https://en.wikipedia.org/wiki/Caxton_Building | new
+Central YMCA (Cleveland) | @41.49972222,-81.67388889 | Built in 1911 by the YMCA of Greater Cleveland to designs by Hubbell & Benes, this residence was one of the homes of the Cleveland YMCA School of Technology, which grew into Fenn College and then Cleveland State University. | https://en.wikipedia.org/wiki/Central_YMCA_(Cleveland)
+Superior Building | @41.50236111,-81.68944444 | Finished in 1922 to designs by Walker & Weeks, this 22-floor tower missed being Cleveland's tallest building by 7 feet, beaten the same year by the Keith Building. | https://en.wikipedia.org/wiki/Superior_Building | new
+Grays Armory | @41.49888889,-81.68222222 | Completed in 1893 for the Cleveland Grays, a private military company founded in 1837, this armory is one of the oldest buildings still standing in downtown Cleveland. | https://en.wikipedia.org/wiki/Grays_Armory | new
+Rhodes Tower | @41.50316667,-81.67561111 | Opened in 1971 as University Tower, this 21-story, 363-foot building holds Cleveland State University's main library and is the tallest academic building in Ohio. | https://en.wikipedia.org/wiki/Rhodes_Tower
+Cleveland Trust Company Building | @41.50004,-81.68612 | Designed by George B. Post and finished in 1907, this bank at East 9th Street and Euclid Avenue keeps its glass-enclosed rotunda, and after a 2013 sale it was renovated into a grocery store. | https://en.wikipedia.org/wiki/Cleveland_Trust_Company_Building | new
+Detroit–Superior Bridge | @41.493843,-81.70365 | Built by the King Bridge Company from 1914 to 1918, this 3,112-foot arch was Cleveland's first fixed high-level bridge, and its lower level was made for streetcars. | https://en.wikipedia.org/wiki/Detroit–Superior_Bridge | new
+1717 East Ninth Building | @41.5021394,-81.6879576 | Opened in 1959 to designs by Emery Roth and Sons, this 275-foot tower, also called the East Ohio Building, was one of the first modernist high-rises in Cleveland. | https://en.wikipedia.org/wiki/1717_East_Ninth_Building | new
+Erieview Tower | @41.50527778,-81.68833333 | Finished in 1964 to designs by Harrison & Abramovitz, this 40-story tower was the first building of the Erieview urban renewal project, and its 38th floor held Stouffer's Top of the Town restaurant until 1995. | https://en.wikipedia.org/wiki/Erieview_Tower | new
+Federal Reserve Bank of Cleveland | @41.50193889,-81.69027778 | Completed in 1923 to designs by Walker and Weeks, the bank's 13-story building emulates an Italian Renaissance palazzo in Georgia pink marble, with allegorical sculptures by Henry Hering at its entrances. | https://en.wikipedia.org/wiki/Federal_Reserve_Bank_of_Cleveland | new
+First Methodist Church (Cleveland) | @41.50222222,-81.66694444 | Built in 1905 at Euclid Avenue and E. 30th Street, this church served its Methodist congregation until 2010 and then sheltered Euclid Avenue Congregational Church, whose own building had burned. | https://en.wikipedia.org/wiki/First_Methodist_Church_(Cleveland)
+Phillip Gaensslen House | @41.50083333,-81.66611111 | Built around 1870 for Phillip Gaensslen, who owned Cleveland's only German-language newspaper, this brick Italianate house later served as a home for unwed mothers, a church and a steel fabrication company's headquarters. | https://en.wikipedia.org/wiki/Phillip_Gaensslen_House | new
+Dr. William Gifford House | @41.50138889,-81.66611111 | Built in about 1901, this Tudor Revival house is an unusual work for William W. Sabin, a Cleveland architect better known for churches, police stations and other large public buildings. | https://en.wikipedia.org/wiki/Dr._William_Gifford_House | new
+Greyhound Bus Station (Cleveland) | @41.50325,-81.68222222 | Opened on April 1, 1948 to designs by William Strudwick Arrasmith, this Streamline Moderne station was sold to Playhouse Square in 2024, and intercity bus service here ended in 2026. | https://en.wikipedia.org/wiki/Greyhound_Bus_Station_(Cleveland)
+Halle Building | @41.50036111,-81.68386111 | Designed by Henry Bacon, this 11-story Chicago School building was the flagship department store of the Halle Brothers Co. from 1910 to 1982. | https://en.wikipedia.org/wiki/Halle_Building | new
+The Statler (Cleveland) | @41.5007,-81.6848 | The Hotel Statler opened here on October 12, 1912 with 700 rooms, and its success led to Statlers from Washington, D.C. to Los Angeles; the building became 295 apartments in 2001. | https://en.wikipedia.org/wiki/The_Statler_(Cleveland) | new
+May Company Building | @41.49861111,-81.69194444 | Added by May Company in 1914 on Euclid Avenue at the southeast corner of Public Square, this was May's Cleveland headquarters store; its top two of 8 floors came in 1931. | https://en.wikipedia.org/wiki/May_Company_Ohio | new
+Fenn Tower | @41.50222222,-81.67222222 | Built for the National Town and Country Club, which used it for only one event before closing, this 22-story tower was bought by Fenn College in 1937 for $250,000. | https://en.wikipedia.org/wiki/Fenn_Tower
+Guardian Bank Building | @41.50027778,-81.68888889 | Built in 1896 as the New England Building, this 221-foot tower by Shepley, Rutan, and Coolidge was the tallest in Cleveland until the Keith Building passed it in 1922. | https://en.wikipedia.org/wiki/Guardian_Bank_Building | new
+Howard M. Metzenbaum United States Courthouse | @41.50055556,-81.69263889 | The first building erected under Cleveland's 1903 Group Plan for a civic Mall, this federal courthouse and post office faces Public Square and is named for Senator Howard Metzenbaum. | https://en.wikipedia.org/wiki/Howard_M._Metzenbaum_United_States_Courthouse
+Old Stone Church (Cleveland) | @41.50027778,-81.69472222 | The oldest building on Public Square, this Romanesque Revival church by Charles Heard and Simeon Porter was dedicated in 1855 and still stands after fires in 1857 and 1884. | https://en.wikipedia.org/wiki/Old_Stone_Church_(Cleveland) | new
+Park Building (Cleveland) | @41.4990276,-81.6926145 | Built in 1904 to designs by Frank Seymour Barnum, this nine-story office building was one of Cleveland's earliest with floors of reinforced concrete, and one family owned it until 2006. | https://en.wikipedia.org/wiki/Park_Building_(Cleveland) | new
+Playhouse Square | @41.50083333,-81.68083333 | The Ohio and State theaters opened here in February 1921; after the district's theaters closed in the late 1960s a grassroots effort revived it, and it is now the largest performing arts center in the US outside New York City. | https://en.wikipedia.org/wiki/Playhouse_Square | new
+Plaza Apartments (Cleveland) | @41.50111111,-81.66472222 | Built in 1901 to designs by Steffens, Searles & Hirsh, this apartment house was home to the members of Pere Ubu and is seen on the cover of the band's 1978 album Dub Housing. | https://en.wikipedia.org/wiki/Plaza_Apartments_(Cleveland)
+Society for Savings Building | @41.50055556,-81.69444444 | Designed by John Wellborn Root of Burnham & Root and structurally complete in 1889, this 10-floor bank building is often called the first modern skyscraper in Cleveland and in Ohio. | https://en.wikipedia.org/wiki/Society_for_Savings_Building | new
+Trinity Cathedral (Cleveland) | @41.50111111,-81.67444444 | Begun in 1901 and consecrated on September 24, 1907, this is the cathedral of the Episcopal Diocese of Ohio, whose Trinity parish was founded in 1816 in the home of Phineas Shepherd. | https://en.wikipedia.org/wiki/Trinity_Cathedral_(Cleveland) | new
+Terminal Tower | @41.49833333,-81.69388889 | Completed in 1927 by the Van Sweringen brothers atop their new Cleveland Union Terminal, this 52-story tower was the tallest building in North America outside New York City until 1964. | https://en.wikipedia.org/wiki/Terminal_Tower | new
+Mather Mansion | @41.50309444,-81.67060556 | Finished in 1910 for shipping and ore mining magnate Samuel Livingston Mather II, this 45-room Tudor Revival home by Charles F. Schweinfurth is one of the last surviving mansions on Euclid Avenue. | https://en.wikipedia.org/wiki/Mather_Mansion | new
+Zion Lutheran Church (Cleveland) | @41.50055556,-81.6675 | Built in 1902 for a congregation formed in the 1840s, this Gothic Revival church by Frank Walker of Walker and Weeks stands beside its former school, and both joined the National Register in 1984. | https://en.wikipedia.org/wiki/Zion_Lutheran_Church_(Cleveland)
+Hay-McKinney and Bingham-Hanna House | @41.5129074,-81.60969 | The Western Reserve Historical Society's museum fills the 1911 Hay-McKinney mansion, designed by Abram Garfield, beside the 35-room Bingham-Hanna House that Harry Payne Bingham built between 1916 and 1919. | https://en.wikipedia.org/wiki/Western_Reserve_Historical_Society | new
+Forest Hill Park (Ohio) | @41.52222222,-81.57694444 | Bought by John D. Rockefeller in 1873 as a summer estate, these 248 acres were deeded to East Cleveland and Cleveland Heights by John D. Rockefeller Jr. and laid out by landscape architect Albert Davis Taylor. | https://en.wikipedia.org/wiki/Forest_Hill_Park_(Ohio) | new
