@@ -1,0 +1,64 @@
+# names-459-cleveland-3e.txt — #459 Cleveland story batch, part 3e: part 3d's carried Stockbridge row and downtown's red-link
+# "SEED — unmapped" rows (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1, -2, -3a, -3b, -3c, -3d, this file, later parts + 459_hidden_curated*.sql) dry-runs
+# and commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# ROWS: CV235 plus downtown's 15 red links (CV058, CV060, CV077, CV115, CV122, CV129, CV139, CV143, CV148, CV149, CV164,
+#   CV204, CV234, CV250, CV274); CV080, CV132, CV165, CV240 and CV264 are part 3b lines already — skipped. Every title
+#   re-resolved on Wikipedia first: all red links ("Record Rendezvous" redirects to *Leo Mintz*, no coordinate).
+#   Multiple-property search first (FROM CLEVELAND (5)): Herold, Kendel and Record Rendezvous sit in the Lower Prospect--Huron
+#   District MPS (NRIS 64500482), whose cover text is district history, not per-building — so each row was searched alone.
+# SOURCES, one per line: NEO Trans (Herold; Record Rendezvous — the same article covers 310 and 300 Prospect, each line read
+#   against its own building's sentence, FROM CLEVELAND (6)); Fresh Water Cleveland (Union Club); Cleveland Historical
+#   (items 236, 902, 1030); Tours of Cleveland (East Ohio Gas); Clio (Hoyt Block); the Encyclopedia of Cleveland History
+#   (Lindner); SBN (Consolidated Fruit Auction); the Ohio History Connection (Grossman); clevelandjewishhistory.net (Medical
+#   Centre); Teaching Cleveland / the Plain Dealer's Elegant Cleveland (Stockbridge).
+# CHECKS (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3), FROM CLEVELAND (6)): every number and capitalised
+#   name in its source text (the checker re-proven on a planted 1894 / "Burnhem" and 1931 / "Hoit", both absent from their
+#   sources); every line in stored tile 830_-1634 or 830_-1633, inside the box; stored pins (364 across the 12 rows
+#   829–831 × -1635…-1632), approved gems, all parts' lines within 100 m and articles within 90 m read at each LINE's own
+#   point; no name repeated across parts 1–3e; no line named "Grave of …".
+# POINTS — OSM's own feature (Photon) unless noted: Herold Building (way 100492494, 1 m from the list point); Record Rendezvous
+#   (way 370597917, 300 Prospect); Union Club (way 189749461, 1211 Euclid — the list point is 254 m north, off the
+#   building); Colonial and Euclid Arcades (way 126820682, *5th Street Arcades*); East Ohio Gas Company Building (way
+#   170638251, OSM's *Rockwell Building*, an aka of the listing; the list point sits on East 6th's centreline); Krause
+#   Building (node 2823695350, *Wonder Bar*, 2044 E. 4th — the Krause's tenant); Hoyt Block (way 189749440); Western
+#   Reserve Building (way 365743941); Lindner Building (way 301664696, *Mandel Community Building*, 1331 Euclid);
+#   Consolidated Fruit Auction Company Building (node 4414036566, *Cleveland Whiskey*, the building's tenant — the list point
+#   is 3-decimal); Medical Centre Building (way 367453848, *Huron Square*, 1001 Huron). Grossman Paper Box Company at its
+#   seconds list point (Commons' photo location agrees; Photon has no 1729 Superior). Stockbridge Apartment Building: the
+#   list point is ~220 m east, among the 3600 block; placed on Euclid's south side at 3328, opposite Applied Industrial
+#   Technologies' building (way 170771901) as the source describes, beside gohistoric's centreline point.
+# NOTHING STORED near any line: the stored map downtown is thin (FROM TAMPA (6)) — none of the arcades, Wonder Bar, Union
+#   Club or Huron Square is a stored pin, so nothing is cut and no curated row is owed.
+# HEROLD / RECORD RENDEZVOUS 13 m apart: two buildings on adjacent lots (310 and 300 Prospect), each separately listed; this
+#   settles the sort's CV122/CV139/CV204 TWIN CANDIDATE flags as three buildings, not one listed twice.
+# `| new` UP FRONT on 11 lines: Herold and Record Rendezvous (each other, 13 m); Union Club (part 1's *The Statler
+#   (Cleveland)* line and article 52 m, *Sterling-Lindner Co.* article 73 m, part 1's *Halle Building* 87 m); the Arcades
+#   (*Downtown Cleveland* 48 m, *East 4th Street (Cleveland)* 69 m); East Ohio Gas (part 1's *Federal Reserve Bank of
+#   Cleveland* line and article 80 m, *Goodrich Social Settlement* 70 m; *1717 East Ninth Building*, once the East Ohio Gas
+#   Building, is ~400 m away — a near-named article, Bergen (2)); Krause (*East 4th Street (Cleveland)* 26 m); Western Reserve
+#   (the served *Perry–Payne Building* 66 m); Lindner (*U.S. Bank Centre* 72 m and the near-named *Sterling-Lindner Co.*
+#   ~110 m); Consolidated Fruit (the served *Lorain Avenue* pin, which carries Hope Memorial Bridge's story, 93 m); Grossman
+#   (*St. Peter Church (Cleveland)* 76 m); Medical Centre (*Cleveland Athletic Club* 50 m). Hoyt Block and Stockbridge have
+#   nothing within reach.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — gone: CV234 Stanley Block (2115-2121 Ontario; demolished December 2012 — the NRHP list's own note).
+#   CARRIED to the depth row (no story in one search — FROM SAN ANTONIO (13)): CV139 Kendel Building (210 Prospect; listing
+#     metadata only) and CV148 Lerner Building (322-324 Euclid; Art Deco, 1936, Hall and Rutherford — metadata only).
+#   STILL CARRIED from parts 3c–3d: CV179 Neff and CV170 Montana Apartments (no point); CV251 Union Steel Screw (depth row).
+# EXPECT on the Mac dry run: 13 new-seed. Any `review` is a stop: read it before --commit.
+Herold Building | @41.49803,-81.690228 | Oscar and A. B. Herold, owners of the Herold Brothers barber supply store on Public Square, put up this building in 1906; Kurtz Furniture bought it in 1920 and gave it a structural glass front in 1948. | https://neo-trans.blog/2020/04/24/how-nucleus-and-herold-got-their-lives-back/ | new
+Record Rendezvous | @41.498004,-81.690386 | Built in 1908 as an expansion of the Herold Building next door, 300 Prospect later housed Record Rendezvous, the record shop remembered as one of the cradles of rock and roll. | https://neo-trans.blog/2020/04/24/how-nucleus-and-herold-got-their-lives-back/ | new
+Union Club | @41.501044,-81.684377 | The Union Club, incorporated on September 25, 1872, turned down a design from New York's McKim, Mead & White and built this clubhouse to Schweinfurth's plan instead. | https://freshwatercleveland.com/breaking-ground/MasterworksUnionClub081122.aspx | new
+Colonial and Euclid Arcades | @41.49909,-81.689218 | The Colonial Arcade of 1898, which led into the Colonial Hotel's main lobby, and the Euclid Arcade of 1911 stand side by side, 100 feet apart, each running a block between Euclid and Prospect avenues. | https://clevelandhistorical.org/items/show/236 | new
+East Ohio Gas Company Building | @41.502513,-81.690858 | Built in 1916 as the home of the East Ohio Gas Company, this building on East 6th, next door to the Federal Reserve, was later known as the Calfee Building. | https://toursofcleveland.com/?p=1190 | new
+Krause Building | @41.499013,-81.690271 | Costume dealer William Krause built this building, where Otto Moser's restaurant opened in 1893 across Sheriff Street from a theater and for nearly 50 years fed Cleveland's actors, comedians and acrobats. | https://clevelandhistorical.org/items/show/902 | new
+Hoyt Block | @41.499702,-81.699058 | Lawyer and real estate dealer James Madison Hoyt built the Hoyt Block in 1875, the city's only surviving upscale stone-block commercial building in the High Victorian Italianate style. | https://theclio.com/entry/104182
+Western Reserve Building | @41.497312,-81.699365 | Mather's eight-story Western Reserve Building opened in 1892, and on May 1 that year Cleveland's weather observatory and signal station opened in it, 135 feet above the street. | https://clevelandhistorical.org/items/show/1030 | new
+Lindner Building | @41.501221,-81.682221 | The Lindner Co., once Cleveland's largest women's specialty store, began in 1908 on E. 9th St. and by 1915 had built this larger store at 1331 Euclid Ave. | https://case.edu/ech/articles/s/sterling-lindner-co | new
+Consolidated Fruit Auction Company Building | @41.491324,-81.691367 | Built in 1911 for the Consolidated Fruit Auction Company, this narrow riverside building on Stones Levee in the Flats South sat empty for about 15 years before Cleveland Whiskey moved in. | https://sbnonline.com/?p=159799 | new
+Grossman Paper Box Company | @41.506389,-81.681111 | The Grossman Paper Box Company began as a small back-room operation in 1880 and grew into one of Cleveland's largest packaging manufacturers before a 1926 merger; this is its building at 1729 Superior Ave. | https://www.ohiohistory.org/?p=11558 | new
+Medical Centre Building | @41.499748,-81.684807 | Built in 1923, this 10-story building at 1001 Huron Road was by 1950 the Community Services Building, shared by United Way, the Girl Scouts and other social welfare organizations. | https://clevelandjewishhistory.net/ins/fed/federation-history.htm | new
+Stockbridge Apartment Building | @41.50255,-81.66403 | The Stockbridge, a dark-brick balconied building across Euclid Avenue from the glass headquarters of Applied Industrial Technologies, has stood here since the days of Millionaires' Row. | https://teachingcleveland.org/the-stockbridge-in-cleveland-has-been-sitting-proudly-on-euclid-since-the-days-of-millionaires-row-elegant-cleveland/
