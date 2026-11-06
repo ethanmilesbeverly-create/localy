@@ -1,0 +1,46 @@
+# names-459-cleveland-3c.txt — #459 Cleveland story batch, part 3c: the rest of Midtown's red-link "SEED — unmapped" rows,
+# Euclid / Prospect / Cedar / E. 55th–E. 82nd, plus the AsiaTown and E. 21st stragglers part 3b left (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1, -2, -3a, -3b, this file, later parts + 459_hidden_curated*.sql) dry-runs and
+# commits in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 459_sort_cleveland.tsv (story-sort 2026.11.01b, prefix CV). Part 3b owed 14 Midtown rows + CV179/CV170's points;
+# this part also took CV249 (part 1's carried Church Home). Every row re-resolved on Wikipedia first: all still red links
+# (FROM CLEVELAND (5)). SOURCES, one per line: the 3101 Euclid Avenue Building NRHP nomination (2016, NPGallery); NEO Trans
+# (Cedar Branch YMCA); the Encyclopedia of Cleveland History (Anshe Chesed; Charles Schweinfurth Residence); Dealer Tire's
+# 2015 release (Victory Center); Signal Cleveland's historic Black churches map (Fellowship); Fresh Water Cleveland (Mueller
+# Lofts); Clio (Stuyvesant Motor Company Building).
+# CHECKS (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3), FROM CLEVELAND (6)): every number and capitalised
+#   name in its source text (the checker re-proven on a planted 1931 and "Schweinfurh"; its two soft hits — "LEED-certified"
+#   for the source's "LEED certified", and "Baptist" from the same article's Fellowship heading — read by hand); every line
+#   in a stored tile inside the box (830_-1633, 830_-1634); stored pins (364 across the 12 rows around the lines), approved
+#   gems, all parts' lines within 100 m and articles within 90 m read at each LINE's own point; no name repeated across
+#   parts 1–3c. Nothing stored, no gem and no article sits within 100 m of any line except as noted under `new`.
+# POINTS: the NRHP list points (seconds precision or better) except Liberty Hill Baptist Church, placed at OSM's building
+#   (way 979420144, ~70 m from the 4-decimal list point). Victory Center is 7012 Euclid; the served-elsewhere *Baker Motor
+#   Vehicle Company Building* article (7100 Euclid) is ~125 m east, outside the 90 m read and a different building.
+# NAMES: Liberty Hill Baptist Church (the NRHP's "Euclid Avenue Temple-Liberty Hill Baptist Church" — the line tells the
+#   temple); Victory Center (NRHP "The Euclid-Seventy-First Street Building"; the sort's story source *Victory Building* is
+#   a red link); Cedar Branch YMCA (NRHP spells out "Young Men's Christian Association (YMCA)").
+# `| new` UP FRONT on 1 line: 3101 Euclid Avenue Building — part 1's *First Methodist Church (Cleveland)* line and article
+#   stand 81 m away. The other 7 have nothing within reach.
+# CHANGED FROM THE SORT, BY READING:
+#   NO LINE — gone: CV201 Quad Hall (7500 Euclid) — Cleveland Historical's Leo's Casino entry marks the old Quad Hall Hotel
+#     demolished; this also clears the sort's CV201/CV222 "line 81 m" flag on the Schweinfurth line.
+#   CARRIED — no fixable point: CV179 Neff Apartments and CV170 Montana Apartments (Photon still has no house numbers on
+#     Prospect or E. 36th; unchanged from part 3b); CV249 Trinity Cathedral Church Home (2227 Prospect — in the Upper
+#     Prospect MRA, Schweinfurth, 1895, but its list point sits ~60 m from the cathedral and whether the 1895 building still
+#     stands was not settled from any source; needs one read before a line).
+#   CARRIED — listing metadata only: CV251 Union Steel Screw Office Building (1677 E. 40th; NPGallery gives Queen Anne,
+#     industry, 1875–1924 and nothing to write from) → the depth row by FROM SAN ANTONIO (13).
+#   OWED TO PART 3d, not yet searched: CV062 Corlett Building, CV110 Jacob Goldsmith House, CV141 Lewis Kies House, CV235
+#     Stockbridge Apartment Building (3328 Euclid, 1912 — one search hit, an apartment listing only).
+# EXPECT on the Mac dry run: 8 new-seed. Any `review` is a stop: read it before --commit.
+3101 Euclid Avenue Building | @41.502886,-81.666538 | Built in 1958 by the Cleveland steel firm H.L. Vokes Company for a syndicate headed by Halley H. Lipp, this nine-story glass and metal office building stands on the site of Samuel Andrews's mansion, Andrews's Folly, and was the tallest office building to rise on downtown Euclid Avenue in more than 25 years. | https://npgallery.nps.gov/GetAsset/3ed7f0b7-45d0-46b2-b17e-2f0ffefe8caf | new
+Cedar Branch YMCA | @41.5003,-81.6352 | Opened in 1942 and closed 70 years later, the Cedar Branch YMCA was a safe and welcoming place for African American men who were often excluded from Cleveland's other YMCA branches, and after World War II Frank "Doc" Kelker guided the young men who came here. | https://neo-trans.blog/?p=44538
+Liberty Hill Baptist Church | @41.502883,-81.6306248 | Anshe Chesed dedicated this $250,000 Euclid Avenue Temple in 1912, designed by Lehman & Schmitt with stained glass windows by Louis Tiffany, and the congregation later sold the building to Liberty Hill Baptist Church. | https://case.edu/ech/articles/a/anshe-chesed
+Victory Center | @41.504167,-81.640278 | Built in 1917 as the Arts Building, this Euclid Avenue building was renovated in 2013 as the LEED-certified Victory Center and is listed on the National Register of Historic Places. | https://www.dealertire.com/?p=461
+Fellowship Missionary Baptist Church | @41.5111,-81.652 | Built for Grace Lutheran Church in 1908, this church became the home of Fellowship Missionary Baptist in 1962, whose leaders fought racial discrimination and poverty and launched the Fellowship Credit Union. | https://signalcleveland.org/map-clevelands-historic-black-churches-restoration-civil-rights
+Mueller Electric Company Building | @41.508952,-81.667842 | Mueller Electric, the alligator clip maker, built this factory and headquarters in 1922 and at one time produced more than 125,000 alligator clips a day before the company was sold in 2011 and its headquarters moved to Akron. | https://freshwatercleveland.com/breaking-ground/MuellerLofts040918.aspx
+Charles Schweinfurth House | @41.505417,-81.636111 | Architect Charles Frederick Schweinfurth built this Romanesque Revival house in 1894 as his private home, on land where he had first been commissioned to design a residence for William K. Vanderbilt. | https://case.edu/ech/articles/c/charles-schweinfurth-residence
+Stuyvesant Motor Company Building | @41.500556,-81.676389 | The Stuyvesant Motor Company built this building in 1917 as its sales showroom, service center, garage and storage, and by 1919 had expanded it from four stories to five. | https://theclio.com/tour/1474/12
