@@ -1,0 +1,30 @@
+# names-459-cleveland-3g.txt — #459 Cleveland story batch, part 3g: the 11 Ohio City / near-west-side rows part 3f
+# carried unsearched (drafted 2026-11-05). Closes that area.
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1 … -3f, this file, later parts + 459_hidden_curated*.sql) dry-runs and commits
+# in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# ROWS (11): CV009, CV025, CV057, CV109, CV118, CV124, CV131, CV140, CV162, CV168, CV182 — all red links (re-resolved in
+#   part 3f). One search each, nine searched; yield 4 of 9 — the depth bar's signal (FROM SAN ANTONIO (13)).
+# SOURCES, one per line: the Marine Review via Maritime History of the Great Lakes (Bruce-Macbeth); the NPGallery
+#   nomination text (Hubbard Cooke); NEOtrans 2024-06-11 (Northern Ohio Blanket Mills); Cleveland Magazine's "Moving
+#   Targets" (Globe Machine and Stamping).
+# CHECKS as part 3f (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3), FROM CLEVELAND (6)): every number and
+#   capitalised name in its source (the checker re-proven on planted 1917 / "Shorway" and 1882 / "Beckmann", all absent);
+#   every line in stored tile 829_-1634, 830_-1634 or 830_-1635, inside the box; stored pins, approved gems, all parts'
+#   lines within 100 m and articles within 90 m read at each line's own point — nothing stored, no gem, no article; no
+#   name repeated across parts 1–3g.
+# POINTS: all four at their list points (seconds or 5-decimal precision); Photon has no feature or house number for any of
+#   them (Center St., the Superior Viaduct block, 3160 W. 33rd, 1250 W. 76th).
+# `| new` UP FRONT on 1 line: Bruce-Macbeth (part 3f's Superior Avenue Viaduct 95 m and Theodor Kundtz 97 m).
+# NOTE: the Hubbard Cooke source's OCR reads "Superior A venue Viaduct"; the line says "Superior Viaduct", its address.
+# CARRIED to the depth row (no story in one search — FROM SAN ANTONIO (13)): CV009 Arnold Wooden Ware Co.-Arnold Wholesale
+#   Corp. Building (1921 — metadata only); CV057 Clinton Apartments (1898, Steffens, Searles & Hirsh — metadata only, from
+#   part 3f's Courtland search); CV118 Harp Apartments and CV140 Kennedy Apartments and Commercial Block (metadata only);
+#   CV124 James Hill House (1880/1889/1891 — metadata only); CV168 Miller Block (sources disagree: 1906–07 vs 1912, and
+#   only a 1984 rehab beyond that); CV162 McKinley Terrace (not searched — carried on the yield signal).
+# EXPECT on the Mac dry run: 4 new-seed. Any `review` is a stop: read it before --commit.
+Bruce-Macbeth Engine Company | @41.494813,-81.705490 | The Macbeth Iron Co. and the Bruce-Meriam-Abbott Co., a maker of commercial gas engines organized in 1900, consolidated as the Bruce-Macbeth Engine Co. and made this former Macbeth Iron Co. plant on Center Street their factory. | https://images.maritimehistoryofthegreatlakes.ca/124959/page/55 | new
+Hubbard Cooke Block | @41.493333,-81.706111 | Lehman and Schmitt designed the Hubbard Cooke Block as two similar commercial and light industrial buildings, historically the only buildings that fronted the Superior Viaduct. | https://npgallery.nps.gov/GetAsset/95343689-5f1d-44b3-b241-39065e8012b7
+Northern Ohio Blanket Mills | @41.468056,-81.706389 | Herman Beckman Sr. founded the Northern Ohio Blanket Mill in 1880 on West 33rd, then called Pleasant Street, and the company rebuilt here after a fire destroyed its original factory in February 1888. | https://neo-trans.blog/?p=39009
+Globe Machine and Stamping Company | @41.486270,-81.738047 | Built in 1918 as a warehouse for the Globe Machine & Stamping Co., this building now holds the 45 Shoreway Lofts, and one apartment kept the fireplace from the company's break room. | https://clevelandmagazine.com/articles/moving-targets
