@@ -1,0 +1,54 @@
+# names-459-cleveland-3b.txt — #459 Cleveland story batch, part 3b: the first of the sort's 187 red-link "SEED — unmapped"
+# rows — Midtown's Prospect / Euclid / Carnegie corridor, E. 22nd to E. 79th (drafted 2026-11-05).
+# Every line: Name | locate | one sentence in our own words | source URL [| new]. Batch file — do NOT run alone; the whole
+# Cleveland batch (names-459-cleveland-1, -2, -3a, this file, later parts + 459_hidden_curated*.sql) dry-runs and commits
+# in one Mac session (handoff §6 THE FAST RUNBOOK (b), FROM SAN ANTONIO (16)).
+#
+# SOURCE: 459_sort_cleveland.tsv (story-sort 2026.11.01b, prefix CV). 187 of the sort's 199 unmapped rows are NRHP-list red
+# links (no Wikipedia article), so every story comes from an outside source; part 3 is re-split by area across chats
+# (3b, 3c, …), each part's leftovers carried by ID. Midtown holds 29 red-link rows: this part = 12 lines, 1 cut, 2 carried;
+# the other 14 are UNSOURCED YET → part 3c (listed below).
+# SOURCES: the Upper Prospect Multiple Resource Area nomination (Cleveland Landmarks Commission, 1984; NPGallery
+# 64000653_text) for the 10 Upper Prospect properties; the Encyclopedia of Cleveland History for the Phillis Wheatley
+# Association; Cleveland Historical (item 623) for Warner & Swasey.
+# Same checks as parts 1–3a (FROM SAN ANTONIO (12), FROM LAS VEGAS (6), FROM SACRAMENTO (3)): every number and capitalised
+# name in its source text (the checker, re-proven on a planted wrong year and name); inside the box, each line's tile stored
+# (box unchanged: 844 pins / 51 stored tiles); no name repeated across parts 1–3b or clashing with a live grave (148);
+# stored pins, graves, all parts' lines within 100 m and articles within 90 m read at the LINE's own point; no two lines of
+# parts 1–3b within 30 m.
+# POINTS: the NRHP list points (seconds precision) except where OSM has the building — United Motor Service (4019 Prospect,
+#   OSM 26 m from the list point), Ohio Bell Henderson-Endicott (5400 Prospect, 32 m) and Warner & Swasey (way 906367143,
+#   83 m), placed at OSM's (FROM TAMPA (5)). Photon has no house numbers for the rest of these blocks. Phillis Wheatley
+#   Association: the list point (41°30′00″N 81°39′18″W) falls on Cedar Avenue at E. 46th Street, where ECH and the
+#   association place the building — kept.
+# CHANGED FROM THE SORT, BY READING:
+#   CUT — served: CV233 Stager-Beckwith House (3813 Euclid) — the served *Children's Museum of Cleveland* pin (wiki_5033908,
+#     48 m) is the museum the mansion now houses, and its story names the house; OSM puts the museum at 3813 Euclid itself.
+#   CARRIED — no fixable point (FROM ORLANDO (6)'s rule, applied to list points that would stack on a served pin):
+#     CV179 Neff Apartments (3606 Prospect) — the list point sits 8 m from the served *Tavern Club* (3522 Prospect) and on
+#       the wrong side of E. 36th St. for its own address; CV170 Montana Apartments (2061 E. 36th) — 20 m from the same pin.
+#       Both are in the MRA source (1902, Progressive style) and need only a point: the operator's map, or a later OSM read.
+# `| new` UP FRONT on the 8 lines with a stored pin, another line or an article within reach — Ensworth (the served
+#   *Southworth House*, 46 m; *Plaza Apartments*, 69 m), Merwin (Plaza Apartments 66 m), Ireland (served Southworth House
+#   56 m and *Tavern Club* 61 m), Cook (the hidden *Colonel Charles Young* bust, 65 m), Cleveland Packard and Ohio Bell (each
+#   other, 78 m), United Motor Service (the served *St. Paul's Episcopal Church*, 90 m) and Templar-Farrell (Plaza Apartments
+#   46 m, the Gaensslen and Gifford houses 76 m). Dixon Hall, Walker and Weeks, Phillis Wheatley and Warner & Swasey have
+#   nothing within reach.
+# OWED TO PART 3c (Midtown, unsourced yet): CV028 Building at 3101 Euclid Avenue, CV031 Cedar Branch YMCA, CV062 Corlett
+#   Building, CV088 Euclid Avenue Temple–Liberty Hill Baptist Church, CV089 Euclid–Seventy-First Street Building, CV094
+#   Fellowship Missionary Baptist Church, CV110 Jacob Goldsmith House, CV141 Lewis Kies House, CV174 Mueller Electric
+#   Company Building, CV201 Quad Hall, CV222 Charles Schweinfurth House, CV235 Stockbridge Apartment Building, CV236
+#   Stuyvesant Motor Company Building, CV251 Union Steel Screw Office Building; plus CV179 and CV170's points.
+# EXPECT on the Mac dry run: 12 new-seed. Any `review` is a stop: read it before --commit.
+Jeremiah Ensworth House | @41.501111,-81.663889 | Built about 1875, this Italianate house is one of the few left from the years when elm-lined Prospect Avenue was considered the second most prestigious street in Cleveland, after Euclid Avenue's Millionaires Row. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+George Merwin House | @41.501667,-81.664444 | Built about 1838 facing Euclid Avenue and moved here in 1858 when Prospect Avenue was extended, this Tuscan style house designed by Charles Heard is the oldest building on Upper Prospect and the home of the Rowfant Club. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+Joseph Ireland House | @41.500833,-81.662778 | Attributed to Joseph Ireland, this house of about 1874 dates from the years after 1860, when the state's first streetcar line ran out Prospect Avenue and the street filled with the homes of the well-to-do. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+Dixon Hall Apartments | @41.501667,-81.66 | Built in 1905 in a Tudor Revival style, Dixon Hall was one of the costly apartment buildings that rose on Prospect Avenue when its prestige and streetcar line to downtown drew demand for higher priced suites. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text
+Cook Building | @41.502222,-81.655 | Designed by Lehman and Schmitt and built in 1917–1918, this Neo-Classic office building won an award as the best small commercial building of 1918. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+Cleveland Packard Building | @41.5025,-81.653056 | Begun in 1915, this Neo-Classic Packard building dates from Prospect Avenue's years as an automobile row, a street with heavy pleasure car traffic yet far enough from the city center to escape the cost of downtown land. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+United Motor Service Building | @41.5026665,-81.6571694 | Built in 1919, this Neo-Classic building is one of three automotive buildings left from the years between 1915 and 1930, when Prospect Avenue was a busy commercial street on the edge of downtown. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+Templar-Farrell Motor Sales Building | @41.501111,-81.665278 | This Neo-Classic motor sales building of 1921 is the youngest of Upper Prospect's three surviving automotive buildings from the street's car-dealership era. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+Walker and Weeks Office Building | @41.499444,-81.6725 | The architects Walker and Weeks designed this Neo-Classic office building, which bears their own name, in 1926. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text
+Ohio Bell Henderson-Endicott Exchange Building | @41.5025124,-81.6521164 | Mills, Rheins, Bellman, and Nordhoff of Toledo designed this Modernistic telephone exchange, completed in 1928, which won an honorable mention for its design from the Chamber of Commerce in 1929. | https://npgallery.nps.gov/NRHP/GetAsset/NRHP/64000653_text | new
+Phillis Wheatley Association | @41.5,-81.655 | Jane Edna Hunter founded the Phillis Wheatley Association in 1911 to house and help unmarried African American women arriving in Cleveland, and in 1927 it built this nine-story home, named for the woman considered the first African American poet. | https://case.edu/ech/articles/p/phillis-wheatley-association
+Warner & Swasey Company Building | @41.5021068,-81.649869 | Built in two stages between 1904 and 1910, this five-story factory is where Warner & Swasey made telescopes and machine lathes, and its machinists' 184-day strike begun in December 1948 was the longest in Cleveland history. | https://clevelandhistorical.org/index.php/items/show/623
